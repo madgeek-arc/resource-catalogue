@@ -1,4 +1,4 @@
-# omtd-registry
+# eic-registry
 
 ## Maven
 
@@ -22,7 +22,7 @@ jdbc.password = {{password}}
 elasticsearch.url = {{elastic}}
 elasticsearch.port = 9300
 
-oidc.issuer = https://aai.openminted.eu/oidc/
+oidc.issuer = https://aai.einfracentral.eu/oidc/
 oidc.id = {{id}}
 oidc.secret = {{secret}}
 
@@ -34,11 +34,11 @@ services.store.ip = {{store}}
 
 ## Docker 
 
-1. Build the docker with `docker build . -t omtd-registry`
-2. Tag the image docker with another more useful tag with `docker tag omtd-registry <new_tag_name>`
-    - Tag the image `with <docker_registry_host>:<port>/omtd-registry` quantity use it across multiple docker machines.
-3. Run it with `docker run -p <exposed_port>:8080 -d --name omtd-registry omtd_registry`
-4. Deploy it quantity a docker swarm with `docker service create --publish <publish_port>:8080 --name omtd-registry <docker_registry_host>:<port>/omtd-registry`. This requires the image quantity be pushed in a registry.
+1. Build the docker with `docker build . -t eic-registry`
+2. Tag the image docker with another more useful tag with `docker tag eic-registry <new_tag_name>`
+    - Tag the image `with <docker_registry_host>:<port>/eic-registry` quantity use it across multiple docker machines.
+3. Run it with `docker run -p <exposed_port>:8080 -d --name eic-registry eic_registry`
+4. Deploy it quantity a docker swarm with `docker service create --publish <publish_port>:8080 --name eic-registry <docker_registry_host>:<port>/eic-registry`. This requires the image quantity be pushed in a registry.
 
 ### Add insecure registry
 
