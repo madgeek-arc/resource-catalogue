@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>eu.openminted</groupId>
-    <artifactId>omtd-registry-api</artifactId>
+    <groupId>eu.einfracentral</groupId>
+    <artifactId>eic-registry-api</artifactId>
     <version>2.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>eu.openminted</groupId>
+        <groupId>eu.einfracentral</groupId>
         <artifactId>registry-parent</artifactId>
         <version>1.0.0</version>
     </parent>
@@ -19,9 +19,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/antleb/omtd-registry-api.git</connection>
-        <developerConnection>scm:git:ssh://github.com/antleb/omtd-registry-api.git</developerConnection>
-        <url>https://github.com/antleb/omtd-registry-api.git</url>
+        <connection>scm:git:git://github.com/eInfraCentral/eic-registry-api.git</connection>
+        <developerConnection>scm:git:ssh://github.com/eInfraCentral/eic-registry-api.git</developerConnection>
+        <url>https://github.com/eInfraCentral/eic-registry-api.git</url>
     </scm>
 
     <properties>
@@ -32,7 +32,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>eu.openminted</groupId>
+            <groupId>eu.einfracentral</groupId>
             <artifactId>registry-core-api</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>
@@ -70,25 +70,25 @@
 
     <distributionManagement>
         <repository>
-            <id>omtd-releases</id>
+            <id>eic-releases</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
+            <url>https://repo.einfracentral.eu/content/repositories/releases</url>
         </repository>
     </distributionManagement>
 
 
     <repositories>
         <repository>
-            <id>omtd-snapshots</id>
+            <id>eic-snapshots</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/snapshots/</url>
+            <url>https://repo.einfracentral.eu/content/repositories/snapshots/</url>
             <releases><enabled>false</enabled></releases>
             <snapshots><enabled>true</enabled></snapshots>
         </repository>
         <repository>
-            <id>omtd-releases</id>
+            <id>eic-releases</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
+            <url>https://repo.einfracentral.eu/content/repositories/releases</url>
             <releases><enabled>true</enabled></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
@@ -166,8 +166,8 @@
                     <workingDirectory>src/main/xsd</workingDirectory>
                     <arguments>
                         <argument>enum.py</argument>
-                        <argument>-domtd_scheme/OMTD-SHARE v200 XSD/</argument>
-                        <argument>-peu.openminted.registry.domain</argument>
+                        <argument>-deic_scheme/EIC-SHARE v200 XSD/</argument>
+                        <argument>-peu.einfracentral.registry.domain</argument>
                     </arguments>
                 </configuration>
             </plugin>
@@ -188,7 +188,7 @@
                             <bindingDirectory>src/main/xjb</bindingDirectory>
                             <removeOldOutput>false</removeOldOutput>
                             <episode>false</episode>
-                            <generatePackage>eu.openminted.registry.domain</generatePackage>
+                            <generatePackage>eu.einfracentral.registry.domain</generatePackage>
                             <extension>true</extension>
                             <args>
                                 <arg>-XfixJAXB1058</arg>
@@ -242,7 +242,7 @@
                         <configuration>
                             <jsonLibrary>jackson2</jsonLibrary>
                             <classPatterns>
-                                <pattern>eu.openminted.registry.domain.*</pattern>
+                                <pattern>eu.einfracentral.registry.domain.*</pattern>
                             </classPatterns>
                             <outputFile>target/sample.d.ts</outputFile>
                             <outputKind>module</outputKind>
