@@ -1,0 +1,8 @@
+*.iml
+.idea/
+target/
+bin/
+*.pyc
+*.json
+*.ts
+*.log

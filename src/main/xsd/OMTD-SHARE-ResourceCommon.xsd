@@ -1,0 +1,3671 @@
+<?xml version="1.0" ?><xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" jaxb:extensionBindingPrefixes="xjc simplify" jaxb:version="1.0" targetNamespace="http://www.meta-share.org/OMTD-SHARE_XMLSchema" version="2.0.0" xml:lang="en" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:ms="http://www.meta-share.org/OMTD-SHARE_XMLSchema" xmlns:simplify="http://jaxb2-commons.dev.java.net/basic/simplify" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:include schemaLocation="./OMTD-SHARE-GlobalTypes.xsd"/>
+	<xs:include schemaLocation="./OMTD-SHARE-ISOVocabularies.xsd"/>
+	<xs:include schemaLocation="./OMTD-SHARE-Actors.xsd"/>
+	<xs:include schemaLocation="./OMTD-SHARE-Projects.xsd"/>
+	<xs:include schemaLocation="./OMTD-SHARE-Distributions.xsd"/>
+	
+	<xs:complexType name="mailingListInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{mailingListName}</render-short>
+			<jaxb:class name="MailingListInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="mailingListName" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The name of the mailing list</xs:documentation>
+					<xs:appinfo>
+						<label>Mailing list name</label>
+						<label-plural>Mailing list names</label-plural>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="1" name="subscribe" type="ms:emailAddress">
+				<xs:annotation>
+					<xs:documentation>The email address to be used for subscribing to the mailing list</xs:documentation>
+					<xs:appinfo>
+						<label>Subscribe</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="1" name="unsubscribe" type="ms:emailAddress">
+				<xs:annotation>
+					<xs:documentation>The email address to be used for unsubscribing from the mailing list</xs:documentation>
+					<xs:appinfo>
+						<label>Unsubscribe</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="post" type="ms:emailAddress">
+				<xs:annotation>
+					<xs:documentation>The email address to be used for posting messages to the mailing list</xs:documentation>
+					<xs:appinfo>
+						<label>Post</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="archive" type="ms:httpURI">
+				<xs:annotation>
+					<xs:documentation>The URL where the mailing list messages are archived</xs:documentation>
+					<xs:appinfo>
+						<label>Archive</label>
+						<label-plural>Archives</label-plural>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="otherArchives">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="otherArchive" type="ms:httpURI">
+							<xs:annotation>
+								<xs:documentation>Alternative ULRs where the mailing list messages are archived (for mirrored mailing lists)</xs:documentation>
+								<xs:appinfo>
+									<label>Other archive</label>
+									<label-plural>Other archives</label-plural>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="identificationInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="IdentificationInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element name="resourceNames">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" ref="ms:resourceName"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="1" name="descriptions">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="description">
+							<xs:annotation>
+								<xs:documentation>A short free-text account that provides information about the resource (e.g. function, contents, technical information etc.)</xs:documentation>
+								<xs:appinfo>
+									<label>Description</label>
+									<label-plural>Descriptions</label-plural>
+									<usage-ugc>A corpus generated automatically by [user name] on [creation date] via OpenMinTeD services. The corpus includes [number of] publications from [Source] (in ([language]) and [domain]).</usage-ugc>
+									<change>true</change>
+									<exactMatch>dct:description</exactMatch>
+									<closeMatch>http://hdl.handle.net/11459/CCR_C-2520_9eeedfb4-47d3-ddee-cfcb-99ac634bf1db (ccr:descriptionContext)</closeMatch>
+									<closeMatch>datacite:description descriptionType=&quot;Abstract&quot;</closeMatch>
+								</xs:appinfo>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:simpleContent>
+									<xs:restriction base="ms:myString">
+										<xs:maxLength value="10000"/>
+									</xs:restriction>
+								</xs:simpleContent>
+							</xs:complexType>
+							<xs:unique name="uniqueLang3">
+								<xs:selector xpath="."/>
+								<xs:field xpath="@lang"/>
+							</xs:unique>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="resourceShortNames">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="resourceShortName">
+							<xs:annotation>
+								<xs:documentation>A short form (e.g. abbreviation, acronym etc.) used to identify the resource.</xs:documentation>
+								<xs:appinfo>
+									<label>Resource short name</label>
+									<label-plural>Resource short names</label-plural>
+									<recommended>true</recommended>
+									<closeMatch>dct:alternative</closeMatch>
+									<exactMatch>http://hdl.handle.net/11459/CCR_C-2544_3626545e-a21d-058c-ebfd-241c0464e7e5 (ccr:resourceName)</exactMatch>
+									
+									<closeMatch>datacite:title titleType=&quot;alternativeTitle&quot;</closeMatch>
+								</xs:appinfo>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:simpleContent>
+									<xs:restriction base="ms:myString">
+										<xs:maxLength value="500"/>
+									</xs:restriction>
+								</xs:simpleContent>
+							</xs:complexType>
+							<xs:unique name="uniqueLang">
+								<xs:selector xpath="."/>
+								<xs:field xpath="@lang"/>
+							</xs:unique>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="1" name="resourceIdentifiers">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="resourceIdentifier" type="ms:resourceIdentifierType">
+							<xs:annotation>
+								<xs:documentation>Associates a resource to an identifier (e.g. PID, DOI, internal to an organization etc.), i.e. a string used to uniquely identify it</xs:documentation>
+								<xs:appinfo>
+									<label>Identifier</label>
+									<label-plural>Identifiers</label-plural>
+									<usage-components>prefill with Maven coordinates if known</usage-components>
+									<usage-ugc>To be created automatically by the system</usage-ugc>
+									<broadMatch>dct:identifier</broadMatch>
+									
+									<closeMatch>http://hdl.handle.net/11459/CCR_C-2573_ae7c2548-8a86-ab6e-7099-e28b7697d1a2 (ccr:persistentIdentifier)</closeMatch>
+									
+									<exactMatch>dataCite:identifier</exactMatch>
+								</xs:appinfo>
+							</xs:annotation>
+							
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element default="false" name="public" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Declares whether the resource is meant for private use or can be publicly available through the registry</xs:documentation>
+					<xs:appinfo>
+						<label>public</label>
+						<change>true</change>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="contactInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<jaxb:class name="ContactInfo"/>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="contactEmail" type="ms:emailAddress">
+					<xs:annotation>
+						<xs:documentation>A general email address that can be used as contact point for a resource (e.g. resource@example.com)</xs:documentation>
+						<xs:appinfo>
+							<label>Contact email</label>
+							<label-plural>Contact emails</label-plural>
+							<simplify:as-element-property/>
+							<closeMatch>datacite:contributor contributorType=&quot;ContactPerson&quot;</closeMatch>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="landingPage" type="ms:httpURI">
+					<xs:annotation>
+						<xs:documentation>A URL used as the landing page of a resource providing general information; for instance, it may present a description of the resource, its creators and possibly include links to the URL where it can be accessed from</xs:documentation>
+						<xs:appinfo>
+							<label>Landing page</label>
+							<label-plural>Landing pages</label-plural>
+							<exactMatch>dcat:landingPage</exactMatch>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element maxOccurs="1" name="contactPersons">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="contactPerson" type="ms:personInfoType">
+								<xs:annotation>
+									<xs:documentation>Groups information on the person(s) that is/are responsible for providing further information regarding the resource</xs:documentation>
+									<xs:appinfo>
+										<label>Contact person</label>
+										<label-plural>Contact persons</label-plural>
+										<usage>email must be mandatory for contact persons</usage>
+										<exactMatch>dcat:contactPoint</exactMatch>
+										<closeMatch>http://hdl.handle.net/11459/CCR_C-2454_e0e88868-2fc6-a87e-cd0d-d8f69c85b41d (ccr:contactFullName)</closeMatch>
+										<relation>many-to-many</relation>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:choice>
+			<xs:element maxOccurs="1" minOccurs="0" name="contactGroups">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="contactGroup" type="ms:groupInfoType">
+							<xs:annotation>
+								<xs:documentation>Groups information on the group(s) that is/are responsible for providing further information regarding the resource</xs:documentation>
+								<xs:appinfo>
+									<label>Contact group</label>
+									<label-plural>Contact groups</label-plural>
+									<recommended>true</recommended>
+									<exactMatch>dcat:contactPoint</exactMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element maxOccurs="1" minOccurs="0" name="mailingLists">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="mailingListInfo" type="ms:mailingListInfoType">
+							<xs:annotation>
+								<xs:documentation>Groups information on the mailing list(s) that can be used for further information regarding the resource</xs:documentation>
+								<xs:appinfo>
+									<label>Mailing list</label>
+									<label-plural>Mailing list</label-plural>
+									<usage-components>show in editor only for component providers</usage-components>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="versionInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{version} {lastDateUpdated}</render-short>
+				<jaxb:class name="VersionInfo"/>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:choice>
+				<xs:annotation><xs:appinfo></xs:appinfo></xs:annotation>
+				<xs:element name="version">
+					<xs:annotation>
+						<xs:documentation>Associates a resource with a numeric pattern of the form major_version.minor_version.patch (in accordance to the semantic versioning guidelines, cf. http://semver.org) that identifies its version</xs:documentation>
+						<xs:appinfo>
+							<simplify:as-element-property/>
+							<label>Version</label>
+							<label-plural>Versions</label-plural>
+							<default>1.0.0</default>
+							<change>true</change>
+							<exactMatch>dataCite:version</exactMatch>
+							<closeMatch>http://hdl.handle.net/11459/CCR_C-2547_7883d382-b3ce-8ab4-7052-0138525a8ba1 (ccr:version)</closeMatch>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="100"/>
+							<xs:pattern value="[0-9]{1,2}(\.[0-9]{1,2}(\.[0-9]{1,3}))"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="versionDate">
+					<xs:annotation>
+						<xs:documentation>Associates a resource with the last modification date (or creation date if it hasn't been modified); the preferred format is YYYYMMDD</xs:documentation>
+						<xs:appinfo>
+							<label>Version</label>
+							<label-plural>Versions</label-plural>
+							<exactMatch>dataCite:version</exactMatch>
+							<closeMatch>http://hdl.handle.net/11459/CCR_C-2547_7883d382-b3ce-8ab4-7052-0138525a8ba1 (ccr:version)</closeMatch>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="100"/>
+							<xs:pattern value="[0-9]{8}"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			</xs:choice>
+			<xs:element minOccurs="0" name="versionType">
+				<xs:annotation>
+					<xs:documentation>A type of versioning vocabulary used mainly for works (e.g. scholarly articles, books etc.) that go through a formal review process before final publication, marked with major changes across the versions</xs:documentation>
+					<xs:appinfo>
+						<label>Version type</label>
+						<label-plural>Version types</label-plural>
+						<usage-publications>show only for publications</usage-publications>
+						<commentForSource>taken from OpenAIRE but added the definitions</commentForSource>
+						<note>Some of these version types can be considered preprints in the sense denoted by COAR (http://purl.org/coar/resource_type/c_816b)</note>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="versionTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:enumeration value="accepted">
+							<xs:annotation>
+								<xs:documentation>For versions that have been accepted for publication but are not yet published</xs:documentation>
+								<xs:appinfo>
+									<label>Accepted</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="published">
+							<xs:annotation>
+								<xs:documentation>For versions as they have been formally published in print or digital form</xs:documentation>
+								<xs:appinfo>
+									<label>Published</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="draft">
+							<xs:annotation>
+								<xs:documentation>For versions during the writing up process</xs:documentation>
+								<xs:appinfo>
+									<label>Draft</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="submitted">
+							<xs:annotation>
+								<xs:documentation>For versions as submitted for publication</xs:documentation>
+								<xs:appinfo>
+									<label>Submitted</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="updated">
+							<xs:annotation>
+								<xs:documentation>For versions that have been updated vis-a-vis the previous published version</xs:documentation>
+								<xs:appinfo>
+									<label>Updated</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="revision">
+				<xs:annotation>
+					<xs:documentation>A short free-text account of the revisions made to the current version vis-a-vis the previous version or a link to a document reporting these revisions</xs:documentation>
+					<xs:appinfo>
+						<label>Revision</label>
+						<label-plural>Revisions</label-plural>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="500"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="lastDateUpdated" type="ms:dateType">
+				<xs:annotation>
+					<xs:documentation>Date when the version of the resource being described was last updated</xs:documentation>
+					<xs:appinfo>
+						<label>Last date updated</label>
+						<exactMatch>dct:modified</exactMatch>
+						<exactMatch>http://hdl.handle.net/11459/CCR_C-2526_979ac535-eaa5-5e59-3cad-51c450234698 (ccr:lastUpdate)</exactMatch>
+						<exactMatch>dataCite:date dateType=&quot;updated&quot;</exactMatch>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="updateFrequency">
+				<xs:annotation>
+					<xs:documentation>Specifies the frequency with which a new updated version of the resource is released (e.g. every 6 months or two years)</xs:documentation>
+					<xs:appinfo>
+						<label>Update frequency</label>
+						<closeMatch>dct:frequency</closeMatch>
+						<closeMatch>dcat:accrualPeriodicity</closeMatch>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="100"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="validationInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="ValidationInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element name="validated" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Specifies the validation status of the resource</xs:documentation>
+					<xs:appinfo>
+						<label>Validated</label>
+						<exactMatch>http://hdl.handle.net/11459/CCR_C-2584_36b81c9c-e23a-2ace-36cd-b0d6679e3197 (ccr:validation)</exactMatch>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="validationType">
+				<xs:annotation>
+					<xs:documentation>Specifies the type of the validation that have been performed </xs:documentation>
+					<xs:appinfo>
+						<label>Validation type</label>
+						<exactMatch>http://hdl.handle.net/11459/CCR_C-2587_026dcaa6-8ece-3364-8492-6479e70f66de (ccr:validationType)</exactMatch>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="validationTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:maxLength value="20"/>
+						<xs:enumeration value="formal">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>Formal</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="content">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>Content</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="validationMode" type="ms:processMode">
+				<xs:annotation>
+					<xs:documentation>Specifies the validation methodology applied</xs:documentation>
+					<xs:appinfo>
+						<label>Validation mode</label>
+						<exactMatch>http://hdl.handle.net/11459/CCR_C-2586_75098d25-a517-983f-817c-2b05c5ce361a (ccr:validationMode)</exactMatch>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="validationModeDetails">
+				<xs:annotation>
+					<xs:documentation>Textual field for additional information on validation</xs:documentation>
+					<xs:appinfo>
+						<label>Validation mode details</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="500"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="validationExtent">
+				<xs:annotation>
+					<xs:documentation>The resource coverage in terms of validated data</xs:documentation>
+					<xs:appinfo>
+						<label>Validation extent</label>
+						<exactMatch>http://hdl.handle.net/11459/CCR_C-2585_0fcf8ea5-a273-d077-86e9-5e8f1c50fe72 (ccr:validationLevel)</exactMatch>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="validationExtentEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:maxLength value="20"/>
+						<xs:enumeration value="full"/>
+						<xs:enumeration value="partial"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="validationExtentDetails">
+				<xs:annotation>
+					<xs:documentation>Provides information on size or other details of partially validated data; to be used if only part of the resource has been validated and as an alternative to SizeInfo if the validated part cannot be counted otherwise</xs:documentation>
+					<xs:appinfo>
+						<label>Validation extent details</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="500"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="sizePerValidation" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Specifies the size of the validated part of a resource</xs:documentation>
+					<xs:appinfo>
+						<label>Size per validation</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="validationReports">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="hasValidationReport" type="ms:relatedDocumentInfoType">
+							<xs:annotation>
+								<xs:documentation>Link to a short account (prose description) of the validation details or the identifier of a document with detailed information on the validation process and results</xs:documentation>
+								<xs:appinfo>
+									<label>Has validation report</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="validationSwComponents">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="isValidatedBy" type="ms:relatedResourceType">
+							<xs:annotation>
+								<xs:documentation>Links a resource to the identifier of the software component that has been used for its validation</xs:documentation>
+								<xs:appinfo>
+									<label>Is validated by</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="validators">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="validator" type="ms:actorInfoType">
+							<xs:annotation>
+								<xs:documentation>Groups information on the person(s) or the organization(s) that validated the resource</xs:documentation>
+								<xs:appinfo>
+									<label>Validator</label>
+									<broadMatch>dct:contributor</broadMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="resourceCreationInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{resourceCreator} {fundingProject}</render-short>
+			<jaxb:class name="ResourceCreationInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element maxOccurs="1" minOccurs="0" name="resourceCreators">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="resourceCreator" type="ms:actorInfoType">
+							<xs:annotation>
+								<xs:documentation>Used to provide information on the person or the organization that has created the resource</xs:documentation>
+								<xs:appinfo>
+									<label>Resource creator</label>
+									<label-plural>Resource creators</label-plural>
+									<recommended>true</recommended>
+									<usage-ugc>To be completed automatically by the system with the details of the user in the relatedPerson</usage-ugc>
+									<exactMatch>dct:creator</exactMatch>
+									<exactMatch>dataCite:creator</exactMatch>
+									<closeMatch>http://hdl.handle.net/11459/CCR_C-2512_e8061b33-c5f3-7f6c-184d-a4311549ba92 (ccr:creatorFullName)</closeMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="fundingProjects">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="fundingProject" type="ms:projectInfoType">
+							<xs:annotation>
+								<xs:documentation>Groups information on the project that has funded the resource; choice between the ID of a project or a project title</xs:documentation>
+								<xs:appinfo>
+									<label>Funding project</label>
+									
+									<broadMatch>dct:relation</broadMatch>
+									<narrowMatch>http://hdl.handle.net/11459/CCR_C-2522_3bdc6af1-bf1b-3f5d-2938-62d99a1980ab (ccr:funder)</narrowMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="creationDate" type="ms:dateCombinationType">
+				<xs:annotation>
+					<xs:documentation>The date of creation of the resource, expressed as a range between starting and end date or exact date</xs:documentation>
+					<xs:appinfo>
+						<label>Creation date</label>
+						<usage-ugc>To be completed automatically by the system with the date that the user submitted the query</usage-ugc>
+						<exactMatch>dct:created</exactMatch>
+						<exactMatch>dataCite:date dateType=&quot;created&quot;</exactMatch>
+						<exactMatch>http://hdl.handle.net/11459/CCR_C-2510_2402e609-046a-dfbf-c2d7-5a2f1ae6dc86 (ccr:creationDate)</exactMatch>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="creationInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="CreationInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element maxOccurs="1" minOccurs="0" name="originalSources">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="hasOriginalSource" type="ms:relatedResourceType">
+							<xs:annotation>
+								<xs:documentation>The identifier of the original resources that were at the base of the creation process of the resource</xs:documentation>
+								<xs:appinfo>
+									<label>Has original source</label>
+									<exactMatch>dct:source</exactMatch>
+									<exactMatch>http://hdl.handle.net/11459/CCR_C-2534_04c8cf6a-4272-2213-4de7-52713b7c286f (ccr:originalSource)</exactMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="creationMode" type="ms:processMode">
+				<xs:annotation>
+					<xs:documentation>Specifies whether the resource is created automatically or in a manual or interactive mode </xs:documentation>
+					<xs:appinfo>
+						<closeMatch>http://hdl.handle.net/11459/CCR_C-2516_cd9adb6a-3f15-12ba-e7c7-1317906cc09e (ccr:derivationMode)</closeMatch>
+						<label>Creation mode</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="creationModeDetails">
+				<xs:annotation>
+					<xs:documentation>Provides further information on the creation methods and processes</xs:documentation>
+					<xs:appinfo>
+						<label>Creation mode details</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="200"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="creationSwComponents">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="isCreatedBy" type="ms:relatedResourceType">
+							<xs:annotation>
+								<xs:documentation>The identifier or the s/w component used in the creation process</xs:documentation>
+								<xs:appinfo>
+									<label>Is created by</label>
+									<exactMatch>http://hdl.handle.net/11459/CCR_C-2511_1db3baca-234b-4610-cb29-77cd35a713a0 (ccr:creationTool)</exactMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="resourceDocumentationInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{documentation}</render-short>
+			<jaxb:class name="ResourceDocumentationInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element minOccurs="0" name="citations">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="mustBeCitedWith" type="ms:relatedDocumentInfoType">
+							<xs:annotation>
+								<xs:documentation>Specifies one or more publication that must be used for citation purposes as requested by the resource provider (usually a scientific article that describes the resource)</xs:documentation>
+								<xs:appinfo>
+									<label>Publlication to be used for citation purposes</label>
+									<label-plural>Publlications to be used for citation purposes</label-plural>
+									<recommended>true</recommended>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="documentationPublications">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="isDocumentedIn" type="ms:relatedDocumentInfoType">
+							<xs:annotation>
+								<xs:documentation>Links a resource to publications, research articles, manuals, reports etc. that describe it</xs:documentation>
+								<xs:appinfo>
+									<label>Is documented in</label>
+									
+									<exactMatch>dataCite:isDocumentedBy</exactMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="onLineHelpURL" type="ms:httpURI">
+				<xs:annotation>
+					<xs:documentation>URL link to an online manual or help pages</xs:documentation>
+					<xs:appinfo>
+						<label>On line help URL</label>
+						<recommended>true</recommended>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="samplesLocations">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="samplesLocation" type="ms:httpURI">
+							<xs:annotation>
+								<xs:documentation>Links a resource to a url (or url's) with samples of the resource or, in the case of tools, of samples of input and/or output processes</xs:documentation>
+								<xs:appinfo>
+									<label>Samples location</label>
+									<label-plural>Samples location</label-plural>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="issueTracker" type="ms:httpURI"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="domainInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="DomainInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element ref="ms:domain"/>
+			<xs:element minOccurs="0" name="sizePerDomain" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Specifies the size of resource parts per domain</xs:documentation>
+					<xs:appinfo>
+						<label>Size per domain</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="annotationInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="AnnotationInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element ref="ms:annotationLevel"/>
+			
+			<xs:element minOccurs="0" name="annotationStandoff" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Indicates whether the annotation is created inline or in a stand-off fashion</xs:documentation>
+					<xs:appinfo>
+						<label>Annotation standoff</label>
+						<recommended>true</recommended>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" ref="ms:dataFormatInfo">
+				<xs:annotation>
+					<xs:appinfo>
+						<recommended>true</recommended>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" ref="ms:typesystem">
+				<xs:annotation>
+					<xs:appinfo>
+						<recommended>true</recommended>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" ref="ms:annotationSchema"/>
+			<xs:element minOccurs="0" ref="ms:annotationResource">
+				<xs:annotation>
+					<xs:appinfo>
+						<recommended>true</recommended>
+						<relation>one-to-one</relation>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" ref="ms:theoreticModel"/>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="guidelinesDocumentedIn" type="ms:relatedDocumentInfoType">
+				<xs:annotation>
+					<xs:documentation>A bibliographic reference or ms:httpURI link to the annotation manual</xs:documentation>
+					<xs:appinfo>
+						<label>Guidelines documented in</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="annotationMode" type="ms:processMode">
+				<xs:annotation>
+					<xs:documentation>Indicates whether the resource is annotated manually or by automatic processes</xs:documentation>
+					<xs:appinfo>
+						<xs:label>Annotation mode</xs:label>
+						<recommended>true</recommended>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="annotationModeDetails" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Provides further information on annotation process </xs:documentation>
+					<xs:appinfo>
+						<label>Annotation mode details</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="isAnnotatedBy" type="ms:relatedResourceType">
+				<xs:annotation>
+					<xs:documentation>The name, the identifier or the url of the tool used for the annotation of the resource</xs:documentation>
+					<xs:appinfo>
+						<label>Annotation tool</label>
+						<recommended>true</recommended>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="annotationDate" type="ms:dateCombinationType">
+				<xs:annotation>
+					<xs:documentation>The dates (either date or range of dates) in which the annotation process has taken place</xs:documentation>
+					<xs:appinfo>
+						<label>Annotation date</label>
+						<recommended>true</recommended>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="sizePerAnnotation" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Provides information on size for the annotated parts of the resource</xs:documentation>
+					<xs:appinfo>
+						<label>Size per annotation</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="interannotatorAgreement">
+				<xs:annotation>
+					<xs:documentation>Provides information on the interannotator agreement and the methods/metrics applied </xs:documentation>
+					<xs:appinfo>
+						<label>Interannotator agreement</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="1000"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="intraannotatorAgreement">
+				<xs:annotation>
+					<xs:documentation>Provides information on the intra-annotator agreement and the methods/metrics applied  </xs:documentation>
+					<xs:appinfo>
+						<label>Intraannotator agreement</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="1000"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="annotators">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="annotator" type="ms:actorInfoType">
+							<xs:annotation>
+								<xs:documentation>Groups information on the annotators of the specific annotation type</xs:documentation>
+								<xs:appinfo>
+									<label>Annotator</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="modalityInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{modalityType} {modalityTypeDetails}</render-short>
+			<jaxb:class name="ModalityInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element maxOccurs="unbounded" ref="ms:modalityType"/>
+			<xs:element minOccurs="0" name="modalityTypeDetails">
+				<xs:annotation>
+					<xs:documentation>Provides further information on modalities</xs:documentation>
+					<xs:appinfo>
+						<label>Modality type details</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="500"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="sizePerModality" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Provides information on the size per modality component</xs:documentation>
+					<xs:appinfo>
+						<label>Size per modality</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="runningEnvironmentInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="RunningEnvironmentInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="requiresSoftware" type="ms:relatedResourceType">
+				<xs:annotation>
+					<xs:documentation>Additional software required for running a s/w component and/or computational grammar</xs:documentation>
+					<xs:appinfo>
+						<label>Requires software</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="requiresLRs" type="ms:relatedResourceType">
+				<xs:annotation>
+					<xs:documentation>If for running a s/w component and/or computational grammar, specific LRs (e.g. a grammar, a list of words etc.) are required</xs:documentation>
+					<xs:appinfo>
+						<label>Requires language resources</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="runningEnvironmentDetails">
+				<xs:annotation>
+					<xs:documentation>Provides further information on the running environment</xs:documentation>
+					<xs:appinfo>
+						<label>Running environment details</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="200"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="characterEncodingInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<label>Character encoding</label>
+			<jaxb:class name="CharacterEncodingInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="ms:characterEncoding"/>
+			<xs:element minOccurs="0" name="sizePerCharacterEncoding" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Provides information on the size of the resource parts with different character encoding</xs:documentation>
+					<xs:appinfo>
+						<label>Size per character encoding</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="timeCoverageInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<label>Time coverage</label>
+			<jaxb:class name="TimeCoverageInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="timeCoverage">
+				<xs:annotation>
+					<xs:documentation>The time period that the content of a resource is about</xs:documentation>
+					<xs:appinfo>
+						<label>Time coverage</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="100"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="sizePerTimeCoverage" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Provides information on size per time period represented in the resource</xs:documentation>
+					<xs:appinfo>
+						<label>Size per time coverage</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="geographicCoverageInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="GeographicCoverageInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element name="geographicCoverage">
+				<xs:annotation>
+					<xs:documentation>The geographic region that the content of a resource is about; for countries, recommended use of ISO-3166</xs:documentation>
+					<xs:appinfo>
+						<label>Geographic coverage</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="100"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="sizePerGeographicCoverage" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Provides information on size per geographically distinct section of the resource</xs:documentation>
+					<xs:appinfo>
+						<label>Size per geographic coverage</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="lingualityInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{lingualityType}</render-short>
+				<label>Linguality</label>
+			<jaxb:class name="LingualityInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="lingualityType">
+				<xs:annotation>
+					<xs:documentation>Indicates whether the resource includes one, two or more languages</xs:documentation>
+					<xs:appinfo>
+						<label>Linguality type</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="lingualityTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:maxLength value="20"/>
+						<xs:enumeration value="monolingual">
+							<xs:annotation>
+								<xs:documentation>For resource with or covering only one language</xs:documentation>
+								<xs:appinfo>
+									<label>Linguality type</label>
+									<usage>To be automatically calculated if languageInfo=1</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="bilingual">
+							<xs:annotation>
+								<xs:documentation>For resource with or covering two languages</xs:documentation>
+								<xs:appinfo>
+									<label>Linguality type</label>
+									<usage>To be automatically calculated if languageInfo=2</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="multilingual">
+							<xs:annotation>
+								<xs:documentation>For resource with or covering three or more languages</xs:documentation>
+								<xs:appinfo>
+									<label>Linguality type</label>
+									<usage>To be automatically calculated if languageInfo is more than 2</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="multilingualityType">
+				<xs:annotation>
+					<xs:documentation>Indicates whether the corpus is parallel, comparable or mixed</xs:documentation>
+					<xs:appinfo>
+						<label>Multilinguality type</label>
+						<usage>Recommended only if lingualityType=bilingual or multilingual</usage>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="multilingualityTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:maxLength value="30"/>
+						<xs:enumeration value="parallel"/>
+						<xs:enumeration value="comparable"/>
+						<xs:enumeration value="multilingualSingleText">
+							<xs:annotation>
+								<xs:documentation>For corpora including single texts that contain multiple language excerpts; e.g. european parliament discussions</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="originalTranslationsInSameText"/>
+						<xs:enumeration value="other"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="multilingualityTypeDetails">
+				<xs:annotation>
+					<xs:documentation>Provides further information on multilinguality of a resource in free text</xs:documentation>
+					<xs:appinfo>
+						<label>Multilinguality type details</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="512"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="languageVarietyInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{languageVarietyName} ({languageVarietyType})</render-short>
+			<jaxb:class name="LanguageVarietyInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="languageVarietyType">
+				<xs:annotation>
+					<xs:documentation>Specifies the type of the language variety that occurs in the resource or is supported by a tool/service</xs:documentation>
+					<xs:appinfo>
+						<label>Language variety type</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="languageVarietyTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:maxLength value="20"/>
+						<xs:enumeration value="dialect"/>
+						<xs:enumeration value="jargon"/>
+						<xs:enumeration value="other"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element ref="ms:languageVarietyName">
+				<xs:annotation>
+					<xs:documentation>The name of the language variety that occurs in the resource or is supported by a tool/service</xs:documentation>
+					<xs:appinfo>
+						<label>Language variety name</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="sizePerLanguageVariety" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Provides information on the size per language variety component</xs:documentation>
+					<xs:appinfo>
+						<label>Size per language variety</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="language" type="ms:languageType">
+		<xs:annotation>
+			<xs:documentation>The language that is used in the resource or supported by the component, as specified in the BCP47 guidelines (https://tools.ietf.org/html/bcp47); the language tag is built upon (a) language tag according to ISO 639-1 and for languages not covered by this, the ISO 639-3; (b) the script tag according to ISO 15924; (c) the region tag according to ISO 3166-1;  (d) the variant subtag</xs:documentation>
+			<xs:appinfo>
+				<label>Language</label>
+				<usage>In the editor, show only the four elements languageId (optionally scriptId, regionId and variantId, according to system rules) and build the languageTag; in the browser show only the languageTag</usage>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="languageInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{languageId} {languageVarietyInfo}</render-short>
+			<jaxb:class name="LanguageInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="ms:language">
+				<xs:annotation>
+					<xs:appinfo>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="sizePerLanguage" type="ms:sizeInfoType">
+				<xs:annotation>
+					<xs:documentation>Provides information on the size per language component</xs:documentation>
+					<xs:appinfo>
+						<label>Size per language</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="languageVarieties">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" ref="ms:languageVarietyInfo">
+							<xs:annotation>
+								<xs:documentation>Groups information on language varieties occurred in the resource (e.g. dialects)</xs:documentation>
+								<xs:appinfo>
+									<label>Language variety</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="sizeInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>{size} {sizeUnit}</render-short>
+			<jaxb:class name="SizeInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="ms:size"/>
+			<xs:element name="sizeUnit">
+				<xs:annotation>
+					<xs:documentation>Specifies the unit that is used when providing information on the size of the resource or of resource parts</xs:documentation>
+					<xs:appinfo>
+						<label>Size unit</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="sizeUnitEnum"><jaxb:typesafeEnumMember name="V5_GRAMS" value="5-grams"/><jaxb:typesafeEnumMember name="V4_GRAMS" value="4-grams"/></jaxb:typesafeEnumClass></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:maxLength value="30"/>
+						<xs:enumeration value="terms">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>terms</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="entries">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>entries</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="articles">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>articles</label>
+									<usage>show only for corpus</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="files">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>files</label>
+									<usage>show only for corpus, components</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="items">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>items</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="elements">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>elements</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="units">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>units</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="texts">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>texts</label>
+									<usage>show only for corpus</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="sentences">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>sentences</label>
+									<usage>show only for corpus, text</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="bytes">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>bytes</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="tokens">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>tokens</label>
+									<usage>show only for corpus, publication</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="words">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>words</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="keywords">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>keywords</label>
+									<usage>show only for corpus, publication</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="idiomaticExpressions">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>idiomatic expressions</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="triples">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>triples</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="neologisms">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>neologisms</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="multiWordUnits">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>multi-word units</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="expressions">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>expressions</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="synsets">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>synsets</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="classes">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>classes</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="concepts">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>concepts</label>
+									<usage>show only for corpus, publication, lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="lexicalTypes">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>lexical types</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="phoneticUnits">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>phonetic units</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="morphologicalUnits">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>morphological units</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="syntacticUnits">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>syntactic units</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="semanticUnits">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>semantic units</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="predicates">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>predicates</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="frames">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>frames</label>
+									<usage>show only for lexicalConceptualResource</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="kb">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>kiloBytes</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="mb">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>megabytes</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="gb">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>gigabytes</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="tb">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>terabytes</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="unigrams">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>unigrams</label>
+									<usage>show only for n-gram corpus</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="bigrams">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>bigrams</label>
+									<usage>show only for n-gram corpus</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="trigrams">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>trigrams</label>
+									<usage>show only for n-gram corpus</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="4-grams">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>four-grams</label>
+									<usage>show only for n-gram corpus</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="5-grams">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>five-grams</label>
+									<usage>show only for n-gram corpus</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="rules">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>rules</label>
+									<usage>show only for languageDescription</usage>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="other">
+							<xs:annotation>
+								<xs:appinfo>
+									<label>other</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						
+						
+						
+						
+						
+						
+						
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="usageInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>foreseen uses: {intendedApplication} / actual uses: {actualUseInfo}</render-short>
+			<jaxb:class name="UsageInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element minOccurs="0" name="intendedApplications">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="intendedApplication" type="ms:applicationType">
+							<xs:annotation>
+								<xs:documentation>Specifies an application where the resource can be used or is recommended to be used</xs:documentation>
+								<xs:appinfo>
+									
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element minOccurs="0" name="actualUseInfos">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" ref="ms:actualUseInfo"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="actualUseInfoType">
+		<xs:annotation>
+			<xs:appinfo>
+				<render-short>applications where involved: {applicationInvolved}</render-short>
+			<jaxb:class name="ActualUseInfo"/></xs:appinfo>
+		</xs:annotation>
+		<xs:sequence>
+			
+			<xs:element minOccurs="0" name="applicationsInvolved">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="applicationInvolved" type="ms:applicationType">
+							<xs:annotation>
+								<xs:documentation>Specifies an application where the resource has actually been involved and used</xs:documentation>
+								<xs:appinfo>
+									<label>Application where the resource was used</label>
+									<label-plural>Applications where the resource was used</label-plural>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="usageReports">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="usageReport" type="ms:relatedDocumentInfoType">
+							<xs:annotation>
+								<xs:documentation>Reports on the research papers documenting the usage of a resource, either in a structured form or in free text</xs:documentation>
+								<xs:appinfo>
+									<label>Usage report</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="derivedResources">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="derivedResource" type="ms:relatedResourceType">
+							<xs:annotation>
+								<xs:documentation>The name, the identifier or the url of the outcome or product of the resource.</xs:documentation>
+								<xs:appinfo>
+									<label>Derived resource</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="usageProjects">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="usageProject" type="ms:projectInfoType">
+							<xs:annotation>
+								<xs:documentation>Groups information on the project in which the resource has been used</xs:documentation>
+								<xs:appinfo>
+									<label>Usage project</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="actualUseDetails">
+				<xs:annotation>
+					<xs:documentation>Reports on the usage of the resource in free text</xs:documentation>
+					<xs:appinfo>
+						<label>Actual use details</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="250"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="relationInfoType">
+		<xs:annotation><xs:appinfo><jaxb:class name="RelationInfo"/></xs:appinfo></xs:annotation><xs:sequence>
+			<xs:element name="relationType">
+				<xs:annotation>
+					<xs:documentation>Specifies the type of relation holding between two entities (e.g. two resources that comprise one new resource together, a corpus and the s/w component that has been used for its creation or a corpus and the publication that describes it</xs:documentation>
+					<xs:appinfo>
+						<label>Relation type</label>
+						<exactMatch>dataCite relation relationType</exactMatch>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="relationTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:enumeration value="isPartOf"/>
+						<xs:enumeration value="isPartWith"/>
+						<xs:enumeration value="hasPart"/>
+						<xs:enumeration value="hasOutcome"/>
+						<xs:enumeration value="isCombinedWith"/>
+						<xs:enumeration value="requiresLR"/>
+						<xs:enumeration value="requiresSoftware"/>
+						<xs:enumeration value="isExactMatch"/>
+						<xs:enumeration value="isSimilarTo"/>
+						<xs:enumeration value="isContinuationOf"/>
+						<xs:enumeration value="isVersionOf"/>
+						<xs:enumeration value="isSimilarTo"/>
+						<xs:enumeration value="replaces"/>
+						<xs:enumeration value="isReplacedWith"/>
+						<xs:enumeration value="isCreatedBy"/>
+						<xs:enumeration value="isElicitedBy"/>
+						<xs:enumeration value="isRecordedBy"/>
+						<xs:enumeration value="isEditedBy"/>
+						<xs:enumeration value="isAnalysedBy"/>
+						<xs:enumeration value="isEvaluatedBy"/>
+						<xs:enumeration value="isQueriedBy"/>
+						<xs:enumeration value="isAccessedBy"/>
+						<xs:enumeration value="isArchivedBy"/>
+						<xs:enumeration value="isDisplayedBy"/>
+						<xs:enumeration value="isCompatibleWith"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="relatedResource" type="ms:relatedResourceType">
+				<xs:annotation>
+					<xs:documentation>Reference to a resource participating in a relation; the preferred form of reference is a unique identifier, otherwise the resource name</xs:documentation>
+					<xs:appinfo>
+						<label>Related resource</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:element name="relationInfo" type="ms:relationInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information on relations between resources</xs:documentation>
+			<xs:appinfo>
+				<label>Annotations</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="usageInfo" type="ms:usageInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on usage of the resource (both intended use and cases where it has already been used)</xs:documentation>
+			<xs:appinfo>
+				<label>Information on usage</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="actualUseInfo" type="ms:actualUseInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on how the resource has already been used</xs:documentation>
+			<xs:appinfo>
+				<label>Actual use</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="identificationInfo" type="ms:identificationInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information needed to identify and describe at a minimal level the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Identification</label>
+				<label-plural>Identifications</label-plural>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="contactInfo" type="ms:contactInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the possible sources for obtaining further information regarding the resource; at least a general email address or a landing page (website) must be supplied, although the recommended practice is to describe a contact person or group</xs:documentation>
+			<xs:appinfo>
+				<label>Contact information</label>
+				<label-plural>Contact information points</label-plural>
+				<usage-ugc>use the contactPerson and add the details of the user</usage-ugc>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="versionInfo" type="ms:versionInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on a specific version or release of the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Information on version</label>
+				<label-plural>Information on versions</label-plural>
+				<label-plural>Information on versions</label-plural>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="validationInfo" type="ms:validationInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on validation of a resource; it can be repeated to allow for different validations (e.g. formal validation of the whole resource; content validation of one part of the resource etc.). </xs:documentation>
+			<xs:appinfo>
+				<label>Validation</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="resourceCreationInfo" type="ms:resourceCreationInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the creation procedure and agents of a resource</xs:documentation>
+			<xs:appinfo>
+				<label>Resource creation</label>
+				<recommended>true</recommended>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="resourceDocumentationInfo" type="ms:resourceDocumentationInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information on any document (publication, report, manual etc.) about the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Documentation about the resource</label>
+				<recommended>true</recommended>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="domainInfo" type="ms:domainInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information on domains represented in the resource; can be repeated for parts of the resource with distinct domain</xs:documentation>
+			<xs:appinfo>
+				<label>Domain</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="annotationInfo" type="ms:annotationInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the annotated part(s) of a resource</xs:documentation>
+			<xs:appinfo>
+				<label>Annotation</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="domain">
+		<xs:annotation>
+			<xs:documentation>Specifies the application domain of the resource or the tool/service</xs:documentation>
+			<xs:appinfo>
+				<label>Domain</label>
+				<broadMatch>dct:subject</broadMatch>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="classificationSchemeName" type="ms:classificationSchemeName" use="required"/>
+					<xs:attribute name="schemeURI" type="xs:anyURI" use="optional"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="modalityInfo" type="ms:modalityInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the modalities represented in the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Modality</label>
+				<label-plural>Modalities</label-plural>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="creationInfo" type="ms:creationInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information on the resource creation (e.g. for corpora, selection of texts/audio files/ video files etc.; for lexica, construction of lemma list etc.)</xs:documentation>
+			<xs:appinfo>
+				<label>Creation</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="runningEnvironmentInfo" type="ms:runningEnvironmentInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information on the running environment of a tool or a language description</xs:documentation>
+			<xs:appinfo>
+				<label>Running environment</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="theoreticModel">
+		<xs:annotation>
+			<xs:documentation>Name of the theoretic model applied for the creation or enrichment of the resource, and/or a reference (URL or bibliographic reference) to informative material about the theoretic model used</xs:documentation>
+			<xs:appinfo>
+				<label>Theoretic model</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:maxLength value="500"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="hasOriginalSource" type="ms:resourceIdentifierType">
+		<xs:annotation>
+			<xs:documentation>The identifier of the original resources that were at the base of the creation process of the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Has original source</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="characterEncodingInfo" type="ms:characterEncodingInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information on character encoding of the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Character encoding</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="timeCoverageInfo" type="ms:timeCoverageInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups together information on time classification of the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Time coverage</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="geographicCoverageInfo" type="ms:geographicCoverageInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on geographic classification of the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Geographic coverage</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="lingualityInfo" type="ms:lingualityInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the number of languages of the resource part and of the way they are combined to each other</xs:documentation>
+			<xs:appinfo>
+				<label>Linguality</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="languageInfo" type="ms:languageInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the languages represented in the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Language</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="metalanguageInfo" type="ms:languageInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the languages used for the description of the resource</xs:documentation>
+			<xs:appinfo>
+				<label>Metalanguage</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="languageVarietyInfo" type="ms:languageVarietyInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on language varieties occurred in the resource (e.g. dialects)</xs:documentation>
+			<xs:appinfo>
+				<label>Language variety</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="languageVarietyName">
+		<xs:annotation>
+			<xs:documentation>The name of the language variety that occurs in the resource or is supported by a tool/service</xs:documentation>
+			<xs:appinfo>
+				<label>Language variety name</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:maxLength value="100"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="modalityType">
+		<xs:annotation>
+			<xs:documentation>Specifies the type of the modality represented in the resource or processed by a tool/service</xs:documentation>
+			<xs:appinfo>
+				<label>Modality type</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="modalityTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+				<xs:maxLength value="30"/>
+				<xs:enumeration value="bodyGesture"/>
+				<xs:enumeration value="facialExpression"/>
+				<xs:enumeration value="voice"/>
+				<xs:enumeration value="combinationOfModalities"/>
+				<xs:enumeration value="signLanguage"/>
+				<xs:enumeration value="spokenLanguage"/>
+				<xs:enumeration value="writtenLanguage"/>
+				<xs:enumeration value="other"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="mediaType">
+		<xs:annotation>
+			<xs:documentation>Specifies the media type of the resource and basically corresponds to the physical medium of the content representation. Each media type is described through a distinctive set of features. A resource may consist of parts attributed to different types of media.</xs:documentation>
+			<xs:appinfo>
+				<label>Media type</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="mediaTypeEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+				<xs:maxLength value="30"/>
+				<xs:enumeration value="text"/>
+				<xs:enumeration value="audio"/>
+				<xs:enumeration value="video"/>
+				<xs:enumeration value="image"/>
+				<xs:enumeration value="textNumerical"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="characterEncoding">
+		<xs:annotation>
+			<xs:documentation>The name of the character encoding used in the resource or supported by the component</xs:documentation>
+			<xs:appinfo>
+				<label>Character encoding set</label>
+				<label-plural>Character encoding sets</label-plural>
+				<default>UTF-8</default>
+				<change>yes</change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="characterEncodingEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+				<xs:maxLength value="100"/>
+				<xs:enumeration value="US-ASCII"/>
+				<xs:enumeration value="windows-1250"/>
+				<xs:enumeration value="windows-1251"/>
+				<xs:enumeration value="windows-1252"/>
+				<xs:enumeration value="windows-1253"/>
+				<xs:enumeration value="windows-1254"/>
+				<xs:enumeration value="windows-1257"/>
+				<xs:enumeration value="ISO-8859-1"/>
+				<xs:enumeration value="ISO-8859-2"/>
+				<xs:enumeration value="ISO-8859-4"/>
+				<xs:enumeration value="ISO-8859-5"/>
+				<xs:enumeration value="ISO-8859-7"/>
+				<xs:enumeration value="ISO-8859-9"/>
+				<xs:enumeration value="ISO-8859-13"/>
+				<xs:enumeration value="ISO-8859-15"/>
+				<xs:enumeration value="KOI8-R"/>
+				<xs:enumeration value="UTF-8"/>
+				<xs:enumeration value="UTF-16"/>
+				<xs:enumeration value="UTF-16BE"/>
+				<xs:enumeration value="UTF-16LE"/>
+				<xs:enumeration value="windows-1255"/>
+				<xs:enumeration value="windows-1256"/>
+				<xs:enumeration value="windows-1258"/>
+				<xs:enumeration value="ISO-8859-3"/>
+				<xs:enumeration value="ISO-8859-6"/>
+				<xs:enumeration value="ISO-8859-8"/>
+				<xs:enumeration value="windows-31j"/>
+				<xs:enumeration value="EUC-JP"/>
+				<xs:enumeration value="x-EUC-JP-LINUX"/>
+				<xs:enumeration value="Shift_JIS"/>
+				<xs:enumeration value="ISO-2022-JP"/>
+				<xs:enumeration value="x-mswin-936"/>
+				<xs:enumeration value="GB18030"/>
+				<xs:enumeration value="x-EUC-CN"/>
+				<xs:enumeration value="GBK"/>
+				<xs:enumeration value="ISCII91"/>
+				<xs:enumeration value="x-windows-949"/>
+				<xs:enumeration value="EUC-KR"/>
+				<xs:enumeration value="ISO-2022-KR"/>
+				<xs:enumeration value="x-windows-950"/>
+				<xs:enumeration value="x-MS950-HKSCS"/>
+				<xs:enumeration value="x-EUC-TW"/>
+				<xs:enumeration value="Big5"/>
+				<xs:enumeration value="Big5-HKSCS"/>
+				<xs:enumeration value="TIS-620"/>
+				<xs:enumeration value="Big5_Solaris"/>
+				<xs:enumeration value="Cp037"/>
+				<xs:enumeration value="Cp273"/>
+				<xs:enumeration value="Cp277"/>
+				<xs:enumeration value="Cp278"/>
+				<xs:enumeration value="Cp280"/>
+				<xs:enumeration value="Cp284"/>
+				<xs:enumeration value="Cp285"/>
+				<xs:enumeration value="Cp297"/>
+				<xs:enumeration value="Cp420"/>
+				<xs:enumeration value="Cp424"/>
+				<xs:enumeration value="Cp437"/>
+				<xs:enumeration value="Cp500"/>
+				<xs:enumeration value="Cp737"/>
+				<xs:enumeration value="Cp775"/>
+				<xs:enumeration value="Cp838"/>
+				<xs:enumeration value="Cp850"/>
+				<xs:enumeration value="Cp852"/>
+				<xs:enumeration value="Cp855"/>
+				<xs:enumeration value="Cp856"/>
+				<xs:enumeration value="Cp857"/>
+				<xs:enumeration value="Cp858"/>
+				<xs:enumeration value="Cp860"/>
+				<xs:enumeration value="Cp861"/>
+				<xs:enumeration value="Cp862"/>
+				<xs:enumeration value="Cp863"/>
+				<xs:enumeration value="Cp864"/>
+				<xs:enumeration value="Cp865"/>
+				<xs:enumeration value="Cp866"/>
+				<xs:enumeration value="Cp868"/>
+				<xs:enumeration value="Cp869"/>
+				<xs:enumeration value="Cp870"/>
+				<xs:enumeration value="Cp871"/>
+				<xs:enumeration value="Cp874"/>
+				<xs:enumeration value="Cp875"/>
+				<xs:enumeration value="Cp918"/>
+				<xs:enumeration value="Cp921"/>
+				<xs:enumeration value="Cp922"/>
+				<xs:enumeration value="Cp930"/>
+				<xs:enumeration value="Cp933"/>
+				<xs:enumeration value="Cp935"/>
+				<xs:enumeration value="Cp937"/>
+				<xs:enumeration value="Cp939"/>
+				<xs:enumeration value="Cp942"/>
+				<xs:enumeration value="Cp942C"/>
+				<xs:enumeration value="Cp943"/>
+				<xs:enumeration value="Cp943C"/>
+				<xs:enumeration value="Cp948"/>
+				<xs:enumeration value="Cp949"/>
+				<xs:enumeration value="Cp949C"/>
+				<xs:enumeration value="Cp950"/>
+				<xs:enumeration value="Cp964"/>
+				<xs:enumeration value="Cp970"/>
+				<xs:enumeration value="Cp1006"/>
+				<xs:enumeration value="Cp1025"/>
+				<xs:enumeration value="Cp1026"/>
+				<xs:enumeration value="Cp1046"/>
+				<xs:enumeration value="Cp1047"/>
+				<xs:enumeration value="Cp1097"/>
+				<xs:enumeration value="Cp1098"/>
+				<xs:enumeration value="Cp1112"/>
+				<xs:enumeration value="Cp1122"/>
+				<xs:enumeration value="Cp1123"/>
+				<xs:enumeration value="Cp1124"/>
+				<xs:enumeration value="Cp1140"/>
+				<xs:enumeration value="Cp1141"/>
+				<xs:enumeration value="Cp1142"/>
+				<xs:enumeration value="Cp1143"/>
+				<xs:enumeration value="Cp1144"/>
+				<xs:enumeration value="Cp1145"/>
+				<xs:enumeration value="Cp1146"/>
+				<xs:enumeration value="Cp1147"/>
+				<xs:enumeration value="Cp1148"/>
+				<xs:enumeration value="Cp1149"/>
+				<xs:enumeration value="Cp1381"/>
+				<xs:enumeration value="Cp1383"/>
+				<xs:enumeration value="Cp33722"/>
+				<xs:enumeration value="ISO2022_CN_CNS"/>
+				<xs:enumeration value="ISO2022_CN_GB"/>
+				<xs:enumeration value="JISAutoDetect"/>
+				<xs:enumeration value="MS874"/>
+				<xs:enumeration value="MacArabic"/>
+				<xs:enumeration value="MacCentralEurope"/>
+				<xs:enumeration value="MacCroatian"/>
+				<xs:enumeration value="MacCyrillic"/>
+				<xs:enumeration value="MacDingbat"/>
+				<xs:enumeration value="MacGreek"/>
+				<xs:enumeration value="MacHebrew"/>
+				<xs:enumeration value="MacIceland"/>
+				<xs:enumeration value="MacRoman"/>
+				<xs:enumeration value="MacRomania"/>
+				<xs:enumeration value="MacSymbol"/>
+				<xs:enumeration value="MacThai"/>
+				<xs:enumeration value="MacTurkish"/>
+				<xs:enumeration value="MacUkraine"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="annotationLevel">
+		<xs:annotation>
+			<xs:documentation>Specifies the annotation level of the resource or what a s/w component consumes or produces as an output</xs:documentation>
+			<xs:appinfo>
+				<label>Annotation level</label>
+				<label-plural>Annotation levels</label-plural>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="annotationLevelEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+				<xs:maxLength value="150"/>
+				<xs:enumeration value="alignment"/>
+				<xs:enumeration value="discourseAnnotation"/>
+				<xs:enumeration value="discourseAnnotation-argumentation"/>
+				<xs:enumeration value="discourseAnnotation-audienceReactions"/>
+				<xs:enumeration value="discourseAnnotation-coreference"/>
+				<xs:enumeration value="discourseAnnotation-dialogueActs"/>
+				<xs:enumeration value="discourseAnnotation-discourseRelations"/>
+				<xs:enumeration value="lemmatization"/>
+				<xs:enumeration value="morphosyntacticAnnotation-bPosTagging"/>
+				<xs:enumeration value="morphosyntacticAnnotation-posTagging"/>
+				<xs:enumeration value="segmentation"/>
+				<xs:enumeration value="semanticAnnotation"/>
+				<xs:enumeration value="semanticAnnotation-certaintyLevel"/>
+				<xs:enumeration value="semanticAnnotation-emotions">
+					<xs:annotation>
+						<xs:appinfo>
+							<exactMatch>semanticAnnotation-sentiments</exactMatch>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="semanticAnnotation-events"/>
+				<xs:enumeration value="semanticAnnotation-namedEntities">
+					<xs:annotation>
+						<xs:appinfo>
+							<exactMatch>semanticAnnotation-entityMentions</exactMatch>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="semanticAnnotation-polarity"/>
+				<xs:enumeration value="semanticAnnotation-questionTopicalTarget"/>
+				<xs:enumeration value="semanticAnnotation-readabilty"/>
+				<xs:enumeration value="semanticAnnotation-semanticClasses"/>
+				<xs:enumeration value="semanticAnnotation-semanticRelations"/>
+				<xs:enumeration value="semanticAnnotation-semanticRoles"/>
+				<xs:enumeration value="semanticAnnotation-speechActs"/>
+				<xs:enumeration value="semanticAnnotation-subjectivity"/>
+				<xs:enumeration value="semanticAnnotation-temporalExpressions"/>
+				<xs:enumeration value="semanticAnnotation-textualEntailment"/>
+				<xs:enumeration value="semanticAnnotation-wordSenses"/>
+				<xs:enumeration value="syntacticAnnotation-semanticFrames">
+					<xs:annotation>
+						<xs:appinfo>
+							<exactMatch>semanticAnnotation-semanticPredication</exactMatch>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="other"/>
+				
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:simpleType name="applicationType">
+		<xs:annotation>
+			<xs:documentation>A classification of NLP/TDM applications; please, note that the ontology is under revision</xs:documentation>
+			<xs:appinfo>
+				<label>Application type</label>
+				<label-plural>Application types</label-plural>
+			<jaxb:typesafeEnumClass/></xs:appinfo>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="100"/>
+			<xs:enumeration value="annotation">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>annotation</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="bilingualLexiconInduction">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>bilingual lexicon induction</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="contradictionDetection">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>contradiction detection</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="dependencyParsing">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>dependency parsing</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="derivationalMorphologicalAnalysis">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>derivational morphological analysis</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="discourseAnalysis">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>discourse analysis</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="documentClassification">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>document classification</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="emotionGeneration">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>emotion generation</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="emotionRecognition">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>emotion recognition</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="entityMentionRecognition">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>entity mention recognition</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="eventExtraction">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>event extraction</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="expressionRecognition">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>expression recognition</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="extractionOfFundingInformation">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>extraction of funding information</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="intra-documentCoreferenceResolution">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>intra-document coreference resolution</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="languageIdentification">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>language identification</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="languageModelling">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>language modelling</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="languageModelsTraining">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>language models training</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lemmatization">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lemmatization</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lexiconAccess">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lexicon access</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lexiconAcquisitionFromCorpora">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lexicon acquisition from corpora</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lexiconEnhancement">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lexicon enhancement</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lexiconExtractionFromLexica">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lexicon extraction from lexica</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lexiconFormatConversion">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lexicon format conversion</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lexiconMerging">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lexicon merging</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="lexiconVisualization">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>lexicon visualization</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="machineTranslation">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>machineTranslation</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="morphologicalAnalysis">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>morphological analysis</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="morphosyntacticAnnotation-bPosTagging">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>morphosyntactic annotation - below Part-of-Speech tagging</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="morphosyntacticAnnotation-posTagging">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>morphosyntactic annotation - below Part-of-Speech tagging</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="naturalLanguageGeneration">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>natural language generation</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="naturalLanguageUnderstanding">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>natural language understanding</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="opinionMining">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>opinion mining</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="other">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>other</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="persuasiveExpressionMining">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>persuasive expression mining</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="qualitativeAnalysis">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>qualitative analysis</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="questionAnswering">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>question answering</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="semanticRoleLabelling">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>Semantic Role Labelling</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="sentenceSplitting">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>sentence splitting</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="shallowParsing">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>shallow parsing</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="spellChecking">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>spell checking</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="temporalExpressionRecognition">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>temporal expression recognition</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="terminologyExtraction">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>terminology extraction</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="textGeneration">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>text generation</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="textMining">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>text mining</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="tokenization">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>tokenization</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="tokenizationAndSentenceSplitting">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>tokenization and sentence splitting</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="topicDetection">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>topic detection</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="topicDetectionAndTracking">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>topic detection and tracking</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="topicModelling">
+				<xs:annotation>
+					<xs:appinfo>
+						<label>topic modelling</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="textAndDataMining">
+				<xs:annotation>
+					<xs:documentation>The automated processing of unstructured text and/or structured data leading to the extraction of previously hidden knowledge.</xs:documentation>
+					<xs:appinfo>
+						<label>Text and Data Mining</label>
+						<note>It was initially defined as the discovery by computer of new, previously unknown information, by automatically extracting and relating information from different (…) resources, to reveal otherwise hidden meanings (Hearst, 1999), in other words, an exploratory data analysis that leads to the discovery of heretofore unknown information, or to answers for questions for which the answer is not currently known' (Hearst, 1999). [From FutureTDM,http://www.futuretdm.eu/news/tdm-definition/]</note>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="contentMining">
+				<xs:annotation>
+					<xs:documentation>The automated analysis of large volumes of content of any form or medium (e.g. text, images, videos, graphs, metadata etc.) that leads to the discovery of previously undiscovered information (e.g. identification of relationships between entities). </xs:documentation>
+					<xs:appinfo>
+						<label>Content Mining</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="textAndDataAnalytics">
+				<xs:annotation>
+					<xs:documentation>The process/task of converting unstructured text and data into high-quality structured data that can be further analysed to extract knowledge, support decision making etc.</xs:documentation>
+					<xs:appinfo>
+						<label>Content Mining</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="knowledgeAcquisition">
+				<xs:annotation>
+					<xs:documentation>The process/task of extracting, organising and systematising knowledge usually of a specific domain from external sources so that it can be used in a knowledge-based system.</xs:documentation>
+					<xs:appinfo>
+						<label>Knowledge Acquisition</label>
+						<xs:broader>Text and Data Mining</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="informationExtraction">
+				<xs:annotation>
+					<xs:documentation>The process/task of automatically extracting structured information from unstructured and/or semi-structured data.</xs:documentation>
+					<xs:appinfo>
+						<label>Information Extraction</label>
+						<xs:broader>Text and Data Mining</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="wordSenseDisambiguation">
+				<xs:annotation>
+					<xs:documentation>&quot;The process/task of identifying which sense of a word with multiple meanings is used in a particular context; the selection of the sense is made from a list of the word's senses.&quot;</xs:documentation>
+					<xs:appinfo>
+						<label>Word Sense Disambiguation</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="eventDetection">
+				<xs:annotation>
+					<xs:documentation>The process/task of identifying events in data (text, video, images etc.), usually combined with their classification into types of events and recognition of the event attributes (e.g. time, place, participants and duration).</xs:documentation>
+					<xs:appinfo>
+						<label>Event Detection</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="namedEntityRecognition">
+				<xs:annotation>
+					<xs:documentation>A subtask of information extraction that seeks to locate and classify named entities in text into pre-defined categories such as the names of persons, organizations, locations, expressions of times, quantities, monetary values, percentages, etc.</xs:documentation>
+					<xs:appinfo>
+						<label>Named Entity Recognition</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="knowledgeDiscovery">
+				<xs:annotation>
+					<xs:documentation>The process/task of automatically searching large volumes of data for patterns that can be considered knowledge about the data.</xs:documentation>
+					<xs:appinfo>
+						<label>Knowledge Discovery</label>
+						<xs:broader>Text and Data Mining</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="knowledgeDiscoveryAndInformationExtraction">
+				<xs:annotation>
+					<xs:documentation>Knowledge discovery is the process/task of automatically searching large volumes of data for patterns that can be considered knowledge about the data. Information extraction is the process/task of automatically extracting structured information from unstructured and/or semi-structured data.</xs:documentation>
+					<xs:appinfo>
+						<label>Knowledge Discovery  and Information Extraction</label>
+						<xs:broader>Text and Data Mining</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="knowledgeRepresentation">
+				<xs:annotation>
+					<xs:documentation>The process/task of representing information about entities in a form that machines are capable of understanding it.</xs:documentation>
+					<xs:appinfo>
+						<label>Knowledge Representation</label>
+						<xs:broader>Text and Data Mining</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="relationExtraction">
+				<xs:annotation>
+					<xs:documentation>The process/task of identifying and classifying relation mentions between entities in text and/or data.</xs:documentation>
+					<xs:appinfo>
+						<label>Relation Extraction</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="coreferenceResolution">
+				<xs:annotation>
+					<xs:documentation>The process/task of determining all linguistic expressions that refer to the same entity in a certain text.</xs:documentation>
+					<xs:appinfo>
+						<label>Co-reference Resolution</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+						<note>Although anaphora is on theoretical grounds different from co-reference (cf. http://linguistics.stackexchange.com/questions/11506/what-is-the-difference-between-coreference-resolution-and-anaphora-resolution for a discussion on the topic), for OpenMinTeD purposes, the terms co-reference resolution and anaphora resolution are semantically close enough to be used as synonyms.</note>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="textCategorisation">
+				<xs:annotation>
+					<xs:documentation>The process/task of assigning documents into classes or categories.</xs:documentation>
+					<xs:appinfo>
+						<label>Text Categorisation</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="summarisation">
+				<xs:annotation>
+					<xs:documentation>The process/task of reducing one or more textual documents with a computer program in order to create a summary that retains the most important points of the original document(s).</xs:documentation>
+					<xs:appinfo>
+						<label>Summarisation</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="sentimentAnalysis">
+				<xs:annotation>
+					<xs:documentation>The process/task of computationally identifying and categorizing opinions expressed in a piece of text, especially in order to determine whether the writer's attitude towards a particular topic, product, etc. is positive, negative, or neutral.</xs:documentation>
+					<xs:appinfo>
+						<label>Sentiment Analysis</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+						<note>&quot;For OpenMinTeD purposes, sentiment analysis and opinion mining are considered synonyms.</note>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="emotionDetection">
+				<xs:annotation>
+					<xs:documentation>The process/task of identifying types of feelings (e.g. anger, fear, happiness, sadness, etc.) in the linguistic expression of texts.</xs:documentation>
+					<xs:appinfo>
+						<label>Emotion Detection</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="questionAnswering">
+				<xs:annotation>
+					<xs:documentation>The process/task of automatically answering questions posed by users in the form of natural language.</xs:documentation>
+					<xs:appinfo>
+						<label>Question Answering</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="computationalArgumentation">
+				<xs:annotation>
+					<xs:documentation>The process/task of identifying and representing argumentation in text, so that systems have the ability to use them in tasks, such as automated logical reasoning.</xs:documentation>
+					<xs:appinfo>
+						<label>Computational Argumentation</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="informationRetrieval">
+				<xs:annotation>
+					<xs:documentation>The activity of obtaining information resources relevant to an information need from a collection of information resources. Searches can be based on full-text or other content-based indexing.</xs:documentation>
+					<xs:appinfo>
+						<label>Information Retrieval</label>
+						<xs:broader>Text and Data Mining</xs:broader>
+						<matchFosterTaxonomy>TDM in Information Retrieval</matchFosterTaxonomy>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="exploratorySearch">
+				<xs:annotation>
+					<xs:documentation>A type of search which, in contrast to traditional lookup search, covers a broad class of activities, such as investigating, evaluating, comparing, and synthesizing.</xs:documentation>
+					<xs:appinfo>
+						<label>Exploratory Search</label>
+						<xs:broader>Information Retrieval</xs:broader>
+						<matchFosterTaxonomy>exploratory search and discovery</matchFosterTaxonomy>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="semanticSearch">
+				<xs:annotation>
+					<xs:documentation>A type of search that seeks to improve search accuracy by understanding the searcher's intent and the contextual meaning of terms as they appear in the searchable dataspace, whether on the Web or within a closed system, to generate more relevant results.</xs:documentation>
+					<xs:appinfo>
+						<label>Semantic Search</label>
+						<xs:broader>Information Retrieval</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="informationFiltering">
+				<xs:annotation>
+					<xs:documentation>The process/task of removing (filtering out) redundant or unwanted information from an information stream using (semi)automated or computerized methods prior to presentation to a human user. The selection of the items is based on the correlation between the content of the items and the user’s preferences (content-based filtering) or the correlation between people with similar preferences (collaborative filtering).</xs:documentation>
+					<xs:appinfo>
+						<label>Information Filtering</label>
+						<xs:broader>Information Retrieval</xs:broader>
+						<matchFosterTaxonomy>filtering and recommendation and similarity</matchFosterTaxonomy>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="recommenderSystem">
+				<xs:annotation>
+					<xs:documentation>An information filtering system that delivers information in the form of suggestions.</xs:documentation>
+					<xs:appinfo>
+						<label>Recommender System</label>
+						<xs:broader>Information Filtering</xs:broader>
+						<matchFosterTaxonomy>filtering and recommendation and similarity</matchFosterTaxonomy>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="recognizingTextualEntailment">
+				<xs:annotation>
+					<xs:documentation>A task/process that intends to recognize for two text fragments whether the meaning of one text is entailed in that of the other, i.e. whether the truth of one text fragment follows from that of the other fragment.</xs:documentation>
+					<xs:appinfo>
+						<label>Recognizing Textual Entailment</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+						<matchFosterTaxonomy>textual entailment</matchFosterTaxonomy>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="paraphrasing">
+				<xs:annotation>
+					<xs:documentation>A task/process whereby a text fragment is reproduced with another text fragment that conveys the same or similar information.</xs:documentation>
+					<xs:appinfo>
+						<label>Paraphrasing</label>
+						<xs:broader>Knowledge Discovery  and Information Extraction</xs:broader>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:enumeration>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="annotationResource" type="ms:relatedResourceType">
+		<xs:annotation>
+			<xs:documentation>A name or an identifier (e.g. url reference) to the ancillary resource (e.g. tagset, ontology, term list) used in the annotation of the resource or used by the component</xs:documentation>
+			<xs:appinfo>
+				<label>Annotation resource</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="typesystem" type="ms:relatedResourceType">
+		<xs:annotation>
+			<xs:documentation>A name or an identifier (e.g. url reference) to the typesystem used in the annotation of the resource or used by the component</xs:documentation>
+			<xs:appinfo>
+				<label>Tagset</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="dataFormatInfo">
+		<xs:annotation>
+			<xs:documentation>Groups the information for the data format; at least mimetype and, if required, a description and documentation url should be provided</xs:documentation>
+			<xs:appinfo>
+				<label>Data format information</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="dataFormat">
+					<xs:annotation>
+						<xs:documentation>Specifies the format that is used since often the mime type will not be sufficient for machine processing; NOTE: normally the format should be represented as a combination of the mimetype (e.g. application/xml) and some name and link to the documentation about the supplementary conventions used (e.g xces, alvisED etc.)</xs:documentation>
+						<xs:appinfo>
+							<xs:label>Data format</xs:label>
+							<usage-ugc>Automatically filled in with the dataFormat of the publications</usage-ugc>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="dataFormatEnum"><jaxb:typesafeEnumMember name="XCES_FORMAT_VARIANT_ILSP" value="xces; format-variant=ilsp"/><jaxb:typesafeEnumMember name="PTB_FORMAT_VARIANT_COMBINED" value="ptb; format-variant=combined"/><jaxb:typesafeEnumMember name="PTB_FORMAT_VARIANT_CHUNKED" value="ptb; format-variant=chunked"/><jaxb:typesafeEnumMember name="BIONLP_FORMAT_VARIANT_ST2013A1_A2" value="bioNLP; format-variant=ST2013a1_a2"/><jaxb:typesafeEnumMember name="APPLICATION_VND_MS_EXCEL" value="application/vnd.ms-excel"/><jaxb:typesafeEnumMember name="APPLICATION_VND_XMI_XML" value="application/vnd.xmi+xml"/></jaxb:typesafeEnumClass></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+							<xs:maxLength value="100"/>
+							<xs:enumeration value="text/plain">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Plain text</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/vnd.xmi+xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>XMI</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>XML</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/x-xces+xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>XCES</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/tei+xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>TEI</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/rdf+xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>RDF</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/xhtml+xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>XHTML</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/emma+xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>EMMA</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/pls+xml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>PLS</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/postscript">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>postscript</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="text/sgml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>SGML</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="text/html">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>HTML</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/x-tex">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>TEX</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/rtf">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>RTF</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/json+ld">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>JSON/LD</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/x-latex">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>LATEX</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="text/csv">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>CSV (Comma Separated Values)</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="text/tab-separated-values">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>TSV (Tab Separated Values)</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/pdf">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>PDF</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/x-msaccess">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>MS-Access database</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/msword">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>MS-Word</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="application/vnd.ms-excel">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>MS-Excel</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="text/turtle">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Turtle</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="aclAnthology">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>ACL anthology</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="alvisEnrichedDocument">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>ALVIS Enriched Document</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="bnc">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>BNC</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="bioNLP">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>BioNLP Shared Task</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="bioNLP; format-variant=ST2013a1_a2">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>BioNLP Shared Task 2013 a1/a2</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="cadixeJSON">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Cadixe</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="conll2000">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>CoNLL 2000</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="conll2002">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>CoNLL 2002</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="conll2006">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>CoNLL 2006</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="conll2007">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>CoNLL 2007</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="conll2009">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>CoNLL 2009</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="conll2012">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>CoNLL 2012</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="dataSift">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>DataSift</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="factoredTagLem">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Factored Tag Lemma</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="gate">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>GATE</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="genia">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Genia</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="graf">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>GrAF</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="html5Microdata">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>HTML5 Microdata</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="i2b2">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>I2B2</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="imsCwb">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>IMS CorpusWorkBench</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="jdbc">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>JAVA Database Connectivity</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="keaCorpus">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>KEA corpus</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="lll">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>LLL</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="negraExport">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>NEGRA export</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="ptb; format-variant=chunked">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Penn Treebank Chunked</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="ptb; format-variant=combined">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Penn Treebank Combined</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="pml">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Prague Markup Language</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="relp">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>RELP</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="aimedCorpus">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>AIMED Corpus</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="tiger">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Tiger</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="tupp-dz">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>TüPP-D/Z corpus</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="twitter">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Twitter</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="xces; format-variant=ilsp">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>XCES - ILSP Variant</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="web1t">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>Web1T corpus</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="uimaCASDump">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>UIMA CAS Dump</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="uimaBinaryCas">
+								<xs:annotation>
+									<xs:appinfo>
+										<label>UIMA Binary CAS</label>
+									</xs:appinfo>
+								</xs:annotation>
+							</xs:enumeration>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element minOccurs="0" ref="ms:mimeType"/>
+				<xs:element minOccurs="0" name="fileExtension" type="xs:string"/>
+				<xs:element minOccurs="0" name="dataFormatDescription" type="xs:string"/>
+				<xs:element minOccurs="0" name="documentationURL" type="xs:anyURI">
+					<xs:annotation>
+						<xs:documentation>Link to the documentation for the specific data format (explanations and examples)</xs:documentation>
+						<xs:appinfo>
+							<xs:label>Documentation URL</xs:label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="mimeType">
+		<xs:annotation>
+			<xs:documentation>The mime-type of the resource which is a formalized specifier for the format included or a mime-type that the tool/service accepts, in conformance with the values of the IANA (Internet Assigned Numbers Authority); you can select one of the pre-defined values or add a value, PREFERABLY FROM THE IANA MEDIA MIMETYPE RECOMMENDED VALUES (http://www.iana.org/assignments/media-types/media-types.xhtml)</xs:documentation>
+			<xs:appinfo>
+				<label>Mime type</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="mimeTypeEnum"><jaxb:typesafeEnumMember name="APPLICATION_VND_MS_EXCEL" value="application/vnd.ms-excel"/><jaxb:typesafeEnumMember name="APPLICATION_VND_XMI_XML" value="application/vnd.xmi+xml"/></jaxb:typesafeEnumClass></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+				<xs:maxLength value="50"/>
+				<xs:enumeration value="text/plain">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>Plain text</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/vnd.xmi+xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>XMI</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="text/xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>XML</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/x-xces+xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>XCES</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/tei+xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>TEI</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/rdf+xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>RDF</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/xhtml+xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>XHTML</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/emma+xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>EMMA</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/pls+xml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>PLS</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/postscript">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>postscript</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="text/sgml">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>SGML</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="text/html">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>HTML</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/x-tex">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>TEX</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/rtf">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>RTF</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/json+ld">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>JSON/LD</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/x-latex">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>LATEX</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="text/csv">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>CSV (Comma Separated Values)</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="text/tab-separated-values">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>TSV (Tab Separated Values)</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/pdf">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>PDF</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/x-msaccess">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>MS-Access database</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/msword">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>MS-Word</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="application/vnd.ms-excel">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>MS-Excel</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="text/turtle">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>Turtle</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				<xs:enumeration value="other">
+					<xs:annotation>
+						<xs:appinfo>
+							<label>other</label>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:enumeration>
+				
+				
+				
+				
+				
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="sizeInfo" type="ms:sizeInfoType">
+		<xs:annotation>
+			<xs:documentation>Groups information on the size of the resource or of resource parts</xs:documentation>
+			<xs:appinfo>
+				<label>Size</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="size">
+		<xs:annotation>
+			<xs:documentation>Specifies the size of the resource with regard to the SizeUnit measurement in form of a number</xs:documentation>
+			<xs:appinfo>
+				<label>Size</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:maxLength value="100"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="register">
+		<xs:annotation>
+			<xs:documentation>For corpora that have already been using register classification</xs:documentation>
+			<xs:appinfo>
+				<label>Register</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="classificationSchemeName" type="ms:classificationSchemeName" use="required"/>
+					<xs:attribute name="schemeURI" type="xs:anyURI" use="optional"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="keyword" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>A word or phrase considered important for the classification of a resource and included as tag in its metadata</xs:documentation>
+			<xs:appinfo>
+				<label>Keyword</label>
+			</xs:appinfo>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="encodingLevel">
+		<xs:annotation>
+			<xs:documentation>Information on the contents of the lexicalConceptualResource as regards the linguistic level of analysis</xs:documentation>
+			<xs:appinfo>
+				<label>Encoding level</label>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="encodingLevelEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+				<xs:maxLength value="30"/>
+				<xs:enumeration value="phonetics"/>
+				<xs:enumeration value="phonology"/>
+				<xs:enumeration value="semantics"/>
+				<xs:enumeration value="morphology"/>
+				<xs:enumeration value="syntax"/>
+				<xs:enumeration value="pragmatics"/>
+				<xs:enumeration value="other"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+				<xs:element name="TDMMethod">
+				<xs:annotation>
+					<xs:documentation/>
+					<xs:appinfo>
+						<recommended>true</recommended>
+						<relation>one-to-many</relation>
+						<label>TDM method</label>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name="TDMMethodEnum"/></xs:appinfo></xs:annotation><xs:restriction base="xs:string">
+						<xs:enumeration value="ruleBased">
+							<xs:annotation>
+								<xs:documentation>A type of method that makes use of set(s) of rules to perform the relevant task.</xs:documentation>
+								<xs:appinfo>
+									<label>Rule-based</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="machineLearning">
+							<xs:annotation>
+								<xs:documentation>A method of data analysis that automates model building. Using algorithms that iteratively learn from data, machine learning allows computers to find hidden insights without being explicitly programmed where to look.</xs:documentation>
+								<xs:appinfo>
+									<label>Machine Learning</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="statisticalLearning">
+							<xs:annotation>
+								<xs:documentation>The process of using statistics and techniques related to statistics in order to understand and learn from your data so that you can predict its future.</xs:documentation>
+								<xs:appinfo>
+									<label>Statistical Learning</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="machineAndStatisticalLearning">
+							<xs:annotation>
+								<xs:documentation>Methods and techniques used either in machine learning or statistical learning</xs:documentation>
+								<xs:appinfo>
+									<label>Machine and Statistical Learning</label>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="regressionAnalysis">
+							<xs:annotation>
+								<xs:documentation>A statistical process for estimating the relationships among variables. It includes many techniques for modeling and analyzing several variables, when the focus is on the relationship between a dependent variable and one or more independent variables (or 'predictors').</xs:documentation>
+								<xs:appinfo>
+									<label>Regression Analysis</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+									<closeMatchFoster>regression</closeMatchFoster>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="regularisation">
+							<xs:annotation>
+								<xs:documentation>A process of introducing additional information in order to solve an ill-posed problem or to prevent overfitting.</xs:documentation>
+								<xs:appinfo>
+									<label>Regularisation</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="instanceBasedLearning">
+							<xs:annotation>
+								<xs:documentation>A family of learning algorithms that, instead of performing explicit generalization, compares new problem instances with instances seen in training, which have been stored in memory.</xs:documentation>
+								<xs:appinfo>
+									<label>Instance-based Learning</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+									<closeMatchFoster>instance-based</closeMatchFoster>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="decisionTrees">
+							<xs:annotation>
+								<xs:documentation>A non-parametric supervised learning method used for classification and regression. The goal is to create a tree-like graph or model of decisions and their possible consequences by learning simple decision rules inferred from the data features.</xs:documentation>
+								<xs:appinfo>
+									<label>Decision Trees</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="bayesian">
+							<xs:annotation>
+								<xs:documentation>A method in probability and statistics based on Bayes' theorem, mainly related to statistical inference.</xs:documentation>
+								<xs:appinfo>
+									<label>Bayesian</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="kernelMethod">
+							<xs:annotation>
+								<xs:documentation>Any method used in pattern analysis that relies on kernel functions, which enable it to operate in a high-dimensional, implicit feature space without ever computing the coordinates of the data in that space, but rather by simply computing the inner products between the images of all pairs of data in the feature space.</xs:documentation>
+								<xs:appinfo>
+									<label>Kernel Method</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+									<closeMatchFoster>kernel methods</closeMatchFoster>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="clusteringMethod">
+							<xs:annotation>
+								<xs:documentation>Any method used in clustering or cluster analysis, i.e. in grouping a set of objects in such a way that objects in the same group (cluster) are more similar (in some sense or another) to each other than to those in other groups (clusters).</xs:documentation>
+								<xs:appinfo>
+									<label>Clustering Method</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+									<closeMatchFoster>clustering methods</closeMatchFoster>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="associationRuleLearning">
+							<xs:annotation>
+								<xs:documentation>A machine learning method used in recognising relationships among variables in databases and extracted in the form of rules.</xs:documentation>
+								<xs:appinfo>
+									<label>Association Rule Learning</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+									<closeMatchFoster>association rules</closeMatchFoster>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="artificialNeuralNetwork">
+							<xs:annotation>
+								<xs:documentation>A computational model based on a large collection of simple neural units (artificial neurons), loosely analogous to the observed behavior of a biological brain's axons. These systems are self-learning and trained, rather than explicitly programmed.</xs:documentation>
+								<xs:appinfo>
+									<label>Artificial Neural Network</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+									<closeMatchFoster>artificial neural networks</closeMatchFoster>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="deepLearning">
+							<xs:annotation>
+								<xs:documentation>A branch of machine learning based on deep neural networks. A deep neural network (DNN) is an artificial neural network (ANN) with multiple hidden layers of units between the input and output layers.</xs:documentation>
+								<xs:appinfo>
+									<label>Deep Learning</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="ensembleMethod">
+							<xs:annotation>
+								<xs:documentation>Any method that uses multiple learning algorithms in an attempt to improve predictive performance not obtainable otherwise with any of the constituent learning algorithms.</xs:documentation>
+								<xs:appinfo>
+									<label>Ensemble Method</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+									<closeMatchFoster>ensembles</closeMatchFoster>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="dimensionalityReduction">
+							<xs:annotation>
+								<xs:documentation>A method based on reducing the number of random variables under consideration, via obtaining a set of principal variables.</xs:documentation>
+								<xs:appinfo>
+									<label>Dimensionality Reduction</label>
+									<broadMatch>Machine and Statistical Learning</broadMatch>
+								</xs:appinfo>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="annotationSchema" type="ms:relatedResourceType">
+				<xs:annotation>
+					<xs:documentation>A set of elements and values designed to annotate data</xs:documentation>
+					<xs:appinfo>
+						<label>Annotation Schema</label>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+
+	
+</xs:schema>
