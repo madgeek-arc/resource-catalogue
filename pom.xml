@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>eu.openminted</groupId>
-    <artifactId>omtd-registry-rest</artifactId>
+    <groupId>eu.einfracentral</groupId>
+    <artifactId>eic-registry-rest</artifactId>
     <version>2.0.2-SNAPSHOT</version>
 
 
     <parent>
-        <groupId>eu.openminted</groupId>
+        <groupId>eu.einfracentral</groupId>
         <artifactId>registry-parent</artifactId>
         <version>1.0.0</version>
     </parent>
@@ -24,9 +24,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git://github.com/antleb/omtd-registry-rest.git</connection>
-        <developerConnection>scm:git:ssh://github.com/antleb/omtd-registry-rest.git</developerConnection>
-        <url>https://github.com/antleb/omtd-registry-rest.git</url>
+        <connection>scm:git:git://github.com/eInfraCentral/eic-registry-rest.git</connection>
+        <developerConnection>scm:git:ssh://github.com/eInfraCentral/eic-registry-rest.git</developerConnection>
+        <url>https://github.com/eInfraCentral/eic-registry-rest.git</url>
     </scm>
     <dependencies>
         <dependency>
@@ -35,8 +35,8 @@
             <version>${registry.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.openminted</groupId>
-            <artifactId>omtd-registry-api</artifactId>
+            <groupId>eu.einfracentral</groupId>
+            <artifactId>eic-registry-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -107,25 +107,25 @@
 
     <distributionManagement>
         <repository>
-            <id>omtd-releases</id>
+            <id>eic-releases</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
+            <url>https://repo.einfracentral.eu/content/repositories/releases</url>
         </repository>
     </distributionManagement>
 
 
     <repositories>
         <repository>
-            <id>omtd-snapshots</id>
+            <id>eic-snapshots</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/snapshots/</url>
+            <url>https://repo.einfracentral.eu/content/repositories/snapshots/</url>
             <releases><enabled>false</enabled></releases>
             <snapshots><enabled>true</enabled></snapshots>
         </repository>
         <repository>
-            <id>omtd-releases</id>
+            <id>eic-releases</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
+            <url>https://repo.einfracentral.eu/content/repositories/releases</url>
             <releases><enabled>true</enabled></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
