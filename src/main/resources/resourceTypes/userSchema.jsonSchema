@@ -1,0 +1,38 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Product",
+    "description": "A product from Acme's catalog",
+    "type": "object",
+    "properties": {
+        "sub": {
+            "description": "The unique identifier for a product",
+            "type": "string"
+        },
+        "name": {
+            "description": "Name of the user",
+            "type": "string"
+        },
+        "given_name": {
+            "description": "given_name of the user",
+            "type": "string"
+        },
+        "family_name": {
+            "description": "family_name of the user",
+            "type": "string"
+        },
+        "email": {
+            "description": "email of the user",
+            "type": "string"
+        },
+        "edu_person_scoped_affiliations": {
+            "description": "edu_person_scoped_affiliations of the user",
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        }
+    },
+    "required": ["sub","name","given_name","family_name","email","edu_person_scoped_affiliations"]
+}
