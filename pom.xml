@@ -1,15 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-    <parent>
-		<groupId>eu.einfracentral</groupId>
-		<artifactId>registry-parent</artifactId>
-		<version>1.0.0</version>
-	</parent>
 
 	<groupId>eu.einfracentral</groupId>
 	<artifactId>eic-registry</artifactId>
-	<version>2.0.2-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
+
 
 	<licenses>
 		<license>
@@ -27,6 +23,7 @@
 	<properties>
 		<registry.core.version>1.2.0-SNAPSHOT</registry.core.version>
 		<netty.version>4.1.12.Final</netty.version>
+		<spring.version>4.2.1.RELEASE</spring.version>
 	</properties>
 
 
@@ -58,53 +55,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>eu.einfracentral</groupId>
-			<artifactId>eic-store-rest-client</artifactId>
-			<version>[0.0.1-SNAPSHOT, )</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-common</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-transport</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-handler</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-resolver</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-buffer</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-codec</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-codec-http</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -181,7 +131,7 @@
 		<repository>
 			<id>eic-releases</id>
 			<layout>default</layout>
-			<url>https://repo.einfracentral.eu/content/repositories/releases</url>
+			<url>https://repo.openminted.eu/content/repositories/releases</url>
 		</repository>
 	</distributionManagement>
 
@@ -190,14 +140,14 @@
 		<repository>
 			<id>eic-snapshots</id>
 			<layout>default</layout>
-			<url>https://repo.einfracentral.eu/content/repositories/snapshots/</url>
+			<url>https://repo.openminted.eu/content/repositories/snapshots/</url>
 			<releases><enabled>false</enabled></releases>
 			<snapshots><enabled>true</enabled></snapshots>
 		</repository>
 		<repository>
 			<id>eic-releases</id>
 			<layout>default</layout>
-			<url>https://repo.einfracentral.eu/content/repositories/releases</url>
+			<url>https://repo.openminted.eu/content/repositories/releases</url>
 			<releases><enabled>true</enabled></releases>
 			<snapshots><enabled>false</enabled></snapshots>
 		</repository>

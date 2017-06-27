@@ -10,19 +10,5 @@
     <context:component-scan base-package="eu.openminted.registry">
         <!--<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>-->
     </context:component-scan>
-
-    <security:global-method-security pre-post-annotations="enabled" proxy-target-class="true"
-                                     authentication-manager-ref="authenticationManager">
-        <!--you could also wire in the expression handler up at the layer of the http filters. See https://jira.springsource.org/browse/SEC-1452 -->
-    </security:global-method-security>
-
-    <bean id="webexpressionHandler"
-          class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler"/>
-
-    <bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration"/>
-    <bean class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory">
-        <constructor-arg name="host" value="${redis.host}"/>
-        <constructor-arg name="port" value="${redis.port}"/>
-    </bean>
 </beans>
 
