@@ -2,15 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.einfracentral</groupId>
     <artifactId>eic-registry-rest</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
-
-
-    <parent>
-        <groupId>eu.einfracentral</groupId>
-        <artifactId>registry-parent</artifactId>
-        <version>1.0.0</version>
-    </parent>
-
+    <version>0.0.1-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -21,6 +13,7 @@
 
     <properties>
         <registry.core.version>1.2.0-SNAPSHOT</registry.core.version>
+        <spring.version>4.2.1.RELEASE</spring.version>
     </properties>
 
     <scm>
@@ -66,18 +59,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>5.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-all</artifactId>
-            <version>5.10.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
@@ -98,23 +79,19 @@
             <artifactId>commons-fileupload</artifactId>
             <version>1.2.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.mitre</groupId>
-            <artifactId>openid-connect-client</artifactId>
-            <version>1.3.0</version>
-        </dependency>
+
     </dependencies>
 
     <distributionManagement>
         <repository>
-            <id>eic-releases</id>
+            <id>omtd-releases</id>
             <layout>default</layout>
-            <url>https://repo.einfracentral.eu/content/repositories/releases</url>
+            <url>https://repo.openminted.eu/content/repositories/releases</url>
         </repository>
     </distributionManagement>
 
 
-    <repositories>
+    <!-- <repositories>
         <repository>
             <id>eic-snapshots</id>
             <layout>default</layout>
@@ -129,7 +106,7 @@
             <releases><enabled>true</enabled></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
-    </repositories>
+    </repositories> -->
 
     <build>
         <pluginManagement>
