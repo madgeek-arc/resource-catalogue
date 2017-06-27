@@ -2,14 +2,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.einfracentral</groupId>
     <artifactId>eic-registry-api</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-
-    <parent>
-        <groupId>eu.einfracentral</groupId>
-        <artifactId>registry-parent</artifactId>
-        <version>1.0.0</version>
-    </parent>
 
     <licenses>
         <license>
@@ -26,13 +20,13 @@
 
     <properties>
         <jaxb2_commons.version>0.11.1</jaxb2_commons.version>
-        <rename.exec.skip>true</rename.exec.skip>
-        <typescript.exec.skip>true</typescript.exec.skip>
+        <registry.core.version>1.2.0-SNAPSHOT</registry.core.version>
+        <spring.version>4.2.1.RELEASE</spring.version>
     </properties>
-    <dependencies>
 
+    <dependencies>
         <dependency>
-            <groupId>eu.einfracentral</groupId>
+            <groupId>eu.openminted</groupId>
             <artifactId>registry-core-api</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>
@@ -42,7 +36,6 @@
             <artifactId>runtime</artifactId>
             <version>0.4.1.5</version>
         </dependency>
-
         <dependency>
             <groupId>org.jvnet.jaxb2_commons</groupId>
             <artifactId>jaxb2-basics-runtime</artifactId>
@@ -60,37 +53,38 @@
             <version>2.2</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-
     </dependencies>
 
     <distributionManagement>
         <repository>
-            <id>eic-releases</id>
+            <id>omtd-releases</id>
             <layout>default</layout>
-            <url>https://repo.einfracentral.eu/content/repositories/releases</url>
+            <url>https://repo.openminted.eu/content/repositories/releases</url>
         </repository>
     </distributionManagement>
 
-
     <repositories>
         <repository>
-            <id>eic-snapshots</id>
+            <id>omtd-snapshots</id>
             <layout>default</layout>
-            <url>https://repo.einfracentral.eu/content/repositories/snapshots/</url>
-            <releases><enabled>false</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <url>https://repo.openminted.eu/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
-            <id>eic-releases</id>
+            <id>omtd-releases</id>
             <layout>default</layout>
-            <url>https://repo.einfracentral.eu/content/repositories/releases</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
+            <url>https://repo.openminted.eu/content/repositories/releases</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -146,30 +140,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <id>xsd-renaming</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${rename.exec.skip}</skip>
-                    <executable>python</executable>
-                    <workingDirectory>src/main/xsd</workingDirectory>
-                    <arguments>
-                        <argument>enum.py</argument>
-                        <argument>-deic_scheme/EIC-SHARE v200 XSD/</argument>
-                        <argument>-peu.einfracentral.registry.domain</argument>
-                    </arguments>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
