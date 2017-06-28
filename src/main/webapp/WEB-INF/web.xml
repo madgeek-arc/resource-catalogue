@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app>
 
-    <display-name>omtd-registry</display-name>
+    <display-name>eic-registry</display-name>
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -31,15 +31,6 @@
     </servlet>
 
     <filter>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-        <init-param>
-            <param-name>contextAttribute</param-name>
-            <param-value>org.springframework.web.servlet.FrameworkServlet.CONTEXT.springrest</param-value>
-        </init-param>
-    </filter>
-
-    <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
         <init-param>
@@ -58,22 +49,6 @@
 
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>springSessionRepositoryFilter</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>springSessionRepositoryFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>ERROR</dispatcher>
-    </filter-mapping>
-
-    <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
