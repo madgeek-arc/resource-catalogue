@@ -7,8 +7,8 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd"
        default-autowire="byType">
 
-    <context:component-scan base-package="eu.openminted.registry">
-        <!--<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>-->
-    </context:component-scan>
+    <context:annotation-config/>
+    <context:component-scan base-package="eu.openminted.registry"/>
+    <context:property-placeholder location="classpath:application.properties" />
 </beans>
 
