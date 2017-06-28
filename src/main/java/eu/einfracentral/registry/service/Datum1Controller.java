@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("datum1")
-public class MyFirstController {
+public class Datum1Controller {
 
     @Autowired
-    MyFirstInterface helloWorld;
+    Datum1Interface datum1Service;
 
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getComponent(@PathVariable("id") String id) {
-        return new ResponseEntity<>(id, HttpStatus.OK);
+    public ResponseEntity<String> getComponent(@PathVariable("id") String id) throws Throwable {
+        return new ResponseEntity<>(datum1Service.get(id), HttpStatus.OK);
     }
 
 }
