@@ -1,4 +1,4 @@
-package eu.einfracentral.registry.domain;
+package eu.einfracentral.domain;
 
 import java.util.List;
 

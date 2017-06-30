@@ -1,4 +1,4 @@
-package eu.einfracentral.registry.domain;
+package eu.einfracentral.domain;
 
 /**
  * Created by pgl on 27/6/2017.
