@@ -87,88 +87,33 @@ public class Service {
     @XmlElement(required = true)
     private String tosURL;
 
-    @XmlElement(required = true)
     private String owner;
-
-    @XmlElement(required = true)
     private String operationsDocumentationURL;
-
-    @XmlElement(required = true)
     private String monitoringURL;
-
-    @XmlElement(required = true)
     private String accountingURL;
-
-    @XmlElement(required = true)
     private String businessContinuityPlanURL;
-
-    @XmlElement(required = true)
     private String disasterRecoveryPlanURL;
-
-    @XmlElement(required = true)
     private String decommissioningProcedureURL;
-
-    @XmlElement(required = true)
     private String metricsURL;
-
-    @XmlElement(required = true)
     private String level1Support;
-
-    @XmlElement(required = true)
     private String level1SupportHours;
-
-    @XmlElement(required = true)
     private String level2Support;
-
-    @XmlElement(required = true)
     private String level2SupportHours;
-
-    @XmlElement(required = true)
     private String level3Support;
-
-    @XmlElement(required = true)
     private String level3SupportHours;
-
-    @XmlElement(required = true)
     private String maintenanceWindow;
-
-    @XmlElement(required = true)
     private String availabilityHours;
-
-    @XmlElement(required = true)
     private String requirements;
-
-    @XmlElement(required = true)
     private String availableFeatures;
-
-    @XmlElement(required = true)
     private String upcomingFeatures;
-
-    @XmlElement(required = true)
     private String components;
-
-    @XmlElement(required = true)
     private String options;
-
-    @XmlElement(required = true)
     private String dependencies;
-
-    @XmlElement(required = true)
     private String uniqueSellingPoint;
-
-    @XmlElement(required = true)
     private String competitors;
-
-    @XmlElement(required = true)
     private String buildCost;
-
-    @XmlElement(required = true)
     private String operationalCost;
-
-    @XmlElement(required = true)
     private String pricing;
-
-    @XmlElement(required = true)
     private String risks;
 
     public int getId() {
