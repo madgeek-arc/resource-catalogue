@@ -7,14 +7,14 @@ import java.net.URL;
  * Created by pgl on 29/6/2017.
  */
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"brandName", "fullName", "description", "targetUsers",
-        "userValue", "usage", "provider", "fundingSources", "webpageURL", "version", "phase", "category",
-        "relatedServices", "requestURL", "helpdeskURL", "documentationURL", "trainingInformationURL", "feedbackURL",
-        "pricingModelURL", "slaURL", "optionsURL", "tosURL", "owner", "operationsDocumentationURL", "monitoringURL", "accountingURL",
-        "businessContinuityPlanURL", "disasterRecoveryPlanURL", "decommissioningProcedureURL", "metricsURL", "level1Support",
-        "level1SupportHours", "level2Support", "level2SupportHours", "level3Support", "level3SupportHours",
-        "maintenanceWindow", "availabilityHours", "requirements", "availableFeatures", "upcomingFeatures", "components",
-        "options", "dependencies", "uniqueSellingPoint", "competitors", "buildCost", "operationalCost", "pricing",
-        "risks", "id"})
+    "userValue", "usage", "provider", "fundingSources", "webpageURL", "version", "phase", "category",
+    "relatedServices", "requestURL", "helpdeskURL", "documentationURL", "trainingInformationURL", "feedbackURL",
+    "pricingModelURL", "slaURL", "optionsURL", "tosURL", "owner", "operationsDocumentationURL", "monitoringURL", "accountingURL",
+    "businessContinuityPlanURL", "disasterRecoveryPlanURL", "decommissioningProcedureURL", "metricsURL", "level1Support",
+    "level1SupportHours", "level2Support", "level2SupportHours", "level3Support", "level3SupportHours",
+    "maintenanceWindow", "availabilityHours", "requirements", "availableFeatures", "upcomingFeatures", "components",
+    "options", "dependencies", "uniqueSellingPoint", "competitors", "buildCost", "operationalCost", "pricing",
+    "risks", "id"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Service {
