@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.service;
 
 
-import eu.einfracentral.registry.domain.Page;
+import eu.einfracentral.domain.Page;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceService;
 import eu.openminted.registry.core.service.SearchService;
