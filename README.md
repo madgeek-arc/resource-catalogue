@@ -1,3 +1,3 @@
-#eic-registry-api
+#eic-registry-model
 
-Contains all the classes for the xsd - java mapping.
+This is the very model of the eInfraCentral registry
