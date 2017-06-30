@@ -18,7 +18,7 @@ import java.net.URL;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Service {
-    @XmlElement(required = true)
+    @XmlElement(required = true, nillable = false)
     private int id;
 
     @XmlElement(required = true)
