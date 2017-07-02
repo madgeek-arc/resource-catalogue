@@ -1,26 +1,36 @@
 package eu.einfracentral.domain.vocabsOrSomethingThatDoesntCauseAFight;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 /**
  * Created by pgl on 29/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu")
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "val"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public enum Category {
+public class Category {
 
-    Storage, Computing, Networking, Data, DataManagement, Identification, Consultancy;
+    @XmlElement(required = true, nillable = false)
+    private int id;
 
-    public static Category fromValue(String v) {
-        return valueOf(v);
+    @XmlElement(required = true, nillable = false)
+    private String val;
+
+    public int getId() {
+        return id;
     }
 
-    public String value() {
-        return name();
+    public void setId(int id) {
+        throw new Error("No.");
     }
 
+    public String getVal() {
+        return val;
+    }
+
+    public void setVal(String val) {
+        this.val = val;
+    }
+
+    //vals: Storage, Computing, Networking, Data, DataManagement, Identification, Consultancy;
 }
