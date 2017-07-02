@@ -1,5 +1,7 @@
 package eu.einfracentral.domain.performance;
 
+import eu.einfracentral.domain.aai.Grant;
+
 import javax.xml.bind.annotation.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -26,7 +28,8 @@ public class Indicator<T extends Comparable<T>> {
     @XmlElement(required = true, nillable = false)
     private ChronoUnit timeGranularity;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElementWrapper(required = true, nillable = false)
+    @XmlElement(name = "measurement")
     private List<Measurement<T>> measurements;
 
     public boolean satisfiedWithin(Instant from, Instant to) {
