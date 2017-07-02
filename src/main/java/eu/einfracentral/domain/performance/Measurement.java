@@ -25,7 +25,7 @@ public class Measurement<T extends Comparable<T>> implements Comparable<T> {
     }
 
     public void setId(int id) {
-        this.id = id;
+        throw new Error("No.");
     }
 
     public Instant getTime() {

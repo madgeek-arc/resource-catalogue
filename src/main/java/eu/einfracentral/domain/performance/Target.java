@@ -25,7 +25,7 @@ public class Target<T extends Comparable<T>> {
     }
 
     public void setId(int id) {
-        this.id = id;
+        throw new Error("No.");
     }
 
     public T getMin() {
