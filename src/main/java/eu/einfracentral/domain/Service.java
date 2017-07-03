@@ -2,27 +2,35 @@ package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.*;
 import java.net.URL;
+import java.time.Instant;
+import java.util.List;
 
 /**
  * Created by pgl on 29/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"brandName", "fullName", "description", "targetUsers",
-    "userValue", "usage", "provider", "fundingSources", "webpageURL", "version", "phase", "category",
-    "relatedServices", "requestURL", "helpdeskURL", "documentationURL", "trainingInformationURL", "feedbackURL",
-    "pricingModelURL", "slaURL", "optionsURL", "tosURL", "owner", "operationsDocumentationURL", "monitoringURL", "accountingURL",
-    "businessContinuityPlanURL", "disasterRecoveryPlanURL", "decommissioningProcedureURL", "metricsURL", "level1Support",
-    "level1SupportHours", "level2Support", "level2SupportHours", "level3Support", "level3SupportHours",
-    "maintenanceWindow", "availabilityHours", "requirements", "availableFeatures", "upcomingFeatures", "components",
-    "options", "dependencies", "uniqueSellingPoint", "competitors", "buildCost", "operationalCost", "pricing",
-    "risks", "id"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "brandName", "tagline", "fullName", "description",
+    "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "symbol",
+    "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "techonologyReadinessLevel", "category",
+    "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
+    "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse", "owner",
+    "operationsDocumentation", "monitoring", "accounting", "businessContinuityPlan", "disasterRecoveryPlan",
+    "decommissioningProcedure", "metrics", "level1Support", "level1SupportHours", "level2Support", "level2SupportHours",
+    "level3Support", "level3SupportHours", "maintenanceWindow", "availabilityHours", "requirements",
+    "availableFeatures", "upcomingFeatures", "components", "dependencies", "uniqueSellingPoint", "competitors",
+    "buildCost", "operationalCost", "pricing", "risks"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Service {
-    @XmlElement(required = true, nillable = false)
-    private int id;
+
+    //Basic
+    @XmlElement(required = true)
+    private int id; //list
+
+    @XmlElement
+    private String brandName;
 
     @XmlElement(required = true)
-    private String brandName;
+    private String tagline;
 
     @XmlElement(required = true)
     private String fullName;
@@ -30,90 +38,183 @@ public class Service {
     @XmlElement(required = true)
     private String description;
 
-    @XmlElement(required = true)
+    @XmlElement
+    private String options;
+
+    @XmlElement
     private String targetUsers; //may become list
 
-    @XmlElement(required = true)
+    @XmlElement
     private String userValue;
 
-    @XmlElement(required = true)
-    private String usage;
+    @XmlElement
+    private String userBase;
 
     @XmlElement(required = true)
     private String provider; //may become list
 
-    @XmlElement(required = true)
+    @XmlElement
     private String fundingSources;
 
     @XmlElement(required = true)
-    private URL webpageURL;
+    private URL webpage;
 
     @XmlElement(required = true)
+    private URL symbol;
+
+    @XmlElement
+    private URL multimediaURL;
+
+    //Classification
+    @XmlElement
     private String version;
 
-    @XmlElement(required = true)
-    private String phase; //executive order is to keep this as String instead of enum, and validate on save
+    @XmlElement
+    private Instant revisionDate;
+
+    @XmlElement
+    private String versionHistory;
 
     @XmlElement(required = true)
-    private String category; //executive order is to keep this as String instead of enum, and validate on save
+    private String phase; //alpha, beta, production
 
     @XmlElement(required = true)
-    private String relatedServices; //may become list
+    private String techonologyReadinessLevel; //7, 8 , 9
 
     @XmlElement(required = true)
-    private URL requestURL;
+    private String category; //e.g. storage, compute, networking, data, training, consultancy, etc.
 
     @XmlElement(required = true)
-    private URL helpdeskURL;
+    private String subcategory; //list
 
+    @XmlElementWrapper(required = true)
+    @XmlElement(name = "country")
+    private List<String> countries;
+
+    @XmlElementWrapper(required = true)
+    @XmlElement(name = "region")
+    private List<String> regions;
+
+    @XmlElementWrapper(required = true)
+    @XmlElement(name = "language")
+    private List<String> languages;
+
+    @XmlElementWrapper(required = true)
+    @XmlElement(name = "tag")
+    private List<String> tags;
+
+    @XmlElementWrapper(required = true)
+    @XmlElement(name = "relatedService")
+    private List<String> relatedServices;
+
+    //Support
     @XmlElement(required = true)
-    private URL documentationURL;
+    private URL request;
 
+    @XmlElement
+    private URL helpdesk;
+
+    @XmlElement
+    private URL documentation;
+
+    @XmlElement
+    private URL trainingInformation;
+
+    @XmlElement
+    private URL feedback;
+
+    //Contractual
     @XmlElement(required = true)
-    private URL trainingInformationURL;
+    private URL pricingModel;
 
-    @XmlElement(required = true)
-    private URL feedbackURL;
+    @XmlElement
+    private String serviceLevelAgreement;
 
-    @XmlElement(required = true)
-    private String pricingModelURL;
+    @XmlElement
+    private String termsOfUse;
 
-    @XmlElement(required = true)
-    private String slaURL;
-
-    @XmlElement(required = true)
-    private String optionsURL;
-
-    @XmlElement(required = true)
-    private String tosURL;
-
+    //Operations
+    @XmlElement
     private String owner;
-    private String operationsDocumentationURL;
-    private String monitoringURL;
-    private String accountingURL;
-    private String businessContinuityPlanURL;
-    private String disasterRecoveryPlanURL;
-    private String decommissioningProcedureURL;
-    private String metricsURL;
+
+    @XmlElement
+    private URL operationsDocumentation;
+
+    @XmlElement
+    private URL monitoring;
+
+    @XmlElement
+    private URL accounting;
+
+    @XmlElement
+    private URL businessContinuityPlan;
+
+    @XmlElement
+    private URL disasterRecoveryPlan;
+
+    @XmlElement
+    private URL decommissioningProcedure;
+
+    @XmlElement
+    private URL metrics;
+
+    @XmlElement
     private String level1Support;
+
+    @XmlElement
     private String level1SupportHours;
+
+    @XmlElement
     private String level2Support;
+
+    @XmlElement
     private String level2SupportHours;
+
+    @XmlElement
     private String level3Support;
+
+    @XmlElement
     private String level3SupportHours;
+
+    @XmlElement
     private String maintenanceWindow;
+
+    @XmlElement
     private String availabilityHours;
+
+    //Advanced
+    @XmlElement
     private String requirements;
+
+    @XmlElement
     private String availableFeatures;
+
+    @XmlElement
     private String upcomingFeatures;
+
+    @XmlElement
     private String components;
-    private String options;
+
+    @XmlElement
     private String dependencies;
+
+    //Business Case
+    @XmlElement
     private String uniqueSellingPoint;
+
+    @XmlElement
     private String competitors;
+
+    @XmlElement
     private String buildCost;
+
+    @XmlElement
     private String operationalCost;
+
+    @XmlElement
     private String pricing;
+
+    @XmlElement
     private String risks;
 
     public int getId() {
@@ -121,7 +222,7 @@ public class Service {
     }
 
     public void setId(int id) {
-        throw new Error("No.");
+        this.id = id;
     }
 
     public String getBrandName() {
@@ -130,6 +231,14 @@ public class Service {
 
     public void setBrandName(String brandName) {
         this.brandName = brandName;
+    }
+
+    public String getTagline() {
+        return tagline;
+    }
+
+    public void setTagline(String tagline) {
+        this.tagline = tagline;
     }
 
     public String getFullName() {
@@ -148,6 +257,14 @@ public class Service {
         this.description = description;
     }
 
+    public String getOptions() {
+        return options;
+    }
+
+    public void setOptions(String options) {
+        this.options = options;
+    }
+
     public String getTargetUsers() {
         return targetUsers;
     }
@@ -164,12 +281,12 @@ public class Service {
         this.userValue = userValue;
     }
 
-    public String getUsage() {
-        return usage;
+    public String getUserBase() {
+        return userBase;
     }
 
-    public void setUsage(String usage) {
-        this.usage = usage;
+    public void setUserBase(String userBase) {
+        this.userBase = userBase;
     }
 
     public String getProvider() {
@@ -188,12 +305,28 @@ public class Service {
         this.fundingSources = fundingSources;
     }
 
-    public URL getWebpageURL() {
-        return webpageURL;
+    public URL getWebpage() {
+        return webpage;
     }
 
-    public void setWebpageURL(URL webpageURL) {
-        this.webpageURL = webpageURL;
+    public void setWebpage(URL webpage) {
+        this.webpage = webpage;
+    }
+
+    public URL getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(URL symbol) {
+        this.symbol = symbol;
+    }
+
+    public URL getMultimediaURL() {
+        return multimediaURL;
+    }
+
+    public void setMultimediaURL(URL multimediaURL) {
+        this.multimediaURL = multimediaURL;
     }
 
     public String getVersion() {
@@ -204,12 +337,36 @@ public class Service {
         this.version = version;
     }
 
+    public Instant getRevisionDate() {
+        return revisionDate;
+    }
+
+    public void setRevisionDate(Instant revisionDate) {
+        this.revisionDate = revisionDate;
+    }
+
+    public String getVersionHistory() {
+        return versionHistory;
+    }
+
+    public void setVersionHistory(String versionHistory) {
+        this.versionHistory = versionHistory;
+    }
+
     public String getPhase() {
         return phase;
     }
 
     public void setPhase(String phase) {
         this.phase = phase;
+    }
+
+    public String getTechonologyReadinessLevel() {
+        return techonologyReadinessLevel;
+    }
+
+    public void setTechonologyReadinessLevel(String techonologyReadinessLevel) {
+        this.techonologyReadinessLevel = techonologyReadinessLevel;
     }
 
     public String getCategory() {
@@ -220,84 +377,116 @@ public class Service {
         this.category = category;
     }
 
-    public String getRelatedServices() {
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
+    }
+
+    public List<String> getCountries() {
+        return countries;
+    }
+
+    public void setCountries(List<String> countries) {
+        this.countries = countries;
+    }
+
+    public List<String> getRegions() {
+        return regions;
+    }
+
+    public void setRegions(List<String> regions) {
+        this.regions = regions;
+    }
+
+    public List<String> getLanguages() {
+        return languages;
+    }
+
+    public void setLanguages(List<String> languages) {
+        this.languages = languages;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public List<String> getRelatedServices() {
         return relatedServices;
     }
 
-    public void setRelatedServices(String relatedServices) {
+    public void setRelatedServices(List<String> relatedServices) {
         this.relatedServices = relatedServices;
     }
 
-    public URL getRequestURL() {
-        return requestURL;
+    public URL getRequest() {
+        return request;
     }
 
-    public void setRequestURL(URL requestURL) {
-        this.requestURL = requestURL;
+    public void setRequest(URL request) {
+        this.request = request;
     }
 
-    public URL getHelpdeskURL() {
-        return helpdeskURL;
+    public URL getHelpdesk() {
+        return helpdesk;
     }
 
-    public void setHelpdeskURL(URL helpdeskURL) {
-        this.helpdeskURL = helpdeskURL;
+    public void setHelpdesk(URL helpdesk) {
+        this.helpdesk = helpdesk;
     }
 
-    public URL getDocumentationURL() {
-        return documentationURL;
+    public URL getDocumentation() {
+        return documentation;
     }
 
-    public void setDocumentationURL(URL documentationURL) {
-        this.documentationURL = documentationURL;
+    public void setDocumentation(URL documentation) {
+        this.documentation = documentation;
     }
 
-    public URL getTrainingInformationURL() {
-        return trainingInformationURL;
+    public URL getTrainingInformation() {
+        return trainingInformation;
     }
 
-    public void setTrainingInformationURL(URL trainingInformationURL) {
-        this.trainingInformationURL = trainingInformationURL;
+    public void setTrainingInformation(URL trainingInformation) {
+        this.trainingInformation = trainingInformation;
     }
 
-    public URL getFeedbackURL() {
-        return feedbackURL;
+    public URL getFeedback() {
+        return feedback;
     }
 
-    public void setFeedbackURL(URL feedbackURL) {
-        this.feedbackURL = feedbackURL;
+    public void setFeedback(URL feedback) {
+        this.feedback = feedback;
     }
 
-    public String getPricingModelURL() {
-        return pricingModelURL;
+    public URL getPricingModel() {
+        return pricingModel;
     }
 
-    public void setPricingModelURL(String pricingModelURL) {
-        this.pricingModelURL = pricingModelURL;
+    public void setPricingModel(URL pricingModel) {
+        this.pricingModel = pricingModel;
     }
 
-    public String getSlaURL() {
-        return slaURL;
+    public String getServiceLevelAgreement() {
+        return serviceLevelAgreement;
     }
 
-    public void setSlaURL(String slaURL) {
-        this.slaURL = slaURL;
+    public void setServiceLevelAgreement(String serviceLevelAgreement) {
+        this.serviceLevelAgreement = serviceLevelAgreement;
     }
 
-    public String getOptionsURL() {
-        return optionsURL;
+    public String getTermsOfUse() {
+        return termsOfUse;
     }
 
-    public void setOptionsURL(String optionsURL) {
-        this.optionsURL = optionsURL;
-    }
-
-    public String getTosURL() {
-        return tosURL;
-    }
-
-    public void setTosURL(String tosURL) {
-        this.tosURL = tosURL;
+    public void setTermsOfUse(String termsOfUse) {
+        this.termsOfUse = termsOfUse;
     }
 
     public String getOwner() {
@@ -308,60 +497,60 @@ public class Service {
         this.owner = owner;
     }
 
-    public String getOperationsDocumentationURL() {
-        return operationsDocumentationURL;
+    public URL getOperationsDocumentation() {
+        return operationsDocumentation;
     }
 
-    public void setOperationsDocumentationURL(String operationsDocumentationURL) {
-        this.operationsDocumentationURL = operationsDocumentationURL;
+    public void setOperationsDocumentation(URL operationsDocumentation) {
+        this.operationsDocumentation = operationsDocumentation;
     }
 
-    public String getMonitoringURL() {
-        return monitoringURL;
+    public URL getMonitoring() {
+        return monitoring;
     }
 
-    public void setMonitoringURL(String monitoringURL) {
-        this.monitoringURL = monitoringURL;
+    public void setMonitoring(URL monitoring) {
+        this.monitoring = monitoring;
     }
 
-    public String getAccountingURL() {
-        return accountingURL;
+    public URL getAccounting() {
+        return accounting;
     }
 
-    public void setAccountingURL(String accountingURL) {
-        this.accountingURL = accountingURL;
+    public void setAccounting(URL accounting) {
+        this.accounting = accounting;
     }
 
-    public String getBusinessContinuityPlanURL() {
-        return businessContinuityPlanURL;
+    public URL getBusinessContinuityPlan() {
+        return businessContinuityPlan;
     }
 
-    public void setBusinessContinuityPlanURL(String businessContinuityPlanURL) {
-        this.businessContinuityPlanURL = businessContinuityPlanURL;
+    public void setBusinessContinuityPlan(URL businessContinuityPlan) {
+        this.businessContinuityPlan = businessContinuityPlan;
     }
 
-    public String getDisasterRecoveryPlanURL() {
-        return disasterRecoveryPlanURL;
+    public URL getDisasterRecoveryPlan() {
+        return disasterRecoveryPlan;
     }
 
-    public void setDisasterRecoveryPlanURL(String disasterRecoveryPlanURL) {
-        this.disasterRecoveryPlanURL = disasterRecoveryPlanURL;
+    public void setDisasterRecoveryPlan(URL disasterRecoveryPlan) {
+        this.disasterRecoveryPlan = disasterRecoveryPlan;
     }
 
-    public String getDecommissioningProcedureURL() {
-        return decommissioningProcedureURL;
+    public URL getDecommissioningProcedure() {
+        return decommissioningProcedure;
     }
 
-    public void setDecommissioningProcedureURL(String decommissioningProcedureURL) {
-        this.decommissioningProcedureURL = decommissioningProcedureURL;
+    public void setDecommissioningProcedure(URL decommissioningProcedure) {
+        this.decommissioningProcedure = decommissioningProcedure;
     }
 
-    public String getMetricsURL() {
-        return metricsURL;
+    public URL getMetrics() {
+        return metrics;
     }
 
-    public void setMetricsURL(String metricsURL) {
-        this.metricsURL = metricsURL;
+    public void setMetrics(URL metrics) {
+        this.metrics = metrics;
     }
 
     public String getLevel1Support() {
@@ -458,14 +647,6 @@ public class Service {
 
     public void setComponents(String components) {
         this.components = components;
-    }
-
-    public String getOptions() {
-        return options;
-    }
-
-    public void setOptions(String options) {
-        this.options = options;
     }
 
     public String getDependencies() {
