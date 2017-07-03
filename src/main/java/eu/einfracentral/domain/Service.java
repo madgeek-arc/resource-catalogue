@@ -1,8 +1,8 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
-import java.time.Instant;
 import java.util.List;
 
 /**
@@ -70,7 +70,7 @@ public class Service {
     private String version;
 
     @XmlElement
-    private Instant revisionDate;
+    private XMLGregorianCalendar revisionDate;
 
     @XmlElement
     private String versionHistory;
@@ -337,11 +337,11 @@ public class Service {
         this.version = version;
     }
 
-    public Instant getRevisionDate() {
+    public XMLGregorianCalendar getRevisionDate() {
         return revisionDate;
     }
 
-    public void setRevisionDate(Instant revisionDate) {
+    public void setRevisionDate(XMLGregorianCalendar revisionDate) {
         this.revisionDate = revisionDate;
     }
 

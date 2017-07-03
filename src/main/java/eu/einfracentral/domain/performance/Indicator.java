@@ -1,9 +1,7 @@
 package eu.einfracentral.domain.performance;
 
-import eu.einfracentral.domain.aai.Grant;
-
 import javax.xml.bind.annotation.*;
-import java.time.Instant;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -32,9 +30,11 @@ public class Indicator<T extends Comparable<T>> {
     @XmlElement(name = "measurement")
     private List<Measurement<T>> measurements;
 
-    public boolean satisfiedWithin(Instant from, Instant to) {
+    public boolean satisfiedWithin(XMLGregorianCalendar from, XMLGregorianCalendar to) {
         for (Measurement<T> m : measurements) {
-            if (from.isAfter(m.getTime()) || to.isBefore(m.getTime())) {
+
+            if (m.getTime().toGregorianCalendar().compareTo(from.toGregorianCalendar()) < 0 &&
+                m.getTime().toGregorianCalendar().compareTo(to.toGregorianCalendar()) > 0) {
                 continue;
             }
             if (!m.satisfies(target)) {

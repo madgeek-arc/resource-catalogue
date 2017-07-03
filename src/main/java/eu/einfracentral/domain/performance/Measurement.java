@@ -1,6 +1,7 @@
 package eu.einfracentral.domain.performance;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.Instant;
 
 /**
@@ -15,7 +16,7 @@ public class Measurement<T extends Comparable<T>> implements Comparable<T> {
     private int id;
 
     @XmlElement(required = true)
-    private Instant time;
+    private XMLGregorianCalendar time;
 
     @XmlElement(required = true)
     private T value;
@@ -28,11 +29,11 @@ public class Measurement<T extends Comparable<T>> implements Comparable<T> {
         this.id = id;
     }
 
-    public Instant getTime() {
+    public XMLGregorianCalendar getTime() {
         return time;
     }
 
-    public void setTime(Instant time) {
+    public void setTime(XMLGregorianCalendar time) {
         this.time = time;
     }
 

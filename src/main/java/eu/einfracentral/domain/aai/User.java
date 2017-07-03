@@ -25,7 +25,6 @@ public class User {
 
     @XmlElementWrapper(required = true)
     @XmlElement(name = "grant")
-    @XmlList
     private List<Grant> grants;
 
     public int getId() {
