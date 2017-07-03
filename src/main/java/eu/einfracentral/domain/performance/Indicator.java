@@ -16,19 +16,19 @@ import java.util.List;
 @XmlRootElement
 public class Indicator<T extends Comparable<T>> {
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private int id;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private String description;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private Target target;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private ChronoUnit timeGranularity;
 
-    @XmlElementWrapper(required = true, nillable = false)
+    @XmlElementWrapper(required = true)
     @XmlElement(name = "measurement")
     private List<Measurement<T>> measurements;
 
