@@ -8,16 +8,16 @@ import javax.xml.bind.annotation.*;
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "min", "max"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+
 public class Target<T extends Comparable<T>> {
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private int id;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private T min;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private T max;
 
     public int getId() {
@@ -25,7 +25,7 @@ public class Target<T extends Comparable<T>> {
     }
 
     public void setId(int id) {
-        throw new Error("No.");
+        this.id = id;
     }
 
     public T getMin() {

@@ -8,12 +8,12 @@ import javax.xml.bind.annotation.*;
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+
 public class Grant {
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private int id;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private String description;
 
     public int getId() {
@@ -21,7 +21,7 @@ public class Grant {
     }
 
     public void setId(int id) {
-        throw new Error("No.");
+        this.id = id;
     }
 
     public String getDescription() {

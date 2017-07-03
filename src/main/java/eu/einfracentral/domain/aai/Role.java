@@ -1,23 +1,37 @@
 package eu.einfracentral.domain.aai;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+
 public class Role {
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private int id;
+
+    @XmlElement(required = true)
+    private String description;
 
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
-        throw new Error("No.");
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

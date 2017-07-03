@@ -9,15 +9,15 @@ import java.time.Instant;
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "time", "value"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+
 public class Measurement<T extends Comparable<T>> implements Comparable<T> {
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private int id;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private Instant time;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private T value;
 
     public int getId() {
@@ -25,7 +25,7 @@ public class Measurement<T extends Comparable<T>> implements Comparable<T> {
     }
 
     public void setId(int id) {
-        throw new Error("No.");
+        this.id = id;
     }
 
     public Instant getTime() {

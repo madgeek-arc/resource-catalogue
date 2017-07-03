@@ -10,21 +10,22 @@ import java.util.Map;
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "organization", "role", "grants"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+
 public class User {
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private int id;
 
-    @XmlElement(required = true, nillable = false)
-    private Provider org;
+    @XmlElement(required = true)
+    private Provider organization;
 
-    @XmlElement(required = true, nillable = false)
+    @XmlElement(required = true)
     private Role role;
 
-    @XmlElementWrapper(required = true, nillable = false)
+    @XmlElementWrapper(required = true)
     @XmlElement(name = "grant")
+    @XmlList
     private List<Grant> grants;
 
     public int getId() {
@@ -32,6 +33,30 @@ public class User {
     }
 
     public void setId(int id) {
-        throw new Error("No.");
+        this.id = id;
+    }
+
+    public Provider getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Provider organization) {
+        this.organization = organization;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public List<Grant> getGrants() {
+        return grants;
+    }
+
+    public void setGrants(List<Grant> grants) {
+        this.grants = grants;
     }
 }
