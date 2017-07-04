@@ -1,0 +1,375 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "eicid",
+      "path": "//*[local-name()='metadataHeaderInfo']/*[local-name()='metadataRecordIdentifier']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "brandName",
+      "path": "//*[local-name()='brandName']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "tagline",
+      "path": "//*[local-name()='tagline']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "fullName",
+      "path": "//*[local-name()='fullName']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "description",
+      "path": "//*[local-name()='description']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "options",
+      "path": "//*[local-name()='options']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "targetUsers",
+      "path": "//*[local-name()='targetUsers']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "userValue",
+      "path": "//*[local-name()='userValue']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "userBase",
+      "path": "//*[local-name()='userBase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "provider",
+      "path": "//*[local-name()='provider']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "fundingSources",
+      "path": "//*[local-name()='fundingSources']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "webpage",
+      "path": "//*[local-name()='webpage']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "symbol",
+      "path": "//*[local-name()='symbol']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "multimediaURL",
+      "path": "//*[local-name()='multimediaURL']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "version",
+      "path": "//*[local-name()='version']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "revisionDate",
+      "path": "//*[local-name()='revisionDate']/text()",
+      "type": "javax.xml.datatype.XMLGregorianCalendar"
+    },
+    {
+      "multivalued": false,
+      "name": "versionHistory",
+      "path": "//*[local-name()='versionHistory']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "phase",
+      "path": "//*[local-name()='phase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "techonologyReadinessLevel",
+      "path": "//*[local-name()='techonologyReadinessLevel']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "category",
+      "path": "//*[local-name()='category']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "subcategory",
+      "path": "//*[local-name()='subcategory']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "country",
+      "path": "//*[local-name()='country']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "region",
+      "path": "//*[local-name()='region']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "language",
+      "path": "//*[local-name()='language']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "tag",
+      "path": "//*[local-name()='tag']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "relatedService",
+      "path": "//*[local-name()='relatedService']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "request",
+      "path": "//*[local-name()='request']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "helpdesk",
+      "path": "//*[local-name()='helpdesk']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "documentation",
+      "path": "//*[local-name()='documentation']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "trainingInformation",
+      "path": "//*[local-name()='trainingInformation']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "feedback",
+      "path": "//*[local-name()='feedback']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "pricingModel",
+      "path": "//*[local-name()='pricingModel']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "serviceLevelAgreement",
+      "path": "//*[local-name()='serviceLevelAgreement']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "termsOfUse",
+      "path": "//*[local-name()='termsOfUse']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "owner",
+      "path": "//*[local-name()='owner']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "operationsDocumentation",
+      "path": "//*[local-name()='operationsDocumentation']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "monitoring",
+      "path": "//*[local-name()='monitoring']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "accounting",
+      "path": "//*[local-name()='accounting']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "businessContinuityPlan",
+      "path": "//*[local-name()='businessContinuityPlan']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "disasterRecoveryPlan",
+      "path": "//*[local-name()='disasterRecoveryPlan']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "decommissioningProcedure",
+      "path": "//*[local-name()='decommissioningProcedure']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "metrics",
+      "path": "//*[local-name()='metrics']/text()",
+      "type": "java.net.URL"
+    },
+    {
+      "multivalued": false,
+      "name": "level1Support",
+      "path": "//*[local-name()='level1Support']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "level1SupportHours",
+      "path": "//*[local-name()='level1SupportHours']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "level2Support",
+      "path": "//*[local-name()='level2Support']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "level2SupportHours",
+      "path": "//*[local-name()='level2SupportHours']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "level3Support",
+      "path": "//*[local-name()='level3Support']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "level3SupportHours",
+      "path": "//*[local-name()='level3SupportHours']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "maintenanceWindow",
+      "path": "//*[local-name()='maintenanceWindow']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "availabilityHours",
+      "path": "//*[local-name()='availabilityHours']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "requirements",
+      "path": "//*[local-name()='requirements']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "availableFeatures",
+      "path": "//*[local-name()='availableFeatures']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "upcomingFeatures",
+      "path": "//*[local-name()='upcomingFeatures']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "components",
+      "path": "//*[local-name()='components']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "dependencies",
+      "path": "//*[local-name()='dependencies']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "uniqueSellingPoint",
+      "path": "//*[local-name()='uniqueSellingPoint']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "competitors",
+      "path": "//*[local-name()='competitors']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "buildCost",
+      "path": "//*[local-name()='buildCost']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "operationalCost",
+      "path": "//*[local-name()='operationalCost']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "pricing",
+      "path": "//*[local-name()='pricing']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "risks",
+      "path": "//*[local-name()='risks']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "service",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": ""
+}
