@@ -1,11 +1,13 @@
 package eu.einfracentral.registry.service;
 
+import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.service.ResourceService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
+
+import java.io.InputStream;
 
 /**
  * Created by pgl on 4/7/2017.
@@ -40,5 +42,17 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public void delete(Service service) {
+    }
+
+    /**
+     * Uploads a zipped service
+     *
+     * @param filename
+     * @param inputStream
+     * @return archive id where it was saved
+     */
+    @Override
+    public String uploadService(String filename, InputStream inputStream) {
+        return null;
     }
 }
