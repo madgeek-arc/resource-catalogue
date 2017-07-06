@@ -1,11 +1,9 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.domain.aai.Grant;
 import eu.einfracentral.domain.aai.User;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by pgl on 30/6/2017.
@@ -18,4 +16,13 @@ public class Provider {
     @XmlElement(required = true)
     private int id;
 
+    @XmlElement(required = true)
+    private String name;
+
+    @XmlElement(required = true)
+    private String contactInformation;
+
+    @XmlElementWrapper(required = true)
+    @XmlElement(name = "user")
+    private List<User> users;
 }
