@@ -24,7 +24,7 @@ public class Service {
 
     //Basic
     @XmlElement(required = true)
-    private int id; //list
+    private String id; //list
 
     @XmlElement
     private String brandName;
@@ -217,11 +217,11 @@ public class Service {
     @XmlElement
     private String risks;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
