@@ -10,7 +10,7 @@ import java.util.List;
  */
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "brandName", "tagline", "fullName", "description",
     "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "symbol",
-    "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "techonologyReadinessLevel", "category",
+    "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "technologyReadinessLevel", "category",
     "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
     "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse", "owner",
     "operationsDocumentation", "monitoring", "accounting", "businessContinuityPlan", "disasterRecoveryPlan",
@@ -79,7 +79,7 @@ public class Service {
     private String phase; //alpha, beta, production
 
     @XmlElement(required = true)
-    private String techonologyReadinessLevel; //7, 8 , 9
+    private String technologyReadinessLevel; //7, 8 , 9
 
     @XmlElement(required = true)
     private String category; //e.g. storage, compute, networking, data, training, consultancy, etc.
@@ -361,12 +361,12 @@ public class Service {
         this.phase = phase;
     }
 
-    public String getTechonologyReadinessLevel() {
-        return techonologyReadinessLevel;
+    public String getTechnologyReadinessLevel() {
+        return technologyReadinessLevel;
     }
 
-    public void setTechonologyReadinessLevel(String techonologyReadinessLevel) {
-        this.techonologyReadinessLevel = techonologyReadinessLevel;
+    public void setTechnologyReadinessLevel(String technologyReadinessLevel) {
+        this.technologyReadinessLevel = technologyReadinessLevel;
     }
 
     public String getCategory() {
