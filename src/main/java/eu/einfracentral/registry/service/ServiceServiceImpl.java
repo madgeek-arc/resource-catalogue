@@ -28,7 +28,7 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public Service get(String id) {
-        Service resource;
+        Service resource = null;
         return resource;
     }
 
