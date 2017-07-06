@@ -12,7 +12,7 @@ import java.io.InputStream;
 /**
  * Created by pgl on 4/7/2017.
  */
-@Service("serviceService")
+@org.springframework.stereotype.Service("serviceService")
 
 public class ServiceServiceImpl implements ServiceService {
     @Autowired
