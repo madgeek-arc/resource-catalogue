@@ -9,7 +9,7 @@ import java.util.List;
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "contactInformation", "users", "services"})
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class Provider {
@@ -25,4 +25,8 @@ public class Provider {
     @XmlElementWrapper(required = true)
     @XmlElement(name = "user")
     private List<User> users;
+
+    @XmlElementWrapper(required = true)
+    @XmlElement(name = "service")
+    private List<User> services;
 }
