@@ -4,7 +4,6 @@ import eu.einfracentral.domain.Provider;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by pgl on 30/6/2017.
