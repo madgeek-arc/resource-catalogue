@@ -58,5 +58,4 @@ public class Page<T> {
         this.facets = facets;
     }
 
-
 }

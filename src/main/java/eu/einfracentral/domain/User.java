@@ -4,94 +4,94 @@ import java.util.ArrayList;
 
 public class User {
 
-	private int id;
-	
-	private String name;
-	
-	private String surname;
-	
-	private String username;
-	
-	private String email;
-	
-	private String password;
-	
-	private String join_date;
-	
-	private String affiliation;
-	
-	private ArrayList<String> roles;
+    private int id;
 
-	public int getId() {
-		return id;
-	}
+    private String name;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    private String surname;
 
-	public String getName() {
-		return name;
-	}
+    private String username;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private String email;
 
-	public String getSurname() {
-		return surname;
-	}
+    private String password;
 
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
+    private String join_date;
 
-	public String getEmail() {
-		return email;
-	}
+    private String affiliation;
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    private ArrayList<String> roles;
 
-	public String getPassword() {
-		return password;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getJoin_date() {
-		return join_date;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setJoin_date(String join_date) {
-		this.join_date = join_date;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getAffiliation() {
-		return affiliation;
-	}
+    public String getSurname() {
+        return surname;
+    }
 
-	public void setAffiliation(String affiliation) {
-		this.affiliation = affiliation;
-	}
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
 
-	public ArrayList<String> getRoles() {
-		return roles;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setRoles(ArrayList<String> roles) {
-		this.roles = roles;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getJoin_date() {
+        return join_date;
+    }
+
+    public void setJoin_date(String join_date) {
+        this.join_date = join_date;
+    }
+
+    public String getAffiliation() {
+        return affiliation;
+    }
+
+    public void setAffiliation(String affiliation) {
+        this.affiliation = affiliation;
+    }
+
+    public ArrayList<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(ArrayList<String> roles) {
+        this.roles = roles;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
 }
