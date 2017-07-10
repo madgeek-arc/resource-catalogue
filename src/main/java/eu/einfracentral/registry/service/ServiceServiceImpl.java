@@ -7,7 +7,7 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ResourceService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
-import eu.openminted.registry.core.controllers.*;
+import eu.openminted.registry.core.controllers.Utils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
