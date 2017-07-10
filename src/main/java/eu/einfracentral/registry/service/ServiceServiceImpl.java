@@ -46,7 +46,7 @@ public class ServiceServiceImpl implements ServiceService {
     public void add(Service service) {
         Service $service;
         try {
-            $service = Utils.serialize(searchService.searchId("service", service.getId()), Service.class);
+            $service = Utils.serialize(searchService.searchId("service", ""+service.getId()), Service.class);
         } catch (UnknownHostException e) {
             logger.fatal(e);
             throw new ServiceException(e);
@@ -76,7 +76,7 @@ public class ServiceServiceImpl implements ServiceService {
         Resource $resource;
         Resource resource = new Resource();
         try {
-            $resource = searchService.searchId("service", service.getId());
+            $resource = searchService.searchId("service", ""+service.getId());
         } catch (UnknownHostException e) {
             logger.fatal(e);
             throw new ServiceException(e);
@@ -103,7 +103,7 @@ public class ServiceServiceImpl implements ServiceService {
     public void delete(Service service) {
         Resource resource;
         try {
-            resource = searchService.searchId("service", service.getId());
+            resource = searchService.searchId("service", "" + service.getId());
             if (resource != null) {
                 throw new ServiceException("Service already exists");
             } else {
