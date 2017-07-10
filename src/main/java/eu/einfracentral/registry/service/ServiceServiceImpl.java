@@ -1,10 +1,13 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Service;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ResourceService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
+import eu.openminted.registry.core.controllers.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -34,7 +37,7 @@ public class ServiceServiceImpl implements ServiceService {
     public Service get(String id) {
         Service resource;
         try {
-            resource = Utils.serialize(searchService.searchId("service", id), Service.class);
+            resource = Utils.serialize(searchService.searchId("service", new SearchService.KeyValue("id", id)), Service.class);
         } catch (UnknownHostException e) {
             logger.fatal(e);
             throw new ServiceException(e);
@@ -43,10 +46,20 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
+    public Browsing getAll(FacetFilter facetFilter) {
+        return null;
+    }
+
+    @Override
+    public Browsing getMy(FacetFilter facetFilter) {
+        return null;
+    }
+
+    @Override
     public void add(Service service) {
         Service $service;
         try {
-            $service = Utils.serialize(searchService.searchId("service", ""+service.getId()), Service.class);
+            $service = Utils.serialize(searchService.searchId("service", new SearchService.KeyValue("id", "" + service.getId())), Service.class);
         } catch (UnknownHostException e) {
             logger.fatal(e);
             throw new ServiceException(e);
@@ -76,7 +89,7 @@ public class ServiceServiceImpl implements ServiceService {
         Resource $resource;
         Resource resource = new Resource();
         try {
-            $resource = searchService.searchId("service", ""+service.getId());
+            $resource = searchService.searchId("service", new SearchService.KeyValue("id", "" + service.getId()));
         } catch (UnknownHostException e) {
             logger.fatal(e);
             throw new ServiceException(e);
@@ -103,7 +116,7 @@ public class ServiceServiceImpl implements ServiceService {
     public void delete(Service service) {
         Resource resource;
         try {
-            resource = searchService.searchId("service", "" + service.getId());
+            resource = searchService.searchId("service", new SearchService.KeyValue("id", "" + service.getId()));
             if (resource != null) {
                 throw new ServiceException("Service already exists");
             } else {
