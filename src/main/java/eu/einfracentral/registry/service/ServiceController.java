@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Service;
-import eu.openminted.registry.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
