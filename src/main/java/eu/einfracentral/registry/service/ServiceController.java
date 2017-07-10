@@ -21,11 +21,11 @@ public class ServiceController {
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     public ResponseEntity<Service> getService(@PathVariable("id") String id) {
         String id_decoded = new String(Base64.getDecoder().decode(id));
-        Service component = serviceService.get(id_decoded);
-        if (component == null) {
+        Service service = serviceService.get(id_decoded);
+        if (service == null) {
             throw new ResourceNotFoundException();
         } else {
-            return new ResponseEntity<>(component, HttpStatus.OK);
+            return new ResponseEntity<>(service, HttpStatus.OK);
         }
     }
 
