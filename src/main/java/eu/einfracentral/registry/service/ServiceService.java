@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Service;
-import eu.openminted.registry.service.ResourceCRUDService;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 
 import java.io.InputStream;
 
