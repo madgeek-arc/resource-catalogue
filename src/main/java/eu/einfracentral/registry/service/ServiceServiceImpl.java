@@ -4,41 +4,32 @@ import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.ResourceService;
-import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.ServiceException;
-import eu.openminted.registry.core.controllers.Utils;
+import eu.openminted.registry.core.service.*;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 
-import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by pgl on 4/7/2017.
  */
 @org.springframework.stereotype.Service("serviceService")
 
-public class ServiceServiceImpl implements ServiceService {
-    @Autowired
-    SearchService searchService;
-
-    @Autowired
-    ResourceService resourceService;
-
-    @Autowired
-    Environment environment;
+public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> {
 
     private Logger logger = Logger.getLogger(ServiceServiceImpl.class);
+
+    public ServiceServiceImpl() {
+        super(Service.class);
+    }
 
     @Override
     public Service get(String id) {
         Service resource;
         try {
-            resource = Utils.serialize(searchService.searchId("service", new SearchService.KeyValue("id", id)), Service.class);
-        } catch (UnknownHostException e) {
+            resource = parserPool.serialize(searchService.searchId("service", new SearchService.KeyValue("id", id)), Service.class).get();
+        } catch (UnknownHostException | InterruptedException | ExecutionException e) {
             logger.fatal(e);
             throw new ServiceException(e);
         }
@@ -59,8 +50,8 @@ public class ServiceServiceImpl implements ServiceService {
     public void add(Service service) {
         Service $service;
         try {
-            $service = Utils.serialize(searchService.searchId("service", new SearchService.KeyValue("id", "" + service.getId())), Service.class);
-        } catch (UnknownHostException e) {
+            $service = parserPool.serialize(searchService.searchId("service", new SearchService.KeyValue("id", "" + service.getId())), Service.class).get();
+        } catch (UnknownHostException | InterruptedException | ExecutionException e) {
             logger.fatal(e);
             throw new ServiceException(e);
         }
@@ -68,7 +59,14 @@ public class ServiceServiceImpl implements ServiceService {
             throw new ServiceException("Service already exists");
         }
         Resource resource = new Resource();
-        String serialized = Utils.unserialize(service, Service.class);
+        String serialized = null;
+        try {
+            serialized = parserPool.deserialize(service, ParserService.ParserServiceTypes.JSON).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.fatal(e);
+            throw new ServiceException(e);
+        }
+
         if (!serialized.equals("failed")) {
             resource.setPayload(serialized);
         } else {
@@ -98,17 +96,22 @@ public class ServiceServiceImpl implements ServiceService {
         if ($resource != null) {
             throw new ServiceException("Service already exists");
         } else {
-            String serialized = Utils.unserialize(service, Service.class);
+            try {
+                String serialized = parserPool.deserialize(service, ParserService.ParserServiceTypes.JSON).get();
 
-            if (!serialized.equals("failed")) {
+                if (!serialized.equals("failed")) {
+                    resource.setPayload(serialized);
+                } else {
+                    throw new ServiceException("Serialization failed");
+                }
+                resource = (Resource) $resource;
+                resource.setPayloadFormat("xml");
                 resource.setPayload(serialized);
-            } else {
-                throw new ServiceException("Serialization failed");
+                resourceService.updateResource(resource);
+            } catch (ExecutionException | InterruptedException e) {
+                logger.fatal(e);
+                throw new ServiceException(e);
             }
-            resource = (Resource) $resource;
-            resource.setPayloadFormat("xml");
-            resource.setPayload(serialized);
-            resourceService.updateResource(resource);
         }
     }
 
@@ -128,16 +131,8 @@ public class ServiceServiceImpl implements ServiceService {
         }
     }
 
-    /**
-     * Uploads a zipped service
-     *
-     * @param filename
-     * @param inputStream
-     * @return archive id where it was saved
-     */
     @Override
-    public String uploadService(String filename, InputStream inputStream) {
-        return null;
+    public String getResourceType() {
+        return "service";
     }
-
 }
