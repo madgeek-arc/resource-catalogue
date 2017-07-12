@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.ServiceException;
-import eu.openminted.registry.domain.ObjectFactory;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,7 @@ public class ParserPool<T> implements ParserService {
     public ParserPool() {
         executor = Executors.newCachedThreadPool();
         try {
-            jaxbContext = newInstance(ObjectFactory.class);
+            jaxbContext = newInstance(ParserPool.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
