@@ -31,7 +31,7 @@ public class ParserPool<T> implements ParserService {
     public ParserPool() {
         executor = Executors.newCachedThreadPool();
         try {
-            jaxbContext = newInstance(ParserPool.class);
+            jaxbContext = newInstance();
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
