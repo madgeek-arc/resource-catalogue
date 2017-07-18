@@ -120,8 +120,8 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> {
         Resource resource;
         try {
             resource = searchService.searchId("service", new SearchService.KeyValue("id", "" + service.getId()));
-            if (resource != null) {
-                throw new ServiceException("Service already exists");
+            if (resource == null) {
+                throw new ServiceException("Service doesn't exist");
             } else {
                 resourceService.deleteResource(resource.getId());
             }
