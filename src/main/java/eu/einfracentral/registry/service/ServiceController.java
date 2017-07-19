@@ -31,13 +31,14 @@ public class ServiceController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, headers = "Accept=application/json; charset=utf-8")
+    @RequestMapping(value="all",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> addService(@RequestBody Service service) {
         serviceService.add(service);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.POST, headers = "Accept=application/xml")
+    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> addServiceXml(@RequestBody Service service) {
         serviceService.add(service);
         return new ResponseEntity<>(HttpStatus.OK);
