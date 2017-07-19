@@ -8,6 +8,8 @@
        default-autowire="byType">
 
     <context:annotation-config/>
+    <mvc:annotation-driven/>
     <context:component-scan base-package="eu.einfracentral.registry"/>
+    <context:component-scan base-package="eu.openminted.registry.core.controllers"/>
 </beans>
 
