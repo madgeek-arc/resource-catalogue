@@ -39,7 +39,8 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implement
 
     @Override
     public Browsing getAll(FacetFilter facetFilter) {
-        return null;
+        facetFilter.setBrowseBy(getBrowseBy());
+        return getResults(facetFilter);
     }
 
     @Override
