@@ -7,6 +7,7 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.*;
 import org.apache.log4j.Logger;
 
+import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
@@ -16,7 +17,7 @@ import java.util.concurrent.ExecutionException;
  */
 @org.springframework.stereotype.Service("serviceService")
 
-public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> {
+public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implements ServiceService{
 
     private Logger logger = Logger.getLogger(ServiceServiceImpl.class);
 
@@ -134,5 +135,10 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> {
     @Override
     public String getResourceType() {
         return "service";
+    }
+
+    @Override
+    public String uploadService(String filename, InputStream inputStream) {
+        return null;
     }
 }

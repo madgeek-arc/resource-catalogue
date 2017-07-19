@@ -23,7 +23,7 @@ import static javax.xml.bind.JAXBContext.newInstance;
  * Created by pgl on 12/7/2017.
  */
 @Component("parserPool")
-public class ParserPool<T> implements ParserService {
+public class ParserPool implements ParserService {
     private static Logger logger = Logger.getLogger(ParserPool.class);
     private ExecutorService executor;
     private JAXBContext jaxbContext = null;
