@@ -1,6 +1,9 @@
 package eu.einfracentral.registry.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.performance.Indicator;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.ServiceException;
@@ -31,7 +34,7 @@ public class ParserPool implements ParserService {
     public ParserPool() {
         executor = Executors.newCachedThreadPool();
         try {
-            jaxbContext = newInstance();
+            jaxbContext = newInstance(Service.class, Indicator.class, User.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
