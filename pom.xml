@@ -14,7 +14,7 @@
 
     <properties>
         <registry.core.version>1.3.0-SNAPSHOT</registry.core.version>
-        <spring.version>4.2.1.RELEASE</spring.version>
+        <spring.version>4.2.3.RELEASE</spring.version>
     </properties>
 
     <scm>
