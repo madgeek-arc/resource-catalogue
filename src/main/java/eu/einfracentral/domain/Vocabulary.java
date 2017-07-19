@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "parent"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+@XmlRootElement(namespace = "http://einfracentral.eu" )
 public class Vocabulary {
 
     @XmlElement(required = true)

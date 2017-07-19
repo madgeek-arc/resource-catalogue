@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlType;
 //    "id", "description", "targets", "timeGranularity", "measurements"
 })
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+@XmlRootElement(namespace = "http://einfracentral.eu" )
 public class Indicator
 //<T extends JAXBComparable<T>>
 {

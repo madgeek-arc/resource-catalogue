@@ -14,7 +14,7 @@ import java.util.List;
     "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
     "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement
+@XmlRootElement (namespace = "http://einfracentral.eu" )
 public class Service {
 
     //Basic
