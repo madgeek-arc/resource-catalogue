@@ -14,6 +14,8 @@ import java.util.Base64;
 /**
  * Created by pgl on 4/7/2017.
  */
+@RestController
+@RequestMapping("path")
 public class ServiceController {
     @Autowired
     ServiceService serviceService;
