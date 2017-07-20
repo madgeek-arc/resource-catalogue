@@ -214,5 +214,5 @@
   "name": "service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": ""
+  "schemaUrl": "https://builds.openminted.eu/job/eic-registry-model/ws/target/generated-resources/schemagen/schema1.xsd"
 }
