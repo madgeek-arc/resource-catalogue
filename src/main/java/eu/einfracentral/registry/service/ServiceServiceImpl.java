@@ -77,7 +77,7 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implement
         resource.setCreationDate(new Date());
         resource.setModificationDate(new Date());
         resource.setPayloadFormat("xml");
-        resource.setResourceType("service");
+        resource.setResourceType(getResourceType());
         resource.setVersion("not_set");
         resource.setId("wont be saved");
 
