@@ -4,7 +4,8 @@
       "multivalued": false,
       "name": "eicid",
       "path": "//*[local-name()='metadataHeaderInfo']/*[local-name()='metadataRecordIdentifier']/text()",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "primaryKey" : true
     },
     {
       "multivalued": false,
