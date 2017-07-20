@@ -63,7 +63,7 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implement
         Resource resource = new Resource();
         String serialized = null;
         try {
-            serialized = parserPool.deserialize(service, ParserService.ParserServiceTypes.JSON).get();
+            serialized = parserPool.deserialize(service, ParserService.ParserServiceTypes.XML).get();
         } catch (InterruptedException | ExecutionException e) {
             logger.fatal(e);
             throw new ServiceException(e);
@@ -99,7 +99,7 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implement
             throw new ServiceException("Service already exists");
         } else {
             try {
-                String serialized = parserPool.deserialize(service, ParserService.ParserServiceTypes.JSON).get();
+                String serialized = parserPool.deserialize(service, ParserService.ParserServiceTypes.XML).get();
 
                 if (!serialized.equals("failed")) {
                     resource.setPayload(serialized);
