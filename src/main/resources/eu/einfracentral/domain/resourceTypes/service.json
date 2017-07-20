@@ -33,6 +33,7 @@
     {
       "multivalued": false,
       "name": "options",
+      "label" : "Options",
       "path": "//*[local-name()='options']/text()",
       "type": "java.lang.String"
     },
@@ -105,6 +106,7 @@
     {
       "multivalued": false,
       "name": "phase",
+      "label" : "Phase",
       "path": "//*[local-name()='phase']/text()",
       "type": "java.lang.String"
     },
@@ -117,12 +119,14 @@
     {
       "multivalued": false,
       "name": "category",
+      "label" : "Category",
       "path": "//*[local-name()='category']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "subcategory",
+      "label" : "Subcategory",
       "path": "//*[local-name()='subcategory']/text()",
       "type": "java.lang.String"
     },
