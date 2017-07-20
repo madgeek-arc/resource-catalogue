@@ -27,45 +27,9 @@
     },
     {
       "multivalued": false,
-      "name": "description",
-      "path": "//*[local-name()='description']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "options",
       "label" : "Options",
       "path": "//*[local-name()='options']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "targetUsers",
-      "path": "//*[local-name()='targetUsers']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "userValue",
-      "path": "//*[local-name()='userValue']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "userBase",
-      "path": "//*[local-name()='userBase']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "provider",
-      "path": "//*[local-name()='provider']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "fundingSources",
-      "path": "//*[local-name()='fundingSources']/text()",
       "type": "java.lang.String"
     },
     {
