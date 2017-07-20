@@ -72,19 +72,19 @@
       "multivalued": false,
       "name": "webpage",
       "path": "//*[local-name()='webpage']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "symbol",
       "path": "//*[local-name()='symbol']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "multimediaURL",
       "path": "//*[local-name()='multimediaURL']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
@@ -96,7 +96,7 @@
       "multivalued": false,
       "name": "revisionDate",
       "path": "//*[local-name()='revisionDate']/text()",
-      "type": "javax.xml.datatype.XMLGregorianCalendar"
+      "type": "java.util.Date"
     },
     {
       "multivalued": false,
@@ -165,37 +165,37 @@
       "multivalued": false,
       "name": "request",
       "path": "//*[local-name()='request']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "helpdesk",
       "path": "//*[local-name()='helpdesk']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "documentation",
       "path": "//*[local-name()='documentation']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "trainingInformation",
       "path": "//*[local-name()='trainingInformation']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "feedback",
       "path": "//*[local-name()='feedback']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "pricingModel",
       "path": "//*[local-name()='pricingModel']/text()",
-      "type": "java.net.URL"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
