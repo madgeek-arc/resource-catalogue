@@ -148,35 +148,35 @@ public class Service {
     /**
      * List of countries within which the service is available
      */
-    @XmlElementWrapper(required = true)
+    //@XmlElementWrapper(required = true)
     @XmlElement(name = "country")
     private List<String> countries;
 
     /**
      * List of regions within which the service is available
      */
-    @XmlElementWrapper(required = true)
+    //@XmlElementWrapper(required = true)
     @XmlElement(name = "region")
     private List<String> regions;
 
     /**
      * List of languages in which the service is available
      */
-    @XmlElementWrapper(required = true)
+    //@XmlElementWrapper(required = true)
     @XmlElement(name = "language")
     private List<String> languages;
 
     /**
      * Field to facilitate searching based on keywords
      */
-    @XmlElementWrapper(required = true)
+    //@XmlElementWrapper(required = true)
     @XmlElement(name = "tag")
     private List<String> tags;
 
     /**
      * Other services that are either required or commonly used with this service.
      */
-    @XmlElementWrapper(required = true)
+    //@XmlElementWrapper(required = true)
     @XmlElement(name = "relatedService")
     private List<String> relatedServices;
 
