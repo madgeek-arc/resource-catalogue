@@ -21,7 +21,7 @@ public class Service {
     /**
      * Global unique and persistent identifier of a specific service. Work in progress.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String id; //list
 
     /**
@@ -33,19 +33,19 @@ public class Service {
     /**
      * Catchline or slogan of service for marketing/advertising  purposes.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String tagline;
 
     /**
      * Extended name of service as assigned by the service provider.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String fullName;
 
     /**
      * High-level description of what the service does in terms of functionality it provides and the resources it enables access to. Should be similar to the name described above, and should cover the value provided by the service, in fairly non-technical terms. These descriptions may seem obvious but help everyone within the organization understand the service, and also will be needed for the Service Catalogue, which will be shown to users and customers. It may provide also information related to the offered capacity, number of installations, underlying data that is offered.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String description;
 
     /**
@@ -75,7 +75,7 @@ public class Service {
     /**
      * Organisation that manages and delivers the service and with whom the customer signs the SLA.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String provider; //may become list
 
     /**
@@ -87,13 +87,13 @@ public class Service {
     /**
      * Link to a webpage providing information about the service. This webpage is usually hosted and maintained by the service provider. It contains fresh and additional information, such as what APIs are supported or links to the documentation.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private URL webpage;
 
     /**
      * Link to a visual representation for the service
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private URL symbol;
 
     /**
@@ -124,25 +124,25 @@ public class Service {
     /**
      * Is used to tag the service to the full service cycle: e.g., discovery, alpha (prototype available for closed set of users), beta (service being developed while available for testing publicly), production, retired (not anymore offered).
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String phase; //alpha, beta, production
 
     /**
      * Is used to tag the service to the Technology Readiness Level.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String technologyReadinessLevel; //7, 8 , 9
 
     /**
      * A named group of services that offer access to the same type of resource. These are external ones that are of interest to a customer.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String category; //e.g. storage, compute, networking, data, training, consultancy, etc.
 
     /**
      * Type of service within a category
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private String subcategory; //list
 
     /**
@@ -184,7 +184,7 @@ public class Service {
     /**
      * Link to request the service from the service provider
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private URL request;
 
     /**
@@ -215,7 +215,7 @@ public class Service {
     /**
      * Supported payment models that apply. List of sentences each of them stating the type of payment model and the restriction that applies to it.
      */
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     private URL pricingModel;
 
     /**
