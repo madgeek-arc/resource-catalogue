@@ -5,9 +5,9 @@ import javax.xml.bind.annotation.*;
 /**
  * Created by pgl on 3/7/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "parent"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "type", "parent"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu" )
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Vocabulary {
 
     @XmlElement(required = true)
@@ -15,6 +15,9 @@ public class Vocabulary {
 
     @XmlElement(required = true)
     private String name;
+
+    @XmlElement(required = true)
+    private String type;
 
     @XmlElement
     private String parent;
@@ -35,6 +38,14 @@ public class Vocabulary {
         this.name = name;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getParent() {
         return parent;
     }
@@ -42,8 +53,5 @@ public class Vocabulary {
     public void setParent(String parent) {
         this.parent = parent;
     }
-
-    //Categories: Storage, Computing, Networking, Data, DataManagement, Identification, Consultancy;
-    //Phases: Beta, Production;
 
 }
