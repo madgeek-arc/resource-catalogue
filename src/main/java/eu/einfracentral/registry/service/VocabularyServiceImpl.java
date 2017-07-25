@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by pgl on 24/7/2017.
  */
+@org.springframework.stereotype.Service("vocabularyService")
 public class VocabularyServiceImpl<T> extends VocabularyServiceHmpl<Vocabulary> implements VocabularyService {
 
     private Logger logger = Logger.getLogger(VocabularyServiceImpl.class);
