@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.*;
 public class Vocabulary {
 
     @XmlElement(required = true)
-    private int id;
+    private String id;
 
     @XmlElement(required = true)
     private String name;
@@ -22,11 +22,11 @@ public class Vocabulary {
     @XmlElement
     private String parent;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
