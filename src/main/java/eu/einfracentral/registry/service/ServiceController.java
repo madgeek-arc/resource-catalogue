@@ -24,8 +24,8 @@ public class ServiceController extends GenericRestController<Service> {
     final private ServiceService serviceService;
 
     @Autowired
-    ServiceController(ServiceService serviceService) {
-        super(serviceService);
-        this.serviceService = serviceService;
+    ServiceController(ServiceService service) {
+        super(service);
+        this.serviceService = service;
     }
 }
