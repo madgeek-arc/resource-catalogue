@@ -3,7 +3,7 @@
     {
       "multivalued": false,
       "name": "eicid",
-      "path": "//*[local-name()='metadataHeaderInfo']/*[local-name()='metadataRecordIdentifier']/text()",
+      "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey" : true
     },

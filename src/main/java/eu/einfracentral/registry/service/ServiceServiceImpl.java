@@ -29,7 +29,7 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implement
     public Service get(String id) {
         Service resource;
         try {
-            resource = parserPool.serialize(searchService.searchId("service", new SearchService.KeyValue("id", id)), Service.class).get();
+            resource = parserPool.serialize(searchService.searchId("service", new SearchService.KeyValue("eicid", id)), Service.class).get();
         } catch (UnknownHostException | InterruptedException | ExecutionException e) {
             logger.fatal(e);
             throw new ServiceException(e);
@@ -51,15 +51,15 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implement
     @Override
     public void add(Service service) {
         Service $service;
-//        try {
-//            $service = parserPool.serialize(searchService.searchId("service", new SearchService.KeyValue("eicid", "" + service.getId())), Service.class).get();
-//        } catch (UnknownHostException | InterruptedException | ExecutionException e) {
-//            logger.fatal(e);
-//            throw new ServiceException(e);
-//        }
-//        if ($service != null) {
-//            throw new ServiceException("Service already exists");
-//        }
+        try {
+            $service = parserPool.serialize(searchService.searchId("service", new SearchService.KeyValue("eicid", "" + service.getId())), Service.class).get();
+        } catch (UnknownHostException | InterruptedException | ExecutionException e) {
+            logger.fatal(e);
+            throw new ServiceException(e);
+        }
+        if ($service != null) {
+            throw new ServiceException("Service already exists");
+        }
         Resource resource = new Resource();
         String serialized = null;
         try {
