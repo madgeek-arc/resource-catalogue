@@ -20,7 +20,7 @@ public class GenericRestController<T> {
         this.service = service;
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "{id}/", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     public ResponseEntity<T> getComponent(@PathVariable("id") String id) {
         String id_decoded = id; //new String(Base64.getDecoder().decode(id));
         T component = service.get(id_decoded);
