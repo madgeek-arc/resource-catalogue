@@ -4,7 +4,9 @@ import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.*;
+import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.log4j.Logger;
 
 import java.io.InputStream;
@@ -17,7 +19,7 @@ import java.util.concurrent.ExecutionException;
  */
 @org.springframework.stereotype.Service("serviceService")
 
-public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implements ServiceService{
+public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implements ServiceService {
 
     private Logger logger = Logger.getLogger(ServiceServiceImpl.class);
 
