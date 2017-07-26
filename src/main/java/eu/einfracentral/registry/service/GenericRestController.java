@@ -23,7 +23,7 @@ public class GenericRestController<T> {
         this.service = service;
     }
 
-    @RequestMapping(value = "{id}/", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "{id}/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> getComponent(@PathVariable("id") String id) {
         String id_decoded = id; //new String(Base64.getDecoder().decode(id));
         T component = service.get(id_decoded);
@@ -49,14 +49,14 @@ public class GenericRestController<T> {
 
     }
 
-    @RequestMapping(method = RequestMethod.PUT, headers = "Accept=application/json; charset=utf-8")
+    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> updateComponent(@RequestBody T component) {
         service.update(component);
         return new ResponseEntity<>(component, HttpStatus.OK);
 
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, headers = "Accept=application/json; charset=utf-8")
+    @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> deleteComponent(@RequestBody T component) {
         service.delete(component);
         return new ResponseEntity<>(HttpStatus.OK);
