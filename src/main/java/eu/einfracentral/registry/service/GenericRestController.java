@@ -66,7 +66,7 @@ public class GenericRestController<T> {
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Browsing> getAllComponents(@RequestParam Map<String,Object> allRequestParams) {
         FacetFilter filter = new FacetFilter();
-        filter.setKeyword(allRequestParams.get("keyword") != null ? (String)allRequestParams.remove("keyword") : "");
+        filter.setKeyword(allRequestParams.get("query") != null ? (String)allRequestParams.remove("query") : "");
         filter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String)allRequestParams.remove("from")) : 0);
         filter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String)allRequestParams.remove("quantity")) : 10);
 //        Map<String,Object> sort = new HashMap<>();
