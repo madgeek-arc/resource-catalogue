@@ -174,7 +174,7 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
+      "multivalued": true,
       "name": "termsOfUse",
       "path": "//*[local-name()='termsOfUse']/text()",
       "type": "java.lang.String"
