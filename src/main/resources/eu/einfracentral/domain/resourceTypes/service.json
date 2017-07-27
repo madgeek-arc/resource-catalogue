@@ -90,15 +90,9 @@
     },
     {
       "multivalued": false,
-      "name": "TRL",
+      "name": "technologyReadinessLevel",
       "label": "TRL",
       "path": "//*[local-name()='technologyReadinessLevel']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "techonologyReadinessLevel",
-      "path": "//*[local-name()='techonologyReadinessLevel']/text()",
       "type": "java.lang.String"
     },
     {
