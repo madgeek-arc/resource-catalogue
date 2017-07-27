@@ -5,7 +5,7 @@
       "name": "eicid",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
-      "primaryKey" : true
+      "primaryKey": true
     },
     {
       "multivalued": false,
@@ -28,7 +28,6 @@
     {
       "multivalued": false,
       "name": "options",
-      "label" : "Options",
       "path": "//*[local-name()='options']/text()",
       "type": "java.lang.String"
     },
@@ -70,9 +69,30 @@
     },
     {
       "multivalued": false,
+      "name": "category",
+      "label": "Category",
+      "path": "//*[local-name()='category']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "provider",
+      "label": "Provider",
+      "path": "//*[local-name()='provider']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "phase",
-      "label" : "Phase",
+      "label": "Phase",
       "path": "//*[local-name()='phase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "TRL",
+      "label": "TRL",
+      "path": "//*[local-name()='technologyReadinessLevel']/text()",
       "type": "java.lang.String"
     },
     {
@@ -83,15 +103,7 @@
     },
     {
       "multivalued": false,
-      "name": "category",
-      "label" : "Category",
-      "path": "//*[local-name()='category']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "subcategory",
-      "label" : "Subcategory",
       "path": "//*[local-name()='subcategory']/text()",
       "type": "java.lang.String"
     },
