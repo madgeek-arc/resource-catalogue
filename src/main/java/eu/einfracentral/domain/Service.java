@@ -17,6 +17,9 @@ import java.util.List;
 @XmlRootElement (namespace = "http://einfracentral.eu" )
 public class Service {
 
+    @XmlTransient
+    private float rating;
+
     //Basic
     /**
      * Global unique and persistent identifier of a specific service. Work in progress.
@@ -503,4 +506,11 @@ public class Service {
         this.termsOfUse = termsOfUse;
     }
 
+    public float getRating() {
+        return rating;
+    }
+
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
 }
