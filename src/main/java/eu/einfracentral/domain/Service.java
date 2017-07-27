@@ -227,8 +227,9 @@ public class Service {
     /**
      * Document containing the rules, service conditions and usage policy which one must agree to abide by in order to use the service.
      */
-    @XmlElement
-    private String termsOfUse;
+    @XmlElementWrapper
+    @XmlElement(name = "termOfUse")
+    private List<URL> termsOfUse;
 
     public String getId() {
         return id;
@@ -494,11 +495,11 @@ public class Service {
         this.serviceLevelAgreement = serviceLevelAgreement;
     }
 
-    public String getTermsOfUse() {
+    public List<URL> getTermsOfUse() {
         return termsOfUse;
     }
 
-    public void setTermsOfUse(String termsOfUse) {
+    public void setTermsOfUse(List<URL> termsOfUse) {
         this.termsOfUse = termsOfUse;
     }
 
