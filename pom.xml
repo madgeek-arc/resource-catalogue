@@ -210,27 +210,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>cz.habarta.typescript-generator</groupId>-->
-            <!--<artifactId>typescript-generator-maven-plugin</artifactId>-->
-            <!--<version>1.10.220</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>generate</id>-->
-            <!--<goals>-->
-            <!--<goal>generate</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<jsonLibrary>jackson2</jsonLibrary>-->
-            <!--<classPatterns>-->
-            <!--<pattern>eu.einfracentral.registry.domain.*</pattern>-->
-            <!--</classPatterns>-->
-            <!--<outputFile>target/sample.d.ts</outputFile>-->
-            <!--<outputKind>module</outputKind>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>external.atlassian.jgitflow</groupId>
                 <artifactId>jgitflow-maven-plugin</artifactId>
