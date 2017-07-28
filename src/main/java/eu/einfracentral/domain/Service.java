@@ -20,6 +20,9 @@ public class Service {
     @XmlTransient
     private float rating;
 
+    @XmlTransient
+    private float ratings;
+
     //Basic
     /**
      * Global unique and persistent identifier of a specific service. Work in progress.
@@ -512,5 +515,13 @@ public class Service {
 
     public void setRating(float rating) {
         this.rating = rating;
+    }
+
+    public float getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(float ratings) {
+        this.ratings = ratings;
     }
 }
