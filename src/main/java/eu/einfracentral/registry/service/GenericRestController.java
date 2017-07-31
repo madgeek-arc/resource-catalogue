@@ -32,35 +32,30 @@ public class GenericRestController<T> {
         } else {
             return new ResponseEntity<>(component, HttpStatus.OK);
         }
-
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> addComponentJson(@RequestBody T component) {
         service.add(component);
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> addComponentXml(@RequestBody T component) {
         service.add(component);
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> updateComponent(@RequestBody T component) {
         service.update(component);
         return new ResponseEntity<>(component, HttpStatus.OK);
-
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> deleteComponent(@RequestBody T component) {
         service.delete(component);
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
