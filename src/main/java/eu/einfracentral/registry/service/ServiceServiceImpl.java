@@ -143,4 +143,18 @@ public class ServiceServiceImpl<T> extends AbstractGenericResourceCRUDService<Se
     public String uploadService(String filename, InputStream inputStream) {
         return null;
     }
+
+    @Override
+    public Service[] getSome(String... ids) {
+        Service[] ret = new Service[ids.length];
+        for (int i = 0; i < ret.length; i++) {
+            try {
+                ret[i] = this.get(ids[i]);
+            } catch (ServiceException se) {
+                ret[i] = new Service();
+                ret[i].setId(ids[i]);
+            }
+        }
+        return ret;
+    }
 }
