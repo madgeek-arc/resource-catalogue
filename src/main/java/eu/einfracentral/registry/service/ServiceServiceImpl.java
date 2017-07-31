@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
  */
 @org.springframework.stereotype.Service("serviceService")
 
-public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implements ServiceService {
+public class ServiceServiceImpl<T> extends AbstractGenericResourceCRUDService<Service> implements ServiceService {
 
     private Logger logger = Logger.getLogger(ServiceServiceImpl.class);
 
@@ -102,7 +102,6 @@ public class ServiceServiceImpl<T> extends ServiceServiceHmpl<Service> implement
         } else {
             try {
                 String serialized = parserPool.deserialize(service, ParserService.ParserServiceTypes.XML).get();
-
                 if (!serialized.equals("failed")) {
                     resource.setPayload(serialized);
                 } else {

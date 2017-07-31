@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
  * Created by pgl on 26/7/2017.
  */
 @org.springframework.stereotype.Service("providerService")
-public class ProviderServiceImpl<T> extends ProviderServiceHmpl<Provider> implements ProviderService {
+public class ProviderServiceImpl<T> extends AbstractGenericResourceCRUDService<Provider> implements ProviderService {
 
     private Logger logger = Logger.getLogger(ProviderServiceImpl.class);
 
