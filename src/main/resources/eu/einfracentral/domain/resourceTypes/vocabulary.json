@@ -2,8 +2,8 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "vocabid",
-      "path": "//*[local-name()='id']/text()",
+      "name": "vocabulary_id",
+      "path": "//*[local-name()='vocabulary_id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
