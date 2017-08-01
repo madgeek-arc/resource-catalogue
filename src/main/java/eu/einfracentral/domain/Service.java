@@ -9,12 +9,12 @@ import java.util.List;
  * Created by pgl on 29/6/2017.
  */
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "brandName", "tagline", "fullName", "description",
-    "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "symbol",
-    "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "technologyReadinessLevel", "category",
-    "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
-    "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse"})
+        "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "symbol",
+        "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "technologyReadinessLevel", "category",
+        "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
+        "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement (namespace = "http://einfracentral.eu" )
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service {
 
     @XmlTransient
