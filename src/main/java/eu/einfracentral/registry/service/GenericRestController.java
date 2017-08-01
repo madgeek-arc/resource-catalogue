@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,47 +22,47 @@ public class GenericRestController<T> {
         this.service = service;
     }
 
-    @RequestMapping(value = "{id}/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> getComponent(@PathVariable("id") String id) {
+    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<T> get(@PathVariable("id") String id) {
         String id_decoded = id; //new String(Base64.getDecoder().decode(id));
-        T component = service.get(id_decoded);
-        if (component == null) {
+        T resource = service.get(id_decoded);
+        if (resource == null) {
             throw new ResourceNotFoundException();
         } else {
-            return new ResponseEntity<>(component, HttpStatus.OK);
+            return new ResponseEntity<>(resource, HttpStatus.OK);
         }
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> addComponentJson(@RequestBody T component) {
-        service.add(component);
+    public ResponseEntity<String> addJson(@RequestBody T resource) {
+        service.add(resource);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<String> addComponentXml(@RequestBody T component) {
-        service.add(component);
+    public ResponseEntity<String> addXml(@RequestBody T resource) {
+        service.add(resource);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> updateComponent(@RequestBody T component) {
-        service.update(component);
-        return new ResponseEntity<>(component, HttpStatus.OK);
+    public ResponseEntity<T> update(@RequestBody T resource) {
+        service.update(resource);
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> deleteComponent(@RequestBody T component) {
-        service.delete(component);
+    public ResponseEntity<String> delete(@RequestBody T resource) {
+        service.delete(resource);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Browsing> getAllComponents(@RequestParam Map<String,Object> allRequestParams) {
+    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams) {
         FacetFilter filter = new FacetFilter();
-        filter.setKeyword(allRequestParams.get("query") != null ? (String)allRequestParams.remove("query") : "");
-        filter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String)allRequestParams.remove("from")) : 0);
-        filter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String)allRequestParams.remove("quantity")) : 10);
+        filter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        filter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        filter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
 //        Map<String,Object> sort = new HashMap<>();
 //        Map<String,Object> order = new HashMap<>();
 //        String orderDirection = allRequestParams.get("order") != null ? (String)allRequestParams.remove("order") : "asc";
