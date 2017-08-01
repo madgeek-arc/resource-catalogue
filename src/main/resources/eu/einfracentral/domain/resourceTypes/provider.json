@@ -1,0 +1,40 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "provid",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "name",
+      "path": "//*[local-name()='name']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "contactInformation",
+      "path": "//*[local-name()='contactInformation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "users",
+      "path": "//*[local-name()='users']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "services",
+      "path": "//*[local-name()='services']/text()",
+      "type": "java.lang.String"
+    },
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "provider",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://builds.openminted.eu/job/eic-registry-model/ws/target/generated-resources/schemagen/schema1.xsd"
+}
