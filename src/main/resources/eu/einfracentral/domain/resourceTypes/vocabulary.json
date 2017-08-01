@@ -5,7 +5,7 @@
       "name": "vocabid",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
-      "primaryKey" : true
+      "primaryKey": true
     },
     {
       "multivalued": false,
