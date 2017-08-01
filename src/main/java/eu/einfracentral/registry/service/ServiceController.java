@@ -25,7 +25,7 @@ public class ServiceController extends GenericRestController<Service> {
         this.serviceService = service;
     }
 
-    @RequestMapping(value = "some/{ids}/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "some/{ids}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Service[]> getSome(@PathVariable String[] ids) {
         Service[] ret = serviceService.getSome(ids);
         if (ret == null) {
