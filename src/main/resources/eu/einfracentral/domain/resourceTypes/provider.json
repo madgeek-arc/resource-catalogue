@@ -2,8 +2,8 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "provid",
-      "path": "//*[local-name()='id']/text()",
+      "name": "provider_id",
+      "path": "//*[local-name()='provider_id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
@@ -30,7 +30,7 @@
       "name": "services",
       "path": "//*[local-name()='services']/text()",
       "type": "java.lang.String"
-    },
+    }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
   "name": "provider",
