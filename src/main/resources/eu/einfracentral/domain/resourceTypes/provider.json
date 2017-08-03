@@ -3,7 +3,7 @@
     {
       "multivalued": false,
       "name": "provider_id",
-      "path": "//*[local-name()='provider_id']/text()",
+      "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },

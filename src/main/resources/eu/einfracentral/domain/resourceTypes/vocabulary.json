@@ -3,7 +3,7 @@
     {
       "multivalued": false,
       "name": "vocabulary_id",
-      "path": "//*[local-name()='vocabulary_id']/text()",
+      "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
