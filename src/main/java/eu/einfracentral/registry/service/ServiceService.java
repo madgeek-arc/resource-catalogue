@@ -4,6 +4,8 @@ import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pgl on 27/6/2017.
@@ -26,5 +28,12 @@ public interface ServiceService extends ResourceCRUDService<eu.einfracentral.dom
      * @return the Services with those ids
      */
     public Service[] getSome(String... ids);
+
+    /**
+     * Returns a map of fields to service lists
+     *
+     * @return The map
+     */
+    public Map<String, List<Service>> getAllBy(String field);
 
 }
