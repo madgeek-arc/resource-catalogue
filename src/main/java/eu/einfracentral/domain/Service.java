@@ -15,7 +15,7 @@ import java.util.List;
         "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Service {
+public class Service implements Identifiable {
 
     @XmlTransient
     private float rating;
@@ -237,10 +237,12 @@ public class Service {
     @XmlElement(name = "termOfUse")
     private List<URL> termsOfUse;
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }

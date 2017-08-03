@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.*;
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "type", "parent"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Vocabulary {
+public class Vocabulary implements Identifiable {
 
     @XmlElement(required = true)
     private String id;
@@ -22,10 +22,12 @@ public class Vocabulary {
     @XmlElement
     private String parent;
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }

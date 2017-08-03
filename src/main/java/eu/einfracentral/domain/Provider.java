@@ -12,9 +12,9 @@ import java.util.List;
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "contactInformation", "users", "services"})
 @XmlAccessorType(XmlAccessType.FIELD)
 
-public class Provider {
+public class Provider implements Identifiable {
     @XmlElement(required = true)
-    private int id;
+    private String id;
 
     @XmlElement(required = true)
     private String name;
@@ -30,11 +30,13 @@ public class Provider {
     @XmlElement(name = "service")
     private List<User> services;
 
-    public int getId() {
+    @Override
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    @Override
+    public void setId(String id) {
         this.id = id;
     }
 
