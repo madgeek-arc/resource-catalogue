@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by pgl on 4/7/2017.
  */
@@ -33,5 +36,10 @@ public class ServiceController extends GenericRestController<Service> {
         } else {
             return new ResponseEntity<>(ret, HttpStatus.OK);
         }
+    }
+
+    @RequestMapping(path = "all/{field}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, List<Service>>> getAllBy(@PathVariable String field) {
+        return new ResponseEntity<>(serviceService.getAllBy(field), HttpStatus.OK);
     }
 }
