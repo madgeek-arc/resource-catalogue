@@ -4,7 +4,6 @@ import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ServiceException;
-import org.apache.log4j.Logger;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -48,15 +47,19 @@ public class ServiceServiceImpl<T> extends BaseGenericResourceCRUDService<Servic
     }
 
     @Override
-    public Map<String, List<Service>> getAllBy(String field) {
+    public Map<String, List<Service>> getBy(String field) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceType());
         Map<String, List<Resource>> results = searchService.searchByCategory(ff, field);
         Map<String, List<Service>> ret = new HashMap<>();
         results.forEach((category, resources) -> {
             List<Service> services = new ArrayList<>();
-            for (Resource r: resources) {
-                services.add(get(r.getId()));
+            for (Resource r : resources) {
+                try {
+                    services.add(parserPool.serialize(r, Service.class).get());
+                } catch (Exception e) {
+                    throw new ServiceException(e);
+                }
             }
             ret.put(category, services);
         });
