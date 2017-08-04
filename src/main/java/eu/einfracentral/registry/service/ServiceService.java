@@ -19,7 +19,7 @@ public interface ServiceService extends ResourceCRUDService<eu.einfracentral.dom
      * @param inputStream
      * @return archive id where it was saved
      */
-    public String uploadService(String filename, InputStream inputStream);
+    String uploadService(String filename, InputStream inputStream);
 
     /**
      * Returns a list of Services
@@ -27,13 +27,13 @@ public interface ServiceService extends ResourceCRUDService<eu.einfracentral.dom
      * @param ids The list of ids
      * @return the Services with those ids
      */
-    public Service[] getSome(String... ids);
+    Service[] getSome(String... ids);
 
     /**
      * Returns a map of fields to service lists
      *
      * @return The map
      */
-    public Map<String, List<Service>> getAllBy(String field);
+    Map<String, List<Service>> getBy(String field);
 
 }
