@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Provider;
-import eu.openminted.registry.core.service.ResourceCRUDService;
 import org.springframework.stereotype.Service;
 
 /**
