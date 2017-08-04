@@ -23,6 +23,9 @@ public class Service implements Identifiable {
     @XmlTransient
     private float ratings;
 
+    @XmlTransient
+    private boolean isPublic = false;
+
     //Basic
     /**
      * Global unique and persistent identifier of a specific service. Work in progress.
@@ -525,5 +528,13 @@ public class Service implements Identifiable {
 
     public void setRatings(float ratings) {
         this.ratings = ratings;
+    }
+
+    public boolean getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 }
