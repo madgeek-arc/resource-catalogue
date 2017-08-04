@@ -38,8 +38,8 @@ public class ServiceController extends GenericRestController<Service> {
         }
     }
 
-    @RequestMapping(path = "all/{field}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, List<Service>>> getAllBy(@PathVariable String field) {
-        return new ResponseEntity<>(serviceService.getAllBy(field), HttpStatus.OK);
+    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field) {
+        return new ResponseEntity<>(serviceService.getBy(field), HttpStatus.OK);
     }
 }
