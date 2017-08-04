@@ -4,20 +4,23 @@ import eu.einfracentral.domain.Identifiable;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.*;
+import eu.openminted.registry.core.service.AbstractGenericService;
+import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.log4j.Logger;
 
 import java.net.UnknownHostException;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
  * Created by pgl on 12/7/2017.
  */
-public abstract class BaseGenericResourceCRUDService<T extends Identifiable> extends AbstractGenericService<T> implements ResourceCRUDService<T> {
+public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceCRUDService<T> {
     private Logger logger;
 
-    public BaseGenericResourceCRUDService(Class<T> typeParameterClass) {
+    public BaseGenericResourceCRUDServiceImpl(Class<T> typeParameterClass) {
         super(typeParameterClass);
         logger = Logger.getLogger(typeParameterClass);
     }
@@ -133,5 +136,38 @@ public abstract class BaseGenericResourceCRUDService<T extends Identifiable> ext
             logger.fatal(e);
             throw new ServiceException(e);
         }
+    }
+
+    @Override
+    public List<T> getSome(String... ids) {
+        ArrayList<T> ret = new ArrayList<>();
+        for (int i = 0; i < ids.length; i++) {
+            try {
+                ret.add(this.get(ids[i]));
+            } catch (ServiceException se) {
+                ret.add(null);
+            }
+        }
+        return ret;
+    }
+
+    @Override
+    public Map<String, List<T>> getBy(String field) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceType());
+        Map<String, List<Resource>> results = searchService.searchByCategory(ff, field);
+        Map<String, List<T>> ret = new HashMap<>();
+        results.forEach((category, resources) -> {
+            List<T> payloads = new ArrayList<>();
+            for (Resource r : resources) {
+                try {
+                    payloads.add(parserPool.serialize(r, typeParameterClass).get());
+                } catch (Exception e) {
+                    throw new ServiceException(e);
+                }
+            }
+            ret.put(category, payloads);
+        });
+        return ret;
     }
 }
