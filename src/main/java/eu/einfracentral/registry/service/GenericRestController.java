@@ -1,14 +1,15 @@
 package eu.einfracentral.registry.service;
 
+import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ResourceCRUDService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -74,6 +75,21 @@ public class GenericRestController<T> {
 //        }
         filter.setFilter(allRequestParams);
         return new ResponseEntity<>(service.getAll(filter), HttpStatus.OK);
+    }
+
+    @RequestMapping(path = "some/{ids}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids) {
+        List<T> ret = service.getSome(ids);
+        if (ret == null) {
+            throw new ResourceNotFoundException();
+        } else {
+            return new ResponseEntity<>(ret, HttpStatus.OK);
+        }
+    }
+
+    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field) {
+        return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
 
 }

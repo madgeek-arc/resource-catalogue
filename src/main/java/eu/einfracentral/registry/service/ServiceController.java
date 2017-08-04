@@ -28,18 +28,5 @@ public class ServiceController extends GenericRestController<Service> {
         this.serviceService = service;
     }
 
-    @RequestMapping(path = "some/{ids}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Service[]> getSome(@PathVariable String[] ids) {
-        Service[] ret = serviceService.getSome(ids);
-        if (ret == null) {
-            throw new ResourceNotFoundException();
-        } else {
-            return new ResponseEntity<>(ret, HttpStatus.OK);
-        }
-    }
 
-    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field) {
-        return new ResponseEntity<>(serviceService.getBy(field), HttpStatus.OK);
-    }
 }
