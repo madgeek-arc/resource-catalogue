@@ -170,7 +170,7 @@
                             <classPatterns>
                                 <pattern>eu.einfracentral.domain.*</pattern>
                             </classPatterns>
-                            <outputFile>target/eic.model.ts</outputFile>
+                            <outputFile>target/eic-model.ts</outputFile>
                             <outputKind>module</outputKind>
                             <outputFileType>implementationFile</outputFileType>
                             <mapEnum>asEnum</mapEnum>
