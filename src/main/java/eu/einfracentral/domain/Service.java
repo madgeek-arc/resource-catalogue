@@ -18,7 +18,7 @@ import java.util.List;
 public class Service implements Identifiable {
 
     @XmlTransient
-    private float rating;
+    private float averageRating;
 
     @XmlTransient
     private float ratings;
@@ -511,12 +511,12 @@ public class Service implements Identifiable {
         this.termsOfUse = termsOfUse;
     }
 
-    public float getRating() {
-        return rating;
+    public float getAverageRating() {
+        return averageRating;
     }
 
-    public void setRating(float rating) {
-        this.rating = rating;
+    public void setAverageRating(float averageRating) {
+        this.averageRating = averageRating;
     }
 
     public float getRatings() {
