@@ -2,6 +2,7 @@ package eu.einfracentral.domain.aai;
 
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Service;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
@@ -66,6 +67,7 @@ public class User implements Identifiable {
 //    public void setGrants(List<Grant> grants) {
 //        this.grants = grants;
 //    }
+
     public boolean getIsServiceProvider() {
         return isServiceProvider;
     }
