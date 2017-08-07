@@ -9,7 +9,6 @@ import java.util.List;
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "organization", "role", "grants"})
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "organization", "favourites", "isServiceProvider"})
 @XmlAccessorType(XmlAccessType.FIELD)
 
@@ -20,12 +19,14 @@ public class User {
     @XmlElement(required = true)
     private Provider organization;
 
-    @XmlElement(required = true)
-    private Role role;
+//    @XmlElement(required = true)
+//    private Role role;
+//
+//    @XmlElementWrapper(required = true)
+//    @XmlElement(name = "grant")
+//    private List<Grant> grants;
 
     @XmlElementWrapper(required = true)
-    @XmlElement(name = "grant")
-    private List<Grant> grants;
     @XmlElement(name = "favourite")
     private List<Service> favourites;
 
@@ -47,26 +48,33 @@ public class User {
         this.organization = organization;
     }
 
-    public Role getRole() {
-        return role;
+//    public Role getRole() {
+//        return role;
+//    }
+//
+//    public void setRole(Role role) {
+//        this.role = role;
+//    }
+//
+//    public List<Grant> getGrants() {
+//        return grants;
+//    }
+//
+//    public void setGrants(List<Grant> grants) {
+//        this.grants = grants;
+//    }
     public boolean getIsServiceProvider() {
         return isServiceProvider;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
     public void setIsServiceProvider(boolean isServiceProvider) {
         this.isServiceProvider = isServiceProvider;
     }
 
-    public List<Grant> getGrants() {
-        return grants;
     public List<Service> getFavourites() {
         return favourites;
     }
 
-    public void setGrants(List<Grant> grants) {
-        this.grants = grants;
     public void setFavourites(List<Service> favourites) {
         this.favourites = favourites;
     }
