@@ -1,0 +1,28 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "eInfraUser_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "organization",
+      "path": "//*[local-name()='organization']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "isServiceProvider",
+      "path": "//*[local-name()='isServiceProvider']/text()",
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "eInfraUser",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://builds.openminted.eu/job/eic-registry-model/ws/target/generated-resources/schemagen/schema1.xsd"
+}
