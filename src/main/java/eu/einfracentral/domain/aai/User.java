@@ -10,6 +10,7 @@ import java.util.List;
  */
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "organization", "role", "grants"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "organization", "favourites", "isServiceProvider"})
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class User {
@@ -25,8 +26,12 @@ public class User {
     @XmlElementWrapper(required = true)
     @XmlElement(name = "grant")
     private List<Grant> grants;
+    @XmlElement(name = "favourite")
+    private List<Service> favourites;
 
     public int getId() {
+    @XmlElement(required = true)
+    private boolean isServiceProvider;
         return id;
     }
 
@@ -44,17 +49,25 @@ public class User {
 
     public Role getRole() {
         return role;
+    public boolean getIsServiceProvider() {
+        return isServiceProvider;
     }
 
     public void setRole(Role role) {
         this.role = role;
+    public void setIsServiceProvider(boolean isServiceProvider) {
+        this.isServiceProvider = isServiceProvider;
     }
 
     public List<Grant> getGrants() {
         return grants;
+    public List<Service> getFavourites() {
+        return favourites;
     }
 
     public void setGrants(List<Grant> grants) {
         this.grants = grants;
+    public void setFavourites(List<Service> favourites) {
+        this.favourites = favourites;
     }
 }
