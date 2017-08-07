@@ -1,5 +1,6 @@
 package eu.einfracentral.domain.aai;
 
+import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.domain.Provider;
 
 import javax.xml.bind.annotation.*;
@@ -12,9 +13,10 @@ import java.util.List;
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "organization", "favourites", "isServiceProvider"})
 @XmlAccessorType(XmlAccessType.FIELD)
 
-public class User {
+public class User implements Identifiable {
+
     @XmlElement(required = true)
-    private int id;
+    private String id;
 
     @XmlElement(required = true)
     private Provider organization;
@@ -30,13 +32,14 @@ public class User {
     @XmlElement(name = "favourite")
     private List<Service> favourites;
 
-    public int getId() {
     @XmlElement(required = true)
     private boolean isServiceProvider;
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
