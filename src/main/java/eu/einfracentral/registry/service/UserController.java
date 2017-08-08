@@ -18,4 +18,9 @@ public class UserController extends GenericRestController<User> {
         super(service);
         this.userService = service;
     }
+    @CrossOrigin
+    @RequestMapping(path = "activate/{token}", method = RequestMethod.GET)
+    public void activate(@PathVariable String token) {
+        this.userService.activate(token);
+    }
 }
