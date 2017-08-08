@@ -26,12 +26,19 @@
     </properties>
 
     <dependencies>
+        <!--einfra-->
+        <dependency>
+            <groupId>eu.einfracentral</groupId>
+            <artifactId>eic-registry-model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <!--core-->
         <dependency>
             <groupId>eu.openminted</groupId>
             <artifactId>registry-core-api</artifactId>
             <version>${registry.core.version}</version>
         </dependency>
-        <!-- JAXB2 -->
+        <!--JAXB2-->
         <dependency>
             <groupId>org.jvnet.jaxb2_commons</groupId>
             <artifactId>runtime</artifactId>
@@ -42,6 +49,7 @@
             <artifactId>jaxb2-basics-runtime</artifactId>
             <version>${jaxb2_commons.version}</version>
         </dependency>
+        <!--junit-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -54,15 +62,11 @@
             <version>2.2</version>
             <scope>test</scope>
         </dependency>
+        <!--spring-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.einfracentral</groupId>
-            <artifactId>eic-registry-model</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
