@@ -26,7 +26,7 @@
     </properties>
 
     <dependencies>
-        <!-- JAXB2 -->
+        <!--JAXB2-->
         <dependency>
             <groupId>org.jvnet.jaxb2_commons</groupId>
             <artifactId>runtime</artifactId>
@@ -37,6 +37,7 @@
             <artifactId>jaxb2-basics-runtime</artifactId>
             <version>${jaxb2_commons.version}</version>
         </dependency>
+        <!--junit-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
