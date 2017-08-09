@@ -39,8 +39,8 @@
     },
     {
       "multivalued": false,
-      "name": "symbol",
-      "path": "//*[local-name()='symbol']/text()",
+      "name": "logo",
+      "path": "//*[local-name()='logo']/text()",
       "type": "java.lang.String"
     },
     {
