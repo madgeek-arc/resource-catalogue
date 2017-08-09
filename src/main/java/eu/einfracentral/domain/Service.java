@@ -12,18 +12,19 @@ import java.util.List;
         "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "logo",
         "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "technologyReadinessLevel", "category",
         "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
-        "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse"})
+        "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse",
+        "averageRating", "ratings", "isPublic"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
 
-    @XmlTransient
+    @XmlElement
     private float averageRating;
 
-    @XmlTransient
+    @XmlElement
     private float ratings;
 
-    @XmlTransient
+    @XmlElement
     private boolean isPublic = false;
 
     //Basic
