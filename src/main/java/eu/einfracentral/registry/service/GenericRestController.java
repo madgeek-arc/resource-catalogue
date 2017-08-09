@@ -1,9 +1,9 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ParserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,19 +36,19 @@ public class GenericRestController<T> {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> addJson(@RequestBody T resource) {
-        service.add(resource);
+        service.add(resource, ParserService.ParserServiceTypes.JSON);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> addXml(@RequestBody T resource) {
-        service.add(resource);
+        service.add(resource, ParserService.ParserServiceTypes.XML);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> update(@RequestBody T resource) {
-        service.update(resource);
+        service.update(resource, ParserService.ParserServiceTypes.JSON);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
