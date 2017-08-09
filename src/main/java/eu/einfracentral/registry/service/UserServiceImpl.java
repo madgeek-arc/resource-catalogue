@@ -15,7 +15,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public String getResourceType() {
-        return "eInfraUser";
+        return "einfrauser";
     }
 
     @Override
