@@ -33,7 +33,7 @@ public class UserController extends GenericRestController<User> {
     @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> register(@RequestBody User user) {
         user.setId("token");
-        this.userService.add(user);
+        this.service.add(user, ParserService.ParserServiceTypes.JSON);
 
 //        SimpleMailMessage email = new SimpleMailMessage();
 //        email.setTo(user.getEmail());
