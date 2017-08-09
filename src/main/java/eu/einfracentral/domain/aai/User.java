@@ -11,42 +11,51 @@ import java.util.List;
  */
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "username", "email", "password",
-        "join_date", "affiliation", "isServiceProvider", "roles", "favourites"})
+        "join_date", "affiliation", "isServiceProvider", "roles", "favourites", "confirmPassword", "providerAdministrator", "provider"})
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class User implements Identifiable {
-    @XmlElement(required = true)
+    @XmlElement
+    private String confirmPassword;
+
+    @XmlElement
+    private boolean providerAdministrator;
+
+    @XmlElement
+    private String provider;
+
+    @XmlElement(required = false)
     private String id;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String name;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String surname;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String username;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String email;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String password;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String join_date;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String affiliation;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private boolean isServiceProvider;
 
     @XmlElementWrapper
     @XmlElement(name = "role")
     private List<Role> roles;
 
-    @XmlElementWrapper(required = true)
+    @XmlElementWrapper(name = "favourites", required = false)
     @XmlElement(name = "favourite")
     private List<Service> favourites;
 
@@ -138,6 +147,30 @@ public class User implements Identifiable {
 
     public void setFavourites(List<Service> favourites) {
         this.favourites = favourites;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
+    public boolean isProviderAdministrator() {
+        return providerAdministrator;
+    }
+
+    public void setProviderAdministrator(boolean providerAdministrator) {
+        this.providerAdministrator = providerAdministrator;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 }
 
