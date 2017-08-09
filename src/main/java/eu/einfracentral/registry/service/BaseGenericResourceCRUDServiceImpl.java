@@ -53,6 +53,13 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
 
     @Override
     public void update(T newResource) {
+        throw new Error("Unusable");
+//        ParserService.ParserServiceTypes[] types = ParserService.ParserServiceTypes.values();
+//        update(newResource, types[(int)(Math.random()*types.length)]);
+    }
+
+    @Override
+    public void update(T newResource, ParserService.ParserServiceTypes type) {
         Resource resourceFound;
         Resource resource = new Resource();
         try {
@@ -73,7 +80,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
                     throw new ServiceException("Serialization failed");
                 }
                 resource = (Resource) resourceFound;
-                resource.setPayloadFormat("xml");
+                resource.setPayloadFormat(type.name().toLowerCase());
                 resource.setPayload(serialized);
                 resourceService.updateResource(resource);
             } catch (ExecutionException | InterruptedException e) {
