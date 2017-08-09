@@ -10,6 +10,7 @@ import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.log4j.Logger;
 
+import javax.swing.text.html.parser.Parser;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -96,6 +97,13 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
 
     @Override
     public void add(T resourceToAdd) {
+        throw new Error("Unusable");
+//        ParserService.ParserServiceTypes[] types = ParserService.ParserServiceTypes.values();
+//        add(resourceToAdd, types[(int)(Math.random()*types.length)]);
+    }
+
+    @Override
+    public void add(T resourceToAdd, ParserService.ParserServiceTypes type) {
         try {
             Resource found = searchService.searchId(getResourceType(), new SearchService.KeyValue(getFieldIDName(), resourceToAdd.getId()));
             if (found != null) {
@@ -121,7 +129,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         }
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());
-        created.setPayloadFormat("xml");
+        created.setPayloadFormat(type.name().toLowerCase());
         created.setResourceType(getResourceType());
         created.setVersion("not_set");
         created.setId("wont be saved");
