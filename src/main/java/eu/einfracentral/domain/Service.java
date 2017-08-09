@@ -9,7 +9,7 @@ import java.util.List;
  * Created by pgl on 29/6/2017.
  */
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "brandName", "tagline", "fullName", "description",
-        "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "symbol",
+        "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "logo",
         "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "technologyReadinessLevel", "category",
         "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
         "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse"})
@@ -103,7 +103,7 @@ public class Service implements Identifiable {
      * Link to a visual representation for the service
      */
     @XmlElement(required = false)
-    private URL symbol;
+    private URL logo;
 
     /**
      * Link to a page containing multimedia regarding the service
@@ -338,12 +338,12 @@ public class Service implements Identifiable {
         this.webpage = webpage;
     }
 
-    public URL getSymbol() {
-        return symbol;
+    public URL getLogo() {
+        return logo;
     }
 
-    public void setSymbol(URL symbol) {
-        this.symbol = symbol;
+    public void setLogo(URL logo) {
+        this.logo = logo;
     }
 
     public URL getMultimediaURL() {
