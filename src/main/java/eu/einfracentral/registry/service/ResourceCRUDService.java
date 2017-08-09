@@ -1,5 +1,7 @@
 package eu.einfracentral.registry.service;
 
+import eu.openminted.registry.core.service.ParserService;
+
 import java.util.List;
 import java.util.Map;
 
@@ -11,4 +13,8 @@ public interface ResourceCRUDService<T> extends eu.openminted.registry.core.serv
     Map<String, List<T>> getBy(String field);
 
     List<T> getSome(String... ids);
+
+    void add(T resourceToAdd, ParserService.ParserServiceTypes type);
+
+    void update(T resourceToAdd, ParserService.ParserServiceTypes type);
 }
