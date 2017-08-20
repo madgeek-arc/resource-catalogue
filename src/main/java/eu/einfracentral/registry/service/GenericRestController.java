@@ -40,6 +40,7 @@ public class GenericRestController<T> {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> addXml(@RequestBody T resource) {
         service.add(resource, ParserService.ParserServiceTypes.XML);
