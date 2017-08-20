@@ -34,29 +34,17 @@ public class UserController extends GenericRestController<User> {
         this.userService.activate(token);
     }
 
-    @CrossOrigin
-    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> register(@RequestBody User user) {
-        user.setId("token");
-        this.service.add(user, ParserService.ParserServiceTypes.JSON);
-
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setTo(user.getEmail());
-        email.setSubject("[eInfraCentral] Activate your account");
-        email.setText("Please visit http://einfracentral.eu/eic-registry/user/activate/" + user.getId());
-        email.setFrom("test.espas@gmail.com");
-        email.setReplyTo("test.espas@gmail.com");
-        JavaMailSenderImpl sender = new JavaMailSenderImpl();
-        sender.setHost("smtp.gmail.com");
-        sender.setPort(465);
-        sender.setUsername("test.espas@gmail.com");
-        sender.setPassword("s.a.g.a.p.w");
-        Properties jmp = new Properties();
-        jmp.setProperty("mail.transport.protocol", "ssl");
-        jmp.setProperty("mail.smtp.auth", "true");
-        jmp.setProperty("mail.smtp.starttls.enable", "true");
-        sender.setJavaMailProperties(jmp);
-        sender.send(email);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+//    @CrossOrigin
+//    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    public ResponseEntity<String> registerJSON(@RequestBody User user) {
+//        this.userService.register(user);
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
+//
+//    @CrossOrigin
+//    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
+//    public ResponseEntity<String> registerXML(@RequestBody String body) {
+//        this.userService.register(body);
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
 }
