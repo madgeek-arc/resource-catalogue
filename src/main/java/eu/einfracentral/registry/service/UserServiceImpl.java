@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Date;
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  * Created by pgl on 07/08/17.
@@ -57,13 +58,11 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 //        sender.send(email);
 //    }
 //
-//    @Override
-//    public void register(User user) {
-//        user.setId("token");
-//        add(user, ParserService.ParserServiceTypes.JSON);
-//
-//
-//    }
+    @Override
+    public void register(User user) {
+        user.setId(UUID.randomUUID().toString());
+        add(user, ParserService.ParserServiceTypes.JSON);
+    }
 //
 //    @Override
 //    public void register(String userAsXML) {
