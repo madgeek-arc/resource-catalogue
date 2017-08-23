@@ -13,7 +13,7 @@ public interface UserService extends ResourceCRUDService<User> {
 
     void activate(String id);
 
-//    void register(User user);
+    void register(User user);
 //
 //    void register(String body);
 }
