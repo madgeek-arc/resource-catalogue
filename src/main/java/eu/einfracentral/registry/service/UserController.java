@@ -34,12 +34,12 @@ public class UserController extends GenericRestController<User> {
         this.userService.activate(token);
     }
 
-//    @CrossOrigin
-//    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//    public ResponseEntity<String> registerJSON(@RequestBody User user) {
-//        this.userService.register(user);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
+    @CrossOrigin
+    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> registerJSON(@RequestBody User user) {
+        this.userService.register(user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 //
 //    @CrossOrigin
 //    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
