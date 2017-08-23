@@ -8,6 +8,7 @@ import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 
 import javax.swing.text.html.parser.Parser;
@@ -104,6 +105,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
 
     @Override
     public void add(T resourceToAdd, ParserService.ParserServiceTypes type) {
+//        BeanUtils.getProperty(resourceToAdd,"getId")
         try {
             Resource found = searchService.searchId(getResourceType(), new SearchService.KeyValue(getFieldIDName(), resourceToAdd.getId()));
             if (found != null) {
