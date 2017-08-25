@@ -36,22 +36,10 @@ public class UserController extends GenericRestController<User> {
     }
 
     @CrossOrigin
-    @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)//TODO: maybe not JSON, maybe set cookie?
     public ResponseEntity<String> login(@RequestBody User user) {
-//        Claims claims = Jwts.claims().setSubject(user.getUsername());
-//        claims.put("id", user.getId() + "");
-//
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .signWith(SignatureAlgorithm.HS512, secret)
-//                .compact();
-//        Authentication auth = new UsernamePasswordAuthenticationToken();
-//        if (SecurityContextHolder.getContext() != null) {
-////            auth = SecurityContextHolder.getContext().getAuthentication();
-//            System.out.println(auth.isAuthenticated());
-////        }
-        if (true) throw new Error("Login requires satanic intervention!");
-        return new ResponseEntity<>(HttpStatus.OK);
+        String token = this.userService.login(user);
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
 //    @CrossOrigin
