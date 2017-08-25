@@ -1,8 +1,12 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
@@ -26,8 +30,26 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     @Override
-    public User login(User creds) {
-        throw new Error("User login not yet implemented!");
+    public String login(User credentials) {
+        String ret = "";
+        if (credentials.getUsername() == null) throw new Error("Invalid username.");
+        if (credentials.getPassword() == null) throw new Error("Invalid password.");
+        //User user =  this.getUserByUsername();
+        //User user = get("pgl_user_id");
+        User user = new User();
+        user.setUsername("pgl");
+        user.setPassword("my actual password irl");
+        //TODO: null check in case user not exist
+        if (credentials.getPassword().equals(user.getPassword())) {
+            ret = Jwts.builder().setSubject(user.getUsername()).claim("roles", "user").setIssuedAt(new Date()).signWith(SignatureAlgorithm.HS256, "secretkey").compact();
+        }
+        System.out.println(ret);
+        return ret;
+//        Authentication auth = new UsernamePasswordAuthenticationToken();
+//        if (SecurityContextHolder.getContext() != null) {
+////            auth = SecurityContextHolder.getContext().getAuthentication();
+//            System.out.println(auth.isAuthenticated());
+////        }
     }
 
     @Override
@@ -36,6 +58,11 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         if (ret.getJoin_date() != null) {
             ret.setJoin_date(new Date().toString());
         }
+    }
+
+    @Override
+    public Browsing getAll(FacetFilter facetFilter) {
+        throw new Error("Security");
     }
 
 //    public void sendMail(User user) {
