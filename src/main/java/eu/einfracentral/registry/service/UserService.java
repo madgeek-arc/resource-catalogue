@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("userService")
 public interface UserService extends ResourceCRUDService<User> {
-    String login(User credentials);
-	//TODO: maybe instead of String token, return a proper object describing auth?
+
     void activate(String id);
 
     void register(User user);
