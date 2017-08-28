@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by pgl on 07/08/17.
@@ -36,10 +37,26 @@ public class UserController extends GenericRestController<User> {
     }
 
     @CrossOrigin
-    @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)//TODO: maybe not JSON, maybe set cookie?
-    public ResponseEntity<String> login(@RequestBody User user) {
-        String token = this.userService.login(user);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+    @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
+        if (credentials.getUsername() == null || credentials.getPassword() == null)
+            return new ResponseEntity<>(credentials, HttpStatus.UNPROCESSABLE_ENTITY);
+        User ret = null;
+        //User user =  this.getUserByUsername();
+        //User user = get("pgl_user_id");
+        ret = new User();
+        ret.setUsername("pgl");
+        ret.setPassword("my actual password irl");
+        if (ret == null) return new ResponseEntity<>(credentials, HttpStatus.NOT_FOUND);
+        if (!credentials.getPassword().equals(ret.getPassword()))
+            return new ResponseEntity<>(credentials, HttpStatus.FORBIDDEN);
+        String token = this.userService.getToken(ret);
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        res.addCookie(cookie);
+        ret.setPassword("");
+        return new ResponseEntity<User>(ret, HttpStatus.OK);
     }
 
 //    @CrossOrigin
