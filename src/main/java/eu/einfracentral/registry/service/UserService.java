@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
-import eu.openminted.registry.core.service.ParserService;
 import org.springframework.stereotype.Service;
 
 /**
