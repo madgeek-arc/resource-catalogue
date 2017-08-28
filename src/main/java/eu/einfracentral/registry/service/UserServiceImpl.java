@@ -29,28 +29,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return "einfrauser";
     }
 
-    @Override
-    public String login(User credentials) {
-        String ret = "";
-        if (credentials.getUsername() == null) throw new Error("Invalid username.");
-        if (credentials.getPassword() == null) throw new Error("Invalid password.");
-        //User user =  this.getUserByUsername();
-        //User user = get("pgl_user_id");
-        User user = new User();
-        user.setUsername("pgl");
-        user.setPassword("my actual password irl");
-        //TODO: null check in case user not exist
-        if (credentials.getPassword().equals(user.getPassword())) {
-            ret = Jwts.builder().setSubject(user.getUsername()).claim("roles", "user").setIssuedAt(new Date()).signWith(SignatureAlgorithm.HS256, "secretkey").compact();
-        }
-        System.out.println(ret);
-        return ret;
-//        Authentication auth = new UsernamePasswordAuthenticationToken();
-//        if (SecurityContextHolder.getContext() != null) {
-////            auth = SecurityContextHolder.getContext().getAuthentication();
-//            System.out.println(auth.isAuthenticated());
-////        }
-    }
 
     @Override
     public void activate(String token) {
