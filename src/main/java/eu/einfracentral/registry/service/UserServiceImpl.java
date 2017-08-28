@@ -68,6 +68,19 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         user.setId(UUID.randomUUID().toString());
         add(user, ParserService.ParserServiceTypes.JSON);
     }
+
+    @Override
+    public String getToken(User user) {
+        Date now = new Date();
+        String ret = Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("roles", "user")
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + 86400000 ))
+                .signWith(SignatureAlgorithm.HS256, "secretkey")
+                .compact();
+        return ret;
+    }
 //
 //    @Override
 //    public void register(String userAsXML) {
