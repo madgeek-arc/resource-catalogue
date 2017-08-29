@@ -31,6 +31,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         super(User.class);
     }
 
+
     @Override
     public String getResourceType() {
         return "einfrauser";
@@ -46,31 +47,31 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return ret;
     }
 
-    @Override
-    public Browsing getAll(FacetFilter facetFilter) {
-        throw new Error("Security");
+    public void sendMail(User user) {
+        SimpleMailMessage email = new SimpleMailMessage();
+        email.setTo(user.getEmail());
+        email.setSubject("[eInfraCentral] Activate your account");
+        email.setText("Please visit http://einfracentral.eu/eic-registry/user/activate/" + user.getId());
+        email.setFrom("test.espas@gmail.com");
+        email.setReplyTo("test.espas@gmail.com");
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+        sender.setHost("smtp.gmail.com");
+        sender.setPort(465);
+        sender.setUsername("test.espas@gmail.com");
+        sender.setPassword("s.a.g.a.p.w");
+        Properties jmp = new Properties();
+        jmp.setProperty("mail.transport.protocol", "smtp");
+        jmp.setProperty("mail.smtp.auth", "true");
+        jmp.setProperty("mail.smtp.starttls.enable", "true");
+        sender.setJavaMailProperties(jmp);
+        sender.send(email);
     }
 
-//    public void sendMail(User user) {
-//        SimpleMailMessage email = new SimpleMailMessage();
-//        email.setTo(user.getEmail());
-//        email.setSubject("[eInfraCentral] Activate your account");
-//        email.setText("Please visit http://einfracentral.eu/eic-registry/user/activate/" + user.getId());
-//        email.setFrom("test.espas@gmail.com");
-//        email.setReplyTo("test.espas@gmail.com");
-//        JavaMailSenderImpl sender = new JavaMailSenderImpl();
-//        sender.setHost("smtp.gmail.com");
-//        sender.setPort(465);
-//        sender.setUsername("test.espas@gmail.com");
-//        sender.setPassword("s.a.g.a.p.w");
-//        Properties jmp = new Properties();
-//        jmp.setProperty("mail.transport.protocol", "ssl");
-//        jmp.setProperty("mail.smtp.auth", "true");
-//        jmp.setProperty("mail.smtp.starttls.enable", "true");
-//        sender.setJavaMailProperties(jmp);
-//        sender.send(email);
+//    @Override
+//    public Browsing getAll(FacetFilter facetFilter) {
+//        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
 //    }
-//
+
     @Override
     public User register(User user) {
         user.setId(UUID.randomUUID().toString());
@@ -79,11 +80,14 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return get(user.getId());
     }
 
+
     @Override
     public boolean authenticate(User credentials) {
         User actual = getUserByEmail(credentials.getEmail());
         return actual.getPassword().equals(credentials.getPassword());
     }
+
+
     @Override
     public User getUserByEmail(String email) {
         try {
@@ -95,6 +99,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             throw new ServiceException(e);
         }
     }
+
+
     @Override
     public String getToken(User credentials) {
         Date now = new Date();
@@ -120,3 +126,4 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
         return ret;
     }
+}
