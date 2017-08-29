@@ -78,6 +78,11 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     @Override
+    public boolean authenticate(User credentials) {
+        User actual = getUserByEmail(credentials.getEmail());
+        return actual.getPassword().equals(credentials.getPassword());
+    }
+    @Override
     public User getUserByEmail(String email) {
         try {
             Resource foundResource = searchService.searchId(getResourceType(), new SearchService.KeyValue("email", email));
