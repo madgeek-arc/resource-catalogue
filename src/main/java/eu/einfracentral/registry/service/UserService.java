@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service("userService")
 public interface UserService extends ResourceCRUDService<User> {
 
-    void activate(String id);
+    User activate(String id);
 
     void register(User user);
 
