@@ -68,14 +68,19 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     @Override
-    public String getToken(User user) {
+    public String getToken(User credentials) {
         Date now = new Date();
-        String ret = Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("roles", "user")
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + 86400000 ))
-                .signWith(SignatureAlgorithm.HS256, "secretkey")
-                .compact();
+        if (authenticate(credentials)) {
+            return Jwts.builder().
+                    setSubject(credentials.getEmail())
+                    .claim("roles", "user")
+                    .setIssuedAt(now)
+                    .setExpiration(new Date(now.getTime() + 86400000))
+                    .signWith(SignatureAlgorithm.HS256, "secretkey")
+                    .compact();
+        } else {
+            throw new ServiceException("Passwords do not match.");
+        }
+    }
         return ret;
     }
