@@ -13,6 +13,7 @@ import java.util.List;
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "username", "email", "password",
         "join_date", "affiliation", "isServiceProvider", "roles", "favourites", "confirmPassword", "providerAdministrator", "provider"})
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(namespace = "http://einfracentral.eu")
 
 public class User implements Identifiable {
     @XmlElement
