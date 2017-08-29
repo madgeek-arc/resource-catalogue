@@ -72,9 +72,11 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 //    }
 //
     @Override
-    public void register(User user) {
+    public User register(User user) {
         user.setId(UUID.randomUUID().toString());
         add(user, ParserService.ParserServiceTypes.JSON);
+        sendMail(user);
+        return get(user.getId());
     }
 
     @Override
