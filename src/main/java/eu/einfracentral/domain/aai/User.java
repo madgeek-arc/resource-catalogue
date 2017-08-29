@@ -10,7 +10,7 @@ import java.util.List;
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "username", "email", "password",
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "email", "password",
         "join_date", "affiliation", "isServiceProvider", "roles", "favourites", "confirmPassword", "providerAdministrator", "provider"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -33,9 +33,6 @@ public class User implements Identifiable {
 
     @XmlElement(required = false)
     private String surname;
-
-    @XmlElement(required = false)
-    private String username;
 
     @XmlElement(required = false)
     private String email;
@@ -84,14 +81,6 @@ public class User implements Identifiable {
 
     public void setSurname(String surname) {
         this.surname = surname;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getEmail() {
