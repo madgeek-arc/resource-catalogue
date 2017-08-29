@@ -78,6 +78,17 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     @Override
+    public User getUserByEmail(String email) {
+        try {
+            Resource foundResource = searchService.searchId(getResourceType(), new SearchService.KeyValue("email", email));
+            User foundUser = parserPool.serialize(foundResource, typeParameterClass).get();
+            return get(foundUser.getId());
+        } catch (UnknownHostException | InterruptedException | ExecutionException e) {
+            logger.fatal(e);
+            throw new ServiceException(e);
+        }
+    }
+    @Override
     public String getToken(User credentials) {
         Date now = new Date();
         if (authenticate(credentials)) {
