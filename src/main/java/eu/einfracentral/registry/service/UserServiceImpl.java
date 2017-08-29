@@ -92,5 +92,13 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             throw new ServiceException("Passwords do not match.");
         }
     }
+
+    @Override
+    public User get(String id) {
+        User ret = super.get(id);
+        if (ret != null) {
+            ret.setPassword("");
+            ret.setConfirmPassword("");
+        }
         return ret;
     }
