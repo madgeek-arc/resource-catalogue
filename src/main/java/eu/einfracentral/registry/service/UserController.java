@@ -25,8 +25,8 @@ public class UserController extends GenericRestController<User> {
 
     @CrossOrigin
     @RequestMapping(path = "activate/{token}", method = RequestMethod.GET)
-    public void activate(@PathVariable String token) {
-        this.userService.activate(token);
+    public ResponseEntity<User> activate(@PathVariable String token) {
+        return new ResponseEntity<>(this.userService.activate(token), HttpStatus.OK);
     }
 
     @CrossOrigin
