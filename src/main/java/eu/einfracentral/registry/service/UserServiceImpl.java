@@ -1,16 +1,25 @@
 package eu.einfracentral.registry.service;
 
+import eu.einfracentral.domain.Facet;
+import eu.einfracentral.domain.Order;
 import eu.einfracentral.domain.aai.User;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.ServiceException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by pgl on 07/08/17.
@@ -29,11 +38,12 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
 
     @Override
-    public void activate(String token) {
-        User ret = get(token);
+    public User activate(String id) {
+        User ret = get(id);
         if (ret.getJoin_date() != null) {
             ret.setJoin_date(new Date().toString());
         }
+        return ret;
     }
 
     @Override
