@@ -59,10 +59,5 @@ public class UserController extends GenericRestController<User> {
         return new ResponseEntity<User>(ret, HttpStatus.OK);
     }
 
-//    @CrossOrigin
-//    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
-//    public ResponseEntity<String> registerXML(@RequestBody String body) {
-//        this.userService.register(body);
-//        return new ResponseEntity<>(HttpStatus.OK);
 //    }
 }
