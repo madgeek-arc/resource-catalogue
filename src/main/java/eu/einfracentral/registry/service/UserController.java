@@ -39,24 +39,27 @@ public class UserController extends GenericRestController<User> {
     @CrossOrigin
     @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
-        if (credentials.getUsername() == null || credentials.getPassword() == null)
+        if (credentials.getEmail() == null || credentials.getPassword() == null)
             return new ResponseEntity<>(credentials, HttpStatus.UNPROCESSABLE_ENTITY);
-        User ret = null;
-        //User user =  this.getUserByUsername();
-        //User user = get("pgl_user_id");
-        ret = new User();
-        ret.setUsername("pgl");
-        ret.setPassword("my actual password irl");
-        if (ret == null) return new ResponseEntity<>(credentials, HttpStatus.NOT_FOUND);
-        if (!credentials.getPassword().equals(ret.getPassword()))
+
+        if (!this.userService.authenticate(credentials))
             return new ResponseEntity<>(credentials, HttpStatus.FORBIDDEN);
-        String token = this.userService.getToken(ret);
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        res.addCookie(cookie);
-        ret.setPassword("");
-        return new ResponseEntity<User>(ret, HttpStatus.OK);
+
+        User ret = this.userService.getUserByEmail(credentials.getEmail());
+        if (ret == null) return new ResponseEntity<>(credentials, HttpStatus.NOT_FOUND);
+
+        try {
+            String token = this.userService.getToken(credentials);
+
+            Cookie cookie = new Cookie("jwt", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false);
+            res.addCookie(cookie);
+
+            return new ResponseEntity<>(ret, HttpStatus.OK);
+        } catch (Throwable t) {
+            return new ResponseEntity<>(credentials, HttpStatus.BAD_REQUEST);
+        }
     }
 
 //    }
