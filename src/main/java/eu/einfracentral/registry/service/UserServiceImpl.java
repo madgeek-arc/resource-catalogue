@@ -79,20 +79,3 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
                 .compact();
         return ret;
     }
-//
-//    @Override
-//    public void register(String userAsXML) {
-//        Resource ret = new Resource();
-//        ret.setPayload(userAsXML);
-//        ret.setCreationDate(new Date());
-//        ret.setModificationDate(new Date());
-//        ret.setPayloadFormat("xml");
-//        ret.setResourceType(getResourceType());
-//        ret.setVersion("not_set");
-//        resourceService.addResource(ret);
-//
-//        get
-//
-//        sendMail(user);
-//    }
-}
