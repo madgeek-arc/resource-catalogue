@@ -15,5 +15,5 @@ public interface UserService extends ResourceCRUDService<User> {
 
     String getToken(User user);
 
-//  void register(String body);
+    boolean authenticate(User credentials);
 }
