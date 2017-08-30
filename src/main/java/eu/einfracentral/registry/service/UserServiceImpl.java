@@ -15,10 +15,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -40,7 +37,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User activate(String id) {
-        User ret = get(id);
+        String decoded = new String(Base64.getDecoder().decode(id));
+        User ret = get(decoded);
         if (ret.getJoin_date() != null) {
             ret.setJoin_date(new Date().toString());
         }
@@ -48,23 +46,25 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     public void sendMail(User user) {
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setTo(user.getEmail());
-        email.setSubject("[eInfraCentral] Activate your account");
-        email.setText("Please visit http://einfracentral.eu/eic-registry/user/activate/" + user.getId());
-        email.setFrom("test.espas@gmail.com");
-        email.setReplyTo("test.espas@gmail.com");
-        JavaMailSenderImpl sender = new JavaMailSenderImpl();
-        sender.setHost("smtp.gmail.com");
-        sender.setPort(465);
-        sender.setUsername("test.espas@gmail.com");
-        sender.setPassword("s.a.g.a.p.w");
-        Properties jmp = new Properties();
-        jmp.setProperty("mail.transport.protocol", "smtp");
-        jmp.setProperty("mail.smtp.auth", "true");
-        jmp.setProperty("mail.smtp.starttls.enable", "true");
-        sender.setJavaMailProperties(jmp);
-        sender.send(email);
+        String encoded = new String(Base64.getEncoder().encode(user.getId().getBytes()));
+        System.err.println("Please visit http://vereniki.athenarc.gr:8080/eic-registry/user/activate/" + encoded + "/");
+//        SimpleMailMessage email = new SimpleMailMessage();
+//        email.setTo(user.getEmail());
+//        email.setSubject("[eInfraCentral] Activate your account");
+//        email.setText("Please visit http://einfracentral.eu/eic-registry/user/activate/" +encoded+"/");
+//        email.setFrom("test.espas@gmail.com");
+//        email.setReplyTo("test.espas@gmail.com");
+//        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+//        sender.setHost("smtp.gmail.com");
+//        sender.setPort(465);
+//        sender.setUsername("test.espas@gmail.com");
+//        sender.setPassword("s.a.g.a.p.w");
+//        Properties jmp = new Properties();
+//        jmp.setProperty("mail.transport.protocol", "smtp");
+//        jmp.setProperty("mail.smtp.auth", "true");
+//        jmp.setProperty("mail.smtp.starttls.enable", "true");
+//        sender.setJavaMailProperties(jmp);
+//        sender.send(email);
     }
 
 //    @Override
