@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "email", "password",
-        "join_date", "affiliation", "isServiceProvider", "roles", "favourites", "confirmPassword", "providerAdministrator", "provider"})
+        "join_date", "affiliation", "isServiceProvider", "roles", "favourites", "providerAdministrator", "provider", "iterationCount", "salt"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 
