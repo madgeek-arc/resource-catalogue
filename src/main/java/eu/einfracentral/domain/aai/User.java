@@ -58,6 +58,9 @@ public class User implements Identifiable {
     @XmlElement(required = false)
     private int iterationCount;
 
+    @XmlElement(required = false)
+    private byte[] salt;
+
     @Override
     public String getId() {
         return id;
@@ -162,6 +165,14 @@ public class User implements Identifiable {
 
     public int getIterationCount() {
         return iterationCount;
+    }
+
+    public void setSalt(byte[] salt) {
+        this.salt = salt;
+    }
+
+    public byte[] getSalt() {
+        return salt;
     }
 }
 
