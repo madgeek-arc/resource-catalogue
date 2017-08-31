@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "user_id",
+      "name": "einfrauser_id",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
