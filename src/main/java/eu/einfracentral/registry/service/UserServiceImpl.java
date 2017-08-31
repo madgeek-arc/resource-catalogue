@@ -1,21 +1,24 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.Facet;
-import eu.einfracentral.domain.Order;
 import eu.einfracentral.domain.aai.User;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -28,12 +31,10 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         super(User.class);
     }
 
-
     @Override
     public String getResourceType() {
         return "einfrauser";
     }
-
 
     @Override
     public User activate(String id) {
@@ -111,7 +112,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
     }
 
-
     @Override
     public User getUserByEmail(String email) {
         try {
@@ -123,7 +123,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             throw new ServiceException(e);
         }
     }
-
 
     @Override
     public String getToken(User credentials) {
