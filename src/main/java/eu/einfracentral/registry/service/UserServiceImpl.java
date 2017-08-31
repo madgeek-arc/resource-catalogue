@@ -120,7 +120,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         User ret = super.get(id);
         if (ret != null) {
             ret.setPassword("");
-            ret.setConfirmPassword("");
         }
         return ret;
     }
