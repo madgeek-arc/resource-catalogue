@@ -73,16 +73,42 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Override
     public User register(User user) {
         user.setId(UUID.randomUUID().toString());
-        add(user, ParserService.ParserServiceTypes.JSON);
-        sendMail(user);
-        return get(user.getId());
+        User ret = hashPass(user);
+        add(ret, ParserService.ParserServiceTypes.JSON);
+        sendMail(ret);
+        return get(ret.getId());
     }
 
+    private User hashPass(User user) {
+        try {
+            final Random r = new SecureRandom();
+            byte[] salt = new byte[8];
+            r.nextBytes(salt);
+
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+            PBEKeySpec spec = new PBEKeySpec(user.getPassword().toCharArray(), salt, 20000, 256);
+            SecretKey key = skf.generateSecret(spec);
+
+            user.setIterationCount(spec.getIterationCount());
+            user.setSalt(salt);
+            user.setPassword(new String(Base64.getEncoder().encode(key.getEncoded())));
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+            ex.printStackTrace();
+        }
+        return user;
+    }
 
     @Override
     public boolean authenticate(User credentials) {
         User actual = getUserByEmail(credentials.getEmail());
-        return actual.getPassword().equals(credentials.getPassword());
+        try {
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+            PBEKeySpec spec = new PBEKeySpec(credentials.getPassword().toCharArray(), actual.getSalt(), actual.getIterationCount(), 256);
+            SecretKey key = skf.generateSecret(spec);
+            return new String(Base64.getEncoder().encode(key.getEncoded())).equals(actual.getPassword());
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            return false;
+        }
     }
 
 
