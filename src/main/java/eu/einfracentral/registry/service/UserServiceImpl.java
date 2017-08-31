@@ -37,8 +37,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User activate(String id) {
-        String decoded = new String(Base64.getDecoder().decode(id));
-        User ret = get(decoded);
+        User ret = get(id);
         if (ret.getJoin_date() != null) {
             ret.setJoin_date(new Date().toString());
         }
@@ -46,8 +45,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     public void sendMail(User user) {
-        String encoded = new String(Base64.getEncoder().encode(user.getId().getBytes()));
-        System.err.println("Please visit http://vereniki.athenarc.gr:8080/eic-registry/user/activate/" + encoded + "/");
+        System.err.println("Please visit http://vereniki.athenarc.gr:8080/eic-registry/user/activate/" + user.getId() + "/");
 //        SimpleMailMessage email = new SimpleMailMessage();
 //        email.setTo(user.getEmail());
 //        email.setSubject("[eInfraCentral] Activate your account");
