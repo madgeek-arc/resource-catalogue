@@ -16,8 +16,6 @@ import java.util.List;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 
 public class User implements Identifiable {
-    @XmlElement
-    private String confirmPassword;
 
     @XmlElement
     private boolean providerAdministrator;
@@ -137,14 +135,6 @@ public class User implements Identifiable {
 
     public void setFavourites(List<Service> favourites) {
         this.favourites = favourites;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
     }
 
     public boolean isProviderAdministrator() {
