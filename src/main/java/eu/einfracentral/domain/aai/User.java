@@ -55,6 +55,9 @@ public class User implements Identifiable {
     @XmlElement(name = "favourite")
     private List<Service> favourites;
 
+    @XmlElement(required = false)
+    private int iterationCount;
+
     @Override
     public String getId() {
         return id;
@@ -151,6 +154,14 @@ public class User implements Identifiable {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public void setIterationCount(int iterationCount) {
+        this.iterationCount = iterationCount;
+    }
+
+    public int getIterationCount() {
+        return iterationCount;
     }
 }
 
