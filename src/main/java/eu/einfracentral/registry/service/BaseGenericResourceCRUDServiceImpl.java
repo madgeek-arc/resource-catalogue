@@ -171,20 +171,20 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     @Override
     public Map<String, List<T>> getBy(String field) {
         Map<String, List<T>> ret = new HashMap<>();
-//        FacetFilter ff = new FacetFilter();
-//        ff.setResourceType(getResourceType());
-//        Map<String, List<Resource>> results = searchService.searchByCategory(ff, field);
-//        results.forEach((category, resources) -> {
-//            List<T> payloads = new ArrayList<>();
-//            for (Resource r : resources) {
-//                try {
-//                    payloads.add(parserPool.serialize(r, typeParameterClass).get());
-//                } catch (Exception e) {
-//                    throw new ServiceException(e);
-//                }
-//            }
-//            ret.put(category, payloads);
-//        });
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceType());
+        Map<String, List<Resource>> results = searchService.searchByCategory(ff, field);
+        results.forEach((category, resources) -> {
+            List<T> payloads = new ArrayList<>();
+            for (Resource r : resources) {
+                try {
+                    payloads.add(parserPool.serialize(r, typeParameterClass).get());
+                } catch (Exception e) {
+                    throw new ServiceException(e);
+                }
+            }
+            ret.put(category, payloads);
+        });
         return ret;
     }
 }
