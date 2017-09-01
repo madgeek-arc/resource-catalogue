@@ -10,8 +10,9 @@ import java.util.List;
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "email", "password",
-        "join_date", "affiliation", "isServiceProvider", "roles", "favourites", "providerAdministrator", "provider", "iterationCount", "salt"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "email", "password", "joinDate",
+        "affiliation", "isServiceProvider", "roles", "favourites", "providerAdministrator", "provider", "iterationCount",
+        "salt"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 
@@ -39,7 +40,7 @@ public class User implements Identifiable {
     private String password;
 
     @XmlElement(required = false)
-    private String join_date;
+    private String joinDate;
 
     @XmlElement(required = false)
     private String affiliation;
@@ -103,12 +104,12 @@ public class User implements Identifiable {
         this.password = password;
     }
 
-    public String getJoin_date() {
-        return join_date;
+    public String getJoinDate() {
+        return joinDate;
     }
 
-    public void setJoin_date(String join_date) {
-        this.join_date = join_date;
+    public void setJoinDate(String joinDate) {
+        this.joinDate = joinDate;
     }
 
     public String getAffiliation() {
