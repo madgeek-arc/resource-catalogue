@@ -39,8 +39,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Override
     public User activate(String id) {
         User ret = get(id);
-        if (ret.getJoin_date() != null) {
-            ret.setJoin_date(new Date().toString());
+        if (ret.getJoinDate() != null) {
+            ret.setJoinDate(new Date().toString());
         }
         return ret;
     }
