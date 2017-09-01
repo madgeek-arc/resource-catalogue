@@ -42,6 +42,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         if (ret.getJoinDate() != null) {
             ret.setJoinDate(new Date().toString());
         }
+        update(ret);
         return ret;
     }
 
