@@ -8,10 +8,8 @@ import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 
-import javax.swing.text.html.parser.Parser;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -55,9 +53,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
 
     @Override
     public void update(T newResource) {
-        throw new Error("Unusable");
-//        ParserService.ParserServiceTypes[] types = ParserService.ParserServiceTypes.values();
-//        update(newResource, types[(int)(Math.random()*types.length)]);
+        update(newResource, ParserService.ParserServiceTypes.XML);
     }
 
     @Override
@@ -98,9 +94,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
 
     @Override
     public void add(T resourceToAdd) {
-        throw new Error("Unusable");
-//        ParserService.ParserServiceTypes[] types = ParserService.ParserServiceTypes.values();
-//        add(resourceToAdd, types[(int)(Math.random()*types.length)]);
+        add(resourceToAdd, ParserService.ParserServiceTypes.XML);
     }
 
     @Override
