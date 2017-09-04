@@ -150,4 +150,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
         return ret;
     }
+    private User reveal(User user) {
+        return super.get(user.getId());
+    }
 }
