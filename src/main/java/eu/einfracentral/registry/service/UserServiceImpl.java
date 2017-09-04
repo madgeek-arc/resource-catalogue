@@ -103,23 +103,25 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return ret; //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
 
-    private User hashPass(User user) {
-        try {
-            final Random r = new SecureRandom();
-            byte[] salt = new byte[8];
-            r.nextBytes(salt);
-
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            PBEKeySpec spec = new PBEKeySpec(user.getPassword().toCharArray(), salt, 20000, 256);
-            SecretKey key = skf.generateSecret(spec);
-
-            user.setIterationCount(spec.getIterationCount());
-            user.setSalt(salt);
-            user.setPassword(new String(Base64.getEncoder().encode(key.getEncoded())));
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
-            ex.printStackTrace();
-        }
+    private User hashUser(User user) {
+        final Random r = new SecureRandom();
+        byte[] salt = new byte[8];
+        r.nextBytes(salt);
+        user.setSalt(salt);
+        user.setIterationCount(20000);
+        user.setPassword(new String(hashPass(user.getPassword().toCharArray(), user.getSalt(), user.getIterationCount())));
         return user;
+    }
+
+    private char[] hashPass(char[] pass, byte[] salt, int iterations) {
+        try {
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+            PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, 256);
+            SecretKey key = skf.generateSecret(spec);
+            return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+            throw new Error(ex);
+        }
     }
 
     @Override
