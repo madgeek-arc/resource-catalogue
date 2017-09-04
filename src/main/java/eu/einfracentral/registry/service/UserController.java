@@ -33,8 +33,9 @@ public class UserController extends GenericRestController<User> {
 
     @CrossOrigin
     @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> registerJSON(@RequestBody User user) {
+    public ResponseEntity<User> register(@RequestBody User user) {
         User ret = this.userService.register(user);
+
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
