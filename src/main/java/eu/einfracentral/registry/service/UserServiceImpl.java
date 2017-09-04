@@ -43,9 +43,13 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User activate(String id) {
-        User ret = get(id);
-        if (ret.getJoinDate() != null) {
+        User ret = reveal(get(id));
+        if (ret.getJoinDate() == null) {
             ret.setJoinDate(new Date().toString());
+            //update(ret); //TODO: Ask Stephanus about rollback error
+        }
+        return ret;
+    }
     private Properties getConfig() {
         String[] propNames = new String[]{"mail.smtp.auth", "mail.smtp.host", "mail.smtp.password", "mail.smtp.port", "mail.smtp.socketFactory.class", "mail.smtp.socketFactory.port", "mail.smtp.starttls.enable", "mail.smtp.user"};
         Properties ret = new Properties();
