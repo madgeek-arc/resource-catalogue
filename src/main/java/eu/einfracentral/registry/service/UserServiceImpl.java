@@ -13,14 +13,14 @@ import org.springframework.core.env.Environment;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -31,6 +31,9 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     private Environment env;
 
+    private Properties jmp;
+
+    private Session session;
 
     public UserServiceImpl() {
         super(User.class);
@@ -57,30 +60,28 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             String val = env.getProperty(prop);
             ret.setProperty(prop, val);
         }
-        update(ret);
         return ret;
     }
 
     public void sendMail(User user) {
-        System.err.println("Please visit http://vereniki.athenarc.gr:8080/eic-registry/user/activate/" + user.getId() + "/");
-//        SimpleMailMessage email = new SimpleMailMessage();
-//        email.setTo(user.getEmail());
-//        email.setSubject("[eInfraCentral] Activate your account");
-//        email.setText("Please visit http://einfracentral.eu/eic-registry/user/activate/" +encoded+"/");
-//        email.setFrom("test.espas@gmail.com");
-//        email.setReplyTo("test.espas@gmail.com");
-//        JavaMailSenderImpl sender = new JavaMailSenderImpl();
-//        sender.setHost("smtp.gmail.com");
-//        sender.setPort(465);
-//        sender.setUsername("test.espas@gmail.com");
-//        sender.setPassword("s.a.g.a.p.w");
-//        Properties jmp = new Properties();
-//        jmp.setProperty("mail.transport.protocol", "smtp");
-//        jmp.setProperty("mail.smtp.auth", "true");
-//        jmp.setProperty("mail.smtp.starttls.enable", "true");
-//        sender.setJavaMailProperties(jmp);
-//        sender.send(email);
         this.jmp = getConfig();
+        this.session = Session.getDefaultInstance(jmp, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(jmp.getProperty("mail.smtp.user"), jmp.getProperty("mail.smtp.password"));
+            }
+        });
+        try {
+            Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(jmp.getProperty("mail.smtp.user")));
+            msg.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+            msg.setSubject(jmp.getProperty("mail.subject"));
+            msg.setText(jmp.getProperty("mail.text") + user.getId());
+            Transport transport = session.getTransport("smtp");
+            transport.connect(jmp.getProperty("mail.smtp.host"), jmp.getProperty("mail.smtp.port"));
+            transport.send(msg);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
 
 //    @Override
