@@ -126,15 +126,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public boolean authenticate(User credentials) {
-        User actual = getUserByEmail(credentials.getEmail());
-        try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            PBEKeySpec spec = new PBEKeySpec(credentials.getPassword().toCharArray(), actual.getSalt(), actual.getIterationCount(), 256);
-            SecretKey key = skf.generateSecret(spec);
-            return new String(Base64.getEncoder().encode(key.getEncoded())).equals(actual.getPassword());
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            return false;
-        }
+        User actual = reveal(getUserByEmail(credentials.getEmail()));
+        return hashPass(credentials.getPassword().toCharArray(), actual.getSalt(), actual.getIterationCount()).equals(actual.getPassword().toCharArray());
     }
 
     @Override
