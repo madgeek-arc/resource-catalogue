@@ -18,6 +18,12 @@
       "name": "isServiceProvider",
       "path": "//*[local-name()='isServiceProvider']/text()",
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "email",
+      "path": "//*[local-name()='email']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
