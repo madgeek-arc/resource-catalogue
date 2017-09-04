@@ -7,6 +7,8 @@ import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -25,7 +27,10 @@ import java.util.concurrent.ExecutionException;
  * Created by pgl on 07/08/17.
  */
 @org.springframework.stereotype.Service("userService")
-public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService {
+public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService, EnvironmentAware {
+
+    private Environment env;
+
 
     public UserServiceImpl() {
         super(User.class);
@@ -41,6 +46,12 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         User ret = get(id);
         if (ret.getJoinDate() != null) {
             ret.setJoinDate(new Date().toString());
+    private Properties getConfig() {
+        String[] propNames = new String[]{"mail.smtp.auth", "mail.smtp.host", "mail.smtp.password", "mail.smtp.port", "mail.smtp.socketFactory.class", "mail.smtp.socketFactory.port", "mail.smtp.starttls.enable", "mail.smtp.user"};
+        Properties ret = new Properties();
+        for (String prop : propNames) {
+            String val = env.getProperty(prop);
+            ret.setProperty(prop, val);
         }
         update(ret);
         return ret;
@@ -65,6 +76,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 //        jmp.setProperty("mail.smtp.starttls.enable", "true");
 //        sender.setJavaMailProperties(jmp);
 //        sender.send(email);
+        this.jmp = getConfig();
     }
 
 //    @Override
@@ -152,5 +164,10 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
     private User reveal(User user) {
         return super.get(user.getId());
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.env = environment;
     }
 }
