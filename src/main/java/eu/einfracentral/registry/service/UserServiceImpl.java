@@ -91,11 +91,15 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User register(User user) {
-        user.setId(UUID.randomUUID().toString());
-        User ret = hashPass(user);
-        add(ret, ParserService.ParserServiceTypes.JSON);
-        sendMail(ret);
-        ret.setPassword("");
+        User ret = null;
+        if (getUserByEmail(user.getEmail()) == null) {
+            user.setId(UUID.randomUUID().toString());
+            sendMail(user);
+            ret = hashUser(user);
+            add(ret, ParserService.ParserServiceTypes.JSON);
+            ret.setPassword("");
+            sendMail(ret);
+        }
         return ret; //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
 
