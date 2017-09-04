@@ -53,6 +53,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
         return ret;
     }
+
     private Properties getConfig() {
         String[] propNames = new String[]{"mail.smtp.auth", "mail.smtp.host", "mail.smtp.password", "mail.smtp.port", "mail.smtp.socketFactory.class", "mail.smtp.socketFactory.port", "mail.smtp.starttls.enable", "mail.smtp.user"};
         Properties ret = new Properties();
@@ -132,14 +133,21 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User getUserByEmail(String email) {
+        Resource foundResource = null;
+        User foundUser = null;
+        User ret = null;
         try {
-            Resource foundResource = searchService.searchId(getResourceType(), new SearchService.KeyValue("email", email));
-            User foundUser = parserPool.serialize(foundResource, typeParameterClass).get();
-            return get(foundUser.getId());
+            foundResource = searchService.searchId(getResourceType(), new SearchService.KeyValue("email", email));
+            if (foundResource != null) {
+                foundUser = parserPool.serialize(foundResource, typeParameterClass).get();
+                if (foundUser != null) {
+                    ret = get(foundUser.getId());
+                }
+            }
         } catch (UnknownHostException | InterruptedException | ExecutionException e) {
-            logger.fatal(e);
-            throw new ServiceException(e);
+            ret = null;
         }
+        return ret;
     }
 
     @Override
@@ -166,6 +174,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
         return ret;
     }
+
     private User reveal(User user) {
         return super.get(user.getId());
     }
