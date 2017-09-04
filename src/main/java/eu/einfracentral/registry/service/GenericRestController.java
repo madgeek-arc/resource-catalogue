@@ -59,6 +59,11 @@ public class GenericRestController<T> {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Browsing> delAll() {
+        return new ResponseEntity<Browsing>(service.delAll(), HttpStatus.OK);
+    }
+
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams) {
         FacetFilter filter = new FacetFilter();
