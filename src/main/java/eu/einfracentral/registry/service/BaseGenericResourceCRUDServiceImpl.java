@@ -3,6 +3,7 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.Identifiable;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Order;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
@@ -46,6 +47,14 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         return getResults(facetFilter);
     }
 
+    @Override
+    public Browsing delAll() {
+        Browsing<T> ret = getAll(new FacetFilter());
+        for (Order<T> t: ret.getResults()) {
+            delete(t.getResource());
+        }
+        return ret;
+    }
     @Override
     public Browsing getMy(FacetFilter facetFilter) {
         return null;
