@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.service;
 
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.service.ParserService;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface ResourceCRUDService<T> extends eu.openminted.registry.core.serv
     void add(T resourceToAdd, ParserService.ParserServiceTypes type);
 
     void update(T resourceToAdd, ParserService.ParserServiceTypes type);
+
+    Browsing delAll();
 }
