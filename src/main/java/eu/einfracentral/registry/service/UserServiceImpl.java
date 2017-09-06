@@ -105,10 +105,10 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
     }
 
-//    @Override
-//    public Browsing getAll(FacetFilter facetFilter) {
-//        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
-//    }
+    @Override
+    public Browsing getAll(FacetFilter facetFilter) {
+        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
+    }
 
     @Override
     public User register(User user) {
