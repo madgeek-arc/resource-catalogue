@@ -58,7 +58,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         User ret = reveal(get(id));
         if (ret.getJoinDate() == null) {
             ret.setJoinDate(new Date().toString());
-            //update(ret); //TODO: Ask Stephanus about rollback error
+            update(ret);
+			//Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
         }
         return ret;
     }
