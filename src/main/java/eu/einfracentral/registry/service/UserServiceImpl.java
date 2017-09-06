@@ -1,13 +1,16 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 import javax.crypto.SecretKey;
@@ -27,9 +30,15 @@ import java.util.concurrent.ExecutionException;
  * Created by pgl on 07/08/17.
  */
 @org.springframework.stereotype.Service("userService")
-public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService, EnvironmentAware {
+public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService/*, EnvironmentAware */{
 
-    private Environment env;
+//    @PropertySource("classpath:application.properties")
+
+
+//    private Environment env;
+
+//    @Autowired
+//    private MailConfig mailConfig;
 
     private Properties jmp;
 
@@ -54,18 +63,18 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return ret;
     }
 
-    private Properties getConfig() {
-        String[] propNames = new String[]{"mail.smtp.auth", "mail.smtp.host", "mail.smtp.password", "mail.smtp.port", "mail.smtp.socketFactory.class", "mail.smtp.socketFactory.port", "mail.smtp.starttls.enable", "mail.smtp.user"};
-        Properties ret = new Properties();
-        for (String prop : propNames) {
-            String val = env.getProperty(prop);
-            ret.setProperty(prop, val);
-        }
-        return ret;
-    }
+//    private Properties getConfig() {
+//        String[] propNames = new String[]{"mail.smtp.auth", "mail.smtp.host", "mail.smtp.password", "mail.smtp.port", "mail.smtp.socketFactory.class", "mail.smtp.socketFactory.port", "mail.smtp.starttls.enable", "mail.smtp.user"};
+//        Properties ret = new Properties();
+//        for (String prop : propNames) {
+//            String val = env.getProperty(prop);
+//            ret.setProperty(prop, val);
+//        }
+//        return ret;
+//    }
 
     public void sendMail(User user) {
-        this.jmp = getConfig();
+//        this.jmp = getConfig();
         this.session = Session.getDefaultInstance(jmp, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(jmp.getProperty("mail.smtp.user"), jmp.getProperty("mail.smtp.password"));
@@ -179,8 +188,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return super.get(user.getId());
     }
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.env = environment;
-    }
+//    @Override
+//    public void setEnvironment(Environment environment) {
+//        this.env = environment;
+//    }
 }
