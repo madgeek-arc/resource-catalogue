@@ -116,7 +116,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         User ret = null;
         if (getUserByEmail(user.getEmail()) == null) {
             user.setId(UUID.randomUUID().toString());
-            sendMail(user);
             ret = hashUser(user);
             add(ret, ParserService.ParserServiceTypes.JSON);
             ret.setPassword("");
