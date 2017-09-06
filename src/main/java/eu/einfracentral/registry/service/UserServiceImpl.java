@@ -75,6 +75,17 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     public void sendMail(User user) {
 //        this.jmp = getConfig();
+        jmp = new Properties();
+        jmp.put("mail.smtp.host", "smtp.gmail.com");
+        jmp.put("mail.smtp.password", "s.a.g.a.p.w");
+        jmp.put("mail.smtp.port", "465");
+        jmp.put("mail.smtp.auth", "true");
+        jmp.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        jmp.put("mail.smtp.socketFactory.port", "465");
+        jmp.put("mail.smtp.starttls.enable", "true");
+        jmp.put("mail.smtp.user", "test.espas@gmail.com");
+        jmp.put("mail.subject", "[eInfraCentral] Activate your account");
+        jmp.put("mail.text", "Please visit http://localhost:8080/eic-registry/user/activate/");
         this.session = Session.getDefaultInstance(jmp, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(jmp.getProperty("mail.smtp.user"), jmp.getProperty("mail.smtp.password"));
