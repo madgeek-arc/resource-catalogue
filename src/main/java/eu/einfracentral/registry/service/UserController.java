@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  * Created by pgl on 07/08/17.
  */
 @RestController
-@RequestMapping(path= "user", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping("user")
 public class UserController extends GenericRestController<User> {
     final private UserService userService;
 
@@ -25,31 +25,31 @@ public class UserController extends GenericRestController<User> {
     }
 
     @CrossOrigin
-    @RequestMapping(path = "activate/{token}", method = RequestMethod.GET)
+    @RequestMapping(path = "activate/{token}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> activate(@PathVariable String token) {
         return new ResponseEntity<>(this.userService.activate(token), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "reset")
+    @RequestMapping(path = "reset", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> reset(@RequestBody User user) {
         return new ResponseEntity<>(this.userService.reset(user), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "forgot")
+    @RequestMapping(path = "forgot", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> forgot(@PathVariable String email) {
         return new ResponseEntity<>(this.userService.forgot(email), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(value = "register")
+    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> register(@RequestBody User user) {
         return new ResponseEntity<>(this.userService.register(user), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(value = "login")
+    @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
         if (credentials.getEmail() == null || credentials.getPassword() == null)
             return new ResponseEntity<>(credentials, HttpStatus.UNPROCESSABLE_ENTITY);
