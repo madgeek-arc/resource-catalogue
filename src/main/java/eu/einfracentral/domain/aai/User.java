@@ -12,7 +12,7 @@ import java.util.List;
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "email", "password", "joinDate",
         "affiliation", "isServiceProvider", "roles", "favourites", "providerAdministrator", "provider", "iterationCount",
-        "salt"})
+        "salt", "resetToken"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 
@@ -62,6 +62,9 @@ public class User implements Identifiable {
     @XmlElement(required = false)
     private byte[] salt;
 
+    @XmlElement(required = false)
+    private String resetToken;
+
     @Override
     public String getId() {
         return id;
@@ -70,6 +73,22 @@ public class User implements Identifiable {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public boolean isProviderAdministrator() {
+        return providerAdministrator;
+    }
+
+    public void setProviderAdministrator(boolean providerAdministrator) {
+        this.providerAdministrator = providerAdministrator;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
     public String getName() {
@@ -144,36 +163,28 @@ public class User implements Identifiable {
         this.favourites = favourites;
     }
 
-    public boolean isProviderAdministrator() {
-        return providerAdministrator;
-    }
-
-    public void setProviderAdministrator(boolean providerAdministrator) {
-        this.providerAdministrator = providerAdministrator;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public int getIterationCount() {
+        return iterationCount;
     }
 
     public void setIterationCount(int iterationCount) {
         this.iterationCount = iterationCount;
     }
 
-    public int getIterationCount() {
-        return iterationCount;
+    public byte[] getSalt() {
+        return salt;
     }
 
     public void setSalt(byte[] salt) {
         this.salt = salt;
     }
 
-    public byte[] getSalt() {
-        return salt;
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
     }
 }
 
