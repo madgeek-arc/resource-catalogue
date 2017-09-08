@@ -13,20 +13,20 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class Provider implements Identifiable {
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String id;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String name;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String contactInformation;
 
-    @XmlElementWrapper(required = true)
+    @XmlElementWrapper(required = false)
     @XmlElement(name = "user")
     private List<User> users;
 
-    @XmlElementWrapper(required = true)
+    @XmlElementWrapper(required = false)
     @XmlElement(name = "service")
     private List<User> services;
 
