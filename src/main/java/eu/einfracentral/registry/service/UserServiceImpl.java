@@ -8,17 +8,11 @@ import eu.openminted.registry.core.service.ServiceException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -30,19 +24,13 @@ import java.util.concurrent.ExecutionException;
  * Created by pgl on 07/08/17.
  */
 @org.springframework.stereotype.Service("userService")
-public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService/*, EnvironmentAware */{
+public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService/*, EnvironmentAware */ {
 
-//    @PropertySource("classpath:application.properties")
+    @Autowired
+    private Environment env;
 
-
-//    private Environment env;
-
-//    @Autowired
-//    private MailConfig mailConfig;
-
-    private Properties jmp;
-
-    private Session session;
+    @Autowired
+    private MailService mailService;
 
     public UserServiceImpl() {
         super(User.class);
@@ -59,51 +47,32 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         if (ret.getJoinDate() == null) {
             ret.setJoinDate(new Date().toString());
             update(ret);
-			//Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
+            //Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
         }
         return ret;
     }
 
-//    private Properties getConfig() {
-//        String[] propNames = new String[]{"mail.smtp.auth", "mail.smtp.host", "mail.smtp.password", "mail.smtp.port", "mail.smtp.socketFactory.class", "mail.smtp.socketFactory.port", "mail.smtp.starttls.enable", "mail.smtp.user"};
-//        Properties ret = new Properties();
-//        for (String prop : propNames) {
-//            String val = env.getProperty(prop);
-//            ret.setProperty(prop, val);
-//        }
-//        return ret;
-//    }
-
-    public void sendMail(User user) {
-//        this.jmp = getConfig();
-        jmp = new Properties();
-        jmp.put("mail.smtp.host", "smtp.gmail.com");
-        jmp.put("mail.smtp.password", "s.a.g.a.p.w");
-        jmp.put("mail.smtp.port", "465");
-        jmp.put("mail.smtp.auth", "true");
-        jmp.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        jmp.put("mail.smtp.socketFactory.port", "465");
-        jmp.put("mail.smtp.starttls.enable", "true");
-        jmp.put("mail.smtp.user", "test.espas@gmail.com");
-        jmp.put("mail.subject", "[eInfraCentral] Activate your account");
-        jmp.put("mail.text", "Please visit http://localhost:8080/eic-registry/user/activate/");
-        this.session = Session.getDefaultInstance(jmp, new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(jmp.getProperty("mail.smtp.user"), jmp.getProperty("mail.smtp.password"));
-            }
-        });
-        try {
-            Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(jmp.getProperty("mail.smtp.user")));
-            msg.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-            msg.setSubject(jmp.getProperty("mail.subject"));
-            msg.setText(jmp.getProperty("mail.text") + user.getId());
-            Transport transport = session.getTransport("smtp");
-            transport.connect(jmp.getProperty("mail.smtp.host"), jmp.getProperty("mail.smtp.port"));
-            transport.send(msg);
-        } catch (MessagingException e) {
-            e.printStackTrace();
+    @Override
+    public User reset(User user) {
+        User ret = null;
+        if (user.getResetToken() == reveal(get(user.getId())).getResetToken()) {
+            ret = hashUser(user);
+            update(ret);
         }
+        return ret;
+    }
+
+    @Override
+    public User forgot(String email) {
+        User ret = getUserByEmail(email);
+        if (ret != null) {
+            ret.setResetToken("Generate THIS!");
+            update(ret);
+            mailService.sendMail(ret.getEmail(), mailService.jmp.getProperty("smtp.activate.subject"),
+                    mailService.jmp.getProperty("smtp.activate.text") + ret.getId() + "/" + ret.getResetToken());
+
+        }
+        return ret;
     }
 
     @Override
@@ -119,7 +88,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             ret = hashUser(user);
             add(ret, ParserService.ParserServiceTypes.JSON);
             ret.setPassword("");
-            sendMail(ret);
+            mailService.sendMail(user.getEmail(), mailService.jmp.getProperty("smtp.activate.subject"),
+                    mailService.jmp.getProperty("smtp.activate.text") + user.getId());
         }
         return ret; //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
@@ -172,6 +142,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public String getToken(User credentials) {
+        String secret = env.getProperty("jwt.secret");
         Date now = new Date();
         if (authenticate(credentials)) {
             return Jwts.builder().
@@ -179,7 +150,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
                     .claim("roles", "user")
                     .setIssuedAt(now)
                     .setExpiration(new Date(now.getTime() + 86400000))
-                    .signWith(SignatureAlgorithm.HS256, "secretkey")
+                    .signWith(SignatureAlgorithm.HS256, secret)
                     .compact();
         } else {
             throw new ServiceException("Passwords do not match.");
@@ -191,6 +162,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         User ret = super.get(id);
         if (ret != null) {
             ret.setPassword("");
+            ret.setResetToken("");
         }
         return ret;
     }
