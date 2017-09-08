@@ -11,7 +11,7 @@ import java.util.List;
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "contactInformation", "users", "services"})
 @XmlAccessorType(XmlAccessType.FIELD)
-
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {
     @XmlElement(required = false)
     private String id;
