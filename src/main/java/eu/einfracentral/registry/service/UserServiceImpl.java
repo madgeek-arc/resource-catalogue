@@ -75,10 +75,10 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return strip(ret);
     }
 
-    @Override
-    public Browsing getAll(FacetFilter facetFilter) {
-        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
-    }
+//    @Override
+//    public Browsing getAll(FacetFilter facetFilter) {
+//        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
+//    }
 
     @Override
     public User register(User user) {
@@ -98,7 +98,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         byte[] salt = new byte[8];
         r.nextBytes(salt);
         user.setSalt(salt);
-        user.setIterationCount(20000);
+        user.setIterationCount(1000);
         user.setPassword(new String(hashPass(user.getPassword().toCharArray(), user.getSalt(), user.getIterationCount())));
         return user;
     }
