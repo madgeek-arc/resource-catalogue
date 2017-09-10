@@ -24,7 +24,7 @@ public class GenericRestController<T> {
     }
 
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> get(@PathVariable("id") String id) {
+    public ResponseEntity<T> get(@PathVariable("id") String id, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         String id_decoded = id; //new String(Base64.getDecoder().decode(id));
         T resource = service.get(id_decoded);
         if (resource == null) {
@@ -35,37 +35,37 @@ public class GenericRestController<T> {
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> addJson(@RequestBody T resource) {
+    public ResponseEntity<String> addJson(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.add(resource, ParserService.ParserServiceTypes.JSON);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<String> addXml(@RequestBody T resource) {
+    public ResponseEntity<String> addXml(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.add(resource, ParserService.ParserServiceTypes.XML);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> update(@RequestBody T resource) {
+    public ResponseEntity<T> update(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.update(resource, ParserService.ParserServiceTypes.JSON);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> delete(@RequestBody T resource) {
+    public ResponseEntity<String> delete(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.delete(resource);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Browsing> delAll() {
+    public ResponseEntity<Browsing> delAll(@CookieValue(value = "jwt", defaultValue = "") String jwt) {
         return new ResponseEntity<Browsing>(service.delAll(), HttpStatus.OK);
     }
 
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams) {
+    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams,@CookieValue(value = "jwt", defaultValue = "") String jwt) {
         FacetFilter filter = new FacetFilter();
         filter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         filter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -84,7 +84,7 @@ public class GenericRestController<T> {
     }
 
     @RequestMapping(path = "some/{ids}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids) {
+    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         List<T> ret = service.getSome(ids);
         if (ret == null) {
             throw new ResourceNotFoundException();
@@ -94,7 +94,7 @@ public class GenericRestController<T> {
     }
 
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field) {
+    public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
 
