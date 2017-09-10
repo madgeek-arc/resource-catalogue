@@ -88,8 +88,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             ret = hashUser(user);
             add(ret, ParserService.ParserServiceTypes.JSON);
             ret.setPassword("");
-            mailService.sendMail(user.getEmail(), mailService.jmp.getProperty("smtp.activate.subject"),
-                    mailService.jmp.getProperty("smtp.activate.text") + user.getId());
+            mailService.sendMail(user.getEmail(), mailService.jmp.getProperty("mail.activate.subject"),
+                    mailService.jmp.getProperty("mail.activate.text") + user.getId());
         }
         return ret; //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
