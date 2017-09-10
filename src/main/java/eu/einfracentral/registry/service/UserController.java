@@ -1,14 +1,18 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
+import eu.openminted.registry.core.domain.Browsing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * Created by pgl on 07/08/17.
@@ -45,7 +49,11 @@ public class UserController extends GenericRestController<User> {
     @CrossOrigin
     @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> register(@RequestBody User user) {
-        return new ResponseEntity<>(this.userService.register(user), HttpStatus.OK);
+        User ret = this.userService.register(user);
+        if (ret == null) {
+            return new ResponseEntity<>(new User(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -74,10 +82,10 @@ public class UserController extends GenericRestController<User> {
         }
     }
 
-//    @RequestMapping(path = "list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 //    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams, HttpServletRequest request) {
 //        if (request.getRemoteAddr().equals("194.177.192.118")) {
-//            ResponseEntity<Browsing> ret = super.getAll(allRequestParams); //TODO: Only allow verified admin user access to this
+//            ResponseEntity<Browsing> ret = super.getAll(allRequestParams, WebUtils.getCookie(request, "jwt").getValue()); //TODO: Only allow verified admin user access to this
 //            return ret;
 //        } else {
 //            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
