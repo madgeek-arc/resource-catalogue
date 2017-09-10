@@ -43,23 +43,23 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User activate(String id) {
-        User ret = reveal(get(id));
+        User ret = unsafeGet(id);
         if (ret.getJoinDate() == null) {
             ret.setJoinDate(new Date().toString());
             update(ret);
             //Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
         }
-        return ret;
+        return strip(ret);
     }
 
     @Override
     public User reset(User user) {
         User ret = null;
-        if (user.getResetToken() == reveal(get(user.getId())).getResetToken()) {
+        if (user.getResetToken() == unsafeGet(user.getId()).getResetToken()) {
             ret = hashUser(user);
             update(ret);
         }
-        return ret;
+        return strip(ret);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
                     mailService.jmp.getProperty("smtp.activate.text") + ret.getId() + "/" + ret.getResetToken());
 
         }
-        return ret;
+        return strip(ret);
     }
 
     @Override
@@ -87,11 +87,10 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             user.setId(UUID.randomUUID().toString());
             ret = hashUser(user);
             add(ret, ParserService.ParserServiceTypes.JSON);
-            ret.setPassword("");
             mailService.sendMail(user.getEmail(), mailService.jmp.getProperty("mail.activate.subject"),
                     mailService.jmp.getProperty("mail.activate.text") + user.getId());
         }
-        return ret; //Not using get(ret.getId()) here, because this line runs before the db is updated
+        return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
 
     private User hashUser(User user) {
@@ -117,7 +116,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public boolean authenticate(User credentials) {
-        User actual = reveal(getUserByEmail(credentials.getEmail()));
+        User actual = unsafeGet(getUserByEmail(credentials.getEmail()).getId());
         return hashPass(credentials.getPassword().toCharArray(), actual.getSalt(), actual.getIterationCount()).equals(actual.getPassword().toCharArray());
     }
 
@@ -131,7 +130,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             if (foundResource != null) {
                 foundUser = parserPool.serialize(foundResource, typeParameterClass).get();
                 if (foundUser != null) {
-                    ret = get(foundUser.getId());
+                    ret = strip(foundUser);
                 }
             }
         } catch (UnknownHostException | InterruptedException | ExecutionException e) {
@@ -159,16 +158,20 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User get(String id) {
-        User ret = super.get(id);
-        if (ret != null) {
-            ret.setPassword("");
-            ret.setResetToken("");
-        }
-        return ret;
+        return strip(unsafeGet(id));
     }
 
-    private User reveal(User user) {
-        return super.get(user.getId());
+    private User strip(User user) {
+        user.setPassword("");
+        user.setResetToken("");
+        user.setSalt(new byte[0]);
+        user.setIterationCount(0);
+        user.setId("");
+        return user;
+    }
+
+    private User unsafeGet(String id) {
+        return super.get(id);
     }
 
 //    @Override
