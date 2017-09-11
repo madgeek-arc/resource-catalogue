@@ -9,14 +9,23 @@ import java.util.List;
  * Created by pgl on 29/6/2017.
  */
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "brandName", "tagline", "fullName", "description",
-        "options", "targetUsers", "userValue", "userBase", "provider", "fundingSources", "webpage", "logo",
+        "options", "targetUsers", "userValue", "userBase", "provider", "providerDetails", "fundingSources", "webpage", "logo",
         "multimediaURL", "version", "revisionDate", "versionHistory", "phase", "technologyReadinessLevel", "category",
         "subcategory", "countries", "regions", "languages", "tags", "relatedServices", "request", "helpdesk",
         "documentation", "trainingInformation", "feedback", "pricingModel", "serviceLevelAgreement", "termsOfUse",
-        "averageRating", "ratings", "isPublic"})
+        "averageRating", "ratings", "isPublic", "externalHits", "internalHits", "favouriteCount"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
+
+    @XmlElement
+    private int externalHits;
+
+    @XmlElement
+    private int internalHits;
+
+    @XmlElement
+    private int favouriteCount;
 
     @XmlElement
     private float averageRating;
@@ -87,6 +96,12 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = false)
     private String provider; //may become list
+
+    /**
+     * Detailed provider data
+     */
+    @XmlElement
+    private String providerDetails;
 
     /**
      * Sources of funding for the development and operation of the service.
@@ -249,6 +264,62 @@ public class Service implements Identifiable {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getProviderDetails() {
+        return providerDetails;
+    }
+
+    public void setProviderDetails(String providerDetails) {
+        this.providerDetails = providerDetails;
+    }
+
+    public int getExternalHits() {
+        return externalHits;
+    }
+
+    public void setExternalHits(int externalHits) {
+        this.externalHits = externalHits;
+    }
+
+    public int getInternalHits() {
+        return internalHits;
+    }
+
+    public void setInternalHits(int internalHits) {
+        this.internalHits = internalHits;
+    }
+
+    public int getFavouriteCount() {
+        return favouriteCount;
+    }
+
+    public void setFavouriteCount(int favouriteCount) {
+        this.favouriteCount = favouriteCount;
+    }
+
+    public float getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(float averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public float getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(float ratings) {
+        this.ratings = ratings;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean aPublic) {
+        isPublic = aPublic;
     }
 
     public String getBrandName() {
@@ -513,29 +584,5 @@ public class Service implements Identifiable {
 
     public void setTermsOfUse(List<URL> termsOfUse) {
         this.termsOfUse = termsOfUse;
-    }
-
-    public float getAverageRating() {
-        return averageRating;
-    }
-
-    public void setAverageRating(float averageRating) {
-        this.averageRating = averageRating;
-    }
-
-    public float getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(float ratings) {
-        this.ratings = ratings;
-    }
-
-    public boolean getIsPublic() {
-        return isPublic;
-    }
-
-    public void setIsPublic(boolean isPublic) {
-        this.isPublic = isPublic;
     }
 }
