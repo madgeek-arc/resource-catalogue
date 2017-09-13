@@ -116,7 +116,7 @@ public class Service implements Identifiable {
     private URL webpage;
 
     /**
-     * Link to a visual representation for the service
+     * Link to a visual representation for the service. If none exists, providers are urged to use the organization's logo
      */
     @XmlElement(required = false)
     private URL logo;
