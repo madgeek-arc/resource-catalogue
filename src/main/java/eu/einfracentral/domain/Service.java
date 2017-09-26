@@ -20,19 +20,19 @@ public class Service implements Identifiable {
     /**
      * Global unique and persistent identifier of a specific service. Work in progress.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String id; //maybe list
 
     /**
      * Link to a webpage providing information about the service. This webpage is usually hosted and maintained by the service provider. It contains fresh and additional information, such as what APIs are supported or links to the userManual.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private URL url;
 
     /**
      * Brief brand/marketing name of service as assigned by the service provider. Should be descriptive from a customer point of view, and should be quite simple, such that someone non-technical is able to understand what the service is about.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String name;
 
     /**
@@ -50,7 +50,7 @@ public class Service implements Identifiable {
     /**
      * High-level description of what the service does in terms of functionality it provides and the resources it enables access to. Should be similar to the name described above, and should cover the value provided by the service, in fairly non-technical terms. These descriptions may seem obvious but help everyone within the organization understand the service, and also will be needed for the Service Catalogue, which will be shown to users and customers. It may provide also information related to the offered capacity, number of installations, underlying data that is offered.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String description;
 
     /**
@@ -93,7 +93,7 @@ public class Service implements Identifiable {
     /**
      * Organisation that manages and delivers the service and with whom the customer signs the SLA.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String provider; //maybe list
 
     /**
@@ -129,45 +129,45 @@ public class Service implements Identifiable {
     /**
      * Is used to tag the service to the full service cycle: e.g., discovery, planned, alpha (prototype available for closed set of users), beta (service being developed while available for testing publicly), production, retired (not anymore offered).
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String lifeCycleStatus; //alpha, beta, production
 
     /**
      * Is used to tag the service to the Technology Readiness Level.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String trl; //7, 8 , 9
 
     /**
      * A named group of services that offer access to the same type of resource. These are external ones that are of interest to a customer.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String category; //maybe list
 
     /**
      * Type of service within a category
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private String subcategory; //maybe list
 
     /**
      * List of places within which the service is available
      */
-    @XmlElementWrapper(required = true)
+    @XmlElementWrapper(required = false)
     @XmlElement(name = "place")
     private List<String> places;
 
     /**
      * List of languages in which the service is available
      */
-    @XmlElementWrapper(required = true)
+    @XmlElementWrapper(required = false)
     @XmlElement(name = "language")
     private List<String> languages;
 
     /**
      * Field to facilitate searching based on keywords
      */
-    @XmlElementWrapper(required = true)
+    @XmlElementWrapper(required = false)
     @XmlElement(name = "tag")
     private List<String> tags;
 
@@ -189,7 +189,7 @@ public class Service implements Identifiable {
     /**
      * Link to request the service from the service provider
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private URL request;
 
     /**
@@ -220,13 +220,13 @@ public class Service implements Identifiable {
     /**
      * Supported payment models that apply. List of sentences each of them stating the type of payment model and the restriction that applies to it.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private URL price;
 
     /**
      * Document containing information about the levels of performance that a service provider is expected to achieve. Current service agreements (SLAs) available for the service or basis for a new SLA. These should be agreements with users (not providers).
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     private URL serviceLevelAgreement;
 
     /**
