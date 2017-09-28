@@ -107,12 +107,6 @@
       "path": "//*[local-name()='place']/text()",
       "type": "java.lang.String"
     },
-//    {
-//      "multivalued": true,
-//      "name": "region",
-//      "path": "//*[local-name()='region']/text()",
-//      "type": "java.lang.String"
-//    },
     {
       "multivalued": true,
       "name": "language",
