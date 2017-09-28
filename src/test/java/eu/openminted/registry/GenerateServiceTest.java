@@ -41,7 +41,7 @@ public class GenerateServiceTest {
                 "    <name>Name</name>\n" +
                 "    <description>A service that does things</description>\n" +
                 "    <provider>Jo Mama</provider>\n" +
-                "    <lifeCyYcleStatus>Production</lifeCyYcleStatus>\n" +
+                "    <lifeCycleStatus>Production</lifeCycleStatus>\n" +
                 "    <trl>9</trl>\n" +
                 "    <category>Cat</category>\n" +
                 "    <subcategory>Subcat</subcategory>\n" +

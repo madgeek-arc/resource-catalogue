@@ -83,9 +83,9 @@
     },
     {
       "multivalued": false,
-      "name": "lifeCyYcleStatus",
+      "name": "lifeCycleStatus",
       "label": "Phase",
-      "path": "//*[local-name()='lifeCyYcleStatus']/text()",
+      "path": "//*[local-name()='lifeCycleStatus']/text()",
       "type": "java.lang.String"
     },
     {
