@@ -1,18 +1,14 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
-import eu.openminted.registry.core.domain.Browsing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 /**
  * Created by pgl on 07/08/17.

@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
