@@ -8,6 +8,5 @@
 )
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchema;
