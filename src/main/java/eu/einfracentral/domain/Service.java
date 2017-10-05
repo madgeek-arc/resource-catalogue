@@ -10,7 +10,7 @@ import java.util.List;
  */
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "url", "name", "tagline", "fullName",
         "description", "options", "targetUsers", "userValue", "userBase", "symbol", "multimediaURL", "provider", "providerDescription", "version", "lastUpdate", "changeLog", "validFor", "lifeCycleStatus", "trl", "category",
-        "subcategory", "places", "languages", "tags", "requiredServices","relatedServices", "request", "helpdesk",
+        "subcategory", "places", "languages", "tags", "requiredServices", "relatedServices", "request", "helpdesk",
         "userManual", "trainingInformation", "feedback", "price", "serviceLevelAgreement", "termsOfUse", "funding",
         "externalHits", "internalHits", "favouriteCount", "averageRating", "ratings", "isPublic"})
 @XmlAccessorType(XmlAccessType.FIELD)

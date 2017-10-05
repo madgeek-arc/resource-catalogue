@@ -7,15 +7,14 @@ package eu.einfracentral.domain;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class MyPOJO implements Identifiable {
+    @XmlElement(required = false)
+    private String id;
+    @XmlElement(required = false)
+    private String field;
+
     public MyPOJO() {
 
     }
-
-    @XmlElement(required = false)
-    private String id;
-
-    @XmlElement(required = false)
-    private String field;
 
     public String getField() {
         return field;
