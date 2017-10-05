@@ -5,7 +5,6 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.aai.User;
-import eu.einfracentral.domain.performance.Indicator;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.ServiceException;

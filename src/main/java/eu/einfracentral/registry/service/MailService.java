@@ -1,6 +1,5 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.aai.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 

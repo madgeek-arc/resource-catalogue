@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
-import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
@@ -17,7 +17,10 @@ import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
