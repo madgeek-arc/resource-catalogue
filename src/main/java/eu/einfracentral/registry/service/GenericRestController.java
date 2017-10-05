@@ -65,7 +65,7 @@ public class GenericRestController<T> {
     }
 
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams,@CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         FacetFilter filter = new FacetFilter();
         filter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         filter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
