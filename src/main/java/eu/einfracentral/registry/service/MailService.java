@@ -14,7 +14,7 @@ import java.util.Properties;
 
 @org.springframework.stereotype.Service("mailService")
 public class MailService {
-//    @PropertySource("classpath:application.properties")
+    //    @PropertySource("classpath:application.properties")
     public Properties jmp;
     @Autowired
     private Environment env;

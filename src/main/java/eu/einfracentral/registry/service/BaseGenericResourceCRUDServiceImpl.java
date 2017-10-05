@@ -50,11 +50,12 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     @Override
     public Browsing delAll() {
         Browsing<T> ret = getAll(new FacetFilter());
-        for (Order<T> t: ret.getResults()) {
+        for (Order<T> t : ret.getResults()) {
             delete(t.getResource());
         }
         return ret;
     }
+
     @Override
     public Browsing getMy(FacetFilter facetFilter) {
         return null;

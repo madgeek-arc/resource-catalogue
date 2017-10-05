@@ -43,7 +43,7 @@ public class GenerateProviderTest {
                 "\t<ns0:users></ns0:users>\n" +
                 "\t<ns0:services></ns0:services>\n" +
                 "</ns0:provider>";
-        
+
         JAXBContext jaxbContext = JAXBContext.newInstance(Provider.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         Provider type = (Provider) unmarshaller.unmarshal(new StringReader(xml));

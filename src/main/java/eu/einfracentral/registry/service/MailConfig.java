@@ -14,34 +14,27 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @PropertySource(value = "classpath:application.properties")
 public class MailConfig {
 
+    @Value("${mail.smtp.auth}")
+    private String auth;
+    @Value("${mail.smtp.host}")
+    private String host;
+    @Value("${mail.smtp.password}")
+    private String password;
+    @Value("${mail.smtp.port}")
+    private String port;
+    @Value("${mail.smtp.socketFactory.class}")
+    private String socketFactor_class;
+    @Value("${mail.smtp.socketFactory.port}")
+    private String socketFactory_port;
+    @Value("${mail.smtp.starttls.enable}")
+    private String starttls_enable;
+    @Value("${mail.smtp.user}")
+    private String user;
+
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
         return new PropertySourcesPlaceholderConfigurer();
     }
-
-    @Value("${mail.smtp.auth}")
-    private String auth;
-
-    @Value("${mail.smtp.host}")
-    private String host;
-
-    @Value("${mail.smtp.password}")
-    private String password;
-
-    @Value("${mail.smtp.port}")
-    private String port;
-
-    @Value("${mail.smtp.socketFactory.class}")
-    private String socketFactor_class;
-
-    @Value("${mail.smtp.socketFactory.port}")
-    private String socketFactory_port;
-
-    @Value("${mail.smtp.starttls.enable}")
-    private String starttls_enable;
-
-    @Value("${mail.smtp.user}")
-    private String user;
 
     public String getAuth() {
         return auth;
