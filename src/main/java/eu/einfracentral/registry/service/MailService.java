@@ -33,9 +33,9 @@ public class MailService {
         jmp.put("mail.smtp.starttls.enable", "true");
         jmp.put("mail.smtp.user", "test.espas@gmail.com");
         jmp.put("mail.activate.subject", "[eInfraCentral] Activate your account");
-        jmp.put("mail.activate.text", "Please visit http://beta.einfracentral.eu:8080/eic-registry/user/activate/");
+        jmp.put("mail.activate.text", "Please visit http://beta.einfracentral.eu/activate/");
         jmp.put("mail.reset.subject", "[eInfraCentral] Reset your password");
-        jmp.put("mail.reset.text", "Please visit http://beta.einfracentral.eu:8080/eic-registry/user/reset/");
+        jmp.put("mail.reset.text", "Please visit http://beta.einfracentral.eu/reset/");
 
         session = Session.getDefaultInstance(jmp, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
