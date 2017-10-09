@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import javax.xml.bind.annotation.*;
+
 /**
  * Created by pgl on 23/08/17.
  */
