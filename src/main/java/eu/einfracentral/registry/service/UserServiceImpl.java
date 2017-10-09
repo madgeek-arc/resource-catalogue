@@ -122,7 +122,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Override
     public boolean authenticate(User credentials) {
         User actual = unsafeGet(getUserByEmail(credentials.getEmail()).getId());
-        return hashPass(credentials.getPassword().toCharArray(), actual.getSalt(), actual.getIterationCount()).equals(actual.getPassword().toCharArray());
+        return Arrays.equals(hashPass(credentials.getPassword().toCharArray(), actual.getSalt(), actual.getIterationCount()), actual.getPassword().toCharArray());
     }
 
     @Override
