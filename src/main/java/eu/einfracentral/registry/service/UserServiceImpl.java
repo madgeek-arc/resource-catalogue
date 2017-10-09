@@ -51,6 +51,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             ret.setJoinDate(new Date().toString());
             update(ret);
             //Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
+        } else {
+            throw new ServiceException("User already activated");
         }
         return strip(ret);
     }
