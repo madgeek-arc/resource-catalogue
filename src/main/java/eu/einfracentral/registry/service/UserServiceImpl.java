@@ -171,7 +171,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         user.setResetToken("");
         user.setSalt(new byte[0]);
         user.setIterationCount(0);
-        user.setId("");
         return user;
     }
 
