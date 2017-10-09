@@ -143,7 +143,9 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public String getToken(User credentials) {
-        String secret = env.getProperty("jwt.secret");
+        String secret = env.getProperty("JWT_SECRET");
+        if (secret == null) throw new ServiceException("no JWT_SECRET set on server");
+
         Date now = new Date();
         if (authenticate(credentials)) {
             return Jwts.builder().
