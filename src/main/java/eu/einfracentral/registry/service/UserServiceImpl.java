@@ -124,8 +124,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User getUserByEmail(String email) {
-        Resource foundResource = null;
-        User foundUser = null;
+        Resource foundResource;
+        User foundUser;
         User ret = null;
         try {
             foundResource = searchService.searchId(getResourceType(), new SearchService.KeyValue("email", email));

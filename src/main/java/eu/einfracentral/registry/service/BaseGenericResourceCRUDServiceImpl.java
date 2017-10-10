@@ -121,7 +121,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             throw new ServiceException(e);
         }
         Resource created = new Resource();
-        String deserialized = null;
+        String deserialized;
         try {
             deserialized = parserPool.deserialize(resourceToAdd, ParserService.ParserServiceTypes.XML).get();
         } catch (InterruptedException | ExecutionException e) {
