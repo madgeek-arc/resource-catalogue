@@ -4,11 +4,11 @@ import eu.einfracentral.domain.aai.User;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.ServiceException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
