@@ -10,6 +10,7 @@ import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
 
 import java.net.UnknownHostException;
 import java.util.*;
@@ -36,7 +37,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             serialized = parserPool.serialize(found, typeParameterClass).get();
         } catch (UnknownHostException | InterruptedException | ExecutionException e) {
             logger.fatal(e);
-            throw new ServiceException(e);
+            throw new RESTException(e, HttpStatus.NOT_FOUND);
         }
         return serialized;
     }
@@ -74,18 +75,18 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             resourceFound = searchService.searchId(getResourceType(), new SearchService.KeyValue(getResourceType() + "_id", "" + newResource.getId()));
         } catch (UnknownHostException e) {
             logger.fatal(e);
-            throw new ServiceException(e);
+            throw new RESTException(e, HttpStatus.BAD_REQUEST);
         }
 
         if (resourceFound == null) {
-            throw new ServiceException(String.format("Resource doesn't exist: {type: %s, id: %s}", getResourceType(), newResource.getId()));
+            throw new RESTException("id: " + newResource.getId(), HttpStatus.NOT_FOUND);
         } else {
             try {
                 String serialized = parserPool.deserialize(newResource, ParserService.ParserServiceTypes.XML).get();
                 if (!serialized.equals("failed")) {
                     resource.setPayload(serialized);
                 } else {
-                    throw new ServiceException("Serialization failed");
+                    throw new RESTException("Serialization failed", HttpStatus.BAD_REQUEST);
                 }
                 resource = (Resource) resourceFound;
                 resource.setPayloadFormat(type.name().toLowerCase());
@@ -93,7 +94,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
                 resourceService.updateResource(resource);
             } catch (ExecutionException | InterruptedException e) {
                 logger.fatal(e);
-                throw new ServiceException(e);
+                throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -131,7 +132,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         if (!deserialized.equals("failed")) {
             created.setPayload(deserialized);
         } else {
-            throw new ServiceException("Serialization failed");
+            throw new RESTException("Serialization failed", HttpStatus.BAD_REQUEST);
         }
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());

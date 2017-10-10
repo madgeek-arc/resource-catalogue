@@ -49,7 +49,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             update(ret);
             //Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
         } else {
-            throw new ServiceException("User already activated");
+            throw new RESTException("User already activated", HttpStatus.CONFLICT);
         }
         return strip(ret);
     }
@@ -144,8 +144,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Override
     public String getToken(User credentials) {
         String secret = env.getProperty("JWT_SECRET");
-        if (secret == null) throw new ServiceException("no JWT_SECRET set on server");
-
+        if (secret == null) throw new RESTException("JWT_SECRET has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
         Date now = new Date();
         if (authenticate(credentials)) {
             return Jwts.builder().
@@ -156,7 +155,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
                     .signWith(SignatureAlgorithm.HS256, secret)
                     .compact();
         } else {
-            throw new ServiceException("Passwords do not match.");
+            throw new RESTException("Passwords do not match.", HttpStatus.FORBIDDEN);
         }
     }
 
