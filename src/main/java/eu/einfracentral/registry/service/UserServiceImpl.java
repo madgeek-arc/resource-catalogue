@@ -57,7 +57,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Override
     public User reset(User user) {
         User ret = null;
-        if (user.getResetToken() == unsafeGet(user.getId()).getResetToken()) {
+        if (user.getResetToken().equals(unsafeGet(user.getId()).getResetToken())) {
             ret = hashUser(user);
             update(ret);
         }
