@@ -162,9 +162,9 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     @Override
     public List<T> getSome(String... ids) {
         ArrayList<T> ret = new ArrayList<>();
-        for (int i = 0; i < ids.length; i++) {
+        for (String id : ids) {
             try {
-                ret.add(this.get(ids[i]));
+                ret.add(this.get(id));
             } catch (ServiceException se) {
                 ret.add(null);
             }
