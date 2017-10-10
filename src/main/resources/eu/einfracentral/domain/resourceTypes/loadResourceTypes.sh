@@ -17,7 +17,7 @@ function post_resourceType {
 }
 
 for resource in *.json; do
-	post_resourceType $resource $1
+	post_resourceType ${resource} $1
 done
 
 wait
