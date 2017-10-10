@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
-import eu.openminted.registry.core.service.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,11 +27,7 @@ public class UserController extends GenericRestController<User> {
     @CrossOrigin
     @RequestMapping(path = "activate/{token}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> activate(@PathVariable String token) {
-        try {
-            return new ResponseEntity<>(this.userService.activate(token), HttpStatus.OK);
-        } catch (ServiceException se) {
-            return new ResponseEntity<>(new User(), HttpStatus.CONFLICT);
-        }
+        return new ResponseEntity<>(this.userService.activate(token), HttpStatus.OK);
     }
 
     @CrossOrigin

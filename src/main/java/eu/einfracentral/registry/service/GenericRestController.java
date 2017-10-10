@@ -98,4 +98,9 @@ public class GenericRestController<T> {
         return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
 
+    @ExceptionHandler(RESTException.class)
+    @ResponseBody
+    public ResponseEntity<RESTException> handleRESTException(RESTException ex) {
+        return new ResponseEntity<>(ex, ex.getStatus());
+    }
 }
