@@ -61,7 +61,7 @@ public class GenericRestController<T> {
 
     @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Browsing> delAll(@CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        return new ResponseEntity<Browsing>(service.delAll(), HttpStatus.OK);
+        return new ResponseEntity<>(service.delAll(), HttpStatus.OK);
     }
 
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
