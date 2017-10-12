@@ -88,7 +88,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
                 } else {
                     throw new RESTException("Serialization failed", HttpStatus.BAD_REQUEST);
                 }
-                resource = (Resource) resourceFound;
+                resource = resourceFound;
                 resource.setPayloadFormat(type.name().toLowerCase());
                 resource.setPayload(serialized);
                 resourceService.updateResource(resource);
