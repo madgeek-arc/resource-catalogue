@@ -25,8 +25,7 @@ public class GenericRestController<T> {
 
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> get(@PathVariable("id") String id, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        String id_decoded = id; //new String(Base64.getDecoder().decode(id));
-        T resource = service.get(id_decoded);
+        T resource = service.get(id);
         if (resource == null) {
             throw new ResourceNotFoundException();
         } else {
