@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Created by pgl on 10/10/17.
  */
-class RESTException extends RuntimeException {
+public class RESTException extends RuntimeException {
     private HttpStatus status;
 
     public RESTException(HttpStatus status) {
