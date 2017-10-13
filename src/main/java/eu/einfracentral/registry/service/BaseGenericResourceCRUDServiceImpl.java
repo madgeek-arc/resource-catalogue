@@ -106,19 +106,11 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     }
 
     @Override
-    public void delete(T resourceToDelete) {
-        Resource resourceFound;
-        try {
-            resourceFound = searchService.searchId(getResourceType(), new SearchService.KeyValue(getResourceType() + "_id", "" + resourceToDelete.getId()));
-            if (resourceFound == null) {
-                throw new ServiceException(String.format("Resource doesn't exist: {type: %s, id: %s}", getResourceType(), resourceToDelete.getId()));
-            } else {
-                resourceService.deleteResource(resourceFound.getId());
-            }
-        } catch (UnknownHostException e) {
-            logger.fatal(e);
-            throw new ServiceException(e);
+    public void delete(T resource) {
+        if (!exists(resource)) {
+            throw new RESTException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
+        resourceService.deleteResource(resource.getId());
     }
 
     @Override
