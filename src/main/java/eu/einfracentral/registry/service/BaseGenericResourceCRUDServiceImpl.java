@@ -216,4 +216,12 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    private T deserialize(Resource resource) {
+        try {
+            return parserPool.serialize(resource, typeParameterClass).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.fatal(e);
+            throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 }
