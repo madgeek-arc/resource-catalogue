@@ -193,6 +193,10 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         return ret;
     }
 
+    private boolean exists(T resource) {
+        return getResource(resource.getId()) != null;
+    }
+
     public Resource getResource(String resourceID) {
         try {
             String type = getResourceType();
