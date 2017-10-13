@@ -53,8 +53,8 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     }
 
     @Override
-    public void update(T newResource) {
-        update(newResource, ParserService.ParserServiceTypes.XML);
+    public void update(T updatedResource) {
+        update(updatedResource, ParserService.ParserServiceTypes.XML);
     }
 
     @Override
