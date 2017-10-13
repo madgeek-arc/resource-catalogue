@@ -84,38 +84,24 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     }
 
     @Override
-    public void add(T resourceToAdd, ParserService.ParserServiceTypes type) {
-//        BeanUtils.getProperty(resourceToAdd,"getId")
-        try {
-            Resource found = searchService.searchId(getResourceType(), new SearchService.KeyValue(getFieldIDName(), resourceToAdd.getId()));
-            if (found != null) {
-                throw new ServiceException(String.format("Resource already exists: {type: %s, id: %s}", getResourceType(), resourceToAdd.getId()));
-            }
-        } catch (UnknownHostException e) {
-            logger.fatal(e);
-            throw new ServiceException(e);
-        }
-        Resource created = new Resource();
-        String deserialized;
-        try {
-            deserialized = parserPool.deserialize(resourceToAdd, ParserService.ParserServiceTypes.XML).get();
-        } catch (InterruptedException | ExecutionException e) {
-            logger.fatal(e);
-            throw new ServiceException(e);
+    public void add(T resource, ParserService.ParserServiceTypes mediaType) {
+        if (exists(resource)) {
+            throw new RESTException("Resource already exists!", HttpStatus.CONFLICT);
         }
 
-        if (!deserialized.equals("failed")) {
-            created.setPayload(deserialized);
-        } else {
-            throw new RESTException("Serialization failed", HttpStatus.BAD_REQUEST);
+        String serialized = serialize(resource, mediaType);
+        if (serialized.equals("failed")) {
+            throw new RESTException("Bad resource!", HttpStatus.BAD_REQUEST);
         }
+
+        Resource created = new Resource();
+        created.setPayload(serialized);
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());
-        created.setPayloadFormat(type.name().toLowerCase());
+        created.setPayloadFormat(mediaType.name().toLowerCase());
         created.setResourceType(getResourceType());
         created.setVersion("not_set");
         created.setId("wont be saved");
-
         resourceService.addResource(created);
     }
 
