@@ -192,4 +192,15 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         });
         return ret;
     }
+
+    public Resource getResource(String resourceID) {
+        try {
+            String type = getResourceType();
+            String idFieldName = String.format("%s_id", type);
+            return searchService.searchId(type, new SearchService.KeyValue(idFieldName, resourceID));
+        } catch (UnknownHostException e) {
+            logger.fatal(e);
+            throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
