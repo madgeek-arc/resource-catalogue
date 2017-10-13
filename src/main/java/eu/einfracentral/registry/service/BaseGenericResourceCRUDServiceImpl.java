@@ -58,35 +58,20 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     }
 
     @Override
-    public void update(T newResource, ParserService.ParserServiceTypes type) {
-        Resource resourceFound;
-        Resource resource = new Resource();
-        try {
-            resourceFound = searchService.searchId(getResourceType(), new SearchService.KeyValue(getResourceType() + "_id", "" + newResource.getId()));
-        } catch (UnknownHostException e) {
-            logger.fatal(e);
-            throw new RESTException(e, HttpStatus.BAD_REQUEST);
+    public void update(T updatedResource, ParserService.ParserServiceTypes type) {
+        String serialized = serialize(updatedResource, type);
+        if (serialized.equals("failed")) {
+            throw new RESTException("Bad resource!", HttpStatus.BAD_REQUEST);
         }
-
-        if (resourceFound == null) {
-            throw new RESTException("id: " + newResource.getId(), HttpStatus.NOT_FOUND);
-        } else {
-            try {
-                String serialized = parserPool.deserialize(newResource, ParserService.ParserServiceTypes.XML).get();
-                if (!serialized.equals("failed")) {
-                    resource.setPayload(serialized);
-                } else {
-                    throw new RESTException("Serialization failed", HttpStatus.BAD_REQUEST);
-                }
-                resource = (Resource) resourceFound;
-                resource.setPayloadFormat(type.name().toLowerCase());
-                resource.setPayload(serialized);
-                resourceService.updateResource(resource);
-            } catch (ExecutionException | InterruptedException e) {
-                logger.fatal(e);
-                throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        Resource existingResource = getResource(updatedResource.getId());
+        if (existingResource == null) {
+            throw new RESTException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
+        if (!existingResource.getPayloadFormat().equals(type.name().toLowerCase())) {
+            throw new RESTException("Resource is " + existingResource.getPayloadFormat() + ", but you're trying to update with " + type.name().toLowerCase(), HttpStatus.NOT_FOUND);
+        }
+        existingResource.setPayload(serialized);
+        resourceService.updateResource(existingResource);
     }
 
     private String getFieldIDName() {
