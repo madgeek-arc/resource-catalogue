@@ -29,17 +29,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
 
     @Override
     public T get(String resourceID) {
-        T serialized;
-        try {
-            String type = getResourceType();
-            String idFieldName = String.format("%s_id", type);
-            Resource found = searchService.searchId(type, new SearchService.KeyValue(idFieldName, resourceID));
-            serialized = parserPool.serialize(found, typeParameterClass).get();
-        } catch (UnknownHostException | InterruptedException | ExecutionException e) {
-            logger.fatal(e);
-            throw new RESTException(e, HttpStatus.NOT_FOUND);
-        }
-        return serialized;
+        return deserialize(getResource(resourceID));
     }
 
     @Override
