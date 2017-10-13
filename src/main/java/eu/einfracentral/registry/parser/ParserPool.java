@@ -5,16 +5,14 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.aai.User;
+import eu.einfracentral.registry.service.RESTException;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
-import eu.openminted.registry.core.service.ServiceException;
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.concurrent.ExecutorService;
@@ -46,7 +44,7 @@ public class ParserPool implements ParserService {
         return executor.submit(() -> {
             T type;
             if (resource == null) {
-                throw new ServiceException("null resource");
+                throw new RESTException("id: " + resource.getId(), HttpStatus.NOT_FOUND);
             }
             try {
                 if (resource.getPayloadFormat().equals("xml")) {
@@ -56,10 +54,11 @@ public class ParserPool implements ParserService {
                     ObjectMapper mapper = new ObjectMapper();
                     type = mapper.readValue(resource.getPayload(), tClass);
                 } else {
-                    throw new ServiceException("Unsupported media type");
+                    throw new RESTException(resource.getPayloadFormat() + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
                 }
-            } catch (JAXBException je) {
-                throw new ServiceException(je);
+            } catch (JAXBException e) {
+                logger.fatal(e);
+                throw new RESTException(e, HttpStatus.I_AM_A_TEAPOT);
             }
             return type;
         });
@@ -77,7 +76,7 @@ public class ParserPool implements ParserService {
                 ObjectMapper mapper = new ObjectMapper();
                 return mapper.writeValueAsString(resource);
             } else {
-                throw new ServiceException("Unsupported media type");
+                throw new RESTException(mediaType + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             }
         });
     }
