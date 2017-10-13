@@ -119,7 +119,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         for (String id : ids) {
             try {
                 ret.add(this.get(id));
-            } catch (ServiceException se) {
+            } catch (RESTException se) {
                 ret.add(null);
             }
         }
