@@ -224,4 +224,9 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             logger.fatal(e);
             throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private boolean resourceIsSerializable(T resource, ParserService.ParserServiceTypes type) {
+        return !serialize(resource, type).equals("failed");
+    }
 }
