@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class GenericRestController<T> {
 
-    final protected ResourceCRUDService<T> service;
+    private final ResourceCRUDService<T> service;
 
     GenericRestController(ResourceCRUDService service) {
         this.service = service;
