@@ -52,6 +52,12 @@ public class GenericRestController<T> {
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<T> updateJSON(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+        service.update(resource, ParserService.ParserServiceTypes.JSON);
+        return new ResponseEntity<>(resource, HttpStatus.OK);
+    }
+
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> delete(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.delete(resource);
