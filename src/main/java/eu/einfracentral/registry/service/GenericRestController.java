@@ -46,8 +46,8 @@ public class GenericRestController<T> {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> update(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<T> updateXML(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.update(resource, ParserService.ParserServiceTypes.XML);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
