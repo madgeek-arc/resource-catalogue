@@ -26,8 +26,8 @@ import static javax.xml.bind.JAXBContext.newInstance;
  */
 @Component("parserPool")
 public class ParserPool implements ParserService {
-    private static Logger logger = Logger.getLogger(ParserPool.class);
-    private ExecutorService executor;
+    private static final Logger logger = Logger.getLogger(ParserPool.class);
+    private final ExecutorService executor;
     private JAXBContext jaxbContext = null;
 
     public ParserPool() {
@@ -44,7 +44,7 @@ public class ParserPool implements ParserService {
         return executor.submit(() -> {
             T type;
             if (resource == null) {
-                throw new RESTException("id: " + resource.getId(), HttpStatus.NOT_FOUND);
+                throw new RESTException("Could not serialize null resource", HttpStatus.BAD_REQUEST);
             }
             try {
                 if (resource.getPayloadFormat().equals("xml")) {
