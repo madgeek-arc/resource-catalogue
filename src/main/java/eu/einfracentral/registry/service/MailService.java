@@ -15,11 +15,10 @@ import java.util.Properties;
 @org.springframework.stereotype.Service("mailService")
 public class MailService {
     //    @PropertySource("classpath:application.properties")
-    public Properties jmp;
+    public final Properties jmp;
     @Autowired
     private Environment env;
-    private Session session;
-    private Transport transport;
+    private final Session session;
 
     public MailService() {
         jmp = new Properties();
@@ -66,9 +65,9 @@ public class MailService {
             msg.setSubject(subject);
             msg.setText(text);
 
-            transport = session.getTransport("smtp");
+            Transport transport = session.getTransport("smtp");
             transport.connect(jmp.getProperty("mail.smtp.host"), jmp.getProperty("mail.smtp.port"));
-            transport.send(msg);
+            Transport.send(msg);
         } catch (MessagingException e) {
             e.printStackTrace();
         }

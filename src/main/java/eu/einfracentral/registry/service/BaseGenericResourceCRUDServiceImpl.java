@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
  * Created by pgl on 12/7/2017.
  */
 public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceCRUDService<T> {
-    protected Logger logger;
+    private final Logger logger;
 
     public BaseGenericResourceCRUDServiceImpl(Class<T> typeParameterClass) {
         super(typeParameterClass);
@@ -150,7 +150,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         return getResource(resource.getId()) != null;
     }
 
-    public Resource getResource(String resourceID) {
+    private Resource getResource(String resourceID) {
         try {
             String type = getResourceType();
             String idFieldName = String.format("%s_id", type);
