@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("provider")
 public class ProviderController extends GenericRestController<Provider> {
-    final private ProviderService providerService;
 
     @Autowired
     ProviderController(ProviderService service) {
         super(service);
-        this.providerService = service;
     }
 
     @RequestMapping(path = "hard", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

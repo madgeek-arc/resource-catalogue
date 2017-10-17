@@ -11,12 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("service")
 public class ServiceController extends GenericRestController<Service> {
-    final private ServiceService serviceService;
-
     @Autowired
     ServiceController(ServiceService service) {
         super(service);
-        this.serviceService = service;
     }
 
 

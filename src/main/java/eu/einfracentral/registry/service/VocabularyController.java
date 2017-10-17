@@ -11,12 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("vocabulary")
 public class VocabularyController extends GenericRestController<Vocabulary> {
-    final private VocabularyService vocabularyService;
 
     @Autowired
     VocabularyController(VocabularyService service) {
         super(service);
-        this.vocabularyService = service;
     }
 
 }
