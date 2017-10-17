@@ -134,6 +134,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
                 }
             }
         } catch (UnknownHostException | InterruptedException | ExecutionException e) {
+            throw new RESTException(e, HttpStatus.NOT_FOUND);
         }
         return ret;
     }
