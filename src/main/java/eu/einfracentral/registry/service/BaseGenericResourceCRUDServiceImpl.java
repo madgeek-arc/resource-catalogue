@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
  * Created by pgl on 12/7/2017.
  */
 public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceCRUDService<T> {
-    private final Logger logger;
+    protected final Logger logger;
 
     public BaseGenericResourceCRUDServiceImpl(Class<T> typeParameterClass) {
         super(typeParameterClass);
