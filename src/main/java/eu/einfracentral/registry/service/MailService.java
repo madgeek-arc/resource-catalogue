@@ -1,7 +1,8 @@
 package eu.einfracentral.registry.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -13,60 +14,63 @@ import java.util.Properties;
  */
 
 @org.springframework.stereotype.Service("mailService")
+@Configurable
+@PropertySource({"classpath:eu/einfracentral/domain/application.properties"})
 public class MailService {
-    //    @PropertySource("classpath:application.properties")
-    public final Properties jmp;
-    @Autowired
-    private Environment env;
-    private final Session session;
+    private Session session;
+
+    @Value("${mail.smtp.auth}")
+    private String auth;
+
+    @Value("${mail.smtp.host}")
+    private String host;
+
+    @Value("${mail.smtp.password}")
+    private String password;
+
+    @Value("${mail.smtp.port}")
+    private String port;
+
+    @Value("${mail.smtp.socketFactory.class}")
+    private String socketFactoryClass;
+
+    @Value("${mail.smtp.socketFactory.port}")
+    private String socketFactoryPort;
+
+    @Value("${mail.smtp.starttls.enable}")
+    private String starttls;
+
+    @Value("${mail.smtp.user}")
+    private String user;
+
 
     public MailService() {
-        jmp = new Properties();
-
-        jmp.put("mail.smtp.host", "smtp.gmail.com");
-        jmp.put("mail.smtp.password", "s.a.g.a.p.w");
-        jmp.put("mail.smtp.port", "465");
-        jmp.put("mail.smtp.auth", "true");
-        jmp.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        jmp.put("mail.smtp.socketFactory.port", "465");
-        jmp.put("mail.smtp.starttls.enable", "true");
-        jmp.put("mail.smtp.user", "test.espas@gmail.com");
-        jmp.put("mail.activate.subject", "[eInfraCentral] Activate your account");
-        jmp.put("mail.activate.text", "Please visit http://beta.einfracentral.eu/activate/");
-        jmp.put("mail.reset.subject", "[eInfraCentral] Reset your password");
-        jmp.put("mail.reset.text", "Please visit http://beta.einfracentral.eu/reset/");
-
-        session = Session.getDefaultInstance(jmp, new Authenticator() {
+        Properties sessionProps = new Properties();
+        sessionProps.setProperty("mail.smtp.auth", auth);
+        sessionProps.setProperty("mail.smtp.host", host);
+        sessionProps.setProperty("mail.smtp.password", password);
+        sessionProps.setProperty("mail.smtp.port", port);
+        sessionProps.setProperty("mail.smtp.socketFactory.class", socketFactoryClass);
+        sessionProps.setProperty("mail.smtp.socketFactory.port", socketFactoryPort);
+        sessionProps.setProperty("mail.smtp.starttls.enable", starttls);
+        sessionProps.setProperty("mail.smtp.user", user);
+        session = Session.getDefaultInstance(sessionProps, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(jmp.getProperty("mail.smtp.user"), jmp.getProperty("mail.smtp.password"));
+                return new PasswordAuthentication(user, password);
             }
         });
-
-
     }
-    //    @Autowired
-//    private MailConfig mailConfig;
-
-    //    private Properties getConfig() {
-//        String[] propNames = new String[]{"mail.smtp.auth", "mail.smtp.host", "mail.smtp.password", "mail.smtp.port", "mail.smtp.socketFactory.class", "mail.smtp.socketFactory.port", "mail.smtp.starttls.enable", "mail.smtp.user"};
-//        Properties ret = new Properties();
-//        for (String prop : propNames) {
-//            String val = env.getProperty(prop);
-//            ret.setProperty(prop, val);
-//        }
-//        return ret;
-//    }
 
     public void sendMail(String to, String subject, String text) {
         Message msg = new MimeMessage(session);
         try {
-            msg.setFrom(new InternetAddress(jmp.getProperty("mail.smtp.user")));
+            msg.setFrom(new InternetAddress(user));
             msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
             msg.setSubject(subject);
             msg.setText(text);
 
             Transport transport = session.getTransport("smtp");
-            transport.connect(jmp.getProperty("mail.smtp.host"), jmp.getProperty("mail.smtp.port"));
+            transport.connect(host, port);
             Transport.send(msg);
         } catch (MessagingException e) {
             e.printStackTrace();
