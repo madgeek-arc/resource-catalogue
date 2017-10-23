@@ -7,7 +7,9 @@ import eu.openminted.registry.core.service.SearchService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 
 import javax.crypto.SecretKey;
@@ -24,13 +26,24 @@ import java.util.concurrent.ExecutionException;
  * Created by pgl on 07/08/17.
  */
 @org.springframework.stereotype.Service("userService")
-public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService/*, EnvironmentAware */ {
-
-    @Autowired
-    private Environment env;
+@Configurable
+@PropertySource({"classpath:eu/einfracentral/domain/application.properties"})
+public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService {
 
     @Autowired
     private MailService mailService;
+
+    @Value("${mail.activate.subject}")
+    private String activateSubject;
+
+    @Value("${mail.reset.subject}")
+    private String resetSubject;
+
+    @Value("${mail.activate.text}")
+    private String activateText;
+
+    @Value("${mail.reset.text}")
+    private String resetText;
 
     public UserServiceImpl() {
         super(User.class);
@@ -70,8 +83,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         if (ret != null) {
             ret.setResetToken("Generate THIS!");
             update(ret);
-            mailService.sendMail(ret.getEmail(), mailService.jmp.getProperty("smtp.activate.subject"),
-                    mailService.jmp.getProperty("smtp.activate.text") + ret.getId() + "/" + ret.getResetToken());
+            mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
 
         }
         return strip(ret);
@@ -89,19 +101,20 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             user.setId(UUID.randomUUID().toString());
             ret = hashUser(user);
             add(ret, ParserService.ParserServiceTypes.JSON);
-            mailService.sendMail(user.getEmail(), mailService.jmp.getProperty("mail.activate.subject"),
-                    mailService.jmp.getProperty("mail.activate.text") + user.getId());
+            mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
         }
         return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
+
+    @Value("${sec.user.iterations:1000}")
+    private int currentServerIterationCount;
 
     private User hashUser(User user) {
         final Random r = new SecureRandom();
         byte[] salt = new byte[8];
         r.nextBytes(salt);
         user.setSalt(salt);
-        user.setIterationCount(1000);
-        user.setPassword(new String(hashPass(user.getPassword().toCharArray(), user.getSalt(), user.getIterationCount())));
+        user.setPassword(new String(hashPass(user.getPassword().toCharArray(), user.getSalt(), currentServerIterationCount)));
         return user;
     }
 
@@ -139,10 +152,13 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return ret;
     }
 
+    @Value("${jwt.secret:}")
+    private String secret;
+
     @Override
     public String getToken(User credentials) {
-        String secret = env.getProperty("JWT_SECRET");
-        if (secret == null) throw new RESTException("JWT_SECRET has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
+        if (secret.length() == 0)
+            throw new RESTException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
         Date now = new Date();
         if (authenticate(credentials)) {
             return Jwts.builder().
@@ -174,8 +190,4 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return super.get(id);
     }
 
-//    @Override
-//    public void setEnvironment(Environment environment) {
-//        this.env = environment;
-//    }
 }
