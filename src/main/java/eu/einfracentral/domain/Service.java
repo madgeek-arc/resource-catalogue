@@ -11,8 +11,7 @@ import java.util.List;
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "url", "name", "tagline", "fullName",
         "description", "options", "targetUsers", "userValue", "userBase", "symbol", "multimediaURL", "provider", "providerDescription", "version", "lastUpdate", "changeLog", "validFor", "lifeCycleStatus", "trl", "category",
         "subcategory", "places", "languages", "tags", "requiredServices", "relatedServices", "request", "helpdesk",
-        "userManual", "trainingInformation", "feedback", "price", "serviceLevelAgreement", "termsOfUse", "funding",
-        "externalHits", "internalHits", "favouriteCount", "averageRating", "ratings", "isPublic"})
+        "userManual", "trainingInformation", "feedback", "price", "serviceLevelAgreement", "termsOfUse", "funding"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
@@ -242,24 +241,8 @@ public class Service implements Identifiable {
     @XmlElement
     private String funding;
 
-    //Addenda
     @XmlElement
-    private int externalHits;
-
-    @XmlElement
-    private int internalHits;
-
-    @XmlElement
-    private int favouriteCount;
-
-    @XmlElement
-    private float averageRating;
-
-    @XmlElement
-    private float ratings;
-
-    @XmlElement
-    private boolean isPublic = false;
+    private ServiceAddenda sa;
 
     @Override
     public String getId() {
@@ -549,53 +532,5 @@ public class Service implements Identifiable {
 
     public void setFunding(String funding) {
         this.funding = funding;
-    }
-
-    public int getExternalHits() {
-        return externalHits;
-    }
-
-    public void setExternalHits(int externalHits) {
-        this.externalHits = externalHits;
-    }
-
-    public int getInternalHits() {
-        return internalHits;
-    }
-
-    public void setInternalHits(int internalHits) {
-        this.internalHits = internalHits;
-    }
-
-    public int getFavouriteCount() {
-        return favouriteCount;
-    }
-
-    public void setFavouriteCount(int favouriteCount) {
-        this.favouriteCount = favouriteCount;
-    }
-
-    public float getAverageRating() {
-        return averageRating;
-    }
-
-    public void setAverageRating(float averageRating) {
-        this.averageRating = averageRating;
-    }
-
-    public float getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(float ratings) {
-        this.ratings = ratings;
-    }
-
-    public boolean isPublic() {
-        return isPublic;
-    }
-
-    public void setPublic(boolean aPublic) {
-        isPublic = aPublic;
     }
 }
