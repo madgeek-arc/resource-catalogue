@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by pgl on 24/10/17.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "externalHits", "internalHits", "favouriteCount", "averageRating", "ratings", "published"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "perfomanceData", "externalHits", "internalHits", "favouriteCount", "averageRating", "ratings", "published"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ServiceAddenda implements Identifiable {

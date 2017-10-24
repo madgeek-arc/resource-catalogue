@@ -11,7 +11,7 @@ import java.util.List;
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "url", "name", "tagline", "fullName",
         "description", "options", "targetUsers", "userValue", "userBase", "symbol", "multimediaURL", "provider", "providerDescription", "version", "lastUpdate", "changeLog", "validFor", "lifeCycleStatus", "trl", "category",
         "subcategory", "places", "languages", "tags", "requiredServices", "relatedServices", "request", "helpdesk",
-        "userManual", "trainingInformation", "feedback", "price", "serviceLevelAgreement", "termsOfUse", "funding"})
+        "userManual", "trainingInformation", "feedback", "price", "serviceLevelAgreement", "termsOfUse", "funding", "serviceAddenda"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
@@ -242,7 +242,7 @@ public class Service implements Identifiable {
     private String funding;
 
     @XmlElement
-    private ServiceAddenda sa;
+    private ServiceAddenda serviceAddenda;
 
     @Override
     public String getId() {
