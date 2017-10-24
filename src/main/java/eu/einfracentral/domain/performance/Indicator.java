@@ -1,29 +1,40 @@
 package eu.einfracentral.domain.performance;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import eu.einfracentral.domain.Identifiable;
+
+import javax.xml.bind.annotation.*;
 
 /**
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-//    "id", "description", "targets", "timeGranularity", "measurements"
-})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Indicator
-//<T extends JAXBComparable<T>>
-{
-//
-//    @XmlElement(required = true)
-//    private int id;
-//
-//    @XmlElement(required = true)
-//    private String description;
-//
+public class Indicator implements Identifiable {
+    @XmlElement(required = true)
+    private String id;
+    @XmlElement(required = true)
+    private String description;
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 //    @XmlElementWrapper(required = true)
 //    @XmlElement(name = "target")
 //    private List<Target<T>> targets;
