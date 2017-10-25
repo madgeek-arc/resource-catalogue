@@ -9,9 +9,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.http.HttpStatus;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -29,21 +32,30 @@ import java.util.concurrent.ExecutionException;
 @Configurable
 @PropertySource({"classpath:eu/einfracentral/domain/application.properties"})
 public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService {
-
     @Autowired
     private MailService mailService;
-
     @Value("${mail.activate.subject}")
     private String activateSubject;
-
     @Value("${mail.reset.subject}")
     private String resetSubject;
-
     @Value("${mail.activate.text}")
     private String activateText;
-
     @Value("${mail.reset.text}")
     private String resetText;
+    @Value("${sec.user.iterations:1000}")
+    private int currentServerIterationCount;
+    @Value("${jwt.secret:}")
+    private String secret;
+
+//    @Bean
+//    public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+//        return new PropertySourcesPlaceholderConfigurer();
+//    }
+
+    @PostConstruct
+    private void postConstruct() {
+        System.err.println(secret);
+    }
 
     public UserServiceImpl() {
         super(User.class);
@@ -67,6 +79,11 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return strip(ret);
     }
 
+//    @Override
+//    public Browsing getAll(FacetFilter facetFilter) {
+//        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
+//    }
+
     @Override
     public User reset(User user) {
         User ret = null;
@@ -89,11 +106,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return strip(ret);
     }
 
-//    @Override
-//    public Browsing getAll(FacetFilter facetFilter) {
-//        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
-//    }
-
     @Override
     public User register(User user) {
         User ret = null;
@@ -105,9 +117,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
         return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
-
-    @Value("${sec.user.iterations:1000}")
-    private int currentServerIterationCount;
 
     private User hashUser(User user) {
         final Random r = new SecureRandom();
@@ -151,9 +160,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
         return ret;
     }
-
-    @Value("${jwt.secret:}")
-    private String secret;
 
     @Override
     public String getToken(User credentials) {
