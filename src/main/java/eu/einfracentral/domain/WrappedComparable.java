@@ -3,11 +3,12 @@ package eu.einfracentral.domain;
 /**
  * Created by pgl on 4/7/2017.
  */
-public abstract class JAXBComparable
-//    <T extends Comparable<T>> implements Comparable<T>
-{
-
-//    private transient T value;
+public class WrappedComparable {
+//    private T value;
+//
+//    int compareTo(WrappedComparable<T> other) {
+//        return value.compareTo(other.getValue());
+//    }
 //
 //    public T getValue() {
 //        return value;

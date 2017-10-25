@@ -14,7 +14,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "indicator", "from", "to", "value"})
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Measurement<T extends Comparable> implements Comparable<Measurement<T>>, Identifiable {
+public class Measurement<T> implements Identifiable {
     @XmlElement(required = true)
     private String id;
     @XmlElement(required = true)
@@ -26,10 +26,10 @@ public class Measurement<T extends Comparable> implements Comparable<Measurement
     @XmlElement(required = true)
     private T value;
 
-    @Override
-    public int compareTo(Measurement<T> m) {
-        return this.value.compareTo(m.getValue());
-    }
+//    @Override
+//    public int compareTo(Measurement<T> m) {
+//        return this.value.compareTo(m.getValue());
+//    }
 
     @Override
     public String getId() {

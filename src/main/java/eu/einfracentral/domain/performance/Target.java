@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class Target
-//    <T extends JAXBComparable<T>>
+//    <T extends WrappedComparable<T>>
 {
 
 //    @XmlElement(required = true)
