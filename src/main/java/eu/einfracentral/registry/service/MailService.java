@@ -2,8 +2,11 @@ package eu.einfracentral.registry.service;
 
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
+import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -43,8 +46,13 @@ public class MailService {
     @Value("${mail.smtp.user}")
     private String user;
 
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
 
-    public MailService() {
+    @PostConstruct
+    private void postConstruct() {
         Properties sessionProps = new Properties();
         sessionProps.setProperty("mail.smtp.auth", auth);
         sessionProps.setProperty("mail.smtp.host", host);
