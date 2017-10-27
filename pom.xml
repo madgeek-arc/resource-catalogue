@@ -152,12 +152,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <!--
-                    Use default configuration, implying that sources are read
-                    from the directory src/main/java below the project basedir.
-
-                    (i.e. getProject().getCompileSourceRoots() in Maven-speak).
-                -->
             </plugin>
             <plugin>
                 <groupId>cz.habarta.typescript-generator</groupId>
