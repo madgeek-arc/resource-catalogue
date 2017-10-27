@@ -3,12 +3,14 @@ package eu.einfracentral.registry.service;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.exception.ServerError;
 import eu.openminted.registry.core.service.ParserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -105,7 +107,7 @@ public class GenericRestController<T> {
 
     @ExceptionHandler(RESTException.class)
     @ResponseBody
-    public ResponseEntity<RESTException> handleRESTException(RESTException ex) {
-        return new ResponseEntity<>(ex, ex.getStatus());
+    public ResponseEntity<ServerError> handleRESTException(HttpServletRequest req, RESTException ex) {
+        return new ResponseEntity<>(new ServerError(req.getRequestURL().toString() ,ex), ex.getStatus());
     }
 }
