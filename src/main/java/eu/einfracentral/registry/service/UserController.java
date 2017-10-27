@@ -43,13 +43,13 @@ public class UserController extends GenericRestController<User> {
     }
 
     @CrossOrigin
-    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> register(@RequestBody User user) {
         return new ResponseEntity<>(this.userService.register(user), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
         if (credentials.getEmail() == null || credentials.getPassword() == null)
             return new ResponseEntity<>(credentials, HttpStatus.UNPROCESSABLE_ENTITY);
