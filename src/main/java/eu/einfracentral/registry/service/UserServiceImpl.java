@@ -114,6 +114,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             ret = hashUser(user);
             add(ret, ParserService.ParserServiceTypes.JSON);
             mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
+        } else {
+            throw new RESTException("User already registered!", HttpStatus.CONFLICT);
         }
         return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
