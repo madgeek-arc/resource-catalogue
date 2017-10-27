@@ -30,7 +30,7 @@
         <dependency>
             <groupId>eu.einfracentral</groupId>
             <artifactId>eic-registry-model</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <!--core-->
         <dependency>
