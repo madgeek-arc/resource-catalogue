@@ -1,5 +1,7 @@
 package eu.einfracentral.domain.aai;
 
+import eu.einfracentral.domain.Identifiable;
+
 import javax.xml.bind.annotation.*;
 
 /**
@@ -9,18 +11,18 @@ import javax.xml.bind.annotation.*;
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Grant {
+public class Grant implements Identifiable {
     @XmlElement(required = true)
-    private int id;
+    private String id;
 
     @XmlElement(required = true)
     private String description;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
