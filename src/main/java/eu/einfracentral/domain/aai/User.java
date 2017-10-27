@@ -14,7 +14,7 @@ import java.util.Map;
  */
 
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "surname", "email", "password", "joinDate",
-        "affiliation", "isServiceProvider", "roles", "favourites", "providerAdministrator", "provider", "iterationCount",
+        "affiliation", "isServiceProvider", "favourites", "providerAdministrator", "provider", "iterationCount",
         "salt", "resetToken"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -64,8 +64,8 @@ public class User implements Identifiable {
     @XmlElement(required = false)
     private String resetToken;
 
-    @XmlElement(required = false)
-    private Map<Provider, Grant> roles;
+//    @XmlElement(required = false)
+//    private Map<Provider, Grant> roles;
 
     @Override
     public String getId() {
@@ -181,13 +181,13 @@ public class User implements Identifiable {
         this.resetToken = resetToken;
     }
 
-    public Map<Provider, Grant> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Map<Provider, Grant> roles) {
-        this.roles = roles;
-    }
+//    public Map<Provider, Grant> getRoles() {
+//        return roles;
+//    }
+//
+//    public void setRoles(Map<Provider, Grant> roles) {
+//        this.roles = roles;
+//    }
 }
 
 
