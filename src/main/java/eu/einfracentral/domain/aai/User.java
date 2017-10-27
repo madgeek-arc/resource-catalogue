@@ -3,6 +3,7 @@ package eu.einfracentral.domain.aai;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.aai.Grant;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
