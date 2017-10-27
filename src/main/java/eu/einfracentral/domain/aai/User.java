@@ -1,10 +1,12 @@
 package eu.einfracentral.domain.aai;
 
 import eu.einfracentral.domain.Identifiable;
+import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pgl on 30/6/2017.
@@ -48,10 +50,6 @@ public class User implements Identifiable {
     @XmlElement(required = false)
     private boolean isServiceProvider;
 
-    @XmlElementWrapper
-    @XmlElement(name = "role")
-    private List<Role> roles;
-
     @XmlElementWrapper(name = "favourites", required = false)
     @XmlElement(name = "favourite")
     private List<Service> favourites;
@@ -64,6 +62,9 @@ public class User implements Identifiable {
 
     @XmlElement(required = false)
     private String resetToken;
+
+    @XmlElement(required = false)
+    private Map<Provider, Grant> roles;
 
     @Override
     public String getId() {
@@ -147,14 +148,6 @@ public class User implements Identifiable {
         isServiceProvider = serviceProvider;
     }
 
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
-    }
-
     public List<Service> getFavourites() {
         return favourites;
     }
@@ -185,6 +178,14 @@ public class User implements Identifiable {
 
     public void setResetToken(String resetToken) {
         this.resetToken = resetToken;
+    }
+
+    public Map<Provider, Grant> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Map<Provider, Grant> roles) {
+        this.roles = roles;
     }
 }
 

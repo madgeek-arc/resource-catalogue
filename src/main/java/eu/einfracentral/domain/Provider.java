@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.domain.aai.User;
 
 import javax.xml.bind.annotation.*;

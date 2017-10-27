@@ -1,4 +1,6 @@
-package eu.einfracentral.domain;
+package eu.einfracentral.domain.aai;
+
+import eu.einfracentral.domain.Identifiable;
 
 import javax.xml.bind.annotation.*;
 
