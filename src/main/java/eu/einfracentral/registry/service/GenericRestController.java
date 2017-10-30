@@ -38,13 +38,13 @@ public class GenericRestController<T> {
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String> add(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        service.add(resource, ParserService.ParserServiceTypes.XML);
+        service.add(resource);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> update(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        service.update(resource, ParserService.ParserServiceTypes.XML);
+        service.update(resource);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
