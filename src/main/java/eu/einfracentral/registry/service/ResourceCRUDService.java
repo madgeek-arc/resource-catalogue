@@ -15,9 +15,5 @@ public interface ResourceCRUDService<T> extends eu.openminted.registry.core.serv
 
     List<T> getSome(String... ids);
 
-    void add(T resourceToAdd, ParserService.ParserServiceTypes type);
-
-    void update(T resourceToAdd, ParserService.ParserServiceTypes type);
-
     Browsing delAll();
 }
