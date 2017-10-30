@@ -35,28 +35,16 @@ public class GenericRestController<T> {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> addJson(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        service.add(resource, ParserService.ParserServiceTypes.JSON);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @CrossOrigin
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<String> addXml(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<String> add(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.add(resource, ParserService.ParserServiceTypes.XML);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<T> updateXML(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        service.update(resource, ParserService.ParserServiceTypes.XML);
-        return new ResponseEntity<>(resource, HttpStatus.OK);
-    }
-
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> updateJSON(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        service.update(resource, ParserService.ParserServiceTypes.JSON);
+    public ResponseEntity<T> update(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+        service.update(resource, ParserService.ParserServiceTypes.XML);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
@@ -108,6 +96,6 @@ public class GenericRestController<T> {
     @ExceptionHandler(RESTException.class)
     @ResponseBody
     public ResponseEntity<ServerError> handleRESTException(HttpServletRequest req, RESTException ex) {
-        return new ResponseEntity<>(new ServerError(req.getRequestURL().toString() ,ex), ex.getStatus());
+        return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), ex), ex.getStatus());
     }
 }
