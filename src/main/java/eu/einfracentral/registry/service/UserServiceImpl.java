@@ -110,7 +110,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         if (getUserByEmail(user.getEmail()) == null) {
             user.setId(UUID.randomUUID().toString());
             ret = hashUser(user);
-            add(ret, ParserService.ParserServiceTypes.JSON);
+            add(ret, ParserService.ParserServiceTypes.XML);
             mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
         } else {
             throw new RESTException("User already registered!", HttpStatus.CONFLICT);

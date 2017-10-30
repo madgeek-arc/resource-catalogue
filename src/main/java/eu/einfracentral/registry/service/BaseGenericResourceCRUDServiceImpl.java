@@ -53,22 +53,17 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     }
 
     @Override
-    public void update(T updatedResource) {
-        update(updatedResource, ParserService.ParserServiceTypes.XML);
-    }
-
-    @Override
-    public void update(T updatedResource, ParserService.ParserServiceTypes type) {
-        String serialized = serialize(updatedResource, type);
+    public void update(T resource) {
+        String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
         if (serialized.equals("failed")) {
             throw new RESTException("Bad resource!", HttpStatus.BAD_REQUEST);
         }
-        Resource existingResource = getResource(updatedResource.getId());
+        Resource existingResource = getResource(resource.getId());
         if (existingResource == null) {
             throw new RESTException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
-        if (!existingResource.getPayloadFormat().equals(type.name().toLowerCase())) {
-            throw new RESTException("Resource is " + existingResource.getPayloadFormat() + ", but you're trying to update with " + type.name().toLowerCase(), HttpStatus.NOT_FOUND);
+        if (!existingResource.getPayloadFormat().equals(ParserService.ParserServiceTypes.XML.name().toLowerCase())) {
+            throw new RESTException("Resource is " + existingResource.getPayloadFormat() + ", but you're trying to update with " + ParserService.ParserServiceTypes.XML.name().toLowerCase(), HttpStatus.NOT_FOUND);
         }
         existingResource.setPayload(serialized);
         resourceService.updateResource(existingResource);
@@ -79,17 +74,12 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     }
 
     @Override
-    public void add(T resourceToAdd) {
-        add(resourceToAdd, ParserService.ParserServiceTypes.XML);
-    }
-
-    @Override
-    public void add(T resource, ParserService.ParserServiceTypes mediaType) {
+    public void add(T resource) {
         if (exists(resource)) {
             throw new RESTException("Resource already exists!", HttpStatus.CONFLICT);
         }
 
-        String serialized = serialize(resource, mediaType);
+        String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
         if (serialized.equals("failed")) {
             throw new RESTException("Bad resource!", HttpStatus.BAD_REQUEST);
         }
@@ -98,7 +88,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         created.setPayload(serialized);
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());
-        created.setPayloadFormat(mediaType.name().toLowerCase());
+        created.setPayloadFormat(ParserService.ParserServiceTypes.XML.name().toLowerCase());
         created.setResourceType(getResourceType());
         created.setVersion("not_set");
         created.setId("wont be saved");
