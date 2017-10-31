@@ -8,10 +8,11 @@ import java.util.List;
 /**
  * Created by pgl on 29/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "url", "name", "tagline", "fullName",
-        "description", "options", "targetUsers", "userValue", "userBase", "symbol", "multimediaURL", "provider", "providerDescription", "version", "lastUpdate", "changeLog", "validFor", "lifeCycleStatus", "trl", "category",
-        "subcategory", "places", "languages", "tags", "requiredServices", "relatedServices", "request", "helpdesk",
-        "userManual", "trainingInformation", "feedback", "price", "serviceLevelAgreement", "termsOfUse", "funding", "serviceAddenda"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "url", "name", "tagline", "description", "options",
+        "targetUsers", "userValue", "userBase", "symbol", "multimediaURL", "providers", "version", "lastUpdate",
+        "changeLog", "validFor", "lifeCycleStatus", "trl", "category", "subcategory", "places", "languages", "tags",
+        "requiredServices", "relatedServices", "request", "helpdesk", "userManual", "trainingInformation", "feedback",
+        "price", "serviceLevelAgreement", "termsOfUse", "funding", "serviceAddenda"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
@@ -39,12 +40,6 @@ public class Service implements Identifiable {
      */
     @XmlElement
     private String tagline;
-
-    /**
-     * Extended name of service as assigned by the service provider.
-     */
-    @XmlElement
-    private String fullName;
 
     /**
      * High-level description of what the service does in terms of functionality it provides and the resources it enables access to. Should be similar to the name described above, and should cover the value provided by the service, in fairly non-technical terms. These descriptions may seem obvious but help everyone within the organization understand the service, and also will be needed for the Service Catalogue, which will be shown to users and customers. It may provide also information related to the offered capacity, number of installations, underlying data that is offered.
@@ -92,14 +87,9 @@ public class Service implements Identifiable {
     /**
      * Organisation that manages and delivers the service and with whom the customer signs the SLA.
      */
-    @XmlElement(required = false)
-    private String provider; //maybe list
-
-    /**
-     * Detailed provider data
-     */
-    @XmlElement
-    private String providerDescription;
+    @XmlElementWrapper(name = "providers", required = false)
+    @XmlElement(name = "provider")
+    private List<Provider> providers;
 
     /**
      * Informs about the implementation of the service that is in force as well as about its previous implementations, if any.
@@ -278,14 +268,6 @@ public class Service implements Identifiable {
         this.tagline = tagline;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -342,20 +324,12 @@ public class Service implements Identifiable {
         this.multimediaURL = multimediaURL;
     }
 
-    public String getProvider() {
-        return provider;
+    public List<Provider> getProviders() {
+        return providers;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public String getProviderDescription() {
-        return providerDescription;
-    }
-
-    public void setProviderDescription(String providerDescription) {
-        this.providerDescription = providerDescription;
+    public void setProviders(List<Provider> providers) {
+        this.providers = providers;
     }
 
     public String getVersion() {
@@ -532,5 +506,13 @@ public class Service implements Identifiable {
 
     public void setFunding(String funding) {
         this.funding = funding;
+    }
+
+    public ServiceAddenda getServiceAddenda() {
+        return serviceAddenda;
+    }
+
+    public void setServiceAddenda(ServiceAddenda serviceAddenda) {
+        this.serviceAddenda = serviceAddenda;
     }
 }
