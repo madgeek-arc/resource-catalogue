@@ -2,7 +2,6 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
