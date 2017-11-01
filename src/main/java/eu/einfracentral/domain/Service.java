@@ -89,7 +89,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "providers", required = false)
     @XmlElement(name = "provider")
-    private List<Provider> providers;
+    private List<String> providers;
 
     /**
      * Informs about the implementation of the service that is in force as well as about its previous implementations, if any.
@@ -324,11 +324,11 @@ public class Service implements Identifiable {
         this.multimediaURL = multimediaURL;
     }
 
-    public List<Provider> getProviders() {
+    public List<String> getProviders() {
         return providers;
     }
 
-    public void setProviders(List<Provider> providers) {
+    public void setProviders(List<String> providers) {
         this.providers = providers;
     }
 
