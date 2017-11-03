@@ -167,6 +167,8 @@
                             <jsonLibrary>jackson2</jsonLibrary>
                             <classPatterns>
                                 <pattern>eu.einfracentral.domain.*</pattern>
+                                <pattern>eu.einfracentral.domain.aai.*</pattern>
+                                <pattern>eu.einfracentral.domain.performance.*</pattern>
                             </classPatterns>
                             <outputFile>target/eic-model.ts</outputFile>
                             <outputKind>module</outputKind>
