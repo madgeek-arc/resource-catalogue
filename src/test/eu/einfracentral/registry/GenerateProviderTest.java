@@ -1,4 +1,4 @@
-package eu.openminted.registry;
+package eu.einfracentral.registry;
 
 import eu.einfracentral.domain.Provider;
 import org.junit.Test;
