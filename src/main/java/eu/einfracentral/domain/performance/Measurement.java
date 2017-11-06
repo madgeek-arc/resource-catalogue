@@ -12,19 +12,20 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "indicator", "from", "to", "value"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "indicator", "value", "time", "location"})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Measurement<T> implements Identifiable {
     @XmlElement(required = true)
     private String id;
     @XmlElement(required = true)
     private Indicator indicator;
+    @XmlElement(required = true)
+    private Object value;
     @XmlElement
     private XMLGregorianCalendar time;
     @XmlElement
     private String[] location;
-    @XmlElement(required = true)
-    private Object value;
+
 
    @Override
     public String getId() {
@@ -44,6 +45,14 @@ public class Measurement<T> implements Identifiable {
         this.indicator = indicator;
     }
 
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
     public XMLGregorianCalendar getTime() {
         return time;
     }
@@ -60,15 +69,7 @@ public class Measurement<T> implements Identifiable {
         this.location = location;
     }
 
-    public Object getValue() {
-        return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-//    public boolean satisfies(Target<T> t) {
+    //    public boolean satisfies(Target<T> t) {
 //        return t.satisfiedBy(this.value);
 //    }
 //

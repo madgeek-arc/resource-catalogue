@@ -3,13 +3,12 @@ package eu.einfracentral.domain.performance;
 import eu.einfracentral.domain.Identifiable;
 
 import javax.xml.bind.annotation.*;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Created by pgl on 30/6/2017.
  */
 
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description", "unit", "dimensions"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Indicator implements Identifiable {
@@ -18,9 +17,9 @@ public class Indicator implements Identifiable {
     @XmlElement(required = true)
     private String description;
     @XmlElement(required = true)
-    private Dimension[] dimensions;
-    @XmlElement(required = true)
     private Unit unit;
+    @XmlElement(required = true)
+    private Dimension[] dimensions;
 
     @Override
     public String getId() {
@@ -40,20 +39,20 @@ public class Indicator implements Identifiable {
         this.description = description;
     }
 
-    public Dimension[] getDimensions() {
-        return dimensions;
-    }
-
-    public void setDimensions(Dimension[] dimensions) {
-        this.dimensions = dimensions;
-    }
-
     public Unit getUnit() {
         return unit;
     }
 
     public void setUnit(Unit unit) {
         this.unit = unit;
+    }
+
+    public Dimension[] getDimensions() {
+        return dimensions;
+    }
+
+    public void setDimensions(Dimension[] dimensions) {
+        this.dimensions = dimensions;
     }
 
     //    @XmlElementWrapper(required = true)

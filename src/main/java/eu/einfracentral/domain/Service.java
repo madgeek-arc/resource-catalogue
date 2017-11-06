@@ -15,7 +15,7 @@ import java.util.List;
         "targetUsers", "userValue", "userBase", "symbol", "multimediaURL", "providers", "version", "lastUpdate",
         "changeLog", "validFor", "lifeCycleStatus", "trl", "category", "subcategory", "places", "languages", "tags",
         "requiredServices", "relatedServices", "request", "helpdesk", "userManual", "trainingInformation", "feedback",
-        "price", "serviceLevelAgreement", "termsOfUse", "funding", "serviceAddenda"})
+        "price", "serviceLevelAgreement", "termsOfUse", "funding", "indicators", "measurements", "serviceAddenda"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
