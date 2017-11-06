@@ -18,20 +18,15 @@ public class Measurement<T> implements Identifiable {
     @XmlElement(required = true)
     private String id;
     @XmlElement(required = true)
-    private String indicator;
+    private Indicator indicator;
+    @XmlElement
+    private XMLGregorianCalendar time;
+    @XmlElement
+    private String[] location;
     @XmlElement(required = true)
-    private XMLGregorianCalendar from;
-    @XmlElement(required = true)
-    private XMLGregorianCalendar to;
-    @XmlElement(required = true)
-    private T value;
+    private Object value;
 
-//    @Override
-//    public int compareTo(Measurement<T> m) {
-//        return this.value.compareTo(m.getValue());
-//    }
-
-    @Override
+   @Override
     public String getId() {
         return id;
     }
@@ -41,39 +36,45 @@ public class Measurement<T> implements Identifiable {
         this.id = id;
     }
 
-    public String getIndicator() {
+    public Indicator getIndicator() {
         return indicator;
     }
 
-    public void setIndicator(String indicator) {
+    public void setIndicator(Indicator indicator) {
         this.indicator = indicator;
     }
 
-    public XMLGregorianCalendar getFrom() {
-        return from;
+    public XMLGregorianCalendar getTime() {
+        return time;
     }
 
-    public void setFrom(XMLGregorianCalendar from) {
-        this.from = from;
+    public void setTime(XMLGregorianCalendar time) {
+        this.time = time;
     }
 
-    public XMLGregorianCalendar getTo() {
-        return to;
+    public String[] getLocation() {
+        return location;
     }
 
-    public void setTo(XMLGregorianCalendar to) {
-        this.to = to;
+    public void setLocation(String[] location) {
+        this.location = location;
     }
 
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(T value) {
+    public void setValue(Object value) {
         this.value = value;
     }
+
 //    public boolean satisfies(Target<T> t) {
 //        return t.satisfiedBy(this.value);
 //    }
 //
+//    @Override
+//    public int compareTo(Measurement<T> m) {
+//        return this.value.compareTo(m.getValue());
+//    }
+
 }
