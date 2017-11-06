@@ -1,5 +1,8 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.domain.performance.Indicator;
+import eu.einfracentral.domain.performance.Measurement;
+
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
@@ -230,6 +233,12 @@ public class Service implements Identifiable {
      */
     @XmlElement
     private String funding;
+
+    @XmlElement
+    private Indicator[] indicators;
+
+    @XmlElement
+    private Measurement[] measurements;
 
     @XmlElement
     private ServiceAddenda serviceAddenda;
@@ -506,6 +515,22 @@ public class Service implements Identifiable {
 
     public void setFunding(String funding) {
         this.funding = funding;
+    }
+
+    public Indicator[] getIndicators() {
+        return indicators;
+    }
+
+    public void setIndicators(Indicator[] indicators) {
+        this.indicators = indicators;
+    }
+
+    public Measurement[] getMeasurements() {
+        return measurements;
+    }
+
+    public void setMeasurements(Measurement[] measurements) {
+        this.measurements = measurements;
     }
 
     public ServiceAddenda getServiceAddenda() {
