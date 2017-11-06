@@ -16,6 +16,8 @@ public class Indicator implements Identifiable {
     private String id;
     @XmlElement(required = true)
     private String description;
+    @XmlElement(required = true)
+    private Unit unit;
 
     @Override
     public String getId() {
@@ -36,6 +38,14 @@ public class Indicator implements Identifiable {
     }
 
 //    @XmlElementWrapper(required = true)
+    public Unit getUnit() {
+        return unit;
+    }
+
+    public void setUnit(Unit unit) {
+        this.unit = unit;
+    }
+
 //    @XmlElement(name = "target")
 //    private List<Target<T>> targets;
 //
