@@ -9,6 +9,12 @@
     },
     {
       "multivalued": false,
+      "name": "url",
+      "path": "//*[local-name()='url']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "name",
       "path": "//*[local-name()='name']/text()",
       "type": "java.lang.String"
@@ -21,61 +27,12 @@
     },
     {
       "multivalued": false,
-      "name": "fullName",
-      "path": "//*[local-name()='fullName']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "options",
       "path": "//*[local-name()='options']/text()",
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "url",
-      "path": "//*[local-name()='url']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "symbol",
-      "path": "//*[local-name()='symbol']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "multimediaURL",
-      "path": "//*[local-name()='multimediaURL']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "version",
-      "path": "//*[local-name()='version']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "lastUpdate",
-      "path": "//*[local-name()='lastUpdate']/text()",
-      "type": "java.util.Date"
-    },
-    {
-      "multivalued": false,
-      "name": "changeLog",
-      "path": "//*[local-name()='changeLog']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "category",
-      "label": "Category",
-      "path": "//*[local-name()='category']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
+      "multivalued": true,
       "name": "provider",
       "label": "Provider",
       "path": "//*[local-name()='provider']/text()",
@@ -90,9 +47,9 @@
     },
     {
       "multivalued": false,
-      "name": "trl",
-      "label": "TRL",
-      "path": "//*[local-name()='trl']/text()",
+      "name": "category",
+      "label": "Category",
+      "path": "//*[local-name()='category']/text()",
       "type": "java.lang.String"
     },
     {
@@ -127,50 +84,8 @@
     },
     {
       "multivalued": false,
-      "name": "request",
-      "path": "//*[local-name()='request']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "helpdesk",
-      "path": "//*[local-name()='helpdesk']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "userManual",
-      "path": "//*[local-name()='userManual']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "trainingInformation",
-      "path": "//*[local-name()='trainingInformation']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "feedback",
-      "path": "//*[local-name()='feedback']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "price",
-      "path": "//*[local-name()='price']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "serviceLevelAgreement",
-      "path": "//*[local-name()='serviceLevelAgreement']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "termsOfUse",
-      "path": "//*[local-name()='termsOfUse']/text()",
+      "name": "funding",
+      "path": "//*[local-name()='funding']/text()",
       "type": "java.lang.String"
     }
   ],
