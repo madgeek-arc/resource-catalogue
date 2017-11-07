@@ -22,11 +22,11 @@ public class Provider implements Identifiable {
     @XmlElement(required = false)
     private String contactInformation;
 
-    @XmlElementWrapper(required = false)
+    @XmlElementWrapper(name = "users", required = false)
     @XmlElement(name = "user")
     private List<User> users;
 
-    @XmlElementWrapper(required = false)
+    @XmlElementWrapper(name = "services", required = false)
     @XmlElement(name = "service")
     private List<User> services;
 

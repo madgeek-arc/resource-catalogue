@@ -26,7 +26,6 @@ public class Measurement<T> implements Identifiable {
     @XmlElement
     private String[] location;
 
-
    @Override
     public String getId() {
         return id;

@@ -145,35 +145,35 @@ public class Service implements Identifiable {
     /**
      * List of places within which the service is available
      */
-    @XmlElementWrapper(required = false)
+    @XmlElementWrapper(name = "places", required = false)
     @XmlElement(name = "place")
     private List<String> places;
 
     /**
      * List of languages in which the service is available
      */
-    @XmlElementWrapper(required = false)
+    @XmlElementWrapper(name = "languages", required = false)
     @XmlElement(name = "language")
     private List<String> languages;
 
     /**
      * Field to facilitate searching based on keywords
      */
-    @XmlElementWrapper(required = false)
+    @XmlElementWrapper(name = "tags",required = false)
     @XmlElement(name = "tag")
     private List<String> tags;
 
     /**
      * No userManual given
      */
-    @XmlElementWrapper
+    @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
     private List<String> requiredServices;
 
     /**
      * Other services that are either required or commonly used with this service.
      */
-    @XmlElementWrapper
+    @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
     private List<String> relatedServices;
 
@@ -224,7 +224,7 @@ public class Service implements Identifiable {
     /**
      * Document containing the rules, service conditions and usage policy which one must agree to abide by in order to use the service.
      */
-    @XmlElementWrapper
+    @XmlElementWrapper(name = "termsOfUse")
     @XmlElement(name = "termOfUse")
     private List<URL> termsOfUse;
 

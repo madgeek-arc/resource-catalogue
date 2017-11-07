@@ -17,39 +17,28 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class User implements Identifiable {
-
     @XmlElement
     private String id;
-
     @XmlElement
     private String email;
-
     @XmlElement
     private String password;
-
     @XmlElement
     private String name;
-
     @XmlElement
     private String surname;
-
     @XmlElement
     private String joinDate;
-
     @XmlElementWrapper(name = "memberships")
     @XmlElement(name = "membership")
     private Map<Provider, Grant> memberships;
-
     @XmlElementWrapper(name = "favourites")
     @XmlElement(name = "favourite")
     private List<Service> favourites;
-
     @XmlElement
     private int iterationCount;
-
     @XmlElement
     private byte[] salt;
-
     @XmlElement
     private String resetToken;
 
