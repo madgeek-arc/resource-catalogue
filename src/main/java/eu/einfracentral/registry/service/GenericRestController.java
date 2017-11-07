@@ -4,7 +4,6 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.exception.ServerError;
-import eu.openminted.registry.core.service.ParserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,6 @@ import java.util.Map;
  * Created by pgl on 25/07/17.
  */
 public class GenericRestController<T> {
-
     private final ResourceCRUDService<T> service;
 
     GenericRestController(ResourceCRUDService service) {
