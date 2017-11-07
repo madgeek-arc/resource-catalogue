@@ -9,16 +9,12 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Vocabulary implements Identifiable {
-
     @XmlElement(required = true)
     private String id;
-
     @XmlElement(required = true)
     private String name;
-
     @XmlElement(required = true)
     private String type;
-
     @XmlElement
     private String parent;
 
@@ -55,5 +51,4 @@ public class Vocabulary implements Identifiable {
     public void setParent(String parent) {
         this.parent = parent;
     }
-
 }

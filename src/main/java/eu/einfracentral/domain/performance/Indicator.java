@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.*;
 /**
  * Created by pgl on 30/6/2017.
  */
-
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description", "unit", "dimensions"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -54,7 +53,6 @@ public class Indicator implements Identifiable {
     public void setDimensions(Dimension[] dimensions) {
         this.dimensions = dimensions;
     }
-
     //    @XmlElementWrapper(required = true)
 //    @XmlElement(name = "target")
 //    private List<Target<T>> targets;

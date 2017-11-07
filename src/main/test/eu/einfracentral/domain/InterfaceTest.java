@@ -15,7 +15,6 @@ import static javax.xml.bind.JAXBContext.newInstance;
  * Created by pgl on 23/08/17.
  */
 public class InterfaceTest {
-
     private ExecutorService executor;
     private JAXBContext jaxbContext = null;
 

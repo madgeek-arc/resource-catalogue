@@ -14,25 +14,18 @@ import java.util.List;
 public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;
-
     @XmlElement
     private List<Measurement<?>> perfomanceData;
-
     @XmlElement
     private int externalHits;
-
     @XmlElement
     private int internalHits;
-
     @XmlElement
     private int favouriteCount;
-
     @XmlElement
     private float averageRating;
-
     @XmlElement
     private float ratings;
-
     @XmlElement(defaultValue = "false")
     private boolean published;
 

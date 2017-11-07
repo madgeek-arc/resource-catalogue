@@ -7,14 +7,12 @@ import javax.xml.bind.annotation.*;
 /**
  * Created by pgl on 30/6/2017.
  */
-
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "description"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Grant implements Identifiable {
     @XmlElement(required = true)
     private String id;
-
     @XmlElement(required = true)
     private String description;
 

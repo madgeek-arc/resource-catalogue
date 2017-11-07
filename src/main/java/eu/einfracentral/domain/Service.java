@@ -25,67 +25,56 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = false)
     private String id; //maybe list
-
     /**
      * Link to a webpage providing information about the service. This webpage is usually hosted and maintained by the service provider. It contains fresh and additional information, such as what APIs are supported or links to the userManual.
      */
     @XmlElement(required = false)
     private URL url;
-
     /**
      * Brief brand/marketing name of service as assigned by the service provider. Should be descriptive from a customer point of view, and should be quite simple, such that someone non-technical is able to understand what the service is about.
      */
     @XmlElement(required = false)
     private String name;
-
     /**
      * Catchline or slogan of service for marketing/advertising  purposes.
      */
     @XmlElement
     private String tagline;
-
     /**
      * High-level description of what the service does in terms of functionality it provides and the resources it enables access to. Should be similar to the name described above, and should cover the value provided by the service, in fairly non-technical terms. These descriptions may seem obvious but help everyone within the organization understand the service, and also will be needed for the Service Catalogue, which will be shown to users and customers. It may provide also information related to the offered capacity, number of installations, underlying data that is offered.
      */
     @XmlElement(required = false)
     private String description;
-
     /**
      * A choice of utility and warranty that the customer can/should specify when commissioning the service
      */
     @XmlElement
     private String options;
-
     /**
      * Type of users or end-users allowed to commission/benefit from the service.
      */
     @XmlElement
     private String targetUsers; //maybe list
-
     /**
      * The benefit to a customer and their users delivered by the service. Benefits are usually related to alleviating pains (e.g., eliminate undesired outcomes, obstacles or risks) or producing gains (e.g. increased performance, social gains, positive emotions or cost saving).
      */
     @XmlElement
     private String userValue;
-
     /**
      * List of customers, communities, etc using the service.
      */
     @XmlElement
     private String userBase;
-
     /**
      * Link to a visual representation for the service. If none exists, providers are urged to use the organization's symbol
      */
     @XmlElement
     private URL symbol;
-
     /**
      * Link to a page containing multimedia regarding the service
      */
     @XmlElement
     private URL multimediaURL;
-
     //Classification
     /**
      * Organisation that manages and delivers the service and with whom the customer signs the SLA.
@@ -93,153 +82,128 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "providers", required = false)
     @XmlElement(name = "provider")
     private List<String> providers;
-
     /**
      * Informs about the implementation of the service that is in force as well as about its previous implementations, if any.
      */
     @XmlElement
     private String version;
-
     /**
      * The date of the latest update.
      */
     @XmlElement
     private XMLGregorianCalendar lastUpdate;
-
     /**
      * A list of the service features added in the latest version
      */
     @XmlElement
     private String changeLog;
-
     /**
      * No userManual given
      */
     @XmlElement
     private XMLGregorianCalendar validFor;
-
     /**
      * Is used to tag the service to the full service cycle: e.g., discovery, planned, alpha (prototype available for closed set of users), beta (service being developed while available for testing publicly), production, retired (not anymore offered).
      */
     @XmlElement(required = false)
     private String lifeCycleStatus; //alpha, beta, production
-
     /**
      * Is used to tag the service to the Technology Readiness Level.
      */
     @XmlElement(required = false)
     private String trl; //7, 8 , 9
-
     /**
      * A named group of services that offer access to the same type of resource. These are external ones that are of interest to a customer.
      */
     @XmlElement(required = false)
     private String category; //maybe list
-
     /**
      * Type of service within a category
      */
     @XmlElement(required = false)
     private String subcategory; //maybe list
-
     /**
      * List of places within which the service is available
      */
     @XmlElementWrapper(name = "places", required = false)
     @XmlElement(name = "place")
     private List<String> places;
-
     /**
      * List of languages in which the service is available
      */
     @XmlElementWrapper(name = "languages", required = false)
     @XmlElement(name = "language")
     private List<String> languages;
-
     /**
      * Field to facilitate searching based on keywords
      */
-    @XmlElementWrapper(name = "tags",required = false)
+    @XmlElementWrapper(name = "tags", required = false)
     @XmlElement(name = "tag")
     private List<String> tags;
-
     /**
      * No userManual given
      */
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
     private List<String> requiredServices;
-
     /**
      * Other services that are either required or commonly used with this service.
      */
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
     private List<String> relatedServices;
-
     //Support
     /**
      * Link to request the service from the service provider
      */
     @XmlElement(required = false)
     private URL request;
-
     /**
      * Link with contact to ask more information from the service provider about this service. A contact person or helpdesk within the organization must be assigned for communications, questions and issues relating to the service.
      */
     @XmlElement
     private URL helpdesk;
-
     /**
      * Link to user manual and userManual
      */
     @XmlElement
     private URL userManual;
-
     /**
      * Link to training information
      */
     @XmlElement
     private URL trainingInformation;
-
     /**
      * Link to page where customers can provide feedback on the service
      */
     @XmlElement
     private URL feedback;
-
     //Contractual
     /**
      * Supported payment models that apply. List of sentences each of them stating the type of payment model and the restriction that applies to it.
      */
     @XmlElement(required = false)
     private URL price;
-
     /**
      * Document containing information about the levels of performance that a service provider is expected to achieve. Current service agreements (SLAs) available for the service or basis for a new SLA. These should be agreements with users (not providers).
      */
     @XmlElement(required = false)
     private URL serviceLevelAgreement;
-
     /**
      * Document containing the rules, service conditions and usage policy which one must agree to abide by in order to use the service.
      */
     @XmlElementWrapper(name = "termsOfUse")
     @XmlElement(name = "termOfUse")
     private List<URL> termsOfUse;
-
     /**
      * Sources of funding for the development and operation of the service.
      */
     @XmlElement
     private String funding;
-
     @XmlElement
     private Indicator[] indicators;
-
     @XmlElement
     private Measurement[] measurements;
-
     @XmlElement
     private ServiceAddenda serviceAddenda;
 

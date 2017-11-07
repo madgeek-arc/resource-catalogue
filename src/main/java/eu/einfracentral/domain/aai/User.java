@@ -11,7 +11,6 @@ import java.util.Map;
 /**
  * Created by pgl on 30/6/2017.
  */
-
 @XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "email", "password", "name", "surname", "joinDate",
         "memberships", "favourites", "iterationCount", "salt", "resetToken"})
 @XmlAccessorType(XmlAccessType.FIELD)

@@ -15,7 +15,6 @@ public class MyPOJO implements Identifiable {
     private String field;
 
     public MyPOJO() {
-
     }
 
     public String getField() {
