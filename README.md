@@ -42,7 +42,6 @@ services.store.ip = {{store}}
 
 ### Add insecure registry
 
-
 1. Create a new docker registry
 
     ```bash

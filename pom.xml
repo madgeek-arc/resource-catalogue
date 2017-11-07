@@ -7,7 +7,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
-
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -29,7 +28,6 @@
         <jackson.version>2.6.2</jackson.version>
         <log4j.version>2.8.2</log4j.version>
     </properties>
-
 
     <dependencies>
         <!--einfra-->
@@ -140,7 +138,6 @@
             <url>https://repo.openminted.eu/content/repositories/releases</url>
         </repository>
     </distributionManagement>
-
 
     <repositories>
         <repository>
