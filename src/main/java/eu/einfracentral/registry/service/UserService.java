@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
  */
 @Service("userService")
 public interface UserService extends ResourceCRUDService<User> {
-
     User activate(String id);
 
     User reset(User user);
@@ -22,5 +21,4 @@ public interface UserService extends ResourceCRUDService<User> {
     boolean authenticate(User credentials);
 
     User getUserByEmail(String email);
-
 }

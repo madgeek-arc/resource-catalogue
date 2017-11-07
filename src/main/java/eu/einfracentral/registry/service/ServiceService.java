@@ -5,5 +5,4 @@ package eu.einfracentral.registry.service;
  */
 @org.springframework.stereotype.Service("serviceService")
 public interface ServiceService extends ResourceCRUDService<eu.einfracentral.domain.Service> {
-
 }
