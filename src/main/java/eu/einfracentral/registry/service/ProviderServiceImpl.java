@@ -7,7 +7,6 @@ import eu.einfracentral.domain.Provider;
  */
 @org.springframework.stereotype.Service("providerService")
 public class ProviderServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<Provider> implements ProviderService {
-
     public ProviderServiceImpl() {
         super(Provider.class);
     }
@@ -16,5 +15,4 @@ public class ProviderServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<P
     public String getResourceType() {
         return "provider";
     }
-
 }

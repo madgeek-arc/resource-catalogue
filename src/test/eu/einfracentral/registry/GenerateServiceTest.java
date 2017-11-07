@@ -12,23 +12,18 @@ import java.io.StringWriter;
 /**
  * Created by pgl on 19/7/2017.
  */
-
 public class GenerateServiceTest {
-
     @Test
     public void createService() throws Exception {
         JAXBContext jaxbContext = JAXBContext.newInstance(Service.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter sw = new StringWriter();
-
         Service testService = new Service();
-
         testService.setId("Hello World");
         marshaller.marshal(testService, sw);
         System.out.println(sw.toString());
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         Service type = (Service) unmarshaller.unmarshal(new StringReader(sw.toString()));
-
         System.out.println(type.getId());
     }
 

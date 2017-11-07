@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app>
-
     <display-name>eic-registry</display-name>
-
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-
     <!--<listener>-->
     <!--<listener-class>-->
     <!--org.springframework.web.context.request.RequestContextListener-->
     <!--</listener-class>-->
     <!--</listener>-->
-
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>/WEB-INF/applicationContext.xml</param-value>
     </context-param>
-
     <servlet>
         <servlet-name>springrest</servlet-name>
         <servlet-class>
@@ -29,7 +24,6 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
@@ -48,15 +42,12 @@
             <param-value>GET, POST, PUT, DELETE, OPTIONS, HEAD</param-value>
         </init-param>
     </filter>
-
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <servlet-mapping>
         <servlet-name>springrest</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 </web-app>  
-

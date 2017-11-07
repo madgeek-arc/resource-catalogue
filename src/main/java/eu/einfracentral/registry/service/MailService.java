@@ -15,34 +15,25 @@ import java.util.Properties;
 /**
  * Created by pgl on 08/09/17.
  */
-
 @org.springframework.stereotype.Service("mailService")
 @Configurable
 @PropertySource({"classpath:eu/einfracentral/domain/application.properties"})
 public class MailService {
     private Session session;
-
     @Value("${mail.smtp.auth}")
     private String auth;
-
     @Value("${mail.smtp.host}")
     private String host;
-
     @Value("${mail.smtp.password}")
     private String password;
-
     @Value("${mail.smtp.port}")
     private String port;
-
     @Value("${mail.smtp.socketFactory.class}")
     private String socketFactoryClass;
-
     @Value("${mail.smtp.socketFactory.port}")
     private String socketFactoryPort;
-
     @Value("${mail.smtp.starttls.enable}")
     private String starttls;
-
     @Value("${mail.smtp.user}")
     private String user;
 
@@ -76,7 +67,6 @@ public class MailService {
             msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
             msg.setSubject(subject);
             msg.setText(text);
-
             Transport transport = session.getTransport("smtp");
             transport.connect(host, port);
             Transport.send(msg);

@@ -3,7 +3,6 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.Identifiable;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Order;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
@@ -78,12 +77,10 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         if (exists(resource)) {
             throw new RESTException("Resource already exists!", HttpStatus.CONFLICT);
         }
-
         String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
         if (serialized.equals("failed")) {
             throw new RESTException("Bad resource!", HttpStatus.BAD_REQUEST);
         }
-
         Resource created = new Resource();
         created.setPayload(serialized);
         created.setCreationDate(new Date());

@@ -12,24 +12,19 @@ import java.io.StringWriter;
 /**
  * Created by pgl on 19/7/2017.
  */
-
 public class GenerateProviderTest {
-
     @Test
     public void createProvider() throws Exception {
         JAXBContext jaxbContext = JAXBContext.newInstance(Provider.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter sw = new StringWriter();
-
         Provider testProvider = new Provider();
-
         testProvider.setId("egi");
         testProvider.setName("EGI Foundation");
         marshaller.marshal(testProvider, sw);
         System.out.println(sw.toString());
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         Provider type = (Provider) unmarshaller.unmarshal(new StringReader(sw.toString()));
-
         //System.out.println(type.getId());
     }
 
@@ -43,17 +38,13 @@ public class GenerateProviderTest {
                 "\t<ns0:users></ns0:users>\n" +
                 "\t<ns0:services></ns0:services>\n" +
                 "</ns0:provider>";
-
         JAXBContext jaxbContext = JAXBContext.newInstance(Provider.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         Provider type = (Provider) unmarshaller.unmarshal(new StringReader(xml));
-
         System.out.println(type.getId());
-
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter sw = new StringWriter();
         marshaller.marshal(type, sw);
         System.out.println(sw.toString());
-
     }
 }

@@ -7,7 +7,6 @@ import eu.einfracentral.domain.Vocabulary;
  */
 @org.springframework.stereotype.Service("vocabularyService")
 public class VocabularyServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<Vocabulary> implements VocabularyService {
-
     public VocabularyServiceImpl() {
         super(Vocabulary.class);
     }
@@ -16,5 +15,4 @@ public class VocabularyServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl
     public String getResourceType() {
         return "vocabulary";
     }
-
 }

@@ -44,18 +44,13 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Value("${jwt.secret:}")
     private String secret;
 
-//    @Bean
-//    public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
-//        return new PropertySourcesPlaceholderConfigurer();
-//    }
+    public UserServiceImpl() {
+        super(User.class);
+    }
 
     @PostConstruct
     private void postConstruct() {
         System.err.println(secret);
-    }
-
-    public UserServiceImpl() {
-        super(User.class);
     }
 
     @Override
@@ -76,10 +71,10 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return strip(ret);
     }
 
-//    @Override
-//    public Browsing getAll(FacetFilter facetFilter) {
-//        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
-//    }
+    @Override
+    public Browsing getAll(FacetFilter facetFilter) {
+        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
+    }
 
     @Override
     public User reset(User user) {
@@ -98,7 +93,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             ret.setResetToken("Generate THIS!");
             update(ret);
             mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
-
         }
         return strip(ret);
     }
@@ -194,5 +188,4 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     private User unsafeGet(String id) {
         return super.get(id);
     }
-
 }
