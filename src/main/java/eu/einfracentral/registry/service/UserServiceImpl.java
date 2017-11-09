@@ -1,6 +1,9 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.aai.User;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.Facet;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
 import io.jsonwebtoken.Jwts;
@@ -73,7 +76,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public Browsing getAll(FacetFilter facetFilter) {
-        return new Browsing(0, 0, 0, new ArrayList<Order>(), new ArrayList<Facet>());
+        return new Browsing(0, 0, 0, new ArrayList<User>(), new ArrayList<Facet>());
     }
 
     @Override
