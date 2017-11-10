@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.aai.User;
+import eu.einfracentral.domain.User;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
