@@ -8,45 +8,7 @@ import java.util.List;
 /**
  * Created by pgl on 29/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "url",
-        "name",
-        "tagline",
-        "description",
-        "options",
-        "targetUsers",
-        "userValue",
-        "userBase",
-        "symbol",
-        "multimediaURL",
-        "providers",
-        "version",
-        "lastUpdate",
-        "changeLog",
-        "validFor",
-        "lifeCycleStatus",
-        "trl",
-        "category",
-        "subcategory",
-        "places",
-        "languages",
-        "tags",
-        "requiredServices",
-        "relatedServices",
-        "request",
-        "helpdesk",
-        "userManual",
-        "trainingInformation",
-        "feedback",
-        "price",
-        "serviceLevelAgreement",
-        "termsOfUse",
-        "funding",
-        "serviceAddenda"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlType
 public class Service implements Identifiable {
     //Basic
     /**

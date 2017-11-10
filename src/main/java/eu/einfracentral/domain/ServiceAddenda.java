@@ -1,25 +1,12 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.domain.performance.Measurement;
-
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
 /**
  * Created by pgl on 24/10/17.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "perfomanceData",
-        "externalHits",
-        "internalHits",
-        "favouriteCount",
-        "averageRating",
-        "ratings",
-        "published"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlType
 public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;

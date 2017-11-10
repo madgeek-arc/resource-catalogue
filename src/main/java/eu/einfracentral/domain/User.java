@@ -1,30 +1,15 @@
-package eu.einfracentral.domain.aai;
+package eu.einfracentral.domain;
 
-import eu.einfracentral.domain.Identifiable;
-import eu.einfracentral.domain.Service;
-
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by pgl on 30/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "email",
-        "password",
-        "name",
-        "surname",
-        "joinDate",
-        "memberships",
-        "favourites",
-        "iterationCount",
-        "salt",
-        "resetToken"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlType
 public class User implements Identifiable {
     @XmlElement
     private String id;

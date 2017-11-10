@@ -1,22 +1,12 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.domain.aai.User;
-
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
 /**
  * Created by pgl on 30/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "name",
-        "contactInformation",
-        "users",
-        "services"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlType
 public class Provider implements Identifiable {
     @XmlElement(required = false)
     private String id;

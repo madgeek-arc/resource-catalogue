@@ -1,18 +1,12 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Created by pgl on 3/7/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "name",
-        "type",
-        "parent"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlType
 public class Vocabulary implements Identifiable {
     @XmlElement(required = true)
     private String id;

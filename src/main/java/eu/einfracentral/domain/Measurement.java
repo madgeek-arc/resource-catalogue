@@ -1,6 +1,4 @@
-package eu.einfracentral.domain.performance;
-
-import eu.einfracentral.domain.Identifiable;
+package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -11,14 +9,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Created by pgl on 30/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "indicator",
-        "value",
-        "time",
-        "location"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType
 public class Measurement<T> implements Identifiable {
     @XmlElement(required = true)
     private String id;

@@ -1,20 +1,11 @@
-package eu.einfracentral.domain.performance;
-
-import eu.einfracentral.domain.Identifiable;
+package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.*;
 
 /**
  * Created by pgl on 30/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "description",
-        "unit",
-        "dimensions"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlType
 public class Indicator implements Identifiable {
     @XmlElement(required = true)
     private String id;

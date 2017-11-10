@@ -1,19 +1,12 @@
-package eu.einfracentral.domain.aai;
+package eu.einfracentral.domain;
 
-import eu.einfracentral.domain.Identifiable;
-
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Created by pgl on 30/6/2017.
  */
-
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {
-        "id",
-        "description"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlType
 public class Grant implements Identifiable {
     @XmlElement(required = true)
     private String id;
