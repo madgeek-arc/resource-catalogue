@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.aai.User;
+import eu.einfracentral.domain.User;
 import org.springframework.stereotype.Service;
 
 /**
