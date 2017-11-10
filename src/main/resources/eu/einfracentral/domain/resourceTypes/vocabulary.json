@@ -18,12 +18,6 @@
       "name": "type",
       "path": "//*[local-name()='type']/text()",
       "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "parent",
-      "path": "//*[local-name()='parent']/text()",
-      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
