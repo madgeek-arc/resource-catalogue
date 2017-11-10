@@ -8,7 +8,13 @@ import java.util.List;
 /**
  * Created by pgl on 30/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "contactInformation", "users", "services"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {
+        "id",
+        "name",
+        "contactInformation",
+        "users",
+        "services"
+})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {

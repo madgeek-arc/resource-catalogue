@@ -7,7 +7,13 @@ import javax.xml.bind.annotation.*;
 /**
  * Created by pgl on 04/08/17.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "instant", "type", "userID", "serviceID"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {
+        "id",
+        "instant",
+        "type",
+        "userID",
+        "serviceID"
+})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Access implements Identifiable {

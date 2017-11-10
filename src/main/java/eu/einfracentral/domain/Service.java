@@ -1,8 +1,5 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.domain.performance.Indicator;
-import eu.einfracentral.domain.performance.Measurement;
-
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
@@ -11,11 +8,43 @@ import java.util.List;
 /**
  * Created by pgl on 29/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "url", "name", "tagline", "description", "options",
-        "targetUsers", "userValue", "userBase", "symbol", "multimediaURL", "providers", "version", "lastUpdate",
-        "changeLog", "validFor", "lifeCycleStatus", "trl", "category", "subcategory", "places", "languages", "tags",
-        "requiredServices", "relatedServices", "request", "helpdesk", "userManual", "trainingInformation", "feedback",
-        "price", "serviceLevelAgreement", "termsOfUse", "funding", "indicators", "measurements", "serviceAddenda"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {
+        "id",
+        "url",
+        "name",
+        "tagline",
+        "description",
+        "options",
+        "targetUsers",
+        "userValue",
+        "userBase",
+        "symbol",
+        "multimediaURL",
+        "providers",
+        "version",
+        "lastUpdate",
+        "changeLog",
+        "validFor",
+        "lifeCycleStatus",
+        "trl",
+        "category",
+        "subcategory",
+        "places",
+        "languages",
+        "tags",
+        "requiredServices",
+        "relatedServices",
+        "request",
+        "helpdesk",
+        "userManual",
+        "trainingInformation",
+        "feedback",
+        "price",
+        "serviceLevelAgreement",
+        "termsOfUse",
+        "funding",
+        "serviceAddenda"
+})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
@@ -200,10 +229,6 @@ public class Service implements Identifiable {
      */
     @XmlElement
     private String funding;
-    @XmlElement
-    private Indicator[] indicators;
-    @XmlElement
-    private Measurement[] measurements;
     @XmlElement
     private ServiceAddenda serviceAddenda;
 
@@ -479,22 +504,6 @@ public class Service implements Identifiable {
 
     public void setFunding(String funding) {
         this.funding = funding;
-    }
-
-    public Indicator[] getIndicators() {
-        return indicators;
-    }
-
-    public void setIndicators(Indicator[] indicators) {
-        this.indicators = indicators;
-    }
-
-    public Measurement[] getMeasurements() {
-        return measurements;
-    }
-
-    public void setMeasurements(Measurement[] measurements) {
-        this.measurements = measurements;
     }
 
     public ServiceAddenda getServiceAddenda() {

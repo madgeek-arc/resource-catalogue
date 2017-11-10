@@ -5,7 +5,12 @@ import javax.xml.bind.annotation.*;
 /**
  * Created by pgl on 3/7/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "name", "type", "parent"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {
+        "id",
+        "name",
+        "type",
+        "parent"
+})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Vocabulary implements Identifiable {

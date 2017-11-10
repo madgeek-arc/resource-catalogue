@@ -1,7 +1,6 @@
 package eu.einfracentral.domain.aai;
 
 import eu.einfracentral.domain.Identifiable;
-import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 
 import javax.xml.bind.annotation.*;
@@ -11,8 +10,19 @@ import java.util.Map;
 /**
  * Created by pgl on 30/6/2017.
  */
-@XmlType(namespace = "http://einfracentral.eu", propOrder = {"id", "email", "password", "name", "surname", "joinDate",
-        "memberships", "favourites", "iterationCount", "salt", "resetToken"})
+@XmlType(namespace = "http://einfracentral.eu", propOrder = {
+        "id",
+        "email",
+        "password",
+        "name",
+        "surname",
+        "joinDate",
+        "memberships",
+        "favourites",
+        "iterationCount",
+        "salt",
+        "resetToken"
+})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class User implements Identifiable {
@@ -30,7 +40,7 @@ public class User implements Identifiable {
     private String joinDate;
     @XmlElementWrapper(name = "memberships")
     @XmlElement(name = "membership")
-    private Map<Provider, Grant> memberships;
+    private Map<String, Grant> memberships;
     @XmlElementWrapper(name = "favourites")
     @XmlElement(name = "favourite")
     private List<Service> favourites;
@@ -91,11 +101,11 @@ public class User implements Identifiable {
         this.joinDate = joinDate;
     }
 
-    public Map<Provider, Grant> getMemberships() {
+    public Map<String, Grant> getMemberships() {
         return memberships;
     }
 
-    public void setMemberships(Map<Provider, Grant> memberships) {
+    public void setMemberships(Map<String, Grant> memberships) {
         this.memberships = memberships;
     }
 
