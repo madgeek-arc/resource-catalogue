@@ -1,5 +1,8 @@
 package eu.einfracentral.registry.service;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.einfracentral.domain.aai.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,8 +47,12 @@ public class UserController extends GenericRestController<User> {
 
     @CrossOrigin
     @RequestMapping(path = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> register(@RequestBody User user) {
-        return new ResponseEntity<>(this.userService.register(user), HttpStatus.OK);
+    public ResponseEntity<User> register(@RequestBody User user) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        User userR = this.userService.register(user);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        System.out.println(mapper.writeValueAsString(userR));
+        return new ResponseEntity<>(userR, HttpStatus.OK);
     }
 
     @CrossOrigin
