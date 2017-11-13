@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutionException;
  */
 @org.springframework.stereotype.Service("userService")
 @Configurable
-@PropertySource({"classpath:eu/einfracentral/domain/application.properties"})
+@PropertySource({"classpath:application.properties"})
 public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService {
     @Autowired
     private MailService mailService;

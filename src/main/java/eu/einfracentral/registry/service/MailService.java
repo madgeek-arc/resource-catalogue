@@ -17,7 +17,7 @@ import java.util.Properties;
  */
 @org.springframework.stereotype.Service("mailService")
 @Configurable
-@PropertySource({"classpath:eu/einfracentral/domain/application.properties"})
+@PropertySource({"classpath:application.properties"})
 public class MailService {
     private Session session;
     @Value("${mail.smtp.auth}")
