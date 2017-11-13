@@ -1,12 +1,14 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
  * Created by pgl on 04/08/17.
  */
 @XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Access implements Identifiable {
     @XmlElement(required = true)
     private String id;

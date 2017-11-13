@@ -1,12 +1,15 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 /**
  * Created by pgl on 24/10/17.
  */
 @XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;
@@ -24,6 +27,7 @@ public class ServiceAddenda implements Identifiable {
     private float ratings;
     @XmlElement(defaultValue = "false")
     private boolean published;
+
     @Override
     public String getId() {
         return id;

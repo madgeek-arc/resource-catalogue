@@ -1,12 +1,16 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 /**
  * Created by pgl on 30/6/2017.
  */
 @XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {
     @XmlElement(required = false)
     private String id;
