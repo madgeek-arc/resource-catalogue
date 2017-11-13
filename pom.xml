@@ -209,21 +209,6 @@
                     <!--</dependency>-->
                 <!--</dependencies>-->
             <!--</plugin>-->
-            <plugin>
-                <groupId>external.atlassian.jgitflow</groupId>
-                <artifactId>jgitflow-maven-plugin</artifactId>
-                <version>1.0-m5.1</version>
-                <configuration>
-                    <flowInitContext>
-                        <developBranchName>develop</developBranchName>
-                        <versionTagPrefix>v</versionTagPrefix>
-                    </flowInitContext>
-                    <username>USERNAME_FOR_A_GIT_USER</username>
-                    <password>PASSWORD_FOR_A_GIT_USER</password>
-                    <noDeploy>true</noDeploy>
-                    <squash>true</squash>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>
