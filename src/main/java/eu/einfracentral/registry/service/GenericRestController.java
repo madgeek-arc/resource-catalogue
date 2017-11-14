@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
  * Created by pgl on 25/07/17.
  */
 public class GenericRestController<T> {
-    private final ResourceCRUDService<T> service;
+    protected final ResourceCRUDService<T> service;
 
     GenericRestController(ResourceCRUDService service) {
         this.service = service;
