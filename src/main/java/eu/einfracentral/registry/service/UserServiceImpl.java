@@ -105,8 +105,8 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         }
         Date now = new Date();
         if (authenticate(credentials)) {
-            return Jwts.builder().
-                    setSubject(credentials.getEmail())
+            return Jwts.builder()
+                       .setSubject(credentials.getEmail())
                        .claim("roles", "user")
                        .setIssuedAt(now)
                        .setExpiration(new Date(now.getTime() + 86400000))
@@ -120,16 +120,17 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Override
     public boolean authenticate(User credentials) {
         User actual = unsafeGet(getUserByEmail(credentials.getEmail()).getId());
-        return Arrays.equals(hashPass(credentials.getPassword()
-                                                 .toCharArray(), actual.getSalt(), actual.getIterationCount()), actual.getPassword()
-                                                                                                                      .toCharArray());
+        return Arrays.equals(hashPass(credentials.getPassword().toCharArray(),
+                                      actual.getSalt(),
+                                      actual.getIterationCount()), actual.getPassword().toCharArray());
     }
 
     @Override
     public User getUserByEmail(String email) {
         User ret = null;
         try {
-            Resource foundResource = searchService.searchId(getResourceType(), new SearchService.KeyValue("email", email));
+            Resource foundResource = searchService.searchId(getResourceType(),
+                                                            new SearchService.KeyValue("email", email));
             if (foundResource != null) {
                 User foundUser = parserPool.serialize(foundResource, typeParameterClass).get();
                 if (foundUser != null) {
@@ -152,8 +153,9 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         byte[] salt = new byte[8];
         r.nextBytes(salt);
         user.setSalt(salt);
-        user.setPassword(new String(hashPass(user.getPassword()
-                                                 .toCharArray(), user.getSalt(), currentServerIterationCount)));
+        user.setPassword(new String(hashPass(user.getPassword().toCharArray(),
+                                             user.getSalt(),
+                                             currentServerIterationCount)));
         return user;
     }
 

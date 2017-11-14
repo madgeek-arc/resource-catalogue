@@ -105,9 +105,10 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             throw new RESTException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
         if (!existingResource.getPayloadFormat().equals(ParserService.ParserServiceTypes.XML.name().toLowerCase())) {
-            throw new RESTException("Resource is " + existingResource.getPayloadFormat() + ", but you're trying to update with " + ParserService.ParserServiceTypes.XML
-                    .name()
-                    .toLowerCase(), HttpStatus.NOT_FOUND);
+            throw new RESTException(String.format("Resource is %s, but you're trying to update with %s",
+                                                  existingResource.getPayloadFormat(),
+                                                  ParserService.ParserServiceTypes.XML.name().toLowerCase()),
+                                    HttpStatus.NOT_FOUND);
         }
         existingResource.setPayload(serialized);
         resourceService.updateResource(existingResource);
