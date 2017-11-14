@@ -1,14 +1,9 @@
 package eu.einfracentral.domain;
 
-import org.junit.Test;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+import java.util.concurrent.*;
+import javax.xml.bind.*;
+import org.junit.Test;
 import static javax.xml.bind.JAXBContext.newInstance;
 
 /**
