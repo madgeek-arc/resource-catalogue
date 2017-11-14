@@ -1,3 +1,3 @@
 #eic-registry-api
 
-Contains all the classes for the xsd - java mapping.
+Contains all the API definitions.
