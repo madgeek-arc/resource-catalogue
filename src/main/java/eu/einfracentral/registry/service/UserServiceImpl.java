@@ -153,9 +153,11 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         byte[] salt = new byte[8];
         r.nextBytes(salt);
         user.setSalt(salt);
+        user.setIterationCount(currentServerIterationCount);
         user.setPassword(new String(hashPass(user.getPassword().toCharArray(),
                                              user.getSalt(),
-                                             currentServerIterationCount)));
+                                             user.getIterationCount())));
+
         return user;
     }
 
