@@ -1,4 +1,4 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.service;
 
 import java.util.Properties;
 import javax.annotation.PostConstruct;

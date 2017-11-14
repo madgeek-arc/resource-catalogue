@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.User;
+import eu.einfracentral.exception.RESTException;
+import eu.einfracentral.service.MailService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.SearchService;
 import io.jsonwebtoken.*;

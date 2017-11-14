@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Identifiable;
+import eu.einfracentral.exception.RESTException;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.*;
 import java.net.UnknownHostException;

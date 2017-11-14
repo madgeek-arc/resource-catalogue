@@ -2,7 +2,7 @@ package eu.einfracentral.registry.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.registry.service.RESTException;
+import eu.einfracentral.exception.RESTException;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import java.io.*;
