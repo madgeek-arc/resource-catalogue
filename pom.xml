@@ -25,7 +25,7 @@
         <junit.version>4.12</junit.version>
         <junit-toolbox.version>2.2</junit-toolbox.version>
         <spring.version>4.2.3.RELEASE</spring.version>
-        <!--<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>-->
+        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
     </properties>
@@ -123,14 +123,15 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-surefire-plugin</artifactId>-->
-                <!--<version>${maven-surefire-plugin.version}</version>-->
-                <!--<configuration>-->
-                    <!--<argLine>-Dfile.encoding=UTF-8</argLine>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
