@@ -1,17 +1,11 @@
 package eu.einfracentral.registry.service;
 
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.exception.ServerError;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.exception.*;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Created by pgl on 25/07/17.

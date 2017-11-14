@@ -1,16 +1,11 @@
 package eu.einfracentral.registry.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import eu.einfracentral.domain.User;
+import javax.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by pgl on 07/08/17.
@@ -57,12 +52,16 @@ public class UserController extends GenericRestController<User> {
     @CrossOrigin
     @RequestMapping(path = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
-        if (credentials.getEmail() == null || credentials.getPassword() == null)
+        if (credentials.getEmail() == null || credentials.getPassword() == null) {
             return new ResponseEntity<>(credentials, HttpStatus.UNPROCESSABLE_ENTITY);
-        if (!this.userService.authenticate(credentials))
+        }
+        if (!this.userService.authenticate(credentials)) {
             return new ResponseEntity<>(credentials, HttpStatus.FORBIDDEN);
+        }
         User ret = this.userService.getUserByEmail(credentials.getEmail());
-        if (ret == null) return new ResponseEntity<>(credentials, HttpStatus.NOT_FOUND);
+        if (ret == null) {
+            return new ResponseEntity<>(credentials, HttpStatus.NOT_FOUND);
+        }
         try {
             String token = this.userService.getToken(credentials);
             Cookie cookie = new Cookie("jwt", token);

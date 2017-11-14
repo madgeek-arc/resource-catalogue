@@ -2,8 +2,7 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Vocabulary;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Created by pgl on 24/7/2017.
