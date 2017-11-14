@@ -39,11 +39,7 @@ public class UserController extends GenericRestController<User> {
     @CrossOrigin
     @RequestMapping(path = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> register(@RequestBody User user) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        User userR = ((UserService) service).register(user);
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        System.out.println(mapper.writeValueAsString(userR));
-        return new ResponseEntity<>(userR, HttpStatus.OK);
+        return new ResponseEntity<>(((UserService) service).register(user), HttpStatus.OK);
     }
 
     @CrossOrigin
