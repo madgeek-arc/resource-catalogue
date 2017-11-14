@@ -1,4 +1,4 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.exception;
 
 import org.springframework.http.HttpStatus;
 

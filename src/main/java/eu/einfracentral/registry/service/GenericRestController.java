@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.service;
 
+import eu.einfracentral.exception.RESTException;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.*;
 import java.util.*;
