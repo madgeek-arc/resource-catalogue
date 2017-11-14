@@ -1,29 +1,21 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.User;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.Facet;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.SearchService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpStatus;
-
-import javax.annotation.PostConstruct;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
+import io.jsonwebtoken.*;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.PostConstruct;
+import javax.crypto.*;
+import javax.crypto.spec.PBEKeySpec;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 
 /**
  * Created by pgl on 07/08/17.
@@ -57,11 +49,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     @Override
-    public String getResourceType() {
-        return "einfrauser";
-    }
-
-    @Override
     public User activate(String id) {
         User ret = unsafeGet(id);
         if (ret.getJoinDate() == null) {
@@ -75,27 +62,11 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     @Override
-    public Browsing getAll(FacetFilter facetFilter) {
-        return new Browsing(0, 0, 0, new ArrayList<User>(), new ArrayList<Facet>());
-    }
-
-    @Override
     public User reset(User user) {
         User ret = null;
         if (user.getResetToken().equals(unsafeGet(user.getId()).getResetToken())) {
             ret = hashUser(user);
             update(ret);
-        }
-        return strip(ret);
-    }
-
-    @Override
-    public User forgot(String email) {
-        User ret = getUserByEmail(email);
-        if (ret != null) {
-            ret.setResetToken("Generate THIS!");
-            update(ret);
-            mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
         }
         return strip(ret);
     }
@@ -114,30 +85,42 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
 
-    private User hashUser(User user) {
-        final Random r = new SecureRandom();
-        byte[] salt = new byte[8];
-        r.nextBytes(salt);
-        user.setSalt(salt);
-        user.setPassword(new String(hashPass(user.getPassword().toCharArray(), user.getSalt(), currentServerIterationCount)));
-        return user;
+    @Override
+    public User forgot(String email) {
+        User ret = getUserByEmail(email);
+        if (ret != null) {
+            ret.setResetToken("Generate THIS!");
+            update(ret);
+            mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
+        }
+        return strip(ret);
     }
 
-    private char[] hashPass(char[] pass, byte[] salt, int iterations) {
-        try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, 256);
-            SecretKey key = skf.generateSecret(spec);
-            return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
-            throw new Error(ex);
+    @Override
+    public String getToken(User credentials) {
+        if (secret.length() == 0) {
+            throw new RESTException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        Date now = new Date();
+        if (authenticate(credentials)) {
+            return Jwts.builder().
+                    setSubject(credentials.getEmail())
+                       .claim("roles", "user")
+                       .setIssuedAt(now)
+                       .setExpiration(new Date(now.getTime() + 86400000))
+                       .signWith(SignatureAlgorithm.HS256, secret)
+                       .compact();
+        } else {
+            throw new RESTException("Passwords do not match.", HttpStatus.FORBIDDEN);
         }
     }
 
     @Override
     public boolean authenticate(User credentials) {
         User actual = unsafeGet(getUserByEmail(credentials.getEmail()).getId());
-        return Arrays.equals(hashPass(credentials.getPassword().toCharArray(), actual.getSalt(), actual.getIterationCount()), actual.getPassword().toCharArray());
+        return Arrays.equals(hashPass(credentials.getPassword()
+                                                 .toCharArray(), actual.getSalt(), actual.getIterationCount()), actual.getPassword()
+                                                                                                                      .toCharArray());
     }
 
     @Override
@@ -158,26 +141,33 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     }
 
     @Override
-    public String getToken(User credentials) {
-        if (secret.length() == 0)
-            throw new RESTException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
-        Date now = new Date();
-        if (authenticate(credentials)) {
-            return Jwts.builder().
-                    setSubject(credentials.getEmail())
-                    .claim("roles", "user")
-                    .setIssuedAt(now)
-                    .setExpiration(new Date(now.getTime() + 86400000))
-                    .signWith(SignatureAlgorithm.HS256, secret)
-                    .compact();
-        } else {
-            throw new RESTException("Passwords do not match.", HttpStatus.FORBIDDEN);
+    public String getResourceType() {
+        return "einfrauser";
+    }
+
+    private User hashUser(User user) {
+        final Random r = new SecureRandom();
+        byte[] salt = new byte[8];
+        r.nextBytes(salt);
+        user.setSalt(salt);
+        user.setPassword(new String(hashPass(user.getPassword()
+                                                 .toCharArray(), user.getSalt(), currentServerIterationCount)));
+        return user;
+    }
+
+    private char[] hashPass(char[] pass, byte[] salt, int iterations) {
+        try {
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+            PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, 256);
+            SecretKey key = skf.generateSecret(spec);
+            return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+            throw new Error(ex);
         }
     }
 
-    @Override
-    public User get(String id) {
-        return strip(unsafeGet(id));
+    private User unsafeGet(String id) {
+        return super.get(id);
     }
 
     private User strip(User user) {
@@ -188,7 +178,13 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         return user;
     }
 
-    private User unsafeGet(String id) {
-        return super.get(id);
+    @Override
+    public User get(String id) {
+        return strip(unsafeGet(id));
+    }
+
+    @Override
+    public Browsing getAll(FacetFilter facetFilter) {
+        return new Browsing(0, 0, 0, new ArrayList<User>(), new ArrayList<Facet>());
     }
 }

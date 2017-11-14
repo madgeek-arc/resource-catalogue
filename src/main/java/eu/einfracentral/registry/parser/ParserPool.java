@@ -1,27 +1,16 @@
 package eu.einfracentral.registry.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.User;
-import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.RESTException;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
+import java.io.*;
+import java.util.concurrent.*;
+import javax.xml.bind.*;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import static javax.xml.bind.JAXBContext.newInstance;
 
 /**

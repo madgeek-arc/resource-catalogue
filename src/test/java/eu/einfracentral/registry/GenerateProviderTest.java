@@ -1,13 +1,9 @@
 package eu.einfracentral.registry;
 
 import eu.einfracentral.domain.Provider;
+import java.io.*;
+import javax.xml.bind.*;
 import org.junit.Test;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
-import java.io.StringWriter;
 
 /**
  * Created by pgl on 19/7/2017.
