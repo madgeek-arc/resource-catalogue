@@ -23,6 +23,7 @@
         <commons-io.version>2.4</commons-io.version>
         <commons-fileupload.version>1.2.1</commons-fileupload.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
     </properties>
     <scm>
         <connection>scm:git:git://github.com/eInfraCentral/eic-registry-rest.git</connection>
@@ -128,6 +129,15 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <skipTests>true</skipTests>
+                        <argLine>-Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
             </plugins>
