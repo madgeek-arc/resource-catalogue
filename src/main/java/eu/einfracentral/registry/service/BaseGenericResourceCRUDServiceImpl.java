@@ -119,7 +119,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         if (!exists(resource)) {
             throw new RESTException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
-        resourceService.deleteResource(resource.getId());
+        resourceService.deleteResource(getResource(resource.getId()).getId());
     }
 
     private boolean exists(T resource) {
