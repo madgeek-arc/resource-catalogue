@@ -44,10 +44,10 @@ public class ServiceTests {
                         "    <validFor>2020-01-01</validFor>\n" +
                         "    <lifeCycleStatus>Alpha</lifeCycleStatus>\n" +
                         "    <trl>7</trl>\n" +
-                        "    <category>Category_Repository</category>\n" +
-                        "    <subcategory>Subcategory_enabling_platform</subcategory>\n" +
-                        "    <places><place>Country_GR</place></places>\n" +
-                        "    <languages><language>Language_el</language></languages>\n" +
+                        "    <category>Repository</category>\n" +
+                        "    <subcategory>enabling_platform</subcategory>\n" +
+                        "    <places><place>GR</place></places>\n" +
+                        "    <languages><language>el</language></languages>\n" +
                         "    <tags><tag>meta</tag></tags>\n" +
                         "    <requiredServices></requiredServices>\n" +
                         "    <relatedServices><relatedService>1.2</relatedService></relatedServices>\n" +
