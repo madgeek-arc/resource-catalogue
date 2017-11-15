@@ -3,7 +3,7 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.RESTException;
 import eu.einfracentral.service.MailService;
-import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
 import io.jsonwebtoken.*;
 import java.net.UnknownHostException;
@@ -15,7 +15,6 @@ import javax.annotation.PostConstruct;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import org.springframework.beans.factory.annotation.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 
@@ -157,7 +156,6 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
         user.setPassword(new String(hashPass(user.getPassword().toCharArray(),
                                              user.getSalt(),
                                              user.getIterationCount())));
-
         return user;
     }
 
