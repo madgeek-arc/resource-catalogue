@@ -4,13 +4,10 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.RESTException;
 import eu.einfracentral.service.MailService;
 import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.service.SearchService;
 import io.jsonwebtoken.*;
-import java.net.UnknownHostException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
@@ -127,20 +124,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
 
     @Override
     public User getUserByEmail(String email) {
-        User ret = null;
-        try {
-            Resource foundResource = searchService.searchId(getResourceType(),
-                                                            new SearchService.KeyValue("email", email));
-            if (foundResource != null) {
-                User foundUser = parserPool.serialize(foundResource, typeParameterClass).get();
-                if (foundUser != null) {
-                    ret = strip(foundUser);
-                }
-            }
-        } catch (UnknownHostException | InterruptedException | ExecutionException e) {
-            throw new RESTException(e, HttpStatus.NOT_FOUND);
-        }
-        return ret;
+        return strip(get("email", email));
     }
 
     @Override
