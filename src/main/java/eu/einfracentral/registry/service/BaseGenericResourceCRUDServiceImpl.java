@@ -126,7 +126,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         return getResource(resource.getId()) != null;
     }
 
-    private String serialize(T resource, ParserService.ParserServiceTypes type) {
+    protected String serialize(T resource, ParserService.ParserServiceTypes type) {
         try {
             return parserPool.deserialize(resource, type).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -135,7 +135,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         }
     }
 
-    private T deserialize(Resource resource) {
+    protected T deserialize(Resource resource) {
         try {
             return parserPool.serialize(resource, typeParameterClass).get();
         } catch (InterruptedException | ExecutionException e) {
