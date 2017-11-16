@@ -163,4 +163,13 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     private boolean resourceIsSerializable(T resource, ParserService.ParserServiceTypes type) {
         return !serialize(resource, type).equals("failed");
     }
+
+    @Override
+    public T get(String field, String value) {
+        try {
+            return deserialize(searchService.searchId(getResourceType(), new SearchService.KeyValue(field, value)));
+        } catch (UnknownHostException e) {
+            throw new RESTException(e, HttpStatus.NOT_FOUND);
+        }
+    }
 }
