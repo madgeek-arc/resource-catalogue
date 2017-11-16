@@ -9,5 +9,6 @@ import java.util.*;
 public interface ResourceCRUDService<T> extends eu.openminted.registry.core.service.ResourceCRUDService<T> {
     Map<String, List<T>> getBy(String field);
     List<T> getSome(String... ids);
+    T get(String field, String value);
     Browsing<T> delAll();
 }
