@@ -34,11 +34,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         results.forEach((category, resources) -> {
             List<T> payloads = new ArrayList<>();
             for (Resource r : resources) {
-                try {
-                    payloads.add(parserPool.serialize(r, typeParameterClass).get());
-                } catch (Exception e) {
-                    throw new ServiceException(e);
-                }
+                payloads.add(deserialize(r));
             }
             ret.put(category, payloads);
         });
