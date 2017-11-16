@@ -1,11 +1,13 @@
 package eu.einfracentral.registry.service;
 
-import com.fasterxml.jackson.databind.*;
 import eu.einfracentral.domain.User;
+import eu.openminted.registry.core.domain.Browsing;
+import java.util.Map;
 import javax.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Created by pgl on 07/08/17.
@@ -66,13 +68,16 @@ public class UserController extends GenericRestController<User> {
             return new ResponseEntity<>(credentials, HttpStatus.BAD_REQUEST);
         }
     }
-//    @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams, HttpServletRequest request) {
-//        if (request.getRemoteAddr().equals("194.177.192.118")) {
-//            ResponseEntity<Browsing> ret = super.getAll(allRequestParams, WebUtils.getCookie(request, "jwt").getValue()); //TODO: Only allow verified admin user access to this
-//            return ret;
-//        } else {
-//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//        }
-//    }
+
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams, HttpServletRequest request) {
+        if (request.getRemoteAddr().equals("194.177.192.118")) {
+            ResponseEntity<Browsing> ret = super.getAll(allRequestParams,
+                                                        WebUtils.getCookie(request, "jwt")
+                                                                .getValue()); //TODO: Only allow verified admin user access to this
+            return ret;
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
 }
