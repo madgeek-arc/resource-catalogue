@@ -30,9 +30,9 @@ public class GenericRestController<T> {
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<String> add(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    public ResponseEntity<T> add(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.add(resource);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
