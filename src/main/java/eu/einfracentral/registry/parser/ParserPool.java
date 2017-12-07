@@ -2,7 +2,7 @@ package eu.einfracentral.registry.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.RESTException;
+import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import java.io.*;
@@ -36,7 +36,7 @@ public class ParserPool implements ParserService {
         return executor.submit(() -> {
             T type;
             if (resource == null) {
-                throw new RESTException("Could not serialize null resource", HttpStatus.BAD_REQUEST);
+                throw new ResourceException("Could not serialize null resource", HttpStatus.BAD_REQUEST);
             }
             try {
                 if (resource.getPayloadFormat().equals("xml")) {
@@ -46,11 +46,11 @@ public class ParserPool implements ParserService {
                     ObjectMapper mapper = new ObjectMapper();
                     type = mapper.readValue(resource.getPayload(), tClass);
                 } else {
-                    throw new RESTException(resource.getPayloadFormat() + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+                    throw new ResourceException(resource.getPayloadFormat() + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
                 }
             } catch (JAXBException e) {
                 logger.fatal(e);
-                throw new RESTException(e, HttpStatus.I_AM_A_TEAPOT);
+                throw new ResourceException(e, HttpStatus.I_AM_A_TEAPOT);
             }
             return type;
         });
@@ -68,7 +68,7 @@ public class ParserPool implements ParserService {
                 ObjectMapper mapper = new ObjectMapper();
                 return mapper.writeValueAsString(resource);
             } else {
-                throw new RESTException(mediaType + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+                throw new ResourceException(mediaType + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             }
         });
     }

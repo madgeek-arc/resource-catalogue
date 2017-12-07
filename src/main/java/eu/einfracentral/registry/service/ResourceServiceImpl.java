@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Identifiable;
-import eu.einfracentral.exception.RESTException;
+import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.*;
 import java.net.UnknownHostException;
@@ -13,10 +13,10 @@ import org.springframework.http.HttpStatus;
 /**
  * Created by pgl on 12/7/2017.
  */
-public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceCRUDService<T> {
+public abstract class ResourceServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
     protected final Logger logger;
 
-    public BaseGenericResourceCRUDServiceImpl(Class<T> typeParameterClass) {
+    public ResourceServiceImpl(Class<T> typeParameterClass) {
         super(typeParameterClass);
         logger = Logger.getLogger(typeParameterClass);
     }
@@ -47,7 +47,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         for (String id : ids) {
             try {
                 ret.add(this.get(id));
-            } catch (RESTException se) {
+            } catch (ResourceException se) {
                 ret.add(null);
             }
         }
@@ -73,11 +73,11 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     @Override
     public void add(T resource) {
         if (exists(resource)) {
-            throw new RESTException("Resource already exists!", HttpStatus.CONFLICT);
+            throw new ResourceException("Resource already exists!", HttpStatus.CONFLICT);
         }
         String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
         if (serialized.equals("failed")) {
-            throw new RESTException("Bad resource!", HttpStatus.BAD_REQUEST);
+            throw new ResourceException("Bad resource!", HttpStatus.BAD_REQUEST);
         }
         Resource created = new Resource();
         created.setPayload(serialized);
@@ -94,17 +94,17 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     public void update(T resource) {
         String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
         if (serialized.equals("failed")) {
-            throw new RESTException("Bad resource!", HttpStatus.BAD_REQUEST);
+            throw new ResourceException("Bad resource!", HttpStatus.BAD_REQUEST);
         }
         Resource existingResource = getResource(resource.getId());
         if (existingResource == null) {
-            throw new RESTException("Resource does not exist!", HttpStatus.NOT_FOUND);
+            throw new ResourceException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
         if (!existingResource.getPayloadFormat().equals(ParserService.ParserServiceTypes.XML.name().toLowerCase())) {
-            throw new RESTException(String.format("Resource is %s, but you're trying to update with %s",
-                                                  existingResource.getPayloadFormat(),
-                                                  ParserService.ParserServiceTypes.XML.name().toLowerCase()),
-                                    HttpStatus.NOT_FOUND);
+            throw new ResourceException(String.format("Resource is %s, but you're trying to update with %s",
+                                                      existingResource.getPayloadFormat(),
+                                                      ParserService.ParserServiceTypes.XML.name().toLowerCase()),
+                                        HttpStatus.NOT_FOUND);
         }
         existingResource.setPayload(serialized);
         resourceService.updateResource(existingResource);
@@ -113,7 +113,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
     @Override
     public void delete(T resource) {
         if (!exists(resource)) {
-            throw new RESTException("Resource does not exist!", HttpStatus.NOT_FOUND);
+            throw new ResourceException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
         resourceService.deleteResource(getResource(resource.getId()).getId());
     }
@@ -127,7 +127,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             return parserPool.deserialize(resource, type).get();
         } catch (InterruptedException | ExecutionException e) {
             logger.fatal(e);
-            throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -136,7 +136,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             return parserPool.serialize(resource, typeParameterClass).get();
         } catch (InterruptedException | ExecutionException e) {
             logger.fatal(e);
-            throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -147,7 +147,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
             return searchService.searchId(type, new SearchService.KeyValue(idFieldName, resourceID));
         } catch (UnknownHostException e) {
             logger.fatal(e);
-            throw new RESTException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -169,7 +169,7 @@ public abstract class BaseGenericResourceCRUDServiceImpl<T extends Identifiable>
         try {
             return deserialize(searchService.searchId(getResourceType(), new SearchService.KeyValue(field, value)));
         } catch (UnknownHostException e) {
-            throw new RESTException(e, HttpStatus.NOT_FOUND);
+            throw new ResourceException(e, HttpStatus.NOT_FOUND);
         }
     }
 }

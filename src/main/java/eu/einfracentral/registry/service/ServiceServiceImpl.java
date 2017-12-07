@@ -6,7 +6,7 @@ import eu.einfracentral.domain.Service;
  * Created by pgl on 4/7/2017.
  */
 @org.springframework.stereotype.Service("serviceService")
-public class ServiceServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<Service> implements ServiceService {
+public class ServiceServiceImpl extends ResourceServiceImpl<Service> implements ServiceService {
     public ServiceServiceImpl() {
         super(Service.class);
     }

@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.User;
-import eu.einfracentral.exception.RESTException;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.service.MailService;
 import eu.openminted.registry.core.domain.*;
 import io.jsonwebtoken.*;
@@ -22,7 +22,7 @@ import org.springframework.http.HttpStatus;
 @org.springframework.stereotype.Service("userService")
 @Configurable
 @PropertySource({"classpath:application.properties"})
-public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User> implements UserService {
+public class UserServiceImpl extends ResourceServiceImpl<User> implements UserService {
     @Autowired
     private MailService mailService;
     @Value("${mail.activate.subject}")
@@ -55,7 +55,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             update(ret);
             //Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
         } else {
-            throw new RESTException("User already activated", HttpStatus.CONFLICT);
+            throw new ResourceException("User already activated", HttpStatus.CONFLICT);
         }
         return strip(ret);
     }
@@ -79,7 +79,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
             add(ret);
             mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
         } else {
-            throw new RESTException("User already registered!", HttpStatus.CONFLICT);
+            throw new ResourceException("User already registered!", HttpStatus.CONFLICT);
         }
         return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
     }
@@ -98,7 +98,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
     @Override
     public String getToken(User credentials) {
         if (secret.length() == 0) {
-            throw new RESTException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResourceException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         Date now = new Date();
         if (authenticate(credentials)) {
@@ -110,7 +110,7 @@ public class UserServiceImpl<T> extends BaseGenericResourceCRUDServiceImpl<User>
                        .signWith(SignatureAlgorithm.HS256, secret)
                        .compact();
         } else {
-            throw new RESTException("Passwords do not match.", HttpStatus.FORBIDDEN);
+            throw new ResourceException("Passwords do not match.", HttpStatus.FORBIDDEN);
         }
     }
 
