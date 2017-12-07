@@ -14,7 +14,7 @@ import org.springframework.web.util.WebUtils;
  */
 @RestController
 @RequestMapping("user")
-public class UserController extends GenericRestController<User> {
+public class UserController extends ResourceController<User> {
     @Autowired
     UserController(UserService service) {
         super(service);

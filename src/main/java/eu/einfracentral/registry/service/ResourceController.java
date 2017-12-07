@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.exception.RESTException;
+import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.*;
 import java.util.*;
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Created by pgl on 25/07/17.
  */
-public class GenericRestController<T> {
-    protected final ResourceCRUDService<T> service;
+public class ResourceController<T> {
+    protected final ResourceService<T> service;
 
-    GenericRestController(ResourceCRUDService service) {
+    ResourceController(ResourceService service) {
         this.service = service;
     }
 
@@ -86,9 +86,9 @@ public class GenericRestController<T> {
         return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
 
-    @ExceptionHandler(RESTException.class)
+    @ExceptionHandler(ResourceException.class)
     @ResponseBody
-    public ResponseEntity<ServerError> handleRESTException(HttpServletRequest req, RESTException ex) {
+    public ResponseEntity<ServerError> handleRESTException(HttpServletRequest req, ResourceException ex) {
         return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), ex), ex.getStatus());
     }
 }

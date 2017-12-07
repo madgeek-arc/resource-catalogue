@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("provider")
-public class ProviderController extends GenericRestController<Provider> {
+public class ProviderController extends ResourceController<Provider> {
     @Autowired
     ProviderController(ProviderService service) {
         super(service);

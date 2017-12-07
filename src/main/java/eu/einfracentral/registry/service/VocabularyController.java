@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("vocabulary")
-public class VocabularyController extends GenericRestController<Vocabulary> {
+public class VocabularyController extends ResourceController<Vocabulary> {
     @Autowired
     VocabularyController(VocabularyService service) {
         super(service);
