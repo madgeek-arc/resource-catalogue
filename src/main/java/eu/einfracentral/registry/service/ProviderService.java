@@ -7,5 +7,5 @@ import org.springframework.stereotype.Service;
  * Created by pgl on 26/07/17.
  */
 @Service("providerService")
-public interface ProviderService extends ResourceCRUDService<Provider> {
+public interface ProviderService extends ResourceService<Provider> {
 }
