@@ -10,4 +10,7 @@
     <mvc:annotation-driven/>
     <context:component-scan base-package="eu.einfracentral"/>
     <context:component-scan base-package="eu.openminted.registry.core.controllers"/>
+    <!--<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>-->
+    <!--<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>-->
+    <!--<bean class="eu.einfracentral.config.SwaggerConfig"/>-->
 </beans>
