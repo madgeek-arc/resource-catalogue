@@ -7,6 +7,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * Created by pgl on 25/07/17.
@@ -42,12 +43,14 @@ public class ResourceController<T> {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ApiIgnore
     public ResponseEntity<T> delete(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
         service.delete(resource);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ApiIgnore
     public ResponseEntity<Browsing> delAll(@CookieValue(value = "jwt", defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.delAll(), HttpStatus.OK);
     }
