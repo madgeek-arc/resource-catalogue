@@ -128,8 +128,18 @@ public class UserServiceImpl extends ResourceServiceImpl<User> implements UserSe
     }
 
     @Override
-    public String getResourceType() {
-        return "einfrauser";
+    public User addFavourite(String userID, String serviceID) {
+        return get(userID); //TODO: implement this
+    }
+
+    @Override
+    public User get(String id) {
+        return strip(unsafeGet(id));
+    }
+
+    @Override
+    public Browsing getAll(FacetFilter facetFilter) {
+        return new Browsing(0, 0, 0, new ArrayList<User>(), new ArrayList<Facet>());
     }
 
     private User hashUser(User user) {
@@ -168,12 +178,7 @@ public class UserServiceImpl extends ResourceServiceImpl<User> implements UserSe
     }
 
     @Override
-    public User get(String id) {
-        return strip(unsafeGet(id));
-    }
-
-    @Override
-    public Browsing getAll(FacetFilter facetFilter) {
-        return new Browsing(0, 0, 0, new ArrayList<User>(), new ArrayList<Facet>());
+    public String getResourceType() {
+        return "einfrauser";
     }
 }
