@@ -15,4 +15,5 @@ public interface UserService extends ResourceService<User> {
     String getToken(User user);
     boolean authenticate(User credentials);
     User getUserByEmail(String email);
+    User addFavourite(String userID, String serviceID);
 }
