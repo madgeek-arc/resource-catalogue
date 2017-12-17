@@ -57,6 +57,25 @@ public class ParserPool implements ParserService {
     }
 
     @Override
+    public <T> T deserialize(String json, Class<T> returnType) throws IOException {
+        return new ObjectMapper().readValue(json, returnType);
+    }
+
+    @Override
+    public Resource deserializeResource(File file, ParserServiceTypes mediaType) {
+        try {
+            if (mediaType == ParserServiceTypes.XML) {
+                return (Resource) (jaxbContext.createUnmarshaller().unmarshal(file));
+            } else if (mediaType == ParserServiceTypes.JSON) {
+                return new ObjectMapper().readValue(file, Resource.class);
+            }
+        } catch (IOException | JAXBException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public Future<String> deserialize(Object resource, ParserServiceTypes mediaType) {
         return executor.submit(() -> {
             if (mediaType == ParserServiceTypes.XML) {
