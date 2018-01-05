@@ -11,7 +11,7 @@ public class Access implements Identifiable {
     @XmlElement(required = true)
     private String id;
     @XmlElement(required = true)
-    private int instant;
+    private long instant;
     @XmlElement(required = true)
     private String type;
     @XmlElement
@@ -29,11 +29,11 @@ public class Access implements Identifiable {
         this.id = id;
     }
 
-    public int getInstant() {
+    public long getInstant() {
         return instant;
     }
 
-    public void setInstant(int instant) {
+    public void setInstant(long instant) {
         this.instant = instant;
     }
 
