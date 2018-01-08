@@ -23,6 +23,8 @@ public class ServiceAddenda implements Identifiable {
     private float averageRating;
     @XmlElement
     private float ratings;
+    @XmlElement
+    private boolean featured;
     @XmlElement(defaultValue = "false")
     private boolean published;
 
@@ -90,5 +92,13 @@ public class ServiceAddenda implements Identifiable {
 
     public void setPublished(boolean published) {
         this.published = published;
+    }
+
+    public boolean isFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(boolean featured) {
+        this.featured = featured;
     }
 }
