@@ -25,7 +25,8 @@ public class ParserPool implements ParserService {
     public ParserPool() {
         executor = Executors.newCachedThreadPool();
         try {
-            jaxbContext = newInstance(Service.class, User.class, Provider.class, Vocabulary.class);
+            jaxbContext = newInstance(Access.class, Manager.class, Provider.class,
+                                      Service.class, User.class, Vocabulary.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
