@@ -2,7 +2,6 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.User;
 import eu.openminted.registry.core.domain.Browsing;
-import java.io.StringReader;
 import java.util.Map;
 import javax.servlet.http.*;
 import org.json.JSONObject;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
-import springfox.documentation.spring.web.json.Json;
 
 /**
  * Created by pgl on 07/08/17.
