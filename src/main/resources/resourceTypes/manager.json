@@ -1,0 +1,28 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "manager_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": true,
+      "name": "users",
+      "path": "//*[local-name()='users']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "services",
+      "path": "//*[local-name()='services']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "manager",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://builds.openminted.eu/job/eic-registry-model/ws/target/generated-resources/schemagen/schema1.xsd"
+}
