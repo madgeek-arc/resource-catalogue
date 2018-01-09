@@ -23,7 +23,6 @@
         <springfox.version>2.7.0</springfox.version>
         <jackson.version>2.6.2</jackson.version>
         <spring.version>4.2.3.RELEASE</spring.version>
-        <log4j.version>2.8.2</log4j.version>
         <jjwt.version>0.7.0</jjwt.version>
         <junit.version>4.12</junit.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
@@ -55,12 +54,6 @@
             <groupId>eu.openminted</groupId>
             <artifactId>registry-core</artifactId>
             <version>${registry-core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -106,21 +99,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-1.2-api</artifactId>
-            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

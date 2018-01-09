@@ -7,18 +7,15 @@ import eu.openminted.registry.core.service.*;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 
 /**
  * Created by pgl on 12/7/2017.
  */
 public abstract class ResourceServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
-    protected final Logger logger;
 
     public ResourceServiceImpl(Class<T> typeParameterClass) {
         super(typeParameterClass);
-        logger = Logger.getLogger(typeParameterClass);
     }
 
     private String getFieldIDName() {
@@ -126,7 +123,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         try {
             return parserPool.deserialize(resource, type).get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.fatal(e);
+            e.printStackTrace();
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -135,7 +132,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         try {
             return parserPool.serialize(resource, typeParameterClass).get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.fatal(e);
+            e.printStackTrace();
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -146,7 +143,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
             String idFieldName = String.format("%s_id", type);
             return searchService.searchId(type, new SearchService.KeyValue(idFieldName, resourceID));
         } catch (UnknownHostException e) {
-            logger.fatal(e);
+            e.printStackTrace();
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

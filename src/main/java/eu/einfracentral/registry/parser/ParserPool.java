@@ -8,7 +8,6 @@ import eu.openminted.registry.core.service.ParserService;
 import java.io.*;
 import java.util.concurrent.*;
 import javax.xml.bind.*;
-import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -18,7 +17,6 @@ import static javax.xml.bind.JAXBContext.newInstance;
  */
 @Component("parserPool")
 public class ParserPool implements ParserService {
-    private static final Logger logger = Logger.getLogger(ParserPool.class);
     private final ExecutorService executor;
     private JAXBContext jaxbContext = null;
 
@@ -50,7 +48,7 @@ public class ParserPool implements ParserService {
                     throw new ResourceException(resource.getPayloadFormat() + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
                 }
             } catch (JAXBException e) {
-                logger.fatal(e);
+                e.printStackTrace();
                 throw new ResourceException(e, HttpStatus.I_AM_A_TEAPOT);
             }
             return type;
