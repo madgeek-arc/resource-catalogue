@@ -70,7 +70,7 @@ public class ParserPool implements ParserService {
             } else if (mediaType == ParserServiceTypes.JSON) {
                 return new ObjectMapper().readValue(file, Resource.class);
             }
-        } catch (IOException | JAXBException e) {
+        } catch (IOException | JAXBException | ClassCastException e) {
             e.printStackTrace();
         }
         return null;
