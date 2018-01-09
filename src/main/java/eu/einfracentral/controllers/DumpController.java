@@ -16,8 +16,8 @@ public class DumpController {
     DumpService dumpService;
 
     @RequestMapping(path = "dump", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public void dumpAll(@RequestParam(value = "types", required = false) String[] types, HttpServletResponse response) {
-        File dump = dumpService.bringAll(false, false, types);
+    public void dumpAll(@RequestParam(value = "types", required = false, defaultValue = "") String[] types, HttpServletResponse response) {
+        File dump = dumpService.bringAll(true, true, types);
         response.setContentLength((int) dump.length());
         response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", dump.getName()));
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(dump));
