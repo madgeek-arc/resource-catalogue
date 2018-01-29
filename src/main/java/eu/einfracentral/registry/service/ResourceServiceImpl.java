@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
  * Created by pgl on 12/7/2017.
  */
 public abstract class ResourceServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
-
     public ResourceServiceImpl(Class<T> typeParameterClass) {
         super(typeParameterClass);
     }
@@ -82,6 +81,8 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         created.setModificationDate(new Date());
         created.setPayloadFormat(ParserService.ParserServiceTypes.XML.name().toLowerCase());
         created.setResourceType(getResourceType());
+        //created.setResourceType(resourceType);
+        //created.setResourceType(resourceTypeService.getResourceType(getResourceType()));
         created.setVersion("not_set");
         created.setId("wont be saved");
         resourceService.addResource(created);
@@ -128,15 +129,6 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         }
     }
 
-    protected T deserialize(Resource resource) {
-        try {
-            return parserPool.serialize(resource, typeParameterClass).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     private Resource getResource(String resourceID) {
         try {
             String type = getResourceType();
@@ -149,6 +141,15 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     @Override
+    public T get(String field, String value) {
+        try {
+            return deserialize(searchService.searchId(getResourceType(), new SearchService.KeyValue(field, value)));
+        } catch (UnknownHostException e) {
+            throw new ResourceException(e, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Override
     public Browsing<T> delAll() {
         Browsing<T> ret = getAll(new FacetFilter());
         for (T t : ret.getResults()) {
@@ -157,16 +158,16 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         return ret;
     }
 
-    private boolean resourceIsSerializable(T resource, ParserService.ParserServiceTypes type) {
-        return !serialize(resource, type).equals("failed");
+    protected T deserialize(Resource resource) {
+        try {
+            return parserPool.serialize(resource, typeParameterClass).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @Override
-    public T get(String field, String value) {
-        try {
-            return deserialize(searchService.searchId(getResourceType(), new SearchService.KeyValue(field, value)));
-        } catch (UnknownHostException e) {
-            throw new ResourceException(e, HttpStatus.NOT_FOUND);
-        }
+    private boolean resourceIsSerializable(T resource, ParserService.ParserServiceTypes type) {
+        return !serialize(resource, type).equals("failed");
     }
 }
