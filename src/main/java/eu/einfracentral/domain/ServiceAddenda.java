@@ -12,6 +12,10 @@ public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;
     @XmlElement
+    private long from;
+    @XmlElement
+    private long to;
+    @XmlElement
     private List<Measurement<?>> performanceData;
     @XmlElement
     private int externalHits;
@@ -36,6 +40,22 @@ public class ServiceAddenda implements Identifiable {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public long getFrom() {
+        return from;
+    }
+
+    public void setFrom(long from) {
+        this.from = from;
+    }
+
+    public long getTo() {
+        return to;
+    }
+
+    public void setTo(long to) {
+        this.to = to;
     }
 
     public List<Measurement<?>> getPerformanceData() {
