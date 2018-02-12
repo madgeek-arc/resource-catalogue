@@ -12,7 +12,7 @@ public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;
     @XmlElement
-    private List<Measurement<?>> perfomanceData;
+    private List<Measurement<?>> performanceData;
     @XmlElement
     private int externalHits;
     @XmlElement
@@ -38,12 +38,12 @@ public class ServiceAddenda implements Identifiable {
         this.id = id;
     }
 
-    public List<Measurement<?>> getPerfomanceData() {
-        return perfomanceData;
+    public List<Measurement<?>> getPerformanceData() {
+        return performanceData;
     }
 
-    public void setPerfomanceData(List<Measurement<?>> perfomanceData) {
-        this.perfomanceData = perfomanceData;
+    public void setPerformanceData(List<Measurement<?>> performanceData) {
+        this.performanceData = performanceData;
     }
 
     public int getExternalHits() {
