@@ -1,4 +1,4 @@
-FROM tomcat:7-jre8
+FROM tomcat:8.5-jre8
 MAINTAINER "pgl@otenel.gr"
 RUN ["rm", "-fr", "/usr/local/tomcat/webapps/ROOT"]
 COPY ./target/eic-registry.war /usr/local/tomcat/webapps/eic-registry.war
