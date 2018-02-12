@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <eic.version>${project.version}</eic.version>
-        <registry-core.version>1.3.3-SNAPSHOT</registry-core.version>
+        <registry-core.version>1.4.3-SNAPSHOT</registry-core.version>
         <runtime.version>0.4.1.5</runtime.version>
         <jaxb2-basics-runtime.version>0.11.1</jaxb2-basics-runtime.version>
         <junit.version>4.12</junit.version>
