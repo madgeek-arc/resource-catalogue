@@ -106,19 +106,19 @@ public class ServiceAddenda implements Identifiable {
         this.ratings = ratings;
     }
 
-    public boolean isPublished() {
-        return published;
-    }
-
-    public void setPublished(boolean published) {
-        this.published = published;
-    }
-
     public boolean isFeatured() {
         return featured;
     }
 
     public void setFeatured(boolean featured) {
         this.featured = featured;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
     }
 }
