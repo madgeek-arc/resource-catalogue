@@ -80,8 +80,8 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());
         created.setPayloadFormat(ParserService.ParserServiceTypes.XML.name().toLowerCase());
-        created.setResourceType(getResourceType());
-        //created.setResourceType(resourceType);
+        //created.setResourceType(getResourceType());
+        created.setResourceType(resourceType);
         //created.setResourceType(resourceTypeService.getResourceType(getResourceType()));
         created.setVersion("not_set");
         created.setId("wont be saved");
