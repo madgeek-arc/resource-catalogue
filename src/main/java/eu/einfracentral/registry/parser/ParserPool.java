@@ -31,8 +31,7 @@ public class ParserPool implements ParserService {
     }
 
     @Override
-    public <T> Future<T> serialize(Resource resource, Class<T> tClass) {
-    //public <T> Future<T> deserialize(Resource resource, Class<T> tClass) {
+    public <T> Future<T> deserialize(Resource resource, Class<T> tClass) {
         return executor.submit(() -> {
             T type;
             if (resource == null) {
@@ -76,8 +75,7 @@ public class ParserPool implements ParserService {
     }
 
     @Override
-    public Future<String> deserialize(Object resource, ParserServiceTypes mediaType) {
-    //public Future<String> serialize(Object resource, ParserServiceTypes mediaType) {
+    public Future<String> serialize(Object resource, ParserServiceTypes mediaType) {
         return executor.submit(() -> {
             if (mediaType == ParserServiceTypes.XML) {
                 Marshaller marshaller = jaxbContext.createMarshaller();
