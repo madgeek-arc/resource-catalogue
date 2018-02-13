@@ -32,14 +32,13 @@ public class ResourceController<T> {
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
-        service.add(resource);
-        return new ResponseEntity<>(resource, HttpStatus.OK);
+        return new ResponseEntity<>(service.add(resource), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> update(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) throws ResourceNotFoundException {
-        service.update(resource);
-        return new ResponseEntity<>(resource, HttpStatus.OK);
+        return new ResponseEntity<>(service.add(resource), HttpStatus.OK);
+    }
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
