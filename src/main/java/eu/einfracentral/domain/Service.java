@@ -15,6 +15,7 @@ public class Service implements Identifiable {
     /**
      * Global unique and persistent identifier of a specific service. Work in progress.
      */
+    //@ApiModelProperty
     @XmlElement(required = false)
     private String id; //maybe list
     /**
