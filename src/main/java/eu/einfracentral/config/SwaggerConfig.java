@@ -1,9 +1,13 @@
 package eu.einfracentral.config;
 
+import com.google.common.collect.ImmutableList;
+import io.swagger.annotations.Api;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
+import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.builders.*;
-import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -33,6 +37,7 @@ public class SwaggerConfig {
                 .globalResponseMessage(RequestMethod.POST, post)
                 .globalResponseMessage(RequestMethod.PUT, put)
                 .globalResponseMessage(RequestMethod.DELETE, dele)
+                .pathMapping("/")
                 .apiInfo(getApiInfo());
     }
 
