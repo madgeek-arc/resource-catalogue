@@ -68,6 +68,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
 
     @Override
     public void add(T resource) {
+    //public T add(T resource) {
         if (exists(resource)) {
             throw new ResourceException("Resource already exists!", HttpStatus.CONFLICT);
         }
@@ -86,10 +87,12 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         created.setVersion("not_set");
         created.setId("wont be saved");
         resourceService.addResource(created);
+        //return resource;
     }
 
     @Override
     public void update(T resource) {
+    //public T update(T resource) {
         String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
         if (serialized.equals("failed")) {
             throw new ResourceException("Bad resource!", HttpStatus.BAD_REQUEST);
@@ -106,6 +109,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         }
         existingResource.setPayload(serialized);
         resourceService.updateResource(existingResource);
+        //return resource;
     }
 
     @Override
@@ -123,6 +127,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     protected String serialize(T resource, ParserService.ParserServiceTypes type) {
         try {
             return parserPool.deserialize(resource, type).get();
+            //return parserPool.serialize(resource, type).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -161,6 +166,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     protected T deserialize(Resource resource) {
         try {
             return parserPool.serialize(resource, typeParameterClass).get();
+            //return parserPool.deserialize(resource, typeParameterClass).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);

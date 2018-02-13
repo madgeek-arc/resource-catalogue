@@ -20,6 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <eic.version>${project.version}</eic.version>
         <registry-core.version>1.4.3-SNAPSHOT</registry-core.version>
+        <!--<registry-core.version>1.4.4-SNAPSHOT</registry-core.version>-->
         <springfox.version>2.7.0</springfox.version>
         <jackson.version>2.6.2</jackson.version>
         <spring.version>4.2.3.RELEASE</spring.version>
