@@ -15,6 +15,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @PropertySource({"classpath:application.properties"})
 public class SwaggerConfig {
+    List get = ImmutableList.of(new ResponseMessage(200, "When the get operation was succesful", null, null, null));
+    List post = ImmutableList.of(new ResponseMessage(200, "When the post operation was succesful", null, null, null));
+    List put = ImmutableList.of(new ResponseMessage(200, "When the put operation was succesful", null, null, null));
+    List dele = ImmutableList.of(new ResponseMessage(200, "When the dele operation was succesful", null, null, null));
     @Value("${platform.root:}")
     private String platform;
 
@@ -25,6 +29,10 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
                 .paths(PathSelectors.any())
                 .build()
+                .globalResponseMessage(RequestMethod.GET, get)
+                .globalResponseMessage(RequestMethod.POST, post)
+                .globalResponseMessage(RequestMethod.PUT, put)
+                .globalResponseMessage(RequestMethod.DELETE, dele)
                 .apiInfo(getApiInfo());
     }
 
