@@ -20,7 +20,7 @@ public class ResourceController<T> {
     }
 
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> get(@PathVariable("id") String id, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    public ResponseEntity<T> get(@PathVariable("id") String id, @CookieValue(value = "jwt", defaultValue = "") String jwt) throws ResourceNotFoundException {
         T resource = service.get(id);
         if (resource == null) {
             throw new ResourceNotFoundException();
@@ -37,14 +37,14 @@ public class ResourceController<T> {
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> update(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    public ResponseEntity<T> update(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) throws ResourceNotFoundException {
         service.update(resource);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiIgnore
-    public ResponseEntity<T> delete(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    public ResponseEntity<T> delete(@RequestBody T resource, @CookieValue(value = "jwt", defaultValue = "") String jwt) throws ResourceNotFoundException {
         service.delete(resource);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
@@ -75,7 +75,7 @@ public class ResourceController<T> {
     }
 
     @RequestMapping(path = "some/{ids}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @CookieValue(value = "jwt", defaultValue = "") String jwt) {
+    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @CookieValue(value = "jwt", defaultValue = "") String jwt) throws ResourceNotFoundException {
         List<T> ret = service.getSome(ids);
         if (ret == null) {
             throw new ResourceNotFoundException();
