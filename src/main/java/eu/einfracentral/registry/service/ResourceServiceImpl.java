@@ -18,14 +18,14 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     private String getFieldIDName() {
-        return String.format("%s_id", getResourceType());
+        return String.format("%s_id", resourceType.getName());
     }
 
     @Override
     public Map<String, List<T>> getBy(String field) {
         Map<String, List<T>> ret = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(resourceType.getName());
         Map<String, List<Resource>> results = searchService.searchByCategory(ff, field);
         results.forEach((category, resources) -> {
             List<T> payloads = new ArrayList<>();
@@ -80,9 +80,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());
         created.setPayloadFormat(ParserService.ParserServiceTypes.XML.name().toLowerCase());
-        //created.setResourceType(getResourceType());
         created.setResourceType(resourceType);
-        //created.setResourceType(resourceTypeService.getResourceType(getResourceType()));
         created.setVersion("not_set");
         created.setId("wont be saved");
         resourceService.addResource(created);
@@ -133,9 +131,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
 
     private Resource getResource(String resourceID) {
         try {
-            String type = getResourceType();
-            String idFieldName = String.format("%s_id", type);
-            return searchService.searchId(type, new SearchService.KeyValue(idFieldName, resourceID));
+            return searchService.searchId(resourceType.getName(), new SearchService.KeyValue(getFieldIDName(), resourceID));
         } catch (UnknownHostException e) {
             e.printStackTrace();
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -145,7 +141,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     @Override
     public T get(String field, String value) {
         try {
-            return deserialize(searchService.searchId(getResourceType(), new SearchService.KeyValue(field, value)));
+            return deserialize(searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value)));
         } catch (UnknownHostException e) {
             throw new ResourceException(e, HttpStatus.NOT_FOUND);
         }
