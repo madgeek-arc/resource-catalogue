@@ -17,42 +17,9 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         super(typeParameterClass);
     }
 
-    private String getFieldIDName() {
-        return String.format("%s_id", resourceType.getName());
-    }
-
     @Override
-    public Map<String, List<T>> getBy(String field) {
-        Map<String, List<T>> ret = new HashMap<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceType.getName());
-        Map<String, List<Resource>> results = searchService.searchByCategory(ff, field);
-        results.forEach((category, resources) -> {
-            List<T> payloads = new ArrayList<>();
-            for (Resource r : resources) {
-                payloads.add(deserialize(r));
-            }
-            ret.put(category, payloads);
-        });
-        return ret;
-    }
-
-    @Override
-    public List<T> getSome(String... ids) {
-        ArrayList<T> ret = new ArrayList<>();
-        for (String id : ids) {
-            try {
-                ret.add(this.get(id));
-            } catch (ResourceException se) {
-                ret.add(null);
-            }
-        }
-        return ret;
-    }
-
-    @Override
-    public T get(String resourceID) {
-        return deserialize(getResource(resourceID));
+    public T get(String id) {
+        return deserialize(whereID(id));
     }
 
     @Override
@@ -67,36 +34,25 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     @Override
-    public T add(T resource) {
-        if (exists(resource)) {
+    public T add(T t) {
+        if (exists(t)) {
             throw new ResourceException("Resource already exists!", HttpStatus.CONFLICT);
         }
-        String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
-        if (serialized.equals("failed")) {
-            throw new ResourceException("Bad resource!", HttpStatus.BAD_REQUEST);
-        }
+        String serialized = serialize(t, ParserService.ParserServiceTypes.XML);
         Resource created = new Resource();
         created.setPayload(serialized);
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());
         created.setPayloadFormat(ParserService.ParserServiceTypes.XML.name().toLowerCase());
         created.setResourceType(resourceType);
-        created.setVersion("not_set");
-        created.setId("wont be saved");
         resourceService.addResource(created);
-        return resource;
+        return t;
     }
 
     @Override
-    public T update(T resource) {
-        String serialized = serialize(resource, ParserService.ParserServiceTypes.XML);
-        if (serialized.equals("failed")) {
-            throw new ResourceException("Bad resource!", HttpStatus.BAD_REQUEST);
-        }
-        Resource existingResource = getResource(resource.getId());
-        if (existingResource == null) {
-            throw new ResourceException("Resource does not exist!", HttpStatus.NOT_FOUND);
-        }
+    public T update(T t) {
+        String serialized = serialize(t, ParserService.ParserServiceTypes.XML);
+        Resource existingResource = whereID(t.getId());
         if (!existingResource.getPayloadFormat().equals(ParserService.ParserServiceTypes.XML.name().toLowerCase())) {
             throw new ResourceException(String.format("Resource is %s, but you're trying to update with %s",
                                                       existingResource.getPayloadFormat(),
@@ -105,46 +61,46 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         }
         existingResource.setPayload(serialized);
         resourceService.updateResource(existingResource);
-        return resource;
+        return t;
     }
 
     @Override
-    public void delete(T resource) {
-        if (!exists(resource)) {
+    public void delete(T t) {
+        if (!exists(t)) {
             throw new ResourceException("Resource does not exist!", HttpStatus.NOT_FOUND);
         }
-        resourceService.deleteResource(getResource(resource.getId()).getId());
+        resourceService.deleteResource(t.getId());
     }
 
-    private boolean exists(T resource) {
-        return getResource(resource.getId()) != null;
+    @Override
+    public Map<String, List<T>> getBy(String field) {
+        Map<String, List<T>> ret = new HashMap<>();
+        groupBy(field).forEach((key, values) -> {
+            List<T> taus = new ArrayList<>();
+            for (Resource resource : values) {
+                taus.add(deserialize(whereCoreID(resource.getId())));
+            }
+            ret.put(key, taus);
+        });
+        return ret;
     }
 
-    protected String serialize(T resource, ParserService.ParserServiceTypes type) {
-        try {
-            return parserPool.serialize(resource, type).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    @Override
+    public List<T> getSome(String... ids) {
+        ArrayList<T> ret = new ArrayList<>();
+        for (Resource r : whereIDin(ids)) {
+            try {
+                ret.add(deserialize(r));
+            } catch (ResourceException se) {
+                ret.add(null);
+            }
         }
-    }
-
-    private Resource getResource(String resourceID) {
-        try {
-            return searchService.searchId(resourceType.getName(), new SearchService.KeyValue(getFieldIDName(), resourceID));
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ret;
     }
 
     @Override
     public T get(String field, String value) {
-        try {
-            return deserialize(searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value)));
-        } catch (UnknownHostException e) {
-            throw new ResourceException(e, HttpStatus.NOT_FOUND);
-        }
+        return deserialize(where(field, value));
     }
 
     @Override
@@ -165,11 +121,63 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         }
     }
 
-    private boolean resourceIsSerializable(T resource, ParserService.ParserServiceTypes type) {
-        return !serialize(resource, type).equals("failed");
+    protected String serialize(T t, ParserService.ParserServiceTypes type) {
+        try {
+            String ret = parserPool.serialize(t, type).get();
+            if (ret.equals("failed")) {
+                throw new ResourceException("Bad resource!", HttpStatus.BAD_REQUEST);
+            }
+            return ret;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    protected boolean exists(T t) {
+        try {
+            whereID(t.getId());
+            return true;
+        } catch (ResourceException e) {
+            return false;
+        }
+    }
+
+    protected Resource where(String field, String value) {
+        try {
+            Resource ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
+            if (ret == null) {
+                throw new ResourceException("Resource does not exist!", HttpStatus.NOT_FOUND);
+            }
+            return ret;
+        } catch (UnknownHostException e) {
+            throw new ResourceException(e, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    protected Resource whereID(String id) {
+        return where(String.format("%s_id", resourceType.getName()), id);
+    }
+
     protected Resource whereCoreID(String id) {
         return where("id", id);
     }
 
+    protected List<Resource> whereIDin(String... ids) {
+        ArrayList<Resource> ret = new ArrayList<>();
+        for (String id : ids) {
+            try {
+                ret.add(whereID(id));
+            } catch (ResourceException se) {
+                ret.add(null);
+            }
+        }
+        return ret;
+    }
+
+    protected Map<String, List<Resource>> groupBy(String field) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(resourceType.getName());
+        return searchService.searchByCategory(ff, field);
     }
 }

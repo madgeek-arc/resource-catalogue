@@ -124,7 +124,7 @@ public class UserServiceImpl extends ResourceServiceImpl<User> implements UserSe
 
     @Override
     public User getUserByEmail(String email) {
-        return strip(get("email", email));
+        return strip(deserialize(where("email", email)));
     }
 
     @Override
