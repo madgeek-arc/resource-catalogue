@@ -167,5 +167,9 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
 
     private boolean resourceIsSerializable(T resource, ParserService.ParserServiceTypes type) {
         return !serialize(resource, type).equals("failed");
+    protected Resource whereCoreID(String id) {
+        return where("id", id);
+    }
+
     }
 }
