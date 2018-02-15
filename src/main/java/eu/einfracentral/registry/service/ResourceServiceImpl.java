@@ -36,7 +36,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     @Override
     public T add(T t) {
         if (exists(t)) {
-            throw new ResourceException("Resource already exists!", HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         String serialized = serialize(t, ParserService.ParserServiceTypes.XML);
         Resource created = new Resource();
@@ -54,7 +54,8 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         String serialized = serialize(t, ParserService.ParserServiceTypes.XML);
         Resource existingResource = whereID(t.getId());
         if (!existingResource.getPayloadFormat().equals(ParserService.ParserServiceTypes.XML.name().toLowerCase())) {
-            throw new ResourceException(String.format("Resource is %s, but you're trying to update with %s",
+            throw new ResourceException(String.format("%s is %s, but you're trying to update with %s",
+                                                      resourceType.getName(),
                                                       existingResource.getPayloadFormat(),
                                                       ParserService.ParserServiceTypes.XML.name().toLowerCase()),
                                         HttpStatus.NOT_FOUND);
@@ -67,7 +68,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     @Override
     public void delete(T t) {
         if (!exists(t)) {
-            throw new ResourceException("Resource does not exist!", HttpStatus.NOT_FOUND);
+            throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
         }
         resourceService.deleteResource(t.getId());
     }
@@ -125,7 +126,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         try {
             String ret = parserPool.serialize(t, type).get();
             if (ret.equals("failed")) {
-                throw new ResourceException("Bad resource!", HttpStatus.BAD_REQUEST);
+                throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()), HttpStatus.BAD_REQUEST);
             }
             return ret;
         } catch (InterruptedException | ExecutionException e) {
@@ -147,7 +148,8 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         try {
             Resource ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
             if (ret == null) {
-                throw new ResourceException("Resource does not exist!", HttpStatus.NOT_FOUND);
+                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()),
+                                            HttpStatus.NOT_FOUND);
             }
             return ret;
         } catch (UnknownHostException e) {
