@@ -31,7 +31,7 @@ public class ParserPool implements ParserService {
     }
 
     @Override
-    public <T> Future<T> deserialize(Resource resource, Class<T> tClass) {
+    public <T> Future<T> deserialize(Resource resource, Class<T> typeParameterClass) {
         return executor.submit(() -> {
             T type;
             if (resource == null) {
@@ -43,7 +43,7 @@ public class ParserPool implements ParserService {
                     type = (T) unmarshaller.unmarshal(new StringReader(resource.getPayload()));
                 } else if (resource.getPayloadFormat().equals("json")) {
                     ObjectMapper mapper = new ObjectMapper();
-                    type = mapper.readValue(resource.getPayload(), tClass);
+                    type = mapper.readValue(resource.getPayload(), typeParameterClass);
                 } else {
                     throw new ResourceException(resource.getPayloadFormat() + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
                 }
