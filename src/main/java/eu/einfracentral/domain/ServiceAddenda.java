@@ -12,6 +12,8 @@ public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;
     @XmlElement
+    private String serviceID;
+    @XmlElement
     private long from;
     @XmlElement
     private long to;
@@ -40,6 +42,14 @@ public class ServiceAddenda implements Identifiable {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getServiceID() {
+        return serviceID;
+    }
+
+    public void setServiceID(String serviceID) {
+        this.serviceID = serviceID;
     }
 
     public long getFrom() {
