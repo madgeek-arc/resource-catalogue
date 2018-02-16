@@ -17,6 +17,8 @@ public class Manager implements Identifiable {
     @XmlElementWrapper(name = "services", required = false)
     @XmlElement(name = "service")
     private List<User> services;
+    @XmlElement(required = false)
+    private String name;
     @Override
     public String getId() {
         return id;
@@ -42,4 +44,12 @@ public class Manager implements Identifiable {
     public void setServices(List<User> services) {
         this.services = services;
     }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }
