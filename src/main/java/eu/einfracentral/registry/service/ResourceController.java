@@ -2,7 +2,8 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.exception.*;
+import eu.openminted.registry.core.exception.ServerError;
+import eu.openminted.registry.core.service.ParserService;
 import io.swagger.annotations.*;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
@@ -111,7 +112,7 @@ public class ResourceController<T> {
 
     @ExceptionHandler(ResourceException.class)
     @ResponseBody
-    public ResponseEntity<ServerError> handleRESTException(HttpServletRequest req, ResourceException ex) {
-        return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), ex), ex.getStatus());
+    public ResponseEntity<ServerError> handleRESTException(HttpServletRequest req, ResourceException e) {
+        return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), e), e.getStatus());
     }
 }

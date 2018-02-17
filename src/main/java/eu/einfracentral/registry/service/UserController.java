@@ -71,7 +71,7 @@ public class UserController extends ResourceController<User> {
             cookie.setSecure(false);
             res.addCookie(cookie);
             return new ResponseEntity<>(ret, HttpStatus.OK);
-        } catch (Throwable t) {
+        } catch (Throwable e) {
             return new ResponseEntity<>(credentials, HttpStatus.BAD_REQUEST);
         }
     }
