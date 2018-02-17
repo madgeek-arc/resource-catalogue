@@ -160,7 +160,7 @@ public class UserServiceImpl extends ResourceServiceImpl<User> implements UserSe
             PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, 256);
             SecretKey key = skf.generateSecret(spec);
             return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }

@@ -92,7 +92,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         for (Resource r : whereIDin(ids)) {
             try {
                 ret.add(deserialize(r));
-            } catch (ResourceException se) {
+            } catch (ResourceException e) {
                 ret.add(null);
             }
         }
@@ -170,7 +170,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         for (String id : ids) {
             try {
                 ret.add(whereID(id));
-            } catch (ResourceException se) {
+            } catch (ResourceException e) {
                 ret.add(null);
             }
         }
