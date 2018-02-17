@@ -56,7 +56,7 @@ public class ParserPool implements ParserService {
     }
 
     @Override
-    public <T> Future<T> deserialize(String json, Class<T> returnType) throws IOException {
+    public <T> Future<T> deserialize(String json, Class<T> returnType) {
         return executor.submit(() -> new ObjectMapper().readValue(json, returnType));
     }
 
