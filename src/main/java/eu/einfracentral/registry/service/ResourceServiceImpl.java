@@ -66,11 +66,14 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     @Override
-    public void delete(T t) {
+    public T del(T t) {
         if (!exists(t)) {
             throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
         }
         resourceService.deleteResource(t.getId());
+        return t;
+    }
+
     }
 
     @Override
