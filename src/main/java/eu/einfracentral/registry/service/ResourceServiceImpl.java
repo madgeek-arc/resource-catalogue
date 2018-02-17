@@ -34,30 +34,30 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     @Override
-    public T add(T t) {
+    public T add(T t, ParserService.ParserServiceTypes format) {
         if (exists(t)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
-        String serialized = serialize(t, ParserService.ParserServiceTypes.XML);
+        String serialized = serialize(t, format);
         Resource created = new Resource();
         created.setPayload(serialized);
         created.setCreationDate(new Date());
         created.setModificationDate(new Date());
-        created.setPayloadFormat(ParserService.ParserServiceTypes.XML.name().toLowerCase());
+        created.setPayloadFormat(format.name().toLowerCase());
         created.setResourceType(resourceType);
         resourceService.addResource(created);
         return t;
     }
 
     @Override
-    public T update(T t) {
-        String serialized = serialize(t, ParserService.ParserServiceTypes.XML);
+    public T update(T t, ParserService.ParserServiceTypes format) {
+        String serialized = serialize(t, format);
         Resource existingResource = whereID(t.getId());
-        if (!existingResource.getPayloadFormat().equals(ParserService.ParserServiceTypes.XML.name().toLowerCase())) {
+        if (!existingResource.getPayloadFormat().equals(format.name().toLowerCase())) {
             throw new ResourceException(String.format("%s is %s, but you're trying to update with %s",
                                                       resourceType.getName(),
                                                       existingResource.getPayloadFormat(),
-                                                      ParserService.ParserServiceTypes.XML.name().toLowerCase()),
+                                                      format.name().toLowerCase()),
                                         HttpStatus.NOT_FOUND);
         }
         existingResource.setPayload(serialized);
