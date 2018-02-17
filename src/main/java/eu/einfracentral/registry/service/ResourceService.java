@@ -10,6 +10,7 @@ import java.util.*;
 public interface ResourceService<T> extends ResourceCRUDService<T> {
     T add(T t, ParserService.ParserServiceTypes format);
     T update(T t, ParserService.ParserServiceTypes format);
+    T del(T t);
     Map<String, List<T>> getBy(String field);
     List<T> getSome(String... ids);
     T get(String field, String value);
