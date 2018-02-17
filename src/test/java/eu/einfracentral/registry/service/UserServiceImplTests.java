@@ -1,4 +1,4 @@
-package eu.einfracentral.registry;
+package eu.einfracentral.registry.service;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -10,9 +10,9 @@ import javax.crypto.spec.PBEKeySpec;
 import org.junit.Test;
 
 /**
- * Created by pgl on 14/11/17.
+ * Created by pgl on 17/02/18.
  */
-public class UserTests {
+public class UserServiceImplTests {
     private static final HashMap<String, String> users = new HashMap<>();
     private static final int iterationCount = -1;
     private static final String algorithm = "PBKDF2WithHmacSHA512";
@@ -30,7 +30,7 @@ public class UserTests {
             "</user>";
 
     @Test
-    public void makeUsers() throws IOException {
+    public void makeUsers() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         //users.put("username", "password");
         for (Map.Entry<String, String> user : users.entrySet()) {
             r.nextBytes(salt);
@@ -45,14 +45,10 @@ public class UserTests {
         }
     }
 
-    private char[] hashPass(char[] pass, byte[] salt, int iterations) {
-        try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithm);
-            PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, keyLength);
-            SecretKey key = skf.generateSecret(spec);
-            return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
-            throw new Error(ex);
-        }
+    private char[] hashPass(char[] pass, byte[] salt, int iterations) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithm);
+        PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, keyLength);
+        SecretKey key = skf.generateSecret(spec);
+        return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
     }
 }
