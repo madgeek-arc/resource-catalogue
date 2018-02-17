@@ -7,6 +7,7 @@ import eu.openminted.registry.core.service.*;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import org.eclipse.persistence.exceptions.CommunicationException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -74,6 +75,19 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         return t;
     }
 
+    @Override
+    public T add(T t) {
+        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+    }
+
+    @Override
+    public T update(T t) {
+        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+    }
+
+    @Override
+    public void delete(T t) {
+        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
     }
 
     @Override
@@ -159,7 +173,6 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
             throw new ResourceException(e, HttpStatus.NOT_FOUND);
         }
     }
-
     protected Resource whereID(String id) {
         return where(String.format("%s_id", resourceType.getName()), id);
     }
