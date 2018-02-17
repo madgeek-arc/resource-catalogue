@@ -2,7 +2,7 @@ package eu.einfracentral.registry;
 
 import eu.einfracentral.domain.Service;
 import java.io.*;
-import javax.xml.bind.JAXBContext;
+import javax.xml.bind.*;
 import org.junit.Test;
 
 /**
@@ -10,7 +10,7 @@ import org.junit.Test;
  */
 public class ServiceTests {
     @Test
-    public void createService() throws Exception {
+    public void createService() throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Service.class);
         StringWriter writer = new StringWriter();
         Service eic = new Service();
@@ -21,7 +21,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void checkService() throws Exception {
+    public void checkService() throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Service.class);
         Service service = (Service) jaxbContext.createUnmarshaller().unmarshal(new StringReader(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
