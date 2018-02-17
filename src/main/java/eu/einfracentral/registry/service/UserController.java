@@ -41,13 +41,13 @@ public class UserController extends ResourceController<User> {
 
     @CrossOrigin
     @RequestMapping(path = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> register(@RequestBody User user) throws Exception {
+    public ResponseEntity<User> register(@RequestBody User user) {
         return new ResponseEntity<>(((UserService) service).register(user), HttpStatus.OK);
     }
 
     @CrossOrigin
     @RequestMapping(path = "addFavourite", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> addFavourite(@RequestBody JSONObject  obj) throws Exception {
+    public ResponseEntity<User> addFavourite(@RequestBody JSONObject  obj) {
         return new ResponseEntity<>(((UserService) service).addFavourite(obj.get("userID").toString(), obj.get("serviceID").toString()), HttpStatus.OK);
     }
 
