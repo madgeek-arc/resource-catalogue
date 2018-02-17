@@ -23,47 +23,41 @@ public class ResourceController<T> {
 
     @ApiOperation(value = "Returns the resource assigned the given id.")
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        T resource = service.get(id);
-        if (resource == null) {
-            throw new ResourceNotFoundException();
-        } else {
-            return new ResponseEntity<>(resource, HttpStatus.OK);
-        }
+    public ResponseEntity<T> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.get(id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Adds the given resource.")
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> addJSON(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.add(resource), HttpStatus.OK);
+        return new ResponseEntity<>(service.add(resource, ParserService.ParserServiceTypes.JSON), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Adds the given resource.")
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<T> addXML(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.add(resource), HttpStatus.OK);
+        return new ResponseEntity<>(service.add(resource, ParserService.ParserServiceTypes.XML), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the resource assigned the given id with the given resource, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> updateJSON(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>(service.update(resource), HttpStatus.OK);
+    public ResponseEntity<T> updateJSON(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.update(resource, ParserService.ParserServiceTypes.JSON), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the resource assigned the given id with the given resource, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<T> updateXML(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>(service.update(resource), HttpStatus.OK);
+    public ResponseEntity<T> updateXML(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.update(resource, ParserService.ParserServiceTypes.XML), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes the resource assigned the given id.")
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiIgnore
-    public ResponseEntity<T> delete(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        service.delete(resource);
-        return new ResponseEntity<>(resource, HttpStatus.OK);
+    public ResponseEntity<T> delete(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.del(resource), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes all resources.")
@@ -94,13 +88,8 @@ public class ResourceController<T> {
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of resource ids", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "some/{ids}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        List<T> ret = service.getSome(ids);
-        if (ret == null) {
-            throw new ResourceNotFoundException();
-        } else {
-            return new ResponseEntity<>(ret, HttpStatus.OK);
-        }
+    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns all resources, grouped by the given field.")
