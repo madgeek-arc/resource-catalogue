@@ -161,6 +161,7 @@ public class UserServiceImpl extends ResourceServiceImpl<User> implements UserSe
             SecretKey key = skf.generateSecret(spec);
             return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
