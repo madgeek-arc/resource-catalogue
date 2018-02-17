@@ -22,7 +22,6 @@ public class ResourceController<T> {
     }
 
     @ApiOperation(value = "Returns the resource assigned the given id.")
-    @ApiParam(value = "jwt", hidden = true)
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<T> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         T resource = service.get(id);
