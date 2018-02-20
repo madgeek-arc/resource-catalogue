@@ -193,7 +193,6 @@ public class Service implements Identifiable {
      */
     @XmlElement
     private String funding;
-
     @XmlElement
     private ServiceAddenda serviceAddenda;
 
