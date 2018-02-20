@@ -100,7 +100,7 @@ public class ResourceController<T> {
 
     @ExceptionHandler(ResourceException.class)
     @ResponseBody
-    public ResponseEntity<ServerError> handleRESTException(HttpServletRequest req, ResourceException e) {
+    public ResponseEntity<ServerError> handleResourceException(HttpServletRequest req, ResourceException e) {
         return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), e), e.getStatus());
     }
 }
