@@ -1,7 +1,9 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.service.ParserService;
+import org.springframework.http.HttpStatus;
 
 /**
  * Created by pgl on 4/7/2017.
@@ -18,13 +20,22 @@ public class ServiceServiceImpl extends ResourceServiceImpl<Service> implements 
     }
 
     @Override
-    public Service update(Service updatedService, ParserService.ParserServiceTypes format) {
+    public Service add(Service service) {
+        if (exists(service)) {
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+        }
+        service.setId(java.util.UUID.randomUUID().toString());
+        return super.add(service);
+    }
+
+    @Override
+    public Service update(Service updatedService) {
         Service existingService = get(updatedService.getId());
         if (updatedService.getVersion().equals(existingService.getVersion())) {
-            super.update(updatedService, format);
+            super.update(updatedService);
         } else {
             //existingService.disable();
-            super.add(updatedService, format);
+            super.add(updatedService);
         }
         return updatedService;
     }

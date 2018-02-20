@@ -7,7 +7,6 @@ import eu.openminted.registry.core.service.*;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.persistence.exceptions.CommunicationException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -36,17 +35,55 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
 
     @Override
     public T add(T t) {
-        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+        if (exists(t)) {
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+        }
+        String serialized = serialize(t);
+        Resource created = new Resource();
+        created.setPayload(serialized);
+        created.setResourceType(resourceType);
+        resourceService.addResource(created);
+        return t;
     }
 
     @Override
     public T update(T t) {
-        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+        String serialized = serialize(t);
+        Resource existing = whereID(t.getId());
+        existing.setPayload(serialized);
+        resourceService.updateResource(existing);
+        return t;
     }
 
     @Override
     public void delete(T t) {
-        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+        del(t);
+    }
+
+    protected boolean exists(T t) {
+        try {
+            whereID(t.getId());
+            return true;
+        } catch (ResourceException e) {
+            return false;
+        }
+    }
+
+    protected String serialize(T t) {
+        try {
+            String ret = parserPool.serialize(t, getCoreFormat()).get();
+            if (ret.equals("failed")) {
+                throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()), HttpStatus.BAD_REQUEST);
+            }
+            return ret;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ParserService.ParserServiceTypes getCoreFormat() {
+        return ParserService.ParserServiceTypes.XML;
     }
 
     protected T deserialize(Resource resource) {
@@ -73,39 +110,6 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         } catch (UnknownHostException e) {
             throw new ResourceException(e, HttpStatus.NOT_FOUND);
         }
-    }
-
-    @Override
-    public T add(T t, ParserService.ParserServiceTypes format) {
-        if (exists(t)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()),
-                                        HttpStatus.CONFLICT);
-        }
-        String serialized = serialize(t, format);
-        Resource created = new Resource();
-        created.setPayload(serialized);
-        created.setCreationDate(new Date());
-        created.setModificationDate(new Date());
-        created.setPayloadFormat(format.name().toLowerCase());
-        created.setResourceType(resourceType);
-        resourceService.addResource(created);
-        return t;
-    }
-
-    @Override
-    public T update(T t, ParserService.ParserServiceTypes format) {
-        String serialized = serialize(t, format);
-        Resource existingResource = whereID(t.getId());
-        if (!existingResource.getPayloadFormat().equals(format.name().toLowerCase())) {
-            throw new ResourceException(String.format("%s is %s, but you're trying to update with %s",
-                                                      resourceType.getName(),
-                                                      existingResource.getPayloadFormat(),
-                                                      format.name().toLowerCase()),
-                                        HttpStatus.NOT_FOUND);
-        }
-        existingResource.setPayload(serialized);
-        resourceService.updateResource(existingResource);
-        return t;
     }
 
     @Override
@@ -177,28 +181,5 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
 
     protected Resource whereCoreID(String id) {
         return where("id", id);
-    }
-
-    protected boolean exists(T t) {
-        try {
-            whereID(t.getId());
-            return true;
-        } catch (ResourceException e) {
-            return false;
-        }
-    }
-
-    protected String serialize(T t, ParserService.ParserServiceTypes type) {
-        try {
-            String ret = parserPool.serialize(t, type).get();
-            if (ret.equals("failed")) {
-                throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()),
-                                            HttpStatus.BAD_REQUEST);
-            }
-            return ret;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 }
