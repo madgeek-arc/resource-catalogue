@@ -71,7 +71,7 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         if (!exists(t)) {
             throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
         }
-        resourceService.deleteResource(t.getId());
+        resourceService.deleteResource(whereID(t.getId()).getId());
         return t;
     }
 
