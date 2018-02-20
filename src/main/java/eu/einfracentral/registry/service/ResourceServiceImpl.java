@@ -35,9 +35,51 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     @Override
+    public T add(T t) {
+        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+    }
+
+    @Override
+    public T update(T t) {
+        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+    }
+
+    @Override
+    public void delete(T t) {
+        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
+    }
+
+    protected T deserialize(Resource resource) {
+        try {
+            return parserPool.deserialize(resource, typeParameterClass).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    protected Resource whereID(String id) {
+        return where(String.format("%s_id", resourceType.getName()), id);
+    }
+
+    protected Resource where(String field, String value) {
+        try {
+            Resource ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
+            if (ret == null) {
+                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()),
+                                            HttpStatus.NOT_FOUND);
+            }
+            return ret;
+        } catch (UnknownHostException e) {
+            throw new ResourceException(e, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Override
     public T add(T t, ParserService.ParserServiceTypes format) {
         if (exists(t)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()),
+                                        HttpStatus.CONFLICT);
         }
         String serialized = serialize(t, format);
         Resource created = new Resource();
@@ -73,21 +115,6 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         }
         resourceService.deleteResource(whereID(t.getId()).getId());
         return t;
-    }
-
-    @Override
-    public T add(T t) {
-        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
-    }
-
-    @Override
-    public T update(T t) {
-        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
-    }
-
-    @Override
-    public void delete(T t) {
-        throw new CommunicationException("I have failed to communicate with core devs to change the base signatures");
     }
 
     @Override
@@ -130,57 +157,6 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         return ret;
     }
 
-    protected T deserialize(Resource resource) {
-        try {
-            return parserPool.deserialize(resource, typeParameterClass).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    protected String serialize(T t, ParserService.ParserServiceTypes type) {
-        try {
-            String ret = parserPool.serialize(t, type).get();
-            if (ret.equals("failed")) {
-                throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()), HttpStatus.BAD_REQUEST);
-            }
-            return ret;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    protected boolean exists(T t) {
-        try {
-            whereID(t.getId());
-            return true;
-        } catch (ResourceException e) {
-            return false;
-        }
-    }
-
-    protected Resource where(String field, String value) {
-        try {
-            Resource ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
-            if (ret == null) {
-                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()),
-                                            HttpStatus.NOT_FOUND);
-            }
-            return ret;
-        } catch (UnknownHostException e) {
-            throw new ResourceException(e, HttpStatus.NOT_FOUND);
-        }
-    }
-    protected Resource whereID(String id) {
-        return where(String.format("%s_id", resourceType.getName()), id);
-    }
-
-    protected Resource whereCoreID(String id) {
-        return where("id", id);
-    }
-
     protected List<Resource> whereIDin(String... ids) {
         ArrayList<Resource> ret = new ArrayList<>();
         for (String id : ids) {
@@ -197,5 +173,32 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceType.getName());
         return searchService.searchByCategory(ff, field);
+    }
+
+    protected Resource whereCoreID(String id) {
+        return where("id", id);
+    }
+
+    protected boolean exists(T t) {
+        try {
+            whereID(t.getId());
+            return true;
+        } catch (ResourceException e) {
+            return false;
+        }
+    }
+
+    protected String serialize(T t, ParserService.ParserServiceTypes type) {
+        try {
+            String ret = parserPool.serialize(t, type).get();
+            if (ret.equals("failed")) {
+                throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()),
+                                            HttpStatus.BAD_REQUEST);
+            }
+            return ret;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
