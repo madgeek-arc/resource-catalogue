@@ -30,34 +30,34 @@ public class ResourceController<T> {
     @ApiOperation(value = "Adds the given resource.")
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> addJSON(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.add(resource, ParserService.ParserServiceTypes.JSON), HttpStatus.OK);
+    public ResponseEntity<T> addJSON(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.add(t, ParserService.ParserServiceTypes.JSON), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Adds the given resource.")
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<T> addXML(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.add(resource, ParserService.ParserServiceTypes.XML), HttpStatus.OK);
+    public ResponseEntity<T> addXML(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.add(t, ParserService.ParserServiceTypes.XML), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the resource assigned the given id with the given resource, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<T> updateJSON(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.update(resource, ParserService.ParserServiceTypes.JSON), HttpStatus.OK);
+    public ResponseEntity<T> updateJSON(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.update(t, ParserService.ParserServiceTypes.JSON), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the resource assigned the given id with the given resource, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<T> updateXML(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.update(resource, ParserService.ParserServiceTypes.XML), HttpStatus.OK);
+    public ResponseEntity<T> updateXML(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.update(t, ParserService.ParserServiceTypes.XML), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes the resource assigned the given id.")
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiIgnore
-    public ResponseEntity<T> delete(@RequestBody T resource, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.del(resource), HttpStatus.OK);
+    public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(service.del(t), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes all resources.")
