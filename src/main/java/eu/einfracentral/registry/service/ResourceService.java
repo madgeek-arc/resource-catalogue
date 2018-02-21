@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.service;
 
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.service.ResourceCRUDService;
+import eu.openminted.registry.core.service.*;
 import java.util.*;
 
 /**
@@ -12,5 +11,5 @@ public interface ResourceService<T> extends ResourceCRUDService<T> {
     Map<String, List<T>> getBy(String field);
     List<T> getSome(String... ids);
     T get(String field, String value);
-    Browsing<T> delAll();
+    List<T> delAll();
 }
