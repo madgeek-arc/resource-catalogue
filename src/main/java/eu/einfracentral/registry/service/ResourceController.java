@@ -50,7 +50,7 @@ public class ResourceController<T> {
     @ApiOperation(value = "Deletes all resources.")
     @RequestMapping(path = "all", method = RequestMethod.DELETE)
     @ApiIgnore
-    public ResponseEntity<Browsing> delAll(@ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<List<T>> delAll(@ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.delAll(), HttpStatus.OK);
     }
 
