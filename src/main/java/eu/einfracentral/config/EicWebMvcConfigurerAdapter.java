@@ -9,6 +9,11 @@ import org.springframework.web.servlet.config.annotation.*;
 @Configuration
 @EnableWebMvc
 public class EicWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
+//    @Override
+//    public void configurePathMatch(PathMatchConfigurer configurer) {
+//        configurer.setUseSuffixPatternMatch(false);
+//    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
