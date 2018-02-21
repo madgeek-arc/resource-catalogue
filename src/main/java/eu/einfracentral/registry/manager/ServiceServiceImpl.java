@@ -1,7 +1,8 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.registry.service.ServiceService;
 import org.springframework.http.HttpStatus;
 
 /**

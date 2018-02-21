@@ -1,6 +1,7 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.registry.service.ProviderService;
 
 /**
  * Created by pgl on 26/7/2017.

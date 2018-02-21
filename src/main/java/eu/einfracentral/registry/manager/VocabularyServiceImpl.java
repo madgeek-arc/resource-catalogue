@@ -1,6 +1,7 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.registry.service.VocabularyService;
 
 /**
  * Created by pgl on 24/7/2017.

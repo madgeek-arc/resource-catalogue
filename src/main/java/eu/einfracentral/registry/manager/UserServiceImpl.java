@@ -1,7 +1,8 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.registry.service.UserService;
 import eu.einfracentral.service.MailService;
 import eu.openminted.registry.core.domain.*;
 import io.jsonwebtoken.*;
