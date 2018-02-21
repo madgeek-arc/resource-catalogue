@@ -1,4 +1,4 @@
-package eu.einfracentral.registry.parser;
+package eu.einfracentral.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
