@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.service;
 
-import eu.openminted.registry.core.service.*;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 import java.util.*;
 
 /**
