@@ -1,4 +1,4 @@
-package eu.einfracentral.controllers;
+package eu.einfracentral.core.controller;
 
 import eu.openminted.registry.core.service.RestoreService;
 import org.springframework.beans.factory.annotation.Autowired;

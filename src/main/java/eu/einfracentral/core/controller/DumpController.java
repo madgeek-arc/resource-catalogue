@@ -1,4 +1,4 @@
-package eu.einfracentral.controllers;
+package eu.einfracentral.core.controller;
 
 import eu.openminted.registry.core.service.DumpService;
 import java.io.*;
