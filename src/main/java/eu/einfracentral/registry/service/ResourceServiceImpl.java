@@ -153,12 +153,12 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     @Override
-    public Browsing<T> delAll() {
         Browsing<T> ret = getAll(new FacetFilter());
         for (T t : ret.getResults()) {
             delete(t);
         }
         return ret;
+    public List<T> delAll() {
     }
 
     protected List<Resource> whereIDin(String... ids) {
