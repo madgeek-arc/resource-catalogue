@@ -7,6 +7,7 @@ import eu.openminted.registry.core.service.*;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.*;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -123,28 +124,12 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
 
     @Override
     public Map<String, List<T>> getBy(String field) {
-        Map<String, List<T>> ret = new HashMap<>();
-        groupBy(field).forEach((key, values) -> {
-            List<T> taus = new ArrayList<>();
-            for (Resource resource : values) {
-                taus.add(deserialize(whereCoreID(resource.getId())));
-            }
-            ret.put(key, taus);
-        });
-        return ret;
+        return groupBy(field).entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().stream().map(resource -> deserialize(whereCoreID(resource.getId()))).collect(Collectors.toList())));
     }
 
     @Override
     public List<T> getSome(String... ids) {
-        ArrayList<T> ret = new ArrayList<>();
-        for (Resource r : whereIDin(ids)) {
-            try {
-                ret.add(deserialize(r));
-            } catch (ResourceException e) {
-                ret.add(null);
-            }
-        }
-        return ret;
+        return whereIDin(ids).stream().map(this::deserialize).collect(Collectors.toList());
     }
 
     @Override
@@ -153,24 +138,12 @@ public abstract class ResourceServiceImpl<T extends Identifiable> extends Abstra
     }
 
     @Override
-        Browsing<T> ret = getAll(new FacetFilter());
-        for (T t : ret.getResults()) {
-            delete(t);
-        }
-        return ret;
     public List<T> delAll() {
+        return getAll(new FacetFilter()).getResults().stream().map(this::del).collect(Collectors.toList());
     }
 
     protected List<Resource> whereIDin(String... ids) {
-        ArrayList<Resource> ret = new ArrayList<>();
-        for (String id : ids) {
-            try {
-                ret.add(whereID(id));
-            } catch (ResourceException e) {
-                ret.add(null);
-            }
-        }
-        return ret;
+        return Stream.of(ids).map(this::whereID).collect(Collectors.toList());
     }
 
     protected Map<String, List<Resource>> groupBy(String field) {
