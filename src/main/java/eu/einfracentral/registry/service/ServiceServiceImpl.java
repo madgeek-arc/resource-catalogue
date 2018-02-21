@@ -2,7 +2,6 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
-import eu.openminted.registry.core.service.ParserService;
 import org.springframework.http.HttpStatus;
 
 /**
