@@ -1,6 +1,7 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.User;
+import eu.einfracentral.registry.service.UserService;
 import eu.openminted.registry.core.domain.Browsing;
 import java.util.Map;
 import javax.servlet.http.*;

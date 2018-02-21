@@ -1,6 +1,7 @@
-package eu.einfracentral.registry.service;
+package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.*;
 import io.swagger.annotations.*;
