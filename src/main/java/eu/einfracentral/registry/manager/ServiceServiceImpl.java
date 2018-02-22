@@ -25,6 +25,9 @@ public class ServiceServiceImpl extends ResourceServiceImpl<Service> implements 
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         service.setId(java.util.UUID.randomUUID().toString());
+        if (service.getVersion() == null || service.getVersion().equals("")) {
+            service.setVersion("0");
+        }
         return super.add(service);
     }
 
