@@ -5,7 +5,6 @@ import eu.einfracentral.registry.service.UserService;
 import eu.openminted.registry.core.domain.Browsing;
 import java.util.Map;
 import javax.servlet.http.*;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -47,9 +46,9 @@ public class UserController extends ResourceController<User> {
     }
 
     @CrossOrigin
-    public ResponseEntity<User> addFavourite(@RequestBody JSONObject obj) {
-        return new ResponseEntity<>(((UserService) service).addFavourite(obj.get("userID").toString(), obj.get("serviceID").toString()), HttpStatus.OK);
     @RequestMapping(path = "addFavourite", method = RequestMethod.POST)
+    public ResponseEntity<User> addFavourite(@RequestParam String userID, @RequestParam String serviceID) {
+        return new ResponseEntity<>(((UserService) service).addFavourite(userID, serviceID), HttpStatus.OK);
     }
 
     @CrossOrigin
