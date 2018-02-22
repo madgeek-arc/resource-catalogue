@@ -31,6 +31,12 @@ public class ServiceServiceImpl extends ResourceServiceImpl<Service> implements 
     @Override
     public Service update(Service updatedService) {
         Service existingService = get(updatedService.getId());
+        if (existingService.getVersion() == null || existingService.getVersion().equals("")) {
+            existingService.setVersion("0");
+        }
+        if (updatedService.getVersion() == null || updatedService.getVersion().equals("")) {
+            updatedService.setVersion("0");
+        }
         if (updatedService.getVersion().equals(existingService.getVersion())) {
             super.update(updatedService);
         } else {
