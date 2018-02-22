@@ -29,31 +29,31 @@ public class UserController extends ResourceController<User> {
     }
 
     @CrossOrigin
-    @RequestMapping(path = "reset", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "reset", method = RequestMethod.POST)
     public ResponseEntity<User> reset(@RequestBody User user) {
         return new ResponseEntity<>(((UserService) service).reset(user), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "forgot", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "forgot", method = RequestMethod.POST)
     public ResponseEntity<User> forgot(@PathVariable String email) {
         return new ResponseEntity<>(((UserService) service).forgot(email), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "register", method = RequestMethod.POST)
     public ResponseEntity<User> register(@RequestBody User user) {
         return new ResponseEntity<>(((UserService) service).register(user), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "addFavourite", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> addFavourite(@RequestBody JSONObject obj) {
         return new ResponseEntity<>(((UserService) service).addFavourite(obj.get("userID").toString(), obj.get("serviceID").toString()), HttpStatus.OK);
+    @RequestMapping(path = "addFavourite", method = RequestMethod.POST)
     }
 
     @CrossOrigin
-    @RequestMapping(path = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "login", method = RequestMethod.POST)
     public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
         if (credentials.getEmail() == null || credentials.getPassword() == null) {
             return new ResponseEntity<>(credentials, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -77,7 +77,7 @@ public class UserController extends ResourceController<User> {
         }
     }
 
-    @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list", method = RequestMethod.GET)
     public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams, HttpServletRequest request) {
         if (request.getRemoteAddr().equals("194.177.192.118")) {
             ResponseEntity<Browsing> ret = super.getAll(allRequestParams, WebUtils.getCookie(request, "jwt").getValue()); //TODO: Only allow verified admin user access to this
