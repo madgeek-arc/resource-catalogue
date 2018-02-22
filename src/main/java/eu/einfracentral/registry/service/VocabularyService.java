@@ -8,4 +8,5 @@ import org.springframework.stereotype.Service;
  */
 @Service("vocabularyService")
 public interface VocabularyService extends ResourceService<Vocabulary> {
+    String[] getEU();
 }
