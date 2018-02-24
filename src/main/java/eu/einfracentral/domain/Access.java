@@ -18,6 +18,8 @@ public class Access implements Identifiable {
     private String user;
     @XmlElement(required = true)
     private String service;
+    @XmlElement()
+    private String value;
 
     @Override
     public String getId() {
@@ -59,6 +61,14 @@ public class Access implements Identifiable {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
     }
 }
