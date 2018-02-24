@@ -70,5 +70,14 @@ public class Access implements Identifiable {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public enum AccessType {
+        INTERNAL,
+        EXTERNAL,
+        FAVOURITE,
+        RATING;
+
+        AccessType() {
+        }
     }
 }
