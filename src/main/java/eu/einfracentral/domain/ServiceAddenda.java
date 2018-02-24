@@ -11,10 +11,6 @@ import javax.xml.bind.annotation.*;
 public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;
-    @XmlElement
-    private long from;
-    @XmlElement
-    private long to;
     @XmlElement(required = true)
     private String service;
     @XmlElement
@@ -41,21 +37,8 @@ public class ServiceAddenda implements Identifiable {
     public void setServiceID(String serviceID) {
         this.serviceID = serviceID;
     }
-
-    public long getFrom() {
-        return from;
-    }
-
-    public void setFrom(long from) {
-        this.from = from;
-    }
-
-    public long getTo() {
-        return to;
-    }
-
-    public void setTo(long to) {
-        this.to = to;
+    public void setService(String service) {
+        this.service = service;
     }
 
     public List<Measurement<?>> getPerformanceData() {
