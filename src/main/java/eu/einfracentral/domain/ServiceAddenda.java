@@ -30,13 +30,10 @@ public class ServiceAddenda implements Identifiable {
         this.id = id;
     }
 
-    public String getServiceID() {
-        return serviceID;
+    public String getService() {
+        return service;
     }
 
-    public void setServiceID(String serviceID) {
-        this.serviceID = serviceID;
-    }
     public void setService(String service) {
         this.service = service;
     }
