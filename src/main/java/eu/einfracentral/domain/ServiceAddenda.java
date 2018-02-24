@@ -19,6 +19,14 @@ public class ServiceAddenda implements Identifiable {
     private boolean featured;
     @XmlElement(defaultValue = "false")
     private boolean published;
+    @XmlElement(defaultValue = "pgl")
+    private String registeredBy;
+    @XmlElement(defaultValue = "pgl")
+    private String modifiedBy;
+    @XmlElement(defaultValue = "0")
+    private long registeredAt;
+    @XmlElement(defaultValue = "0")
+    private long modifiedAt;
 
     @Override
     public String getId() {
@@ -60,5 +68,37 @@ public class ServiceAddenda implements Identifiable {
 
     public void setPublished(boolean published) {
         this.published = published;
+    }
+
+    public String getRegisteredBy() {
+        return registeredBy;
+    }
+
+    public void setRegisteredBy(String registeredBy) {
+        this.registeredBy = registeredBy;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public long getRegisteredAt() {
+        return registeredAt;
+    }
+
+    public void setRegisteredAt(long registeredAt) {
+        this.registeredAt = registeredAt;
+    }
+
+    public long getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(long modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }
