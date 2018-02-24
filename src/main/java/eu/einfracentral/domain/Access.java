@@ -14,10 +14,10 @@ public class Access implements Identifiable {
     private long instant;
     @XmlElement(required = true)
     private String type;
-    @XmlElement
-    private String userID;
     @XmlElement(required = true)
-    private String serviceID;
+    private String user;
+    @XmlElement(required = true)
+    private String service;
 
     @Override
     public String getId() {
@@ -45,19 +45,20 @@ public class Access implements Identifiable {
         this.type = type;
     }
 
-    public String getUserID() {
-        return userID;
+    public String getUser() {
+        return user;
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public String getServiceID() {
-        return serviceID;
+    public String getService() {
+        return service;
     }
 
-    public void setServiceID(String serviceID) {
-        this.serviceID = serviceID;
+    public void setService(String service) {
+        this.service = service;
+    }
     }
 }
