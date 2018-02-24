@@ -16,11 +16,12 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by pgl on 07/08/17.
  */
-@org.springframework.stereotype.Service("userService")
+@Service("userService")
 @Configurable
 @PropertySource({"classpath:application.properties"})
 public class UserServiceImpl extends ResourceServiceImpl<User> implements UserService {

@@ -7,11 +7,12 @@ import java.io.IOException;
 import java.net.*;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by pgl on 24/7/2017.
  */
-@org.springframework.stereotype.Service("vocabularyService")
+@Service("vocabularyService")
 public class VocabularyServiceImpl extends ResourceServiceImpl<Vocabulary> implements VocabularyService {
     private String[] euURLs = {"https://restcountries.eu/rest/v2/regionalbloc/EU?fields=alpha2Code"};
     private String[] eu;

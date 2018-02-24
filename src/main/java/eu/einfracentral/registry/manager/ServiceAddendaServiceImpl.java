@@ -2,8 +2,9 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.ServiceAddenda;
 import eu.einfracentral.registry.service.ServiceAddendaService;
+import org.springframework.stereotype.Service;
 
-@org.springframework.stereotype.Service("serviceAddendaService")
+@Service("serviceAddendaService")
 public class ServiceAddendaServiceImpl extends ResourceServiceImpl<ServiceAddenda> implements ServiceAddendaService {
     public ServiceAddendaServiceImpl() {
         super(ServiceAddenda.class);

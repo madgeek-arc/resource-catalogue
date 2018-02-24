@@ -7,11 +7,12 @@ import javax.mail.internet.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by pgl on 08/09/17.
  */
-@org.springframework.stereotype.Service("mailService")
+@Service("mailService")
 @Configurable
 @PropertySource({"classpath:application.properties"})
 public class MailService {

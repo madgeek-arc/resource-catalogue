@@ -2,11 +2,12 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Access;
 import eu.einfracentral.registry.service.AccessService;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by pgl on 05/01/18.
  */
-@org.springframework.stereotype.Service("accessService")
+@Service("accessService")
 public class AccessServiceImpl extends ResourceServiceImpl<Access> implements AccessService {
     public AccessServiceImpl() {
         super(Access.class);
