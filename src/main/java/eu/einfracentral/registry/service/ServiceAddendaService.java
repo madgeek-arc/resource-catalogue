@@ -1,7 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.ServiceAddenda;
+import org.springframework.stereotype.Service;
 
-@org.springframework.stereotype.Service("serviceAddendaService")
+@Service("serviceAddendaService")
 public interface ServiceAddendaService extends ResourceService<ServiceAddenda> {
 }
