@@ -8,11 +8,11 @@ import javax.xml.bind.annotation.*;
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Dimension {
-    public enum DimensionTypes {
+    public enum DimensionType {
         TIME,
         LOCATION;
 
-        DimensionTypes() {
+        DimensionType() {
         }
     }
 }

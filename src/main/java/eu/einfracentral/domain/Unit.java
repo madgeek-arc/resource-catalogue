@@ -8,12 +8,12 @@ import javax.xml.bind.annotation.*;
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Unit {
-    public enum UnitTypes {
+    public enum UnitType {
         PCT,
         NUM,
         BOOL;
 
-        UnitTypes() {
+        UnitType() {
         }
     }
 }
