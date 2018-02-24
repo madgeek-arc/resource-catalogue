@@ -50,4 +50,12 @@ public class Membership implements Identifiable {
     public void setGrant(String grant) {
         this.grant = grant;
     }
+
+    public enum Grant {
+        EDIT,
+        UPDATE;
+
+        Grant() {
+        }
+    }
 }
