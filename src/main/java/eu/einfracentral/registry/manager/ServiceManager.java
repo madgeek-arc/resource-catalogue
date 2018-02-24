@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
  * Created by pgl on 4/7/2017.
  */
 @org.springframework.stereotype.Service("serviceService")
-public class ServiceServiceImpl extends ResourceServiceImpl<Service> implements ServiceService {
-    public ServiceServiceImpl() {
+public class ServiceManager extends ResourceManager<Service> implements ServiceService {
+    public ServiceManager() {
         super(Service.class);
     }
 

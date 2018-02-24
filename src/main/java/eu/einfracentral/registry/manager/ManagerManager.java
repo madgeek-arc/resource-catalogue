@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
  * Created by pgl on 08/01/18.
  */
 @Service("managerService")
-public class ManagerServiceImpl extends ResourceServiceImpl<Manager> implements ManagerService {
-    public ManagerServiceImpl() {
+public class ManagerManager extends ResourceManager<Manager> implements ManagerService {
+    public ManagerManager() {
         super(Manager.class);
     }
 

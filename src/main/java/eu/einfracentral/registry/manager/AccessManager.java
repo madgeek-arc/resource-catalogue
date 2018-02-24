@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
  * Created by pgl on 05/01/18.
  */
 @Service("accessService")
-public class AccessServiceImpl extends ResourceServiceImpl<Access> implements AccessService {
-    public AccessServiceImpl() {
+public class AccessManager extends ResourceManager<Access> implements AccessService {
+    public AccessManager() {
         super(Access.class);
     }
 

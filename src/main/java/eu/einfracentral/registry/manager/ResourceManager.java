@@ -14,8 +14,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Created by pgl on 12/7/2017.
  */
-public abstract class ResourceServiceImpl<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
-    public ResourceServiceImpl(Class<T> typeParameterClass) {
+public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
+    public ResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
     }
 

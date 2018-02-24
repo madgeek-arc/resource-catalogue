@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
  * Created by pgl on 24/7/2017.
  */
 @Service("vocabularyService")
-public class VocabularyServiceImpl extends ResourceServiceImpl<Vocabulary> implements VocabularyService {
+public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private String[] euURLs = {"https://restcountries.eu/rest/v2/regionalbloc/EU?fields=alpha2Code"};
     private String[] eu;
 
-    public VocabularyServiceImpl() {
+    public VocabularyManager() {
         super(Vocabulary.class);
     }
 

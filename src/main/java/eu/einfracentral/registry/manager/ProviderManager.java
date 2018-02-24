@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
  * Created by pgl on 26/7/2017.
  */
 @Service("providerService")
-public class ProviderServiceImpl extends ResourceServiceImpl<Provider> implements ProviderService {
-    public ProviderServiceImpl() {
+public class ProviderManager extends ResourceManager<Provider> implements ProviderService {
+    public ProviderManager() {
         super(Provider.class);
     }
 

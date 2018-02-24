@@ -5,8 +5,8 @@ import eu.einfracentral.registry.service.ServiceAddendaService;
 import org.springframework.stereotype.Service;
 
 @Service("serviceAddendaService")
-public class ServiceAddendaServiceImpl extends ResourceServiceImpl<ServiceAddenda> implements ServiceAddendaService {
-    public ServiceAddendaServiceImpl() {
+public class ServiceAddendaManager extends ResourceManager<ServiceAddenda> implements ServiceAddendaService {
+    public ServiceAddendaManager() {
         super(ServiceAddenda.class);
     }
 

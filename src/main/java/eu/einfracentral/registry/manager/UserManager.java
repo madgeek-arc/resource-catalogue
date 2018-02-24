@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Service("userService")
 @Configurable
 @PropertySource({"classpath:application.properties"})
-public class UserServiceImpl extends ResourceServiceImpl<User> implements UserService {
+public class UserManager extends ResourceManager<User> implements UserService {
     @Autowired
     private MailService mailService;
     @Value("${mail.activate.subject}")
@@ -40,7 +40,7 @@ public class UserServiceImpl extends ResourceServiceImpl<User> implements UserSe
     @Value("${jwt.secret:}")
     private String secret;
 
-    public UserServiceImpl() {
+    public UserManager() {
         super(User.class);
     }
 
