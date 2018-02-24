@@ -15,7 +15,7 @@ public class ServiceAddenda implements Identifiable {
     private String service;
     @XmlElement
     private List<Measurement<?>> performanceData;
-    @XmlElement
+    @XmlElement(defaultValue = "false")
     private boolean featured;
     @XmlElement(defaultValue = "false")
     private boolean published;
