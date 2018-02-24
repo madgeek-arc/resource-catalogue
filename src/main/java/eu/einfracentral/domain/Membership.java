@@ -11,11 +11,11 @@ public class Membership implements Identifiable {
     @XmlElement
     private String id;
     @XmlElement
-    private User user;
+    private String user;
     @XmlElement
-    private Provider provider;
+    private String provider;
     @XmlElement
-    private Grant grant;
+    private String grant;
 
     @Override
     public String getId() {
@@ -27,27 +27,27 @@ public class Membership implements Identifiable {
         this.id = id;
     }
 
-    public User getUser() {
+    public String getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
-    public Provider getProvider() {
+    public String getProvider() {
         return provider;
     }
 
-    public void setProvider(Provider provider) {
+    public void setProvider(String provider) {
         this.provider = provider;
     }
 
-    public Grant getGrant() {
+    public String getGrant() {
         return grant;
     }
 
-    public void setGrant(Grant grant) {
+    public void setGrant(String grant) {
         this.grant = grant;
     }
 }
