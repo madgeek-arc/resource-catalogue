@@ -12,11 +12,11 @@ public class ServiceAddenda implements Identifiable {
     @XmlElement
     private String id;
     @XmlElement
-    private String serviceID;
-    @XmlElement
     private long from;
     @XmlElement
     private long to;
+    @XmlElement(required = true)
+    private String service;
     @XmlElement
     private List<Measurement<?>> performanceData;
     @XmlElement
