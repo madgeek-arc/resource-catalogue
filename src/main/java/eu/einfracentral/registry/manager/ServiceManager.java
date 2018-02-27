@@ -24,7 +24,9 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         if (exists(service)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
-        service.setId(java.util.UUID.randomUUID().toString());
+        if (service.getId().indexOf(".") < 0) {
+            service.setId(java.util.UUID.randomUUID().toString());
+        }
         if (service.getVersion() == null || service.getVersion().equals("")) {
             service.setVersion("0");
         }
