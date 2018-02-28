@@ -44,11 +44,6 @@ public class UserManager extends ResourceManager<User> implements UserService {
         super(User.class);
     }
 
-    @PostConstruct
-    private void postConstruct() {
-        System.err.println(secret);
-    }
-
     @Override
     public User activate(String id) {
         User ret = unsafeGet(id);
