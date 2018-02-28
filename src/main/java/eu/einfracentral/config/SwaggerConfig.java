@@ -33,10 +33,10 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
                 .paths(PathSelectors.any())
                 .build()
-                .globalResponseMessage(RequestMethod.GET, get)
-                .globalResponseMessage(RequestMethod.POST, post)
-                .globalResponseMessage(RequestMethod.PUT, put)
-                .globalResponseMessage(RequestMethod.DELETE, dele)
+//                .globalResponseMessage(RequestMethod.GET, get)
+//                .globalResponseMessage(RequestMethod.POST, post)
+//                .globalResponseMessage(RequestMethod.PUT, put)
+//                .globalResponseMessage(RequestMethod.DELETE, dele)
                 .pathMapping("/")
                 .apiInfo(getApiInfo());
     }
