@@ -23,9 +23,8 @@ public class ParserPool implements ParserService {
     public ParserPool() {
         executor = Executors.newCachedThreadPool();
         try {
-            jaxbContext = newInstance(Access.class, Manager.class, Provider.class,
-                                      ServiceAddenda.class,
-                                      Service.class, User.class, Vocabulary.class);
+            jaxbContext = newInstance(Access.class, Manager.class, Provider.class, ServiceAddenda.class, Service.class, User.class,
+                                      Vocabulary.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -34,17 +33,15 @@ public class ParserPool implements ParserService {
     @Override
     public <T> Future<T> deserialize(Resource resource, Class<T> typeParameterClass) {
         return executor.submit(() -> {
-            T type;
+            T ret;
             if (resource == null) {
                 throw new ResourceException("Could not serialize null resource", HttpStatus.BAD_REQUEST);
             }
             try {
                 if (resource.getPayloadFormat().equals("xml")) {
-                    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                    type = typeParameterClass.cast(unmarshaller.unmarshal(new StringReader(resource.getPayload())));
+                    ret = typeParameterClass.cast(jaxbContext.createUnmarshaller().unmarshal(new StringReader(resource.getPayload())));
                 } else if (resource.getPayloadFormat().equals("json")) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    type = mapper.readValue(resource.getPayload(), typeParameterClass);
+                    ret = new ObjectMapper().readValue(resource.getPayload(), typeParameterClass);
                 } else {
                     throw new ResourceException(resource.getPayloadFormat() + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
                 }
@@ -52,13 +49,13 @@ public class ParserPool implements ParserService {
                 e.printStackTrace();
                 throw new ResourceException(e, HttpStatus.I_AM_A_TEAPOT);
             }
-            return type;
+            return ret;
         });
     }
 
     @Override
-    public <T> Future<T> deserialize(String json, Class<T> returnType) {
-        return executor.submit(() -> new ObjectMapper().readValue(json, returnType));
+    public <T> Future<T> deserialize(String json, Class<T> typeParameterClass) {
+        return executor.submit(() -> new ObjectMapper().readValue(json, typeParameterClass));
     }
 
     @Override
@@ -79,13 +76,11 @@ public class ParserPool implements ParserService {
     public Future<String> serialize(Object resource, ParserServiceTypes mediaType) {
         return executor.submit(() -> {
             if (mediaType == ParserServiceTypes.XML) {
-                Marshaller marshaller = jaxbContext.createMarshaller();
                 StringWriter sw = new StringWriter();
-                marshaller.marshal(resource, sw);
+                jaxbContext.createMarshaller().marshal(resource, sw);
                 return sw.toString();
             } else if (mediaType == ParserServiceTypes.JSON) {
-                ObjectMapper mapper = new ObjectMapper();
-                return mapper.writeValueAsString(resource);
+                return new ObjectMapper().writeValueAsString(resource);
             } else {
                 throw new ResourceException(mediaType + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             }
