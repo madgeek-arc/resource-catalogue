@@ -12,7 +12,7 @@ import org.junit.Test;
 /**
  * Created by pgl on 17/02/18.
  */
-public class UserServiceImplTests {
+public class UserManagerTests {
     private static final HashMap<String, String> users = new HashMap<>();
     private static final int iterationCount = -1;
     private static final String algorithm = "PBKDF2WithHmacSHA512";
