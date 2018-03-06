@@ -130,7 +130,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public List<T> getSome(String... ids) {
-        return whereIDin(ids).stream().map(this::deserialize).collect(Collectors.toList());
+        return whereIDin(ids).stream().filter(Objects::nonNull).map(this::deserialize).collect(Collectors.toList());
     }
 
     @Override
