@@ -41,7 +41,7 @@ public class ParserPool implements ParserService {
             try {
                 if (resource.getPayloadFormat().equals("xml")) {
                     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                    type = (T) unmarshaller.unmarshal(new StringReader(resource.getPayload()));
+                    type = typeParameterClass.cast(unmarshaller.unmarshal(new StringReader(resource.getPayload())));
                 } else if (resource.getPayloadFormat().equals("json")) {
                     ObjectMapper mapper = new ObjectMapper();
                     type = mapper.readValue(resource.getPayload(), typeParameterClass);
