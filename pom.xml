@@ -32,11 +32,6 @@
     <dependencies>
         <dependency>
             <groupId>eu.einfracentral</groupId>
-            <artifactId>eic-registry-api</artifactId>
-            <version>${eic.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.einfracentral</groupId>
             <artifactId>eic-registry-rest</artifactId>
             <version>${eic.version}</version>
         </dependency>
