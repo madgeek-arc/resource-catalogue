@@ -9,7 +9,6 @@ import io.jsonwebtoken.*;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
-import javax.annotation.PostConstruct;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import org.springframework.beans.factory.annotation.*;
@@ -70,7 +69,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
     @Override
     public User register(User user) {
         User ret = null;
-        if (getUserByEmail(user.getEmail()) == null) {
+        if (where("email", user.getEmail(), false) == null) {
             user.setId(UUID.randomUUID().toString());
             ret = hashUser(user);
             add(ret);
@@ -121,7 +120,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        return strip(deserialize(where("email", email)));
+        return strip(deserialize(where("email", email, true)));
     }
 
     @Override

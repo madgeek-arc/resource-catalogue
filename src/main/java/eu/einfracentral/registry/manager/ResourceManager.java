@@ -95,7 +95,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     protected Resource whereID(String id, boolean throwOnNull) {
         Resource ret = null;
         try {
-            ret = where(String.format("%s_id", resourceType.getName()), id);
+            ret = where(String.format("%s_id", resourceType.getName()), id, throwOnNull);
         } catch (ResourceException e) {
             if (throwOnNull) {
                 throw e;
@@ -104,17 +104,17 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return ret;
     }
 
-    protected Resource where(String field, String value) {
+    protected Resource where(String field, String value, boolean throwOnNull) {
+        Resource ret;
         try {
-            Resource ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
-            if (ret == null) {
-                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()),
-                                            HttpStatus.NOT_FOUND);
+            ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
+            if (throwOnNull && ret == null) {
+                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
             }
-            return ret;
         } catch (UnknownHostException e) {
-            throw new ResourceException(e, HttpStatus.NOT_FOUND);
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        return ret;
     }
 
     @Override
@@ -135,7 +135,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T get(String field, String value) {
-        return deserialize(where(field, value));
+        return deserialize(where(field, value, true));
     }
 
     @Override
@@ -154,6 +154,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected Resource whereCoreID(String id) {
-        return where("id", id);
+        return where("id", id, true);
     }
 }
