@@ -31,7 +31,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
-    public Browsing getMy(FacetFilter facetFilter) {
+    public Browsing<T> getMy(FacetFilter facetFilter) {
         return null;
     }
 
