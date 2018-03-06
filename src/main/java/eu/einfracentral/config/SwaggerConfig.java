@@ -1,13 +1,10 @@
 package eu.einfracentral.config;
 
-import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.Api;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
-import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.builders.*;
-import springfox.documentation.service.*;
+import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -19,10 +16,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @PropertySource({"classpath:application.properties"})
 public class SwaggerConfig {
-    List get = ImmutableList.of(new ResponseMessage(200, "When the get operation was succesful", null, null, null));
-    List post = ImmutableList.of(new ResponseMessage(200, "When the post operation was succesful", null, null, null));
-    List put = ImmutableList.of(new ResponseMessage(200, "When the put operation was succesful", null, null, null));
-    List dele = ImmutableList.of(new ResponseMessage(200, "When the dele operation was succesful", null, null, null));
     @Value("${platform.root:}")
     private String platform;
 
@@ -33,10 +26,6 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
                 .paths(PathSelectors.any())
                 .build()
-//                .globalResponseMessage(RequestMethod.GET, get)
-//                .globalResponseMessage(RequestMethod.POST, post)
-//                .globalResponseMessage(RequestMethod.PUT, put)
-//                .globalResponseMessage(RequestMethod.DELETE, dele)
                 .pathMapping("/")
                 .apiInfo(getApiInfo());
     }
