@@ -21,7 +21,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T get(String id) {
-        return deserialize(whereID(id));
+        return deserialize(whereID(id, true));
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T update(T t) {
         String serialized = serialize(t);
-        Resource existing = whereID(t.getId());
+        Resource existing = whereID(t.getId(), true);
         existing.setPayload(serialized);
         resourceService.updateResource(existing);
         return t;
@@ -63,12 +63,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected boolean exists(T t) {
-        try {
-            whereID(t.getId());
-            return true;
-        } catch (ResourceException e) {
-            return false;
-        }
+        return whereID(t.getId(), false) != null;
     }
 
     protected String serialize(T t) {
@@ -97,8 +92,16 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         }
     }
 
-    protected Resource whereID(String id) {
-        return where(String.format("%s_id", resourceType.getName()), id);
+    protected Resource whereID(String id, boolean throwOnNull) {
+        Resource ret = null;
+        try {
+            ret = where(String.format("%s_id", resourceType.getName()), id);
+        } catch (ResourceException e) {
+            if (throwOnNull) {
+                throw e;
+            }
+        }
+        return ret;
     }
 
     protected Resource where(String field, String value) {
@@ -116,10 +119,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T del(T t) {
-        if (!exists(t)) {
-            throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
-        }
-        resourceService.deleteResource(whereID(t.getId()).getId());
+        resourceService.deleteResource(whereID(t.getId(), true).getId());
         return t;
     }
 
@@ -144,7 +144,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected List<Resource> whereIDin(String... ids) {
-        return Stream.of(ids).map(this::whereID).collect(Collectors.toList());
+        return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
     }
 
     protected Map<String, List<Resource>> groupBy(String field) {
