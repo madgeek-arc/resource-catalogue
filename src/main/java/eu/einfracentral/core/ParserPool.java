@@ -60,16 +60,17 @@ public class ParserPool implements ParserService {
 
     @Override
     public Resource deserializeResource(File file, ParserServiceTypes mediaType) {
+        Resource ret;
         try {
             if (mediaType == ParserServiceTypes.XML) {
-                return (Resource) (jaxbContext.createUnmarshaller().unmarshal(file));
+                ret = (Resource) (jaxbContext.createUnmarshaller().unmarshal(file));
             } else if (mediaType == ParserServiceTypes.JSON) {
-                return new ObjectMapper().readValue(file, Resource.class);
+                ret = new ObjectMapper().readValue(file, Resource.class);
             }
         } catch (IOException | JAXBException | ClassCastException e) {
             e.printStackTrace();
         }
-        return null;
+        return ret;
     }
 
     @Override
