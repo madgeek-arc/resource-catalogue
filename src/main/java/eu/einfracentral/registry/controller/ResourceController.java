@@ -75,7 +75,7 @@ public class ResourceController<T> {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of resource ids", dataType = "string", paramType = "query")
     })
-    @RequestMapping(path = "some/{ids}", method = RequestMethod.GET)
+    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET)
     public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
     }
