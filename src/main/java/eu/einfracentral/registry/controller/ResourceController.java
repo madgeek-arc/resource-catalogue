@@ -14,7 +14,7 @@ import springfox.documentation.annotations.ApiIgnore;
 /**
  * Created by pgl on 25/07/17.
  */
-@RequestMapping(consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+@RequestMapping(consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.ALL_VALUE})
 public class ResourceController<T> {
     protected final ResourceService<T> service;
 
