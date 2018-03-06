@@ -66,9 +66,12 @@ public class ParserPool implements ParserService {
                 ret = (Resource) (jaxbContext.createUnmarshaller().unmarshal(file));
             } else if (mediaType == ParserServiceTypes.JSON) {
                 ret = new ObjectMapper().readValue(file, Resource.class);
+            } else {
+                throw new ResourceException(mediaType + " is unsupported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             }
         } catch (IOException | JAXBException | ClassCastException e) {
             e.printStackTrace();
+            throw new ResourceException(e, HttpStatus.I_AM_A_TEAPOT);
         }
         return ret;
     }
