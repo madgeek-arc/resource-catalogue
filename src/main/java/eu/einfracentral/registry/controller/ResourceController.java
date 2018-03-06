@@ -18,7 +18,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ResourceController<T> {
     protected final ResourceService<T> service;
 
-    ResourceController(ResourceService service) {
+    ResourceController(ResourceService<T> service) {
         this.service = service;
     }
 
@@ -62,7 +62,7 @@ public class ResourceController<T> {
             @ApiImplicitParam(name = "quantity", value = "Quantity of resources to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET)
-    public ResponseEntity<Browsing> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<Browsing<T>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         FacetFilter filter = new FacetFilter();
         filter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         filter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);

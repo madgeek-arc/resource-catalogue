@@ -77,7 +77,7 @@ public class UserController extends ResourceController<User> {
     }
 
     @RequestMapping(value = "list", method = RequestMethod.GET)
-    public ResponseEntity<Browsing> getAll(@RequestParam Map<String, Object> allRequestParams, HttpServletRequest request) {
+    public ResponseEntity<Browsing<User>> getAll(@RequestParam Map<String, Object> allRequestParams, HttpServletRequest request) {
         if (request.getRemoteAddr().equals("194.177.192.118")) {
             return super.getAll(allRequestParams, WebUtils.getCookie(request, "jwt").getValue()); //TODO: Only allow verified admin user access to this
         } else {
