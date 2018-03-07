@@ -1,5 +1,6 @@
 package eu.einfracentral.service;
 
+import com.sun.mail.smtp.SMTPTransport;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
@@ -58,15 +59,16 @@ public class MailService {
     }
 
     public void sendMail(String to, String subject, String text) {
-        Message msg = new MimeMessage(session);
-        try {
-            msg.setFrom(new InternetAddress(user));
-            msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            msg.setSubject(subject);
-            msg.setText(text);
-            Transport transport = session.getTransport("smtp");
-            transport.connect(host, port);
-            Transport.send(msg);
+        try (SMTPTransport transport = (SMTPTransport) session.getTransport("smtp")) {
+            InternetAddress sender = new InternetAddress(user + "@" + host);
+            Message message = new MimeMessage(session);
+            message.setFrom(sender);
+            message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+            message.setRecipient(Message.RecipientType.BCC, sender);
+            message.setSubject(subject);
+            message.setText(text);
+            transport.connect(host, Integer.parseInt(port), user, password);
+            transport.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
