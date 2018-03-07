@@ -18,56 +18,13 @@
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <eic.version>${project.version}</eic.version>
-        <registry-core.version>1.4.4-SNAPSHOT</registry-core.version>
-        <runtime.version>0.4.1.5</runtime.version>
-        <jaxb2-basics-runtime.version>0.11.1</jaxb2-basics-runtime.version>
-        <junit.version>4.12</junit.version>
-        <junit-toolbox.version>2.2</junit-toolbox.version>
-        <spring.version>4.2.3.RELEASE</spring.version>
-        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>2.8</maven-dependency-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>eu.einfracentral</groupId>
-            <artifactId>eic-registry-model</artifactId>
-            <version>${eic.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.openminted</groupId>
-            <artifactId>registry-core-api</artifactId>
-            <version>${registry-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jvnet.jaxb2_commons</groupId>
-            <artifactId>jaxb2-basics-runtime</artifactId>
-            <version>${jaxb2-basics-runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jvnet.jaxb2_commons</groupId>
-            <artifactId>runtime</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.junit-toolbox</groupId>
-            <artifactId>junit-toolbox</artifactId>
-            <version>${junit-toolbox.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
+        <dependency><groupId>eu.einfracentral</groupId><artifactId>eic-registry-model</artifactId><version>${project.version}</version></dependency>
     </dependencies>
     <distributionManagement>
         <repository>
