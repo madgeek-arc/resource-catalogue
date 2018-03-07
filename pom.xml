@@ -12,17 +12,6 @@
     </licenses>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <eic.version>${project.version}</eic.version>
-        <registry-core.version>1.4.4-SNAPSHOT</registry-core.version>
-        <springfox.version>2.7.0</springfox.version>
-        <spring.version>4.2.3.RELEASE</spring.version>
-        <json.version>LATEST</json.version>
-        <mail.version>LATEST</mail.version>
-        <jackson.version>2.6.2</jackson.version>
-        <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
-        <org.eclipse.persistence.moxy.version>2.5.0</org.eclipse.persistence.moxy.version>
-        <commons-io.version>2.4</commons-io.version>
-        <commons-fileupload.version>1.2.1</commons-fileupload.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>2.8</maven-dependency-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
@@ -33,91 +22,7 @@
         <url>https://github.com/eInfraCentral/eic-registry-rest.git</url>
     </scm>
     <dependencies>
-        <dependency>
-            <groupId>eu.einfracentral</groupId>
-            <artifactId>eic-registry-api</artifactId>
-            <version>${eic.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.openminted</groupId>
-            <artifactId>registry-core-api</artifactId>
-            <version>${registry-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.openminted</groupId>
-            <artifactId>registry-core-rest</artifactId>
-            <version>${registry-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${springfox.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${json.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${mail.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.moxy</artifactId>
-            <version>${org.eclipse.persistence.moxy.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>${commons-fileupload.version}</version>
-        </dependency>
+        <dependency><groupId>eu.einfracentral</groupId><artifactId>eic-registry-api</artifactId><version>${project.version}</version></dependency>
     </dependencies>
     <distributionManagement>
         <repository>
