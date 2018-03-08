@@ -62,6 +62,55 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         del(t);
     }
 
+    @Override
+    public T del(T t) {
+        resourceService.deleteResource(whereID(t.getId(), true).getId());
+        return t;
+    }
+
+    @Override
+    public Map<String, List<T>> getBy(String field) {
+        return groupBy(field).entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(),
+                                                                           entry -> entry.getValue()
+                                                                                         .stream()
+                                                                                         .map(resource -> deserialize(whereCoreID(resource.getId())))
+                                                                                         .collect(Collectors.toList())));
+    }
+
+    @Override
+    public List<T> getSome(String... ids) {
+        return whereIDin(ids).stream().filter(Objects::nonNull).map(this::deserialize).collect(Collectors.toList());
+    }
+
+    @Override
+    public T get(String field, String value) {
+        return deserialize(where(field, value, true));
+    }
+
+    @Override
+    public List<T> delAll() {
+        return getAll(new FacetFilter()).getResults().stream().map(this::del).collect(Collectors.toList());
+    }
+
+    @Override
+    public T validate(T t) {
+        return t;
+    }
+
+    protected List<Resource> whereIDin(String... ids) {
+        return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
+    }
+
+    protected Map<String, List<Resource>> groupBy(String field) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(resourceType.getName());
+        return searchService.searchByCategory(ff, field);
+    }
+
+    protected Resource whereCoreID(String id) {
+        return where("id", id, true);
+    }
+
     protected boolean exists(T t) {
         return whereID(t.getId(), false) != null;
     }
@@ -115,45 +164,5 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return ret;
-    }
-
-    @Override
-    public T del(T t) {
-        resourceService.deleteResource(whereID(t.getId(), true).getId());
-        return t;
-    }
-
-    @Override
-    public Map<String, List<T>> getBy(String field) {
-        return groupBy(field).entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().stream().map(resource -> deserialize(whereCoreID(resource.getId()))).collect(Collectors.toList())));
-    }
-
-    @Override
-    public List<T> getSome(String... ids) {
-        return whereIDin(ids).stream().filter(Objects::nonNull).map(this::deserialize).collect(Collectors.toList());
-    }
-
-    @Override
-    public T get(String field, String value) {
-        return deserialize(where(field, value, true));
-    }
-
-    @Override
-    public List<T> delAll() {
-        return getAll(new FacetFilter()).getResults().stream().map(this::del).collect(Collectors.toList());
-    }
-
-    protected List<Resource> whereIDin(String... ids) {
-        return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
-    }
-
-    protected Map<String, List<Resource>> groupBy(String field) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceType.getName());
-        return searchService.searchByCategory(ff, field);
-    }
-
-    protected Resource whereCoreID(String id) {
-        return where("id", id, true);
     }
 }
