@@ -12,4 +12,5 @@ public interface ResourceService<T> extends ResourceCRUDService<T> {
     List<T> getSome(String... ids);
     T get(String field, String value);
     List<T> delAll();
+    T validate(T t);
 }
