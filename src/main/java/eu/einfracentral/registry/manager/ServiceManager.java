@@ -26,39 +26,44 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Service add(Service service) {
-        if (exists(service)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
-        }
         if (service.getId().indexOf(".") < 0) {
             service.setId(java.util.UUID.randomUUID().toString());
         }
-        if (service.getVersion() == null || service.getVersion().equals("")) {
-            service.setVersion("0");
+        if (exists(service)) {
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
-        return super.add(service);
+        return super.add(validate(service));
     }
 
     @Override
-    public Service update(Service updatedService) {
-        Service existingService = get(updatedService.getId());
-        ServiceAddenda existingAddenda = sam.get(updatedService.getId());
-        if (existingService.getVersion() == null || existingService.getVersion().equals("")) {
-            existingService.setVersion("0");
+    public Service validate(Service service) {
+        return fixVersion(service);
+    }
+
+    private Service fixVersion(Service service) {
+        if (service.getVersion() == null || service.getVersion().equals("")) {
+            service.setVersion("0");
         }
-        if (updatedService.getVersion() == null || updatedService.getVersion().equals("")) {
-            updatedService.setVersion("0");
-        }
-        if (updatedService.getVersion().equals(existingService.getVersion())) {
+        return service;
+    }
+
+    @Override
+    public Service update(Service service) {
+        Service existingService = get(service.getId());
+        ServiceAddenda existingAddenda = sam.get(service.getId());
+        fixVersion(existingService); //remove this when it has ran for all services
+
+        if (service.getVersion().equals(existingService.getVersion())) {
             existingAddenda.setModifiedAt(System.currentTimeMillis());
             existingAddenda.setModifiedBy("pgl");
             sam.update(existingAddenda);
-            super.update(updatedService);
+            super.update(service);
         } else {
             existingAddenda.setRegisteredAt(System.currentTimeMillis());
             existingAddenda.setRegisteredBy("pgl");
             sam.add(existingAddenda);
-            super.add(updatedService);
+            super.add(service);
         }
-        return updatedService;
+        return service;
     }
 }
