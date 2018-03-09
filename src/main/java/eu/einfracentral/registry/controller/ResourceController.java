@@ -41,6 +41,12 @@ public class ResourceController<T> {
         return new ResponseEntity<>(service.update(t), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Validates the resource without actually changing the respository")
+    @RequestMapping(value = "validate", method = RequestMethod.POST)
+    public ResponseEntity<T> validate(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+        return new ResponseEntity<>(service.validate(t), HttpStatus.OK);
+    }
+
     @ApiOperation(value = "Deletes the resource assigned the given id.")
     @RequestMapping(method = RequestMethod.DELETE)
     @ApiIgnore
