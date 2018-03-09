@@ -51,7 +51,7 @@ public class MailService {
         sessionProps.setProperty("mail.smtp.socketFactory.port", socketFactoryPort);
         sessionProps.setProperty("mail.smtp.starttls.enable", starttls);
         sessionProps.setProperty("mail.smtp.user", user);
-        session = Session.getDefaultInstance(sessionProps, new Authenticator() {
+        session = Session.getInstance(sessionProps, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(user, password);
             }
