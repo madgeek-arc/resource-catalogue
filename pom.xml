@@ -79,6 +79,7 @@
                             <goal>analyze-only</goal>
                         </goals>
                         <configuration>
+                            <skip>true</skip>
                             <failOnWarning>false</failOnWarning>
                             <ignoreNonCompile>true</ignoreNonCompile>
                             <outputXML>true</outputXML>
