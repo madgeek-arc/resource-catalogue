@@ -193,8 +193,6 @@ public class Service implements Identifiable {
      */
     @XmlElement
     private String funding;
-    @XmlElement
-    private ServiceAddenda serviceAddenda;
 
     @Override
     public String getId() {
@@ -468,13 +466,5 @@ public class Service implements Identifiable {
 
     public void setFunding(String funding) {
         this.funding = funding;
-    }
-
-    public ServiceAddenda getServiceAddenda() {
-        return serviceAddenda;
-    }
-
-    public void setServiceAddenda(ServiceAddenda serviceAddenda) {
-        this.serviceAddenda = serviceAddenda;
     }
 }
