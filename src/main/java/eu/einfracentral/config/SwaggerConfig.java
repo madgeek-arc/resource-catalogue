@@ -1,9 +1,10 @@
 package eu.einfracentral.config;
 
+import com.fasterxml.classmate.TypeResolver;
 import io.swagger.annotations.Api;
 import java.net.URL;
 import javax.xml.datatype.XMLGregorianCalendar;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.context.annotation.*;
 import springfox.documentation.builders.*;
 import springfox.documentation.service.ApiInfo;
@@ -18,6 +19,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @PropertySource({"classpath:application.properties"})
 public class SwaggerConfig {
+    @Autowired
+    private TypeResolver typeResolver;
     @Value("${platform.root:}")
     private String platform;
 
@@ -26,6 +29,8 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.SWAGGER_2)
                 .directModelSubstitute(URL.class, String.class)
                 .directModelSubstitute(XMLGregorianCalendar.class, String.class)
+//                .alternateTypeRules(newRule(typeResolver.arrayType(URL.class), typeResolver.arrayType(String.class)))
+//                .alternateTypeRules(newRule(typeResolver.arrayType(XMLGregorianCalendar.class), typeResolver.arrayType(String.class)))
                 .select()
                 .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
                 .paths(PathSelectors.any())
