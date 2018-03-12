@@ -1,6 +1,8 @@
 package eu.einfracentral.config;
 
 import io.swagger.annotations.Api;
+import java.net.URL;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import springfox.documentation.builders.*;
@@ -22,6 +24,8 @@ public class SwaggerConfig {
     @Bean
     public Docket getDocket() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .directModelSubstitute(URL.class, String.class)
+                .directModelSubstitute(XMLGregorianCalendar.class, String.class)
                 .select()
                 .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
                 .paths(PathSelectors.any())
