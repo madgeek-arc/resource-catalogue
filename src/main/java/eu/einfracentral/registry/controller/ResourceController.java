@@ -77,7 +77,7 @@ public class ResourceController<T> {
         return new ResponseEntity<>(service.getAll(filter), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns a list of resources. If a resource isn't found, null  is returned in its stead")
+    @ApiOperation(value = "Returns any resources with the given id(s)")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of resource ids", dataType = "string", paramType = "query")
     })
