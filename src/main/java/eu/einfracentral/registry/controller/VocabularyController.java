@@ -21,37 +21,37 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     VocabularyController(VocabularyService service) { super(service); }
 
     @ApiOperation(value = "Returns the list of EU countries.")
-    @RequestMapping(value = "getEU", method = RequestMethod.GET)
+    @RequestMapping(value = "getEU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String[]> getEU() {
         return new ResponseEntity<>(((VocabularyService) service).getEU(), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ApiIgnore
     public ResponseEntity<Vocabulary> add(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.add(vocabulary), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ApiIgnore
     public ResponseEntity<Vocabulary> update(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return new ResponseEntity<>(service.update(vocabulary), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "validate", method = RequestMethod.POST)
+    @RequestMapping(value = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ApiIgnore
     public ResponseEntity<Vocabulary> validate(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return new ResponseEntity<>(service.validate(vocabulary), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE)
+    @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ApiIgnore
     public ResponseEntity<Vocabulary> delete(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.del(vocabulary), HttpStatus.OK);
     }
 
-    @RequestMapping(path = "all", method = RequestMethod.DELETE)
+    @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ApiIgnore
     public ResponseEntity<List<Vocabulary>> delAll(@CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.delAll(), HttpStatus.OK);

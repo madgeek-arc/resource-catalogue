@@ -22,37 +22,37 @@ public class UserController extends ResourceController<User> {
     }
 
     @CrossOrigin
-    @RequestMapping(path = "activate/{token}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(path = "activate/{token}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<User> activate(@PathVariable String token) {
         return new ResponseEntity<>(((UserService) service).activate(token), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "reset", method = RequestMethod.POST)
+    @RequestMapping(path = "reset", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<User> reset(@RequestBody User user) {
         return new ResponseEntity<>(((UserService) service).reset(user), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "forgot", method = RequestMethod.POST)
+    @RequestMapping(path = "forgot", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<User> forgot(@PathVariable String email) {
         return new ResponseEntity<>(((UserService) service).forgot(email), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "register", method = RequestMethod.POST)
+    @RequestMapping(path = "register", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<User> register(@RequestBody User user) {
         return new ResponseEntity<>(((UserService) service).register(user), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "addFavourite", method = RequestMethod.POST)
+    @RequestMapping(path = "addFavourite", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<User> addFavourite(@RequestParam String userID, @RequestParam String serviceID) {
         return new ResponseEntity<>(((UserService) service).addFavourite(userID, serviceID), HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(path = "login", method = RequestMethod.POST)
+    @RequestMapping(path = "login", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
         if (credentials.getEmail() == null || credentials.getPassword() == null) {
             return new ResponseEntity<>(credentials, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -76,7 +76,7 @@ public class UserController extends ResourceController<User> {
         }
     }
 
-    @RequestMapping(value = "list", method = RequestMethod.GET)
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<User>> getAll(@RequestParam Map<String, Object> allRequestParams, HttpServletRequest request) {
         if (request.getRemoteAddr().equals("194.177.192.118")) {
             return super.getAll(allRequestParams, WebUtils.getCookie(request, "jwt").getValue()); //TODO: Only allow verified admin user access to this

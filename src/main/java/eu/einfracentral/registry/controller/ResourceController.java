@@ -23,39 +23,39 @@ public class ResourceController<T> {
     }
 
     @ApiOperation(value = "Returns the resource assigned the given id.")
-    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.get(id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Adds the given resource.")
     @CrossOrigin
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.add(t), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the resource assigned the given id with the given resource, keeping a history of revisions.")
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> update(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return new ResponseEntity<>(service.update(t), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Validates the resource without actually changing the respository")
-    @RequestMapping(value = "validate", method = RequestMethod.POST)
+    @RequestMapping(value = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> validate(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return new ResponseEntity<>(service.validate(t), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes the resource assigned the given id.")
-    @RequestMapping(method = RequestMethod.DELETE)
+    @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ApiIgnore
     public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.del(t), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes all resources.")
-    @RequestMapping(path = "all", method = RequestMethod.DELETE)
+    @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ApiIgnore
     public ResponseEntity<List<T>> delAll(@ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.delAll(), HttpStatus.OK);
@@ -67,7 +67,7 @@ public class ResourceController<T> {
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity of resources to be fetched", dataType = "string", paramType = "query")
     })
-    @RequestMapping(path = "all", method = RequestMethod.GET)
+    @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<T>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         FacetFilter filter = new FacetFilter();
         filter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
@@ -81,13 +81,13 @@ public class ResourceController<T> {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of resource ids", dataType = "string", paramType = "query")
     })
-    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET)
+    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns all resources, grouped by the given field.")
-    @RequestMapping(path = "by/{field}", method = RequestMethod.GET)
+    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
