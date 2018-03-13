@@ -21,9 +21,6 @@ public class User implements Identifiable {
     private String surname;
     @XmlElement
     private String joinDate;
-    @XmlElementWrapper(name = "favourites")
-    @XmlElement(name = "favourite")
-    private List<Service> favourites;
     @XmlElement
     private int iterationCount;
     @XmlElement
@@ -79,14 +76,6 @@ public class User implements Identifiable {
 
     public void setJoinDate(String joinDate) {
         this.joinDate = joinDate;
-    }
-
-    public List<Service> getFavourites() {
-        return favourites;
-    }
-
-    public void setFavourites(List<Service> favourites) {
-        this.favourites = favourites;
     }
 
     public int getIterationCount() {
