@@ -21,9 +21,6 @@ public class User implements Identifiable {
     private String surname;
     @XmlElement
     private String joinDate;
-    @XmlElementWrapper(name = "memberships")
-    @XmlElement(name = "membership")
-    private List<Membership> memberships;
     @XmlElementWrapper(name = "favourites")
     @XmlElement(name = "favourite")
     private List<Service> favourites;
@@ -82,14 +79,6 @@ public class User implements Identifiable {
 
     public void setJoinDate(String joinDate) {
         this.joinDate = joinDate;
-    }
-
-    public List<Membership> getMemberships() {
-        return memberships;
-    }
-
-    public void setMemberships(List<Membership> memberships) {
-        this.memberships = memberships;
     }
 
     public List<Service> getFavourites() {
