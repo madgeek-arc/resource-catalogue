@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Access implements Identifiable {
+public class UserAction implements Identifiable {
     @XmlElement(required = true)
     private String id;
     @XmlElement(required = true)
@@ -71,13 +71,13 @@ public class Access implements Identifiable {
         this.value = value;
     }
 
-    public enum AccessType {
+    public enum UserActionType {
         INTERNAL,
         EXTERNAL,
         FAVOURITE,
         RATING;
 
-        AccessType() {
+        UserActionType() {
         }
     }
 }
