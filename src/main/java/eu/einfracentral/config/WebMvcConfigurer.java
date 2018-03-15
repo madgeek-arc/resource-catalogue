@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.*;
  */
 @Configuration
 @EnableWebMvc
-public class EicWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
+public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 //    @Override
 //    public void configurePathMatch(PathMatchConfigurer configurer) {
 //        configurer.setUseSuffixPatternMatch(false);
