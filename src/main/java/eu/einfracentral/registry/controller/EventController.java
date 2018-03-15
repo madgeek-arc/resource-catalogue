@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.UserAction;
-import eu.einfracentral.registry.service.UserActionService;
+import eu.einfracentral.domain.Event;
+import eu.einfracentral.registry.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.*;
  * Created by pgl on 05/01/18.
  */
 @RestController
-@RequestMapping("useraction")
-public class UserActionController extends ResourceController<UserAction> {
+@RequestMapping("event")
+public class EventController extends ResourceController<Event> {
     @Autowired
-    UserActionController(UserActionService service) {
+    EventController(EventService service) {
         super(service);
     }
 }
