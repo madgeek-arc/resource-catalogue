@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 @org.springframework.stereotype.Service("serviceService")
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
     @Autowired
-    ServiceAddendaManager sam;
+    private AddendaManager sam;
 
     public ServiceManager() {
         super(Service.class);
