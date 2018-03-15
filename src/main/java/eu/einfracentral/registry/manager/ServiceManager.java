@@ -46,20 +46,32 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Service update(Service service) {
-        Service existingService = get(service.getId());
-        ServiceAddenda existingAddenda = sam.get(service.getId());
-        fixVersion(existingService); //remove this when it has ran for all services
-
-        if (service.getVersion().equals(existingService.getVersion())) {
-            existingAddenda.setModifiedAt(System.currentTimeMillis());
-            existingAddenda.setModifiedBy("pgl");
-            sam.update(existingAddenda);
-            super.update(service);
-        } else {
-            existingAddenda.setRegisteredAt(System.currentTimeMillis());
-            existingAddenda.setRegisteredBy("pgl");
-            sam.add(existingAddenda);
-            super.add(service);
+        try {
+            Service existingService = get(service.getId());
+            Addenda addenda = null;
+            Resource existingAddendaResource = sam.where("service", service.getId(), false);
+            if (existingAddendaResource != null) {
+                addenda = parserPool.deserialize(existingAddendaResource, Addenda.class).get();
+            } else {
+                addenda = new Addenda();
+                addenda.setId(UUID.randomUUID().toString());
+                addenda.setService(service.getId());
+                sam.add(addenda);
+            }
+            fixVersion(existingService); //remove this when it has ran for all services
+            if (service.getVersion().equals(existingService.getVersion())) {
+                addenda.setModifiedAt(System.currentTimeMillis());
+                addenda.setModifiedBy("pgl");
+                sam.update(addenda);
+                super.update(service);
+            } else {
+                addenda.setRegisteredAt(System.currentTimeMillis());
+                addenda.setRegisteredBy("pgl");
+                sam.add(addenda);
+                super.add(service);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
         return service;
     }
