@@ -1,5 +1,7 @@
 package eu.einfracentral.registry.manager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.UserService;
@@ -97,13 +99,21 @@ public class UserManager extends ResourceManager<User> implements UserService {
             throw new ResourceException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         Date now = new Date();
+        String payload;
         if (authenticate(credentials)) {
+            try {
+                payload = new ObjectMapper().writeValueAsString(credentials);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                throw new ResourceException("Could not stringify user.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
             return Jwts.builder()
                        .setSubject(credentials.getEmail())
                        .claim("roles", "user")
                        .setIssuedAt(now)
                        .setExpiration(new Date(now.getTime() + 86400000))
                        .signWith(SignatureAlgorithm.HS256, secret)
+                       .setPayload(payload)
                        .compact();
         } else {
             throw new ResourceException("Passwords do not match.", HttpStatus.FORBIDDEN);
