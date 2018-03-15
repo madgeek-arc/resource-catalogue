@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class ServiceAddenda implements Identifiable {
+public class Addenda implements Identifiable {
     @XmlElement
     private String id;
     @XmlElement(required = true)

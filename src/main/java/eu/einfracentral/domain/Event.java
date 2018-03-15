@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class UserAction implements Identifiable {
+public class Event implements Identifiable {
     @XmlElement(required = true)
     private String id;
     @XmlElement(required = true)
