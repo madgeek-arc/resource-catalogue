@@ -2,14 +2,20 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "useraction_id",
+      "name": "addenda_id",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "service",
+      "path": "//*[local-name()='service']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "useraction",
+  "name": "addenda",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://builds.openminted.eu/job/eic-registry-model/ws/target/generated-resources/schemagen/schema1.xsd"
