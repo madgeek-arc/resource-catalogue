@@ -1,7 +1,7 @@
 package eu.einfracentral.config;
 
 import com.fasterxml.classmate.TypeResolver;
-import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 import java.net.URL;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.springframework.beans.factory.annotation.*;
@@ -32,7 +32,7 @@ public class SwaggerConfig {
 //                .alternateTypeRules(newRule(typeResolver.arrayType(URL.class), typeResolver.arrayType(String.class)))
 //                .alternateTypeRules(newRule(typeResolver.arrayType(XMLGregorianCalendar.class), typeResolver.arrayType(String.class)))
                 .select()
-                .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
+                .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                 .paths(PathSelectors.any())
                 .build()
                 .pathMapping("/")
