@@ -2,9 +2,10 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.*;
-import java.util.List;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -13,12 +14,11 @@ import springfox.documentation.annotations.ApiIgnore;
 /**
  * Created by pgl on 24/7/2017.
  */
-@Api
 @RestController
 @RequestMapping("vocabulary")
 public class VocabularyController extends ResourceController<Vocabulary> {
     @Autowired
-    VocabularyController(VocabularyService service) { super(service); }
+    VocabularyController(VocabularyService vocabulary) { super(vocabulary); }
 
     @ApiOperation(value = "Returns the list of EU countries.")
     @RequestMapping(value = "getEU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -26,34 +26,35 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(((VocabularyService) service).getEU(), HttpStatus.OK);
     }
 
-    @CrossOrigin
-    @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @ApiIgnore
-    public ResponseEntity<Vocabulary> add(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.add(vocabulary), HttpStatus.OK);
+    @ApiOperation(value = "Returns the vocabulary assigned the given id.")
+    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Vocabulary> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return super.get(id, jwt);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @ApiIgnore
-    public ResponseEntity<Vocabulary> update(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>(service.update(vocabulary), HttpStatus.OK);
+    @ApiOperation(value = "Returns all vocabularies satisfying the given parametres.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity of vocabularies to be fetched", dataType = "string", paramType = "query")
+    })
+    @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Browsing<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return super.getAll(allRequestParams, jwt);
     }
 
-    @RequestMapping(value = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @ApiIgnore
-    public ResponseEntity<Vocabulary> validate(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>(service.validate(vocabulary), HttpStatus.OK);
+    @ApiOperation(value = "Returns any vocabularies with the given id(s)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of vocabulary ids", dataType = "string", paramType = "query")
+    })
+    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<Vocabulary>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return super.getSome(ids, jwt);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @ApiIgnore
-    public ResponseEntity<Vocabulary> delete(@RequestBody Vocabulary vocabulary, @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.del(vocabulary), HttpStatus.OK);
-    }
-
-    @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @ApiIgnore
-    public ResponseEntity<List<Vocabulary>> delAll(@CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.delAll(), HttpStatus.OK);
+    @ApiOperation(value = "Returns all vocabularies, grouped by the given field.")
+    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Map<String, List<Vocabulary>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return super.getBy(field, jwt);
     }
 }
