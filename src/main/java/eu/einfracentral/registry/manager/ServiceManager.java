@@ -3,6 +3,9 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
+import eu.openminted.registry.core.domain.Resource;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
@@ -11,7 +14,6 @@ import org.springframework.http.HttpStatus;
  */
 @org.springframework.stereotype.Service("serviceService")
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
-
     @Autowired
     ServiceAddendaManager sam;
 
@@ -33,11 +35,6 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         return super.add(validate(service));
-    }
-
-    @Override
-    public Service validate(Service service) {
-        return fixVersion(service);
     }
 
     private Service fixVersion(Service service) {
@@ -65,5 +62,10 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             super.add(service);
         }
         return service;
+    }
+
+    @Override
+    public Service validate(Service service) {
+        return fixVersion(service);
     }
 }
