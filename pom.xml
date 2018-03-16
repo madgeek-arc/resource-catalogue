@@ -26,30 +26,6 @@
     <dependencies>
         <dependency><groupId>eu.einfracentral</groupId><artifactId>eic-registry-model</artifactId><version>${project.version}</version></dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>omtd-snapshots</id>
-            <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>omtd-releases</id>
-            <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <build>
         <plugins>
             <plugin>
