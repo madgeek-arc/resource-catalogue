@@ -109,11 +109,10 @@ public class UserManager extends ResourceManager<User> implements UserService {
             }
             return Jwts.builder()
                        .setSubject(credentials.getEmail())
-                       .claim("roles", "user")
+                       .setPayload(payload)
                        .setIssuedAt(now)
                        .setExpiration(new Date(now.getTime() + 86400000))
                        .signWith(SignatureAlgorithm.HS256, secret)
-                       .setPayload(payload)
                        .compact();
         } else {
             throw new ResourceException("Passwords do not match.", HttpStatus.FORBIDDEN);
