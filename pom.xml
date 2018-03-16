@@ -24,13 +24,6 @@
     <dependencies>
         <dependency><groupId>eu.einfracentral</groupId><artifactId>eic-registry-api</artifactId><version>${project.version}</version></dependency>
     </dependencies>
-    <distributionManagement>
-        <repository>
-            <id>omtd-releases</id>
-            <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
-        </repository>
-    </distributionManagement>
     <build>
         <pluginManagement>
             <plugins>
