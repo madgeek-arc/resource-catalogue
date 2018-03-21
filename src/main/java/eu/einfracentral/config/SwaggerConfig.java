@@ -1,10 +1,9 @@
 package eu.einfracentral.config;
 
 import com.fasterxml.classmate.TypeResolver;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
 import java.net.URL;
 import javax.xml.datatype.XMLGregorianCalendar;
-import org.springframework.beans.factory.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import springfox.documentation.builders.*;
@@ -18,12 +17,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
-@PropertySource({"classpath:application.properties"})
 public class SwaggerConfig {
     @Autowired
     private TypeResolver typeResolver;
-    @Value("${platform.root:}")
-    private String platform;
     @Autowired
     private ApplicationConfig config;
 

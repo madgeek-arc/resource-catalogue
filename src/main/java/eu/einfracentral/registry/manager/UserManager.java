@@ -15,8 +15,6 @@ import java.util.*;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import org.springframework.beans.factory.annotation.*;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -25,22 +23,9 @@ import org.springframework.stereotype.Service;
  */
 @Service("userService")
 @Configurable
-@PropertySource({"classpath:application.properties"})
 public class UserManager extends ResourceManager<User> implements UserService {
     @Autowired
     private MailService mailService;
-    @Value("${mail.activate.subject}")
-    private String activateSubject;
-    @Value("${mail.reset.subject}")
-    private String resetSubject;
-    @Value("${mail.activate.text}")
-    private String activateText;
-    @Value("${mail.reset.text}")
-    private String resetText;
-    @Value("${sec.user.iterations:1000}")
-    private int currentServerIterationCount;
-    @Value("${jwt.secret:}")
-    private String secret;
     @Autowired
     private ApplicationConfig config;
 

@@ -5,9 +5,6 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.context.annotation.*;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,29 +12,8 @@ import org.springframework.stereotype.Service;
  * Created by pgl on 08/09/17.
  */
 @Service("mailService")
-@Configurable
-@PropertySource({"classpath:application.properties"})
 public class MailService {
     private Session session;
-    @Value("${mail.smtp.auth}")
-    private String auth;
-    @Value("${mail.smtp.host}")
-    private String host;
-    @Value("${mail.smtp.password}")
-    private String password;
-    @Value("${mail.smtp.port}")
-    private String port;
-    @Value("${mail.smtp.protocol}")
-    private String protocol;
-    @Value("${mail.smtp.ssl.enable}")
-    private String sslEnable;
-    @Value("${mail.smtp.user}")
-    private String user;
-
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
-    }
     @Autowired
     private ApplicationConfig config;
 
