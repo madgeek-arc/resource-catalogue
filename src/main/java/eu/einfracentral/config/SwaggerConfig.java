@@ -5,6 +5,7 @@ import io.swagger.annotations.*;
 import java.net.URL;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import springfox.documentation.builders.*;
 import springfox.documentation.service.ApiInfo;
@@ -23,6 +24,8 @@ public class SwaggerConfig {
     private TypeResolver typeResolver;
     @Value("${platform.root:}")
     private String platform;
+    @Autowired
+    private ApplicationConfig config;
 
     @Bean
     public Docket getDocket() {
@@ -44,9 +47,9 @@ public class SwaggerConfig {
                 .title("eInfraCentral")
                 .description("External APIs for the eInfraCentral registry")
                 .version("1")
-                .termsOfServiceUrl(String.format("%s/tos", platform))
+                .termsOfServiceUrl(String.format("%s/tos", config.getPlatform()))
 //                .license("NAME")
-                .licenseUrl(String.format("%s/license", platform))
+                .licenseUrl(String.format("%s/license", config.getPlatform()))
                 .build();
     }
 }

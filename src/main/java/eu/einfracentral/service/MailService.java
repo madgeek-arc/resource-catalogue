@@ -1,5 +1,6 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.config.ApplicationConfig;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
@@ -7,6 +8,7 @@ import javax.mail.internet.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,27 +38,29 @@ public class MailService {
     public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
     }
+    @Autowired
+    private ApplicationConfig config;
 
     @PostConstruct
     private void postConstruct() {
         Properties sessionProps = new Properties();
-        sessionProps.setProperty("mail.smtp.auth", auth);
-        sessionProps.setProperty("mail.smtp.host", host);
-        sessionProps.setProperty("mail.smtp.password", password);
-        sessionProps.setProperty("mail.smtp.port", port);
-        sessionProps.setProperty("mail.smtp.protocol", protocol);
-        sessionProps.setProperty("mail.smtp.ssl.enable", sslEnable);
-        sessionProps.setProperty("mail.smtp.user", user);
+        sessionProps.setProperty("mail.smtp.auth", config.getAuth());
+        sessionProps.setProperty("mail.smtp.host", config.getHost());
+        sessionProps.setProperty("mail.smtp.password", config.getPassword());
+        sessionProps.setProperty("mail.smtp.port", config.getPort());
+        sessionProps.setProperty("mail.smtp.protocol", config.getProtocol());
+        sessionProps.setProperty("mail.smtp.ssl.enable", config.getSsl());
+        sessionProps.setProperty("mail.smtp.user", config.getUser());
         session = Session.getInstance(sessionProps, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(user, password);
+                return new PasswordAuthentication(config.getUser(), config.getPassword());
             }
         });
     }
 
     public void sendMail(String to, String subject, String text) {
         try (Transport transport = session.getTransport()) {
-            InternetAddress sender = new InternetAddress(user);
+            InternetAddress sender = new InternetAddress(config.getUser());
             Message message = new MimeMessage(session);
             message.setFrom(sender);
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));

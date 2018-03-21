@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.einfracentral.config.ApplicationConfig;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.UserService;
@@ -40,6 +41,8 @@ public class UserManager extends ResourceManager<User> implements UserService {
     private int currentServerIterationCount;
     @Value("${jwt.secret:}")
     private String secret;
+    @Autowired
+    private ApplicationConfig config;
 
     public UserManager() {
         super(User.class);
@@ -75,7 +78,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
             user.setId(UUID.randomUUID().toString());
             ret = hashUser(user);
             add(ret);
-            mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
+            mailService.sendMail(user.getEmail(), config.getActivateSubject(), config.getActivateText() + user.getId());
         } else {
             throw new ResourceException("User already registered!", HttpStatus.CONFLICT);
         }
@@ -88,14 +91,14 @@ public class UserManager extends ResourceManager<User> implements UserService {
         if (ret != null) {
             ret.setResetToken("Generate THIS!");
             update(ret);
-            mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
+            mailService.sendMail(ret.getEmail(), config.getResetSubject(), config.getResetText() + ret.getId() + "/" + ret.getResetToken());
         }
         return strip(ret);
     }
 
     @Override
     public String getToken(User credentials) {
-        if (secret.length() == 0) {
+        if (config.getSecret().length() == 0) {
             throw new ResourceException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         Date now = new Date();
@@ -112,7 +115,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
                        .setPayload(payload)
                        .setIssuedAt(now)
                        .setExpiration(new Date(now.getTime() + 86400000))
-                       .signWith(SignatureAlgorithm.HS256, secret)
+                       .signWith(SignatureAlgorithm.HS256, config.getSecret())
                        .compact();
         } else {
             throw new ResourceException("Passwords do not match.", HttpStatus.FORBIDDEN);
@@ -152,7 +155,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
         byte[] salt = new byte[8];
         r.nextBytes(salt);
         user.setSalt(salt);
-        user.setIterationCount(currentServerIterationCount);
+        user.setIterationCount(config.getIterations());
         user.setPassword(new String(hashPass(user.getPassword().toCharArray(),
                                              user.getSalt(),
                                              user.getIterationCount())));
