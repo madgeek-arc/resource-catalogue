@@ -46,6 +46,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Service update(Service service) {
+        service = validate(service);
         try {
             Service existingService = get(service.getId());
             Addenda addenda = null;
