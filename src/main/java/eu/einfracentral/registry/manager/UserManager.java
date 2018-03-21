@@ -74,7 +74,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
     public User forgot(String email) {
         User ret = getUserByEmail(email);
         if (ret != null) {
-            ret.setResetToken("Generate THIS!");
+            ret.setResetToken(UUID.randomUUID().toString());
             update(ret);
             mailService.sendMail(ret.getEmail(), config.getResetSubject(), config.getResetText() + ret.getId() + "/" + ret.getResetToken());
         }
