@@ -1,12 +1,10 @@
 package eu.einfracentral.registry.service;
 
+import eu.einfracentral.registry.manager.UserManager;
 import java.io.IOException;
 import java.nio.file.*;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.SecureRandom;
 import java.util.*;
-import javax.crypto.*;
-import javax.crypto.spec.PBEKeySpec;
 import org.junit.Test;
 
 /**
@@ -15,8 +13,6 @@ import org.junit.Test;
 public class UserManagerTests {
     private static final HashMap<String, String> users = new HashMap<>();
     private static final int iterationCount = -1;
-    private static final String algorithm = "PBKDF2WithHmacSHA512";
-    private static final int keyLength = 256;
     private static final Random r = new SecureRandom();
     private static final byte[] salt = new byte[8];
     private static final String base = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
@@ -30,7 +26,7 @@ public class UserManagerTests {
             "</user>";
 
     @Test
-    public void makeUsers() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public void makeUsers() throws IOException {
         //users.put("username", "password");
         for (Map.Entry<String, String> user : users.entrySet()) {
             r.nextBytes(salt);
@@ -40,15 +36,8 @@ public class UserManagerTests {
                                       user.getKey(),
                                       iterationCount,
                                       new Date().toString(),
-                                      new String(hashPass(user.getValue().toCharArray(), salt, iterationCount)),
+                                      new String(UserManager.hashPass(user.getValue().toCharArray(), salt, iterationCount)),
                                       new String(Base64.getEncoder().encode(salt))).getBytes());
         }
-    }
-
-    private char[] hashPass(char[] pass, byte[] salt, int iterations) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithm);
-        PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, keyLength);
-        SecretKey key = skf.generateSecret(spec);
-        return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
     }
 }
