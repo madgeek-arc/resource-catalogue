@@ -41,6 +41,7 @@
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
         <typescript-generator-maven-plugin.version>1.27.339</typescript-generator-maven-plugin.version>
+        <maven-model.version>3.3.9</maven-model.version>
         <spring-security-config.version>5.0.3.RELEASE</spring-security-config.version>
     </properties>
     <dependencies>
@@ -71,6 +72,7 @@
         <dependency><groupId>org.springframework</groupId><artifactId>spring-webmvc</artifactId><version>${spring.version}</version></dependency>
         <dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-core</artifactId><version>${spring-security-config.version}</version></dependency>
         <dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-config</artifactId><version>${spring-security-config.version}</version></dependency>
+        <dependency><groupId>org.apache.maven</groupId><artifactId>maven-model</artifactId><version>${maven-model.version}</version></dependency>
     </dependencies>
     <distributionManagement>
         <repository>
