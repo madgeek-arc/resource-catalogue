@@ -2,7 +2,9 @@ package eu.einfracentral.config;
 
 import com.fasterxml.classmate.TypeResolver;
 import io.swagger.annotations.ApiOperation;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Properties;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -42,10 +44,21 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("eInfraCentral")
                 .description("External APIs for the eInfraCentral registry")
-                .version("1")
+                .version(getVersion())
                 .termsOfServiceUrl(String.format("%s/tos", config.getPlatform()))
 //                .license("NAME")
                 .licenseUrl(String.format("%s/license", config.getPlatform()))
                 .build();
+    }
+
+    private String getVersion() {
+        String ret = null;
+        try (InputStream in = getClass().getResourceAsStream("/META-INF/maven/eu.einfracentral/eic-registry-model/pom.properties")) {
+            Properties props = new Properties();
+            props.load(in);
+            ret = props.getProperty("version");
+        } catch (Throwable e) {
+        }
+        return ret == null ? "" : ret;
     }
 }
