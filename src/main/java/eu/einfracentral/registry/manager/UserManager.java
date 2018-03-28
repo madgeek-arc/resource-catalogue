@@ -147,7 +147,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
         return user;
     }
 
-    private char[] hashPass(char[] pass, byte[] salt, int iterations) {
+    public static char[] hashPass(char[] pass, byte[] salt, int iterations) {
         try {
             SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
             PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, 256);
