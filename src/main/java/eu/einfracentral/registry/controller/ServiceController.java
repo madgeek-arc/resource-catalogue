@@ -1,13 +1,11 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.service.*;
-import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.exception.*;
+import eu.einfracentral.registry.service.ServiceService;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.*;
 import java.util.*;
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +14,6 @@ import springfox.documentation.annotations.ApiIgnore;
 /**
  * Created by pgl on 4/7/2017.
  */
-
 @RestController
 @RequestMapping("service")
 public class ServiceController extends ResourceController<Service> {
@@ -58,7 +55,7 @@ public class ServiceController extends ResourceController<Service> {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<Service>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return super.getAll(allRequestParams,jwt);
+        return super.getAll(allRequestParams, jwt);
     }
 
     @ApiOperation(value = "Returns any services with the given id(s)")
