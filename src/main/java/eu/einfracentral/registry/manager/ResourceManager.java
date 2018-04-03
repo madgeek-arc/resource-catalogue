@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Identifiable;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.*;

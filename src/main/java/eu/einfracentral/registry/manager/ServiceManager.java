@@ -4,7 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
 import eu.openminted.registry.core.domain.Resource;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
