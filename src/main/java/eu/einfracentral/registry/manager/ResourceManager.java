@@ -97,6 +97,11 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return t;
     }
 
+    @Override
+    public List<T> history(String id) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
     protected List<Resource> whereIDin(String... ids) {
         return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
     }
