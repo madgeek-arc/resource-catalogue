@@ -79,4 +79,10 @@ public class ResourceController<T> {
     public ResponseEntity<ServerError> handleResourceException(HttpServletRequest req, ResourceException e) {
         return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), e), e.getStatus());
     }
+
+    @ApiOperation(value = "Retrieves service history.")
+    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<T>> history(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+        return new ResponseEntity<>(service.history(t.getId()), HttpStatus.OK);
+    }
 }

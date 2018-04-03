@@ -75,4 +75,10 @@ public class ServiceController extends ResourceController<Service> {
     public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.getBy(field, jwt);
     }
+
+    @ApiOperation(value = "Retrieves service history.")
+    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<Service>> history(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+        return super.history(service, jwt);
+    }
 }
