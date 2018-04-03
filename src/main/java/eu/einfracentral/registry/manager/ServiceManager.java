@@ -28,7 +28,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Service add(Service service) {
-        if (service.getId().indexOf(".") < 0) {
+        if (!service.getId().contains(".")) {
             service.setId(java.util.UUID.randomUUID().toString());
         }
         if (exists(service)) {
