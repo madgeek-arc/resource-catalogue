@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 /**
  * Created by pgl on 05/01/18.
  */
-@Service("userActionService")
+@Service("eventService")
 public class EventManager extends ResourceManager<Event> implements EventService {
     public EventManager() {
         super(Event.class);
