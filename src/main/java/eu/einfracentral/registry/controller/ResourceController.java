@@ -16,7 +16,7 @@ import springfox.documentation.annotations.ApiIgnore;
  */
 //the below line contains the only produces needed for spring to work in the entire project; all others are there until springfox fix their bugs
 @RequestMapping(consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class ResourceController<T> {
+public class ResourceController<T extends Identifiable> {
     protected final ResourceService<T> service;
 
     ResourceController(ResourceService<T> service) {
