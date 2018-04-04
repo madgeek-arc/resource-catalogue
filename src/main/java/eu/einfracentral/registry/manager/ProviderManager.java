@@ -17,4 +17,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public String getResourceType() {
         return "provider";
     }
+
+    @Override
+    public Integer visits(String id) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }
