@@ -7,4 +7,8 @@ import eu.einfracentral.domain.Service;
  */
 @org.springframework.stereotype.Service("serviceService")
 public interface ServiceService extends ResourceService<Service> {
+    Integer visits(String id);
+    Integer favourites(String id);
+    Integer ratings(String id);
+    Integer rating(String id);
 }
