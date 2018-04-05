@@ -57,7 +57,11 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
                 addenda = new Addenda();
                 addenda.setId(UUID.randomUUID().toString());
                 addenda.setService(service.getId());
-                sam.add(addenda);
+                try {
+                    sam.add(addenda);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
             fixVersion(existingService); //remove this when it has ran for all services
             if (service.getVersion().equals(existingService.getVersion())) {
@@ -68,7 +72,11 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             } else {
                 addenda.setRegisteredAt(System.currentTimeMillis());
                 addenda.setRegisteredBy("pgl");
-                sam.add(addenda);
+                try {
+                    sam.add(addenda);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
                 super.add(service);
             }
         } catch (InterruptedException | ExecutionException e) {
