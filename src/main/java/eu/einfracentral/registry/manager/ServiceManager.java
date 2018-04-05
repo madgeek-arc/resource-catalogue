@@ -67,7 +67,11 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             if (service.getVersion().equals(existingService.getVersion())) {
                 addenda.setModifiedAt(System.currentTimeMillis());
                 addenda.setModifiedBy("pgl");
-                sam.update(addenda);
+                try {
+                    sam.update(addenda);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
                 super.update(service);
             } else {
                 addenda.setRegisteredAt(System.currentTimeMillis());
