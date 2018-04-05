@@ -4,7 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
 import eu.openminted.registry.core.domain.Resource;
-import java.util.*;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -88,5 +88,25 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     @Override
     public Service validate(Service service) {
         return fixVersion(service);
+    }
+
+    @Override
+    public Integer visits(String id) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public Integer favourites(String id) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public Integer ratings(String id) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public Integer rating(String id) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }
