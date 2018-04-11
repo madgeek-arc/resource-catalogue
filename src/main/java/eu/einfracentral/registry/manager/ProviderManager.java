@@ -35,6 +35,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         });
         return ret;
     }
+
+    public Map<String, Float> visitation(String id) {
+        Map<String, Float> ret = new HashMap<>();
+        List<Service> services = getServices(id);
+        return ret;
+    }
         return ret;
     }
 }
