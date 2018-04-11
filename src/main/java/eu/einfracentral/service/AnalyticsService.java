@@ -35,7 +35,12 @@ public class AnalyticsService {
         return map;
     }
 
-    public String getAnalyticsForLabel(String label) {
+    private JsonNode getAnalyticsForLabel(String label) {
+        String contents = getURL(String.format(visits, label));
+        JsonNode ret = parse(contents);
+        return ret;
+    }
+
         StringBuilder ret = new StringBuilder();
             URL url = new URL("http://www.oracle.com/");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()))) {
