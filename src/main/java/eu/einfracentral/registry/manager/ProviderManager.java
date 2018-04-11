@@ -47,6 +47,29 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return serviceService.getAll(ff).getResults();
     }
 
+    @Override
+    public Map<String, Integer> favourites(String id) {
+        Map<String, Integer> ret = new HashMap<>();
+        getServices(id).stream().forEach(s -> {
+            Map<String, Integer> favourites = serviceService.favourites(s.getId());
+            favourites.forEach((k, v) -> {
+                ret.putIfAbsent(k, 0);
+                ret.put(k, ret.get(k) + v);
+            });
+        });
+        return ret;
+    }
+
+    @Override
+    public Map<String, Float> ratings(String id) {
+        Map<String, Float> ret = new HashMap<>();
+        getServices(id).stream().forEach(s -> {
+            Map<String, Float> ratings = serviceService.ratings(s.getId());
+            ratings.forEach((k, v) -> {
+                ret.putIfAbsent(k, 0f);
+                ret.put(k, ret.get(k) + v);
+            });
+        });
         return ret;
     }
 }
