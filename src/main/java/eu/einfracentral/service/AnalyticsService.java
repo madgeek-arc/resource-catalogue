@@ -41,8 +41,8 @@ public class AnalyticsService {
         return ret;
     }
 
+    private static String getURL(String url) {
         StringBuilder ret = new StringBuilder();
-            URL url = new URL("http://www.oracle.com/");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()))) {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
