@@ -3,7 +3,6 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.*;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,20 +3,18 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.UserService;
 import eu.openminted.registry.core.domain.Browsing;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
 import java.util.Map;
 import javax.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * Created by pgl on 07/08/17.
  */
 @RestController
-
 @RequestMapping("user")
 public class UserController extends ResourceController<User> {
     @Autowired

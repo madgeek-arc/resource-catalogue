@@ -1,11 +1,11 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.*;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.*;
