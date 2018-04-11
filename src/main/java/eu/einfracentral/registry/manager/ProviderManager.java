@@ -26,13 +26,15 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public Map<String, Integer> visits(String id) {
         Map<String, Integer> ret = new HashMap<>();
-        for (Service s : serviceService.getAll(new FacetFilter()).getResults()) {
+        getServices(id).stream().forEach(s -> {
             Map<String, Integer> visits = serviceService.visits(s.getId());
             visits.forEach((k, v) -> {
                 ret.putIfAbsent(k, 0);
                 ret.put(k, ret.get(k) + v);
             });
-        }
+        });
+        return ret;
+    }
         return ret;
     }
 }
