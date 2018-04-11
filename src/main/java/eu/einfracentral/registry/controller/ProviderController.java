@@ -37,4 +37,10 @@ public class ProviderController extends ResourceController<Provider> {
     public ResponseEntity<Map<String, Float>> ratings(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(((ProviderService) service).ratings(id), HttpStatus.OK);
     }
+
+    @ApiOperation(value = "Returns the visitation portions")
+    @RequestMapping(value = "visitation/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, Float>> visitation(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(((ProviderService) service).visitation(id), HttpStatus.OK);
+    }
 }
