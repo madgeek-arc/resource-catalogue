@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 /**
  * Created by pgl on 05/01/18.
  */
-@Service("actionService")
+@Service("eventService")
 public interface EventService extends ResourceService<Event> {
 }
