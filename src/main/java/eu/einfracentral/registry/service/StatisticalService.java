@@ -7,6 +7,6 @@ import java.util.Map;
 @Service("statisticalService")
 public interface StatisticalService{
 
-    Map<String, Float> averageRatingByService(int serviceId);
+    Map<String, Float> averageRatingByService(String serviceId);
 
 }
