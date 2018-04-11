@@ -94,8 +94,10 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     }
 
     @Override
-    public Integer visits(String id) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public Map<String, Integer> visits(String id) {
+        return favourites(id);
+    }
+
     }
 
     @Override
