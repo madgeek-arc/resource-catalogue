@@ -41,6 +41,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         List<Service> services = getServices(id);
         return ret;
     }
+    private List<Service> getServices(String id) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("provider", id);
+        return serviceService.getAll(ff).getResults();
+    }
+
         return ret;
     }
 }
