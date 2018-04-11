@@ -109,8 +109,11 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     }
 
     @Override
-    public Integer ratings(String id) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public Map<String, Float> ratings(String id) {
+        Map<String, Float> ret = new HashMap<>();
+        String[] dates = getDates();
+        Stream.of(dates).forEach(i -> ret.put(i, 5 * ThreadLocalRandom.current().nextFloat()));
+        return ret;
     }
 
     @Override
