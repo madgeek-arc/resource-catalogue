@@ -101,6 +101,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     @Override
     public Map<String, Integer> visits(String id) {
         return favourites(id);
+        //return analyticsService.getVisitsForLabel("service/" + id);
     }
 
     private static String[] getDates() {
