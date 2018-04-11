@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Provider;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 
 /**
@@ -8,5 +9,5 @@ import org.springframework.stereotype.Service;
  */
 @Service("providerService")
 public interface ProviderService extends ResourceService<Provider> {
-    Integer visits(String id);
+    Map<String, Integer> visits(String id);
 }
