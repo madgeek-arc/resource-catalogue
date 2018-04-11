@@ -37,24 +37,14 @@ public class AnalyticsService {
 
     public String getAnalyticsForLabel(String label) {
         StringBuilder ret = new StringBuilder();
-        BufferedReader in = null;
-        try {
             URL url = new URL("http://www.oracle.com/");
-            in = new BufferedReader(new InputStreamReader(url.openStream()));
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()))) {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 ret.append(inputLine).append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
         return ret.toString();
     }
