@@ -39,7 +39,7 @@ public class StatisticalManager implements StatisticalService {
     private int bucketSize;
 
     @Override
-    public Map<String, Float> averageRatingByService(int serviceId) {
+    public Map<String, Float> averageRatingByService(String serviceId) {
 
         Map<String, Float> results = new HashMap<>();
 
@@ -65,7 +65,7 @@ public class StatisticalManager implements StatisticalService {
         c.roll(Calendar.MONTH,false);
 
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .filter(QueryBuilders.termsQuery("service_id",Integer.toString(serviceId)))
+                .filter(QueryBuilders.termsQuery("service_id",serviceId))
                 .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(new Date().getTime()));
 
         SearchRequestBuilder searchBuilder=client.prepareSearch("event").setTypes("general").setQuery(queryBuilder)
