@@ -1,11 +1,13 @@
 package eu.einfracentral.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.*;
+import eu.einfracentral.config.ApplicationConfig;
 import java.io.*;
-import java.net.*;
+import java.net.URL;
 import java.util.*;
-import org.springframework.beans.factory.annotation.Value;
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
