@@ -26,6 +26,17 @@ public class AnalyticsService {
                 matomoToken);
     }
 
+    public HashMap<String, Integer> getVisitsForLabel(String label) {
+        HashMap<String, Integer> map = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            map = mapper.readValue(getAnalyticsForLabel(label), new TypeReference<Map<String, Integer>>() {});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
     public String getAnalyticsForLabel(String label) {
         StringBuilder ret = new StringBuilder();
         BufferedReader in = null;
