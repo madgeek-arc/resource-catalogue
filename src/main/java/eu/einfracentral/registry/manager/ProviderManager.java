@@ -36,11 +36,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return ret;
     }
 
-    public Map<String, Float> visitation(String id) {
-        Map<String, Float> ret = new HashMap<>();
-        List<Service> services = getServices(id);
-        return ret;
-    }
     private List<Service> getServices(String id) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider", id);
@@ -69,6 +64,26 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 ret.putIfAbsent(k, 0f);
                 ret.put(k, ret.get(k) + v);
             });
+        });
+        return ret;
+    }
+
+    @Override
+    public Map<String, Float> visitation(String id) {
+        Map<String, Float> ret = new HashMap<>();
+        Map<String, Integer> counts = new HashMap<>();
+        List<Service> services = getServices(id);
+        final int[] grandTotal = {0};
+        services.forEach(service -> {
+            final Integer[] total = {0};
+            serviceService.visits(service.getId()).forEach((k, v) -> {
+                total[0] += v;
+            });
+            grandTotal[0] += total[0];
+            counts.put(service.getId(), total[0]);
+        });
+        counts.forEach((k, v) -> {
+            ret.put(k, ((float) v) / grandTotal[0]);
         });
         return ret;
     }
