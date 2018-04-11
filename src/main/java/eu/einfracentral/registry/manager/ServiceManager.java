@@ -58,23 +58,18 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         if (service.getVersion().equals(existingService.getVersion())) {
             addenda.setModifiedAt(System.currentTimeMillis());
             addenda.setModifiedBy("pgl");
-            addendaManager.update(addenda);
             super.update(service);
         } else {
             addenda.setRegisteredAt(System.currentTimeMillis());
             addenda.setRegisteredBy("pgl");
-            addendaManager.add(addenda);
             super.add(service);
         }
+        try {
+            addendaManager.update(addenda);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         return service;
-    }
-
-    private Addenda makeAddenda(String id) {
-        Addenda ret = new Addenda();
-        ret.setId(UUID.randomUUID().toString());
-        ret.setService(id);
-        addendaManager.add(ret);
-        return ret;
     }
 
     private Addenda ensureAddenda(String id) {
@@ -89,6 +84,18 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             }
         } else {
             ret = makeAddenda(id);
+        }
+        return ret;
+    }
+
+    private Addenda makeAddenda(String id) {
+        Addenda ret = new Addenda();
+        ret.setId(UUID.randomUUID().toString());
+        ret.setService(id);
+        try {
+            addendaManager.add(ret);
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
         return ret;
     }
