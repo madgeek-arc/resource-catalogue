@@ -24,15 +24,12 @@ public class AnalyticsService {
                 matomoToken);
     }
 
-    public HashMap<String, Integer> getVisitsForLabel(String label) {
-        HashMap<String, Integer> map = new HashMap<>();
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            map = mapper.readValue(getAnalyticsForLabel(label), new TypeReference<Map<String, Integer>>() {});
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return map;
+    public Map<String, Integer> getVisitsForLabel(String label) {
+        Map<String, Integer> ret = new HashMap<>();
+        getAnalyticsForLabel(label).fields().forEachRemaining(dayStats -> {
+            ret.put(dayStats.getKey(), dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0);
+        });
+        return ret;
     }
 
     private JsonNode getAnalyticsForLabel(String label) {
