@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ApplicationConfig {
-    private final String activateSubject, activateText, auth, host, password, platform, port, protocol, resetSubject, resetText, secret, ssl, user;
+    private final String activateSubject, activateText, auth, host, password, platform, port, protocol, resetSubject, resetText, secret, ssl,
+            user, fqdn, matomoToken;
     private int iterations;
 
     @Autowired
@@ -20,8 +21,9 @@ public class ApplicationConfig {
                              @Value("${platform.root:}") String platform, @Value("${mail.smtp.port}") String port,
                              @Value("${mail.smtp.protocol}") String protocol, @Value("${mail.reset.subject}") String resetSubject,
                              @Value("${mail.reset.text}") String resetText, @Value("${jwt.secret:}") String secret,
-                             @Value("${mail.smtp.ssl.enable}") String ssl, @Value("${mail.smtp.user}") String user
-    ) {
+                             @Value("${mail.smtp.ssl.enable}") String ssl, @Value("${mail.smtp.user}") String user,
+                             @Value("${matomoToken:e235d94544916c326e80b713dd233cd1}") String matomoToken,
+                             @Value("${fqdn:beta.einfracentral.eu}") String fqdn) {
         this.activateSubject = activateSubject;
         this.activateText = activateText;
         this.auth = auth;
@@ -36,6 +38,9 @@ public class ApplicationConfig {
         this.secret = secret;
         this.ssl = ssl;
         this.user = user;
+        //this.fqdn = fqdn;
+        this.fqdn = "beta.einfracentral.eu";
+        this.matomoToken = matomoToken;
     }
 
     @Bean
@@ -93,6 +98,14 @@ public class ApplicationConfig {
 
     public String getUser() {
         return user;
+    }
+
+    public String getFqdn() {
+        return fqdn;
+    }
+
+    public String getMatomoToken() {
+        return matomoToken;
     }
 
     public int getIterations() {

@@ -95,13 +95,17 @@ public class UserManager extends ResourceManager<User> implements UserService {
                 e.printStackTrace();
                 throw new ResourceException("Could not stringify user.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return Jwts.builder()
-                       .setSubject(credentials.getEmail())
-                       .setPayload(payload)
-                       .setIssuedAt(now)
-                       .setExpiration(new Date(now.getTime() + 86400000))
-                       .signWith(SignatureAlgorithm.HS256, config.getSecret())
-                       .compact();
+            String ret;
+            try {
+                ret = Jwts.builder()
+                          .setPayload(payload)
+                          .signWith(SignatureAlgorithm.HS256, config.getSecret())
+                          .compact();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                throw e;
+            }
+            return ret;
         } else {
             throw new ResourceException("Passwords do not match.", HttpStatus.FORBIDDEN);
         }
