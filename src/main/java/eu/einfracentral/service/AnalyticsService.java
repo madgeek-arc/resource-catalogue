@@ -16,12 +16,11 @@ public class AnalyticsService {
     @Autowired
     private ApplicationConfig config;
     private String visits;
+    private String base = "http://%s:8084/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=1&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
 
-    AnalyticsService() {
-        visits = String.format(
-                "http://%s:8084/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=1&period=day&flat=1&filter_limit=100&date=",
-                fqdn,
-                matomoToken);
+    @PostConstruct
+    void postConstruct() {
+        visits = String.format(base, config.getFqdn(), config.getMatomoToken(), "%s", "%s");
     }
 
     public Map<String, Integer> getVisitsForLabel(String label) {
