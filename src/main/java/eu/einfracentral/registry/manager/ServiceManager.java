@@ -115,7 +115,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         Calendar day = Calendar.getInstance();
         for (int i = 0; i < ret.length; i++) {
             day.add(Calendar.DAY_OF_YEAR, -1);
-            ret[i] = new SimpleDateFormat("yyyy-MM-dd ").format(day.getTime());
+            ret[i] = new SimpleDateFormat("yyyy-MM-dd").format(day.getTime());
         }
         return ret;
     }
