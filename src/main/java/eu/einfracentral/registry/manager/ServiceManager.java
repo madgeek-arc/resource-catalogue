@@ -47,34 +47,45 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     @Override
     public Service update(Service service) {
         service = validate(service);
-        try {
-            Service existingService = get(service.getId());
-            Addenda addenda = null;
-            Resource existingAddendaResource = sam.where("service", service.getId(), false);
-            if (existingAddendaResource != null) {
-                addenda = parserPool.deserialize(existingAddendaResource, Addenda.class).get();
-            } else {
-                addenda = new Addenda();
-                addenda.setId(UUID.randomUUID().toString());
-                addenda.setService(service.getId());
-                sam.add(addenda);
-            }
-            fixVersion(existingService); //remove this when it has ran for all services
-            if (service.getVersion().equals(existingService.getVersion())) {
-                addenda.setModifiedAt(System.currentTimeMillis());
-                addenda.setModifiedBy("pgl");
-                sam.update(addenda);
-                super.update(service);
-            } else {
-                addenda.setRegisteredAt(System.currentTimeMillis());
-                addenda.setRegisteredBy("pgl");
-                sam.add(addenda);
-                super.add(service);
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+        Service existingService = get(service.getId());
+        Addenda addenda = ensureAddenda(service.getId());
+        fixVersion(existingService); //remove this when it has ran for all services
+        if (service.getVersion().equals(existingService.getVersion())) {
+            addenda.setModifiedAt(System.currentTimeMillis());
+            addenda.setModifiedBy("pgl");
+            addendaManager.update(addenda);
+            super.update(service);
+        } else {
+            addenda.setRegisteredAt(System.currentTimeMillis());
+            addenda.setRegisteredBy("pgl");
+            addendaManager.add(addenda);
+            super.add(service);
         }
         return service;
+    }
+
+    private Addenda makeAddenda(String id) {
+        Addenda ret = new Addenda();
+        ret.setId(UUID.randomUUID().toString());
+        ret.setService(id);
+        addendaManager.add(ret);
+        return ret;
+    }
+
+    private Addenda ensureAddenda(String id) {
+        Addenda ret = null;
+        Resource existingAddendaResource = addendaManager.where("service", id, false);
+        if (existingAddendaResource != null) {
+            try {
+                ret = parserPool.deserialize(existingAddendaResource, Addenda.class).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                ret = makeAddenda(id);
+            }
+        } else {
+            ret = makeAddenda(id);
+        }
+        return ret;
     }
 
     @Override
