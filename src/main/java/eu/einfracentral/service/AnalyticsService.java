@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
  */
 @Service("analyticsService")
 public class AnalyticsService {
-    @Value("${matomoToken:e235d94544916c326e80b713dd233cd1}")
-    private String matomoToken;
-    @Value("${fqdn:beta.einfracentral.eu}")
-    private String fqdn;
+    @Autowired
+    private ApplicationConfig config;
     private String visits;
 
     AnalyticsService() {
