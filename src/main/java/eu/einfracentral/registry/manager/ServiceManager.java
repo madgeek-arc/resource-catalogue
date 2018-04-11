@@ -3,9 +3,12 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
+import eu.einfracentral.service.AnalyticsService;
 import eu.openminted.registry.core.domain.Resource;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
@@ -15,7 +18,9 @@ import org.springframework.http.HttpStatus;
 @org.springframework.stereotype.Service("serviceService")
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
     @Autowired
-    private AddendaManager sam;
+    private AddendaManager addendaManager;
+    @Autowired
+    private AnalyticsService analyticsService;
 
     public ServiceManager() {
         super(Service.class);
@@ -98,6 +103,14 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         return favourites(id);
     }
 
+    private static String[] getDates() {
+        String[] ret = new String[30];
+        Calendar day = Calendar.getInstance();
+        for (int i = 0; i < ret.length; i++) {
+            day.add(Calendar.DAY_OF_YEAR, -1);
+            ret[i] = new SimpleDateFormat("yyyy-MM-dd ").format(day.getTime());
+        }
+        return ret;
     }
 
     @Override
