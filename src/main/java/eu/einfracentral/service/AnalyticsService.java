@@ -48,4 +48,13 @@ public class AnalyticsService {
         }
         return ret.toString();
     }
+
+    private static JsonNode parse(String json) {
+        try {
+            return new ObjectMapper(new JsonFactory()).readTree(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
