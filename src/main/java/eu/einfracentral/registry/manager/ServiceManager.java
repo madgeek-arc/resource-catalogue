@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
@@ -123,16 +124,14 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     @Override
     public Map<String, Integer> favourites(String id) {
         Map<String, Integer> ret = new HashMap<>();
-        String[] dates = getDates();
-        Stream.of(dates).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
+        Stream.of(getDates()).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
         return ret;
     }
 
     @Override
     public Map<String, Float> ratings(String id) {
         Map<String, Float> ret = new HashMap<>();
-        String[] dates = getDates();
-        Stream.of(dates).forEach(i -> ret.put(i, 5 * ThreadLocalRandom.current().nextFloat()));
+        Stream.of(getDates()).forEach(i -> ret.put(i, 5 * ThreadLocalRandom.current().nextFloat()));
         return ret;
     }
 
