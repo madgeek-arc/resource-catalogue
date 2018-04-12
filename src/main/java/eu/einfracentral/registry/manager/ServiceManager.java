@@ -3,13 +3,14 @@ package eu.einfracentral.registry.manager;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.service.ServiceService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.AnalyticsService;
 import eu.openminted.registry.core.domain.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
+import javax.management.j2ee.statistics.Statistic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
@@ -22,6 +23,8 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     private AddendaManager addendaManager;
     @Autowired
     private AnalyticsService analyticsService;
+    @Autowired
+    private StatisticalService statisticalService;
 
     public ServiceManager() {
         super(Service.class);
@@ -126,13 +129,12 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         Map<String, Integer> ret = new HashMap<>();
         Stream.of(getDates()).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
         return ret;
+        //return statisticalService.averageFavouritesByService(id);
     }
 
     @Override
     public Map<String, Float> ratings(String id) {
-        Map<String, Float> ret = new HashMap<>();
-        Stream.of(getDates()).forEach(i -> ret.put(i, 5 * ThreadLocalRandom.current().nextFloat()));
-        return ret;
+        return statisticalService.averageRatingByService(id);
     }
 
     @Override
