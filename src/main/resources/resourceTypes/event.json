@@ -6,9 +6,44 @@
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "score",
+      "path": "//*[local-name()='value']/text()",
+      "type": "java.lang.Integer",
+      "primaryKey": false
+    },
+    {
+      "multivalued": false,
+      "name": "instant",
+      "path": "//*[local-name()='instant']/text()",
+      "type": "java.util.Date",
+      "primaryKey": false
+    },
+    {
+      "multivalued": false,
+      "name": "service_id",
+      "path": "//*[local-name()='service']/text()",
+      "type": "java.lang.Integer",
+      "primaryKey": false
+    },
+    {
+      "multivalued": false,
+      "name": "type",
+      "path": "//*[local-name()='type']/text()",
+      "type": "java.lang.String",
+      "primaryKey": false
+    },
+    {
+      "multivalued": false,
+      "name": "user_id",
+      "path": "//*[local-name()='user']/text()",
+      "type": "java.lang.Integer",
+      "primaryKey": false
     }
   ],
-  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "indexMapperClass":   "eu.openminted.registry.core.index.DefaultIndexMapper",
   "name": "event",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
