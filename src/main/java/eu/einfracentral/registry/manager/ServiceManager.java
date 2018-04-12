@@ -126,10 +126,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Map<String, Integer> favourites(String id) {
-        Map<String, Integer> ret = new HashMap<>();
-        Stream.of(getDates()).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
-        return ret;
-        //return statisticalService.averageFavouritesByService(id);
+        return statisticalService.averageFavouritesByService(id);
     }
 
     @Override
