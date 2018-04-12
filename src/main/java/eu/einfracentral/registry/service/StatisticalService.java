@@ -9,4 +9,6 @@ public interface StatisticalService{
 
     Map<String, Float> averageRatingByService(String serviceId);
 
+    Map<String, Integer> averageFavouritesByService(String serviceId);
+
 }
