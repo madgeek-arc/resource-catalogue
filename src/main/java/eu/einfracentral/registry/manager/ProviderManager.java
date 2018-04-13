@@ -78,7 +78,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             final Integer[] total = {0};
             serviceService.visits(service.getId()).forEach((k, v) -> total[0] += v);
             grandTotal[0] += total[0];
-            counts.put(service.getId(), total[0]);
+            counts.put(service.getName(), total[0]);
         });
         counts.forEach((k, v) -> {
             ret.put(k, ((float) v) / grandTotal[0]);
