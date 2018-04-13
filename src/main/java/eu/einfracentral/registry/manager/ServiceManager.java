@@ -126,12 +126,20 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Map<String, Integer> favourites(String id) {
-        return statisticalService.averageFavouritesByService(id);
+        Map<String, Integer> ret = statisticalService.averageFavouritesByService(id);
+        if (ret.isEmpty()) {
+            Stream.of(getDates()).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
+        }
+        return ret;
     }
 
     @Override
     public Map<String, Float> ratings(String id) {
-        return statisticalService.averageRatingByService(id);
+        Map<String, Float> ret = statisticalService.averageRatingByService(id);
+        if (ret.isEmpty()) {
+            Stream.of(getDates()).forEach(i -> ret.put(i, 5 * ThreadLocalRandom.current().nextFloat()));
+        }
+        return ret;
     }
 
     @Override
