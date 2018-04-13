@@ -38,8 +38,7 @@ public class ApplicationConfig {
         this.secret = secret;
         this.ssl = ssl;
         this.user = user;
-        //this.fqdn = fqdn;
-        this.fqdn = "beta.einfracentral.eu";
+        this.fqdn = fqdn;
         this.matomoToken = matomoToken;
     }
 
