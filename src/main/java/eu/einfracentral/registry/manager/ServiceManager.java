@@ -37,6 +37,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Service add(Service service) {
+        //TODO: id is null when service is added via frontend, so make sure to make one, based on provider
         if (!service.getId().contains(".")) {
             service.setId(java.util.UUID.randomUUID().toString());
         }
