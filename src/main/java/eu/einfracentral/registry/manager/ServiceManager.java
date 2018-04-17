@@ -60,13 +60,15 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         Service existingService = get(service.getId());
         Addenda addenda = ensureAddenda(service.getId());
         fixVersion(existingService); //remove this when it has ran for all services
-        if (!service.getVersion().equals(existingService.getVersion())) {
+        if (service.getVersion().equals(existingService.getVersion())) {
             addenda.setModifiedAt(System.currentTimeMillis());
             addenda.setModifiedBy("pgl");
             super.update(service);
         } else {
             addenda.setRegisteredAt(System.currentTimeMillis());
             addenda.setRegisteredBy("pgl");
+            existingService.setId(UUID.randomUUID().toString());
+            super.update(existingService);
             super.add(service);
         }
         try {
