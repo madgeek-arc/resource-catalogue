@@ -8,8 +8,5 @@ import java.util.Map;
  */
 @org.springframework.stereotype.Service("serviceService")
 public interface ServiceService extends ResourceService<Service> {
-    Map<String, Integer> visits(String id);
-    Map<String, Integer> favourites(String id);
-    Map<String, Float> ratings(String id);
     Integer rating(String id);
 }
