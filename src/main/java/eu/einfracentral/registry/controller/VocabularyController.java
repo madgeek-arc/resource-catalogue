@@ -25,13 +25,11 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(((VocabularyService) service).getEU(), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the vocabulary assigned the given id.")
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Vocabulary> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.get(id, jwt);
     }
 
-    @ApiOperation(value = "Returns all vocabularies satisfying the given parametres.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
@@ -42,7 +40,6 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return super.getAll(allRequestParams, jwt);
     }
 
-    @ApiOperation(value = "Returns any vocabularies with the given id(s)")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of vocabulary ids", dataType = "string", paramType = "query")
     })
