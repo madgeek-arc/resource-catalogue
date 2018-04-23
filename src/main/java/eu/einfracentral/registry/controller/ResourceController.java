@@ -82,7 +82,7 @@ public class ResourceController<T extends Identifiable> {
     }
 
     @ApiOperation(value = "Retrieves service history.")
-    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "history", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<T>> history(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return new ResponseEntity<>(service.history(t.getId()), HttpStatus.OK);
     }
