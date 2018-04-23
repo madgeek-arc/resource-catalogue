@@ -79,24 +79,6 @@ public class ServiceController extends ResourceController<Service> {
         return super.history(service, jwt);
     }
 
-    @ApiOperation(value = "Returns the service visits")
-    @RequestMapping(value = "visits/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> visits(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(((ServiceService) service).visits(id), HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns the service favourites")
-    @RequestMapping(value = "favourites/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> favourites(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(((ServiceService) service).favourites(id), HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns the service ratings")
-    @RequestMapping(value = "ratings/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Float>> ratings(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(((ServiceService) service).ratings(id), HttpStatus.OK);
-    }
-
     @ApiOperation(value = "Returns the service rating")
     @RequestMapping(value = "rating/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Integer> rating(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
