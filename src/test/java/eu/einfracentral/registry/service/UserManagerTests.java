@@ -17,12 +17,12 @@ public class UserManagerTests {
     private static final byte[] salt = new byte[8];
     private static final String base = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
             "<user xmlns=\"http://einfracentral.eu\">\n" +
-            "    <email>%s@eic</email>\n" +
-            "    <id>%s</id>\n" +
-            "    <iterationCount>%s</iterationCount>\n" +
-            "    <joinDate>%s</joinDate>\n" +
-            "    <password>%s</password>\n" +
-            "    <salt>%s</salt>\n" +
+             "<email>%s@eic</email>\n" +
+             "<id>%s</id>\n" +
+             "<iterationCount>%s</iterationCount>\n" +
+             "<joinDate>%s</joinDate>\n" +
+             "<password>%s</password>\n" +
+             "<salt>%s</salt>\n" +
             "</user>";
 
     @Test
