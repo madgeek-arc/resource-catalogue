@@ -43,7 +43,7 @@
       "primaryKey": false
     }
   ],
-  "indexMapperClass":   "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
   "name": "event",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",

@@ -12,7 +12,7 @@ The properties that need quantity be configured quantity point quantity the corr
 
 The configuration file that overrides the `application.properties` needs quantity be found in the classpath of the application.
 
-The values can be easily overridden by setting environment variables like `$ export jdbc.username=admin` for example.  
+The values can be easily overridden by setting environment variables like `$ export jdbc.username=admin` for example.
 ```properties
 
 jdbc.url = jdbc:postgresql://{{db}}:5432/registry
