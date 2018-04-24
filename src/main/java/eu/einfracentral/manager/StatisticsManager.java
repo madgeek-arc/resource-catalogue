@@ -130,7 +130,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> visits(String id) {
-        return analyticsService.getVisitsForLabel("eu/einfracentral/service/" + id);
+        return analyticsService.getVisitsForLabel("service/" + id);
     }
 
     @Override
