@@ -4,7 +4,6 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.ApiOperation;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;

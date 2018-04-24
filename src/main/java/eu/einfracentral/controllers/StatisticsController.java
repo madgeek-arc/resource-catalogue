@@ -1,6 +1,5 @@
 package eu.einfracentral.controllers;
 
-import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.StatisticsService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Map;
