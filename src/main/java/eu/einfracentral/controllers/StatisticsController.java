@@ -3,6 +3,7 @@ package eu.einfracentral.controllers;
 import eu.einfracentral.service.StatisticsService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -13,7 +14,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("stats")
 public class StatisticsController {
-    StatisticsService statisticsService;
+    @Autowired
+    private StatisticsService statisticsService;
 
     @ApiOperation(value = "Returns the service visits (via piwik)")
     @RequestMapping(value = "service/visits/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
