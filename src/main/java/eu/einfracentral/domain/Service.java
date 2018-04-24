@@ -29,7 +29,7 @@ public class Service implements Identifiable {
     @XmlElement(required = false)
     private String name;
     /**
-     * Catchline or slogan of service for marketing/advertising  purposes.
+     * Catchline or slogan of service for marketing/advertising purposes.
      */
     @XmlElement
     private String tagline;
