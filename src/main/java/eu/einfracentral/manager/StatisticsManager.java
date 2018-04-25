@@ -18,9 +18,6 @@ import org.elasticsearch.search.aggregations.pipeline.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by pgl on 23/04/18.
- */
 @Service("statisticsService")
 public class StatisticsManager implements StatisticsService {
     private static Logger logger = LogManager.getLogger(StatisticsManager.class);

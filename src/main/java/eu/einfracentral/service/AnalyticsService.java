@@ -10,9 +10,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by pgl on 11/04/18.
- */
 @Service("analyticsService")
 public class AnalyticsService {
     @Autowired

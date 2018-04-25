@@ -12,9 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import static javax.xml.bind.JAXBContext.newInstance;
 
-/**
- * Created by pgl on 12/7/2017.
- */
 @Component("parserPool")
 public class ParserPool implements ParserService {
     private final ExecutorService executor;

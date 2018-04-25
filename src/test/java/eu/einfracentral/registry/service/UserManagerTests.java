@@ -7,9 +7,6 @@ import java.security.SecureRandom;
 import java.util.*;
 import org.junit.Test;
 
-/**
- * Created by pgl on 17/02/18.
- */
 public class UserManagerTests {
     private static final HashMap<String, String> users = new HashMap<>();
     private static final int iterationCount = -1;

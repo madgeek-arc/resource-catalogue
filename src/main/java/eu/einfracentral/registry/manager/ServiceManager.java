@@ -9,9 +9,6 @@ import java.util.concurrent.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-/**
- * Created by pgl on 4/7/2017.
- */
 @org.springframework.stereotype.Service("serviceService")
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
     @Autowired

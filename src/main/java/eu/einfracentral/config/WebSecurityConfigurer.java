@@ -3,10 +3,6 @@
 //import org.springframework.context.annotation.*;
 //import org.springframework.security.config.annotation.web.configuration.*;
 //
-///**
-// * Created by pgl on 15/03/18.
-// */
-//
 //@Configuration
 //@EnableWebSecurity
 //public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {

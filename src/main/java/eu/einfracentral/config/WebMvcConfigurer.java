@@ -3,9 +3,6 @@ package eu.einfracentral.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
 
-/**
- * Created by pgl on 08/12/17.
- */
 @Configuration
 @EnableWebMvc
 public class WebMvcConfigurer extends WebMvcConfigurerAdapter {

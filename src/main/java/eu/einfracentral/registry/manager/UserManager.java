@@ -18,9 +18,6 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by pgl on 07/08/17.
- */
 @Service("userService")
 @Configurable
 public class UserManager extends ResourceManager<User> implements UserService {

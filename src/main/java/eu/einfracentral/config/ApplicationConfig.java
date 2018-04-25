@@ -5,9 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by pgl on 08/12/17.
- */
 @Component
 public class ApplicationConfig {
     private final String activateSubject, activateText, auth, host, password, platform, port, protocol, resetSubject, resetText, secret, ssl,

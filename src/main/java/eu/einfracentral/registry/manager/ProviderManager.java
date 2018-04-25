@@ -6,9 +6,6 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * Created by pgl on 26/7/2017.
- */
 @org.springframework.stereotype.Service("providerService")
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService {
 

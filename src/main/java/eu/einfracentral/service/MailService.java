@@ -8,9 +8,6 @@ import javax.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by pgl on 08/09/17.
- */
 @Service("mailService")
 public class MailService {
     private Session session;

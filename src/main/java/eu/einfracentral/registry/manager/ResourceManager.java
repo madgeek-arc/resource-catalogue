@@ -11,9 +11,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.*;
 import org.springframework.http.HttpStatus;
 
-/**
- * Created by pgl on 12/7/2017.
- */
 public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
     public ResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);

@@ -4,9 +4,6 @@ import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by pgl on 05/01/18.
- */
 @Service("eventService")
 public class EventManager extends ResourceManager<Event> implements EventService {
     public EventManager() {
