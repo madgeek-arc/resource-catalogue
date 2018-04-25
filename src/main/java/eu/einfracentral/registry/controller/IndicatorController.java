@@ -1,7 +1,4 @@
 package eu.einfracentral.registry.controller;
-/**
- * Created by pgl on 24/04/18.
- */
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.IndicatorService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;

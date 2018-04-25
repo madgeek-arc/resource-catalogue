@@ -11,9 +11,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
 
-/**
- * Created by pgl on 07/08/17.
- */
 @RestController
 @RequestMapping("user")
 public class UserController extends ResourceController<User> {

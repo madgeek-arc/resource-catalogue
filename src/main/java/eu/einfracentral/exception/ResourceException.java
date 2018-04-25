@@ -2,9 +2,6 @@ package eu.einfracentral.exception;
 
 import org.springframework.http.HttpStatus;
 
-/**
- * Created by pgl on 10/10/17.
- */
 public class ResourceException extends RuntimeException {
     private HttpStatus status;
 

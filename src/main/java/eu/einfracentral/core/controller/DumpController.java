@@ -7,9 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Created by pgl on 08/01/18.
- */
 @RestController
 public class DumpController {
     @Autowired

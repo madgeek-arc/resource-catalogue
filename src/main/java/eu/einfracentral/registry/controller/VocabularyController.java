@@ -10,9 +10,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-/**
- * Created by pgl on 24/7/2017.
- */
 @RestController
 @RequestMapping("vocabulary")
 public class VocabularyController extends ResourceController<Vocabulary> {

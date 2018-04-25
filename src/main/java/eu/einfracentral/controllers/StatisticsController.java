@@ -8,9 +8,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-/**
- * Created by pgl on 23/04/18.
- */
 @RestController
 @RequestMapping("stats")
 public class StatisticsController {

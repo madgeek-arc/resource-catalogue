@@ -11,9 +11,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-/**
- * Created by pgl on 25/07/17.
- */
 //the below line contains the only produces needed for spring to work in the entire project; all others are there until springfox fix their bugs
 @RequestMapping(consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
 public class ResourceController<T extends Identifiable> {
