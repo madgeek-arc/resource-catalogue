@@ -98,7 +98,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
-    public List<T> history(String id) {
+    public List<T> versions(String id, String version) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
