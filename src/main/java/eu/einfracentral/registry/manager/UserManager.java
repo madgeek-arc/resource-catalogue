@@ -135,7 +135,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
     }
 
     @Override
-    public Browsing<User> getAll(FacetFilter facetFilter) {
+    public Browsing<User> getAll(FacetFilter ff) {
         return new Browsing<>(0, 0, 0, new ArrayList<User>(), new ArrayList<>());
     }
 

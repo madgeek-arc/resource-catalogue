@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.*;
 import eu.openminted.registry.core.domain.FacetFilter;
-import java.util.*;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

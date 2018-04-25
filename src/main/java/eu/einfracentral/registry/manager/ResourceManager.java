@@ -25,13 +25,13 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
-    public Browsing<T> getAll(FacetFilter facetFilter) {
-        facetFilter.setBrowseBy(getBrowseBy());
-        return getResults(facetFilter);
+    public Browsing<T> getAll(FacetFilter ff) {
+        ff.setBrowseBy(getBrowseBy());
+        return getResults(ff);
     }
 
     @Override
-    public Browsing<T> getMy(FacetFilter facetFilter) {
+    public Browsing<T> getMy(FacetFilter ff) {
         return null;
     }
 

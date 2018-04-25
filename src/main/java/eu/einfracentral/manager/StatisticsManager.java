@@ -1,6 +1,6 @@
 package eu.einfracentral.manager;
 
-import eu.einfracentral.registry.service.ServiceService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.*;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
 import eu.openminted.registry.core.domain.FacetFilter;
