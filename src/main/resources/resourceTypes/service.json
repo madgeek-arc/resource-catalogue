@@ -32,6 +32,12 @@
       "type": "java.lang.String"
     },
     {
+      "multivalued": false,
+      "name": "trl",
+      "path": "//*[local-name()='trl']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": true,
       "name": "provider",
       "label": "Provider",
