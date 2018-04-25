@@ -4,9 +4,6 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
-/**
- * Created by pgl on 30/6/2017.
- */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {

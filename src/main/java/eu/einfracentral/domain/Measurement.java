@@ -3,9 +3,6 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-/**
- * Created by pgl on 30/6/2017.
- */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Measurement<T> implements Identifiable {

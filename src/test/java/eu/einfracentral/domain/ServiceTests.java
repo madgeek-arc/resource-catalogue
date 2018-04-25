@@ -4,9 +4,6 @@ import java.io.*;
 import javax.xml.bind.*;
 import org.junit.Test;
 
-/**
- * Created by pgl on 19/7/2017.
- */
 public class ServiceTests {
     @Test
     public void createService() throws JAXBException {

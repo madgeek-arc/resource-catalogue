@@ -5,9 +5,6 @@ import java.util.List;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-/**
- * Created by pgl on 29/6/2017.
- */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {

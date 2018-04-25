@@ -2,9 +2,6 @@ package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.*;
 
-/**
- * Created by pgl on 3/7/2017.
- */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Vocabulary implements Identifiable {

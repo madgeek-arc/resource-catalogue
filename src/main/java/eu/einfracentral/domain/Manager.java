@@ -3,9 +3,6 @@ package eu.einfracentral.domain;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
-/**
- * Created by pgl on 08/01/18.
- */
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Manager implements Identifiable {
