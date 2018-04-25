@@ -20,12 +20,12 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     VocabularyController(VocabularyService vocabulary) { super(vocabulary); }
 
     @ApiOperation(value = "Returns the list of EU countries.")
-    @RequestMapping(value = "getEU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "getEU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String[]> getEU() {
         return new ResponseEntity<>(((VocabularyService) service).getEU(), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Vocabulary> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.get(id, jwt);
     }

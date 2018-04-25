@@ -23,7 +23,7 @@ public class ServiceController extends ResourceController<Service> {
     }
 
     @ApiOperation(value = "Returns the service assigned the given id.")
-    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.get(id, jwt);
     }
@@ -42,7 +42,7 @@ public class ServiceController extends ResourceController<Service> {
     }
 
     @ApiOperation(value = "Validates the service without actually changing the respository")
-    @RequestMapping(value = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return super.validate(service, jwt);
     }
@@ -74,7 +74,6 @@ public class ServiceController extends ResourceController<Service> {
     }
 
     @ApiOperation(value = "Retrieves service history.")
-    @RequestMapping(path = "history", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> history(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return super.history(service, jwt);
     }
@@ -83,5 +82,6 @@ public class ServiceController extends ResourceController<Service> {
     @RequestMapping(value = "rating/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Integer> rating(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(((ServiceService) service).rating(id), HttpStatus.OK);
+    @RequestMapping(path = "versions", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     }
 }

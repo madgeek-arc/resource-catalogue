@@ -24,7 +24,7 @@ public class ResourceController<T extends Identifiable> {
         this.service = service;
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(service.get(id), HttpStatus.OK);
     }
@@ -40,7 +40,7 @@ public class ResourceController<T extends Identifiable> {
         return new ResponseEntity<>(service.update(t), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> validate(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return new ResponseEntity<>(service.validate(t), HttpStatus.OK);
     }
