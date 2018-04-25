@@ -30,6 +30,7 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return super.get(id, jwt);
     }
 
+    @ApiOperation(value = "Returns all vocabularies satisfying the given parametres.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
@@ -40,15 +41,11 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return super.getAll(allRequestParams, jwt);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "ids", value = "Comma-separated list of vocabulary ids", dataType = "string", paramType = "query")
-    })
     @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Vocabulary>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.getSome(ids, jwt);
     }
 
-    @ApiOperation(value = "Returns all vocabularies, grouped by the given field.")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<Vocabulary>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.getBy(field, jwt);
