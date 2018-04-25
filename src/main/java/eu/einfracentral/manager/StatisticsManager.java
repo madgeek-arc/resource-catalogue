@@ -60,7 +60,7 @@ public class StatisticsManager implements StatisticsService {
             ab = ab.subAggregation(optional);
         }
         SearchRequestBuilder srb = elastic.client()
-                                          .prepareSearch("eventType")
+                                          .prepareSearch("event")
                                           .setTypes("general")
                                           .setQuery(getEventQueryBuilder(id, eventType))
                                           .addAggregation(ab);
