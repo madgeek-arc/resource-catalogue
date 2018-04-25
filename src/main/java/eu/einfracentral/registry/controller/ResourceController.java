@@ -5,7 +5,6 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.*;
-import io.swagger.annotations.ApiOperation;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.*;
@@ -57,12 +56,12 @@ public class ResourceController<T extends Identifiable> {
 
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<T>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        FacetFilter filter = new FacetFilter();
-        filter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        filter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        filter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        filter.setFilter(allRequestParams);
-        return new ResponseEntity<>(service.getAll(filter), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        ff.setFilter(allRequestParams);
+        return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
     }
 
     @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
