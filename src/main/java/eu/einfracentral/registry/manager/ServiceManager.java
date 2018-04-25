@@ -102,9 +102,4 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     public Service validate(Service service) {
         return fixVersion(service);
     }
-
-    @Override
-    public Integer rating(String id) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 }
