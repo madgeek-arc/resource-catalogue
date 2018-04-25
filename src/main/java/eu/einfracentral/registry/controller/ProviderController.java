@@ -32,4 +32,10 @@ public class ProviderController extends ResourceController<Provider> {
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.get(id, jwt);
     }
+
+    @ApiOperation(value = "Returns the provider's services")
+    @RequestMapping(path = "{id}/services", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(((ProviderService)service).getServices(id), HttpStatus.OK);
+    }
 }
