@@ -23,14 +23,18 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.visits(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service page visits in the provider's site")
     @RequestMapping(path = "service/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> externals(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.externals(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service page visits in eic (via registry-core)")
+    @ApiOperation(value = "Returns the time series of service page visits in the provider's site")
     @RequestMapping(path = "service/orders/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, Integer>> externalsAlias(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return externals(id, jwt);
+    }
+
+    @RequestMapping(path = "service/internals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> internals(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.internals(id), HttpStatus.OK);
     }
@@ -53,14 +57,18 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.pVisits(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service page visits in the provider's site for all of the provider's services")
     @RequestMapping(path = "provider/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pExternals(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.pExternals(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service page visits in eic (via registry-core) for all of the provider's services")
+    @ApiOperation(value = "Returns the time series of service page visits in the provider's site for all of the provider's services")
     @RequestMapping(path = "provider/orders/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, Integer>> pExternalsAlias(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(statisticsService.pExternals(id), HttpStatus.OK);
+    }
+
+    @RequestMapping(path = "provider/internals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pInternals(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.pInternals(id), HttpStatus.OK);
     }
