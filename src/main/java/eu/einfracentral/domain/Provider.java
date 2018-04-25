@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
@@ -17,9 +18,11 @@ public class Provider implements Identifiable {
     private String contactInformation;
     @XmlElementWrapper(name = "users", required = false)
     @XmlElement(name = "user")
+    @ApiModelProperty(hidden = true)
     private List<User> users;
     @XmlElementWrapper(name = "services", required = false)
     @XmlElement(name = "service")
+    @ApiModelProperty(hidden = true)
     private List<Service> services;
 
     @Override
@@ -48,18 +51,22 @@ public class Provider implements Identifiable {
         this.contactInformation = contactInformation;
     }
 
+    @ApiModelProperty(hidden = true)
     public List<User> getUsers() {
         return users;
     }
 
+    @ApiModelProperty(hidden = true)
     public void setUsers(List<User> users) {
         this.users = users;
     }
 
+    @ApiModelProperty(hidden = true)
     public List<Service> getServices() {
         return services;
     }
 
+    @ApiModelProperty(hidden = true)
     public void setServices(List<Service> services) {
         this.services = services;
     }
