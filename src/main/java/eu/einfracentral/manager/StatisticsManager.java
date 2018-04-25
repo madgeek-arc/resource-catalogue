@@ -29,7 +29,7 @@ public class StatisticsManager implements StatisticsService {
     @Autowired
     private AnalyticsService analyticsService;
     @Autowired
-    private ServiceService serviceService;
+    private ProviderService providerService;
 
     @Override
     public Map<String, Float> ratings(String id) {
@@ -118,7 +118,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> pFavourites(String id) {
         Map<String, Integer> ret = new HashMap<>();
-        getServices(id).stream().forEach(s -> {
+        providerService.getServices(id).stream().forEach(s -> {
             Map<String, Integer> favourites = favourites(s.getId());
             favourites.forEach((k, v) -> {
                 ret.putIfAbsent(k, 0);
@@ -136,7 +136,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Float> pRatings(String id) {
         Map<String, Float> ret = new HashMap<>();
-        getServices(id).stream().forEach(s -> {
+        providerService.getServices(id).stream().forEach(s -> {
             Map<String, Float> ratings = ratings(s.getId());
             ratings.forEach((k, v) -> {
                 ret.putIfAbsent(k, 0f);
@@ -149,7 +149,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> pExternals(String id) {
         Map<String, Integer> ret = new HashMap<>();
-        getServices(id).stream().forEach(s -> {
+        providerService.getServices(id).stream().forEach(s -> {
             Map<String, Integer> externals = externals(s.getId());
             externals.forEach((k, v) -> {
                 ret.putIfAbsent(k, 0);
@@ -162,7 +162,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> pInternals(String id) {
         Map<String, Integer> ret = new HashMap<>();
-        getServices(id).stream().forEach(s -> {
+        providerService.getServices(id).stream().forEach(s -> {
             Map<String, Integer> internals = internals(s.getId());
             internals.forEach((k, v) -> {
                 ret.putIfAbsent(k, 0);
@@ -207,7 +207,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> pVisits(String id) {
         Map<String, Integer> ret = new HashMap<>();
-        getServices(id).stream().forEach(s -> {
+        providerService.getServices(id).stream().forEach(s -> {
             Map<String, Integer> visits = visits(s.getId());
             visits.forEach((k, v) -> {
                 ret.putIfAbsent(k, 0);
@@ -221,7 +221,7 @@ public class StatisticsManager implements StatisticsService {
     public Map<String, Float> pVisitation(String id) {
         Map<String, Float> ret = new HashMap<>();
         Map<String, Integer> counts = new HashMap<>();
-        List<eu.einfracentral.domain.Service> services = getServices(id);
+        List<eu.einfracentral.domain.Service> services = providerService.getServices(id);
         final int[] grandTotal = {0};
         services.forEach(service -> {
             final Integer[] total = {0};
@@ -233,13 +233,5 @@ public class StatisticsManager implements StatisticsService {
             ret.put(k, ((float) v) / grandTotal[0]);
         });
         return ret;
-    }
-
-    private List<eu.einfracentral.domain.Service> getServices(String id) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("provider", id);
-        ff.setFrom(0);
-        ff.setQuantity(100);
-        return serviceService.getAll(ff).getResults();
     }
 }

@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 @org.springframework.stereotype.Service("providerService")
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService {
 
+    @Autowired
+    private ServiceService serviceService;
+
     public ProviderManager() {
         super(Provider.class);
     }
@@ -19,5 +22,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public String getResourceType() {
         return "provider";
+    }
+
+    @Override
+    public List<Service> getServices(String id) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("provider", id);
+        ff.setFrom(0);
+        ff.setQuantity(1000);
+        return serviceService.getAll(ff).getResults();
     }
 }
