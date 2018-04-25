@@ -73,11 +73,6 @@ public class ServiceController extends ResourceController<Service> {
         return super.getBy(field, jwt);
     }
 
-
-    @ApiOperation(value = "Returns the service rating")
-    @RequestMapping(value = "rating/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Integer> rating(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(((ServiceService) service).rating(id), HttpStatus.OK);
     @ApiOperation(value = "Retrieves service versions.")
     @RequestMapping(path = "versions", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable String version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
