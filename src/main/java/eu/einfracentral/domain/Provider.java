@@ -20,7 +20,7 @@ public class Provider implements Identifiable {
     private List<User> users;
     @XmlElementWrapper(name = "services", required = false)
     @XmlElement(name = "service")
-    private List<User> services;
+    private List<Service> services;
 
     @Override
     public String getId() {
@@ -56,11 +56,11 @@ public class Provider implements Identifiable {
         this.users = users;
     }
 
-    public List<User> getServices() {
+    public List<Service> getServices() {
         return services;
     }
 
-    public void setServices(List<User> services) {
+    public void setServices(List<Service> services) {
         this.services = services;
     }
 }
