@@ -13,13 +13,14 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("service")
+@Api(value = "Get Information about a Service")
 public class ServiceController extends ResourceController<Service> {
     @Autowired
     ServiceController(ServiceService service) {
         super(service);
     }
 
-    @ApiOperation(value = "Returns the service assigned the given id.")
+    @ApiOperation(value = "Get the most current version of a specific service providing the service ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.get(id, jwt);
@@ -44,7 +45,7 @@ public class ServiceController extends ResourceController<Service> {
         return super.validate(service, jwt);
     }
 
-    @ApiOperation(value = "Returns all services satisfying the given parametres.")
+    @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
@@ -55,7 +56,7 @@ public class ServiceController extends ResourceController<Service> {
         return super.getAll(allRequestParams, jwt);
     }
 
-    @ApiOperation(value = "Returns any services with the given id(s)")
+    @ApiOperation(value = "Get a list of services based on a set of IDs")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
     })
@@ -64,13 +65,13 @@ public class ServiceController extends ResourceController<Service> {
         return super.getSome(ids, jwt);
     }
 
-    @ApiOperation(value = "Returns all services, grouped by the given field.")
+    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get service organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.getBy(field, jwt);
     }
 
-    @ApiOperation(value = "Retrieves service versions.")
+    @ApiOperation(value = "Get a past version of a specific service providing the service ID and a version identifier")
     @RequestMapping(path = "versions", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable String version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return super.versions(id, version, jwt);

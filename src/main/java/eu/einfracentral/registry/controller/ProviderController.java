@@ -12,6 +12,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("provider")
+@Api(value = "Get information about a Provider")
 public class ProviderController extends ResourceController<Provider> {
     @Autowired
     ProviderController(ProviderService service) {
@@ -24,15 +25,17 @@ public class ProviderController extends ResourceController<Provider> {
         return super.update(provider, jwt);
     }
 
-    @ApiOperation(value = "Returns the provider")
+    @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.get(id, jwt);
     }
 
-    @ApiOperation(value = "Returns the provider's services")
+    @ApiOperation(value = "Get a list of services offered by a provider")
     @RequestMapping(path = "{id}/services", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(((ProviderService)service).getServices(id), HttpStatus.OK);
     }
+
+    @ApiOperation(value = "Get a list of all service providers in the catalogue")
 }

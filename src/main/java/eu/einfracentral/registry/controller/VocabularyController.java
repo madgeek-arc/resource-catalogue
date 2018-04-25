@@ -12,6 +12,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("vocabulary")
+@Api(value = "Get auxiliary information about list of values (i.e., vocabularies) used in eInfraCentral")
 public class VocabularyController extends ResourceController<Vocabulary> {
     @Autowired
     VocabularyController(VocabularyService vocabulary) { super(vocabulary); }
@@ -27,7 +28,7 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return super.get(id, jwt);
     }
 
-    @ApiOperation(value = "Returns all vocabularies satisfying the given parametres.")
+    @ApiOperation(value = "Get all categories \\ sub categories used in eInfraCentral, etc.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),

@@ -1,7 +1,7 @@
 package eu.einfracentral.controllers;
 
 import eu.einfracentral.service.StatisticsService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -10,11 +10,12 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("stats")
+@Api("Get information about KPIs and eInfraCentral usage statistics")
 public class StatisticsController {
     @Autowired
     private StatisticsService statisticsService;
 
-    @ApiOperation(value = "Returns the time series of service page visits in eic (via piwik)")
+    @ApiOperation(value = "Get visits per day for a service")
     @RequestMapping(path = "service/visits/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> visits(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.visits(id), HttpStatus.OK);
@@ -36,19 +37,19 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.internals(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service favourites")
+    @ApiOperation(value = "Get favourites per day for a service")
     @RequestMapping(path = "service/favourites/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> favourites(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.favourites(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service ratings")
+    @ApiOperation(value = "Get average ratings per day for a service")
     @RequestMapping(path = "service/ratings/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Float>> ratings(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.ratings(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service page visits in eic (via piwik) for all of the provider's services")
+    @ApiOperation(value = "Get aggregate visits per day for all services offered by a provider")
     @RequestMapping(path = "provider/visits/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pVisits(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.pVisits(id), HttpStatus.OK);
@@ -70,19 +71,19 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.pInternals(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service favourites for all of the provider's services")
+    @ApiOperation(value = "Get aggregate favourites per day for all services offered by a provider")
     @RequestMapping(path = "provider/favourites/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pFavourites(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.pFavourites(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the time series of service ratings for all of the provider's services")
+    @ApiOperation(value = "Get average ratings per day for all services offered by a provider")
     @RequestMapping(path = "provider/ratings/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Float>> pRatings(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.pRatings(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the visitation portions for all of the provider's services")
+    @ApiOperation(value = "Get percentage of visits for all services offered by a provider")
     @RequestMapping(path = "provider/visitation/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Float>> pVisitation(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(statisticsService.pVisitation(id), HttpStatus.OK);
