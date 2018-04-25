@@ -3,9 +3,6 @@ package eu.einfracentral.service;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by pgl on 23/04/18.
- */
 @Service("statisticsService")
 public interface StatisticsService {
     Map<String, Float> ratings(String id);

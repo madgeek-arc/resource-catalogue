@@ -4,9 +4,6 @@ import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import java.util.*;
 
-/**
- * Created by pgl on 04/08/17.
- */
 public interface ResourceService<T> extends ResourceCRUDService<T> {
     T del(T t);
     Map<String, List<T>> getBy(String field);

@@ -3,9 +3,6 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.User;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by pgl on 07/08/17.
- */
 @Service("userService")
 public interface UserService extends ResourceService<User> {
     User activate(String id);
