@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.*;
@@ -96,7 +96,9 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public List<T> versions(String id, String version) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        List<T> ret = new ArrayList<>();
+        ret.add(get(id));
+        return ret;
     }
 
     protected List<Resource> whereIDin(String... ids) {
