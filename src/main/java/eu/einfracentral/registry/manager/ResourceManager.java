@@ -96,6 +96,10 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public List<T> versions(String id, String version) {
+        //TODO
+        //1) get all resources that have our own id (from Identifiable) (for now only 1, because we check existence on add, maybe change that?)
+        //2) get that resource's versions (based on coreid) using core
+        //3) send those in a meaningful way
         List<T> ret = new ArrayList<>();
         ret.add(get(id));
         return ret;
