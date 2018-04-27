@@ -10,186 +10,211 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class Service implements Identifiable {
     //Basic
     /**
-     * Global unique and persistent identifier of a specific service. Work in progress.
+     * Global unique and persistent identifier of the service.
      */
     //@ApiModelProperty
     @XmlElement(required = false)
     private String id; //maybe list
     /**
-     * Link to a webpage providing information about the service. This webpage is usually hosted and maintained by the service provider. It contains fresh and additional information, such as what APIs are supported or links to the userManual.
+     * The Uniform Resource Locator (web address) to the entry web page of the service usually hosted and maintained by the service provider.
      */
     @XmlElement(required = false)
     private URL url;
     /**
-     * Brief brand/marketing name of service as assigned by the service provider. Should be descriptive from a customer point of view, and should be quite simple, such that someone non-technical is able to understand what the service is about.
+     * The organisation that manages and delivers the service and with whom the customer signs the SLA.
+     */
+    @XmlElement(required = false)
+    private String provider;
+    /**
+     * Brief and descriptive name of service as assigned by the service provider.
      */
     @XmlElement(required = false)
     private String name;
     /**
-     * Catchline or slogan of service for marketing/advertising purposes.
+     * Short text, catch line or slogan which serves mainly marketing and advertising purposes.
      */
     @XmlElement
     private String tagline;
     /**
-     * High-level description of what the service does in terms of functionality it provides and the resources it enables access to. Should be similar to the name described above, and should cover the value provided by the service, in fairly non-technical terms. These descriptions may seem obvious but help everyone within the organization understand the service, and also will be needed for the Service Catalogue, which will be shown to users and customers. It may provide also information related to the offered capacity, number of installations, underlying data that is offered.
+     * High-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables access to.
      */
     @XmlElement(required = false)
     private String description;
     /**
-     * A choice of utility and warranty that the customer can/should specify when commissioning the service
+     * A high-level description of the various options or forms in which the service can be instantiated.
      */
     @XmlElement
     private String options;
     /**
-     * Type of users or end-users allowed to commission/benefit from the service.
+     * Type of users/customers allowed to commission/benefit from the service.
      */
     @XmlElement
     private String targetUsers; //maybe list
     /**
-     * The benefit to a customer and their users delivered by the service. Benefits are usually related to alleviating pains (e.g., eliminate undesired outcomes, obstacles or risks) or producing gains (e.g. increased performance, social gains, positive emotions or cost saving).
+     * Description of the benefit delivered to a customer/user by the service.
      */
     @XmlElement
     private String userValue;
     /**
-     * List of customers, communities, etc using the service.
+     * List of customers, communities, users, etc using the service.
      */
     @XmlElement
     private String userBase;
     /**
-     * Link to a visual representation for the service. If none exists, providers are urged to use the organization's symbol
+     * The Uniform Resource Locator (web address) to the logo/visual identity of the service.
      */
-    @XmlElement
+    @XmlElement(required = false)
     private URL symbol;
     /**
-     * Link to a page containing multimedia regarding the service
+     * The Uniform Resource Locator (web address) to the multimedia material of the service (screenshots or videos).
      */
     @XmlElement
     private URL multimediaURL;
     //Classification
     /**
-     * Organisation that manages and delivers the service and with whom the customer signs the SLA.
+     * (Deprecated) Organisations that manage and deliver the service and with whom the customer signs the SLA.
      */
-    @XmlElementWrapper(name = "providers", required = false)
+    @XmlElementWrapper(name = "providers")
     @XmlElement(name = "provider")
     private List<String> providers;
     /**
-     * Informs about the implementation of the service that is in force as well as about its previous implementations, if any.
+     * Informs about the service version that is in force.
      */
-    @XmlElement
+    @XmlElement(required = false)
     private String version;
     /**
-     * The date of the latest update.
+     * The date of the latest update of the service.
      */
-    @XmlElement
+    @XmlElement(required = false)
     private XMLGregorianCalendar lastUpdate;
     /**
-     * A list of the service features added in the latest version
+     * A log of the service features added in the last and previous versions.
      */
     @XmlElement
     private String changeLog;
     /**
-     * No userManual given
+     * The date up to which the service description is valid.
      */
     @XmlElement
     private XMLGregorianCalendar validFor;
     /**
-     * Is used to tag the service to the full service cycle: e.g., discovery, planned, alpha (prototype available for closed set of users), beta (service being developed while available for testing publicly), production, retired (not anymore offered).
+     * Used to tag the service to the full service cycle.
      */
     @XmlElement(required = false)
     private String lifeCycleStatus; //alpha, beta, production
     /**
-     * Is used to tag the service to the Technology Readiness Level.
+     * Used to tag the service to the Technology Readiness Level, a method of estimating technology ma-turity of critical technology elements. TRL are based on a scale from 1 to 9 with 9 being the most ma-ture technology.
      */
     @XmlElement(required = false)
     private String trl; //7, 8 , 9
     /**
-     * A named group of services that offer access to the same type of resource. These are external ones that are of interest to a customer.
+     * A named group of services that offer access to the same type of resource that is of interest to a customer/user.
      */
     @XmlElement(required = false)
     private String category; //maybe list
     /**
-     * Type of service within a category
+     * Type/Subcategory of service within a category
      */
     @XmlElement(required = false)
     private String subcategory; //maybe list
     /**
-     * List of places within which the service is available
+     * Regions/Countries Availability
      */
     @XmlElementWrapper(name = "places", required = false)
     @XmlElement(name = "place")
     private List<String> places;
     /**
-     * List of languages in which the service is available
+     * Languages of the User interface
      */
     @XmlElementWrapper(name = "languages", required = false)
     @XmlElement(name = "language")
     private List<String> languages;
     /**
-     * Field to facilitate searching based on keywords
+     * Attribute to facilitate searching based on keywords.
      */
     @XmlElementWrapper(name = "tags", required = false)
     @XmlElement(name = "tag")
     private List<String> tags;
     /**
-     * No userManual given
+     * Other services that are required with this service.
      */
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
     private List<String> requiredServices;
     /**
-     * Other services that are either required or commonly used with this service.
+     * Other services that are commonly used with this service.
      */
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
     private List<String> relatedServices;
     //Support
     /**
-     * Link to request the service from the service provider
+     * The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.
      */
     @XmlElement(required = false)
+    private URL order;
+    /**
+     * (Deprecated) Link to request the service from the service provider
+     */
+    @XmlElement
     private URL request;
     /**
-     * Link with contact to ask more information from the service provider about this service. A contact person or helpdesk within the organization must be assigned for communications, questions and issues relating to the service.
+     * The Uniform Resource Locator (web address) to a webpage with the contact person or helpdesk to ask more information from the service provider about this service.
      */
     @XmlElement
     private URL helpdesk;
     /**
-     * Link to user manual and userManual
+     * The Uniform Resource Locator (web address) to the service user manual and documentation
      */
     @XmlElement
     private URL userManual;
     /**
-     * Link to training information
+     * The Uniform Resource Locator (web address) to training information on the service.
      */
     @XmlElement
     private URL trainingInformation;
     /**
-     * Link to page where customers can provide feedback on the service
+     * The Uniform Resource Locator (web address) to the page where customers can provide feedback on the service.
      */
     @XmlElement
     private URL feedback;
     //Contractual
     /**
-     * Supported payment models that apply. List of sentences each of them stating the type of payment model and the restriction that applies to it.
+     * The Uniform Resource Locator (web address) to the information about the payment models that apply, the cost and any related information.
      */
-    @XmlElement(required = false)
+    @XmlElement
     private URL price;
     /**
-     * Document containing information about the levels of performance that a service provider is expected to achieve. Current service agreements (SLAs) available for the service or basis for a new SLA. These should be agreements with users (not providers).
+     * The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.
      */
     @XmlElement(required = false)
     private URL serviceLevelAgreement;
     /**
-     * Document containing the rules, service conditions and usage policy which one must agree to abide by in order to use the service.
+     * The Uniform Resource Locator (web address) to the webpage describing the rules, service conditions and usage policy which one must agree to abide by in order to use the service.
      */
     @XmlElementWrapper(name = "termsOfUse")
     @XmlElement(name = "termOfUse")
     private List<URL> termsOfUse;
     /**
-     * Sources of funding for the development and operation of the service.
+     * Sources of funding for the development and/or operation of the service.
      */
     @XmlElement
     private String funding;
+    /**
+     * Availability, i.e., the fraction of a time period that an item is in a condition to perform its intended function upon demand (“available” indicates that an item is in this condition); availability is often expressed as a probability.
+     */
+    @XmlElement
+    private String availability;
+    /**
+     * Reliability, i.e., the probability that an item will function without failure under stated conditions for a speciﬁed amount of time. “Stated conditions” indicates perquisite conditions external to the item being considered. For example, a stated condition for a supercomputer might be that power and cooling must be available - thus a failure of the power or cooling systems would not be considered a failure of the supercomputer.
+     */
+    @XmlElement
+    private String reliability;
+    /**
+     * Serviceability, i.e., the probability that an item will be retained in, or restored to, a condition to per-form its intended function within a speciﬁed period of time Durability, i.e., the ability of a physical product to remain functional, without requiring excessive maintenance or repair, when faced with the challenges of normal operation over its design lifetime.
+     */
+    @XmlElement
+    private String serviceability;
 
     @Override
     public String getId() {
@@ -207,6 +232,14 @@ public class Service implements Identifiable {
 
     public void setUrl(URL url) {
         this.url = url;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
     public String getName() {
@@ -393,6 +426,14 @@ public class Service implements Identifiable {
         this.relatedServices = relatedServices;
     }
 
+    public URL getOrder() {
+        return order;
+    }
+
+    public void setOrder(URL order) {
+        this.order = order;
+    }
+
     public URL getRequest() {
         return request;
     }
@@ -463,5 +504,29 @@ public class Service implements Identifiable {
 
     public void setFunding(String funding) {
         this.funding = funding;
+    }
+
+    public String getAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(String availability) {
+        this.availability = availability;
+    }
+
+    public String getReliability() {
+        return reliability;
+    }
+
+    public void setReliability(String reliability) {
+        this.reliability = reliability;
+    }
+
+    public String getServiceability() {
+        return serviceability;
+    }
+
+    public void setServiceability(String serviceability) {
+        this.serviceability = serviceability;
     }
 }
