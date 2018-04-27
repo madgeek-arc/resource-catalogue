@@ -77,8 +77,8 @@ public class ResourceController<T extends Identifiable> {
         return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), e), e.getStatus());
     }
 
-    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"} , method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<T>> versions(@PathVariable String id, @PathVariable String version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>(service.versions(id, version), HttpStatus.OK);
+    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<T>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+        return new ResponseEntity<>(service.versions(id, version.orElse(null)), HttpStatus.OK);
     }
 }
