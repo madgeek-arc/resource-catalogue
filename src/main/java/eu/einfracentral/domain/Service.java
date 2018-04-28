@@ -24,7 +24,7 @@ public class Service implements Identifiable {
      * The organisation that manages and delivers the service and with whom the customer signs the SLA.
      */
     @XmlElement(required = false)
-    private String provider;
+    private String providerName;
     /**
      * Brief and descriptive name of service as assigned by the service provider.
      */
@@ -234,12 +234,12 @@ public class Service implements Identifiable {
         this.url = url;
     }
 
-    public String getProvider() {
-        return provider;
+    public String getProviderName() {
+        return providerName;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
     }
 
     public String getName() {
