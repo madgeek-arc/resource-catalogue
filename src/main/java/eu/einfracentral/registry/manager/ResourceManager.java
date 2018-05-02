@@ -106,6 +106,16 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return multiWhere(String.format("%s_id", resourceType.getName()), id);
     }
 
+    protected List<Resource> multiWhere(String field, String value) {
+        List<Resource> ret;
+        try {
+            FacetFilter ff = new FacetFilter();
+            ff.setResourceType(resourceType.getName());
+            ff.addFilter(field, value);
+            ret = (List<Resource>) searchService.search(ff).getResults(); //TODO: is unchecked, ask core for fix?
+        } catch (UnknownHostException e) {
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return ret;
     }
 
