@@ -102,6 +102,10 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         //3) send those in a meaningful way
         List<T> ret = new ArrayList<>();
         ret.add(get(id));
+    protected List<Resource> multiWhereID(String id) {
+        return multiWhere(String.format("%s_id", resourceType.getName()), id);
+    }
+
         return ret;
     }
 
