@@ -9,9 +9,13 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
+    @Autowired
+    private VersionService versionService;
+
     public ResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
     }
@@ -96,12 +100,16 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public List<T> versions(String id, String version) {
-        //TODO
-        //1) get all resources that have our own id (from Identifiable) (for now only 1, because we check existence on add, maybe change that?)
-        //2) get that resource's versions (based on coreid) using core
-        //3) send those in a meaningful way
-        List<T> ret = new ArrayList<>();
-        ret.add(get(id));
+        return multiWhereID(id).stream().flatMap(
+                resource -> versionService.getVersionsByResource(resource.getId())
+                                          .stream()
+                                          .filter(Objects::nonNull)
+                                          .map(
+                                                  versionObject -> deserialize(versionObject.getResource())
+                                          )
+        ).collect(Collectors.toList());
+    }
+
     protected List<Resource> multiWhereID(String id) {
         return multiWhere(String.format("%s_id", resourceType.getName()), id);
     }
