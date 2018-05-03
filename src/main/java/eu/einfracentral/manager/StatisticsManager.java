@@ -32,14 +32,14 @@ public class StatisticsManager implements StatisticsService {
     public Map<String, Float> ratings(String id) {
         Map<String, Float> ret = new HashMap<>();
         try {
-            int totalDocCount = 0;
-            for (Histogram.Bucket bucket : histogram(id,
-                                                     "RATING",
-                                                     PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating")).getBuckets()) {
-                totalDocCount += Math.toIntExact(bucket.getDocCount());
-                SimpleValue cumSumVal = bucket.getAggregations().get("cum_sum");
-                ret.put(bucket.getKeyAsString(), Float.parseFloat(cumSumVal.getValueAsString()) / totalDocCount);
-            }
+            List<Histogram.Bucket> buckets = histogram(id,
+                                                       "RATING",
+                                                       PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating")).getBuckets();
+            long totalDocCount = buckets.stream().mapToLong(MultiBucketsAggregation.Bucket::getDocCount).sum();
+            ret = buckets.stream().collect(Collectors.toMap(
+                    MultiBucketsAggregation.Bucket::getKeyAsString,
+                    e -> Float.parseFloat(((SimpleValue) e.getAggregations().get("cum_sum")).getValueAsString()) / totalDocCount
+            ));
         } catch (Exception e) {
             logger.error("Parsing aggregations ", e);
         }
