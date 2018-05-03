@@ -1,17 +1,15 @@
 package eu.einfracentral.manager;
 
-import eu.einfracentral.registry.service.*;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.*;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
-import eu.openminted.registry.core.domain.FacetFilter;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.*;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.*;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.histogram.*;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.pipeline.*;
