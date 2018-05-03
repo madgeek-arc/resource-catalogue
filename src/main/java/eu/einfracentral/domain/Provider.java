@@ -7,17 +7,17 @@ import javax.xml.bind.annotation.*;
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {
-    @XmlElement(required = false)
+    @XmlElement(required = true)
     private String id;
-    @XmlElement(required = false)
+    @XmlElement(required = true)
     private String name;
-    @XmlElement(required = false)
+    @XmlElement(required = true)
     private String contactInformation;
-    @XmlElementWrapper(name = "users", required = false)
+    @XmlElementWrapper(name = "users")
     @XmlElement(name = "user")
     @ApiModelProperty(hidden = true)
     private List<User> users;
-    @XmlElementWrapper(name = "services", required = false)
+    @XmlElementWrapper(name = "services")
     @XmlElement(name = "service")
     @ApiModelProperty(hidden = true)
     private List<Service> services;

@@ -12,23 +12,22 @@ public class Service implements Identifiable {
     /**
      * Global unique and persistent identifier of the service.
      */
-    //@ApiModelProperty
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String id; //maybe list
     /**
      * The Uniform Resource Locator (web address) to the entry web page of the service usually hosted and maintained by the service provider.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL url;
     /**
      * The organisation that manages and delivers the service and with whom the customer signs the SLA.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String providerName;
     /**
      * Brief and descriptive name of service as assigned by the service provider.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String name;
     /**
      * Short text, catch line or slogan which serves mainly marketing and advertising purposes.
@@ -38,7 +37,7 @@ public class Service implements Identifiable {
     /**
      * High-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables access to.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String description;
     /**
      * A high-level description of the various options or forms in which the service can be instantiated.
@@ -63,7 +62,7 @@ public class Service implements Identifiable {
     /**
      * The Uniform Resource Locator (web address) to the logo/visual identity of the service.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL symbol;
     /**
      * The Uniform Resource Locator (web address) to the multimedia material of the service (screenshots or videos).
@@ -80,12 +79,12 @@ public class Service implements Identifiable {
     /**
      * Informs about the service version that is in force.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String version;
     /**
      * The date of the latest update of the service.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private XMLGregorianCalendar lastUpdate;
     /**
      * A log of the service features added in the last and previous versions.
@@ -100,39 +99,39 @@ public class Service implements Identifiable {
     /**
      * Used to tag the service to the full service cycle.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String lifeCycleStatus; //alpha, beta, production
     /**
      * Used to tag the service to the Technology Readiness Level, a method of estimating technology ma-turity of critical technology elements. TRL are based on a scale from 1 to 9 with 9 being the most ma-ture technology.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String trl; //7, 8 , 9
     /**
      * A named group of services that offer access to the same type of resource that is of interest to a customer/user.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String category; //maybe list
     /**
      * Type/Subcategory of service within a category
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private String subcategory; //maybe list
     /**
      * Regions/Countries Availability
      */
-    @XmlElementWrapper(name = "places", required = false)
+    @XmlElementWrapper(name = "places", required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     @XmlElement(name = "place")
     private List<String> places;
     /**
      * Languages of the User interface
      */
-    @XmlElementWrapper(name = "languages", required = false)
+    @XmlElementWrapper(name = "languages", required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     @XmlElement(name = "language")
     private List<String> languages;
     /**
      * Attribute to facilitate searching based on keywords.
      */
-    @XmlElementWrapper(name = "tags", required = false)
+    @XmlElementWrapper(name = "tags", required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     @XmlElement(name = "tag")
     private List<String> tags;
     /**
@@ -151,7 +150,7 @@ public class Service implements Identifiable {
     /**
      * The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL order;
     /**
      * (Deprecated) Link to request the service from the service provider
@@ -187,7 +186,7 @@ public class Service implements Identifiable {
     /**
      * The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL serviceLevelAgreement;
     /**
      * The Uniform Resource Locator (web address) to the webpage describing the rules, service conditions and usage policy which one must agree to abide by in order to use the service.
