@@ -13,7 +13,4 @@
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="268435456"/>
     </bean>
-    <!--<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>-->
-    <!--<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>-->
-    <!--<bean class="eu.einfracentral.config.SwaggerConfig"/>-->
 </beans>
