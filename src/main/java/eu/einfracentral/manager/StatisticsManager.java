@@ -43,9 +43,6 @@ public class StatisticsManager implements StatisticsService {
         } catch (Exception e) {
             logger.error("Parsing aggregations ", e);
         }
-        if (ret.isEmpty()) {
-            Stream.of(getDates()).forEach(i -> ret.put(i, 5 * ThreadLocalRandom.current().nextFloat()));
-        }
         return ret;
     }
 
@@ -80,11 +77,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> externals(String id) {
-        Map<String, Integer> ret = counts(id, "EXTERNAL");
-        if (ret.isEmpty()) {
-            Stream.of(getDates()).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
-        }
-        return ret;
+        return counts(id, "EXTERNAL");
     }
 
     private Map<String, Integer> counts(String id, String eventType) {
@@ -93,23 +86,9 @@ public class StatisticsManager implements StatisticsService {
         );
     }
 
-    private static String[] getDates() {
-        String[] ret = new String[30];
-        Calendar day = Calendar.getInstance();
-        for (int i = 0; i < ret.length; i++) {
-            day.add(Calendar.DAY_OF_YEAR, -1);
-            ret[i] = new SimpleDateFormat("yyyy-MM-dd").format(day.getTime());
-        }
-        return ret;
-    }
-
     @Override
     public Map<String, Integer> internals(String id) {
-        Map<String, Integer> ret = counts(id, "INTERNAL");
-        if (ret.isEmpty()) {
-            Stream.of(getDates()).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
-        }
-        return ret;
+        return counts(id, "INTERNAL");
     }
 
     @Override
@@ -194,9 +173,6 @@ public class StatisticsManager implements StatisticsService {
             }
         } catch (Exception e) {
             logger.error("Parsing aggregations ", e);
-        }
-        if (ret.isEmpty()) {
-            Stream.of(getDates()).forEach(i -> ret.put(i, ThreadLocalRandom.current().nextInt(0, 9)));
         }
         return ret;
     }
