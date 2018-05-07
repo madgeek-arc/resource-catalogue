@@ -111,15 +111,17 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> pRatings(String id) {
-        Map<String, Float> ret = new HashMap<>();
-        providerService.getServices(id).stream().forEach(s -> {
-            Map<String, Float> ratings = ratings(s.getId());
-            ratings.forEach((k, v) -> {
-                ret.putIfAbsent(k, 0f);
-                ret.put(k, ret.get(k) + v);
-            });
-        });
-        return ret;
+        return providerService.getServices(id)
+                              .stream()
+                              .flatMap(s -> ratings(s.getId()).entrySet().stream())
+                              .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingDouble(e -> (double) e.getValue())))
+                              .entrySet()
+                              .stream()
+                              .collect(Collectors.toMap(Map.Entry::getKey, v -> (float) v.getValue().doubleValue()));
+        //The above 4 lines should be just
+        //.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingFloat(Map.Entry::getValue)));
+        //but Collectors don't offer a summingFloat for some reason
+        //if they ever offer that, you know what to do
     }
 
     @Override
