@@ -188,19 +188,11 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> pVisitation(String id) {
-        Map<String, Float> ret = new HashMap<>();
-        Map<String, Integer> counts = new HashMap<>();
-        List<eu.einfracentral.domain.Service> services = providerService.getServices(id);
-        final int[] grandTotal = {0};
-        services.forEach(service -> {
-            final Integer[] total = {0};
-            visits(service.getId()).forEach((k, v) -> total[0] += v);
-            grandTotal[0] += total[0];
-            counts.put(service.getName(), total[0]);
-        });
-        counts.forEach((k, v) -> {
-            ret.put(k, ((float) v) / grandTotal[0]);
-        });
-        return ret;
+        Map<String, Integer> counts = providerService.getServices(id).stream().collect(Collectors.toMap(
+                Service::getName,
+                s -> visits(s.getId()).values().stream().mapToInt(Integer::intValue).sum()
+        ));
+        int grandTotal = counts.values().stream().mapToInt(Integer::intValue).sum();
+        return counts.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> ((float) v.getValue()) / grandTotal));
     }
 }
