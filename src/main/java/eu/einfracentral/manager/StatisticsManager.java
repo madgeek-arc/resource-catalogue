@@ -142,29 +142,25 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> favourites(String id) {
-        Map<String, Integer> ret = new HashMap<>();
         final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
-        try {
-            ret = histogram(id, "FAVOURITE", null).getBuckets().stream().collect(
-                    Collectors.toMap(
-                            MultiBucketsAggregation.Bucket::getKeyAsString,
-                            bucket -> {
-                                Terms subTerm = bucket.getAggregations().get("score");
-                                if (subTerm.getBuckets() != null) {
-                                    totalDocCounts[0] += subTerm.getBuckets().stream().mapToLong(
-                                            subBucket -> subBucket.getKeyAsNumber().intValue() == 0 ? subBucket.getDocCount() : 0
-                                    ).sum();
-                                    totalDocCounts[1] += subTerm.getBuckets().stream().mapToLong(
-                                            subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
-                                    ).sum();
-                                }
-                                return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
+        List<Histogram.Bucket> buckets = histogram(id, "FAVOURITE").getBuckets();
+        return buckets.stream().collect(
+                Collectors.toMap(
+                        MultiBucketsAggregation.Bucket::getKeyAsString,
+                        bucket -> {
+                            Terms subTerm = bucket.getAggregations().get("value");
+                            if (subTerm.getBuckets() != null) {
+                                totalDocCounts[0] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 0 ? subBucket.getDocCount() : 0
+                                ).sum();
+                                totalDocCounts[1] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
+                                ).sum();
                             }
-                    ));
-        } catch (Exception e) {
-            logger.error("Parsing aggregations ", e);
-        }
-        return ret;
+                            return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
+                        }
+                )
+        );
     }
 
     @Override
