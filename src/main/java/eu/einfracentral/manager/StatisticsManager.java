@@ -69,15 +69,15 @@ public class StatisticsManager implements StatisticsService {
                 .get("months");
     }
 
-    private QueryBuilder getEventQueryBuilder(String serviceId, String typeOf) {
+    private QueryBuilder getEventQueryBuilder(String serviceId, String eventType) {
         Date date = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(date);
         c.roll(Calendar.MONTH, false);
         return QueryBuilders.boolQuery()
-                            .filter(QueryBuilders.termsQuery("service_id", serviceId))
+                            .filter(QueryBuilders.termsQuery("service", serviceId))
                             .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(new Date().getTime()))
-                            .filter(QueryBuilders.termsQuery("type", typeOf));
+                            .filter(QueryBuilders.termsQuery("type", eventType));
     }
 
     @Override
