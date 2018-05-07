@@ -31,9 +31,16 @@ public class AnalyticsService {
     }
 
     private JsonNode getAnalyticsForLabel(String label) {
-        String contents = getURL(String.format(visits, label));
-        JsonNode ret = parse(contents);
-        return ret;
+        return parse(getURL(String.format(visits, label)));
+    }
+
+    private static JsonNode parse(String json) {
+        try {
+            return new ObjectMapper(new JsonFactory()).readTree(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static String getURL(String url) {
@@ -47,14 +54,5 @@ public class AnalyticsService {
             e.printStackTrace();
         }
         return ret.toString();
-    }
-
-    private static JsonNode parse(String json) {
-        try {
-            return new ObjectMapper(new JsonFactory()).readTree(json);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
