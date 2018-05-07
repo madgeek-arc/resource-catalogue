@@ -9,7 +9,7 @@
     },
     {
       "multivalued": false,
-      "name": "score",
+      "name": "value",
       "path": "//*[local-name()='value']/text()",
       "type": "java.lang.Integer",
       "primaryKey": false
@@ -23,9 +23,9 @@
     },
     {
       "multivalued": false,
-      "name": "service_id",
+      "name": "service",
       "path": "//*[local-name()='service']/text()",
-      "type": "java.lang.Integer",
+      "type": "java.lang.String",
       "primaryKey": false
     },
     {
@@ -37,9 +37,9 @@
     },
     {
       "multivalued": false,
-      "name": "user_id",
+      "name": "user",
       "path": "//*[local-name()='user']/text()",
-      "type": "java.lang.Integer",
+      "type": "java.lang.String",
       "primaryKey": false
     }
   ],
