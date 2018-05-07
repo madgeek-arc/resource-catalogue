@@ -6,7 +6,6 @@ import eu.einfracentral.service.*;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.*;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @org.springframework.stereotype.Service("statisticsService")
 public class StatisticsManager implements StatisticsService {
-    private static Logger logger = LogManager.getLogger(StatisticsManager.class);
     @Autowired
     private ElasticConfiguration elastic;
     @Autowired
