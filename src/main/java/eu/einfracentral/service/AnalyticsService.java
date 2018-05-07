@@ -6,6 +6,7 @@ import eu.einfracentral.config.ApplicationConfig;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.*;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,13 @@ public class AnalyticsService {
     }
 
     public Map<String, Integer> getVisitsForLabel(String label) {
-        Map<String, Integer> ret = new HashMap<>();
-        getAnalyticsForLabel(label).fields().forEachRemaining(dayStats -> {
-            ret.put(dayStats.getKey(), dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0);
-        });
-        return ret;
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label).fields(), Spliterator.NONNULL), false).collect(
+                Collectors.toMap(
+                        Map.Entry::getKey,
+                        dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
+                )
+        );
     }
 
     private JsonNode getAnalyticsForLabel(String label) {
