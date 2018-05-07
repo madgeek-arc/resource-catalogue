@@ -175,15 +175,10 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> pVisits(String id) {
-        Map<String, Integer> ret = new HashMap<>();
-        providerService.getServices(id).stream().forEach(s -> {
-            Map<String, Integer> visits = visits(s.getId());
-            visits.forEach((k, v) -> {
-                ret.putIfAbsent(k, 0);
-                ret.put(k, ret.get(k) + v);
-            });
-        });
-        return ret;
+        return providerService.getServices(id)
+                              .stream()
+                              .flatMap(s -> visits(s.getId()).entrySet().stream())
+                              .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
 
     @Override
