@@ -1,22 +1,21 @@
 package eu.einfracentral.manager;
 
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.*;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.*;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.aggregations.*;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.histogram.*;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.pipeline.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service("statisticsService")
+@org.springframework.stereotype.Service("statisticsService")
 public class StatisticsManager implements StatisticsService {
     private static Logger logger = LogManager.getLogger(StatisticsManager.class);
     @Autowired
@@ -86,8 +85,8 @@ public class StatisticsManager implements StatisticsService {
     }
 
     private Map<String, Integer> counts(String id, String eventType) {
-        return histogram(id, eventType, null).getBuckets().stream().collect(
-                Collectors.toMap(e -> e.getKeyAsString(), e -> (int) e.getDocCount())
+        return histogram(id, eventType).getBuckets().stream().collect(
+                Collectors.toMap(MultiBucketsAggregation.Bucket::getKeyAsString, e -> (int) e.getDocCount())
         );
     }
 
