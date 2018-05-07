@@ -51,22 +51,22 @@ public class StatisticsManager implements StatisticsService {
         ));
     }
 
-    private InternalDateHistogram histogram(String id, String eventType, PipelineAggregationBuilder optional) {
-        AggregationBuilder ab = AggregationBuilders
-                .dateHistogram("months")
-                .field("instant")
-                .dateHistogramInterval(DateHistogramInterval.DAY)
-                .format("yyyy-MM-dd")
-                .subAggregation(AggregationBuilders.terms("score").field("score"));
-        if (optional != null) {
-            ab = ab.subAggregation(optional);
-        }
-        SearchRequestBuilder srb = elastic.client()
-                                          .prepareSearch("event")
-                                          .setTypes("general")
-                                          .setQuery(getEventQueryBuilder(id, eventType))
-                                          .addAggregation(ab);
-        return srb.execute().actionGet().getAggregations().get("months");
+    private InternalDateHistogram histogram(String id, String eventType) {
+        return elastic
+                .client()
+                .prepareSearch("event")
+                .setTypes("general")
+                .setQuery(getEventQueryBuilder(id, eventType))
+                .addAggregation(AggregationBuilders
+                                        .dateHistogram("months")
+                                        .field("instant")
+                                        .dateHistogramInterval(DateHistogramInterval.DAY)
+                                        .format("yyyy-MM-dd")
+                                        .subAggregation(AggregationBuilders.terms("value").field("value"))
+                ).execute()
+                .actionGet()
+                .getAggregations()
+                .get("months");
     }
 
     private QueryBuilder getEventQueryBuilder(String serviceId, String typeOf) {
