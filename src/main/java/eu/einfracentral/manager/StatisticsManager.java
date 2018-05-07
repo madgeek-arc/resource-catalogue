@@ -28,20 +28,27 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> ratings(String id) {
-        Map<String, Float> ret = new HashMap<>();
-        try {
-            List<Histogram.Bucket> buckets = histogram(id,
-                                                       "RATING",
-                                                       PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating")).getBuckets();
-            long totalDocCount = buckets.stream().mapToLong(MultiBucketsAggregation.Bucket::getDocCount).sum();
-            ret = buckets.stream().collect(Collectors.toMap(
-                    MultiBucketsAggregation.Bucket::getKeyAsString,
-                    e -> Float.parseFloat(((SimpleValue) e.getAggregations().get("cum_sum")).getValueAsString()) / totalDocCount
-            ));
-        } catch (Exception e) {
-            logger.error("Parsing aggregations ", e);
-        }
-        return ret;
+        List<Histogram.Bucket> buckets = ((InternalDateHistogram) (elastic
+                .client()
+                .prepareSearch("event")
+                .setTypes("general")
+                .setQuery(getEventQueryBuilder(id, "RATING"))
+                .addAggregation(AggregationBuilders.dateHistogram("months")
+                                                   .field("instant")
+                                                   .dateHistogramInterval(DateHistogramInterval.DAY)
+                                                   .format("yyyy-MM-dd")
+                                                   .subAggregation(AggregationBuilders.sum("rating").field("value"))
+                                                   .subAggregation(PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating"))
+                ).execute()
+                .actionGet()
+                .getAggregations()
+                .get("months")))
+                .getBuckets();
+        long totalDocCount = buckets.stream().mapToLong(MultiBucketsAggregation.Bucket::getDocCount).sum();
+        return buckets.stream().collect(Collectors.toMap(
+                MultiBucketsAggregation.Bucket::getKeyAsString,
+                e -> Float.parseFloat(((SimpleValue) e.getAggregations().get("cum_sum")).getValueAsString()) / totalDocCount
+        ));
     }
 
     private InternalDateHistogram histogram(String id, String eventType, PipelineAggregationBuilder optional) {
