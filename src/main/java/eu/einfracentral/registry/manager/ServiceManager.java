@@ -31,6 +31,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         if (exists(service)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
+        ensureAddenda(service.getId()); //using ensure instead of add here, in case we were populated via a DB transfer
         return super.add(validate(service));
     }
 
