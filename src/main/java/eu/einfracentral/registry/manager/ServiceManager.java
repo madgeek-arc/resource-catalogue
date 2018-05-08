@@ -2,10 +2,9 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.service.*;
-import eu.openminted.registry.core.domain.Resource;
-import java.util.*;
-import java.util.concurrent.*;
+import eu.einfracentral.registry.service.ServiceService;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
@@ -35,13 +34,6 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         return super.add(validate(service));
     }
 
-    private Service fixVersion(Service service) {
-        if (service.getVersion() == null || service.getVersion().equals("")) {
-            service.setVersion("0");
-        }
-        return service;
-    }
-
     @Override
     public Service update(Service service) {
         service = validate(service);
@@ -49,6 +41,23 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         fixVersion(existingService); //remove this when it has ran for all services
         updateAddenda(service.getId());
         return service.getVersion().equals(existingService.getVersion()) ? super.update(service) : super.add(service);
+    }
+
+    private Addenda updateAddenda(String id) {
+        try {
+            Addenda ret = ensureAddenda(id);
+            ret.setModifiedAt(System.currentTimeMillis());
+            ret.setModifiedBy("pgl"); //get actual username somehow
+            return addendaManager.update(ret);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
+        }
+    }
+
+    @Override
+    public Service validate(Service service) {
+        return fixVersion(service);
     }
 
     private Addenda ensureAddenda(String id) {
@@ -74,20 +83,10 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         }
     }
 
-    private Addenda updateAddenda(String id) {
-        try {
-            Addenda ret = ensureAddenda(id);
-            ret.setModifiedAt(System.currentTimeMillis());
-            ret.setModifiedBy("pgl"); //get actual username somehow
-            return addendaManager.update(ret);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
+    private Service fixVersion(Service service) {
+        if (service.getVersion() == null || service.getVersion().equals("")) {
+            service.setVersion("0");
         }
-    }
-
-    @Override
-    public Service validate(Service service) {
-        return fixVersion(service);
+        return service;
     }
 }
