@@ -52,19 +52,12 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     }
 
     private Addenda ensureAddenda(String id) {
-        Addenda ret = null;
-        Resource existingAddendaResource = addendaManager.where("service", id, false);
-        if (existingAddendaResource != null) {
-            try {
-                ret = parserPool.deserialize(existingAddendaResource, Addenda.class).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                ret = makeAddenda(id);
-            }
-        } else {
-            ret = makeAddenda(id);
+        try {
+            return parserPool.deserialize(addendaManager.where("service", id, true), Addenda.class).get();
+        } catch (InterruptedException | ExecutionException | ResourceException e) {
+            e.printStackTrace();
+            return addAddenda(id);
         }
-        return ret;
     }
 
     private Addenda makeAddenda(String id) {
