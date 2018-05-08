@@ -46,25 +46,16 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     public Service update(Service service) {
         service = validate(service);
         Service existingService = get(service.getId());
-        Addenda addenda = ensureAddenda(service.getId());
         fixVersion(existingService); //remove this when it has ran for all services
         if (service.getVersion().equals(existingService.getVersion())) {
-            addenda.setModifiedAt(System.currentTimeMillis());
-            addenda.setModifiedBy("pgl");
             super.update(service);
         } else {
-            addenda.setRegisteredAt(System.currentTimeMillis());
-            addenda.setRegisteredBy("pgl");
             existingService.setId(UUID.randomUUID().toString());
             super.update(existingService);
             super.add(service);
         }
-        try {
-            addendaManager.update(addenda);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
         return service;
+        updateAddenda(service.getId());
     }
 
     private Addenda ensureAddenda(String id) {
@@ -93,6 +84,17 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             e.printStackTrace();
         }
         return ret;
+    }
+
+    private void updateAddenda(String id) {
+        try {
+            Addenda addenda = ensureAddenda(id);
+            addenda.setModifiedAt(System.currentTimeMillis());
+            addenda.setModifiedBy("pgl");
+            addendaManager.update(addenda);
+        } catch (Throwable e) {
+            e.printStackTrace(); //addenda are thoroughly optional, and should not interfere with normal add/update operations
+        }
     }
 
     @Override
