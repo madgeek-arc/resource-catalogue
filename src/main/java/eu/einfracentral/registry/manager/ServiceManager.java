@@ -50,8 +50,6 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         if (service.getVersion().equals(existingService.getVersion())) {
             super.update(service);
         } else {
-            existingService.setId(UUID.randomUUID().toString());
-            super.update(existingService);
             super.add(service);
         }
         return service;
