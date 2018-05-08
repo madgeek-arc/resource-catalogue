@@ -74,14 +74,15 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         }
     }
 
-    private void updateAddenda(String id) {
+    private Addenda updateAddenda(String id) {
         try {
-            Addenda addenda = ensureAddenda(id);
-            addenda.setModifiedAt(System.currentTimeMillis());
-            addenda.setModifiedBy("pgl");
-            addendaManager.update(addenda);
+            Addenda ret = ensureAddenda(id);
+            ret.setModifiedAt(System.currentTimeMillis());
+            ret.setModifiedBy("pgl"); //get actual username somehow
+            return addendaManager.update(ret);
         } catch (Throwable e) {
-            e.printStackTrace(); //addenda are thoroughly optional, and should not interfere with normal add/update operations
+            e.printStackTrace();
+            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
         }
     }
 
