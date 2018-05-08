@@ -45,15 +45,16 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     @Override
     public Service update(Service service) {
         service = validate(service);
+        Service ret;
         Service existingService = get(service.getId());
         fixVersion(existingService); //remove this when it has ran for all services
         if (service.getVersion().equals(existingService.getVersion())) {
-            super.update(service);
+            ret = super.update(service);
         } else {
-            super.add(service);
+            ret = super.add(service);
         }
-        return service;
         updateAddenda(service.getId());
+        return ret;
     }
 
     private Addenda ensureAddenda(String id) {
