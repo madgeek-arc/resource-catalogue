@@ -46,10 +46,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (this.eu != null && this.eu.length > 0) {
-                return true;
-            }
-            return false;
+            return this.eu != null && this.eu.length > 0;
         });
     }
 
