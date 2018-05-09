@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class RestoreController {
     @Autowired
-    RestoreService restoreService;
+    private RestoreService restoreService;
 
     @RequestMapping(path = "restore", method = RequestMethod.POST)
     public void restoreAll(@RequestParam("file") MultipartFile file) {

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class DumpController {
     @Autowired
-    DumpService dumpService;
+    private DumpService dumpService;
 
     @RequestMapping(path = "dump", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void dumpAll(@RequestParam(value = "types", required = false, defaultValue = "") String[] types, HttpServletResponse response) {
