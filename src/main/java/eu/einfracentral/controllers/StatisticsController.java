@@ -21,15 +21,15 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.visits(id), HttpStatus.OK);
     }
 
-    @RequestMapping(path = "service/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> externals(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(statisticsService.externals(id), HttpStatus.OK);
-    }
-
     @ApiOperation(value = "Returns the time series of service page visits in the provider's site")
     @RequestMapping(path = "service/orders/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> externalsAlias(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return externals(id, jwt);
+    }
+
+    @RequestMapping(path = "service/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Map<String, Integer>> externals(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(statisticsService.externals(id), HttpStatus.OK);
     }
 
     @RequestMapping(path = "service/internals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

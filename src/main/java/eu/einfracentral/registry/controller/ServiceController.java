@@ -72,7 +72,7 @@ public class ServiceController extends ResourceController<Service> {
     }
 
     @ApiOperation(value = "Get a past version of a specific service providing the service ID and a version identifier")
-    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"} , method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return super.versions(id, version, jwt);
     }

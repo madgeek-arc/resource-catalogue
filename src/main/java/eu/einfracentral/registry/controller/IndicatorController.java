@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.controller;
-import eu.einfracentral.domain.*;
+
+import eu.einfracentral.domain.Indicator;
 import eu.einfracentral.registry.service.IndicatorService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.ApiOperation;

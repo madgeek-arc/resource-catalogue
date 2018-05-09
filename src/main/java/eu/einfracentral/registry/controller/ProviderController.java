@@ -20,22 +20,16 @@ public class ProviderController extends ResourceController<Provider> {
         super(service);
     }
 
-    @ApiOperation(value = "Updates provider info")
-    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return super.update(provider, jwt);
-    }
-
     @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.get(id, jwt);
     }
 
-    @ApiOperation(value = "Get a list of services offered by a provider")
-    @RequestMapping(path = "{id}/services", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(((ProviderService)service).getServices(id), HttpStatus.OK);
+    @ApiOperation(value = "Updates provider info")
+    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+        return super.update(provider, jwt);
     }
 
     @ApiOperation(value = "Get a list of all service providers in the catalogue")
@@ -47,5 +41,11 @@ public class ProviderController extends ResourceController<Provider> {
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return super.getAll(allRequestParams, jwt);
+    }
+
+    @ApiOperation(value = "Get a list of services offered by a provider")
+    @RequestMapping(path = "{id}/services", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(((ProviderService) service).getServices(id), HttpStatus.OK);
     }
 }
