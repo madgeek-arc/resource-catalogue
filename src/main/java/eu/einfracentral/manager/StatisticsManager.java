@@ -13,8 +13,9 @@ import org.elasticsearch.search.aggregations.bucket.histogram.*;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.pipeline.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@org.springframework.stereotype.Service
+@Component
 public class StatisticsManager implements StatisticsService {
     @Autowired
     private ElasticConfiguration elastic;

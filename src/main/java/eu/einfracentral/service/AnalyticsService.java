@@ -9,9 +9,9 @@ import java.util.*;
 import java.util.stream.*;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class AnalyticsService {
     @Autowired
     private ApplicationConfig config;

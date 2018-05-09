@@ -2,9 +2,9 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.registry.service.MeasurementService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class MeasurementManager extends ResourceManager<Measurement> implements MeasurementService {
     public MeasurementManager() {
         super(Measurement.class);

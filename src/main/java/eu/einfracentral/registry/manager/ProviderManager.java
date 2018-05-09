@@ -5,10 +5,10 @@ import eu.einfracentral.registry.service.*;
 import eu.openminted.registry.core.domain.FacetFilter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@org.springframework.stereotype.Service
+@Component
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService {
-
     @Autowired
     private ServiceService serviceService;
 

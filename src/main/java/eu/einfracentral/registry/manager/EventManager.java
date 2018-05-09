@@ -6,9 +6,9 @@ import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.Resource;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class EventManager extends ResourceManager<Event> implements EventService {
     public EventManager() {
         super(Event.class);

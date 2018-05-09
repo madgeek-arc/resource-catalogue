@@ -6,9 +6,9 @@ import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class MailService {
     private Session session;
     @Autowired

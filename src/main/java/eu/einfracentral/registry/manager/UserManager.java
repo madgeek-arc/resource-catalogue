@@ -16,9 +16,9 @@ import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @Configurable
 public class UserManager extends ResourceManager<User> implements UserService {
     @Autowired
