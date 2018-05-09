@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-@Service("eventService")
+@Service
 public class EventManager extends ResourceManager<Event> implements EventService {
     public EventManager() {
         super(Event.class);

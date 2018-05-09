@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
-@Service("vocabularyService")
+@Service
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private String[] euURLs = {"https://restcountries.eu/rest/v2/regionalbloc/EU?fields=alpha2Code"};
     private String[] eu;

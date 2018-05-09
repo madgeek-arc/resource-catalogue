@@ -8,7 +8,7 @@ import javax.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("mailService")
+@Service
 public class MailService {
     private Session session;
     @Autowired

@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-@org.springframework.stereotype.Service("serviceService")
+@org.springframework.stereotype.Service
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
     @Autowired
     private AddendaManager addendaManager;

@@ -4,7 +4,7 @@ import eu.einfracentral.domain.Addenda;
 import eu.einfracentral.registry.service.AddendaService;
 import org.springframework.stereotype.Service;
 
-@Service("addendaService")
+@Service
 public class AddendaManager extends ResourceManager<Addenda> implements AddendaService {
     public AddendaManager() {
         super(Addenda.class);

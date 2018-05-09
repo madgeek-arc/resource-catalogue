@@ -14,7 +14,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.pipeline.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@org.springframework.stereotype.Service("statisticsService")
+@org.springframework.stereotype.Service
 public class StatisticsManager implements StatisticsService {
     @Autowired
     private ElasticConfiguration elastic;

@@ -4,7 +4,7 @@ import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.registry.service.MeasurementService;
 import org.springframework.stereotype.Service;
 
-@Service("measurementService")
+@Service
 public class MeasurementManager extends ResourceManager<Measurement> implements MeasurementService {
     public MeasurementManager() {
         super(Measurement.class);

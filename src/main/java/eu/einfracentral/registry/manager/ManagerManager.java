@@ -4,7 +4,7 @@ import eu.einfracentral.domain.Manager;
 import eu.einfracentral.registry.service.ManagerService;
 import org.springframework.stereotype.Service;
 
-@Service("managerService")
+@Service
 public class ManagerManager extends ResourceManager<Manager> implements ManagerService {
     public ManagerManager() {
         super(Manager.class);

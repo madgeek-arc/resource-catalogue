@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-@Service("userService")
+@Service
 @Configurable
 public class UserManager extends ResourceManager<User> implements UserService {
     @Autowired
