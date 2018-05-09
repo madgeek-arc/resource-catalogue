@@ -1,9 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.User;
-import org.springframework.stereotype.Service;
 
-@Service("userService")
 public interface UserService extends ResourceService<User> {
     User activate(String id);
     User reset(User user);

@@ -1,8 +1,6 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.*;
-import org.springframework.stereotype.Service;
+import eu.einfracentral.domain.Measurement;
 
-@Service("measurementService")
 public interface MeasurementService extends ResourceService<Measurement> {
 }
