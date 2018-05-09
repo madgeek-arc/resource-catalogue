@@ -4,7 +4,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
-@ComponentScan
+@ComponentScan(basePackages = {"eu.openminted.registry.core", "eu.einfracentral"})
 @EnableWebMvc
 public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
     @Override
