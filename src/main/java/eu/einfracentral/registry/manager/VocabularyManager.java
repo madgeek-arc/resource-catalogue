@@ -33,6 +33,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     @PostConstruct
     private void fetchEU() {
+        //do not be fooled; this code only supports a specific type of rest data, and it's outside its scope for now to support any more
         Stream.of(euURLs).anyMatch(url -> {
             try {
                 HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
