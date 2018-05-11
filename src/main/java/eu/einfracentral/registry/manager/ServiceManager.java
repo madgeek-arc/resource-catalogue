@@ -52,6 +52,33 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         return validateVocabularies(fixVersion(service));
     }
 
+    //yes, this is foreign key logic right here on the application
+    private Service validateVocabularies(Service service) {
+        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
+                Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
+                )
+        );
+        if (!validVocabularies.get("Category").contains(service.getCategory())) {
+            service.setCategory(null);
+        }
+        if (!validVocabularies.get("Place").containsAll(service.getPlaces())) {
+            service.setPlaces(null);
+        }
+        if (!validVocabularies.get("Language").containsAll(service.getLanguages())) {
+            service.setLanguages(null);
+        }
+        if (!validVocabularies.get("LifeCycleStatus").contains(service.getLifeCycleStatus())) {
+            service.setLifeCycleStatus(null);
+        }
+        if (!validVocabularies.get("Subcategory").contains(service.getSubcategory())) {
+            service.setSubcategory(null);
+        }
+        if (!validVocabularies.get("TRL").contains(service.getTrl())) {
+            service.setTrl(null);
+        }
+        return service;
     }
 
     private Addenda updateAddenda(String id) {
