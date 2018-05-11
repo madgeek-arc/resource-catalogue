@@ -47,7 +47,7 @@
     {
       "multivalued": false,
       "name": "lifeCycleStatus",
-      "label": "Phase",
+      "label": "Lifecycle Status",
       "path": "//*[local-name()='lifeCycleStatus']/text()",
       "type": "java.lang.String"
     },
