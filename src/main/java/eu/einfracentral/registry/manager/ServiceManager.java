@@ -42,7 +42,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         Service existingService = get(service.getId());
         fixVersion(existingService); //remove this when it has ran for all services
         updateAddenda(service.getId());
-        return service.getVersion().equals(existingService.getVersion()) ? super.update(service) : super.add(service);
+        return service.getVersion().equals(existingService.getVersion()) ? super.update(service) : add(service);
     @Override
     public Service validate(Service service) {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
