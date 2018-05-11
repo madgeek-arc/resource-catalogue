@@ -3,8 +3,9 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
     @Autowired
     private AddendaManager addendaManager;
+    @Autowired
+    private VocabularyManager vocabularyManager;
 
     public ServiceManager() {
         super(Service.class);
