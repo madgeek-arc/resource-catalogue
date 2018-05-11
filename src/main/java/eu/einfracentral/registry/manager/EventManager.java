@@ -18,6 +18,14 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     public Event add(Event event) {
+        //this is to clean up the DB from diplastic events (the ones where userids were digits)
+        try {
+            Integer.parseInt(event.getUser());
+        } catch (NumberFormatException nfe) {
+            return event;
+        }
+        //so delete it when the DB is cleared
+
         event.setId(UUID.randomUUID().toString());
         return super.add(event);
     }
