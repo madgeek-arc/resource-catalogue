@@ -71,7 +71,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public Map<String, List<T>> getBy(String field) {
-        return groupBy(field).entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(),
+        return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                                                                            entry -> entry.getValue()
                                                                                          .stream()
                                                                                          .map(resource -> deserialize(whereCoreID(resource.getId())))
