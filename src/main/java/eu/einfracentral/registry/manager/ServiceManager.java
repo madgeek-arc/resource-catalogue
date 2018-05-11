@@ -43,6 +43,13 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         fixVersion(existingService); //remove this when it has ran for all services
         updateAddenda(service.getId());
         return service.getVersion().equals(existingService.getVersion()) ? super.update(service) : super.add(service);
+    @Override
+    public Service validate(Service service) {
+        //If we want to reject bad vocab ids instead of silently accept, here's where we do it
+        //just check if validateVocabularies did anything or not
+        return validateVocabularies(fixVersion(service));
+    }
+
     }
 
     private Addenda updateAddenda(String id) {
@@ -55,11 +62,6 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             e.printStackTrace();
             return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
         }
-    }
-
-    @Override
-    public Service validate(Service service) {
-        return fixVersion(service);
     }
 
     private Addenda ensureAddenda(String id) {
