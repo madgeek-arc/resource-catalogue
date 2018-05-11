@@ -63,6 +63,35 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
                         entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
                 )
         );
+
+        //From here, all the way to...
+        if (service.getCategory() != null && !service.getCategory().contains("-")) {
+            service.setCategory("Category-" + service.getCategory());
+        }
+        if (service.getLifeCycleStatus() != null && !service.getLifeCycleStatus().contains("-")) {
+            service.setLifeCycleStatus("LifeCycleStatus-" + service.getLifeCycleStatus());
+        }
+        if (service.getSubcategory() != null && !service.getSubcategory().contains("-")) {
+            service.setSubcategory("Subcategory-" + service.getSubcategory());
+        }
+        if (service.getTrl() != null && !service.getTrl().contains("-")) {
+            service.setTrl("TRL-" + service.getTrl());
+        }
+        if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
+            service.setPlaces(service.getPlaces()
+                                     .stream()
+                                     .map(place -> (place.contains("-") ? "" : "Place-") + place)
+                                     .collect(Collectors.toList()));
+        }
+        if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
+            service.setLanguages(service.getLanguages()
+                                        .stream()
+                                        .map(language -> (language.contains("-") ? "" : "Language-") + language)
+                                        .collect(Collectors.toList()));
+        }
+        //...here is logic for migrating our data to release schema; can safely delete after it's ran once
+
+        //whereas what follows here is logic for invalidating data based on whether or not they comply with existing ids
         if (!validVocabularies.get("Category").contains(service.getCategory())) {
             service.setCategory(null);
         }
