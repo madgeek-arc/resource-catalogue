@@ -28,6 +28,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public Service add(Service service) {
+        migrate(service);
         //TODO: id is null when service is added via frontend, so make sure to make one, based on provider
         if (!service.getId().contains(".")) {
             service.setId(java.util.UUID.randomUUID().toString());
@@ -55,16 +56,8 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         return validateVocabularies(fixVersion(service));
     }
 
-    //yes, this is foreign key logic right here on the application
-    private Service validateVocabularies(Service service) {
-        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
-                Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
-                )
-        );
-
-        //From here, all the way to...
+    //logic for migrating our data to release schema; can safely delete after it's ran once
+    private Service migrate(Service service) {
         if (service.getCategory() != null && !service.getCategory().contains("-")) {
             service.setCategory("Category-" + service.getCategory());
         }
@@ -78,28 +71,45 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             service.setTrl("TRL-" + service.getTrl());
         }
         if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
-            service.setPlaces(service.getPlaces()
-                                     .stream()
-                                     .map(place -> (place.contains("-") ? "" : "Place-") + place)
-                                     .collect(Collectors.toList()));
+            if (service.getPlaces() != null) {
+                service.setPlaces(service.getPlaces()
+                                         .stream()
+                                         .map(place -> (place.contains("-") ? "" : "Place-") + place)
+                                         .collect(Collectors.toList()));
+            }
         }
         if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
-            service.setLanguages(service.getLanguages()
-                                        .stream()
-                                        .map(language -> (language.contains("-") ? "" : "Language-") + language)
-                                        .collect(Collectors.toList()));
+            if (service.getLanguages() != null) {
+                service.setLanguages(service.getLanguages()
+                                            .stream()
+                                            .map(language -> (language.contains("-") ? "" : "Language-") + language)
+                                            .collect(Collectors.toList()));
+            }
         }
-        //...here is logic for migrating our data to release schema; can safely delete after it's ran once
+        return service;
+    }
 
-        //whereas what follows here is logic for invalidating data based on whether or not they comply with existing ids
+    //yes, this is foreign key logic right here on the application
+    private Service validateVocabularies(Service service) {
+        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
+                Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
+                )
+        );
+        //logic for invalidating data based on whether or not they comply with existing ids
         if (!validVocabularies.get("Category").contains(service.getCategory())) {
             service.setCategory(null);
         }
-        if (!validVocabularies.get("Place").containsAll(service.getPlaces())) {
-            service.setPlaces(null);
+        if (service.getPlaces() != null) {
+            if (!validVocabularies.get("Place").containsAll(service.getPlaces())) {
+                service.setPlaces(null);
+            }
         }
-        if (!validVocabularies.get("Language").containsAll(service.getLanguages())) {
-            service.setLanguages(null);
+        if (service.getLanguages() != null) {
+            if (!validVocabularies.get("Language").containsAll(service.getLanguages())) {
+                service.setLanguages(null);
+            }
         }
         if (!validVocabularies.get("LifeCycleStatus").contains(service.getLifeCycleStatus())) {
             service.setLifeCycleStatus(null);
