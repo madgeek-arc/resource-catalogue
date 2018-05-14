@@ -37,7 +37,7 @@
     },
     {
       "multivalued": false,
-      "name": "user",
+      "name": "event_user",
       "path": "//*[local-name()='user']/text()",
       "type": "java.lang.String",
       "primaryKey": false
