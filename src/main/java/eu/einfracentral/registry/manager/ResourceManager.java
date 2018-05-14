@@ -134,6 +134,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     protected Map<String, List<Resource>> groupBy(String field) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceType.getName());
+        ff.setQuantity(1000);
         return searchService.searchByCategory(ff, field);
     }
 
