@@ -20,7 +20,12 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     @ApiOperation(value = "Returns the list of EU countries.")
     @RequestMapping(path = "getEU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String[]> getEU() {
-        return new ResponseEntity<>(((VocabularyService) service).getEU(), HttpStatus.OK);
+        return new ResponseEntity<>(((VocabularyService) service).getRegion("EU"), HttpStatus.OK);
+    }
+
+    @RequestMapping(path = "getWW", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<String[]> getWW() {
+        return new ResponseEntity<>(((VocabularyService) service).getRegion("WW"), HttpStatus.OK);
     }
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
