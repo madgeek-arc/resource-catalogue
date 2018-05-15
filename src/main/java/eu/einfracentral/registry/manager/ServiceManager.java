@@ -56,36 +56,8 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         return validateVocabularies(fixVersion(service));
     }
 
-    //logic for migrating our data to release schema; can safely delete after it's ran once
+    //logic for migrating our data to release schema; can be a no-op when outside of migratory period
     private Service migrate(Service service) {
-        if (service.getCategory() != null && !service.getCategory().contains("-")) {
-            service.setCategory("Category-" + service.getCategory());
-        }
-        if (service.getLifeCycleStatus() != null && !service.getLifeCycleStatus().contains("-")) {
-            service.setLifeCycleStatus("LifeCycleStatus-" + service.getLifeCycleStatus());
-        }
-        if (service.getSubcategory() != null && !service.getSubcategory().contains("-")) {
-            service.setSubcategory("Subcategory-" + service.getSubcategory());
-        }
-        if (service.getTrl() != null && !service.getTrl().contains("-")) {
-            service.setTrl("TRL-" + service.getTrl());
-        }
-        if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
-            if (service.getPlaces() != null) {
-                service.setPlaces(service.getPlaces()
-                                         .stream()
-                                         .map(place -> (place.contains("-") ? "" : "Place-") + place)
-                                         .collect(Collectors.toList()));
-            }
-        }
-        if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
-            if (service.getLanguages() != null) {
-                service.setLanguages(service.getLanguages()
-                                            .stream()
-                                            .map(language -> (language.contains("-") ? "" : "Language-") + language)
-                                            .collect(Collectors.toList()));
-            }
-        }
         return service;
     }
 
