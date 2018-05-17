@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -54,6 +55,28 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
         return validateVocabularies(fixVersion(service));
+    }
+
+    private Service fixCatsAndSubcats(Service s) {
+        if (s.getCategory() == null) {
+            s.setCategory("Category-Other");
+        }
+        if (s.getSubcategory() == null) {
+            s.setSubcategory("Subcategory-Other");
+        }
+        return super.update(s);
+    }
+
+    @Override
+    public List<Service> fixCatsAndSubcats() {
+        FacetFilter ff = new FacetFilter();
+        ff.setFrom(0);
+        ff.setQuantity(1000);
+        return getAll(ff).getResults()
+                         .stream()
+                         .filter(s -> s.getCategory() == null || s.getSubcategory() == null)
+                         .map(this::fixCatsAndSubcats)
+                         .collect(Collectors.toList());
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
