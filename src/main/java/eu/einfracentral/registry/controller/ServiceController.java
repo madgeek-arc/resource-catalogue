@@ -76,4 +76,9 @@ public class ServiceController extends ResourceController<Service> {
     public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return super.versions(id, version, jwt);
     }
+
+    @RequestMapping(path = "fixCatsAndSubcats", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<Service>> fixCatsAndSubcats(@ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return new ResponseEntity<>(((ServiceService) service).fixCatsAndSubcats(), HttpStatus.OK);
+    }
 }
