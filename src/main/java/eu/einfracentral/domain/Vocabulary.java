@@ -14,7 +14,7 @@ public class Vocabulary implements Identifiable {
     @XmlElement
     private String parent;
     @XmlElement
-    private String uri;
+    private String[] extra;
 
     @Override
     public String getId() {
@@ -50,11 +50,11 @@ public class Vocabulary implements Identifiable {
         this.parent = parent;
     }
 
-    public String getUri() {
-        return uri;
+    public String[] getExtra() {
+        return extra;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setExtra(String[] extra) {
+        this.extra = extra;
     }
 }
