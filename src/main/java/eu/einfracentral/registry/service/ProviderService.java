@@ -1,8 +1,8 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.*;
 import java.util.List;
 
 public interface ProviderService extends ResourceService<Provider> {
-    List<eu.einfracentral.domain.Service> getServices(String id);
+    List<Service> getServices(String id);
 }
