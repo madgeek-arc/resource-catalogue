@@ -13,6 +13,8 @@ public class Vocabulary implements Identifiable {
     private String type;
     @XmlElement
     private String parent;
+    @XmlElement
+    private String uri;
 
     @Override
     public String getId() {
@@ -46,5 +48,13 @@ public class Vocabulary implements Identifiable {
 
     public void setParent(String parent) {
         this.parent = parent;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }
