@@ -44,12 +44,6 @@ public class UserController extends ResourceController<User> {
     }
 
     @CrossOrigin
-    @RequestMapping(path = "addFavourite", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<User> addFavourite(@RequestParam String userID, @RequestParam String serviceID) {
-        return new ResponseEntity<>(((UserService) service).addFavourite(userID, serviceID), HttpStatus.OK);
-    }
-
-    @CrossOrigin
     @ApiOperation(value = "Issues the jwt")
     @RequestMapping(path = "login", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<User> login(@RequestBody User credentials, HttpServletResponse res) {
