@@ -121,21 +121,6 @@ public class UserManager extends ResourceManager<User> implements UserService {
         return strip(deserialize(where("email", email, true)));
     }
 
-    @Override
-    public User addFavourite(String userID, String serviceID) {
-        return get(userID); //TODO: implement this
-    }
-
-    @Override
-    public User get(String id) {
-        return strip(unsafeGet(id));
-    }
-
-    @Override
-    public Browsing<User> getAll(FacetFilter ff) {
-        return new Browsing<>(0, 0, 0, new ArrayList<User>(), new ArrayList<>());
-    }
-
     private User hashUser(User user) {
         final Random r = new SecureRandom();
         byte[] salt = new byte[8];
@@ -170,6 +155,16 @@ public class UserManager extends ResourceManager<User> implements UserService {
         user.setSalt(new byte[0]);
         user.setIterationCount(0);
         return user;
+    }
+
+    @Override
+    public User get(String id) {
+        return strip(unsafeGet(id));
+    }
+
+    @Override
+    public Browsing<User> getAll(FacetFilter ff) {
+        return new Browsing<>(0, 0, 0, new ArrayList<User>(), new ArrayList<>());
     }
 
     @Override
