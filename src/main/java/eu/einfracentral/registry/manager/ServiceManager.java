@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
+import eu.openminted.registry.core.domain.Resource;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -46,7 +47,17 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         Service existingService = get(service.getId());
         fixVersion(existingService); //remove this when it has ran for all services
         updateAddenda(service.getId());
-        return service.getVersion().equals(existingService.getVersion()) ? super.update(service) : add(service);
+        Service ret;
+        if (service.getVersion().equals(existingService.getVersion())) {
+            ret = super.update(service);
+        } else {
+            Resource existingResource = whereID(service.getId(), false);
+            existingService.setId(UUID.randomUUID().toString());
+            existingResource.setPayload(serialize(existingService));
+            resourceService.updateResource(existingResource);
+            ret = add(service);
+        }
+        return ret;
     }
 
     @Override
