@@ -52,7 +52,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             ret = super.update(service);
         } else {
             Resource existingResource = whereID(service.getId(), false);
-            existingService.setId(UUID.randomUUID().toString());
+            existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getVersion()));
             existingResource.setPayload(serialize(existingService));
             resourceService.updateResource(existingResource);
             ret = add(service);
