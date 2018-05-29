@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import java.util.List;
 import javax.xml.bind.annotation.*;
 
 @XmlType
@@ -13,8 +14,9 @@ public class Vocabulary implements Identifiable {
     private String type;
     @XmlElement
     private String parent;
-    @XmlElement
-    private String[] extra;
+    @XmlElementWrapper(name = "extras")
+    @XmlElement(name = "extra")
+    private List<String> extras;
 
     @Override
     public String getId() {
@@ -50,11 +52,11 @@ public class Vocabulary implements Identifiable {
         this.parent = parent;
     }
 
-    public String[] getExtra() {
-        return extra;
+    public List<String> getExtras() {
+        return extras;
     }
 
-    public void setExtra(String[] extra) {
-        this.extra = extra;
+    public void setExtras(List<String> extras) {
+        this.extras = extras;
     }
 }
