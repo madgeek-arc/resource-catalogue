@@ -31,8 +31,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     public Service add(Service service) {
         migrate(service);
         //TODO: id is null when service is added via frontend, so make sure to make one, based on provider
-        if (service == null) {
-            service = new Service();
+        if (service.getId() == null) {
             service.setId(java.util.UUID.randomUUID().toString());
         }
         if (!service.getId().contains(".")) {
