@@ -1,22 +1,41 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.core.ParserPool;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ServiceService;
+import eu.openminted.registry.core.domain.Facet;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
+
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
+
     @Autowired
     private AddendaManager addendaManager;
+
     @Autowired
     private VocabularyManager vocabularyManager;
+
+    @Autowired
+    private SearchService searchService;
+
+    @Autowired
+    ParserPool parserPool;
+
+    private Logger logger = Logger.getLogger(ServiceManager.class);
 
     public ServiceManager() {
         super(Service.class);
@@ -30,9 +49,12 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     @Override
     public Service add(Service service) {
         migrate(service);
-        //TODO: id is null when service is added via frontend, so make sure to make one, based on provider
+
         if (service.getId() == null) {
-            service.setId(java.util.UUID.randomUUID().toString());
+            String id = createServiceId(service);
+            service.setId(id);
+
+            logger.info("Created service with id: " + id);
         }
         if (!service.getId().contains(".")) {
             service.setId(java.util.UUID.randomUUID().toString());
@@ -149,5 +171,20 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             service.setVersion("0");
         }
         return service;
+    }
+
+    private String createServiceId(Service service) {
+        String id = "";
+
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setResourceType("service");
+
+        try {
+            List<Resource> services = searchService.search(facetFilter).getResults();
+            id = String.format("%s.%02d", service.getProviderName(), services.size()+1);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return id;
     }
 }
