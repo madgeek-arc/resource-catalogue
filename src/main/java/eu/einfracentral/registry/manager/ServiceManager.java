@@ -191,7 +191,6 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
                     provider += (prov + ".");
                 }
             }
-                provider = service.getProviders().get(0);
             id = String.format("%s%02d", provider, services.size()+1);
         } catch (UnknownHostException e) {
             e.printStackTrace();
