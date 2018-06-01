@@ -188,7 +188,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 //            List<Resource> services = searchService.search(facetFilter).getResults();
 
         List<Resource> services = searchService.cqlQuery("provider="+provider, "service", 1000, 0,
-                    "_id", SortOrder.ASC).getResults();
+                    "modification_date", SortOrder.DESC).getResults();
         if (providers.size() > 0) {
             provider = providers.get(0) + ".";
 //                provider = "";
