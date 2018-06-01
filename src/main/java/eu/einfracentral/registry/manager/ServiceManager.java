@@ -185,11 +185,12 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         try {
             List<Resource> services = searchService.search(facetFilter).getResults();
             if (providers.size() > 0) {
-                provider = "";
-                Collections.sort(providers);
-                for (String prov : providers) {
-                    provider += (prov + ".");
-                }
+                provider = providers.get(0) + ".";
+//                provider = "";
+//                Collections.sort(providers);
+//                for (String prov : providers) {
+//                    provider += (prov + ".");
+//                }
             }
             id = String.format("%s%02d", provider, services.size()+1);
         } catch (UnknownHostException e) {
