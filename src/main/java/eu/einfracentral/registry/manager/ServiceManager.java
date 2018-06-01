@@ -53,6 +53,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
         if (service.getId() == null) {
             String id = createServiceId(service);
             service.setId(id);
+            logger.info("Providers: " + service.getProviders());
 
             logger.info("Created service with id: " + id);
         }
@@ -175,13 +176,21 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     private String createServiceId(Service service) {
         String id = "";
+        String provider = null;
 
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setResourceType("service");
 
         try {
             List<Resource> services = searchService.search(facetFilter).getResults();
-            id = String.format("%s.%02d", service.getProviderName(), services.size()+1);
+            if (service.getProviders().size() > 0) {
+                provider = "";
+                for (String prov : service.getProviders()) {
+                    provider += prov + ".";
+                }
+            }
+                provider = service.getProviders().get(0);
+            id = String.format("%s%02d", provider, services.size()+1);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
