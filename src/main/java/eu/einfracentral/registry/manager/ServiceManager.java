@@ -57,9 +57,9 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
             logger.info("Created service with id: " + id);
         }
-        if (!service.getId().contains(".")) {
-            service.setId(java.util.UUID.randomUUID().toString());
-        }
+//        if (!service.getId().contains(".")) {
+//            service.setId(java.util.UUID.randomUUID().toString());
+//        }
         if (exists(service)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
@@ -177,16 +177,18 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     private String createServiceId(Service service) {
         String id = "";
         String provider = null;
+        List<String> providers = service.getProviders();
 
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setResourceType("service");
 
         try {
             List<Resource> services = searchService.search(facetFilter).getResults();
-            if (service.getProviders().size() > 0) {
+            if (providers.size() > 0) {
                 provider = "";
-                for (String prov : service.getProviders()) {
-                    provider += prov + ".";
+                Collections.sort(providers);
+                for (String prov : providers) {
+                    provider += (prov + ".");
                 }
             }
                 provider = service.getProviders().get(0);
