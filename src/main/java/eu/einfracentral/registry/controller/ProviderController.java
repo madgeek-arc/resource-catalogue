@@ -48,4 +48,16 @@ public class ProviderController extends ResourceController<Provider> {
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return new ResponseEntity<>(((ProviderService) service).getServices(id), HttpStatus.OK);
     }
+
+    @ApiOperation(value = "Get a featured service offered by a provider")
+    @RequestMapping(path = "{id}/featured", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
+        List<Service> services = ((ProviderService) service).getServices(id);
+        Service featuredService = null;
+        if (services.size() > 0) {
+            Random random = new Random();
+            featuredService = services.get(random.nextInt(services.size()));
+        }
+        return new ResponseEntity<>(featuredService, HttpStatus.OK);
+    }
 }
