@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.Addenda;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.ProviderService;
@@ -85,7 +86,7 @@ public class ServiceController extends ResourceController<Service> {
     }
 
     @ApiOperation(value = "Get all featured services")
-    @RequestMapping(path = "getFeaturedServices", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
         // TODO: return featured services (now it returns a random service for each provider)
         List<Provider> providers = providerService.getAll(new FacetFilter()).getResults();
@@ -99,5 +100,14 @@ public class ServiceController extends ResourceController<Service> {
             }
         }
         return new ResponseEntity<>(featuredServices, HttpStatus.OK);
+
+//        List<Service> featuredServices = new ArrayList<>();
+//        services.addAll(service.getAll(new FacetFilter()).getResults());
+//        for (Iterator<Service> iterator = services.iterator(); iterator.hasNext(); iterator.next()) {
+//            Service s = iterator.next();
+//            if () {
+//            }
+//        }
+//        return new ResponseEntity<>(featuredServices, HttpStatus.OK);
     }
 }
