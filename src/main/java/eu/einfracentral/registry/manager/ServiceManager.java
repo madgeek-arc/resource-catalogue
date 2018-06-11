@@ -178,7 +178,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
     private String createServiceId(Service service) {
         String id = "";
         String provider = service.getProviderName();
-        List<String> providers = service.getProviders();
+//        List<String> providers = service.getProviders();
 
 //        FacetFilter facetFilter = new FacetFilter();
 //        facetFilter.setResourceType("service");
@@ -187,21 +187,23 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 //        try {
 //            List<Resource> services = searchService.search(facetFilter).getResults();
 
-        List<Resource> services = searchService.cqlQuery("provider="+provider, "service", 1000, 0,
-                    "modification_date", SortOrder.DESC).getResults();
-        if (providers.size() > 0) {
-            provider = providers.get(0) + ".";
+//        List<Resource> services = searchService.cqlQuery("provider="+provider, "service", 1000, 0,
+//                    "modification_date", SortOrder.DESC).getResults();
+//        if (providers.size() > 0) {
+//            provider = providers.get(0) + ".";
 //                provider = "";
 //                Collections.sort(providers);
 //                for (String prov : providers) {
 //                    provider += (prov + ".");
 //                }
-        }
-        id = String.format("%s%02d", provider, services.size()+1);
+//        }
+//        id = String.format("%s%02d", provider, services.size()+1);
 
 //        } catch (UnknownHostException e) {
 //            e.printStackTrace();
 //        }
+
+        id = String.format("%s.%s", provider, service.getName().replaceAll(" ", "_").toLowerCase());
         return id;
     }
 }
