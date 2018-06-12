@@ -49,6 +49,7 @@ public class ProviderController extends ResourceController<Provider> {
         return new ResponseEntity<>(((ProviderService) service).getServices(id), HttpStatus.OK);
     }
 
+    @ApiIgnore // TODO enable in a future release
     @ApiOperation(value = "Get a featured service offered by a provider")
     @RequestMapping(path = "{id}/featured", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {

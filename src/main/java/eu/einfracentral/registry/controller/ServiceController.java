@@ -85,6 +85,7 @@ public class ServiceController extends ResourceController<Service> {
         return super.versions(id, version, jwt);
     }
 
+    @ApiIgnore // TODO enable in a future release
     @ApiOperation(value = "Get all featured services")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
