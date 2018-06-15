@@ -16,9 +16,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-@Component
+@org.springframework.stereotype.Service()
 public class InfraServiceManager extends ResourceManager<InfraService> {
 
     @Autowired
@@ -62,9 +63,9 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
         if (exists(infraService)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
-        Addenda addenda = createAddenda(infraService.getId(), "CREATED BY ???"); // TODO: find a way to retrieve user
+        Addenda addenda = createAddenda(infraService.getService().getProviderName()); // TODO: find a way to retrieve user
         infraService.setAddenda(addenda);
-//        validate(infraService.getService());
+//        validate(infraService.getService()); // FIXME: takes too long to finish
         return super.add(infraService);
     }
 
@@ -73,10 +74,12 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = get(infraService.getId());
 
-//        updateAddenda(infraService.getAddenda());
+        updateAddenda(infraService.getAddenda(), infraService.getService().getProviderName());
         InfraService ret;
         if (infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
-            ret = super.update(infraService);
+            // replace existing service with new
+            existingService.setService(infraService.getService());
+            ret = super.update(existingService);
         } else {
             Resource existingResource = whereID(infraService.getId(), false);
             existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getService().getVersion()));
@@ -88,11 +91,11 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
     }
 
 //    @Override
-//    public Service validate(Service service) {
-//        //If we want to reject bad vocab ids instead of silently accept, here's where we do it
-//        //just check if validateVocabularies did anything or not
-//        return validateVocabularies(fixVersion(service));
-//    }
+    public Service validate(Service service) {
+        //If we want to reject bad vocab ids instead of silently accept, here's where we do it
+        //just check if validateVocabularies did anything or not
+        return validateVocabularies(fixVersion(service));
+    }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
     private Service migrate(Service service) {
@@ -133,43 +136,40 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
         return service;
     }
 
-//    private Addenda updateAddenda(Addenda addenda) {
-//        try {
-//            Addenda ret = ensureAddenda(id);
-//            ret.setModifiedAt(System.currentTimeMillis());
-//            ret.setModifiedBy("pgl"); //get actual username somehow
-//            return addendaManager.update(ret);
-//        } catch (Throwable e) {
-//            e.printStackTrace();
-//            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
-//        }
-//    }
+    private Addenda updateAddenda(Addenda addenda, String registeredBy) {
+        try {
+            Addenda ret;
+            if (addenda == null) {
+                ret = createAddenda(registeredBy);
+            } else {
+                ret = addenda;
+            }
+//            Addenda ret = ensureAddenda(id); // TODO remove
+            ret.setModifiedAt(System.currentTimeMillis());
+            ret.setModifiedBy("pgl"); //get actual username somehow
+            return addendaManager.update(ret);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
+        }
+    }
 
-//    private Addenda ensureAddenda(String id) {
-//        try {
-//            return parserPool.deserialize(addendaManager.where("service", id, true), Addenda.class).get();
-//        } catch (InterruptedException | ExecutionException | ResourceException e) {
-//            e.printStackTrace();
-//            return createAddenda(id);
-//        }
-//    }
-
-    private Addenda createAddenda(String id, String registeredBy) {
+    private Addenda createAddenda(String registeredBy) {
         // TODO: probably remove 'serviceID' from addenda
         Addenda ret = new Addenda();
         ret.setId(UUID.randomUUID().toString());
-        ret.setService(id);
+//        ret.setService();
         ret.setRegisteredBy(registeredBy);
         ret.setRegisteredAt(System.currentTimeMillis());
         return ret;
     }
 
-//    private Service fixVersion(Service service) {
-//        if (service.getVersion() == null || service.getVersion().equals("")) {
-//            service.setVersion("0");
-//        }
-//        return service;
-//    }
+    private Service fixVersion(Service service) {
+        if (service.getVersion() == null || service.getVersion().equals("")) {
+            service.setVersion("0");
+        }
+        return service;
+    }
 
     private String createServiceId(Service service) {
         String provider = service.getProviderName();
