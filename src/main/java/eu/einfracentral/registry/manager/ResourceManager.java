@@ -110,10 +110,13 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         ).collect(Collectors.toList());
     }
 
+    @Deprecated
     protected List<Resource> multiWhereID(String id) {
         return multiWhere(String.format("%s_id", resourceType.getName()), id);
     }
 
+    @Deprecated
+    @SuppressWarnings("unchecked")
     protected List<Resource> multiWhere(String field, String value) {
         List<Resource> ret;
         try {
@@ -127,6 +130,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return ret;
     }
 
+    @Deprecated
     protected List<Resource> whereIDin(String... ids) {
         return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
     }
@@ -138,6 +142,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return searchService.searchByCategory(ff, field);
     }
 
+    @Deprecated
     protected Resource whereCoreID(String id) {
         return where("id", id, true);
     }
