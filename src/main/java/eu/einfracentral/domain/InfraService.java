@@ -49,6 +49,11 @@ public class InfraService implements Identifiable {
     public InfraService() {
     }
 
+    public InfraService(Service service) {
+        this.service = service;
+        this.id = service.getId();
+    }
+
     public InfraService(Service service, Addenda addenda, String id) {
         this.service = service;
         this.addenda = addenda;
