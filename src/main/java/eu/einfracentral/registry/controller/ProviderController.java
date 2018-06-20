@@ -32,7 +32,7 @@ public class ProviderController extends ResourceController<Provider> {
         return super.update(provider, jwt);
     }
 
-    @ApiOperation(value = "Get a list of all service providers in the catalogue")
+    @ApiOperation(value = "Get a list of all infraService providers in the catalogue")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
@@ -50,7 +50,7 @@ public class ProviderController extends ResourceController<Provider> {
     }
 
     @ApiIgnore // TODO enable in a future release
-    @ApiOperation(value = "Get a featured service offered by a provider")
+    @ApiOperation(value = "Get a featured infraService offered by a provider")
     @RequestMapping(path = "{id}/featured", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         List<Service> services = ((ProviderService) service).getServices(id);

@@ -3,7 +3,6 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.registry.manager.ResourceManager;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.Browsing;
@@ -24,7 +23,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ServiceController extends ResourceController<Service>{
 
     @Autowired
-    ResourceManager<InfraService> infraService;
+    ResourceService<InfraService> infraService;
 
     @Autowired
     ProviderService providerService;
@@ -34,32 +33,32 @@ public class ServiceController extends ResourceController<Service>{
         super(service);
     }
 
-    @ApiOperation(value = "Get the most current version of a specific service providing the service ID")
+    @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(service.get(id), HttpStatus.OK);
         //return super.get(id, jwt);
     }
 
     @CrossOrigin
-    @ApiOperation(value = "Adds the given service.")
+    @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> add(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         InfraService infraService = this.infraService.add(new InfraService(service));
-        return new ResponseEntity<>(infraService.getService(), HttpStatus.CREATED);
+        return new ResponseEntity<>(infraService, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the service assigned the given id with the given service, keeping a history of revisions.")
+    @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> update(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         InfraService infraService = this.infraService.update(new InfraService(service));
-        return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
+        return new ResponseEntity<>(infraService, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Validates the service without actually changing the respository")
+    @ApiOperation(value = "Validates the infraService without actually changing the respository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>(infraService.validate(new InfraService(service)).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.validate(new InfraService(service)), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
@@ -85,46 +84,46 @@ public class ServiceController extends ResourceController<Service>{
             facetFilter.setOrderBy(sort);
         }
         Browsing<InfraService> infraServices = infraService.getAll(facetFilter);
-        List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+        List<Service> services = infraServices.getResults().stream().map(service -> (Service) service).collect(Collectors.toList());
         // FIXME: probably needs fixing
         return ResponseEntity.ok(new Browsing<>(services.size(), 0, services.size()-1, services, infraServices.getFacets()));
     }
 
     @ApiOperation(value = "Get a list of services based on a set of IDs")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
     })
     @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return ResponseEntity.ok(
                 infraService.getSome(ids)
-                        .stream().map(InfraService::getService).collect(Collectors.toList()));
+                        .stream().map(service -> (Service) service).collect(Collectors.toList()));
     }
 
-    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get service organized in categories ")
+    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         Map<String, List<InfraService>> results = infraService.getBy(field);
         Map<String, List<Service>> serviceResults = new HashMap<>();
         for(Map.Entry<String, List<InfraService>> services : results.entrySet()) {
-            serviceResults.put(services.getKey(), services.getValue().stream().map(InfraService::getService).collect(Collectors.toList()));
+            serviceResults.put(services.getKey(), services.getValue().stream().map(service -> (Service) service).collect(Collectors.toList()));
         }
         return ResponseEntity.ok(serviceResults);
     }
 
-    @ApiOperation(value = "Get a past version of a specific service providing the service ID and a version identifier")
+    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
     @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return ResponseEntity.ok(
                 infraService.versions(id, version.toString())
-                        .stream().map(InfraService::getService).collect(Collectors.toList()));
+                        .stream().map(service -> (Service) service).collect(Collectors.toList()));
     }
 
     @ApiIgnore // TODO enable in a future release
     @ApiOperation(value = "Get all featured services")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
-        // TODO: return featured services (now it returns a random service for each provider)
+        // TODO: return featured services (now it returns a random infraService for each provider)
         List<Provider> providers = providerService.getAll(new FacetFilter()).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
@@ -138,7 +137,7 @@ public class ServiceController extends ResourceController<Service>{
         return new ResponseEntity<>(featuredServices, HttpStatus.OK);
 
 //        List<Service> featuredServices = new ArrayList<>();
-//        services.addAll(service.getAll(new FacetFilter()).getResults());
+//        services.addAll(infraService.getAll(new FacetFilter()).getResults());
 //        for (Iterator<Service> iterator = services.iterator(); iterator.hasNext(); iterator.next()) {
 //            Service s = iterator.next();
 //            if () {
