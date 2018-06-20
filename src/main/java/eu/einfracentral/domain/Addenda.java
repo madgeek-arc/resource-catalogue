@@ -5,43 +5,43 @@ import javax.xml.bind.annotation.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Addenda implements Identifiable {
-    @XmlElement
-    private String id;
-    @XmlElement(required = true)
-    private String service;
+public class Addenda { // implements Identifiable {
+//    @XmlElement
+//    private String id;
+//    @XmlElement(required = true)
+//    private String service;
     @XmlElement
     private List<Measurement<?>> performanceData;
     @XmlElement(defaultValue = "false")
     private boolean featured;
     @XmlElement(defaultValue = "false")
     private boolean published;
-    @XmlElement(defaultValue = "pgl")
+    @XmlElement(defaultValue = "")
     private String registeredBy;
-    @XmlElement(defaultValue = "pgl")
+    @XmlElement(defaultValue = "")
     private String modifiedBy;
-    @XmlElement(defaultValue = "0")
+    @XmlElement(defaultValue = "")
     private long registeredAt;
-    @XmlElement(defaultValue = "0")
+    @XmlElement(defaultValue = "")
     private long modifiedAt;
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
-    }
+//    @Override
+//    public String getId() {
+//        return id;
+//    }
+//
+//    @Override
+//    public void setId(String id) {
+//        this.id = id;
+//    }
+//
+//    public String getService() {
+//        return service;
+//    }
+//
+//    public void setService(String service) {
+//        this.service = service;
+//    }
 
     public List<Measurement<?>> getPerformanceData() {
         return performanceData;

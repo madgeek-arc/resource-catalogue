@@ -6,37 +6,37 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class InfraService implements Identifiable {
+public class InfraService extends Service {
 
-    @XmlElement(name = "service")
-    Service service;
+//    @XmlElement(name = "service")
+//    Service service;
 
     @XmlElement(name = "addenda")
     Addenda addenda;
 
-    /**
-     * Global unique and persistent identifier of the service.
-     */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
-    private String id; //maybe list
+//    /**
+//     * Global unique and persistent identifier of the service.
+//     */
+//    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+//    private String id; //maybe list
+//
+//    @Override
+//    public String getId() {
+//        return id;
+//    }
+//
+//    @Override
+//    public void setId(String s) {
+//        this.id = s;
+//    }
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String s) {
-        this.id = s;
-    }
-
-    public Service getService() {
-        return service;
-    }
-
-    public void setService(Service service) {
-        this.service = service;
-    }
+//    public Service getService() {
+//        return service;
+//    }
+//
+//    public void setService(Service service) {
+//        this.service = service;
+//    }
 
     public Addenda getAddenda() {
         return addenda;
@@ -50,13 +50,15 @@ public class InfraService implements Identifiable {
     }
 
     public InfraService(Service service) {
-        this.service = service;
-        this.id = service.getId();
+        super(service);
+//        this.service = service;
+//        this.id = service.getId();
     }
 
     public InfraService(Service service, Addenda addenda, String id) {
-        this.service = service;
+        super(service);
+//        this.service = service;
         this.addenda = addenda;
-        this.id = id;
+//        this.id = id;
     }
 }
