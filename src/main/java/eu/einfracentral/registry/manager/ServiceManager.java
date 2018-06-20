@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
 
-    @Autowired
-    private AddendaManager addendaManager;
+//    @Autowired
+//    private AddendaManager addendaManager;
 
     @Autowired
     private VocabularyManager vocabularyManager;
@@ -101,71 +101,74 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     //yes, this is foreign key logic right here on the application
     private Service validateVocabularies(Service service) {
-        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
-                Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
-                )
-        );
+//        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
+//                Collectors.toMap(
+//                        Map.Entry::getKey,
+//                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
+//                )
+//        );
         //logic for invalidating data based on whether or not they comply with existing ids
-        if (!validVocabularies.get("Category").contains(service.getCategory())) {
+        if (!vocabularyManager.exists("Category", service.getCategory())) {
             service.setCategory(null);
         }
         if (service.getPlaces() != null) {
-            if (!validVocabularies.get("Place").containsAll(service.getPlaces())) {
+            if (service.getPlaces().parallelStream().allMatch(place-> vocabularyManager.exists("Place", place))) {
                 service.setPlaces(null);
             }
         }
         if (service.getLanguages() != null) {
-            if (!validVocabularies.get("Language").containsAll(service.getLanguages())) {
+            if (service.getLanguages().parallelStream().allMatch(lang-> vocabularyManager.exists("Language", lang))) {
                 service.setLanguages(null);
             }
         }
-        if (!validVocabularies.get("LifeCycleStatus").contains(service.getLifeCycleStatus())) {
+        if (!vocabularyManager.exists("LifeCycleStatus", service.getLifeCycleStatus())) {
             service.setLifeCycleStatus(null);
         }
-        if (!validVocabularies.get("Subcategory").contains(service.getSubcategory())) {
+        if (!vocabularyManager.exists("Subcategory", service.getSubcategory())) {
             service.setSubcategory(null);
         }
-        if (!validVocabularies.get("TRL").contains(service.getTrl())) {
+        if (!vocabularyManager.exists("TRL", service.getTrl())) {
             service.setTrl(null);
         }
         return service;
     }
 
     private Addenda updateAddenda(String id) {
-        try {
-            Addenda ret = ensureAddenda(id);
-            ret.setModifiedAt(System.currentTimeMillis());
-            ret.setModifiedBy("pgl"); //get actual username somehow
-            return addendaManager.update(ret);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
-        }
+//        try {
+//            Addenda ret = ensureAddenda(id);
+//            ret.setModifiedAt(System.currentTimeMillis());
+//            ret.setModifiedBy("pgl"); //get actual username somehow
+//            return addendaManager.update(ret);
+//        } catch (Throwable e) {
+//            e.printStackTrace();
+//            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
+//        }
+        return null; // TODO remove
     }
 
     private Addenda ensureAddenda(String id) {
-        try {
-            return parserPool.deserialize(addendaManager.where("service", id, true), Addenda.class).get();
-        } catch (InterruptedException | ExecutionException | ResourceException e) {
-            e.printStackTrace();
-            return addAddenda(id);
-        }
+//        try {
+//            return parserPool.deserialize(addendaManager.where("service", id, true), Addenda.class).get();
+//        } catch (InterruptedException | ExecutionException | ResourceException e) {
+//            e.printStackTrace();
+//            return addAddenda(id);
+//        }
+        return null; // TODO remove
     }
 
     private Addenda addAddenda(String id) {
-        try {
-            Addenda ret = new Addenda();
-            ret.setId(UUID.randomUUID().toString());
-            ret.setService(id);
-            ret.setRegisteredBy("pgl"); //get actual username somehow
-            ret.setRegisteredAt(System.currentTimeMillis());
-            return addendaManager.add(ret);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
-        }
+//        try {
+//            Addenda ret = new Addenda();
+//            ret.setId(UUID.randomUUID().toString());
+//            ret.setService(id);
+//            ret.setRegisteredBy("pgl"); //get actual username somehow
+//            ret.setRegisteredAt(System.currentTimeMillis());
+//            return addendaManager.add(ret);
+//        } catch (Throwable e) {
+//            e.printStackTrace();
+//            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
+//        }
+        return null; // TODO remove
     }
 
     private Service fixVersion(Service service) {

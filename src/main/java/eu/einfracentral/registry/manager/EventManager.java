@@ -21,4 +21,12 @@ public class EventManager extends ResourceManager<Event> implements EventService
         event.setId(UUID.randomUUID().toString());
         return super.add(event);
     }
+
+    public Event update(Event event) {
+        return super.update(event);
+    }
+
+    public void delete(Event event) {
+        super.delete(event);
+    }
 }

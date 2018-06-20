@@ -6,24 +6,25 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.registry.service.InfraServiceService;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-@org.springframework.stereotype.Service()
-public class InfraServiceManager extends ResourceManager<InfraService> {
+@org.springframework.stereotype.Component()
+public class InfraServiceManager extends ResourceManager<InfraService> implements InfraServiceService {
 
-    @Autowired
-    private AddendaManager addendaManager;
+//    @Autowired
+//    private AddendaManager addendaManager;
 
     @Autowired
     private VocabularyManager vocabularyManager;
@@ -42,18 +43,18 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
 
     @Override
     public String getResourceType() {
-        return "service";
+        return "infra_service";
     }
 
     @Override
     public InfraService add(InfraService infraService) {
 
-        migrate(infraService.getService());
+        migrate(infraService);
 
         if (infraService.getId() == null) {
-            String id = createServiceId(infraService.getService());
+            String id = createServiceId(infraService);
             infraService.setId(id);
-            logger.info("Providers: " + infraService.getService().getProviders());
+            logger.info("Providers: " + infraService.getProviders());
 
             logger.info("Created service with id: " + id);
         }
@@ -63,9 +64,9 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
         if (exists(infraService)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
-        Addenda addenda = createAddenda(infraService.getService().getProviderName()); // TODO: find a way to retrieve user
+        Addenda addenda = createAddenda(infraService.getProviderName()); // TODO: find a way to retrieve user
         infraService.setAddenda(addenda);
-//        validate(infraService.getService()); // FIXME: takes too long to finish
+        validate(infraService); // FIXME: takes too long to finish
         return super.add(infraService);
     }
 
@@ -74,27 +75,32 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = get(infraService.getId());
 
-        updateAddenda(infraService.getAddenda(), infraService.getService().getProviderName());
+        // update existing service addenda
+        Addenda addenda = updateAddenda(existingService.getAddenda(), infraService.getProviderName());
+        infraService.setAddenda(addenda);
+
         InfraService ret;
-        if (infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
+        if (infraService.getVersion().equals(existingService.getVersion())) {
             // replace existing service with new
-            existingService.setService(infraService.getService());
-            ret = super.update(existingService);
+            ret = super.update(infraService);
         } else {
             Resource existingResource = whereID(infraService.getId(), false);
-            existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getService().getVersion()));
+            existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getVersion()));
+//            existingService.setAddenda(addenda); // TODO is it needed ??
             existingResource.setPayload(serialize(existingService));
             resourceService.updateResource(existingResource);
+
             ret = add(infraService);
         }
         return ret;
     }
 
-//    @Override
-    public Service validate(Service service) {
+    @Override
+    public InfraService validate(InfraService service) {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
-        return validateVocabularies(fixVersion(service));
+//        return validateVocabularies(fixVersion(service));
+        return validateVocabularies(service);
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
@@ -103,73 +109,71 @@ public class InfraServiceManager extends ResourceManager<InfraService> {
     }
 
     //yes, this is foreign key logic right here on the application
-    private Service validateVocabularies(Service service) {
-        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
-                Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
-                )
-        );
+    private InfraService validateVocabularies(InfraService service) {
+//        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
+//                Collectors.toMap(
+//                        Map.Entry::getKey,
+//                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
+//                )
+//        );
         //logic for invalidating data based on whether or not they comply with existing ids
-        if (!validVocabularies.get("Category").contains(service.getCategory())) {
+        if (!vocabularyManager.exists("Category", service.getCategory())) {
             service.setCategory(null);
         }
         if (service.getPlaces() != null) {
-            if (!validVocabularies.get("Place").containsAll(service.getPlaces())) {
+            if (service.getPlaces().parallelStream().allMatch(place-> vocabularyManager.exists("Place", place))) {
                 service.setPlaces(null);
             }
         }
         if (service.getLanguages() != null) {
-            if (!validVocabularies.get("Language").containsAll(service.getLanguages())) {
+            if (service.getLanguages().parallelStream().allMatch(lang-> vocabularyManager.exists("Language", lang))) {
                 service.setLanguages(null);
             }
         }
-        if (!validVocabularies.get("LifeCycleStatus").contains(service.getLifeCycleStatus())) {
+        if (!vocabularyManager.exists("LifeCycleStatus", service.getLifeCycleStatus())) {
             service.setLifeCycleStatus(null);
         }
-        if (!validVocabularies.get("Subcategory").contains(service.getSubcategory())) {
+        if (!vocabularyManager.exists("Subcategory", service.getSubcategory())) {
             service.setSubcategory(null);
         }
-        if (!validVocabularies.get("TRL").contains(service.getTrl())) {
+        if (!vocabularyManager.exists("TRL", service.getTrl())) {
             service.setTrl(null);
         }
         return service;
     }
 
-    private Addenda updateAddenda(Addenda addenda, String registeredBy) {
-        try {
-            Addenda ret;
-            if (addenda == null) {
-                ret = createAddenda(registeredBy);
-            } else {
-                ret = addenda;
-            }
-//            Addenda ret = ensureAddenda(id); // TODO remove
-            ret.setModifiedAt(System.currentTimeMillis());
-            ret.setModifiedBy("pgl"); //get actual username somehow
-            return addendaManager.update(ret);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return null; //addenda are thoroughly optional, and should not interfere with normal add/update operations
+    @Override
+    public Browsing<InfraService> getAll(FacetFilter ff) {
+        return super.getAll(ff);
+    }
+
+    private Addenda updateAddenda(Addenda addenda, String modifiedBy) {
+        Addenda ret;
+        if (addenda == null) {
+            ret = createAddenda(modifiedBy);
+        } else {
+            ret = addenda;
         }
+        ret.setModifiedAt(System.currentTimeMillis());
+        ret.setModifiedBy(modifiedBy); //get actual username somehow
+        return ret;
     }
 
     private Addenda createAddenda(String registeredBy) {
         // TODO: probably remove 'serviceID' from addenda
         Addenda ret = new Addenda();
-        ret.setId(UUID.randomUUID().toString());
 //        ret.setService();
         ret.setRegisteredBy(registeredBy);
         ret.setRegisteredAt(System.currentTimeMillis());
         return ret;
     }
 
-    private Service fixVersion(Service service) {
-        if (service.getVersion() == null || service.getVersion().equals("")) {
-            service.setVersion("0");
-        }
-        return service;
-    }
+//    private Service fixVersion(Service service) {
+//        if (service.getVersion() == null || service.getVersion().equals("")) {
+//            service.setVersion("0");
+//        }
+//        return service;
+//    }
 
     private String createServiceId(Service service) {
         String provider = service.getProviderName();

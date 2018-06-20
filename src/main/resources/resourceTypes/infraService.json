@@ -9,12 +9,6 @@
     },
     {
       "multivalued": false,
-      "name": "service_id",
-      "path": "//*[local-name()='service']/*[local-name()='id']/text()",
-      "type": "java.lang.String",
-    },
-    {
-      "multivalued": false,
       "name": "url",
       "path": "//*[local-name()='url']/text()",
       "type": "java.lang.String"
@@ -102,13 +96,6 @@
     },
     {
       "multivalued": false,
-      "name": "addenda_id",
-      "path": "//*[local-name()='addenda']/*[local-name()='id']/text()",
-      "type": "java.lang.String",
-      "primaryKey": true
-    },
-    {
-      "multivalued": false,
       "name": "featured",
       "path": "//*[local-name()='featured']/text()",
       "type": "java.lang.Boolean"
@@ -135,17 +122,17 @@
       "multivalued": false,
       "name": "registeredAt",
       "path": "//*[local-name()='registeredAt']/text()",
-      "type": "java.lang.Long"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "modifiedAt",
       "path": "//*[local-name()='modifiedAt']/text()",
-      "type": "java.lang.Long"
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "infraService",
+  "name": "infra_service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://builds.openminted.eu/job/eic-registry-model/ws/target/generated-resources/schemagen/schema1.xsd"

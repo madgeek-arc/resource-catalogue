@@ -8,11 +8,18 @@ import java.net.*;
 import java.util.*;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
+
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.ServiceException;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private Map<String, Region> regions = new HashMap<>();
+
+    private static Logger logger = Logger.getLogger(VocabularyManager.class);
 
     public VocabularyManager() {
         super(Vocabulary.class);
@@ -32,6 +39,19 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             fetchRegion(region);
         }
         return region.getMembers();
+    }
+
+    @Override
+    public boolean exists(String type, String value) {
+        SearchService.KeyValue kv = new SearchService.KeyValue(type,value);
+        Resource resource;
+        try {
+            resource = this.searchService.searchId(getResourceType(),kv);
+            return resource != null;
+        } catch (UnknownHostException e) {
+            logger.error(type + "=" + value,e);
+            throw new ServiceException(e);
+        }
     }
 
     private void fetchRegion(Region region) {
