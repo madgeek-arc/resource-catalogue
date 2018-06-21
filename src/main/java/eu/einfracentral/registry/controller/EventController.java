@@ -5,7 +5,6 @@ import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.SearchService;
 import io.swagger.annotations.ApiOperation;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +57,7 @@ public class EventController extends ResourceController<Event> {
     @ApiOperation("Retrieve all the favorited events of a infraService with the specified ID.")
     @RequestMapping(path = "favorite/service/{id}/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public List<Event> getServiceFavorites(@PathVariable String id) {
-        searchService.cqlQuery("infraService="+id+" AND ","event",1000,0,"modification_date", SortOrder.DESC).getResults();
+        searchService.cqlQuery("infraService="+id+" AND ","event",1000,0,"modification_date", "DESC").getResults();
         return null;
     }
 }

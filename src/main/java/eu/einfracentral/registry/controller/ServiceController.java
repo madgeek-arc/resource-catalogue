@@ -72,7 +72,6 @@ public class ServiceController extends ResourceController<Service>{
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setKeyword(allRequestParams.get("keyword") != null ? (String)allRequestParams.remove("keyword") : "");
         facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String)allRequestParams.remove("from")) : 0);
-        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String)allRequestParams.remove("quantity")) : 10);
         facetFilter.setFilter(allRequestParams);
         Map<String,Object> sort = new HashMap<>();
         Map<String,Object> order = new HashMap<>();

@@ -1,22 +1,34 @@
 package eu.einfracentral.registry.controller;
 
+import com.google.common.util.concurrent.ServiceManager;
+import eu.einfracentral.domain.Addenda;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.registry.service.ServiceService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("infraService")
@@ -24,10 +36,58 @@ import java.util.*;
 public class InfraServiceController {
 
     private ResourceService<InfraService> infraService;
+
+    @Autowired
+    SearchService searchService;
+
+    @Autowired
+    ParserService parserService;
+
+    @Autowired
+    ServiceService serviceService;
     
     @Autowired
     InfraServiceController(ResourceService<InfraService> service) {
         this.infraService = service;
+    }
+
+    private static Logger logger = Logger.getLogger(InfraServiceController.class.getName());
+
+    @ApiOperation(value = "Deletes all InfraServices")
+    @RequestMapping(path= "delete/all/delete", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<String> deleteAllInfraServices() {
+        infraService.delAll();
+        return ResponseEntity.ok("deleted");
+    }
+
+    @ApiOperation(value = "Searches for Services and their Addenda and converts them to InfraServices")
+    @RequestMapping(path= "convert/service/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<String> convertToInfraServices() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<Service> services = serviceService.getAll(ff).getResults();
+        for (Service service : services) {
+            InfraService infra = null;
+            List addenda_resources = searchService.cqlQuery("service="+service.getId(), "addenda", 10000, 0, "", "ASC").getResults();
+            if (addenda_resources.size() == 1) {
+                try {
+                    Addenda addenda = parserService.deserialize(((Resource) addenda_resources.get(0)), Addenda.class).get();
+
+                    infra = new InfraService(service, new ServiceMetadata(addenda));
+                    logger.info("adding infraService: " + infra.toString());
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.info("could not deserialize addenda \n" + e);
+                }
+            } else if (addenda_resources.size() == 0) {
+                infra = new InfraService(service);
+            } else {
+                // TODO: decide what to do with the addenda list (create events with changes ??)
+                infra = new InfraService(service);
+            }
+            infraService.add(infra);
+//            serviceService.del(service);
+        }
+        return ResponseEntity.ok("ok");
     }
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
@@ -66,7 +126,7 @@ public class InfraServiceController {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+//        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
         return ResponseEntity.ok(infraService.getAll(ff));
     }
