@@ -8,42 +8,16 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class InfraService extends Service {
 
-//    @XmlElement(name = "service")
-//    Service service;
+    @XmlElement(name = "serviceMetadata")
+    ServiceMetadata serviceMetadata;
 
-    @XmlElement(name = "addenda")
-    Addenda addenda;
 
-//    /**
-//     * Global unique and persistent identifier of the service.
-//     */
-//    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
-//    private String id; //maybe list
-//
-//    @Override
-//    public String getId() {
-//        return id;
-//    }
-//
-//    @Override
-//    public void setId(String s) {
-//        this.id = s;
-//    }
-
-//    public Service getService() {
-//        return service;
-//    }
-//
-//    public void setService(Service service) {
-//        this.service = service;
-//    }
-
-    public Addenda getAddenda() {
-        return addenda;
+    public ServiceMetadata getServiceMetadata() {
+        return serviceMetadata;
     }
 
-    public void setAddenda(Addenda addenda) {
-        this.addenda = addenda;
+    public void setServiceMetadata(ServiceMetadata serviceMetadata) {
+        this.serviceMetadata = serviceMetadata;
     }
 
     public InfraService() {
@@ -51,14 +25,11 @@ public class InfraService extends Service {
 
     public InfraService(Service service) {
         super(service);
-//        this.service = service;
-//        this.id = service.getId();
+        this.setServiceMetadata(null);
     }
 
-    public InfraService(Service service, Addenda addenda, String id) {
+    public InfraService(Service service, ServiceMetadata serviceMetadata) {
         super(service);
-//        this.service = service;
-        this.addenda = addenda;
-//        this.id = id;
+        this.serviceMetadata = serviceMetadata;
     }
 }

@@ -5,42 +5,39 @@ import javax.xml.bind.annotation.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Addenda implements Identifiable {
-    @XmlElement
-    private String id;
-    @XmlElement(required = true)
-    private String service;
+public class ServiceMetadata {
+
     @XmlElement
     private List<Measurement<?>> performanceData;
+
     @XmlElement(defaultValue = "false")
     private boolean featured;
+
     @XmlElement(defaultValue = "false")
     private boolean published;
-    @XmlElement(defaultValue = "")
+
+    @XmlElement(defaultValue = "null")
     private String registeredBy;
-    @XmlElement(defaultValue = "")
+
+    @XmlElement(defaultValue = "null")
+    private String registeredAt;
+
+    @XmlElement(defaultValue = "null")
     private String modifiedBy;
-    @XmlElement(defaultValue = "0")
-    private long registeredAt;
-    @XmlElement(defaultValue = "0")
-    private long modifiedAt;
 
-    @Override
-    public String getId() {
-        return id;
+    @XmlElement(defaultValue = "null")
+    private String modifiedAt;
+
+    public ServiceMetadata() {
     }
 
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
+    public ServiceMetadata(Addenda addenda) {
+        this.featured = addenda.isFeatured();
+        this.published = addenda.isPublished();
+        this.registeredBy = addenda.getRegisteredBy();
+        this.modifiedBy = addenda.getModifiedBy();
+        this.registeredAt = String.valueOf(addenda.getRegisteredAt());
+        this.modifiedAt = String.valueOf(addenda.getModifiedAt());
     }
 
     public List<Measurement<?>> getPerformanceData() {
@@ -83,19 +80,19 @@ public class Addenda implements Identifiable {
         this.modifiedBy = modifiedBy;
     }
 
-    public long getRegisteredAt() {
+    public String getRegisteredAt() {
         return registeredAt;
     }
 
-    public void setRegisteredAt(long registeredAt) {
+    public void setRegisteredAt(String registeredAt) {
         this.registeredAt = registeredAt;
     }
 
-    public long getModifiedAt() {
+    public String getModifiedAt() {
         return modifiedAt;
     }
 
-    public void setModifiedAt(long modifiedAt) {
+    public void setModifiedAt(String modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
 }
