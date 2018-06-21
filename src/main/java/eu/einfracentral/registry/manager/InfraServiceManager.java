@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.core.ParserPool;
-import eu.einfracentral.domain.Addenda;
+import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.Vocabulary;
@@ -22,9 +22,6 @@ import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Component()
 public class InfraServiceManager extends ResourceManager<InfraService> implements InfraServiceService {
-
-//    @Autowired
-//    private AddendaManager addendaManager;
 
     @Autowired
     private VocabularyManager vocabularyManager;
@@ -64,9 +61,11 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
         if (exists(infraService)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
-        Addenda addenda = createAddenda(infraService.getProviderName()); // TODO: find a way to retrieve user
-        infraService.setAddenda(addenda);
-        validate(infraService); // FIXME: takes too long to finish
+        if (infraService.getServiceMetadata() == null) {
+            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName()); // TODO: find a way to retrieve user
+            infraService.setServiceMetadata(serviceMetadata);
+        }
+//        validate(infraService); // FIXME: takes too long to finish
         return super.add(infraService);
     }
 
@@ -75,9 +74,9 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = get(infraService.getId());
 
-        // update existing service addenda
-        Addenda addenda = updateAddenda(existingService.getAddenda(), infraService.getProviderName());
-        infraService.setAddenda(addenda);
+        // update existing service serviceMetadata
+        ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), infraService.getProviderName());
+        infraService.setServiceMetadata(serviceMetadata);
 
         InfraService ret;
         if (infraService.getVersion().equals(existingService.getVersion())) {
@@ -86,7 +85,7 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
         } else {
             Resource existingResource = whereID(infraService.getId(), false);
             existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getVersion()));
-//            existingService.setAddenda(addenda); // TODO is it needed ??
+//            existingService.setServiceMetadata(serviceMetadata); // TODO is it needed ??
             existingResource.setPayload(serialize(existingService));
             resourceService.updateResource(existingResource);
 
@@ -147,24 +146,23 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
         return super.getAll(ff);
     }
 
-    private Addenda updateAddenda(Addenda addenda, String modifiedBy) {
-        Addenda ret;
-        if (addenda == null) {
-            ret = createAddenda(modifiedBy);
+    private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
+        ServiceMetadata ret;
+        if (serviceMetadata == null) {
+            ret = createServiceMetadata(modifiedBy);
         } else {
-            ret = addenda;
+            ret = serviceMetadata;
         }
-        ret.setModifiedAt(System.currentTimeMillis());
+        ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
         ret.setModifiedBy(modifiedBy); //get actual username somehow
         return ret;
     }
 
-    private Addenda createAddenda(String registeredBy) {
-        // TODO: probably remove 'serviceID' from addenda
-        Addenda ret = new Addenda();
-//        ret.setService();
+    private ServiceMetadata createServiceMetadata(String registeredBy) {
+        // TODO: probably remove 'serviceID' from serviceMetadata
+        ServiceMetadata ret = new ServiceMetadata();
         ret.setRegisteredBy(registeredBy);
-        ret.setRegisteredAt(System.currentTimeMillis());
+        ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
         return ret;
     }
 

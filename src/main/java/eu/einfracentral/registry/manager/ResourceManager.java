@@ -90,7 +90,9 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public List<T> delAll() {
-        return getAll(new FacetFilter()).getResults().stream().map(this::del).collect(Collectors.toList());
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setQuantity(10000);
+        return getAll(facetFilter).getResults().stream().map(this::del).collect(Collectors.toList());
     }
 
     @Override

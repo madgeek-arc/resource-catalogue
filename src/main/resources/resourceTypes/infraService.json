@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "infraService_id",
+      "name": "infra_service_id",
       "path": "//*[local-name()='infraService']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
