@@ -28,7 +28,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public Browsing<T> getAll(FacetFilter ff) {
         ff.setBrowseBy(getBrowseBy());
-        ff.setQuantity(10000);
         return getResults(ff);
     }
 
