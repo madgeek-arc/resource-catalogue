@@ -9,6 +9,7 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("service")
 @Api(value = "Get Information about a Service")
-public class ServiceController extends ResourceController<Service>{
+public class ServiceController extends ResourceController<Service> {
 
     @Autowired
     ResourceService<InfraService> infraService;
@@ -70,22 +71,22 @@ public class ServiceController extends ResourceController<Service>{
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<Service>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("keyword") != null ? (String)allRequestParams.remove("keyword") : "");
-        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String)allRequestParams.remove("from")) : 0);
+        facetFilter.setKeyword(allRequestParams.get("keyword") != null ? (String) allRequestParams.remove("keyword") : "");
+        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         facetFilter.setFilter(allRequestParams);
-        Map<String,Object> sort = new HashMap<>();
-        Map<String,Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String)allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String)allRequestParams.remove("orderField") : null;
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
         if (orderField != null) {
-            order.put("order",orderDirection);
+            order.put("order", orderDirection);
             sort.put(orderField, order);
             facetFilter.setOrderBy(sort);
         }
         Browsing<InfraService> infraServices = infraService.getAll(facetFilter);
         List<Service> services = infraServices.getResults().stream().map(service -> (Service) service).collect(Collectors.toList());
-        // FIXME: probably needs fixing
-        return ResponseEntity.ok(new Browsing<>(services.size(), 0, services.size()-1, services, infraServices.getFacets()));
+        return ResponseEntity.ok(new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
     @ApiOperation(value = "Get a list of services based on a set of IDs")
@@ -104,7 +105,7 @@ public class ServiceController extends ResourceController<Service>{
     public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         Map<String, List<InfraService>> results = infraService.getBy(field);
         Map<String, List<Service>> serviceResults = new HashMap<>();
-        for(Map.Entry<String, List<InfraService>> services : results.entrySet()) {
+        for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
             serviceResults.put(services.getKey(), services.getValue().stream().map(service -> (Service) service).collect(Collectors.toList()));
         }
         return ResponseEntity.ok(serviceResults);
@@ -126,7 +127,7 @@ public class ServiceController extends ResourceController<Service>{
         List<Provider> providers = providerService.getAll(new FacetFilter()).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
-        for (Provider provider: providers) {
+        for (Provider provider : providers) {
             services = providerService.getServices(provider.getId());
             if (services.size() > 0) {
                 Random random = new Random();
