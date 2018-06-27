@@ -22,7 +22,7 @@
         <junit-toolbox.version>2.2</junit-toolbox.version>
         <commons-fileupload.version>1.2.1</commons-fileupload.version>
         <commons-io.version>2.4</commons-io.version>
-        <registry-core.version>1.4.5-SNAPSHOT</registry-core.version>
+        <registry-core.version>[1.4.0-SNAPSHOT,)</registry-core.version>
         <jjwt.version>0.7.0</jjwt.version>
         <springfox.version>2.7.0</springfox.version>
         <javax.mail-version>1.6.1</javax.mail-version>
@@ -307,6 +307,22 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>external.atlassian.jgitflow</groupId>
+                <artifactId>jgitflow-maven-plugin</artifactId>
+                <version>1.0-m5.1</version>
+                <configuration>
+                    <!-- see goals wiki page for configuration options -->
+                    <flowInitContext>
+                        <masterBranchName>master</masterBranchName>
+                        <developBranchName>develop</developBranchName>
+                        <featureBranchPrefix>feature-</featureBranchPrefix>
+                        <releaseBranchPrefix>release-</releaseBranchPrefix>
+                        <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
+                        <!--<versionTagPrefix>blither-</versionTagPrefix>-->
+                    </flowInitContext>
+                </configuration>
             </plugin>
         </plugins>
     </build>
