@@ -24,9 +24,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceManager extends ResourceManager<Service> implements ServiceService {
 
-//    @Autowired
-//    private AddendaManager addendaManager;
-
     @Autowired
     private VocabularyManager vocabularyManager;
 
@@ -44,7 +41,7 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 
     @Override
     public String getResourceType() {
-        return "service";
+        return "infra_service";
     }
 
     @Override
@@ -108,26 +105,38 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
 //                )
 //        );
         //logic for invalidating data based on whether or not they comply with existing ids
-        if (!vocabularyManager.exists("Category", service.getCategory())) {
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "Category"),
+                new SearchService.KeyValue("name", service.getCategory()))) {
             service.setCategory(null);
         }
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "Subcategory"),
+                new SearchService.KeyValue("name", service.getSubcategory()))) {
+            service.setSubcategory(null);
+        }
         if (service.getPlaces() != null) {
-            if (service.getPlaces().parallelStream().allMatch(place-> vocabularyManager.exists("Place", place))) {
+            if (!service.getPlaces().parallelStream().allMatch(place-> vocabularyManager.exists(
+                    new SearchService.KeyValue("type", "Place"),
+                    new SearchService.KeyValue("vocabulary_id", place)))) {
                 service.setPlaces(null);
             }
         }
         if (service.getLanguages() != null) {
-            if (service.getLanguages().parallelStream().allMatch(lang-> vocabularyManager.exists("Language", lang))) {
+            if (!service.getLanguages().parallelStream().allMatch(lang-> vocabularyManager.exists(
+                    new SearchService.KeyValue("type", "Language"),
+                    new SearchService.KeyValue("vocabulary_id", lang)))) {
                 service.setLanguages(null);
             }
         }
-        if (!vocabularyManager.exists("LifeCycleStatus", service.getLifeCycleStatus())) {
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "LifeCycleStatus"),
+                new SearchService.KeyValue("vocabulary_id", service.getLifeCycleStatus()))) {
             service.setLifeCycleStatus(null);
         }
-        if (!vocabularyManager.exists("Subcategory", service.getSubcategory())) {
-            service.setSubcategory(null);
-        }
-        if (!vocabularyManager.exists("TRL", service.getTrl())) {
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "TRL"),
+                new SearchService.KeyValue("vocabulary_id", service.getTrl()))) {
             service.setTrl(null);
         }
         return service;

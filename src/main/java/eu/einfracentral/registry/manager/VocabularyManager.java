@@ -42,14 +42,13 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    public boolean exists(String type, String value) {
-        SearchService.KeyValue kv = new SearchService.KeyValue(type,value);
+    public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
         try {
-            resource = this.searchService.searchId(getResourceType(),kv);
+            resource = this.searchService.searchId(getResourceType(), ids);
             return resource != null;
         } catch (UnknownHostException e) {
-            logger.error(type + "=" + value,e);
+            logger.error(e);
             throw new ServiceException(e);
         }
     }

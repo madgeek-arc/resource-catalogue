@@ -65,7 +65,7 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
             ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName()); // TODO: find a way to retrieve user
             infraService.setServiceMetadata(serviceMetadata);
         }
-//        validate(infraService); // FIXME: takes too long to finish
+        validate(infraService); // FIXME: takes too long to finish
         return super.add(infraService);
     }
 
@@ -116,26 +116,38 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
 //                )
 //        );
         //logic for invalidating data based on whether or not they comply with existing ids
-        if (!vocabularyManager.exists("Category", service.getCategory())) {
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "Category"),
+                new SearchService.KeyValue("name", service.getCategory()))) {
             service.setCategory(null);
         }
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "Subcategory"),
+                new SearchService.KeyValue("name", service.getSubcategory()))) {
+            service.setSubcategory(null);
+        }
         if (service.getPlaces() != null) {
-            if (service.getPlaces().parallelStream().allMatch(place-> vocabularyManager.exists("Place", place))) {
+            if (!service.getPlaces().parallelStream().allMatch(place-> vocabularyManager.exists(
+                    new SearchService.KeyValue("type", "Place"),
+                    new SearchService.KeyValue("vocabulary_id", place)))) {
                 service.setPlaces(null);
             }
         }
         if (service.getLanguages() != null) {
-            if (service.getLanguages().parallelStream().allMatch(lang-> vocabularyManager.exists("Language", lang))) {
+            if (!service.getLanguages().parallelStream().allMatch(lang-> vocabularyManager.exists(
+                    new SearchService.KeyValue("type", "Language"),
+                    new SearchService.KeyValue("vocabulary_id", lang)))) {
                 service.setLanguages(null);
             }
         }
-        if (!vocabularyManager.exists("LifeCycleStatus", service.getLifeCycleStatus())) {
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "LifeCycleStatus"),
+                new SearchService.KeyValue("vocabulary_id", service.getLifeCycleStatus()))) {
             service.setLifeCycleStatus(null);
         }
-        if (!vocabularyManager.exists("Subcategory", service.getSubcategory())) {
-            service.setSubcategory(null);
-        }
-        if (!vocabularyManager.exists("TRL", service.getTrl())) {
+        if (!vocabularyManager.exists(
+                new SearchService.KeyValue("type", "TRL"),
+                new SearchService.KeyValue("vocabulary_id", service.getTrl()))) {
             service.setTrl(null);
         }
         return service;
@@ -159,7 +171,6 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
     }
 
     private ServiceMetadata createServiceMetadata(String registeredBy) {
-        // TODO: probably remove 'serviceID' from serviceMetadata
         ServiceMetadata ret = new ServiceMetadata();
         ret.setRegisteredBy(registeredBy);
         ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
