@@ -20,11 +20,13 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +34,7 @@ import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("infraService")
+@ApiIgnore
 @Api(value = "Get Information about a Service")
 public class InfraServiceController {
 
@@ -52,13 +55,6 @@ public class InfraServiceController {
     }
 
     private static Logger logger = Logger.getLogger(InfraServiceController.class.getName());
-
-    @ApiOperation(value = "Deletes all InfraServices")
-    @RequestMapping(path= "delete/all/delete", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<String> deleteAllInfraServices() {
-        infraService.delAll();
-        return ResponseEntity.ok("deleted");
-    }
 
     @ApiOperation(value = "Searches for Services and their Addenda and converts them to InfraServices")
     @RequestMapping(path= "convert/service/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
