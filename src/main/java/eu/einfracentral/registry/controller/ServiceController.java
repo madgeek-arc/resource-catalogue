@@ -37,7 +37,7 @@ public class ServiceController extends ResourceController<Service> {
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(service.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.get(id), HttpStatus.OK);
         //return super.get(id, jwt);
     }
 
