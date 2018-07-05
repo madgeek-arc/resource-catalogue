@@ -25,6 +25,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     public Event update(Event event) {
+        event.setInstant(System.currentTimeMillis());
         return super.update(event);
     }
 
