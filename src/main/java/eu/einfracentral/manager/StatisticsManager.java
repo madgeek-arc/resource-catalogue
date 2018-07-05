@@ -26,7 +26,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> ratings(String id) {
-        List<Histogram.Bucket> buckets = ((InternalDateHistogram) (elastic
+        List<InternalDateHistogram.Bucket> buckets = ((InternalDateHistogram) (elastic
                 .client()
                 .prepareSearch("event")
                 .setTypes("general")
@@ -141,7 +141,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> favourites(String id) {
         final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
-        List<Histogram.Bucket> buckets = histogram(id, "FAVOURITE").getBuckets();
+        List<InternalDateHistogram.Bucket> buckets = histogram(id, "FAVOURITE").getBuckets();
         return buckets.stream().collect(
                 Collectors.toMap(
                         MultiBucketsAggregation.Bucket::getKeyAsString,
