@@ -2,9 +2,6 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ServiceService;
-import eu.einfracentral.registry.service.UserService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -19,11 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,12 +35,6 @@ public class EventController extends ResourceController<Event> {
 
     @Autowired
     private ParserService parserService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private InfraServiceService infraServiceService;
 
     Logger logger = Logger.getLogger(EventController.class);
 
@@ -85,7 +74,7 @@ public class EventController extends ResourceController<Event> {
 
 
     @ApiOperation("Set a service as favorite for a user.")
-    @RequestMapping(path = "favorite/service/{sId}/user/{uId}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "favorite/service/{sId}/user/{uId}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Event> setFavourite(@PathVariable String sId, @PathVariable String uId) throws ExecutionException, InterruptedException, ResourceNotFoundException {
         // TODO: check if user and service exists ?
         return new ResponseEntity<>(toggleFavourite(sId, uId), HttpStatus.OK);
@@ -127,8 +116,8 @@ public class EventController extends ResourceController<Event> {
         return new ResponseEntity<>(getServiceEvents(Event.UserActionType.RATING.getKey(), id), HttpStatus.OK);
     }
 
-    @ApiOperation("Set a service as favorite for a user.")
-    @RequestMapping(path = "rating/service/{sId}/user/{uId}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @ApiOperation("Set a rating to a service from the given user.")
+    @RequestMapping(path = "rating/service/{sId}/user/{uId}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Event> setUserRating(@PathVariable String sId, @PathVariable String uId, @RequestParam("rating") String rating)
             throws ExecutionException, InterruptedException, ResourceNotFoundException {
         // TODO: check if user and service exists ?
