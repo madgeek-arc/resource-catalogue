@@ -1,9 +1,10 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Vocabulary;
+import eu.openminted.registry.core.service.SearchService;
 
 public interface VocabularyService extends ResourceService<Vocabulary> {
     String[] getRegion(String name);
 
-    boolean exists(String type, String value);
+    boolean exists(SearchService.KeyValue... ids);
 }
