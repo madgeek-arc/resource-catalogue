@@ -69,10 +69,10 @@ public class Event implements Identifiable {
     }
 
     public enum UserActionType {
-        INTERNAL("internal"),
-        EXTERNAL("external"),
-        FAVOURITE("favorite"),
-        RATING("rating");
+        INTERNAL("INTERNAL"),
+        EXTERNAL("EXTERNAL"),
+        FAVOURITE("FAVOURITE"),
+        RATING("RATING");
 
         private final String type;
 
