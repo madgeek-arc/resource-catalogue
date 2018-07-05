@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EventManager extends ResourceManager<Event> implements EventService {
+
     public EventManager() {
         super(Event.class);
     }
@@ -19,6 +20,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public Event add(Event event) {
         event.setId(UUID.randomUUID().toString());
+        event.setInstant(System.currentTimeMillis());
         return super.add(event);
     }
 
