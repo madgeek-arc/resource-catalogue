@@ -2,7 +2,6 @@ package eu.einfracentral.registry.manager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.einfracentral.config.ApplicationConfig;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.UserService;
@@ -15,16 +14,36 @@ import java.util.*;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 @Configurable
+@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class UserManager extends ResourceManager<User> implements UserService {
+
     @Autowired
     private MailService mailService;
-    @Autowired
-    private ApplicationConfig config;
+
+    @Value("${mail.activate.subject}")
+    String activateSubject;
+
+    @Value("${mail.activate.text}")
+    String activateText;
+
+    @Value("${sec.user.iterations:1000}")
+    String iterations;
+
+    @Value("${mail.reset.subject}")
+    String resetSubject;
+
+    @Value("${mail.reset.text}")
+    String resetText;
+
+    @Value("${jwt.secret:}")
+    String secret;
 
     public UserManager() {
         super(User.class);
@@ -60,7 +79,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
             user.setId(UUID.randomUUID().toString());
             ret = hashUser(user);
             add(ret);
-            mailService.sendMail(user.getEmail(), config.getActivateSubject(), config.getActivateText() + user.getId());
+            mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
         } else {
             throw new ResourceException("User already registered!", HttpStatus.CONFLICT);
         }
@@ -73,14 +92,14 @@ public class UserManager extends ResourceManager<User> implements UserService {
         if (ret != null) {
             ret.setResetToken(UUID.randomUUID().toString());
             update(ret);
-            mailService.sendMail(ret.getEmail(), config.getResetSubject(), config.getResetText() + ret.getId() + "/" + ret.getResetToken());
+            mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
         }
         return strip(ret);
     }
 
     @Override
     public String getToken(User credentials) {
-        if (config.getSecret().length() == 0) {
+        if (secret.length() == 0) {
             throw new ResourceException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         Date now = new Date();
@@ -96,7 +115,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
             try {
                 ret = Jwts.builder()
                           .setPayload(payload)
-                          .signWith(SignatureAlgorithm.HS256, config.getSecret())
+                          .signWith(SignatureAlgorithm.HS256, secret)
                           .compact();
             } catch (Throwable e) {
                 e.printStackTrace();
@@ -126,7 +145,7 @@ public class UserManager extends ResourceManager<User> implements UserService {
         byte[] salt = new byte[8];
         r.nextBytes(salt);
         user.setSalt(salt);
-        user.setIterationCount(config.getIterations());
+        user.setIterationCount(Integer.parseInt(iterations));
         user.setPassword(new String(hashPass(user.getPassword().toCharArray(),
                                              user.getSalt(),
                                              user.getIterationCount())));
