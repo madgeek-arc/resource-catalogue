@@ -10,6 +10,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.DumpService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,10 +63,10 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         if (infraService.getServiceMetadata() == null) {
-            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName()); // TODO: find a way to retrieve user
+            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName());
             infraService.setServiceMetadata(serviceMetadata);
         }
-        validate(infraService); // FIXME: takes too long to finish
+        validate(infraService);
         return super.add(infraService);
     }
 
@@ -85,11 +86,13 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
         } else {
             Resource existingResource = whereID(infraService.getId(), false);
             existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getVersion()));
-//            existingService.setServiceMetadata(serviceMetadata); // TODO is it needed ??
-            existingResource.setPayload(serialize(existingService));
+            // save in exististing resource the payload of the updated service
+            validate(infraService);
+            existingResource.setPayload(serialize(infraService));
             resourceService.updateResource(existingResource);
 
-            ret = add(infraService);
+            // create new service, the old one
+            ret = add(existingService);
         }
         return ret;
     }
@@ -109,13 +112,6 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
 
     //yes, this is foreign key logic right here on the application
     private InfraService validateVocabularies(InfraService service) {
-//        Map<String, List<String>> validVocabularies = vocabularyManager.getBy("type").entrySet().stream().collect(
-//                Collectors.toMap(
-//                        Map.Entry::getKey,
-//                        entry -> entry.getValue().stream().map(Vocabulary::getId).collect(Collectors.toList())
-//                )
-//        );
-        //logic for invalidating data based on whether or not they comply with existing ids
         if (!vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Category"),
                 new SearchService.KeyValue("name", service.getCategory()))) {

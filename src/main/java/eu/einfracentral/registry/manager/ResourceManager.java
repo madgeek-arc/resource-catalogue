@@ -100,6 +100,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return t;
     }
 
+    @Deprecated
     @Override
     public List<T> versions(String id, String version) {
         return multiWhereID(id).stream().flatMap(
