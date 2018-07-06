@@ -92,6 +92,22 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.get(id));
     }
 
+    @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
+    @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @PathVariable("version") String version,
+                                            @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        InfraService ret;
+        try {
+            ret = infraService.get(id + "/" + version);
+        } catch (Exception e) {
+            ret = infraService.get(id);
+            if (!version.equals(ret.getVersion())) {
+                throw e;
+            }
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -142,6 +158,7 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.getBy(field));
     }
 
+    @Deprecated
     @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
     @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<InfraService>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {

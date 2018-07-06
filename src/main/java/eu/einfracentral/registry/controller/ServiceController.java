@@ -37,29 +37,47 @@ public class ServiceController extends ResourceController<Service> {
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return new ResponseEntity<>(infraService.get(id), HttpStatus.OK);
+        Service ret = new Service(infraService.get(id));
+        return new ResponseEntity<>(ret, HttpStatus.OK);
         //return super.get(id, jwt);
+    }
+
+    @ApiOperation(value = "Get the specified version of an infraService providing the infraService ID")
+    @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Service> get(@PathVariable("id") String id, @PathVariable("version") String version,
+                                       @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        InfraService ret;
+        try {
+            ret = infraService.get(id + "/" + version);
+        } catch (Exception e) {
+            ret = infraService.get(id);
+            if (!version.equals(ret.getVersion())) {
+                throw e;
+            }
+        }
+        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> add(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        InfraService infraService = this.infraService.add(new InfraService(service));
-        return new ResponseEntity<>(infraService, HttpStatus.CREATED);
+        InfraService ret = this.infraService.add(new InfraService(service));
+        return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> update(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        InfraService infraService = this.infraService.update(new InfraService(service));
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        InfraService ret = this.infraService.update(new InfraService(service));
+        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Validates the infraService without actually changing the respository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>(infraService.validate(new InfraService(service)), HttpStatus.OK);
+        InfraService ret = this.infraService.validate(new InfraService(service));
+        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
@@ -85,7 +103,7 @@ public class ServiceController extends ResourceController<Service> {
             facetFilter.setOrderBy(sort);
         }
         Browsing<InfraService> infraServices = infraService.getAll(facetFilter);
-        List<Service> services = infraServices.getResults().stream().map(service -> (Service) service).collect(Collectors.toList());
+        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
         return ResponseEntity.ok(new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
@@ -97,7 +115,7 @@ public class ServiceController extends ResourceController<Service> {
     public ResponseEntity<List<Service>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return ResponseEntity.ok(
                 infraService.getSome(ids)
-                        .stream().map(service -> (Service) service).collect(Collectors.toList()));
+                        .stream().map(Service::new).collect(Collectors.toList()));
     }
 
     @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
@@ -106,17 +124,18 @@ public class ServiceController extends ResourceController<Service> {
         Map<String, List<InfraService>> results = infraService.getBy(field);
         Map<String, List<Service>> serviceResults = new HashMap<>();
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
-            serviceResults.put(services.getKey(), services.getValue().stream().map(service -> (Service) service).collect(Collectors.toList()));
+            serviceResults.put(services.getKey(), services.getValue().stream().map(Service::new).collect(Collectors.toList()));
         }
         return ResponseEntity.ok(serviceResults);
     }
 
+    @Deprecated
     @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
     @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return ResponseEntity.ok(
                 infraService.versions(id, version.toString())
-                        .stream().map(service -> (Service) service).collect(Collectors.toList()));
+                        .stream().map(Service::new).collect(Collectors.toList()));
     }
 
     @ApiIgnore // TODO enable in a future release
