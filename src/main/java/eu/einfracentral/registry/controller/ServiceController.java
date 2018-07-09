@@ -13,6 +13,7 @@ import io.swagger.annotations.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,8 @@ public class ServiceController extends ResourceController<Service> {
     public ServiceController(ResourceService<Service> service) {
         super(service);
     }
+
+    private static Logger logger = Logger.getLogger(ServiceController.class);
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -88,8 +91,10 @@ public class ServiceController extends ResourceController<Service> {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<Service>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+//        super.getAll(allRequestParams, jwt);
+        logger.info("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("keyword") != null ? (String) allRequestParams.remove("keyword") : "");
+        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         facetFilter.setFilter(allRequestParams);
