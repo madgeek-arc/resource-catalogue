@@ -45,7 +45,7 @@ public class EventController extends ResourceController<Event> {
         return new ResponseEntity<>(service.getAll(new FacetFilter()), HttpStatus.OK);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
     @ApiOperation("Retrieve the event with a specific ID.")
     @RequestMapping(path = "id/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Event> get(@PathVariable String id) {
@@ -66,7 +66,7 @@ public class EventController extends ResourceController<Event> {
         return new ResponseEntity<>(getUserEvents(Event.UserActionType.FAVOURITE.getKey(), id), HttpStatus.OK);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
     @ApiOperation("Retrieve all the favourited events of a infraService with the specified ID.")
     @RequestMapping(path = "favourite/all/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getServiceFavourites(@PathVariable String id) {
@@ -109,7 +109,7 @@ public class EventController extends ResourceController<Event> {
         return new ResponseEntity<>(getUserEvents(Event.UserActionType.RATING.getKey(), id), HttpStatus.OK);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
     @ApiOperation("Retrieve all the rating events of a infraService with the specified ID.")
     @RequestMapping(path = "rating/all/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getServiceRatings(@PathVariable String id) {
@@ -212,9 +212,7 @@ public class EventController extends ResourceController<Event> {
         List<Event> events = resources.getResults().stream().map(resource -> {
             try {
                 return parserService.deserialize(resource, Event.class).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
             return null;

@@ -43,7 +43,7 @@ public class InfraServiceController {
 
     @Autowired
     ServiceService serviceService;
-    
+
     @Autowired
     InfraServiceController(ResourceService<InfraService> service) {
         this.infraService = service;
@@ -52,14 +52,14 @@ public class InfraServiceController {
     private static Logger logger = Logger.getLogger(InfraServiceController.class.getName());
 
     @ApiOperation(value = "Searches for Services and their Addenda and converts them to InfraServices")
-    @RequestMapping(path= "convert/service/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "convert/service/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String> convertToInfraServices() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<Service> services = serviceService.getAll(ff).getResults();
         for (Service service : services) {
             InfraService infra = null;
-            List addenda_resources = searchService.cqlQuery("service="+service.getId(), "addenda", 10000, 0, "", "ASC").getResults();
+            List addenda_resources = searchService.cqlQuery("service=" + service.getId(), "addenda").getResults();
             if (addenda_resources.size() == 1) {
                 try {
                     Addenda addenda = parserService.deserialize(((Resource) addenda_resources.get(0)), Addenda.class).get();
@@ -117,8 +117,8 @@ public class InfraServiceController {
     }
 
     @ApiOperation(value = "Validates the infraService without actually changing the respository")
-    @RequestMapping(path="validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<InfraService> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<InfraService> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         return ResponseEntity.ok(infraService.validate(new InfraService(service)));
     }
 

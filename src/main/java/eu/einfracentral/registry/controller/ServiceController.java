@@ -92,7 +92,7 @@ public class ServiceController extends ResourceController<Service> {
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Browsing<Service>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
 //        super.getAll(allRequestParams, jwt);
-        logger.info("Request params: " + allRequestParams);
+        logger.debug("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
