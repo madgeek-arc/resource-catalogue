@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import java.util.List;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.*;
 
 @XmlType
@@ -38,6 +39,15 @@ public class ServiceMetadata {
         this.modifiedBy = addenda.getModifiedBy();
         this.registeredAt = String.valueOf(addenda.getRegisteredAt());
         this.modifiedAt = String.valueOf(addenda.getModifiedAt());
+    }
+
+    public ServiceMetadata(ServiceMetadata serviceMetadata) {
+        this.featured = serviceMetadata.isFeatured();
+        this.published = serviceMetadata.isPublished();
+        this.registeredBy = serviceMetadata.getRegisteredBy();
+        this.modifiedBy = serviceMetadata.getModifiedBy();
+        this.registeredAt = serviceMetadata.getRegisteredAt();
+        this.modifiedAt = serviceMetadata.getModifiedAt();
     }
 
     public List<Measurement<?>> getPerformanceData() {
