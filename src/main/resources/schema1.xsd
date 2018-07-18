@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://einfracentral.eu" elementFormDefault="qualified" targetNamespace="http://einfracentral.eu" version="1.0">
+
+  <xs:element name="addenda" type="tns:addenda"/>
+
+  <xs:element name="dimension" type="tns:dimension"/>
+
+  <xs:element name="event" type="tns:event"/>
+
+  <xs:element name="indicator" type="tns:indicator"/>
+
+  <xs:element name="infraService" type="tns:infraService"/>
+
+  <xs:element name="manager" type="tns:manager"/>
+
+  <xs:element name="measurement" type="tns:measurement"/>
+
+  <xs:element name="membership" type="tns:membership"/>
+
+  <xs:element name="provider" type="tns:provider"/>
+
+  <xs:element name="service" type="tns:service"/>
+
+  <xs:element name="serviceMetadata" type="tns:serviceMetadata"/>
+
+  <xs:element name="unit" type="tns:unit"/>
+
+  <xs:element name="user" type="tns:user"/>
+
+  <xs:element name="vocabulary" type="tns:vocabulary"/>
+
+  <xs:complexType name="addenda">
+    <xs:sequence>
+      <xs:element default="false" name="featured" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element default="0" name="modifiedAt" type="xs:long"/>
+      <xs:element default="" minOccurs="0" name="modifiedBy" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="performanceData" type="tns:measurement"/>
+      <xs:element default="false" name="published" type="xs:boolean"/>
+      <xs:element default="0" name="registeredAt" type="xs:long"/>
+      <xs:element default="" minOccurs="0" name="registeredBy" type="xs:string"/>
+      <xs:element name="service" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="measurement">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element ref="tns:indicator"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="location" type="xs:string"/>
+      <xs:element minOccurs="0" name="time" type="xs:anySimpleType"/>
+      <xs:element name="value" type="xs:anyType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="indicator">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" name="dimensions" type="tns:dimension"/>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element ref="tns:unit"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="dimension">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="unit">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="event">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="instant" type="xs:long"/>
+      <xs:element name="service" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
+      <xs:element name="user" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="infraService">
+    <xs:complexContent>
+      <xs:extension base="tns:service">
+        <xs:sequence>
+          <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="service">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="availability" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Availability, i.e., the fraction of a time period that an item is in a condition to perform its intended function upon demand (“available” indicates that an item is in this condition); availability is often expressed as a probability.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="category" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of services that offer access to the same type of resource that is of interest to a customer/user.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="changeLog" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A log of the service features added in the last and previous versions.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="description" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[High-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables access to.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="feedback" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the page where customers can provide feedback on the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="funding" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Sources of funding for the development and/or operation of the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="helpdesk" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to a webpage with the contact person or helpdesk to ask more information from the service provider about this service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Global unique and persistent identifier of the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="languages">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="language" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="lastUpdate" type="xs:anySimpleType">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The date of the latest update of the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="lifeCycleStatus" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Used to tag the service to the full service cycle.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="multimediaURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the multimedia material of the service (screenshots or videos).]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Brief and descriptive name of service as assigned by the service provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="options" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A high-level description of the various options or forms in which the service can be instantiated.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="order" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="places">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="place" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="price" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the information about the payment models that apply, the cost and any related information.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="providerName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The organisation that manages and delivers the service and with whom the customer signs the SLA.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="providers">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="provider" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="relatedServices">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="relatedService" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="reliability" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Reliability, i.e., the probability that an item will function without failure under stated conditions for a speciﬁed amount of time. “Stated conditions” indicates perquisite conditions external to the item being considered. For example, a stated condition for a supercomputer might be that power and cooling must be available - thus a failure of the power or cooling systems would not be considered a failure of the supercomputer.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="request" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[(Deprecated) Link to request the service from the service provider]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="requiredServices">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="requiredService" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="serviceLevelAgreement" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="serviceability" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Serviceability, i.e., the probability that an item will be retained in, or restored to, a condition to per-form its intended function within a speciﬁed period of time Durability, i.e., the ability of a physical product to remain functional, without requiring excessive maintenance or repair, when faced with the challenges of normal operation over its design lifetime.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="subcategory" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Type/Subcategory of service within a category]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="symbol" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the logo/visual identity of the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="tagline" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Short text, catch line or slogan which serves mainly marketing and advertising purposes.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="tags">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="tag" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="targetUsers" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Type of users/customers allowed to commission/benefit from the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="termsOfUse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="termOfUse" type="xs:anyURI"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="trainingInformation" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to training information on the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="trl" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Used to tag the service to the Technology Readiness Level, a method of estimating technology ma-turity of critical technology elements. TRL are based on a scale from 1 to 9 with 9 being the most ma-ture technology.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="url" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the entry web page of the service usually hosted and maintained by the service provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="userBase" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of customers, communities, users, etc using the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="userManual" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the service user manual and documentation]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="userValue" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Description of the benefit delivered to a customer/user by the service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="validFor" type="xs:anySimpleType">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The date up to which the service description is valid.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="version" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Informs about the service version that is in force.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="serviceMetadata">
+    <xs:sequence>
+      <xs:element default="false" name="featured" type="xs:boolean"/>
+      <xs:element default="null" minOccurs="0" name="modifiedAt" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="performanceData" type="tns:measurement"/>
+      <xs:element default="false" name="published" type="xs:boolean"/>
+      <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="manager">
+    <xs:sequence>
+      <xs:element name="contactInformation" type="xs:string"/>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="services">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="service" type="tns:user"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="users">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:user"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="user">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="email" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element name="iterationCount" type="xs:int"/>
+      <xs:element minOccurs="0" name="joinDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="password" type="xs:string"/>
+      <xs:element minOccurs="0" name="resetToken" type="xs:string"/>
+      <xs:element minOccurs="0" name="salt" type="xs:base64Binary"/>
+      <xs:element minOccurs="0" name="surname" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="membership">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="grant" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="provider" type="xs:string"/>
+      <xs:element minOccurs="0" name="user" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="provider">
+    <xs:sequence>
+      <xs:element name="contactInformation" type="xs:string"/>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="services">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:service"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="users">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:user"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="serviceHistory">
+    <xs:complexContent>
+      <xs:extension base="tns:serviceMetadata">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="version" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="vocabulary">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="extras">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="extra" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="parent" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
