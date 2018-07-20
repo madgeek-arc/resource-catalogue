@@ -45,7 +45,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     @Override
     public InfraService get(String id) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not Implemented");
     }
 
     @Override
@@ -124,9 +124,14 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     public Resource getResource(String id, String version) {
         Paging resources = null;
-        resources = searchService
-                .cqlQuery(String.format("infra_service_id = %s AND service_version = %s", id, version), resourceType.getName());
-
+        if (version == null) {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = %s AND service_version = %s", id, version),
+                            resourceType.getName(), 1, 0, "registeredAt", "DESC");
+        } else {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = %s AND service_version = %s", id, version), resourceType.getName());
+        }
         assert resources != null;
         return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
     }
