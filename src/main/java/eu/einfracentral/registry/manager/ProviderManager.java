@@ -4,13 +4,15 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.*;
 import eu.openminted.registry.core.domain.FacetFilter;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService {
     @Autowired
-    private ServiceService serviceService;
+    private InfraServiceService infraServiceService;
 
     public ProviderManager() {
         super(Provider.class);
@@ -27,6 +29,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.addFilter("provider", id);
         ff.setFrom(0);
         ff.setQuantity(1000);
-        return serviceService.getAll(ff).getResults();
+        return infraServiceService.getAll(ff).getResults().stream().map(Service::new).collect(Collectors.toList());
     }
 }

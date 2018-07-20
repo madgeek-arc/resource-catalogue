@@ -1,28 +1,21 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.core.ParserPool;
-import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.DumpService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-@org.springframework.stereotype.Component()
-public class InfraServiceManager extends ResourceManager<InfraService> implements InfraServiceService {
+@org.springframework.stereotype.Service("infraServiceService")
+public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService {
 
     @Autowired
     private VocabularyManager vocabularyManager;
@@ -59,11 +52,11 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
 //        if (!service.getId().contains(".")) {
 //            service.setId(java.util.UUID.randomUUID().toString());
 //        }
-        if (exists(infraService)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
-        }
+//        if (exists(infraService)) {
+//            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+//        }
         if (infraService.getServiceMetadata() == null) {
-            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName());
+            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName()); //FIXME: get name from backend
             infraService.setServiceMetadata(serviceMetadata);
         }
         validate(infraService);
@@ -73,31 +66,31 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
     @Override
     public InfraService update(InfraService infraService) {
 //        infraService.setService(validate(infraService.getService()));
-        InfraService existingService = get(infraService.getId());
-
-        // update existing service serviceMetadata
-        ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), infraService.getProviderName());
-        infraService.setServiceMetadata(serviceMetadata);
+        InfraService existingService = getLatest(infraService.getId());
 
         InfraService ret;
         if (infraService.getVersion().equals(existingService.getVersion())) {
+            validate(infraService);
+            // update existing service serviceMetadata
+            ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), infraService.getProviderName());
+            infraService.setServiceMetadata(serviceMetadata);
             // replace existing service with new
             ret = super.update(infraService);
         } else {
-            Resource existingResource = whereID(infraService.getId(), false);
-            existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getVersion()));
-            // save in exististing resource the payload of the updated service
-            validate(infraService);
-            existingResource.setPayload(serialize(infraService));
-            resourceService.updateResource(existingResource);
+//            Resource existingResource = getResource(infraService.getId(), infraService.getVersion());
+//            existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getVersion()));
 
-            // create new service, the old one
-            ret = add(existingService);
+            // save in exististing resource the payload of the updated service
+//            existingResource.setPayload(serialize(infraService));
+//            resourceService.updateResource(existingResource);
+
+            // create new service
+            ret = add(infraService);
         }
         return ret;
     }
 
-    @Override
+//    @Override
     public InfraService validate(InfraService service) {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
@@ -114,12 +107,12 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
     private InfraService validateVocabularies(InfraService service) {
         if (!vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Category"),
-                new SearchService.KeyValue("name", service.getCategory()))) {
+                new SearchService.KeyValue("vocabulary_id", service.getCategory()))) {
             service.setCategory(null);
         }
         if (!vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Subcategory"),
-                new SearchService.KeyValue("name", service.getSubcategory()))) {
+                new SearchService.KeyValue("vocabulary_id", service.getSubcategory()))) {
             service.setSubcategory(null);
         }
         if (service.getPlaces() != null) {
@@ -162,7 +155,7 @@ public class InfraServiceManager extends ResourceManager<InfraService> implement
             ret = serviceMetadata;
         }
         ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(modifiedBy); //get actual username somehow
+        ret.setModifiedBy(modifiedBy); //TODO: get actual username from backend
         return ret;
     }
 

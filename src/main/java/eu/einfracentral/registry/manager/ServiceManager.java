@@ -1,28 +1,20 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.core.ParserPool;
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Addenda;
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.service.ServiceService;
-import eu.openminted.registry.core.domain.Facet;
-import eu.openminted.registry.core.domain.FacetFilter;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.Resource;
-
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
-import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.Logger;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceManager extends ResourceManager<Service> implements ServiceService {
+public class ServiceManager extends ResourceManager<Service> implements ResourceService<Service> {
+//public class ServiceManager extends ServiceResourceManager implements InfraServiceService {
 
     @Autowired
     private VocabularyManager vocabularyManager;
@@ -116,14 +108,14 @@ public class ServiceManager extends ResourceManager<Service> implements ServiceS
             service.setSubcategory(null);
         }
         if (service.getPlaces() != null) {
-            if (!service.getPlaces().parallelStream().allMatch(place-> vocabularyManager.exists(
+            if (!service.getPlaces().parallelStream().allMatch(place -> vocabularyManager.exists(
                     new SearchService.KeyValue("type", "Place"),
                     new SearchService.KeyValue("vocabulary_id", place)))) {
                 service.setPlaces(null);
             }
         }
         if (service.getLanguages() != null) {
-            if (!service.getLanguages().parallelStream().allMatch(lang-> vocabularyManager.exists(
+            if (!service.getLanguages().parallelStream().allMatch(lang -> vocabularyManager.exists(
                     new SearchService.KeyValue("type", "Language"),
                     new SearchService.KeyValue("vocabulary_id", lang)))) {
                 service.setLanguages(null);

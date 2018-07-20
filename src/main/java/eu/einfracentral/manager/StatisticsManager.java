@@ -1,5 +1,6 @@
 package eu.einfracentral.manager;
 
+import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.*;
@@ -30,7 +31,7 @@ public class StatisticsManager implements StatisticsService {
                 .client()
                 .prepareSearch("event")
                 .setTypes("general")
-                .setQuery(getEventQueryBuilder(id, "RATING"))
+                .setQuery(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()))
                 .addAggregation(AggregationBuilders.dateHistogram("months")
                                                    .field("instant")
                                                    .dateHistogramInterval(DateHistogramInterval.DAY)
@@ -80,7 +81,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> externals(String id) {
-        return counts(id, "EXTERNAL");
+        return counts(id, Event.UserActionType.EXTERNAL.getKey());
     }
 
     private Map<String, Integer> counts(String id, String eventType) {
@@ -91,7 +92,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> internals(String id) {
-        return counts(id, "INTERNAL");
+        return counts(id, Event.UserActionType.INTERNAL.getKey());
     }
 
     @Override
@@ -141,7 +142,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> favourites(String id) {
         final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
-        List<InternalDateHistogram.Bucket> buckets = histogram(id, "FAVOURITE").getBuckets();
+        List<InternalDateHistogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey()).getBuckets();
         return buckets.stream().collect(
                 Collectors.toMap(
                         MultiBucketsAggregation.Bucket::getKeyAsString,
