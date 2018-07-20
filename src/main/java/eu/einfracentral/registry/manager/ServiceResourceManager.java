@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceHistory;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.Browsing;
@@ -9,12 +10,16 @@ import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService {
 
@@ -23,6 +28,9 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     public ServiceResourceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
     }
+
+    @Autowired
+    VersionService versionService;
 
     @Override
     public String getResourceType() {
@@ -98,6 +106,30 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         resourceService.deleteResource(getResource(infraService.getId(), infraService.getVersion()).getId());
     }
 
+    @Override
+    public Browsing<ServiceHistory> getHistory(String id) {
+        List<ServiceHistory> history = new ArrayList<>();
+//        versions = versionService.getVersionsByResource(getResource(id, null).getId())
+//                .stream()
+//                .map(version -> deserialize(version.getResource()))
+//                .collect(Collectors.toList())
+//                .stream()
+//                .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
+//                .collect(Collectors.toList());
+//
+        List<Resource> resources = getResourcesWithId(id);
+        resources.forEach(resource -> history.addAll(
+                versionService.getVersionsByResource(resource.getId())
+                        .stream()
+                        .map(version -> deserialize(version.getResource()))
+                        .collect(Collectors.toList())
+                        .stream()
+                        .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
+                        .collect(Collectors.toList())));
+
+        return new Browsing<>(history.size(), 0, history.size(), history, null);
+    }
+
     public String serialize(InfraService infraService) {
         String serialized;
         try {
@@ -126,7 +158,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         Paging resources = null;
         if (version == null) {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s AND service_version = %s", id, version),
+                    .cqlQuery(String.format("infra_service_id = %s", id),
                             resourceType.getName(), 1, 0, "registeredAt", "DESC");
         } else {
             resources = searchService
@@ -136,4 +168,13 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
     }
 
+    public List<Resource> getResourcesWithId(String id) {
+        Paging resources = null;
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = %s", id),
+                            resourceType.getName(), 1, 0, "registeredAt", "DESC");
+
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults();
+    }
 }
