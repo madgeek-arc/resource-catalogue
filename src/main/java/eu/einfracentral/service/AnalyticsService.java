@@ -2,25 +2,35 @@ package eu.einfracentral.service;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.*;
-import eu.einfracentral.config.ApplicationConfig;
+
 import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.*;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
+@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class AnalyticsService {
-    @Autowired
-    private ApplicationConfig config;
+
+    @Value("${matomoToken:e235d94544916c326e80b713dd233cd1}")
+    String matomoToken;
+
+    @Value("${fqdn:beta.einfracentral.eu}")
+    String fqdn;
+
     private String visits;
-    private String base = "http://%s:8084/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=1&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
+
+    final private String base = "http://%s:8084/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=1&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
+
 
     @PostConstruct
     void postConstruct() {
-        visits = String.format(base, config.getFqdn(), config.getMatomoToken(), "%s", "%s");
+        visits = String.format(base, fqdn, matomoToken, "%s", "%s");
     }
 
     public Map<String, Integer> getVisitsForLabel(String label) {

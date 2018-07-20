@@ -1,26 +1,30 @@
 package eu.einfracentral.config;
 
-import com.fasterxml.classmate.TypeResolver;
 import io.swagger.annotations.ApiOperation;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Properties;
-import javax.xml.datatype.XMLGregorianCalendar;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.*;
-import springfox.documentation.builders.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Properties;
+
 @Configuration
 @EnableSwagger2
+@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SwaggerConfig {
-    @Autowired
-    private TypeResolver typeResolver;
-    @Autowired
-    private ApplicationConfig config;
+
+    @Value("${platform.root:}")
+    String platform;
 
     @Bean
     public Docket getDocket() {
@@ -42,9 +46,9 @@ public class SwaggerConfig {
                 .title("eInfraCentral")
                 .description("External APIs for the eInfraCentral registry")
                 .version(getVersion())
-                .termsOfServiceUrl(String.format("%s/tos", config.getPlatform()))
+                .termsOfServiceUrl(String.format("%s/tos", platform))
 //                .license("NAME")
-                .licenseUrl(String.format("%s/license", config.getPlatform()))
+                .licenseUrl(String.format("%s/license", platform))
                 .build();
     }
 

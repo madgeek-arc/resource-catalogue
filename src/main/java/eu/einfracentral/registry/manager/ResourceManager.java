@@ -26,6 +26,11 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
+    public Resource getResource(String id) {
+        return whereID(id, true);
+    }
+
+    @Override
     public Browsing<T> getAll(FacetFilter ff) {
         ff.setBrowseBy(getBrowseBy());
         return getResults(ff);

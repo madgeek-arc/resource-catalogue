@@ -1,39 +1,61 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.config.ApplicationConfig;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
+@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class MailService {
+
     private Session session;
-    @Autowired
-    private ApplicationConfig config;
+
+    @Value("${mail.smtp.auth}")
+    String auth;
+
+    @Value("${mail.smtp.host}")
+    String host;
+
+    @Value("${mail.smtp.user}")
+    String user;
+
+    @Value("${mail.smtp.password}")
+    String password;
+
+    @Value("${mail.smtp.protocol}")
+    String protocol;
+
+    @Value("${mail.smtp.port}")
+    String port;
+
+    @Value("${mail.smtp.ssl.enable}")
+    String ssl;
 
     @PostConstruct
     private void postConstruct() {
         Properties sessionProps = new Properties();
-        sessionProps.setProperty("mail.smtp.auth", config.getAuth());
-        sessionProps.setProperty("mail.smtp.host", config.getHost());
-        sessionProps.setProperty("mail.smtp.password", config.getPassword());
-        sessionProps.setProperty("mail.smtp.port", config.getPort());
-        sessionProps.setProperty("mail.smtp.protocol", config.getProtocol());
-        sessionProps.setProperty("mail.smtp.ssl.enable", config.getSsl());
-        sessionProps.setProperty("mail.smtp.user", config.getUser());
+        sessionProps.setProperty("mail.smtp.auth", auth);
+        sessionProps.setProperty("mail.smtp.host", host);
+        sessionProps.setProperty("mail.smtp.password", password);
+        sessionProps.setProperty("mail.smtp.port", port);
+        sessionProps.setProperty("mail.smtp.protocol", protocol);
+        sessionProps.setProperty("mail.smtp.ssl.enable", ssl);
+        sessionProps.setProperty("mail.smtp.user", user);
         session = Session.getInstance(sessionProps, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(config.getUser(), config.getPassword());
+                return new PasswordAuthentication(user, password);
             }
         });
     }
 
     public void sendMail(String to, String subject, String text) {
         try (Transport transport = session.getTransport()) {
-            InternetAddress sender = new InternetAddress(config.getUser());
+            InternetAddress sender = new InternetAddress(user);
             Message message = new MimeMessage(session);
             message.setFrom(sender);
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
