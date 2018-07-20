@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.service;
 
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import java.util.*;
 
@@ -11,4 +12,5 @@ public interface ResourceService<T> extends ResourceCRUDService<T> {
     List<T> delAll();
     T validate(T t);
     List<T> versions(String id, String version);
+    Resource getResource(String id);
 }
