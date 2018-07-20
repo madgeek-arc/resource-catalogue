@@ -4,8 +4,8 @@ import eu.einfracentral.domain.Addenda;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceMetadata;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ResourceService;
-import eu.einfracentral.registry.service.ServiceService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -23,7 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
 @Api(value = "Get Information about a Service")
 public class InfraServiceController {
 
-    private ResourceService<InfraService> infraService;
+    private InfraServiceService infraService;
 
     @Autowired
     SearchService searchService;
@@ -42,10 +43,10 @@ public class InfraServiceController {
     ParserService parserService;
 
     @Autowired
-    ServiceService serviceService;
+    ResourceService<Service> serviceService;
 
     @Autowired
-    InfraServiceController(ResourceService<InfraService> service) {
+    InfraServiceController(InfraServiceService service) {
         this.infraService = service;
     }
 
@@ -84,23 +85,15 @@ public class InfraServiceController {
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return ResponseEntity.ok(infraService.get(id));
+        return ResponseEntity.ok(infraService.getLatest(id));
     }
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @PathVariable("version") String version,
                                             @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        InfraService ret;
-        try {
-            ret = infraService.get(id + "/" + version);
-        } catch (Exception e) {
-            ret = infraService.get(id);
-            if (!version.equals(ret.getVersion())) {
-                throw e;
-            }
-        }
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+        InfraService ret = infraService.get(id, version);
+        return new ResponseEntity<>(ret, ret!= null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @CrossOrigin
@@ -116,11 +109,12 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.update(new InfraService(service)));
     }
 
-    @ApiOperation(value = "Validates the infraService without actually changing the respository")
-    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<InfraService> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return ResponseEntity.ok(infraService.validate(new InfraService(service)));
-    }
+    // TODO needs fixing
+//    @ApiOperation(value = "Validates the infraService without actually changing the respository")
+//    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<InfraService> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+//        return ResponseEntity.ok(infraService.validate(new InfraService(service)));
+//    }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
     @ApiImplicitParams({
@@ -138,25 +132,25 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.getAll(ff));
     }
 
-    @ApiOperation(value = "Get a list of services based on a set of IDs")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
-    })
-    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<InfraService>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return ResponseEntity.ok(infraService.getSome(ids));
-    }
-
-    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
-    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return ResponseEntity.ok(infraService.getBy(field));
-    }
-
-    @Deprecated
-    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
-    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<InfraService>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return ResponseEntity.ok(infraService.versions(id, version.orElse(null)));
-    }
+//    @ApiOperation(value = "Get a list of services based on a set of IDs")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
+//    })
+//    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<List<InfraService>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+//        return ResponseEntity.ok(infraService.getSome(ids));
+//    }
+//
+//    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
+//    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+//        return ResponseEntity.ok(infraService.getBy(field));
+//    }
+//
+//    @Deprecated
+//    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
+//    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<List<InfraService>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+//        return ResponseEntity.ok(infraService.versions(id, version.orElse(null)));
+//    }
 }

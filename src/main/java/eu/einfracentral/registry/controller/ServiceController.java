@@ -1,16 +1,21 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.*;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.registry.service.ServiceService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Version;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.VersionService;
 import io.swagger.annotations.*;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -25,10 +30,16 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ServiceController extends ResourceController<Service> {
 
     @Autowired
-    ResourceService<InfraService> infraService;
+    InfraServiceService infraService;
 
     @Autowired
     ProviderService providerService;
+
+    @Autowired
+    VersionService versionService;
+
+    @Autowired
+    ParserService parserService;
 
     @Autowired
     public ServiceController(ResourceService<Service> service) {
@@ -40,7 +51,7 @@ public class ServiceController extends ResourceController<Service> {
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        Service ret = new Service(infraService.get(id));
+        Service ret = new Service(infraService.getLatest(id));
         return new ResponseEntity<>(ret, HttpStatus.OK);
         //return super.get(id, jwt);
     }
@@ -51,9 +62,9 @@ public class ServiceController extends ResourceController<Service> {
                                        @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
         InfraService ret;
         try {
-            ret = infraService.get(id + "/" + version);
+            ret = infraService.get(id, version);
         } catch (Exception e) {
-            ret = infraService.get(id);
+            ret = infraService.getLatest(id);
             if (!version.equals(ret.getVersion())) {
                 throw e;
             }
@@ -76,12 +87,12 @@ public class ServiceController extends ResourceController<Service> {
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Validates the infraService without actually changing the respository")
-    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        InfraService ret = this.infraService.validate(new InfraService(service));
-        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
-    }
+//    @ApiOperation(value = "Validates the infraService without actually changing the respository")
+//    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<Service> validate(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+//        InfraService ret = this.infraService.validate(new InfraService(service));
+//        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
+//    }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
     @ApiImplicitParams({
@@ -112,35 +123,56 @@ public class ServiceController extends ResourceController<Service> {
         return ResponseEntity.ok(new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
-    @ApiOperation(value = "Get a list of services based on a set of IDs")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
-    })
-    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        return ResponseEntity.ok(
-                infraService.getSome(ids)
-                        .stream().map(Service::new).collect(Collectors.toList()));
-    }
+//    @ApiOperation(value = "Get a list of services based on a set of IDs")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
+//    })
+//    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<List<Service>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+//        return ResponseEntity.ok(
+//                infraService.getSome(ids)
+//                        .stream().map(Service::new).collect(Collectors.toList()));
+//    }
 
-    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
-    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        Map<String, List<InfraService>> results = infraService.getBy(field);
-        Map<String, List<Service>> serviceResults = new HashMap<>();
-        for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
-            serviceResults.put(services.getKey(), services.getValue().stream().map(Service::new).collect(Collectors.toList()));
-        }
-        return ResponseEntity.ok(serviceResults);
-    }
+//    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
+//    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+//        Map<String, List<InfraService>> results = infraService.getBy(field);
+//        Map<String, List<Service>> serviceResults = new HashMap<>();
+//        for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
+//            serviceResults.put(services.getKey(), services.getValue().stream().map(Service::new).collect(Collectors.toList()));
+//        }
+//        return ResponseEntity.ok(serviceResults);
+//    }
+//
+//    @Deprecated
+//    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
+//    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+//        return ResponseEntity.ok(
+//                infraService.versions(id, version.toString())
+//                        .stream().map(Service::new).collect(Collectors.toList()));
+//    }
 
-    @Deprecated
-    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
-    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        return ResponseEntity.ok(
-                infraService.versions(id, version.toString())
-                        .stream().map(Service::new).collect(Collectors.toList()));
+    @ApiOperation(value = "Get all modifications of a specific infraService providing the infraService ID and a version identifier")
+    @RequestMapping(path = {"history/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<ServiceHistory>> history(@PathVariable String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        List<ServiceHistory> versions = versionService.getVersionsByResource(infraService.getResource(id, null).getId())
+                .stream()
+                .map(version -> {
+                    try {
+                        return parserService.deserialize(version.getResource(), InfraService.class).get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        logger.error(e);
+                        return null;
+                    }
+                })
+                .collect(Collectors.toList())
+                .stream()
+                .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
+                .collect(Collectors.toList());
+        ServiceHistory serviceHistory;
+        return ResponseEntity.ok(versions);
     }
 
     @ApiIgnore // TODO enable in a future release
