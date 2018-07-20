@@ -36,9 +36,6 @@ public class ServiceController extends ResourceController<Service> {
     ProviderService providerService;
 
     @Autowired
-    VersionService versionService;
-
-    @Autowired
     ParserService parserService;
 
     @Autowired
@@ -156,23 +153,9 @@ public class ServiceController extends ResourceController<Service> {
 
     @ApiOperation(value = "Get all modifications of a specific infraService providing the infraService ID and a version identifier")
     @RequestMapping(path = {"history/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<ServiceHistory>> history(@PathVariable String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        List<ServiceHistory> versions = versionService.getVersionsByResource(infraService.getResource(id, null).getId())
-                .stream()
-                .map(version -> {
-                    try {
-                        return parserService.deserialize(version.getResource(), InfraService.class).get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        logger.error(e);
-                        return null;
-                    }
-                })
-                .collect(Collectors.toList())
-                .stream()
-                .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
-                .collect(Collectors.toList());
-        ServiceHistory serviceHistory;
-        return ResponseEntity.ok(versions);
+    public ResponseEntity<Browsing<ServiceHistory>> history(@PathVariable String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        Browsing<ServiceHistory> history = infraService.getHistory(id);
+        return ResponseEntity.ok(history);
     }
 
     @ApiIgnore // TODO enable in a future release
