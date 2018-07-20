@@ -21,6 +21,12 @@
     },
     {
       "multivalued": false,
+      "name": "service_version",
+      "path": "//*[local-name()='version']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "tagline",
       "path": "//*[local-name()='tagline']/text()",
       "type": "java.lang.String"
@@ -135,5 +141,5 @@
   "name": "infra_service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://builds.openminted.eu/job/eic-registry-model/ws/target/generated-resources/schemagen/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/master/src/main/resources/schema1.xsd"
 }
