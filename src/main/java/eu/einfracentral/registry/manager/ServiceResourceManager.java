@@ -50,12 +50,13 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter) {
-        return null;
+        filter.setBrowseBy(getBrowseBy());
+        return getResults(filter);
     }
 
     @Override
     public Browsing<InfraService> getMy(FacetFilter filter) {
-        return null;
+        throw new UnsupportedOperationException("Not yet Implemented");
     }
 
     @Override
