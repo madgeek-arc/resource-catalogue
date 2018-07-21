@@ -49,12 +49,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
             logger.info("Created service with id: " + id);
         }
-//        if (!service.getId().contains(".")) {
-//            service.setId(java.util.UUID.randomUUID().toString());
-//        }
-//        if (exists(infraService)) {
-//            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
-//        }
+
         if (infraService.getServiceMetadata() == null) {
             ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName()); //FIXME: get name from backend
             infraService.setServiceMetadata(serviceMetadata);
@@ -94,12 +89,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public InfraService validate(InfraService service) {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
-//        return validateVocabularies(fixVersion(service));
         return validateVocabularies(service);
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
-    private Service migrate(Service service) {
+    private InfraService migrate(InfraService service) {
         return service;
     }
 
@@ -163,15 +157,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ServiceMetadata ret = new ServiceMetadata();
         ret.setRegisteredBy(registeredBy);
         ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
+        ret.setModifiedBy(registeredBy);
+        ret.setModifiedAt(ret.getRegisteredAt());
         return ret;
     }
-
-//    private Service fixVersion(Service service) {
-//        if (service.getVersion() == null || service.getVersion().equals("")) {
-//            service.setVersion("0");
-//        }
-//        return service;
-//    }
 
     private String createServiceId(Service service) {
         String provider = service.getProviderName();
