@@ -4,10 +4,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ServiceHistory;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.VersionService;
@@ -107,25 +104,28 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public Browsing<ServiceHistory> getHistory(String id) {
-        List<ServiceHistory> history = new ArrayList<>();
-//        versions = versionService.getVersionsByResource(getResource(id, null).getId())
-//                .stream()
-//                .map(version -> deserialize(version.getResource()))
-//                .collect(Collectors.toList())
-//                .stream()
-//                .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
-//                .collect(Collectors.toList());
-//
-        List<Resource> resources = getResourcesWithId(id);
-        resources.forEach(resource -> history.addAll(
-                versionService.getVersionsByResource(resource.getId())
-                        .stream()
-                        .map(version -> deserialize(version.getResource()))
-                        .collect(Collectors.toList())
-                        .stream()
-                        .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
-                        .collect(Collectors.toList())));
+    public Browsing<ServiceHistory> getHistory(String service_id) {
+        List<ServiceHistory> history;
+        List<Resource> serviceVersionsResources = new ArrayList<>();
+
+        // get all resources with the specified Service id
+        List<Resource> resources = getResourcesWithServiceId(service_id);
+
+        // save each resource (InfraService) in the variable 'serviceVersionsResources',
+        // followed by its previous versions
+        for (Resource resource : resources) {
+//            serviceVersionsResources.add(resource); // FIXME: check if this is necessary (don't forget the comment above)
+            List<Version> versions = versionService.getVersionsByResource(resource.getId());
+            versions.forEach(version -> serviceVersionsResources.add(version.getResource()));
+        }
+
+        // at this point 'serviceVersionsResources' contains all resources
+        // created from the updates of the service with ID = service_id
+        history = serviceVersionsResources
+                .stream()
+                .map(this::deserialize)
+                .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
+                .collect(Collectors.toList());
 
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
@@ -168,11 +168,11 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
     }
 
-    public List<Resource> getResourcesWithId(String id) {
+    public List<Resource> getResourcesWithServiceId(String infra_service_id) {
         Paging resources = null;
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s", id),
-                            resourceType.getName(), 1, 0, "registeredAt", "DESC");
+                    .cqlQuery(String.format("infra_service_id = %s", infra_service_id),
+                            resourceType.getName(), 10000, 0, "registeredAt", "DESC");
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();
