@@ -6,6 +6,9 @@ import eu.einfracentral.domain.ServiceHistory;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.Resource;
 
+import java.util.List;
+import java.util.Map;
+
 public interface InfraServiceService extends ServiceInterface<InfraService> {
 
     /**
@@ -22,4 +25,18 @@ public interface InfraServiceService extends ServiceInterface<InfraService> {
      * @return
      */
     Browsing<ServiceHistory> getHistory(String id);
+
+    /**
+     * Get InfraServices by a specific field.
+     * @param field
+     * @return
+     */
+    Map<String, List<InfraService>> getBy(String field);
+
+    /**
+     * Get InfraServices with the specified ids.
+     * @param ids
+     * @return
+     */
+    List<InfraService> getByIds(String... ids);
 }

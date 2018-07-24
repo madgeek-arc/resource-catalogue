@@ -2,6 +2,7 @@ package eu.einfracentral.registry.service;
 
 
 import eu.einfracentral.domain.InfraService;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 
 public interface ServiceInterface<T> extends ResourceCRUDService<T> {
@@ -18,5 +19,5 @@ public interface ServiceInterface<T> extends ResourceCRUDService<T> {
      * @param id of the resource in the index.
      * @return service.
      */
-    InfraService getLatest(String id);
+    InfraService getLatest(String id) throws ResourceNotFoundException;
 }
