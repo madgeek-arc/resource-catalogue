@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public InfraService update(InfraService infraService) {
+    public InfraService update(InfraService infraService) throws ResourceNotFoundException {
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = getLatest(infraService.getId());
 

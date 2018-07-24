@@ -5,8 +5,10 @@ import eu.einfracentral.domain.ServiceHistory;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.ServiceException;
 import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 
 import java.rmi.dgc.Lease;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -43,11 +46,14 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public InfraService getLatest(String id) {
+    public InfraService getLatest(String id) throws ResourceNotFoundException {
         List resources = searchService
                 .cqlQuery("infra_service_id=" + id, "infra_service", 1, 0, "registeredAt", "DESC")
                 .getResults();
-        return resources.isEmpty() ? null : deserialize((Resource) resources.get(0));
+        if (resources.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return deserialize((Resource) resources.get(0));
     }
 
     @Override
@@ -85,7 +91,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public InfraService update(InfraService infraService) {
+    public InfraService update(InfraService infraService) throws ResourceNotFoundException {
         String serialized = null;
         Resource existing = null;
         try {
@@ -112,6 +118,20 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
                         .stream()
                         .map(resource -> deserialize(getResourceById(resource.getId())))
                         .collect(Collectors.toList())));
+    }
+
+    @Override
+    public List<InfraService> getByIds(String... ids) {
+        List<InfraService> services;
+        services = Arrays.stream(ids).map(id -> {
+            try {
+                return getLatest(id);
+            } catch (ResourceNotFoundException e) {
+                logger.error("Could not find InfraService with id: "+ id, e);
+                throw new ServiceException(e);
+            }
+        }).collect(Collectors.toList());
+        return services;
     }
 
     @Override
