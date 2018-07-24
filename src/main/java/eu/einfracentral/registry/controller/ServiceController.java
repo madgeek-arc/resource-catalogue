@@ -47,7 +47,7 @@ public class ServiceController extends ResourceController<Service> {
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         Service ret = new Service(infraService.getLatest(id));
         return new ResponseEntity<>(ret, HttpStatus.OK);
         //return super.get(id, jwt);
@@ -56,7 +56,7 @@ public class ServiceController extends ResourceController<Service> {
     @ApiOperation(value = "Get the specified version of an infraService providing the infraService ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> get(@PathVariable("id") String id, @PathVariable("version") String version,
-                                       @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+                                       @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         InfraService ret;
         try {
             ret = infraService.get(id, version);
@@ -98,7 +98,7 @@ public class ServiceController extends ResourceController<Service> {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Browsing<Service>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<Browsing<Service>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
 //        super.getAll(allRequestParams, jwt);
         logger.debug("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
@@ -117,30 +117,33 @@ public class ServiceController extends ResourceController<Service> {
         }
         Browsing<InfraService> infraServices = infraService.getAll(facetFilter);
         List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
+        if (services.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
         return ResponseEntity.ok(new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
-//    @ApiOperation(value = "Get a list of services based on a set of IDs")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
-//    })
-//    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<List<Service>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-//        return ResponseEntity.ok(
-//                infraService.getSome(ids)
-//                        .stream().map(Service::new).collect(Collectors.toList()));
-//    }
+    @ApiOperation(value = "Get a list of services based on a set of IDs")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
+    })
+    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<Service>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return ResponseEntity.ok(
+                infraService.getByIds(ids)
+                        .stream().map(Service::new).collect(Collectors.toList()));
+    }
 
-//    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
-//    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-//        Map<String, List<InfraService>> results = infraService.getBy(field);
-//        Map<String, List<Service>> serviceResults = new HashMap<>();
-//        for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
-//            serviceResults.put(services.getKey(), services.getValue().stream().map(Service::new).collect(Collectors.toList()));
-//        }
-//        return ResponseEntity.ok(serviceResults);
-//    }
+    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
+    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        Map<String, List<InfraService>> results = infraService.getBy(field);
+        Map<String, List<Service>> serviceResults = new HashMap<>();
+        for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
+            serviceResults.put(services.getKey(), services.getValue().stream().map(Service::new).collect(Collectors.toList()));
+        }
+        return ResponseEntity.ok(serviceResults);
+    }
 //
 //    @Deprecated
 //    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
