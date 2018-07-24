@@ -19,7 +19,7 @@ public class MeasurementController extends ResourceController<Measurement> {
 
     @ApiOperation(value = "Returns the measurement assigned the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return super.get(id, jwt);
     }
 

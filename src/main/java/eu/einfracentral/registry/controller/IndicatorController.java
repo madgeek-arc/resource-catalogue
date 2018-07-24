@@ -19,7 +19,7 @@ public class IndicatorController extends ResourceController<Indicator> {
 
     @ApiOperation(value = "Returns the indicator assigned the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
         return super.get(id, jwt);
     }
 

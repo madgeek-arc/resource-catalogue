@@ -132,21 +132,21 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.getAll(ff));
     }
 
-//    @ApiOperation(value = "Get a list of services based on a set of IDs")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
-//    })
-//    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<List<InfraService>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-//        return ResponseEntity.ok(infraService.getSome(ids));
-//    }
-//
-//    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
-//    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-//        return ResponseEntity.ok(infraService.getBy(field));
-//    }
-//
+    @ApiOperation(value = "Get a list of services based on a set of IDs")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
+    })
+    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<InfraService>> getSome(@PathVariable String[] ids, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return ResponseEntity.ok(infraService.getByIds(ids));
+    }
+
+    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
+    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+        return ResponseEntity.ok(infraService.getBy(field));
+    }
+
 //    @Deprecated
 //    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
 //    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
