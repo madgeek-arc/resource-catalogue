@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -104,9 +105,17 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
+    public Map<String, List<InfraService>> getBy(String field) {
+        return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                entry -> entry.getValue()
+                        .stream()
+                        .map(resource -> deserialize(getResource(resource.getId(), null)))
+                        .collect(Collectors.toList())));
+    }
+
+    @Override
     public Browsing<ServiceHistory> getHistory(String service_id) {
-        List<ServiceHistory> history;
-        List<Resource> serviceVersionsResources = new ArrayList<>();
+        List<ServiceHistory> history = new ArrayList<>();
 
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(service_id);
@@ -116,16 +125,13 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         for (Resource resource : resources) {
 //            serviceVersionsResources.add(resource); // FIXME: check if this is necessary (don't forget the comment above)
             List<Version> versions = versionService.getVersionsByResource(resource.getId());
-            versions.forEach(version -> serviceVersionsResources.add(version.getResource()));
+            for (Version version : versions) {
+                Resource tempResource = version.getResource();
+                tempResource.setPayload(version.getPayload());
+                InfraService service = deserialize(tempResource);
+                history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
+            }
         }
-
-        // at this point 'serviceVersionsResources' contains all resources
-        // created from the updates of the service with ID = service_id
-        history = serviceVersionsResources
-                .stream()
-                .map(this::deserialize)
-                .map(service -> new ServiceHistory(service.getServiceMetadata(), service.getVersion()))
-                .collect(Collectors.toList());
 
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
@@ -176,5 +182,12 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();
+    }
+
+    protected Map<String, List<Resource>> groupBy(String field) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(resourceType.getName());
+        ff.setQuantity(1000);
+        return searchService.searchByCategory(ff, field);
     }
 }
