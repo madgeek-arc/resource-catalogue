@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import java.rmi.dgc.Lease;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 entry -> entry.getValue()
                         .stream()
-                        .map(resource -> deserialize(getResource(resource.getId(), null)))
+                        .map(resource -> deserialize(getResourceById(resource.getId())))
                         .collect(Collectors.toList())));
     }
 
@@ -148,6 +149,10 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     public InfraService deserialize(Resource resource) {
+        if (resource == null) {
+            logger.warn("attempt to deserialize null resource");
+            return null;
+        }
         try {
             return parserPool.deserialize(resource, InfraService.class).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -160,24 +165,33 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         return getResource(infraService.getId(), infraService.getVersion()) != null;
     }
 
-    public Resource getResource(String id, String version) {
+    public Resource getResourceById(String resourceId) {
+        List resource = searchService.cqlQuery(String.format("id = %s", resourceId), resourceType.getName(),
+                1, 0, "registeredAt", "DESC").getResults();
+        if (resource.isEmpty()) {
+            return null;
+        }
+        return (Resource) resource.get(0);
+    }
+
+    public Resource getResource(String serviceId, String serviceVersion) {
         Paging resources = null;
-        if (version == null) {
+        if (serviceVersion == null) {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s", id),
+                    .cqlQuery(String.format("infra_service_id = %s", serviceId),
                             resourceType.getName(), 1, 0, "registeredAt", "DESC");
         } else {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s AND service_version = %s", id, version), resourceType.getName());
+                    .cqlQuery(String.format("infra_service_id = %s AND service_version = %s", serviceId, serviceVersion), resourceType.getName());
         }
         assert resources != null;
         return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
     }
 
-    public List<Resource> getResourcesWithServiceId(String infra_service_id) {
+    public List<Resource> getResourcesWithServiceId(String infraServiceId) {
         Paging resources = null;
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s", infra_service_id),
+                    .cqlQuery(String.format("infra_service_id = %s", infraServiceId),
                             resourceType.getName(), 10000, 0, "registeredAt", "DESC");
 
         assert resources != null;
@@ -188,6 +202,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceType.getName());
         ff.setQuantity(1000);
-        return searchService.searchByCategory(ff, field);
+        Map<String, List<Resource>> res = searchService.searchByCategory(ff, field);
+        return res;
     }
 }
