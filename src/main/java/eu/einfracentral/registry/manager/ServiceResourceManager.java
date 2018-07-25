@@ -47,7 +47,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     @Override
     public InfraService getLatest(String id) throws ResourceNotFoundException {
         List resources = searchService
-                .cqlQuery("infra_service_id=" + id, "infra_service", 1, 0, "registeredAt", "DESC")
+                .cqlQuery("infra_service_id=\"" + id + "\"", "infra_service", 1, 0, "registeredAt", "DESC")
                 .getResults();
         if (resources.isEmpty()) {
             throw new ResourceNotFoundException();
@@ -185,7 +185,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     public Resource getResourceById(String resourceId) {
-        List resource = searchService.cqlQuery(String.format("id = %s", resourceId), resourceType.getName(),
+        List resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
                 1, 0, "registeredAt", "DESC").getResults();
         if (resource.isEmpty()) {
             return null;
@@ -197,11 +197,11 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         Paging resources = null;
         if (serviceVersion == null) {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s", serviceId),
+                    .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
                             resourceType.getName(), 1, 0, "registeredAt", "DESC");
         } else {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s AND service_version = %s", serviceId, serviceVersion), resourceType.getName());
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND service_version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
         }
         assert resources != null;
         return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
@@ -210,7 +210,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     public List<Resource> getResourcesWithServiceId(String infraServiceId) {
         Paging resources = null;
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = %s", infraServiceId),
+                    .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
                             resourceType.getName(), 10000, 0, "registeredAt", "DESC");
 
         assert resources != null;
