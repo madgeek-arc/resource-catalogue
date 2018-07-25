@@ -389,6 +389,7 @@
       <xs:extension base="tns:serviceMetadata">
         <xs:sequence>
           <xs:element minOccurs="0" name="version" type="xs:string"/>
+          <xs:element name="versionChange" type="xs:boolean"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
