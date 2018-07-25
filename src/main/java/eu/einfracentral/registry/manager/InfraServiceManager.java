@@ -100,12 +100,12 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     //yes, this is foreign key logic right here on the application
     private InfraService validateVocabularies(InfraService service) {
-        if (!vocabularyManager.exists(
+        if (service.getCategory() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Category"),
                 new SearchService.KeyValue("vocabulary_id", service.getCategory()))) {
             service.setCategory(null);
         }
-        if (!vocabularyManager.exists(
+        if (service.getSubcategory() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Subcategory"),
                 new SearchService.KeyValue("vocabulary_id", service.getSubcategory()))) {
             service.setSubcategory(null);
@@ -165,6 +165,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     private String createServiceId(Service service) {
         String provider = service.getProviderName();
-        return String.format("%s.%s", provider, service.getName().replaceAll(" ", "_").toLowerCase());
+        return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z\\s]+","").replaceAll(" ", "_").toLowerCase());
     }
 }
