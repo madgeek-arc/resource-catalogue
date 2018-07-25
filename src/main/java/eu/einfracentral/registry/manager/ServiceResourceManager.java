@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-import java.rmi.dgc.Lease;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -141,8 +140,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(service_id);
 
-        // save each resource (InfraService) in the variable 'serviceVersionsResources',
-        // followed by its previous versions
+        // save each resource (InfraService), followed by its previous versions
         for (Resource resource : resources) {
 //            serviceVersionsResources.add(resource); // FIXME: check if this is necessary (don't forget the comment above)
             List<Version> versions = versionService.getVersionsByResource(resource.getId());
@@ -152,6 +150,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
                 InfraService service = deserialize(tempResource);
                 history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
             }
+            history.get(history.size()-1).setVersionChange(true);
         }
 
         return new Browsing<>(history.size(), 0, history.size(), history, null);
