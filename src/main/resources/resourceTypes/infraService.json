@@ -40,6 +40,7 @@
     {
       "multivalued": false,
       "name": "trl",
+      "label": "TRL",
       "path": "//*[local-name()='trl']/text()",
       "type": "java.lang.String"
     },
@@ -67,6 +68,7 @@
     {
       "multivalued": false,
       "name": "subcategory",
+      "label": "Subcategory",
       "path": "//*[local-name()='subcategory']/text()",
       "type": "java.lang.String"
     },
@@ -79,6 +81,7 @@
     {
       "multivalued": true,
       "name": "language",
+      "label": "Language",
       "path": "//*[local-name()='language']/text()",
       "type": "java.lang.String"
     },
