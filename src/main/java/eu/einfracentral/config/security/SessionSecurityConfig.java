@@ -21,6 +21,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -61,6 +62,9 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         logger.info("Configure AAI Security Config");
         http
+                .headers()
+                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
+                .httpStrictTransportSecurity().disable()
                 .authenticationProvider(openIdConnectAuthenticationProvider()).exceptionHandling().and()
                 .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
@@ -75,7 +79,8 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 .csrf()
-                .disable();
+                .disable()
+        ;
 
         //authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/openid_connect_login"))
     }

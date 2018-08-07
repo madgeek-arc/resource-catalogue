@@ -1,6 +1,8 @@
 package eu.einfracentral.config;
 
 import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,8 @@ import java.util.Properties;
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SwaggerConfig {
 
+    private static final Logger logger = LogManager.getLogger(SwaggerConfig.class);
+
     @Value("${platform.root:}")
     String platform;
 
@@ -54,7 +58,7 @@ public class SwaggerConfig {
     @Bean
     public Docket getDocket() throws MalformedURLException {
 
-            URL hostURL = new URL(platform + "/api");
+            URL hostURL = new URL(platform + "api");
             return new Docket(DocumentationType.SWAGGER_2)
                     .directModelSubstitute(URL.class, String.class)
                     .directModelSubstitute(XMLGregorianCalendar.class, String.class)
@@ -89,7 +93,7 @@ public class SwaggerConfig {
             Properties props = new Properties();
             props.load(in);
             ret = props.getProperty("version");
-        } catch (Throwable e) {
+        } catch (Throwable ignored) {
         }
         return ret == null ? "" : ret;
     }
