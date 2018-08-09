@@ -75,7 +75,7 @@ public class EventController extends ResourceController<Event> {
 
 
     @ApiOperation("Set a service as favorite for a user.")
-    @RequestMapping(path = "favorite/service/{sId}/user/{uId}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "favourite/service/{sId}/user/{uId}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Event> setFavourite(@PathVariable String sId, @PathVariable String uId) throws ResourceNotFoundException {
         // TODO: check if user and service exists ?
         return new ResponseEntity<>(toggleFavourite(sId, uId), HttpStatus.OK);
