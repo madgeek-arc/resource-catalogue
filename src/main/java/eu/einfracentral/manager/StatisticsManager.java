@@ -2,11 +2,15 @@ package eu.einfracentral.manager;
 
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.*;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
@@ -18,6 +22,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StatisticsManager implements StatisticsService {
+
+    private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
+
+    @Autowired
+    EventService eventService;
+
     @Autowired
     private ElasticConfiguration elastic;
     @Autowired
@@ -97,10 +107,20 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> pFavourites(String id) {
+//        List<Service> list = providerService.getServices(id);
+//        Map<String, Integer> map = new HashMap<>();
+//        Map<String, Integer> sth = new HashMap<>();
+//        for (Service service : list){
+//            sth = favourites(service.getId());
+//        }
+////        map.put()
+
+//        eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), id);
+
         return providerService.getServices(id)
-                              .stream()
-                              .flatMap(s -> favourites(s.getId()).entrySet().stream())
-                              .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+        /*return list*/.stream()
+                .flatMap(s -> favourites(s.getId()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
 
     @Override
@@ -143,6 +163,12 @@ public class StatisticsManager implements StatisticsService {
     public Map<String, Integer> favourites(String id) {
         final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
         List<InternalDateHistogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey()).getBuckets();
+        InternalDateHistogram hist = histogram(id, Event.UserActionType.FAVOURITE.getKey());
+        Object x = hist.getBuckets().get(0).getKey();
+        Map<String, Integer> map = new HashMap<>();
+        for (MultiBucketsAggregation.Bucket bucket : buckets) {
+            map.put(bucket.getKeyAsString(), bucket.getAggregations().get("value"));
+        }
         return buckets.stream().collect(
                 Collectors.toMap(
                         MultiBucketsAggregation.Bucket::getKeyAsString,
