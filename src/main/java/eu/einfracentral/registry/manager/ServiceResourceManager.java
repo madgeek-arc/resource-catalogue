@@ -140,17 +140,21 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(service_id);
 
-        // save each resource (InfraService), followed by its previous versions
+        // for each resource (InfraService), get its versions
         for (Resource resource : resources) {
-//            serviceVersionsResources.add(resource); // FIXME: check if this is necessary (don't forget the comment above)
             List<Version> versions = versionService.getVersionsByResource(resource.getId());
-            for (Version version : versions) {
-                Resource tempResource = version.getResource();
-                tempResource.setPayload(version.getPayload());
-                InfraService service = deserialize(tempResource);
+            if (versions.size() == 0) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
+                InfraService service = deserialize(resource);
                 history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
+            } else {
+                for (Version version : versions) {
+                    Resource tempResource = version.getResource();
+                    tempResource.setPayload(version.getPayload());
+                    InfraService service = deserialize(tempResource);
+                    history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
+                }
+                history.get(history.size()-1).setVersionChange(true);
             }
-            history.get(history.size()-1).setVersionChange(true);
         }
 
         return new Browsing<>(history.size(), 0, history.size(), history, null);
