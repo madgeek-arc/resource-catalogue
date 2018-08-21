@@ -163,8 +163,6 @@ public class StatisticsManager implements StatisticsService {
     public Map<String, Integer> favourites(String id) {
         final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
         List<InternalDateHistogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey()).getBuckets();
-        InternalDateHistogram hist = histogram(id, Event.UserActionType.FAVOURITE.getKey());
-        Object x = hist.getBuckets().get(0).getKey();
         Map<String, Integer> map = new HashMap<>();
         for (MultiBucketsAggregation.Bucket bucket : buckets) {
             map.put(bucket.getKeyAsString(), bucket.getAggregations().get("value"));
