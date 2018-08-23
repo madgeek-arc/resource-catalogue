@@ -60,7 +60,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setService(serviceId);
             event.setUser(userId);
             event.setType(Event.UserActionType.FAVOURITE.getKey());
-            event.setValue("true");
+            event.setValue("1");
             event = add(event);
         } else {
             event = events.get(0);
@@ -118,10 +118,10 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     private Event booleanToggleValue(Event event) {
-        if ("true".equals(event.getValue())) {
-            event.setValue("false");
+        if ("1".equals(event.getValue())) {
+            event.setValue("0");
         } else {
-            event.setValue("true");
+            event.setValue("1");
         }
         return event;
     }
