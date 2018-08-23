@@ -115,15 +115,8 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> pFavourites(String id) {
-        List<Service> list = providerService.getServices(id);
-
-        Map<String, Integer> map = list
-                .stream()
-                .flatMap(s -> favourites(s.getId()).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
-
         return providerService.getServices(id)
-        /*return list*/.stream()
+                .stream()
                 .flatMap(s -> favourites(s.getId()).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
