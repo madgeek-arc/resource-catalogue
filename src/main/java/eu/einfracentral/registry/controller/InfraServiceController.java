@@ -143,7 +143,7 @@ public class InfraServiceController {
 
     @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field));
     }
 
