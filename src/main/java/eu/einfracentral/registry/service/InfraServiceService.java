@@ -31,7 +31,7 @@ public interface InfraServiceService extends ServiceInterface<InfraService> {
      * @param field
      * @return
      */
-    Map<String, List<InfraService>> getBy(String field);
+    Map<String, List<InfraService>> getBy(String field) throws NoSuchFieldException;
 
     /**
      * Get InfraServices with the specified ids.
