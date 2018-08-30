@@ -134,11 +134,11 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         final Field f = serviceField;
         return services.getResults().stream()/*.map(Service::new)*/.collect(Collectors.groupingBy(service -> {
             try {
-                return f.get(service).toString();
+                return f.get(service) != null ? f.get(service).toString() : "undefined";
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 try {
-                    return f.get(service).toString();
+                    return f.get(service) != null ? f.get(service).toString() : "undefined";
                 } catch (IllegalAccessException e1) {
                     e1.printStackTrace();
                 }
