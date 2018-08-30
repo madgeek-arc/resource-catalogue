@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceHistory;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -15,12 +16,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService {
 
@@ -111,12 +115,36 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public Map<String, List<InfraService>> getBy(String field) {
-        return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                entry -> entry.getValue()
-                        .stream()
-                        .map(resource -> deserialize(getResourceById(resource.getId())))
-                        .collect(Collectors.toList())));
+    public Map<String, List<InfraService>> getBy(String field) throws NoSuchFieldException {
+        Field serviceField = null;
+        try {
+            serviceField = Service.class.getDeclaredField(field);
+        } catch (NoSuchFieldException e) {
+            logger.warn("Attempt to find field " + field + " in Service failed: ", e);
+            serviceField = InfraService.class.getDeclaredField(field);
+        } finally {
+            assert serviceField != null;
+            serviceField.setAccessible(true);
+        }
+
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        Browsing<InfraService> services = getAll(ff);
+
+        final Field f = serviceField;
+        return services.getResults().stream()/*.map(Service::new)*/.collect(Collectors.groupingBy(service -> {
+            try {
+                return f.get(service).toString();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                try {
+                    return f.get(service).toString();
+                } catch (IllegalAccessException e1) {
+                    e1.printStackTrace();
+                }
+                return "undefined";
+            }
+        }, Collectors.mapping((InfraService service) -> service, toList())));
     }
 
     @Override
@@ -129,7 +157,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
                 logger.error("Could not find InfraService with id: "+ id, e);
                 throw new ServiceException(e);
             }
-        }).collect(Collectors.toList());
+        }).collect(toList());
         return services;
     }
 
