@@ -113,7 +113,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getUserEvents(String eventType, String userId) {
         Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType + " AND event_user=" + userId, "event");
+                .cqlQuery("type=" + eventType + " AND event_user=" + userId, "event", 10000, 0, "instant", "DESC");
         return pagingToList(event_resources);
     }
 
