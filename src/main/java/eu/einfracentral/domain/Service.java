@@ -298,6 +298,15 @@ public class Service implements Identifiable {
         this.availability = service.getAvailability();
         this.reliability = service.getReliability();
         this.serviceability = service.getServiceability();
+        // transient fields
+        this.categoryName = service.getCategoryName();
+        this.subCategoryName = service.getSubCategoryName();
+        this.languageNames = service.getLanguageNames();
+        this.views = service.getViews();
+        this.ratings = service.getRatings();
+        this.hasRate = service.getHasRate();
+        this.favourites = service.getFavourites();
+        this.isFavourite = service.isFavourite();
     }
 
     @Override
