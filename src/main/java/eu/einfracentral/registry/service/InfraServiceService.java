@@ -2,8 +2,10 @@ package eu.einfracentral.registry.service;
 
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceHistory;
 import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 
 import java.util.List;
@@ -39,4 +41,11 @@ public interface InfraServiceService extends ServiceInterface<InfraService> {
      * @return
      */
     List<InfraService> getByIds(String... ids);
+
+    /**
+     *
+     * @param ff
+     * @return
+     */
+    Browsing<Service> getRichServices(FacetFilter ff);
 }
