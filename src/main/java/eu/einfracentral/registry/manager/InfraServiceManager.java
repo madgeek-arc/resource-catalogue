@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import java.util.stream.Collectors;
+
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService {
 
@@ -140,6 +142,9 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     @Override
     public Browsing<InfraService> getAll(FacetFilter ff) {
         return super.getAll(ff);
+//        Browsing<InfraService> services = super.getAll(ff);
+//        services.setResults(services.getResults().stream().map(this::FillTransientFields).collect(Collectors.toList()));
+//        return services;
     }
 
     private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {

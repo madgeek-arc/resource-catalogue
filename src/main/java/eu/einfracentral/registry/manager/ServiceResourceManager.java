@@ -37,6 +37,9 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     @Autowired
     VersionService versionService;
 
+    @Autowired
+    VocabularyManager vocabularyManager;
+
     @Override
     public String getResourceType() {
         return resourceType.getName();
@@ -162,6 +165,18 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
+    public Browsing<Service> getRichServices(FacetFilter ff) {
+        Browsing<InfraService> infraServices = getAll(ff);
+        List<Service> services = infraServices.getResults()
+                .stream()
+//                .map(this::FillTransientFields)
+                .map(Service::new)
+                .collect(toList());
+        return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(),
+                infraServices.getTo(), services, infraServices.getFacets());
+    }
+
+    @Override
     public Browsing<ServiceHistory> getHistory(String service_id) {
         List<ServiceHistory> history = new ArrayList<>();
 
@@ -255,5 +270,16 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         ff.setQuantity(1000);
         Map<String, List<Resource>> res = searchService.searchByCategory(ff, field);
         return res;
+    }
+
+
+    private InfraService FillTransientFields(InfraService infraService) {
+        // FIXME: vocabularyManager.get() is very slow
+        infraService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
+        infraService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
+        // TODO complete function
+
+        logger.info(infraService.toString());
+        return infraService;
     }
 }
