@@ -227,7 +227,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     public Resource getResource(String serviceId, String serviceVersion) {
         Paging resources = null;
-        if (serviceVersion == null) {
+        if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
                             resourceType.getName(), 1, 0, "registeredAt", "DESC");
