@@ -115,12 +115,17 @@ public class ServiceController extends ResourceController<Service> {
             sort.put(orderField, order);
             facetFilter.setOrderBy(sort);
         }
-        Browsing<InfraService> infraServices = infraService.getAll(facetFilter);
-        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
-        if (services.isEmpty()) {
+//        Browsing<InfraService> infraServices = infraService.getAll(facetFilter);
+//        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
+//        if (services.isEmpty()) {
+//            throw new ResourceNotFoundException();
+//        }
+//        return ResponseEntity.ok(new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
+        Browsing<Service> services = infraService.getRichServices(facetFilter);
+        if (services.getResults().isEmpty()) {
             throw new ResourceNotFoundException();
         }
-        return ResponseEntity.ok(new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
+        return ResponseEntity.ok(services);
     }
 
     @ApiOperation(value = "Get a list of services based on a set of IDs")
