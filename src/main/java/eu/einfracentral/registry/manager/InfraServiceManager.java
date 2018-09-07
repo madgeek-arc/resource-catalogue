@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.UrlValidator;
 import eu.einfracentral.core.ParserPool;
 import eu.einfracentral.domain.InfraService;
@@ -39,6 +40,9 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Autowired
     private VocabularyManager vocabularyManager;
+
+    @Autowired
+    private ProviderManager providerManager;
 
     @Autowired
     private SearchService searchService;
@@ -128,6 +132,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         service = validateDescription(service);
         service = validateSymbol(service);
         service = validateVersion(service);
+        service = validateLastUpdate(service);
+        service = validateOrder(service);
+        service = validateSLA(service);
+        service = validateProviders(service);
         return service;
     }
 
@@ -199,6 +207,18 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return service;
     }
 
+    //validates the correctness of Providers.
+    private InfraService validateProviders(InfraService service) throws Exception {
+        List<String> providers = service.getProviders();
+        List<String> existingProviders = new ArrayList<>();
+        if (service.getProviders() == null) {
+            throw new Exception("field 'providers' is obligatory");
+        } if (service.getProviders().stream().noneMatch(x -> providerManager.getResource(x) != null)) {
+            throw new Exception("Provider does not exist");
+        }
+        return service;
+    }
+
     //validates the correctness of Service Description.
     private InfraService validateDescription(InfraService service) throws Exception{
         if (service.getDescription() == null || service.getDescription().equals("")){
@@ -219,6 +239,30 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private InfraService validateVersion(InfraService service) throws Exception {
         if (service.getVersion() == null || service.getVersion().equals("")) {
             throw new Exception("field 'version' is mandatory");
+        }
+        return service;
+    }
+
+    //validates the correctness of Service Last Update.
+    private InfraService validateLastUpdate(InfraService service) throws Exception {
+        if (service.getLastUpdate() == null || service.getLastUpdate().equals("")) {
+            throw new Exception("field 'lastUpdate' is mandatory");
+        }
+        return service;
+    }
+
+    //validates the correctness of Service Order URL Page.
+    private InfraService validateOrder(InfraService service) throws Exception {
+        if (service.getOrder() == null || service.getOrder().equals("")) {
+            throw new Exception("field 'order' is mandatory");
+        }
+        return service;
+    }
+
+    //validates the correctness of Service SLA.
+    private InfraService validateSLA(InfraService service) throws Exception {
+        if (service.getServiceLevelAgreement() == null || service.getServiceLevelAgreement().equals("")) {
+            throw new Exception("field 'serviceLevelAgreement' is mandatory");
         }
         return service;
     }
