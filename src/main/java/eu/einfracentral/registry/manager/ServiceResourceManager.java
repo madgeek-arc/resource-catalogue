@@ -7,16 +7,14 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.AbstractGenericService;
-import eu.openminted.registry.core.service.ParserService;
-import eu.openminted.registry.core.service.ServiceException;
-import eu.openminted.registry.core.service.VersionService;
+import eu.openminted.registry.core.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.lang.reflect.Field;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -177,6 +175,18 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
+    public boolean exists(SearchService.KeyValue... ids) {
+        Resource resource;
+        try {
+            resource = this.searchService.searchId(getResourceType(), ids);
+            return resource != null;
+        } catch (UnknownHostException e) {
+            logger.error(e);
+            throw new ServiceException(e);
+        }
+    }
+
+    @Override
     public Browsing<ServiceHistory> getHistory(String service_id) {
         List<ServiceHistory> history = new ArrayList<>();
 
@@ -274,12 +284,39 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
 
     private InfraService FillTransientFields(InfraService infraService) {
-        // FIXME: vocabularyManager.get() is very slow
-        infraService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
-        infraService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
+        //FIXME: vocabularyManager.get() is very slow
+        logger.info("Category: " + infraService.getCategory());
+        logger.info("Subcategory: " + infraService.getSubcategory());
+        if (infraService.getCategory() == null) {
+            infraService.setCategoryName("null");
+        } else {
+            infraService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
+        }
+        if (infraService.getSubcategory() == null) {
+            infraService.setSubCategoryName("null");
+        } else {
+            try {
+                infraService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
+            } catch (Exception e) {
+                logger.info(e);
+                infraService.setSubCategoryName("Not Found");
+            }
+        }
+
+        //infraService.setLanguageNames(vocabularyManager.multiWhereID("vocabulary_id", infraService.getLanguages()));
+
+        //if (infraService.getRatings() == ) {
+        //    infraService.setRatings("unrated");
+        //} else {
+        //    infraService.setRatings(eventManager.get("event_id", infraService.getRatings()).getValue());
+        //}
+       // infraService.setHasRate(vocabularyManager.getInt("vocabulary_id", infraService.getHasRate()).getHasRate());
+       // infraService.setFavourites(vocabularyManager.getInt("vocabulary_id", infraService.getFavourites()).getFavourites());
+      //  infraService.setFavourite(vocabularyManager.getBoolean("vocabulary_id", infraService.isFavourite()).isFavourite());
+        //infraService.setViews(eventManager.get("event_id", infraService.).getViews());
+        //logger.info("service/all end");
         // TODO complete function
 
-        logger.info(infraService.toString());
         return infraService;
     }
 }
