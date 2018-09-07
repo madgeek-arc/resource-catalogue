@@ -7,6 +7,7 @@ import eu.einfracentral.domain.ServiceHistory;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.SearchService;
 
 import java.util.List;
 import java.util.Map;
@@ -48,4 +49,11 @@ public interface InfraServiceService extends ServiceInterface<InfraService> {
      * @return
      */
     Browsing<Service> getRichServices(FacetFilter ff);
+
+    /**
+     *
+     * @param ids
+     * @return
+     */
+    boolean exists(SearchService.KeyValue... ids);
 }
