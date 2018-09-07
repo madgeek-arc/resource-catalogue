@@ -16,6 +16,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,7 +28,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("infraService")
@@ -50,7 +51,7 @@ public class InfraServiceController {
         this.infraService = service;
     }
 
-    private static Logger logger = Logger.getLogger(InfraServiceController.class.getName());
+    final static private Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
 
     @ApiOperation(value = "Searches for Services and their Addenda and converts them to InfraServices")
     @RequestMapping(path = "convert/service/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
