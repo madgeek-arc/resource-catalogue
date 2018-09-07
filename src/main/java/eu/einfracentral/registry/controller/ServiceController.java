@@ -137,7 +137,12 @@ public class ServiceController extends ResourceController<Service> {
     @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getBy(@PathVariable String field, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        Map<String, List<InfraService>> results = infraService.getBy(field);
+        Map<String, List<InfraService>> results = null;
+        try {
+            results = infraService.getBy(field);
+        } catch (NoSuchFieldException e) {
+            logger.error(e);
+        }
         Map<String, List<Service>> serviceResults = new HashMap<>();
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
             serviceResults.put(services.getKey(), services.getValue().stream().map(Service::new).collect(Collectors.toList()));
