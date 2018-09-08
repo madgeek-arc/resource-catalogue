@@ -6,6 +6,24 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 
 public interface ServiceInterface<T> extends ResourceCRUDService<T> {
+    // TODO: merge with InfraServiceService
+    /**
+     *
+     * @param var1
+     * @return
+     * @throws Exception
+     */
+    T addService(T var1) throws Exception;
+
+    /**
+     *
+     * @param var1
+     * @return
+     * @throws ResourceNotFoundException
+     * @throws Exception
+     */
+    T updateService(T var1) throws ResourceNotFoundException, Exception;
+
     /**
      * Returns the Service.
      * @param id of the Service.
