@@ -27,12 +27,12 @@ public class ResourceController<T extends Identifiable> {
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws Exception {
         return new ResponseEntity<>(service.add(t), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<T> update(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+    public ResponseEntity<T> update(@RequestBody T t, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws Exception {
         return new ResponseEntity<>(service.update(t), HttpStatus.OK);
     }
 

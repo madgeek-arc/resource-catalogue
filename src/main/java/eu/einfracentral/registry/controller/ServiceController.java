@@ -72,15 +72,15 @@ public class ServiceController extends ResourceController<Service> {
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> add(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
-        InfraService ret = this.infraService.add(new InfraService(service));
+    public ResponseEntity<Service> add(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws Exception {
+        InfraService ret = this.infraService.addService(new InfraService(service));
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> update(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
-        InfraService ret = this.infraService.update(new InfraService(service));
+    public ResponseEntity<Service> update(@RequestBody Service service, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws Exception {
+        InfraService ret = this.infraService.updateService(new InfraService(service));
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 

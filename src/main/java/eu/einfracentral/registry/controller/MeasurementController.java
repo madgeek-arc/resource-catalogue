@@ -26,13 +26,13 @@ public class MeasurementController extends ResourceController<Measurement> {
     @CrossOrigin
     @ApiOperation(value = "Adds the given measurement.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore @CookieValue(defaultValue = "") String jwt) {
+    public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws Exception {
         return super.add(measurement, jwt);
     }
 
     @ApiOperation(value = "Updates the measurement assigned the given id with the given measurement, keeping a versions of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws ResourceNotFoundException {
+    public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore @CookieValue(defaultValue = "") String jwt) throws Exception {
         return super.update(measurement, jwt);
     }
 }
