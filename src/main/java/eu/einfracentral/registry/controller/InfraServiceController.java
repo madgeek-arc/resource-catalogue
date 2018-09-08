@@ -25,6 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -51,6 +52,20 @@ public class InfraServiceController {
     }
 
     private static Logger logger = Logger.getLogger(InfraServiceController.class.getName());
+
+    @ApiIgnore
+    @RequestMapping(path = {"delete/{id}/", "delete/{id}/{version}/"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version) throws ResourceNotFoundException {
+        InfraService service;
+        if (version.isPresent())
+            service = infraService.get(id, version.get());
+        else
+            service = infraService.getLatest(id);
+        infraService.delete(service);
+//        Service ret = new Service(infraService.getLatest(id));
+        return new ResponseEntity<>(HttpStatus.OK);
+        //return super.get(id, jwt);
+    }
 
     @ApiOperation(value = "Searches for Services and their Addenda and converts them to InfraServices")
     @RequestMapping(path = "convert/service/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
