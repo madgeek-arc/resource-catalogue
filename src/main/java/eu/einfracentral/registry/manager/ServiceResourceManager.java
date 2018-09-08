@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceHistory;
 import eu.einfracentral.exception.ResourceException;
@@ -41,6 +42,40 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     @Override
     public String getResourceType() {
         return resourceType.getName();
+    }
+
+    @Override
+    public InfraService addService(InfraService infraService) throws Exception {
+        if (exists(infraService)) {
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+        }
+        String serialized = null;
+        try {
+            serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error(e);
+        }
+        Resource created = new Resource();
+        created.setPayload(serialized);
+        created.setResourceType(resourceType);
+        resourceService.addResource(created);
+        return infraService;
+    }
+
+    @Override
+    public InfraService updateService(InfraService infraService) throws ResourceNotFoundException, Exception {
+        String serialized = null;
+        Resource existing = null;
+        try {
+            serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML).get();
+            existing = getResource(infraService.getId(), infraService.getVersion());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        assert existing != null;
+        existing.setPayload(serialized);
+        resourceService.updateResource(existing);
+        return infraService;
     }
 
     @Override
@@ -285,21 +320,22 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     private InfraService FillTransientFields(InfraService infraService) {
         //FIXME: vocabularyManager.get() is very slow
+        RichService richService = new RichService(infraService);
         logger.info("Category: " + infraService.getCategory());
         logger.info("Subcategory: " + infraService.getSubcategory());
         if (infraService.getCategory() == null) {
-            infraService.setCategoryName("null");
+            richService.setCategoryName("null");
         } else {
-            infraService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
+            richService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
         }
         if (infraService.getSubcategory() == null) {
-            infraService.setSubCategoryName("null");
+            richService.setSubCategoryName("null");
         } else {
             try {
-                infraService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
+                richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
             } catch (Exception e) {
                 logger.info(e);
-                infraService.setSubCategoryName("Not Found");
+                richService.setSubCategoryName("Not Found");
             }
         }
 

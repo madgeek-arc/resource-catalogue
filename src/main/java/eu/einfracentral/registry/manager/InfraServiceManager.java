@@ -21,8 +21,7 @@ import org.springframework.http.HttpStatus;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service("infraServiceService")
@@ -62,10 +61,9 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public InfraService add(InfraService infraService) {
+    public InfraService addService(InfraService infraService) throws Exception{
 
         migrate(infraService);
-        // TODO: THROW EXCEPTION INSTEAD OF RETURNING NULL
         if (infraService.getId() == null) {
             String id = createServiceId(infraService);
             infraService.setId(id);
@@ -75,7 +73,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         } else return null;
 
         if (infraService.getServiceMetadata() == null) {
-            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getProviderName()); //FIXME: get name from backend
+            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getEditorName()); //FIXME: get name from backend
             infraService.setServiceMetadata(serviceMetadata);
         }
         InfraService ret;
@@ -84,13 +82,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             ret = super.add(infraService);
         } catch (Exception e) {
             logger.error(e);
-            ret = null;
+            throw e;
         }
         return ret;
     }
 
     @Override
-    public InfraService update(InfraService infraService) throws ResourceNotFoundException {
+    public InfraService updateService(InfraService infraService) throws ResourceNotFoundException, Exception {
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = getLatest(infraService.getId());
 
@@ -99,21 +97,15 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             try {
                 validate(infraService);
                 // update existing service serviceMetadata
-                ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), infraService.getProviderName());
+                ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), infraService.getEditorName());
                 infraService.setServiceMetadata(serviceMetadata);
                 // replace existing service with new
                 ret = super.update(infraService);
             } catch (Exception e) {
                 logger.error(e);
+                throw e;
             }
         } else {
-//            Resource existingResource = getResource(infraService.getId(), infraService.getVersion());
-//            existingService.setId(String.format("%s/%s", existingService.getId(), existingService.getVersion()));
-
-            // save in exististing resource the payload of the updated service
-//            existingResource.setPayload(serialize(infraService));
-//            resourceService.updateResource(existingResource);
-
             // create new service
             ret = add(infraService);
         }
@@ -128,7 +120,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         service = validateName(service);
         service = validateVocabularies(service);
         service = validateURL(service);
-        service = validateProviderName(service);
+//        service = validateProviderName(service);
         service = validateDescription(service);
         service = validateSymbol(service);
         service = validateVersion(service);
@@ -144,7 +136,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return service;
     }
 
-    //yes, this is foreign key logic right here on the application
     private InfraService validateVocabularies(InfraService service) throws Exception {
         if (service.getCategory() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Category"),
@@ -199,13 +190,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
      return service;
     }
 
-    //validates the correctness of Provider Name.
-    private InfraService validateProviderName(InfraService service) throws Exception{
-        if (service.getProviderName() == null || service.getProviderName().equals("")){
-            throw new Exception("field 'providerName' is mandatory");
-        }
-        return service;
-    }
+//    //validates the correctness of Provider Name.
+//    private InfraService validateProviderName(InfraService service) throws Exception{
+//        if (service.getProviderName() == null || service.getProviderName().equals("")){
+//            throw new Exception("field 'providerName' is mandatory");
+//        }
+//        return service;
+//    }
 
     //validates the correctness of Providers.
     private InfraService validateProviders(InfraService service) throws Exception {
@@ -220,7 +211,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     //validates the correctness of Service Description.
-    private InfraService validateDescription(InfraService service) throws Exception{
+    private InfraService validateDescription(InfraService service) throws Exception {
         if (service.getDescription() == null || service.getDescription().equals("")){
             throw new Exception("field 'description' is mandatory");
         }
@@ -228,7 +219,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     //validates the correctness of Service Symbol.
-    private InfraService validateSymbol(InfraService service) throws Exception{
+    private InfraService validateSymbol(InfraService service) throws Exception {
         if (service.getSymbol() == null || service.getSymbol().equals("")){
             throw new Exception("field 'symbol' is mandatory");
         }
@@ -267,17 +258,23 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return service;
     }
 
+
     //validates the correctness of Related and Required Services.
     private InfraService validateServices(InfraService service) throws Exception {
         List<String> relatedServices = service.getRelatedServices();
         List<String> existingRelatedServices = new ArrayList<>();
+        List<String> notFoundServices = new ArrayList<>();
         for (String serviceRel : relatedServices) {
             //logger.info("Inside loop relatedServices: " + serviceRel);
             if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel)))
-            {
                 existingRelatedServices.add(serviceRel);
-            }
+            else
+                notFoundServices.add(serviceRel);
         }
+        // TODO: decide if entering invalid service ids leads to Exception OR not.
+        if (existingRelatedServices.size() != relatedServices.size())
+            throw new Exception("relatedServices not found : " + String.join(", ", notFoundServices));
+
         service.setRelatedServices(existingRelatedServices);
 
         //logger.info(infraService.toString());
@@ -286,14 +283,15 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         List<String> existingRequiredServices = new ArrayList<>();
         for (String serviceReq : requiredServices) {
             //logger.info("Inside for requiredServices: " + serviceReq);
-            if (this.exists(
-
-                    new SearchService.KeyValue("infra_service_id", serviceReq)))
-
-            {
+            if (this.exists(new SearchService.KeyValue("infra_service_id", serviceReq)))
                 existingRequiredServices.add(serviceReq);
-            }
+            else
+                notFoundServices.add(serviceReq);
         }
+        // TODO: decide if entering invalid service ids leads to Exception OR not.
+        if (existingRequiredServices.size() != relatedServices.size())
+            throw new Exception("requiredServices not found : " + String.join(", ", notFoundServices));
+
         service.setRequiredServices(existingRequiredServices);
 
         //logger.info(infraService.toString());
@@ -331,7 +329,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     private String createServiceId(Service service) {
-        String provider = service.getProviderName();
+        String provider = service.getProviders().get(0);
         return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z\\s]+","").replaceAll(" ", "_").toLowerCase());
     }
 }

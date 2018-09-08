@@ -181,7 +181,7 @@ public class ServiceManager extends ResourceManager<Service> implements Resource
 
     private String createServiceId(Service service) {
         String id = "";
-        String provider = service.getProviderName();
+        String provider = service.getEditorName();
 //        List<String> providers = service.getProviders();
 
 //        FacetFilter facetFilter = new FacetFilter();
