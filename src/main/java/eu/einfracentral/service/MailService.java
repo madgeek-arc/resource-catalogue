@@ -4,7 +4,6 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -53,8 +52,10 @@ public class MailService {
         });
     }
 
-    public void sendMail(String to, String subject, String text) {
-        try (Transport transport = session.getTransport()) {
+    public void sendMail(String to, String subject, String text) throws MessagingException {
+        Transport transport = null;
+        try {
+            transport = session.getTransport();
             InternetAddress sender = new InternetAddress(user);
             Message message = new MimeMessage(session);
             message.setFrom(sender);
@@ -66,6 +67,10 @@ public class MailService {
             Transport.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
+        } finally {
+            if (transport != null) {
+                transport.close();
+            }
         }
     }
 }

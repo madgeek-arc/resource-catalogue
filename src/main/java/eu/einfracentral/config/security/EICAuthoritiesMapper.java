@@ -18,10 +18,18 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     final private static Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
     final private static String ROLE_CLAIMS = "edu_person_entitlements";
     private Map<String, SimpleGrantedAuthority> userRolesMap;
-
+//    @Value("@{admin.emails}")
+//    List<String> admins;
 
     public EICAuthoritiesMapper() throws IOException {
         userRolesMap = new HashMap<>();
+//        Properties properties = new Properties();
+//        String filename = "/eu/einfracentral/registry/aaiRoles.xml";
+//        org.springframework.core.io.Resource resource = new ClassPathResource(filename);
+//        properties.loadFromXML(resource.getInputStream());
+//        for (final String name : properties.stringPropertyNames()) {
+//            userRolesMap.put(name, new SimpleGrantedAuthority(properties.getProperty(name)));
+//        }
     }
 
     @Override
