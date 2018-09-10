@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService {
     @Autowired
-    private InfraServiceService infraServiceService;
+    private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     public ProviderManager() {
         super(Provider.class);
@@ -29,6 +29,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.addFilter("provider", id);
         ff.setFrom(0);
         ff.setQuantity(1000);
-        return infraServiceService.getAll(ff).getResults().stream().map(Service::new).collect(Collectors.toList());
+        return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
     }
 }
