@@ -13,7 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
@@ -21,11 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
+public class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
 
@@ -101,23 +101,27 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
+    public Browsing<InfraService> getAll(FacetFilter filter) {
         filter.setBrowseBy(getBrowseBy());
         return getResults(filter);
     }
 
     @Override
-    public Browsing<InfraService> getMy(FacetFilter filter, Authentication auth) {
+    public Browsing<InfraService> getMy(FacetFilter filter) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
     @Override
-    public InfraService add(InfraService infraService, Authentication auth) {
+    public InfraService add(InfraService infraService) {
         if (exists(infraService)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
-        String serialized;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
+        String serialized = null;
+        try {
+            serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error(e);
+        }
         Resource created = new Resource();
         created.setPayload(serialized);
         created.setResourceType(resourceType);
@@ -126,11 +130,15 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public InfraService update(InfraService infraService, Authentication auth) throws ResourceNotFoundException {
-        String serialized;
-        Resource existing;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
-        existing = getResource(infraService.getId(), infraService.getVersion());
+    public InfraService update(InfraService infraService) throws ResourceNotFoundException {
+        String serialized = null;
+        Resource existing = null;
+        try {
+            serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML).get();
+            existing = getResource(infraService.getId(), infraService.getVersion());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
         assert existing != null;
         existing.setPayload(serialized);
         resourceService.updateResource(existing);
@@ -157,7 +165,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        Browsing<InfraService> services = getAll(ff, null);
+        Browsing<InfraService> services = getAll(ff);
 
         final Field f = serviceField;
         return services.getResults().stream()/*.map(Service::new)*/.collect(Collectors.groupingBy(service -> {
@@ -182,7 +190,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
             try {
                 return getLatest(id);
             } catch (ResourceNotFoundException e) {
-                logger.error("Could not find InfraService with id: " + id, e);
+                logger.error("Could not find InfraService with id: "+ id, e);
                 throw new ServiceException(e);
             }
         }).collect(toList());
@@ -191,7 +199,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     @Override
     public Browsing<Service> getRichServices(FacetFilter ff) {
-        Browsing<InfraService> infraServices = getAll(ff, null);
+        Browsing<InfraService> infraServices = getAll(ff);
         List<Service> services = infraServices.getResults()
                 .stream()
 //                .map(this::FillTransientFields)
@@ -233,7 +241,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
                     InfraService service = deserialize(tempResource);
                     history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
                 }
-                history.get(history.size() - 1).setVersionChange(true);
+                history.get(history.size()-1).setVersionChange(true);
             }
         }
 
@@ -242,19 +250,29 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     public String serialize(InfraService infraService) {
         String serialized;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
+        try {
+            serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error(e);
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return serialized;
     }
 
-    private InfraService deserialize(Resource resource) {
+    public InfraService deserialize(Resource resource) {
         if (resource == null) {
             logger.warn("attempt to deserialize null resource");
             return null;
         }
-        return parserPool.deserialize(resource, InfraService.class);
+        try {
+            return parserPool.deserialize(resource, InfraService.class).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error(e);
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    private boolean exists(InfraService infraService) {
+    public boolean exists(InfraService infraService) {
         return getResource(infraService.getId(), infraService.getVersion()) != null;
     }
 
@@ -268,7 +286,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     public Resource getResource(String serviceId, String serviceVersion) {
-        Paging resources;
+        Paging resources = null;
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
@@ -281,17 +299,16 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
     }
 
-    private List<Resource> getResourcesWithServiceId(String infraServiceId) {
-        Paging resources;
-        resources = searchService
-                .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
-                        resourceType.getName(), 10000, 0, "registeredAt", "DESC");
+    public List<Resource> getResourcesWithServiceId(String infraServiceId) {
+        Paging resources = null;
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
+                            resourceType.getName(), 10000, 0, "registeredAt", "DESC");
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();
     }
 
-    @Deprecated
     protected Map<String, List<Resource>> groupBy(String field) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceType.getName());
@@ -329,9 +346,9 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         //} else {
         //    infraService.setRatings(eventManager.get("event_id", infraService.getRatings()).getValue());
         //}
-        // infraService.setHasRate(vocabularyManager.getInt("vocabulary_id", infraService.getHasRate()).getHasRate());
-        // infraService.setFavourites(vocabularyManager.getInt("vocabulary_id", infraService.getFavourites()).getFavourites());
-        //  infraService.setFavourite(vocabularyManager.getBoolean("vocabulary_id", infraService.isFavourite()).isFavourite());
+       // infraService.setHasRate(vocabularyManager.getInt("vocabulary_id", infraService.getHasRate()).getHasRate());
+       // infraService.setFavourites(vocabularyManager.getInt("vocabulary_id", infraService.getFavourites()).getFavourites());
+      //  infraService.setFavourite(vocabularyManager.getBoolean("vocabulary_id", infraService.isFavourite()).isFavourite());
         //infraService.setViews(eventManager.get("event_id", infraService.).getViews());
         //logger.info("service/all end");
         // TODO complete function

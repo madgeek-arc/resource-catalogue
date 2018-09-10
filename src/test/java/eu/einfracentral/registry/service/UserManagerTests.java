@@ -19,7 +19,7 @@ public class UserManagerTests {
             "<iterationCount>%s</iterationCount>\n" +
             "<joinDate>%s</joinDate>\n" +
             "<password>%s</password>\n" +
-//            "<salt>%s</salt>\n" +
+            "<salt>%s</salt>\n" +
             "</user>";
 
     @Test
@@ -33,7 +33,7 @@ public class UserManagerTests {
                                       user.getKey(),
                                       iterationCount,
                                       new Date().toString(),
-//                                      new String(UserManager.hashPass(user.getValue().toCharArray(), salt, iterationCount)),
+                                      new String(UserManager.hashPass(user.getValue().toCharArray(), salt, iterationCount)),
                                       new String(Base64.getEncoder().encode(salt))).getBytes());
         }
     }

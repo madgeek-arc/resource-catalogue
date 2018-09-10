@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.core.ParserPool;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceMetadata;
@@ -10,16 +11,34 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @org.springframework.stereotype.Service("infraServiceService")
-public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService,InfraService> {
+public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService {
+
+
+    public class MyException extends Exception {
+
+        public MyException() { }
+
+        public MyException(String s) {
+            super(s);
+        }
+    }
 
     @Autowired
     private VocabularyManager vocabularyManager;
+
+    @Autowired
+    private ProviderManager providerManager;
+
+    @Autowired
+    private SearchService searchService;
+
+    @Autowired
+    ParserPool parserPool;
 
     private Logger logger = Logger.getLogger(InfraServiceManager.class);
 
@@ -33,7 +52,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public InfraService add(InfraService infraService, Authentication authentication) {
     public InfraService addService(InfraService infraService) throws Exception{
 
         migrate(infraService);
@@ -52,7 +70,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         InfraService ret;
         try {
             validate(infraService);
-            ret = super.add(infraService,authentication);
+            ret = super.add(infraService);
         } catch (Exception e) {
             logger.error(e);
             throw e;
@@ -62,7 +80,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     public InfraService updateService(InfraService infraService) throws ResourceNotFoundException, Exception {
-    public InfraService update(InfraService infraService, Authentication authentication) throws ResourceNotFoundException {
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = getLatest(infraService.getId());
 
@@ -74,37 +91,19 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), infraService.getEditorName());
                 infraService.setServiceMetadata(serviceMetadata);
                 // replace existing service with new
-                ret = super.update(infraService,authentication);
+                ret = super.update(infraService);
             } catch (Exception e) {
                 logger.error(e);
                 throw e;
             }
         } else {
             // create new service
-            ret = add(infraService,authentication);
+            ret = add(infraService);
         }
         return ret;
     }
 
-    @Override
-    public Browsing<InfraService> getAll(FacetFilter ff, Authentication authentication) {
-        return super.getAll(ff,authentication);
-//        Browsing<InfraService> services = super.getAll(ff);
-//        services.setResults(services.getResults().stream().map(this::FillTransientFields).collect(Collectors.toList()));
-//        return services;
-    }
-
-    @Override
-    public Browsing<InfraService> getMy(FacetFilter facetFilter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public void delete(InfraService o) {
-
-    }
-
-    //    @Override
+//    @Override
     public InfraService validate(InfraService service) throws Exception {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
@@ -291,6 +290,14 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         //logger.info(infraService.toString());
 
         return service;
+    }
+
+    @Override
+    public Browsing<InfraService> getAll(FacetFilter ff) {
+        return super.getAll(ff);
+//        Browsing<InfraService> services = super.getAll(ff);
+//        services.setResults(services.getResults().stream().map(this::FillTransientFields).collect(Collectors.toList()));
+//        return services;
     }
 
     private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
