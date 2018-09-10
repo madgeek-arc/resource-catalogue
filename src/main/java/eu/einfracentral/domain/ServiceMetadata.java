@@ -32,15 +32,6 @@ public class ServiceMetadata {
     public ServiceMetadata() {
     }
 
-    public ServiceMetadata(Addenda addenda) {
-        this.featured = addenda.isFeatured();
-        this.published = addenda.isPublished();
-        this.registeredBy = addenda.getRegisteredBy();
-        this.modifiedBy = addenda.getModifiedBy();
-        this.registeredAt = String.valueOf(addenda.getRegisteredAt());
-        this.modifiedAt = String.valueOf(addenda.getModifiedAt());
-    }
-
     public ServiceMetadata(ServiceMetadata serviceMetadata) {
         this.featured = serviceMetadata.isFeatured();
         this.published = serviceMetadata.isPublished();
