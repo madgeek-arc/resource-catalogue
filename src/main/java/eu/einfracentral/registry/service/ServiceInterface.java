@@ -14,6 +14,24 @@ import java.util.Map;
 
 public interface ServiceInterface<T, R, U extends Authentication> extends TransformerCRUDService<T, R, U> {
 
+    // TODO: merge with InfraServiceService
+    /**
+     *
+     * @param var1
+     * @return
+     * @throws Exception
+     */
+    T addService(T var1) throws Exception;
+
+    /**
+     *
+     * @param var1
+     * @return
+     * @throws ResourceNotFoundException
+     * @throws Exception
+     */
+    T updateService(T var1) throws ResourceNotFoundException, Exception;
+
     /**
      * Returns the Service.
      * @param id of the Service.
