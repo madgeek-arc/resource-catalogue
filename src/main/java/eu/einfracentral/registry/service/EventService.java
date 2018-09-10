@@ -1,10 +1,11 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Event;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface EventService extends ResourceService<Event> {
+public interface EventService extends ResourceService<Event, Authentication> {
 
     /**
      * Toggle a favourited event true/false.
