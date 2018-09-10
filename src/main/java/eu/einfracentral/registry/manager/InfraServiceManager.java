@@ -152,12 +152,12 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 throw new Exception("One or more languages do not exist.");
             }
         } else throw new Exception("field 'languages' is obligatory");
-        if (!vocabularyManager.exists(
+        if (service.getLifeCycleStatus() == null ||!vocabularyManager.exists(
                 new SearchService.KeyValue("type", "LifeCycleStatus"),
                 new SearchService.KeyValue("vocabulary_id", service.getLifeCycleStatus()))) {
             throw new Exception(String.format("lifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
         }
-        if (!vocabularyManager.exists(
+        if (service.getTrl() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "TRL"),
                 new SearchService.KeyValue("vocabulary_id", service.getTrl()))) {
             throw new Exception(String.format("trl '%s' does not exist.", service.getTrl()));
@@ -190,10 +190,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //    }
 
     //validates the correctness of Providers.
+    //TODO: Exception "field providers is obligatory" isn't triggered when providers==null OR providers==[]. Fix!
     private InfraService validateProviders(InfraService service) throws Exception {
         List<String> providers = service.getProviders();
         List<String> existingProviders = new ArrayList<>();
-        if (service.getProviders() == null) {
+        if (providers == null) {
             throw new Exception("field 'providers' is obligatory");
         } if (service.getProviders().stream().noneMatch(x -> providerManager.getResource(x) != null)) {
             throw new Exception("Provider does not exist");
@@ -252,38 +253,39 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     //validates the correctness of Related and Required Services.
     private InfraService validateServices(InfraService service) throws Exception {
-        List<String> relatedServices = service.getRelatedServices();
-        List<String> existingRelatedServices = new ArrayList<>();
+        List<String> services = service.getRelatedServices();
+        List<String> foundServices = new ArrayList<>();
         List<String> notFoundServices = new ArrayList<>();
-        for (String serviceRel : relatedServices) {
+        for (String serviceRel : services) {
             //logger.info("Inside loop relatedServices: " + serviceRel);
             if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel)))
-                existingRelatedServices.add(serviceRel);
+                foundServices.add(serviceRel);
             else
                 notFoundServices.add(serviceRel);
         }
         // TODO: decide if entering invalid service ids leads to Exception OR not.
-        if (existingRelatedServices.size() != relatedServices.size())
+//        notFoundServices.clear();
+        if (foundServices.size() != services.size())
             throw new Exception("relatedServices not found : " + String.join(", ", notFoundServices));
 
-        service.setRelatedServices(existingRelatedServices);
+        service.setRelatedServices(foundServices);
 
         //logger.info(infraService.toString());
 
-        List<String> requiredServices = service.getRequiredServices();
-        List<String> existingRequiredServices = new ArrayList<>();
-        for (String serviceReq : requiredServices) {
+        services = service.getRequiredServices();
+        foundServices.clear();
+        for (String serviceReq : services) {
             //logger.info("Inside for requiredServices: " + serviceReq);
             if (this.exists(new SearchService.KeyValue("infra_service_id", serviceReq)))
-                existingRequiredServices.add(serviceReq);
+                foundServices.add(serviceReq);
             else
                 notFoundServices.add(serviceReq);
         }
         // TODO: decide if entering invalid service ids leads to Exception OR not.
-        if (existingRequiredServices.size() != relatedServices.size())
+        if (foundServices.size() != services.size())
             throw new Exception("requiredServices not found : " + String.join(", ", notFoundServices));
 
-        service.setRequiredServices(existingRequiredServices);
+        service.setRequiredServices(foundServices);
 
         //logger.info(infraService.toString());
 
