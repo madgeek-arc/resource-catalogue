@@ -2,12 +2,9 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
-import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.log4j.Logger;
@@ -15,15 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("event")
-public class EventController extends ResourceController<Event> {
+public class EventController extends ResourceController<Event, Authentication> {
 
     private EventService service;
 
@@ -40,8 +36,8 @@ public class EventController extends ResourceController<Event> {
 
     @ApiOperation("Retrieve all events.")
     @RequestMapping(path = "events/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Browsing<Event>> getAll() {
-        return new ResponseEntity<>(service.getAll(new FacetFilter()), HttpStatus.OK);
+    public ResponseEntity<Paging<Event>> getAll(Authentication authentication) {
+        return new ResponseEntity<>(service.getAll(new FacetFilter(), authentication), HttpStatus.OK);
     }
 
     //    @ApiIgnore
@@ -117,8 +113,7 @@ public class EventController extends ResourceController<Event> {
 
     @ApiOperation("Set a rating to a service from the given user.")
     @RequestMapping(path = "rating/service/{sId}/user/{uId}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Event> setUserRating(@PathVariable String sId, @PathVariable String uId, @RequestParam("rating") String rating)
-            throws ExecutionException, InterruptedException, ResourceNotFoundException {
+    public ResponseEntity<Event> setUserRating(@PathVariable String sId, @PathVariable String uId, @RequestParam("rating") String rating) {
         // TODO: check if user and service exists ?
         return new ResponseEntity<>(service.setRating(sId, uId, rating), HttpStatus.OK);
     }
