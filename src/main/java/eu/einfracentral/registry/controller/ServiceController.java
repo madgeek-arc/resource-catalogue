@@ -54,9 +54,9 @@ public class ServiceController {
                                               Authentication jwt) throws ResourceNotFoundException {
         InfraService ret;
         try {
-            ret = (InfraService) infraService.get(id, version);
+            ret = infraService.get(id, version);
         } catch (Exception e) {
-            ret = (InfraService) infraService.getLatest(id);
+            ret = infraService.getLatest(id);
             if (!version.equals(ret.getVersion())) {
                 throw e;
             }
@@ -68,14 +68,14 @@ public class ServiceController {
     @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, Authentication jwt) throws Exception {
-        InfraService ret = (InfraService) this.infraService.add(new InfraService(service), jwt);
+        InfraService ret = this.infraService.addService(new InfraService(service), jwt);
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, Authentication jwt) throws Exception {
-        InfraService ret = (InfraService) this.infraService.update(new InfraService(service), jwt);
+        InfraService ret = this.infraService.updateService(new InfraService(service), jwt);
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
