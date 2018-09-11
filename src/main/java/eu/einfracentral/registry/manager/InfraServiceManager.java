@@ -63,7 +63,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public InfraService updateService(InfraService infraService, Authentication authentication) throws Exception {
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = getLatest(infraService.getId());
-
+//        logger.info("User: " + authentication.getDetails());
         InfraService ret = null;
         if (infraService.getVersion().equals(existingService.getVersion())) {
             try {
@@ -196,7 +196,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         if (providers == null || CollectionUtils.isEmpty(service.getProviders())) {
             throw new Exception("field 'providers' is obligatory");
         }
-        if (service.getProviders().stream().noneMatch(x -> providerManager.getResource(x) != null)) {
+        if (service.getProviders().stream().anyMatch(x -> providerManager.getResource(x) == null)) {
             throw new Exception("Provider does not exist");
         }
         return service;
