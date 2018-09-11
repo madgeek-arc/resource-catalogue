@@ -393,6 +393,9 @@ public class Service implements Identifiable {
 
     // FIXME: Important!!! fix this returning the name of the user from Authentication
     public String getEditorName() {
+        if (getProviders() == null || getProviders().size() == 0) {
+            return null;
+        }
         return getProviders().get(0);
 //        return editorName;
     }
