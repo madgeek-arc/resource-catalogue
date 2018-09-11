@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.SearchService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -107,10 +108,14 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         service = validateName(service);
         service = validateVocabularies(service);
         service = validateURL(service);
-        service = validateProviderName(service);
+//        service = validateProviderName(service);
         service = validateDescription(service);
         service = validateSymbol(service);
         service = validateVersion(service);
+        service = validateLastUpdate(service);
+        service = validateRequest(service);
+        service = validateSLA(service);
+        service = validateProviders(service);
         return service;
     }
 
@@ -131,21 +136,22 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 new SearchService.KeyValue("vocabulary_id", service.getSubcategory()))) {
             throw new Exception(String.format("Subcategory '%s' does not exist.", service.getSubcategory()));
         }
-        if (service.getPlaces() != null) {
+
+        if (service.getPlaces() != null && CollectionUtils.isNotEmpty(service.getLanguages())) {
             if (!service.getPlaces().parallelStream().allMatch(place -> vocabularyManager.exists(
                     new SearchService.KeyValue("type", "Place"),
                     new SearchService.KeyValue("vocabulary_id", place)))) {
                 throw new Exception("One or more places do not exist.");
             }
         } else throw new Exception("field 'places' is obligatory");
-        if (service.getLanguages() != null) {
+        if (service.getLanguages() != null && CollectionUtils.isNotEmpty(service.getLanguages())) {
             if (!service.getLanguages().parallelStream().allMatch(lang -> vocabularyManager.exists(
                     new SearchService.KeyValue("type", "Language"),
                     new SearchService.KeyValue("vocabulary_id", lang)))) {
                 throw new Exception("One or more languages do not exist.");
             }
         } else throw new Exception("field 'languages' is obligatory");
-        if (!vocabularyManager.exists(
+        if (service.getLifeCycleStatus() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "LifeCycleStatus"),
                 new SearchService.KeyValue("vocabulary_id", service.getLifeCycleStatus()))) {
             throw new Exception(String.format("lifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
@@ -174,10 +180,24 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return service;
     }
 
-    //validates the correctness of Provider Name.
-    private InfraService validateProviderName(InfraService service) throws Exception {
-        if (service.getEditorName() == null || service.getEditorName().equals("")) {
-            throw new Exception("field 'providerName' is mandatory");
+//    //validates the correctness of Provider Name.
+//    private InfraService validateProviderName(InfraService service) throws Exception{
+//        if (service.getProviderName() == null || service.getProviderName().equals("")){
+//            throw new Exception("field 'providerName' is mandatory");
+//        }
+//        return service;
+//    }
+
+    //validates the correctness of Providers.
+    //TODO: Exception "field providers is obligatory" isn't triggered when providers==null OR providers==[]. Fix!
+    private InfraService validateProviders(InfraService service) throws Exception {
+        List<String> providers = service.getProviders();
+        List<String> existingProviders = new ArrayList<>();
+        if (providers == null || CollectionUtils.isEmpty(service.getProviders())) {
+            throw new Exception("field 'providers' is obligatory");
+        }
+        if (service.getProviders().stream().noneMatch(x -> providerManager.getResource(x) != null)) {
+            throw new Exception("Provider does not exist");
         }
         return service;
     }
@@ -205,6 +225,32 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
         return service;
     }
+
+    //validates the correctness of Service Last Update (Revision Date).
+    private InfraService validateLastUpdate(InfraService service) throws Exception {
+        if (service.getLastUpdate() == null || service.getLastUpdate().equals("")) {
+            throw new Exception("field 'Revision Date' (lastUpdate) is mandatory");
+        }
+        return service;
+    }
+
+    //validates the correctness of URL for requesting the service from the service providers.
+    //TODO: Fix the conflict between order and request variables. What we need, what we keep.
+    private InfraService validateRequest(InfraService service) throws Exception {
+        if (service.getRequest() == null || service.getRequest().equals("")) {
+            throw new Exception("field 'request' is mandatory");
+        }
+        return service;
+    }
+
+    //validates the correctness of Service SLA.
+    private InfraService validateSLA(InfraService service) throws Exception {
+        if (service.getServiceLevelAgreement() == null || service.getServiceLevelAgreement().equals("")) {
+            throw new Exception("field 'serviceLevelAgreement' is mandatory");
+        }
+        return service;
+    }
+
 
     //validates the correctness of Related and Required Services.
     private InfraService validateServices(InfraService service) throws Exception {
