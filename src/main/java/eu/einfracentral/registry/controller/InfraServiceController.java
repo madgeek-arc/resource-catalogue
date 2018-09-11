@@ -31,7 +31,7 @@ import java.util.Optional;
 public class InfraServiceController {
 
     final static private Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
-  
+
     private InfraServiceService<InfraService, InfraService> infraService;
 
     @Autowired

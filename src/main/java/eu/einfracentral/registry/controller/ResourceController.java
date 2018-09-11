@@ -35,12 +35,12 @@ public class ResourceController<T extends Identifiable, U extends Authentication
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<T> add(@RequestBody T t, Authentication jwt) {
+    public ResponseEntity<T> add(@RequestBody T t, Authentication jwt) throws Exception {
         return new ResponseEntity<>(service.add(t, null), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<T> update(@RequestBody T t, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<T> update(@RequestBody T t, Authentication jwt) throws Exception {
         return new ResponseEntity<>(service.update(t, null), HttpStatus.OK);
     }
 

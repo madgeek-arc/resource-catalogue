@@ -38,7 +38,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
 
     @ApiOperation(value = "Updates provider info")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Provider> update(@RequestBody Provider provider, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<Provider> update(@RequestBody Provider provider, Authentication jwt) throws Exception {
         return super.update(provider, jwt);
     }
 

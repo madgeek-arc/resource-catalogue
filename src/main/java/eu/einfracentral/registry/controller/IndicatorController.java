@@ -27,13 +27,14 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @CrossOrigin
     @ApiOperation(value = "Adds the given indicator.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, Authentication jwt) {
+
+    public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, Authentication jwt) throws Exception {
         return super.add(indicator, jwt);
     }
 
     @ApiOperation(value = "Updates the indicator assigned the given id with the given indicator, keeping a versions of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, Authentication jwt) throws Exception {
         return super.update(indicator, jwt);
     }
 }
