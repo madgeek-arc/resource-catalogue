@@ -24,7 +24,7 @@ public class Service implements Identifiable {
     /**
      * Global unique and persistent identifier of the service.
      */
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     @JsonIgnore
     private String id; //maybe list
 
@@ -280,7 +280,7 @@ public class Service implements Identifiable {
     public Service(InfraService service) {
         this.id = service.getId();
         this.url = service.getUrl();
-        this.providerName = service.getProviderName();
+        this.editorName = service.getEditorName();
         this.name = service.getName();
         this.tagline = service.getTagline();
         this.description = service.getDescription();
@@ -317,15 +317,6 @@ public class Service implements Identifiable {
         this.availability = service.getAvailability();
         this.reliability = service.getReliability();
         this.serviceability = service.getServiceability();
-        // transient fields
-        this.categoryName = service.getCategoryName();
-        this.subCategoryName = service.getSubCategoryName();
-        this.languageNames = service.getLanguageNames();
-        this.views = service.getViews();
-        this.ratings = service.getRatings();
-        this.hasRate = service.getHasRate();
-        this.favourites = service.getFavourites();
-        this.isFavourite = service.isFavourite();
     }
 
 
