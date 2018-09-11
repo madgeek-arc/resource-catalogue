@@ -24,8 +24,8 @@ public class Service implements Identifiable {
     /**
      * Global unique and persistent identifier of the service.
      */
-    @XmlElement(required = true)
-    @JsonIgnore
+    @XmlElement(required = false)
+//    @JsonIgnore
     private String id; //maybe list
 
     /**
@@ -276,6 +276,50 @@ public class Service implements Identifiable {
     public Service() {
         // No arg constructor
     }
+
+    public Service(InfraService service) {
+        this.id = service.getId();
+        this.url = service.getUrl();
+        this.editorName = service.getEditorName();
+        this.name = service.getName();
+        this.tagline = service.getTagline();
+        this.description = service.getDescription();
+        this.options = service.getOptions();
+        this.targetUsers = service.getTargetUsers();
+        this.userValue = service.getUserValue();
+        this.userBase = service.getUserBase();
+        this.symbol = service.getSymbol();
+        this.multimediaURL = service.getMultimediaURL();
+        this.providers = service.getProviders();
+        this.version = service.getVersion();
+        this.lastUpdate = service.getLastUpdate();
+        this.changeLog = service.getChangeLog();
+        this.validFor = service.getValidFor();
+        this.lifeCycleStatus = service.getLifeCycleStatus();
+        this.trl = service.getTrl();
+        this.category = service.getCategory();
+        this.subcategory = service.getSubcategory();
+        this.places = service.getPlaces();
+        this.languages = service.getLanguages();
+        this.tags = service.getTags();
+        this.requiredServices = service.getRequiredServices();
+        this.relatedServices = service.getRelatedServices();
+        this.order = service.getOrder();
+        this.request = service.getRequest();
+        this.helpdesk = service.getHelpdesk();
+        this.userManual = service.getUserManual();
+        this.trainingInformation = service.getTrainingInformation();
+        this.feedback = service.getFeedback();
+        this.price = service.getPrice();
+        this.serviceLevelAgreement = service.getServiceLevelAgreement();
+        this.termsOfUse = service.getTermsOfUse();
+        this.funding = service.getFunding();
+        this.availability = service.getAvailability();
+        this.reliability = service.getReliability();
+        this.serviceability = service.getServiceability();
+    }
+
+
 
     public Service(Service service) {
 
