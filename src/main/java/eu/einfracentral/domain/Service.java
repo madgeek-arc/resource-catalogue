@@ -25,7 +25,7 @@ public class Service implements Identifiable {
      * Global unique and persistent identifier of the service.
      */
     @XmlElement(required = false)
-    @JsonIgnore
+//    @JsonIgnore
     private String id; //maybe list
 
     /**
