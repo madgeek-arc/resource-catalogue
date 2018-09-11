@@ -137,7 +137,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             throw new Exception(String.format("Subcategory '%s' does not exist.", service.getSubcategory()));
         }
 
-        if (service.getPlaces() != null && CollectionUtils.isNotEmpty(service.getLanguages())) {
+        if (service.getPlaces() != null && CollectionUtils.isNotEmpty(service.getPlaces())) {
             if (!service.getPlaces().parallelStream().allMatch(place -> vocabularyManager.exists(
                     new SearchService.KeyValue("type", "Place"),
                     new SearchService.KeyValue("vocabulary_id", place)))) {
