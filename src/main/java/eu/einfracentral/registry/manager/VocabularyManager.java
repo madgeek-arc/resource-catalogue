@@ -41,18 +41,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         return region.getMembers();
     }
 
-    @Override
-    public boolean exists(SearchService.KeyValue... ids) {
-        Resource resource;
-        try {
-            resource = this.searchService.searchId(getResourceType(), ids);
-            return resource != null;
-        } catch (UnknownHostException e) {
-            logger.error(e);
-            throw new ServiceException(e);
-        }
-    }
-
     private void fetchRegion(Region region) {
         try {
             HttpURLConnection c = (HttpURLConnection) new URL(region.getSource()).openConnection();

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Configurable
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-public class UserManager extends ResourceManager<User> implements UserService {
+public class UserManager /*extends ResourceManager<User> implements UserService*/ {
 
     @Autowired
     private MailService mailService;
@@ -46,148 +46,148 @@ public class UserManager extends ResourceManager<User> implements UserService {
     String secret;
 
     public UserManager() {
-        super(User.class);
+//        super(User.class);
     }
 
-    @Override
-    public User activate(String id) {
-        User ret = unsafeGet(id);
-        if (ret.getJoinDate() == null) {
-            ret.setJoinDate(new Date().toString());
-            update(ret);
-            //Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
-        } else {
-            throw new ResourceException("User already activated", HttpStatus.CONFLICT);
-        }
-        return strip(ret);
-    }
-
-    @Override
-    public User reset(User user) {
-        User ret = null;
-        if (user.getResetToken().equals(unsafeGet(user.getId()).getResetToken())) {
-            ret = hashUser(user);
-            update(ret);
-        }
-        return strip(ret);
-    }
-
-    @Override
-    public User register(User user) {
-        User ret = null;
-        if (where("email", user.getEmail(), false) == null) {
-            user.setId(UUID.randomUUID().toString());
-            ret = hashUser(user);
-            add(ret);
-            mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
-        } else {
-            throw new ResourceException("User already registered!", HttpStatus.CONFLICT);
-        }
-        return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
-    }
-
-    @Override
-    public User forgot(String email) {
-        User ret = getUserByEmail(email);
-        if (ret != null) {
-            ret.setResetToken(UUID.randomUUID().toString());
-            update(ret);
-            mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
-        }
-        return strip(ret);
-    }
-
-    @Override
-    public String getToken(User credentials) {
-        if (secret.length() == 0) {
-            throw new ResourceException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        Date now = new Date();
-        String payload;
-        if (authenticate(credentials)) {
-            try {
-                payload = new ObjectMapper().writeValueAsString(credentials);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-                throw new ResourceException("Could not stringify user.", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            String ret;
-            try {
-                ret = Jwts.builder()
-                          .setPayload(payload)
-                          .signWith(SignatureAlgorithm.HS256, secret)
-                          .compact();
-            } catch (Throwable e) {
-                e.printStackTrace();
-                throw e;
-            }
-            return ret;
-        } else {
-            throw new ResourceException("Passwords do not match.", HttpStatus.FORBIDDEN);
-        }
-    }
-
-    @Override
-    public boolean authenticate(User credentials) {
-        User actual = unsafeGet(getUserByEmail(credentials.getEmail()).getId());
-        return Arrays.equals(hashPass(credentials.getPassword().toCharArray(),
-                                      actual.getSalt(),
-                                      actual.getIterationCount()), actual.getPassword().toCharArray());
-    }
-
-    @Override
-    public User getUserByEmail(String email) {
-        return strip(deserialize(where("email", email, true)));
-    }
-
-    private User hashUser(User user) {
-        final Random r = new SecureRandom();
-        byte[] salt = new byte[8];
-        r.nextBytes(salt);
-        user.setSalt(salt);
-        user.setIterationCount(Integer.parseInt(iterations));
-        user.setPassword(new String(hashPass(user.getPassword().toCharArray(),
-                                             user.getSalt(),
-                                             user.getIterationCount())));
-        return user;
-    }
-
-    public static char[] hashPass(char[] pass, byte[] salt, int iterations) {
-        try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, 256);
-            SecretKey key = skf.generateSecret(spec);
-            return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    private User unsafeGet(String id) {
-        return super.get(id);
-    }
-
-    private User strip(User user) {
-        user.setPassword("");
-        user.setResetToken("");
-        user.setSalt(new byte[0]);
-        user.setIterationCount(0);
-        return user;
-    }
-
-    @Override
-    public User get(String id) {
-        return strip(unsafeGet(id));
-    }
-
-    @Override
-    public Browsing<User> getAll(FacetFilter ff) {
-        return new Browsing<>(0, 0, 0, new ArrayList<User>(), new ArrayList<>());
-    }
-
-    @Override
-    public String getResourceType() {
-        return "einfrauser";
-    }
+//    @Override
+//    public User activate(String id) {
+//        User ret = unsafeGet(id);
+//        if (ret.getJoinDate() == null) {
+//            ret.setJoinDate(new Date().toString());
+//            update(ret);
+//            //Rollback error exists up to 1.3.1-20170804.135357-7, other errors appear aftewards
+//        } else {
+//            throw new ResourceException("User already activated", HttpStatus.CONFLICT);
+//        }
+//        return strip(ret);
+//    }
+//
+//    @Override
+//    public User reset(User user) {
+//        User ret = null;
+//        if (user.getResetToken().equals(unsafeGet(user.getId()).getResetToken())) {
+//            ret = hashUser(user);
+//            update(ret);
+//        }
+//        return strip(ret);
+//    }
+//
+//    @Override
+//    public User register(User user) {
+//        User ret = null;
+//        if (where("email", user.getEmail(), false) == null) {
+//            user.setId(UUID.randomUUID().toString());
+//            ret = hashUser(user);
+//            add(ret);
+//            mailService.sendMail(user.getEmail(), activateSubject, activateText + user.getId());
+//        } else {
+//            throw new ResourceException("User already registered!", HttpStatus.CONFLICT);
+//        }
+//        return strip(ret); //Not using get(ret.getId()) here, because this line runs before the db is updated
+//    }
+//
+//    @Override
+//    public User forgot(String email) {
+//        User ret = getUserByEmail(email);
+//        if (ret != null) {
+//            ret.setResetToken(UUID.randomUUID().toString());
+//            update(ret);
+//            mailService.sendMail(ret.getEmail(), resetSubject, resetText + ret.getId() + "/" + ret.getResetToken());
+//        }
+//        return strip(ret);
+//    }
+//
+//    @Override
+//    public String getToken(User credentials) {
+//        if (secret.length() == 0) {
+//            throw new ResourceException("jwt.secret has not been set", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//        Date now = new Date();
+//        String payload;
+//        if (authenticate(credentials)) {
+//            try {
+//                payload = new ObjectMapper().writeValueAsString(credentials);
+//            } catch (JsonProcessingException e) {
+//                e.printStackTrace();
+//                throw new ResourceException("Could not stringify user.", HttpStatus.INTERNAL_SERVER_ERROR);
+//            }
+//            String ret;
+//            try {
+//                ret = Jwts.builder()
+//                          .setPayload(payload)
+//                          .signWith(SignatureAlgorithm.HS256, secret)
+//                          .compact();
+//            } catch (Throwable e) {
+//                e.printStackTrace();
+//                throw e;
+//            }
+//            return ret;
+//        } else {
+//            throw new ResourceException("Passwords do not match.", HttpStatus.FORBIDDEN);
+//        }
+//    }
+//
+//    @Override
+//    public boolean authenticate(User credentials) {
+//        User actual = unsafeGet(getUserByEmail(credentials.getEmail()).getId());
+//        return Arrays.equals(hashPass(credentials.getPassword().toCharArray(),
+//                                      actual.getSalt(),
+//                                      actual.getIterationCount()), actual.getPassword().toCharArray());
+//    }
+//
+//    @Override
+//    public User getUserByEmail(String email) {
+//        return strip(deserialize(where("email", email, true)));
+//    }
+//
+//    private User hashUser(User user) {
+//        final Random r = new SecureRandom();
+//        byte[] salt = new byte[8];
+//        r.nextBytes(salt);
+//        user.setSalt(salt);
+//        user.setIterationCount(Integer.parseInt(iterations));
+//        user.setPassword(new String(hashPass(user.getPassword().toCharArray(),
+//                                             user.getSalt(),
+//                                             user.getIterationCount())));
+//        return user;
+//    }
+//
+//    public static char[] hashPass(char[] pass, byte[] salt, int iterations) {
+//        try {
+//            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+//            PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, 256);
+//            SecretKey key = skf.generateSecret(spec);
+//            return new String(Base64.getEncoder().encode(key.getEncoded())).toCharArray();
+//        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+//            e.printStackTrace();
+//            throw new RuntimeException(e);
+//        }
+//    }
+//
+//    private User unsafeGet(String id) {
+//        return super.get(id);
+//    }
+//
+//    private User strip(User user) {
+//        user.setPassword("");
+//        user.setResetToken("");
+//        user.setSalt(new byte[0]);
+//        user.setIterationCount(0);
+//        return user;
+//    }
+//
+//    @Override
+//    public User get(String id) {
+//        return strip(unsafeGet(id));
+//    }
+//
+//    @Override
+//    public Browsing<User> getAll(FacetFilter ff) {
+//        return new Browsing<>(0, 0, 0, new ArrayList<User>(), new ArrayList<>());
+//    }
+//
+//    @Override
+//    public String getResourceType() {
+//        return "einfrauser";
+//    }
 }
