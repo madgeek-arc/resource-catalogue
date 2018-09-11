@@ -17,20 +17,20 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     // TODO: merge with InfraServiceService
     /**
      *
-     * @param var1
+     * @param service, auth
      * @return
      * @throws Exception
      */
-    T addService(T var1) throws Exception;
+    T addService(T service, U auth) throws Exception;
 
     /**
      *
-     * @param var1
+     * @param service, auth
      * @return
      * @throws ResourceNotFoundException
      * @throws Exception
      */
-    T updateService(T var1) throws ResourceNotFoundException, Exception;
+    T updateService(T service, U auth) throws ResourceNotFoundException, Exception;
 
     /**
      * Returns the Service.
