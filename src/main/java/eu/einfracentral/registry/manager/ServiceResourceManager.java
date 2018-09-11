@@ -44,6 +44,32 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         return resourceType.getName();
     }
 
+//    @Override
+    public InfraService addService(InfraService infraService, Authentication auth) throws Exception {
+        if (exists(infraService)) {
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+        }
+        String serialized = null;
+        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
+        Resource created = new Resource();
+        created.setPayload(serialized);
+        created.setResourceType(resourceType);
+        resourceService.addResource(created);
+        return infraService;
+    }
+
+//    @Override
+    public InfraService updateService(InfraService infraService, Authentication auth) throws Exception {
+        String serialized = null;
+        Resource existing = null;
+        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
+        existing = getResource(infraService.getId(), infraService.getVersion());
+        assert existing != null;
+        existing.setPayload(serialized);
+        resourceService.updateResource(existing);
+        return infraService;
+    }
+
     @Override
     public InfraService addService(InfraService infraService) throws Exception {
         if (exists(infraService)) {
@@ -318,7 +344,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
 
-    private InfraService FillTransientFields(InfraService infraService) {
+    private RichService FillTransientFields(InfraService infraService) {
         //FIXME: vocabularyManager.get() is very slow
         RichService richService = new RichService(infraService);
         logger.info("Category: " + infraService.getCategory());
@@ -353,6 +379,6 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         //logger.info("service/all end");
         // TODO complete function
 
-        return infraService;
+        return richService;
     }
 }
