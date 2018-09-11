@@ -15,6 +15,7 @@ import eu.openminted.registry.core.service.ParserService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,15 +37,15 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    public Event add(Event event) {
+    public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
-        return super.add(event);
+        return super.add(event, auth);
     }
 
-    public Event update(Event event) {
+    public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
-        return super.update(event);
+        return super.update(event, auth);
     }
 
     public void delete(Event event) {
@@ -61,11 +62,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setUser(userId);
             event.setType(Event.UserActionType.FAVOURITE.getKey());
             event.setValue("1");
-            event = add(event);
+            event = add(event, null);
         } else {
             event = events.get(0);
             event = booleanToggleValue(event);
-            event = update(event);
+            event = update(event, null);
         }
         return event;
     }
@@ -80,11 +81,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setUser(userId);
             event.setType(Event.UserActionType.RATING.getKey());
             event.setValue(value);
-            event = add(event);
+            event = add(event, null);
         } else {
             event = events.get(0);
             event.setValue(value);
-            event = update(event);
+            event = update(event, null);
         }
         return event;
     }
@@ -127,14 +128,10 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     private List<Event> pagingToList(Paging<Resource> resources) {
-        List<Event> events = resources.getResults().stream().map(resource -> {
-            try {
-                return parserService.deserialize(resource, Event.class).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }).collect(Collectors.toList());
+        List<Event> events = resources.getResults()
+                .stream()
+                .map(resource -> parserService.deserialize(resource, Event.class))
+                .collect(Collectors.toList());
         logger.info(events.toString());
         return events;
     }
