@@ -67,14 +67,14 @@ public class ServiceController {
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> addService(@RequestBody Service service, Authentication jwt) {
+    public ResponseEntity<Service> addService(@RequestBody Service service, Authentication jwt) throws Exception {
         InfraService ret = (InfraService) this.infraService.add(new InfraService(service), jwt);
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> updateService(@RequestBody Service service, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<Service> updateService(@RequestBody Service service, Authentication jwt) throws Exception {
         InfraService ret = (InfraService) this.infraService.update(new InfraService(service), jwt);
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
