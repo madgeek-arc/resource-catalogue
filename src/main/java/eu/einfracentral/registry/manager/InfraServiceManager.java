@@ -63,7 +63,9 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public InfraService updateService(InfraService infraService, Authentication authentication) throws Exception {
 //        infraService.setService(validate(infraService.getService()));
         InfraService existingService = getLatest(infraService.getId());
-//        logger.info("User: " + authentication.getDetails());
+        if (authentication != null) {
+            logger.info("User: " + authentication.getDetails());
+        }
         InfraService ret = null;
         if (infraService.getVersion().equals(existingService.getVersion())) {
             try {
