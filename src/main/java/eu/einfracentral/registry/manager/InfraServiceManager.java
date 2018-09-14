@@ -37,20 +37,20 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     public InfraService addService(InfraService infraService, Authentication authentication) throws Exception {
-        migrate(infraService);
-        // TODO: THROW EXCEPTION INSTEAD OF RETURNING NULL
-        String id = createServiceId(infraService);
-        infraService.setId(id);
-        logger.info("Created service with id: " + id);
-        logger.info("Providers: " + infraService.getProviders());
-
-        if (infraService.getServiceMetadata() == null) {
-            ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getEditorName()); //FIXME: get name from backend
-            infraService.setServiceMetadata(serviceMetadata);
-        }
         InfraService ret;
         try {
             validate(infraService);
+            migrate(infraService);
+            String id = createServiceId(infraService);
+            infraService.setId(id);
+            logger.info("Created service with id: " + id);
+            logger.info("Providers: " + infraService.getProviders());
+
+            if (infraService.getServiceMetadata() == null) {
+                ServiceMetadata serviceMetadata = createServiceMetadata(infraService.getEditorName()); //FIXME: get name from backend
+                infraService.setServiceMetadata(serviceMetadata);
+            }
+
             ret = super.add(infraService, authentication);
         } catch (Exception e) {
             logger.error(e);
@@ -61,25 +61,29 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     public InfraService updateService(InfraService infraService, Authentication authentication) throws Exception {
-//        infraService.setService(validate(infraService.getService()));
-        InfraService existingService = getLatest(infraService.getId());
-        if (authentication != null) {
-            logger.info("User: " + authentication.getDetails());
-        }
-        InfraService ret = null;
-        if (infraService.getVersion().equals(existingService.getVersion())) {
-            try {
-                validate(infraService);
+        InfraService ret;
+        try {
+            validate(infraService);
+            //        infraService.setService(validate(infraService.getService()));
+            InfraService existingService = getLatest(infraService.getId());
+            if (authentication != null) {
+                logger.info("User: " + authentication.getDetails());
+            }
+
+
+
+            if (infraService.getVersion().equals(existingService.getVersion())) {
                 // update existing service serviceMetadata
                 ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), infraService.getEditorName());
                 infraService.setServiceMetadata(serviceMetadata);
                 ret = super.update(infraService, authentication);
-            } catch (Exception e) {
-                logger.error(e);
-                throw e;
+
+            } else {
+                ret = add(infraService, authentication);
             }
-        } else {
-            ret = add(infraService, authentication);
+        } catch (Exception e) {
+            logger.error(e);
+            throw e;
         }
         return ret;
     }
@@ -115,9 +119,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         service = validateSymbol(service);
         service = validateVersion(service);
         service = validateLastUpdate(service);
-        service = validateRequest(service);
+        service = validateOrder(service);
         service = validateSLA(service);
         service = validateProviders(service);
+        service = validateMaxLength(service);
         return service;
     }
 
@@ -158,7 +163,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 new SearchService.KeyValue("vocabulary_id", service.getLifeCycleStatus()))) {
             throw new Exception(String.format("lifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
         }
-        if (!vocabularyManager.exists(
+        if (service.getTrl() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "TRL"),
                 new SearchService.KeyValue("vocabulary_id", service.getTrl()))) {
             throw new Exception(String.format("trl '%s' does not exist.", service.getTrl()));
@@ -170,6 +175,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private InfraService validateName(InfraService service) throws Exception {
         if (service.getName() == null || service.getName().equals("")) {
             throw new Exception("field 'name' is obligatory");
+        }
+        //TODO: Core should check the max length
+        if (service.getName().length() > 80){
+            throw new Exception("max length for 'name' is 80 chars");
         }
         return service;
     }
@@ -191,7 +200,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //    }
 
     //validates the correctness of Providers.
-    //TODO: Exception "field providers is obligatory" isn't triggered when providers==null OR providers==[]. Fix!
     private InfraService validateProviders(InfraService service) throws Exception {
         List<String> providers = service.getProviders();
         List<String> existingProviders = new ArrayList<>();
@@ -209,6 +217,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         if (service.getDescription() == null || service.getDescription().equals("")) {
             throw new Exception("field 'description' is mandatory");
         }
+        //TODO: Core should check the max length
+        if (service.getDescription().length() > 1000){
+            throw new Exception("max length for 'description' is 1000 chars");
+        }
         return service;
     }
 
@@ -225,6 +237,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         if (service.getVersion() == null || service.getVersion().equals("")) {
             throw new Exception("field 'version' is mandatory");
         }
+        //TODO: Core should check the max length
+        if (service.getVersion().length() > 10){
+            throw new Exception("max length for 'version' is 10 chars");
+        }
         return service;
     }
 
@@ -237,10 +253,9 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     //validates the correctness of URL for requesting the service from the service providers.
-    //TODO: Fix the conflict between order and request variables. What we need, what we keep.
-    private InfraService validateRequest(InfraService service) throws Exception {
-        if (service.getRequest() == null || service.getRequest().equals("")) {
-            throw new Exception("field 'request' is mandatory");
+    private InfraService validateOrder(InfraService service) throws Exception {
+        if (service.getOrder() == null || service.getOrder().equals("")) {
+            throw new Exception("field 'order' is mandatory");
         }
         return service;
     }
@@ -309,5 +324,32 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private String createServiceId(Service service) {
         String provider = service.getProviders().get(0);
         return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z\\s]+", "").replaceAll(" ", "_").toLowerCase());
+    }
+
+    //validates the max length of various variables.
+    //FIXME: Core should check the max length
+    private InfraService validateMaxLength(InfraService service) throws Exception {
+        if (service.getTagline().length() > 100){
+            throw new Exception("max length for 'tagline' is 100 chars");
+        }
+        if (service.getOptions().length() > 1000){
+            throw new Exception("max length for 'options' is 1000 chars");
+        }
+        if (service.getTargetUsers().length() > 1000){
+            throw new Exception("max length for 'targetUsers' is 1000 chars");
+        }
+        if (service.getUserValue().length() > 1000){
+            throw new Exception("max length for 'userValue' is 1000 chars");
+        }
+        if (service.getUserBase().length() > 1000){
+            throw new Exception("max length for 'userBase' is 1000 chars");
+        }
+        if (service.getChangeLog().length() > 1000){
+            throw new Exception("max length for 'changeLog' is 1000 chars");
+        }
+        if (service.getFunding().length() > 500){
+            throw new Exception("max length for 'funding' is 500 chars");
+        }
+        return service;
     }
 }

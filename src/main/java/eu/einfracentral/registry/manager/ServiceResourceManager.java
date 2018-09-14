@@ -79,7 +79,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     @Override
     public InfraService getLatest(String id) throws ResourceNotFoundException {
         List resources = searchService
-                .cqlQuery("infra_service_id=\"" + id + "\"", "infra_service", 1, 0, "registeredAt", "DESC")
+                .cqlQuery("infra_service_id=\"" + id + "\"", "infra_service", 1, 0, "creation_date", "DESC")
                 .getResults();
         if (resources.isEmpty()) {
             throw new ResourceNotFoundException();
