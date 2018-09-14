@@ -59,7 +59,9 @@
     <xs:complexContent>
       <xs:extension base="tns:service">
         <xs:sequence>
+          <xs:element minOccurs="0" name="active" type="xs:boolean"/>
           <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -322,12 +324,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="email" type="xs:string"/>
       <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element name="iterationCount" type="xs:int"/>
-      <xs:element minOccurs="0" name="joinDate" type="xs:string"/>
       <xs:element minOccurs="0" name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="password" type="xs:string"/>
-      <xs:element minOccurs="0" name="resetToken" type="xs:string"/>
-      <xs:element minOccurs="0" name="salt" type="xs:base64Binary"/>
       <xs:element minOccurs="0" name="surname" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
@@ -343,16 +340,14 @@
 
   <xs:complexType name="provider">
     <xs:sequence>
-      <xs:element name="contactInformation" type="xs:string"/>
+      <xs:element minOccurs="0" name="active" type="xs:boolean"/>
+      <xs:element name="additionalInfo" type="xs:string"/>
+      <xs:element minOccurs="0" name="catalogueOfResources" type="xs:anyURI"/>
+      <xs:element minOccurs="0" name="contactInformation" type="xs:string"/>
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="services">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:service"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element minOccurs="0" name="publicDescOfResources" type="xs:anyURI"/>
+      <xs:element minOccurs="0" name="status" type="xs:string"/>
       <xs:element minOccurs="0" name="users">
         <xs:complexType>
           <xs:sequence>
@@ -360,6 +355,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="website" type="xs:anyURI"/>
     </xs:sequence>
   </xs:complexType>
 
