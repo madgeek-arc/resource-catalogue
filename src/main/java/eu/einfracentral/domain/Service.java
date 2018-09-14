@@ -1,8 +1,10 @@
 package eu.einfracentral.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.List;
 import javax.xml.bind.annotation.*;
@@ -198,8 +200,11 @@ public class Service implements Identifiable {
     /**
      * (Deprecated) Link to request the service from the service provider
      */
+    @JsonIgnore
     @XmlElement
-    private URL request;
+    @ApiParam(hidden = true)
+    @ApiModelProperty(hidden = true,readOnly = true)
+    private URL requests;
 
     /**
      * The Uniform Resource Locator (web address) to a webpage with the contact person or helpdesk to ask more information from the service provider about this service.
@@ -305,7 +310,7 @@ public class Service implements Identifiable {
         this.requiredServices = service.getRequiredServices();
         this.relatedServices = service.getRelatedServices();
         this.order = service.getOrder();
-        this.request = service.getRequest();
+        this.requests = service.getRequests();
         this.helpdesk = service.getHelpdesk();
         this.userManual = service.getUserManual();
         this.trainingInformation = service.getTrainingInformation();
@@ -359,7 +364,7 @@ public class Service implements Identifiable {
         this.requiredServices = service.getRequiredServices();
         this.relatedServices = service.getRelatedServices();
         this.order = service.getOrder();
-        this.request = service.getRequest();
+        this.requests = service.getRequests();
         this.helpdesk = service.getHelpdesk();
         this.userManual = service.getUserManual();
         this.trainingInformation = service.getTrainingInformation();
@@ -596,13 +601,13 @@ public class Service implements Identifiable {
     public void setOrder(URL order) {
         this.order = order;
     }
-
-    public URL getRequest() {
-        return request;
+    @ApiIgnore
+    public URL getRequests() {
+        return requests;
     }
-
-    public void setRequest(URL request) {
-        this.request = request;
+    @ApiIgnore
+    public void setRequests(URL requests) {
+        this.requests = requests;
     }
 
     public URL getHelpdesk() {
