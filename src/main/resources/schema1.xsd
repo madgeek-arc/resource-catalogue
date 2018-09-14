@@ -177,7 +177,7 @@
           <xs:documentation><![CDATA[Reliability, i.e., the probability that an item will function without failure under stated conditions for a speciﬁed amount of time. “Stated conditions” indicates perquisite conditions external to the item being considered. For example, a stated condition for a supercomputer might be that power and cooling must be available - thus a failure of the power or cooling systems would not be considered a failure of the supercomputer.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="request" type="xs:anyURI">
+      <xs:element minOccurs="0" name="requests" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[(Deprecated) Link to request the service from the service provider]]></xs:documentation>
         </xs:annotation>
