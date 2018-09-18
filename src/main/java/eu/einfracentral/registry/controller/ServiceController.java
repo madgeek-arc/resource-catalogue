@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -32,10 +33,10 @@ public class ServiceController {
 
     private static Logger logger = Logger.getLogger(ServiceController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
-    private ProviderService providerService;
+    private ProviderService<Provider, Authentication> providerService;
 
     @Autowired
-    ServiceController(InfraServiceService<InfraService, InfraService> service, ProviderService provider) {
+    ServiceController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider) {
         infraService = service;
         providerService = provider;
     }
@@ -66,6 +67,7 @@ public class ServiceController {
 
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
+    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @infraServiceService.userIsServiceProvider(principal['email'],#service)")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, Authentication jwt) throws Exception {
         InfraService ret = this.infraService.addService(new InfraService(service), jwt);
@@ -73,6 +75,7 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
+    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @infraServiceService.userIsServiceProvider(principal['email'],#service)")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, Authentication jwt) throws Exception {
         InfraService ret = this.infraService.updateService(new InfraService(service), jwt);
@@ -93,8 +96,9 @@ public class ServiceController {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication authentication) throws ResourceNotFoundException {
 //        super.getAll(allRequestParams, jwt);
+        logger.info(authentication.getDetails());
         logger.debug("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
