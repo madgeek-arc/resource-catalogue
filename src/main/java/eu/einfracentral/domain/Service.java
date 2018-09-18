@@ -14,15 +14,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
 
-
-    /**
-     * The name of the user that modified content of the service. This value is saved in ServiceMetadata.
-     */
-    @XmlTransient
-    @JsonIgnore
-    private String editorName;
-
-
     /**
      * Global unique and persistent identifier of the service.
      */
@@ -35,13 +26,6 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     private URL url;
-
-//    /**
-//     * The organisation that manages and delivers the service and with whom the customer signs the SLA.
-//     */
-//    @XmlTransient
-//    @JsonIgnore
-//    private String providerName;
 
     /**
      * Brief and descriptive name of service as assigned by the service provider.
@@ -285,7 +269,6 @@ public class Service implements Identifiable {
     public Service(InfraService service) {
         this.id = service.getId();
         this.url = service.getUrl();
-        this.editorName = service.getEditorName();
         this.name = service.getName();
         this.tagline = service.getTagline();
         this.description = service.getDescription();
@@ -339,7 +322,6 @@ public class Service implements Identifiable {
 //        }
         this.id = service.getId();
         this.url = service.getUrl();
-        this.editorName = service.getEditorName();
         this.name = service.getName();
         this.tagline = service.getTagline();
         this.description = service.getDescription();
@@ -394,20 +376,6 @@ public class Service implements Identifiable {
 
     public void setUrl(URL url) {
         this.url = url;
-    }
-
-    // FIXME: Important!!! fix this returning the name of the user from Authentication
-    public String getEditorName() {
-        if (getProviders() == null || getProviders().size() == 0) {
-            return null;
-        }
-        return getProviders().get(0);
-//        return editorName;
-    }
-
-    // FIXME: Set the name of the Authenticated user in this value
-    public void setEditorName(String editorName) {
-        this.editorName = editorName;
     }
 
     public String getName() {

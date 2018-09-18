@@ -361,8 +361,16 @@
 
   <xs:complexType name="richService">
     <xs:sequence>
+      <xs:element minOccurs="0" name="categoryName" type="xs:string"/>
+      <xs:element name="favourites" type="xs:int"/>
+      <xs:element name="hasRate" type="xs:int"/>
+      <xs:element name="isFavourite" type="xs:boolean"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="languageNames" nillable="true" type="xs:string"/>
+      <xs:element name="ratings" type="xs:int"/>
       <xs:element minOccurs="0" ref="tns:service"/>
       <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
+      <xs:element minOccurs="0" name="subCategoryName" type="xs:string"/>
+      <xs:element name="views" type="xs:int"/>
     </xs:sequence>
   </xs:complexType>
 

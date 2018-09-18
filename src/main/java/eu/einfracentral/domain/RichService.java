@@ -6,17 +6,14 @@ public class RichService {
 
     private Service service;
     private ServiceMetadata serviceMetadata;
-
-    // Transient Fields
-    private transient String categoryName;
-    private transient String subCategoryName;
-    private transient List<String> languageNames;
-    private transient int views;
-    private transient int ratings;
-    private transient int hasRate;
-    private transient int favourites;
-    private transient boolean isFavourite;
-    // End of Transient Fields
+    private String categoryName;
+    private String subCategoryName;
+    private List<String> languageNames;
+    private int views;
+    private int ratings;
+    private int hasRate;
+    private int favourites;
+    private boolean isFavourite;
 
 
     public RichService() {
