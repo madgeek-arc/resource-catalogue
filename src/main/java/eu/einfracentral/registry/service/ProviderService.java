@@ -5,6 +5,8 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ProviderService extends ResourceService<Provider, Authentication> {
+public interface ProviderService<T, U extends Authentication> extends ResourceService<Provider, Authentication> {
+    List<T> getMyServiceProviders(String email);
     List<Service> getServices(String id);
+    Service getFeaturedService(String id);
 }
