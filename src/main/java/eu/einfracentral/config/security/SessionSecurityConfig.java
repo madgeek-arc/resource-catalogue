@@ -1,9 +1,13 @@
 package eu.einfracentral.config.security;
 
 import com.google.common.collect.Sets;
+import com.google.gson.*;
 import com.nimbusds.jose.util.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.OIDCAuthenticationFilter;
@@ -26,10 +30,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.servlet.http.Cookie;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Configuration
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
@@ -165,7 +173,18 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         ret.setAuthRequestUrlBuilder(new PlainAuthRequestUrlBuilder());
         ret.setAuthenticationSuccessHandler((httpServletRequest, response, authentication) -> {
             OIDCAuthenticationToken authOIDC = (OIDCAuthenticationToken) authentication;
-            Cookie sessionCookie = new Cookie("info", Base64.encode(authOIDC.getUserInfo().toJson().toString()).toString());
+            JsonObject info = authOIDC.getUserInfo().toJson();
+            logger.info("Authorities: ", StringUtils.join(authentication.getAuthorities().toArray()));
+            List<String> roles = authentication.getAuthorities()
+                    .stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            Gson gson = new Gson();
+            gson.toJson(roles);
+            JsonElement jsonRoles = new JsonParser().parse(gson.toJson(roles));
+            info.add("roles", jsonRoles);
+
+            Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
             int expireSec = -1;
             sessionCookie.setMaxAge(expireSec);
             sessionCookie.setPath("/");

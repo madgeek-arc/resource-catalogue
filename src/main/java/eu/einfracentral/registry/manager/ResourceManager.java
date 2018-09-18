@@ -119,7 +119,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public List<T> delAll() {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(10000);
-        return getAll(facetFilter,null).getResults().stream().map(this::del).collect(Collectors.toList());
+        return getAll(facetFilter, null).getResults().stream().map(this::del).collect(Collectors.toList());
     }
 
     @Override

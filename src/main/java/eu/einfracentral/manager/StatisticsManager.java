@@ -1,6 +1,7 @@
 package eu.einfracentral.manager;
 
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -26,6 +27,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.pipeline.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,7 +43,7 @@ public class StatisticsManager implements StatisticsService {
     @Autowired
     private AnalyticsService analyticsService;
     @Autowired
-    private ProviderService providerService;
+    private ProviderService<Provider, Authentication> providerService;
 
     @Override
     public Map<String, Float> ratings(String id) {
