@@ -41,7 +41,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         Optional<List<Provider>> providers = Optional.of(providerManager.getAll(ff, null).getResults());
-        userRolesMap.putAll(providers.get()
+        userRolesMap = providers.get()
                 .stream()
                 // TODO IMPORTANT!! Check if provider is active and then map provider admin roles
                 .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
@@ -50,7 +50,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                         .map(User::getEmail))
                 .distinct()
                 .collect(Collectors
-                        .toMap(Function.identity(), (a) -> new SimpleGrantedAuthority("ROLE_PROVIDER"))));
+                        .toMap(Function.identity(), (a) -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
 
         userRolesMap.putAll(Arrays.stream(admins.split(","))
                 .collect(Collectors.toMap(
