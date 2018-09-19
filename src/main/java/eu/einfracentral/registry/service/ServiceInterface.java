@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 
+import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -67,7 +68,7 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
      * @param ff
      * @return
      */
-    Paging<Service> getRichServices(FacetFilter ff);
+    Paging<RichService> getRichServices(FacetFilter ff);
 
     /**
      * Check if the Service exists.
