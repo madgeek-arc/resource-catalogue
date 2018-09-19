@@ -5,24 +5,28 @@ import javax.xml.bind.annotation.*;
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class User implements Identifiable {
+
     @XmlElement
     private String id;
+
     @XmlElement
     private String email;
-    @XmlElement
-    private String password;
+
     @XmlElement
     private String name;
+
     @XmlElement
     private String surname;
-    @XmlElement
-    private String joinDate;
-    @XmlElement
-    private int iterationCount;
-    @XmlElement
-    private byte[] salt;
-    @XmlElement
-    private String resetToken;
+
+    public User() {
+    }
+
+    public User(String id, String email, String name, String surname) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.surname = surname;
+    }
 
     @Override
     public String getId() {
@@ -42,14 +46,6 @@ public class User implements Identifiable {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getName() {
         return name;
     }
@@ -66,35 +62,4 @@ public class User implements Identifiable {
         this.surname = surname;
     }
 
-    public String getJoinDate() {
-        return joinDate;
-    }
-
-    public void setJoinDate(String joinDate) {
-        this.joinDate = joinDate;
-    }
-
-    public int getIterationCount() {
-        return iterationCount;
-    }
-
-    public void setIterationCount(int iterationCount) {
-        this.iterationCount = iterationCount;
-    }
-
-    public byte[] getSalt() {
-        return salt;
-    }
-
-    public void setSalt(byte[] salt) {
-        this.salt = salt;
-    }
-
-    public String getResetToken() {
-        return resetToken;
-    }
-
-    public void setResetToken(String resetToken) {
-        this.resetToken = resetToken;
-    }
 }

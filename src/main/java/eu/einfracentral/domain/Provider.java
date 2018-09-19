@@ -1,26 +1,65 @@
 package eu.einfracentral.domain;
 
 import io.swagger.annotations.ApiModelProperty;
+
+import java.net.URL;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {
+
     @XmlElement(required = true)
     private String id;
+
     @XmlElement(required = true)
     private String name;
+
     @XmlElement(required = true)
+    private URL website;
+
+    @XmlElement
+    private URL catalogueOfResources;
+
+    @XmlElement
+    private URL publicDescOfResources;
+
+    @XmlElement(required = true)
+    private String additionalInfo;
+
+    @XmlElement
     private String contactInformation;
+
     @XmlElementWrapper(name = "users")
     @XmlElement(name = "user")
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(required = true)
     private List<User> users;
-    @XmlElementWrapper(name = "services")
-    @XmlElement(name = "service")
+
+    @XmlElement
     @ApiModelProperty(hidden = true)
-    private List<Service> services;
+    private Boolean active;
+
+    @XmlElement
+    @ApiModelProperty(hidden = true)
+    private String status;
+
+
+    public Provider() {
+    }
+
+    public Provider(String id, String name, String contactInformation, URL website, URL catalogueOfResources, URL publicDescOfResources, String additionalInfo, List<User> users, Boolean active, String status) {
+        this.id = id;
+        this.name = name;
+        this.contactInformation = contactInformation;
+        this.website = website;
+        this.catalogueOfResources = catalogueOfResources;
+        this.publicDescOfResources = publicDescOfResources;
+        this.additionalInfo = additionalInfo;
+        this.users = users;
+        this.active = active;
+        this.status = status;
+    }
 
     @Override
     public String getId() {
@@ -58,13 +97,51 @@ public class Provider implements Identifiable {
         this.users = users;
     }
 
-    @ApiModelProperty(hidden = true)
-    public List<Service> getServices() {
-        return services;
+    public URL getWebsite() {
+        return website;
     }
 
-    @ApiModelProperty(hidden = true)
-    public void setServices(List<Service> services) {
-        this.services = services;
+    public void setWebsite(URL website) {
+        this.website = website;
+    }
+
+    public URL getCatalogueOfResources() {
+        return catalogueOfResources;
+    }
+
+    public void setCatalogueOfResources(URL catalogueOfResources) {
+        this.catalogueOfResources = catalogueOfResources;
+    }
+
+    public URL getPublicDescOfResources() {
+        return publicDescOfResources;
+    }
+
+    public void setPublicDescOfResources(URL publicDescOfResources) {
+        this.publicDescOfResources = publicDescOfResources;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
