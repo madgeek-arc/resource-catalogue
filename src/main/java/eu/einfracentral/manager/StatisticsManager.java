@@ -159,7 +159,7 @@ public class StatisticsManager implements StatisticsService {
                               .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
 
-    @Override
+    /*@Override
     public Map<String, Integer> favourites(String id) {
         InternalDateHistogram histogram = elastic
                 .client()
@@ -185,6 +185,29 @@ public class StatisticsManager implements StatisticsService {
                         bucket -> {
                             Filter subTerm = bucket.getAggregations().get("values");
                             return (int) subTerm.getDocCount();
+                        }
+                )
+        );
+    }*/
+
+    @Override
+    public Map<String, Integer> favourites(String id) {
+        final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
+        List<InternalDateHistogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey()).getBuckets();
+        return buckets.stream().collect(
+                Collectors.toMap(
+                        MultiBucketsAggregation.Bucket::getKeyAsString,
+                        bucket -> {
+                            Terms subTerm = bucket.getAggregations().get("value");
+                            if (subTerm.getBuckets() != null) {
+                                totalDocCounts[0] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 0 ? subBucket.getDocCount() : 0
+                                ).sum();
+                                totalDocCounts[1] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
+                                ).sum();
+                            }
+                            return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
                         }
                 )
         );
