@@ -204,7 +204,7 @@
           <xs:documentation><![CDATA[Type/Subcategory of service within a category]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="symbol" type="xs:anyURI">
+      <xs:element name="symbol" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the logo/visual identity of the service.]]></xs:documentation>
         </xs:annotation>

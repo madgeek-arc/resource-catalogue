@@ -5,10 +5,13 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
 import java.util.List;
-import javax.xml.bind.annotation.*;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -18,19 +21,21 @@ public class Service implements Identifiable {
      * Global unique and persistent identifier of the service.
      */
     @XmlElement(required = false)
-//    @JsonIgnore
+    @ApiModelProperty(position = 1, example = "(required on PUT only)")
     private String id; //maybe list
 
     /**
      * The Uniform Resource Locator (web address) to the entry web page of the service usually hosted and maintained by the service provider.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 2, example = "http://service.url (required)", required = true)
     private URL url;
 
     /**
      * Brief and descriptive name of service as assigned by the service provider.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 3, example = "Service Name (required)", required = true)
     private String name;
 
     /**
@@ -43,6 +48,7 @@ public class Service implements Identifiable {
      * High-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables access to.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 5, example = "Service Description (required)", required = true)
     private String description;
 
     /**
@@ -72,7 +78,8 @@ public class Service implements Identifiable {
     /**
      * The Uniform Resource Locator (web address) to the logo/visual identity of the service.
      */
-    @XmlElement(required = false)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 10, example = "http://symbol.url (required)", required = true)
     //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL symbol;
 
@@ -88,18 +95,21 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "providers")
     @XmlElement(name = "provider")
+    @ApiModelProperty(position = 12, dataType = "List", example = "['provider1', 'provider2'] (required)", required = true)
     private List<String> providers;
 
     /**
      * Informs about the service version that is in force.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 13, example = "1.08 (required)", required = true)
     private String version;
 
     /**
      * The date of the latest update of the service.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 14, example = "2018-01-30 (required)", required = true)
     private XMLGregorianCalendar lastUpdate;
 
     /**
@@ -118,24 +128,28 @@ public class Service implements Identifiable {
      * Used to tag the service to the full service cycle.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 17, example = "LifeCycleStatus-X (required)", required = true)
     private String lifeCycleStatus; //alpha, beta, production
 
     /**
      * Used to tag the service to the Technology Readiness Level, a method of estimating technology ma-turity of critical technology elements. TRL are based on a scale from 1 to 9 with 9 being the most ma-ture technology.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 18, example = "TRL-X (required)", required = true)
     private String trl; //7, 8 , 9
 
     /**
      * A named group of services that offer access to the same type of resource that is of interest to a customer/user.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 19, example = "Category-X (required)", required = true)
     private String category; //maybe list
 
     /**
      * Type/Subcategory of service within a category
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 20, example = "Subcategory-X (required)", required = true)
     private String subcategory; //maybe list
 
     /**
@@ -143,6 +157,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "places", required = true)
     @XmlElement(name = "place")
+    @ApiModelProperty(position = 21, example = "['Place-X1', 'Place-X2'] (required)", required = true)
     private List<String> places;
 
     /**
@@ -150,6 +165,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "languages", required = true)
     @XmlElement(name = "language")
+    @ApiModelProperty(position = 22, example = "['Language-X1', 'Language-X2'] (required)", required = true)
     private List<String> languages;
 
     /**
@@ -178,6 +194,7 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 26, example = "http://order.url (required)", required = true)
     //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL order;
 
@@ -187,7 +204,7 @@ public class Service implements Identifiable {
     @JsonIgnore
     @XmlElement
     @ApiParam(hidden = true)
-    @ApiModelProperty(hidden = true,readOnly = true)
+    @ApiModelProperty(hidden = true, readOnly = true)
     private URL requests;
 
     /**
@@ -225,6 +242,7 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.
      */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 32, example = "http://sla.url (required)", required = true)
     private URL serviceLevelAgreement;
 
     /**
@@ -306,7 +324,6 @@ public class Service implements Identifiable {
         this.reliability = service.getReliability();
         this.serviceability = service.getServiceability();
     }
-
 
 
     public Service(Service service) {
@@ -569,10 +586,12 @@ public class Service implements Identifiable {
     public void setOrder(URL order) {
         this.order = order;
     }
+
     @ApiIgnore
     public URL getRequests() {
         return requests;
     }
+
     @ApiIgnore
     public void setRequests(URL requests) {
         this.requests = requests;
@@ -665,5 +684,6 @@ public class Service implements Identifiable {
     public void setServiceability(String serviceability) {
         this.serviceability = serviceability;
     }
+
 
 }
