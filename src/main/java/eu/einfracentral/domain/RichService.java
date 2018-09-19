@@ -11,7 +11,7 @@ public class RichService {
     private List<String> languageNames;
     private int views;
     private int ratings;
-    private int hasRate;
+    private float hasRate;
     private int favourites;
     private boolean isFavourite;
 
@@ -20,7 +20,7 @@ public class RichService {
 
     }
 
-    public RichService(Service service, ServiceMetadata serviceMetadata, String categoryName, String subCategoryName, List<String> languageNames, int views, int ratings, int hasRate, int favourites, boolean isFavourite) {
+    public RichService(Service service, ServiceMetadata serviceMetadata, String categoryName, String subCategoryName, List<String> languageNames, int views, int ratings, float hasRate, int favourites, boolean isFavourite) {
         this.service = service;
         this.serviceMetadata = serviceMetadata;
         this.categoryName = categoryName;
@@ -79,11 +79,11 @@ public class RichService {
         this.ratings = ratings;
     }
 
-    public int getHasRate() {
+    public float getHasRate() {
         return hasRate;
     }
 
-    public void setHasRate(int hasRate) {
+    public void setHasRate(float hasRate) {
         this.hasRate = hasRate;
     }
 
