@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.ServiceHistory;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -113,13 +110,50 @@ public class ServiceController {
             sort.put(orderField, order);
             facetFilter.setOrderBy(sort);
         }
+        Paging<InfraService> infraServices = infraService.getAll(facetFilter, null);
+        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
+        if (services.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
+//        Paging<Service> services = infraService.getAll(facetFilter, null);
+//        if (services.getResults().isEmpty()) {
+//            throw new ResourceNotFoundException();
+//        }
+//        return ResponseEntity.ok(services);
+    }
+
+    @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
+    })
+    @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication jwt) throws ResourceNotFoundException {
+//        super.getAll(allRequestParams, jwt);
+        logger.debug("Request params: " + allRequestParams);
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        facetFilter.setFilter(allRequestParams);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            facetFilter.setOrderBy(sort);
+        }
 //        Paging<InfraService> infraServices = infraService.getAll(facetFilter);
 //        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
 //        if (services.isEmpty()) {
 //            throw new ResourceNotFoundException();
 //        }
 //        return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
-        Paging<Service> services = infraService.getRichServices(facetFilter);
+        Paging<RichService> services = infraService.getRichServices(facetFilter);
         if (services.getResults().isEmpty()) {
             throw new ResourceNotFoundException();
         }
