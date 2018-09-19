@@ -37,13 +37,15 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         if (admins == null) {
             throw new Exception("No Admins Provided");
         }
+        userRolesMap = new HashMap<>();
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         Optional<List<Provider>> providers = Optional.of(providerManager.getAll(ff, null).getResults());
         userRolesMap = providers.get()
                 .stream()
-                // TODO IMPORTANT!! Check if provider is active and then map provider admin roles
+                .distinct()
+                .filter(Provider::getActive)
                 .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
                         .stream()
                         .filter(Objects::nonNull)
