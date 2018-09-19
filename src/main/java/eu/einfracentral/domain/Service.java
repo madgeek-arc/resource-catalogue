@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
@@ -11,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlType
@@ -42,6 +44,7 @@ public class Service implements Identifiable {
      * Short text, catch line or slogan which serves mainly marketing and advertising purposes.
      */
     @XmlElement
+    @ApiModelProperty(position = 4, example = "Service Slogan (optional)")
     private String tagline;
 
     /**
@@ -55,24 +58,28 @@ public class Service implements Identifiable {
      * A high-level description of the various options or forms in which the service can be instantiated.
      */
     @XmlElement
+    @ApiModelProperty(position = 6, example = "Service Options (optional)")
     private String options;
 
     /**
      * Type of users/customers allowed to commission/benefit from the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 7, example = "Service Target Users (optional)")
     private String targetUsers; //maybe list
 
     /**
      * Description of the benefit delivered to a customer/user by the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 8, example = "Service User Value (optional)")
     private String userValue;
 
     /**
      * List of customers, communities, users, etc using the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 9, example = "Service User Base (optional)")
     private String userBase;
 
     /**
@@ -87,13 +94,14 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to the multimedia material of the service (screenshots or videos).
      */
     @XmlElement
+    @ApiModelProperty(position = 11, example = "http://multimedia.url (optional)")
     private URL multimediaURL;
 
     //Classification
     /**
      * (Deprecated) Organisations that manage and deliver the service and with whom the customer signs the SLA.
      */
-    @XmlElementWrapper(name = "providers")
+    @XmlElementWrapper(name = "providers", required = true)
     @XmlElement(name = "provider")
     @ApiModelProperty(position = 12, dataType = "List", example = "['provider1', 'provider2'] (required)", required = true)
     private List<String> providers;
@@ -116,12 +124,14 @@ public class Service implements Identifiable {
      * A log of the service features added in the last and previous versions.
      */
     @XmlElement
+    @ApiModelProperty(position = 15, example = "Service Changelog (optional)")
     private String changeLog;
 
     /**
      * The date up to which the service description is valid.
      */
     @XmlElement
+    @ApiModelProperty(position = 16, example = "2050-04-27 (optional)")
     private XMLGregorianCalendar validFor;
 
     /**
@@ -171,8 +181,9 @@ public class Service implements Identifiable {
     /**
      * Attribute to facilitate searching based on keywords.
      */
-    @XmlElementWrapper(name = "tags", required = true)
+    @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
+    @ApiModelProperty(position = 23, dataType = "List", example = "['tag1', 'tag2'] (optional)")
     private List<String> tags;
 
     /**
@@ -180,6 +191,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
+    @ApiModelProperty(position = 24, dataType = "List", example = "['service1', 'service2'] (optional)")
     private List<String> requiredServices;
 
     /**
@@ -187,6 +199,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
+    @ApiModelProperty(position = 25, dataType = "List", example = "['service1', 'service2'] (optional)")
     private List<String> relatedServices;
 
     //Support
@@ -211,24 +224,28 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to a webpage with the contact person or helpdesk to ask more information from the service provider about this service.
      */
     @XmlElement
+    @ApiModelProperty(position = 27, example = "http://helpdesk.url (optional)")
     private URL helpdesk;
 
     /**
      * The Uniform Resource Locator (web address) to the service user manual and documentation
      */
     @XmlElement
+    @ApiModelProperty(position = 28, example = "http://manual.url (optional)")
     private URL userManual;
 
     /**
      * The Uniform Resource Locator (web address) to training information on the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 29, example = "http://training.url (optional)")
     private URL trainingInformation;
 
     /**
      * The Uniform Resource Locator (web address) to the page where customers can provide feedback on the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 30, example = "http://feedback.url (optional)")
     private URL feedback;
 
     //Contractual
@@ -236,6 +253,7 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to the information about the payment models that apply, the cost and any related information.
      */
     @XmlElement
+    @ApiModelProperty(position = 31, example = "http://price.url (optional)")
     private URL price;
 
     /**
@@ -250,12 +268,14 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "termsOfUse")
     @XmlElement(name = "termOfUse")
+    @ApiModelProperty(position = 33, dataType = "List", example = "['http://terms1.url', 'http://terms2.url'] (optional)")
     private List<URL> termsOfUse;
 
     /**
      * Sources of funding for the development and/or operation of the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 34, example = "Service Funding Sources (optional)")
     private String funding;
 
     /**
