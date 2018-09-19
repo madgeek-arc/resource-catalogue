@@ -1,22 +1,24 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.RichService;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.ServiceHistory;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.KeyValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,16 +30,21 @@ import static java.util.stream.Collectors.toList;
 public class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
-
     public ServiceResourceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
     }
 
     @Autowired
-    VersionService versionService;
+    private VersionService versionService;
 
     @Autowired
-    VocabularyManager vocabularyManager;
+    private VocabularyManager vocabularyManager;
+
+    @Autowired
+    private EventManager eventManager;
+
+    @Autowired
+    private StatisticsManager statisticsService;
 
     @Override
     public String getResourceType() {
@@ -182,12 +189,11 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public Browsing<Service> getRichServices(FacetFilter ff) {
+    public Browsing<RichService> getRichServices(FacetFilter ff) {
         Browsing<InfraService> infraServices = getAll(ff, null);
-        List<Service> services = infraServices.getResults()
+        List<RichService> services = infraServices.getResults()
                 .stream()
-//                .map(this::FillTransientFields)
-                .map(Service::new)
+                .map(this::FillTransientFields)
                 .collect(toList());
         return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(),
                 infraServices.getTo(), services, infraServices.getFacets());
@@ -293,40 +299,72 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
 
-    private RichService FillTransientFields(InfraService infraService) {
+    private RichService FillTransientFields(InfraService infraService){
         //FIXME: vocabularyManager.get() is very slow
         RichService richService = new RichService(infraService);
-        logger.info("Category: " + infraService.getCategory());
-        logger.info("Subcategory: " + infraService.getSubcategory());
+
+        //setCategoryName & setSubcategoryName
         if (infraService.getCategory() == null) {
             richService.setCategoryName("null");
         } else {
             richService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
         }
+
         if (infraService.getSubcategory() == null) {
             richService.setSubCategoryName("null");
         } else {
-            try {
-                richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
-            } catch (Exception e) {
-                logger.info(e);
-                richService.setSubCategoryName("Not Found");
+            richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
+        }
+
+        //setLanguageNames
+        List<String> languageNames = new ArrayList<>();
+        if (infraService.getLanguages() != null) {
+            for (String lang : infraService.getLanguages()) {
+                Vocabulary language = vocabularyManager.get("vocabulary_id", lang);
+                if (language != null) {
+                    languageNames.add(language.getName());
+                }
+            }
+            richService.setLanguageNames(languageNames);
+        }
+
+        //setFavourites & setFavourite
+        Paging<Resource> eventResources = searchService.cqlQuery(String.format("value=1 and type=%s and service=%s",
+                Event.UserActionType.FAVOURITE.getKey(), infraService.getId()), "event");
+        richService.setFavourites(eventResources.getResults().size()); //0 unrated, 1 rated
+
+        for (Resource event : eventResources.getResults()) {
+            Event fav = parserPool.deserialize(event, Event.class);
+            String x1 = fav.getUser(); //getUser of event fav is string, so we save it on a new string - x1
+            // TODO finish this
+//            eventManager.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), authentication);
+            richService.setFavourite(false);
+        }
+
+        //setRatings & setHasRate
+        eventResources = searchService.cqlQuery(String.format("value>0 and type=%s and service=%s",
+                Event.UserActionType.RATING.getKey(), infraService.getId()), "event");
+        richService.setRatings(eventResources.getResults().size()); //how many ratings the specific service has
+        float sum = 0;
+        for (Resource event : eventResources.getResults()) {
+            Event rat = parserPool.deserialize(event, Event.class);
+            String x2 = rat.getValue(); //getValue of event rat is string, so we save it on a new string - x2
+            sum += Float.parseFloat(x2); //we need the sum to be float, so we parseFloat(x2)
+            if (sum == 0) {
+                richService.setHasRate(0);
+            } else {
+                float average = sum / richService.getRatings();
+                richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(average))); //the rating of the specific service as x.xx (3.33)
             }
         }
 
-        //infraService.setLanguageNames(vocabularyManager.multiWhereID("vocabulary_id", infraService.getLanguages()));
-
-        //if (infraService.getRatings() == ) {
-        //    infraService.setRatings("unrated");
-        //} else {
-        //    infraService.setRatings(eventManager.get("event_id", infraService.getRatings()).getValue());
-        //}
-        // infraService.setHasRate(vocabularyManager.getInt("vocabulary_id", infraService.getHasRate()).getHasRate());
-        // infraService.setFavourites(vocabularyManager.getInt("vocabulary_id", infraService.getFavourites()).getFavourites());
-        //  infraService.setFavourite(vocabularyManager.getBoolean("vocabulary_id", infraService.isFavourite()).isFavourite());
-        //infraService.setViews(eventManager.get("event_id", infraService.).getViews());
-        //logger.info("service/all end");
-        // TODO complete function
+        Map<String, Integer> visits = statisticsService.visits(infraService.getId());
+        List<Integer> visitsList = new ArrayList<>(visits.values());
+        int visitSum = 0;
+        for (int i : visitsList) {
+            visitSum += i;
+        }
+        richService.setViews(visitSum);
 
         return richService;
     }
