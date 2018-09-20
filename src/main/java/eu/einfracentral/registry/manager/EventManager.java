@@ -3,10 +3,13 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.config.security.AuthenticationDetails;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Autowired
     private ParserService parserService;
+
+    @Autowired
+    private InfraServiceManager infraServiceManager;
 
     @Override
     public String getResourceType() {
@@ -53,6 +59,9 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     public Event setFavourite(String serviceId, Integer value, Authentication authentication) throws Exception {
+        if(!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))){
+                throw new Exception("Resource not found");
+        }
         List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, authentication);
         if (value != 0) {
             value = 1;
@@ -75,6 +84,9 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     public Event setRating(String serviceId, String value, Authentication authentication) throws Exception {
+        if(!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))){
+            throw new Exception("Resource not found");
+        }
         if (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 5) {
             throw new Exception("Rating value must be between [1,5]");
         }
