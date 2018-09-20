@@ -211,8 +211,8 @@ public class ServiceController {
         List<Provider> providers = providerService.getAll(new FacetFilter(), null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
-        for (Provider provider : providers) {
-            services = providerService.getServices(provider.getId());
+        for (int i=0; i < 5; i++) {
+            services = providerService.getServices(providers.get(i).getId());
             if (services.size() > 0) {
                 Random random = new Random();
                 featuredServices.add(services.get(random.nextInt(services.size())));
