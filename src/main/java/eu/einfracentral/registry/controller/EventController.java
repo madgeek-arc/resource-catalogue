@@ -113,7 +113,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     @ApiOperation("Set a rating to a service from the given user.")
     @RequestMapping(path = "rating/service/{sId}/user/{uId}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Event> setUserRating(@PathVariable String sId, @PathVariable String uId, @RequestParam("rating") String rating) {
+    public ResponseEntity<Event> setUserRating(@PathVariable String sId, @PathVariable String uId, @RequestParam("rating") String rating) throws Exception {
         // TODO: check if user and service exists ?
         return new ResponseEntity<>(service.setRating(sId, uId, rating), HttpStatus.OK);
     }
