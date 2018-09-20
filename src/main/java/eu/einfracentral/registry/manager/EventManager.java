@@ -1,22 +1,20 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.config.security.AuthenticationDetails;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ParserService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @SuppressWarnings("unchecked")
@@ -53,42 +51,46 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    public Event toggleFavourite(String serviceId, String userId) {
-        List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, userId);
+    public Event setFavourite(String serviceId, Integer value, Authentication authentication) throws Exception {
+        List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, authentication);
+        if (value != 0) {
+            value = 1;
+        }
         Event event;
-        if (events.size() == 0) {
+        if (events.size() > 0 && sameDay(events.get(0).getInstant())) {
+            event = events.get(0);
+            event.setValue(value.toString());
+            event = update(event, null);
+        } else {
             event = new Event();
             event.setService(serviceId);
-            event.setUser(userId);
+            event.setUser(AuthenticationDetails.getSub(authentication));
             event.setType(Event.UserActionType.FAVOURITE.getKey());
-            event.setValue("1");
+            event.setValue(value.toString());
             event = add(event, null);
-        } else {
-            event = events.get(0);
-            event = booleanToggleValue(event);
-            event = update(event, null);
         }
         return event;
     }
 
     @Override
-    public Event setRating(String serviceId, String userId, String value) throws Exception {
+    public Event setRating(String serviceId, String value, Authentication authentication) throws Exception {
         if (Integer.parseInt(value) <= 0 || Integer.parseInt(value) > 5) {
             throw new Exception("Rating value must be between [1,5]");
         }
-        List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, userId);
+        List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, authentication);
         Event event;
-        if (events.size() == 0) {
-            event = new Event();
-            event.setService(serviceId);
-            event.setUser(userId);
-            event.setType(Event.UserActionType.RATING.getKey());
-            event.setValue(value);
-            event = add(event, null);
-        } else {
+        if (events.size() > 0 && sameDay(events.get(0).getInstant())) {
             event = events.get(0);
             event.setValue(value);
             event = update(event, null);
+        }
+        else {
+            event = new Event();
+            event.setService(serviceId);
+            event.setUser(AuthenticationDetails.getSub(authentication));
+            event.setType(Event.UserActionType.RATING.getKey());
+            event.setValue(value);
+            event = add(event, null);
         }
         return event;
     }
@@ -96,38 +98,30 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getEvents(String eventType) {
         Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType, "event");
+                .cqlQuery("type=" + eventType, "event", 20000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
     @Override
-    public List<Event> getEvents(String eventType, String serviceId, String userId) {
-        Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType + " AND service=" + serviceId + " AND event_user=" + userId, "event");
+    public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws Exception {
+        Paging<Resource> event_resources = searchService.cqlQuery(
+                String.format("type=%s AND service=%s AND event_user=%s",
+                        eventType, serviceId, AuthenticationDetails.getSub(authentication)), "event", 20000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
     @Override
     public List<Event> getServiceEvents(String eventType, String serviceId) {
-        Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType + " AND service=" + serviceId, "event");
+        Paging<Resource> event_resources = searchService.cqlQuery(String.format("type=%s AND service=%s",
+                        eventType, serviceId), "event");
         return pagingToList(event_resources);
     }
 
     @Override
-    public List<Event> getUserEvents(String eventType, String userId) {
-        Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType + " AND event_user=" + userId, "event", 10000, 0, "instant", "DESC");
+    public List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception {
+        Paging<Resource> event_resources = searchService.cqlQuery(String.format("type=%s AND event_user=%s",
+                eventType, AuthenticationDetails.getSub(authentication)), "event", 20000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
-    }
-
-    private Event booleanToggleValue(Event event) {
-        if ("1".equals(event.getValue())) {
-            event.setValue("0");
-        } else {
-            event.setValue("1");
-        }
-        return event;
     }
 
     private List<Event> pagingToList(Paging<Resource> resources) {
@@ -137,5 +131,9 @@ public class EventManager extends ResourceManager<Event> implements EventService
                 .collect(Collectors.toList());
         logger.info(events.toString());
         return events;
+    }
+
+    private boolean sameDay(Long instant) {
+        return instant - System.currentTimeMillis() < 86400000;
     }
 }
