@@ -72,7 +72,10 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    public Event setRating(String serviceId, String userId, String value) {
+    public Event setRating(String serviceId, String userId, String value) throws Exception {
+        if (Integer.parseInt(value) <= 0 || Integer.parseInt(value) > 5) {
+            throw new Exception("Rating value must be between [1,5]");
+        }
         List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, userId);
         Event event;
         if (events.size() == 0) {
