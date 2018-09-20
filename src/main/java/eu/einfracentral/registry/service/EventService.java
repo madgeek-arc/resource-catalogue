@@ -22,7 +22,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param value
      * @return
      */
-    Event setRating(String serviceId, String userId, String value);
+    Event setRating(String serviceId, String userId, String value) throws Exception;
 
     /**
      * Get all events of a specific type.
