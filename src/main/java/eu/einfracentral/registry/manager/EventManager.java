@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.config.security.AuthenticationDetails;
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -74,7 +75,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     public Event setRating(String serviceId, String value, Authentication authentication) throws Exception {
-        if (Integer.parseInt(value) <= 0 || Integer.parseInt(value) > 5) {
+        if (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 5) {
             throw new Exception("Rating value must be between [1,5]");
         }
         List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, authentication);
@@ -98,7 +99,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getEvents(String eventType) {
         Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType, "event", 20000, 0, "creation_date", "DESC");
+                .cqlQuery("type=" + eventType, "event", 10000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
@@ -106,7 +107,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws Exception {
         Paging<Resource> event_resources = searchService.cqlQuery(
                 String.format("type=%s AND service=%s AND event_user=%s",
-                        eventType, serviceId, AuthenticationDetails.getSub(authentication)), "event", 20000, 0, "creation_date", "DESC");
+                        eventType, serviceId, AuthenticationDetails.getSub(authentication)), "event", 10000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
@@ -120,7 +121,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception {
         Paging<Resource> event_resources = searchService.cqlQuery(String.format("type=%s AND event_user=%s",
-                eventType, AuthenticationDetails.getSub(authentication)), "event", 20000, 0, "creation_date", "DESC");
+                eventType, AuthenticationDetails.getSub(authentication)), "event", 10000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
