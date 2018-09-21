@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
+import java.lang.reflect.Method;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
@@ -75,14 +76,14 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         resourceService.addResource(created);
         return t;
     }
-
-    @Override
+    
     public T update(T t, Authentication auth) {
-        String serialized = serialize(t);
         Resource existing = whereID(t.getId(), true);
-        existing.setPayload(serialized);
+        T ex = deserialize(existing);
+        ex = merge(ex,t);
+        existing.setPayload(serialize(ex));
         resourceService.updateResource(existing);
-        return t;
+        return ex;
     }
 
     @Override
@@ -220,4 +221,33 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         }
         return ret;
     }
+
+    public T merge(T existing, T update){
+        if(!existing.getClass().isAssignableFrom(update.getClass())){
+            return existing;
+        }
+
+        Method[] methods = existing.getClass().getMethods();
+
+        for(Method fromMethod: methods){
+            if(fromMethod.getDeclaringClass().equals(existing.getClass())
+                    && fromMethod.getName().startsWith("get")){
+
+                String fromName = fromMethod.getName();
+                String toName = fromName.replace("get", "set");
+
+                try {
+                    Method toMetod = existing.getClass().getMethod(toName, fromMethod.getReturnType());
+                    Object value = fromMethod.invoke(update, (Object[])null);
+                    if(value != null){
+                        toMetod.invoke(existing, value);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return existing;
+    }
+
 }
