@@ -32,6 +32,7 @@ public class ServiceController {
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
 
+
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider) {
         infraService = service;
@@ -64,7 +65,7 @@ public class ServiceController {
 
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
-    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @infraServiceService.userIsServiceProvider(principal['email'],#service)")
+    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProvider(#jwt,#service)")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, Authentication jwt) throws Exception {
         InfraService ret = this.infraService.addService(new InfraService(service), jwt);
@@ -72,19 +73,18 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
-    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @infraServiceService.userIsServiceProvider(principal['email'],#service)")
+    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProvider(#jwt,#service)")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, Authentication jwt) throws Exception {
         InfraService ret = this.infraService.updateService(new InfraService(service), jwt);
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Validates the infraService without actually changing the respository")
-//    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<Service> validate(@RequestBody Service service, Authentication jwt) throws ResourceNotFoundException {
-//        InfraService ret = this.infraService.validate(new InfraService(service));
-//        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
-//    }
+    @ApiOperation(value = "Validates the service without actually changing the respository")
+    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Boolean> validate(@RequestBody Service service, Authentication jwt) throws Exception {
+        return ResponseEntity.ok(infraService.validate(new InfraService(service)));
+    }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
     @ApiImplicitParams({
@@ -94,33 +94,12 @@ public class ServiceController {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication authentication) throws ResourceNotFoundException {
-//        super.getAll(allRequestParams, jwt);
-        logger.debug("Request params: " + allRequestParams);
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        facetFilter.setFilter(allRequestParams);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            facetFilter.setOrderBy(sort);
-        }
-        Paging<InfraService> infraServices = infraService.getAll(facetFilter, null);
+        Paging<InfraService> infraServices = infraService.getAll(getFacetFilter(allRequestParams), null);
         List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
         if (services.isEmpty()) {
             throw new ResourceNotFoundException();
         }
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
-//        Paging<Service> services = infraService.getAll(facetFilter, null);
-//        if (services.getResults().isEmpty()) {
-//            throw new ResourceNotFoundException();
-//        }
-//        return ResponseEntity.ok(services);
     }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
@@ -131,29 +110,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication jwt) throws ResourceNotFoundException {
-//        super.getAll(allRequestParams, jwt);
-        logger.debug("Request params: " + allRequestParams);
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        facetFilter.setFilter(allRequestParams);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            facetFilter.setOrderBy(sort);
-        }
-//        Paging<InfraService> infraServices = infraService.getAll(facetFilter);
-//        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
-//        if (services.isEmpty()) {
-//            throw new ResourceNotFoundException();
-//        }
-//        return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
-        Paging<RichService> services = infraService.getRichServices(facetFilter);
+        Paging<RichService> services = infraService.getRichServices(getFacetFilter(allRequestParams));
         if (services.getResults().isEmpty()) {
             throw new ResourceNotFoundException();
         }
@@ -173,12 +130,13 @@ public class ServiceController {
 
     @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, Authentication jwt) {
+    public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, Authentication jwt) throws NoSuchFieldException {
         Map<String, List<InfraService>> results = null;
         try {
             results = infraService.getBy(field);
         } catch (NoSuchFieldException e) {
             logger.error(e);
+            throw e;
         }
         Map<String, List<Service>> serviceResults = new HashMap<>();
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
@@ -228,5 +186,41 @@ public class ServiceController {
 //            }
 //        }
 //        return new ResponseEntity<>(featuredServices, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get all inactive services")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
+    })
+    @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<Service>> getInactiveServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication jwt) throws ResourceNotFoundException {
+        Paging<InfraService> infraServices = infraService.getInactiveServices();
+        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
+        if (services.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
+    }
+
+
+    private FacetFilter getFacetFilter(Map<String, Object> allRequestParams) {
+        logger.debug("Request params: " + allRequestParams);
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        facetFilter.setFilter(allRequestParams);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            facetFilter.setOrderBy(sort);
+        }
+        return facetFilter;
     }
 }

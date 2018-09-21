@@ -22,9 +22,9 @@ import java.util.Optional;
 //the below line contains the only produces needed for spring to work in the entire project; all others are there until springfox fix their bugs
 @RequestMapping(consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
 public class ResourceController<T extends Identifiable, U extends Authentication> {
-    protected final ResourceService<T, U> service;
+    protected final ResourceService<T, Authentication> service;
 
-    ResourceController(ResourceService<T, U> service) {
+    ResourceController(ResourceService<T, Authentication> service) {
         this.service = service;
     }
 
@@ -36,12 +36,12 @@ public class ResourceController<T extends Identifiable, U extends Authentication
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, Authentication jwt) throws Exception {
-        return new ResponseEntity<>(service.add(t, null), HttpStatus.OK);
+        return new ResponseEntity<>(service.add(t, jwt), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> update(@RequestBody T t, Authentication jwt) throws Exception {
-        return new ResponseEntity<>(service.update(t, null), HttpStatus.OK);
+        return new ResponseEntity<>(service.update(t, jwt), HttpStatus.OK);
     }
 
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})

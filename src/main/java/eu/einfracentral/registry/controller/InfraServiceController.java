@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -41,6 +42,7 @@ public class InfraServiceController {
 
     @ApiIgnore
     @RequestMapping(path = {"delete/{id}/", "delete/{id}/{version}/"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, Authentication authentication) throws ResourceNotFoundException {
         InfraService service;
         if (version.isPresent())
@@ -53,17 +55,33 @@ public class InfraServiceController {
         //return super.get(id, jwt);
     }
 
+    @RequestMapping(path = {"updateFields/all/"}, method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> updateFields(Authentication authentication) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+//        infraService.getAll(ff, null).getResults().parallelStream().map(s -> infraService.eInfraCentralUpdate(s));
+        List<InfraService> services = infraService.getAll(ff, null).getResults();
+        for (InfraService service : services) {
+            infraService.eInfraCentralUpdate(service);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+        //return super.get(id, jwt);
+    }
+
+
+
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, Authentication jwt) throws ResourceNotFoundException {
-        return new ResponseEntity<>((InfraService) infraService.getLatest(id), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.getLatest(id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @PathVariable("version") String version,
                                             Authentication jwt) {
-        InfraService ret = (InfraService) infraService.get(id, version);
+        InfraService ret = infraService.get(id, version);
         return new ResponseEntity<>(ret, ret != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
@@ -71,21 +89,20 @@ public class InfraServiceController {
     @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> add(@RequestBody Service service, Authentication authentication) {
-        return new ResponseEntity<>((InfraService) infraService.add(new InfraService(service), authentication), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.add(new InfraService(service), authentication), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> update(@RequestBody Service service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        return new ResponseEntity<>((InfraService) infraService.update(new InfraService(service), authentication), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.update(new InfraService(service), authentication), HttpStatus.OK);
     }
 
-    // TODO needs fixing
-//    @ApiOperation(value = "Validates the infraService without actually changing the respository")
-//    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<InfraService> validate(@RequestBody Service service, Authentication jwt) {
-//        return ResponseEntity.ok(infraService.validate(new InfraService(service)));
-//    }
+    @ApiOperation(value = "Validates the infraService without actually changing the respository")
+    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Boolean> validate(@RequestBody Service service, Authentication jwt) throws Exception {
+        return ResponseEntity.ok(infraService.validate(new InfraService(service)));
+    }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
     @ApiImplicitParams({
