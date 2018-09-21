@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
+public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
     public ServiceResourceManager(Class<InfraService> typeParameterClass) {
@@ -147,12 +147,10 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         try {
             serviceField = Service.class.getDeclaredField(field);
         } catch (NoSuchFieldException e) {
-            logger.warn("Attempt to find field " + field + " in Service failed: ", e);
+            logger.warn("Attempt to find field '" + field + "' in Service failed: ", e);
             serviceField = InfraService.class.getDeclaredField(field);
-        } finally {
-            assert serviceField != null;
-            serviceField.setAccessible(true);
         }
+        serviceField.setAccessible(true);
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -192,7 +190,7 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     public Browsing<RichService> getRichServices(FacetFilter ff) {
         Browsing<InfraService> infraServices = getAll(ff, null);
         List<RichService> services = infraServices.getResults()
-                .stream()
+                .parallelStream()
                 .map(this::FillTransientFields)
                 .collect(toList());
         return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(),

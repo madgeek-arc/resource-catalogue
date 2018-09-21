@@ -13,7 +13,17 @@ public class AuthenticationDetails {
         return getOIDC(auth).getUserInfo().getEmail();
     }
 
+    public static String getName(Authentication auth) throws Exception {
+        return getOIDC(auth).getUserInfo().getName();
+    }
 
+    public static String getGivenName(Authentication auth) throws Exception {
+        return getOIDC(auth).getUserInfo().getGivenName();
+    }
+
+    public static String getFamilyName(Authentication auth) throws Exception {
+        return getOIDC(auth).getUserInfo().getFamilyName();
+    }
 
     private static OIDCAuthenticationToken getOIDC(Authentication auth) throws Exception {
         if (auth instanceof OIDCAuthenticationToken) {

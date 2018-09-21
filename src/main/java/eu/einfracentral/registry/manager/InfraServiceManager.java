@@ -1,12 +1,16 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.config.security.AuthenticationDetails;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.validators.ServiceValidators;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @org.springframework.stereotype.Service("infraServiceService")
@@ -54,14 +59,14 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         InfraService ret;
         try {
             validate(infraService);
-            migrate(infraService);
+            infraService.setActive(false);
             String id = createServiceId(infraService);
             infraService.setId(id);
             logger.info("Created service with id: " + id);
             logger.info("Providers: " + infraService.getProviders());
 
             if (infraService.getServiceMetadata() == null) {
-                ServiceMetadata serviceMetadata = createServiceMetadata(getUser(authentication)); //FIXME: get name from backend
+                ServiceMetadata serviceMetadata = createServiceMetadata(getUser(authentication));
                 infraService.setServiceMetadata(serviceMetadata);
             }
 
@@ -100,7 +105,36 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
+    public Paging<InfraService> getInactiveServices() {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("active", "false");
+        ff.setFrom(0);
+        ff.setQuantity(10000);
+        return getAll(ff, null);
+    }
+
+    @Override
+    public InfraService eInfraCentralUpdate(InfraService infraService) {
+        InfraService ret = null;
+        try {
+            ret = migrate(infraService);
+//            validate(ret);
+            InfraService existingService = getLatest(infraService.getId());
+
+            // update existing service serviceMetadata
+            ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), "eInfraCentral");
+            ret.setServiceMetadata(serviceMetadata);
+            ret = super.update(ret, null);
+
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return ret;
+    }
+
+    @Override
     public Browsing<InfraService> getAll(FacetFilter ff, Authentication authentication) {
+//        ff.addFilter("active", "false");
         return super.getAll(ff, authentication);
 //        Browsing<InfraService> services = super.getAll(ff);
 //        services.setResults(services.getResults().stream().map(this::FillTransientFields).collect(Collectors.toList()));
@@ -117,41 +151,57 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     }
 
-    //    @Override
-    public InfraService validate(InfraService service) throws Exception {
+    @Override
+    public boolean validate(InfraService service) throws Exception {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
         validateServices(service);
-        validateName(service);
-        validateVocabularies(service);
-        validateURL(service);
-        validateDescription(service);
-        validateSymbol(service);
-        validateVersion(service);
-        validateLastUpdate(service);
-        validateOrder(service);
-        validateSLA(service);
         validateProviders(service);
-        validateMaxLength(service);
-        return service;
-    }
-
-    public boolean userIsServiceProvider(String email, Service service) {
-        Optional<List<String>> providers = Optional.of(service.getProviders());
-        return providers
-                .get()
-                .stream()
-                .map(id -> providerManager.get(id))
-                .flatMap(x -> x.getUsers().stream().filter(Objects::nonNull))
-                .anyMatch(x-> x.getEmail().equals(email));
+        validateVocabularies(service);
+        ServiceValidators.validateName(service);
+        ServiceValidators.validateURL(service);
+        ServiceValidators.validateDescription(service);
+        ServiceValidators.validateSymbol(service);
+        ServiceValidators.validateVersion(service);
+        ServiceValidators.validateLastUpdate(service);
+        ServiceValidators.validateOrder(service);
+        ServiceValidators.validateSLA(service);
+        ServiceValidators.validateMaxLength(service);
+        return true;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
     private InfraService migrate(InfraService service) {
+        service.setActive(true);
         return service;
     }
 
-    //yes, this is foreign key logic right here on the application
+    private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
+        ServiceMetadata ret;
+        if (serviceMetadata == null) {
+            ret = createServiceMetadata(modifiedBy);
+        } else {
+            ret = serviceMetadata;
+        }
+        ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+        ret.setModifiedBy(modifiedBy); //TODO: get actual username from backend
+        return ret;
+    }
+
+    private ServiceMetadata createServiceMetadata(String registeredBy) {
+        ServiceMetadata ret = new ServiceMetadata();
+        ret.setRegisteredBy(registeredBy);
+        ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
+        ret.setModifiedBy(registeredBy);
+        ret.setModifiedAt(ret.getRegisteredAt());
+        return ret;
+    }
+
+    private String createServiceId(Service service) {
+        String provider = service.getProviders().get(0);
+        return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z\\s]+", "").replaceAll(" ", "_").toLowerCase());
+    }
+
     private void validateVocabularies(InfraService service) throws Exception {
         if (service.getCategory() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Category"),
@@ -190,24 +240,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
     }
 
-    //validates the correctness of Service Name.
-    private void validateName(InfraService service) throws Exception {
-        if (service.getName() == null || service.getName().equals("")) {
-            throw new Exception("field 'name' is obligatory");
-        }
-        //TODO: Core should check the max length
-        if (service.getName().length() > 80){
-            throw new Exception("max length for 'name' is 80 chars");
-        }
-    }
-
-    //validates the correctness of Service URL.
-    private void validateURL(InfraService service) throws Exception {
-        if (service.getUrl() == null || service.getUrl().equals("")) {
-            throw new Exception("field 'url' is mandatory");
-        }
-    }
-
     //validates the correctness of Providers.
     private void validateProviders(InfraService service) throws Exception {
         List<String> providers = service.getProviders();
@@ -220,136 +252,35 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
     }
 
-    //validates the correctness of Service Description.
-    private void validateDescription(InfraService service) throws Exception {
-        if (service.getDescription() == null || service.getDescription().equals("")) {
-            throw new Exception("field 'description' is mandatory");
-        }
-        //TODO: Core should check the max length
-        if (service.getDescription().length() > 1000){
-            throw new Exception("max length for 'description' is 1000 chars");
-        }
-    }
-
-    //validates the correctness of Service Symbol.
-    private void validateSymbol(InfraService service) throws Exception {
-        if (service.getSymbol() == null || service.getSymbol().equals("")) {
-            throw new Exception("field 'symbol' is mandatory");
-        }
-    }
-
-    //validates the correctness of Service Version.
-    private void validateVersion(InfraService service) throws Exception {
-        if (service.getVersion() == null || service.getVersion().equals("")) {
-            throw new Exception("field 'version' is mandatory");
-        }
-        //TODO: Core should check the max length
-        if (service.getVersion().length() > 10){
-            throw new Exception("max length for 'version' is 10 chars");
-        }
-    }
-
-    //validates the correctness of Service Last Update (Revision Date).
-    private void validateLastUpdate(InfraService service) throws Exception {
-        if (service.getLastUpdate() == null || service.getLastUpdate().equals("")) {
-            throw new Exception("field 'Revision Date' (lastUpdate) is mandatory");
-        }
-    }
-
-    //validates the correctness of URL for requesting the service from the service providers.
-    private void validateOrder(InfraService service) throws Exception {
-        if (service.getOrder() == null || service.getOrder().equals("")) {
-            throw new Exception("field 'order' is mandatory");
-        }
-    }
-
-    //validates the correctness of Service SLA.
-    private void validateSLA(InfraService service) throws Exception {
-        if (service.getServiceLevelAgreement() == null || service.getServiceLevelAgreement().equals("")) {
-            throw new Exception("field 'serviceLevelAgreement' is mandatory");
-        }
-    }
-
-
     //validates the correctness of Related and Required Services.
-    private void validateServices(InfraService service) throws Exception {
+    public void validateServices(InfraService service) throws Exception {
         List<String> relatedServices = service.getRelatedServices();
         List<String> existingRelatedServices = new ArrayList<>();
-        for (String serviceRel : relatedServices) {
-            //logger.info("Inside loop relatedServices: " + serviceRel);
-            if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel))) {
-                existingRelatedServices.add(serviceRel);
+        if (relatedServices != null) {
+            for (String serviceRel : relatedServices) {
+                //logger.info("Inside loop relatedServices: " + serviceRel);
+                if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel))) {
+                    existingRelatedServices.add(serviceRel);
+                }
             }
+            service.setRelatedServices(existingRelatedServices);
         }
-        service.setRelatedServices(existingRelatedServices);
 
         //logger.info(infraService.toString());
 
         List<String> requiredServices = service.getRequiredServices();
         List<String> existingRequiredServices = new ArrayList<>();
-        for (String serviceReq : requiredServices) {
-            //logger.info("Inside for requiredServices: " + serviceReq);
-            if (this.exists(
+        if (requiredServices != null) {
+            for (String serviceReq : requiredServices) {
+                //logger.info("Inside for requiredServices: " + serviceReq);
+                if (this.exists(
 
-                    new SearchService.KeyValue("infra_service_id", serviceReq))) {
-                existingRequiredServices.add(serviceReq);
+                        new SearchService.KeyValue("infra_service_id", serviceReq))) {
+                    existingRequiredServices.add(serviceReq);
+                }
             }
+            service.setRequiredServices(existingRequiredServices);
         }
-        service.setRequiredServices(existingRequiredServices);
-
         //logger.info(infraService.toString());
-    }
-
-    private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
-        ServiceMetadata ret;
-        if (serviceMetadata == null) {
-            ret = createServiceMetadata(modifiedBy);
-        } else {
-            ret = serviceMetadata;
-        }
-        ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(modifiedBy); //TODO: get actual username from backend
-        return ret;
-    }
-
-    private ServiceMetadata createServiceMetadata(String registeredBy) {
-        ServiceMetadata ret = new ServiceMetadata();
-        ret.setRegisteredBy(registeredBy);
-        ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(registeredBy);
-        ret.setModifiedAt(ret.getRegisteredAt());
-        return ret;
-    }
-
-    private String createServiceId(Service service) {
-        String provider = service.getProviders().get(0);
-        return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z\\s]+", "").replaceAll(" ", "_").toLowerCase());
-    }
-
-    //validates the max length of various variables.
-    //FIXME: Core should check the max length
-    private InfraService validateMaxLength(InfraService service) throws Exception {
-        if (service.getTagline().length() > 100){
-            throw new Exception("max length for 'tagline' is 100 chars");
-        }
-        if (service.getOptions().length() > 1000){
-            throw new Exception("max length for 'options' is 1000 chars");
-        }
-        if (service.getTargetUsers().length() > 1000){
-            throw new Exception("max length for 'targetUsers' is 1000 chars");
-        }
-        if (service.getUserValue().length() > 1000){
-            throw new Exception("max length for 'userValue' is 1000 chars");
-        }
-        if (service.getUserBase().length() > 1000){
-            throw new Exception("max length for 'userBase' is 1000 chars");
-        }
-        if (service.getChangeLog().length() > 1000){
-            throw new Exception("max length for 'changeLog' is 1000 chars");
-        }
-        if (service.getFunding().length() > 500){
-            throw new Exception("max length for 'funding' is 500 chars");
-        }
-        return service;
     }
 }

@@ -40,12 +40,12 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         userRolesMap = new HashMap<>();
 
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(10000);
         Optional<List<Provider>> providers = Optional.of(providerManager.getAll(ff, null).getResults());
         userRolesMap = providers.get()
                 .stream()
                 .distinct()
-                .filter(Provider::getActive)
+//                .filter(Provider::getActive) // FIXME: figure out what to do with pending providers
                 .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
                         .stream()
                         .filter(Objects::nonNull)
