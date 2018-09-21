@@ -36,13 +36,13 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     }
 
     @ApiOperation(value = "Returns the list of EU countries.")
-    @RequestMapping(path = "places/EU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "getEU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String[]> getEU() {
         return new ResponseEntity<>(vocabularyService.getRegion("EU"), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns the list of WW countries.")
-    @RequestMapping(path = "places/WW", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "getWW", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String[]> getWW() {
         return new ResponseEntity<>(vocabularyService.getRegion("WW"), HttpStatus.OK);
     }
