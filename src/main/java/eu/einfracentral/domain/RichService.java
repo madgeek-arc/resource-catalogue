@@ -2,9 +2,10 @@ package eu.einfracentral.domain;
 
 import java.util.List;
 
-public class RichService {
+// FIXME: change to composition instead of inheritance.
+public class RichService extends Service{
 
-    private Service service;
+//    private Service service;
     private ServiceMetadata serviceMetadata;
     private String categoryName;
     private String subCategoryName;
@@ -21,7 +22,8 @@ public class RichService {
     }
 
     public RichService(Service service, ServiceMetadata serviceMetadata, String categoryName, String subCategoryName, List<String> languageNames, int views, int ratings, float hasRate, int favourites, boolean isFavourite) {
-        this.service = service;
+//        this.service = service;
+        super(service);
         this.serviceMetadata = serviceMetadata;
         this.categoryName = categoryName;
         this.subCategoryName = subCategoryName;
@@ -34,10 +36,18 @@ public class RichService {
     }
 
     public RichService(InfraService service) {
-        this.service = (Service) service;
+//        this.service = (Service) service;
+        super(service);
         this.serviceMetadata = service.getServiceMetadata();
     }
 
+/*    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
+    }*/
 
     public String getCategoryName() {
         return categoryName;
