@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import java.lang.reflect.Method;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
@@ -76,11 +76,11 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         resourceService.addResource(created);
         return t;
     }
-    
+
     public T update(T t, Authentication auth) {
         Resource existing = whereID(t.getId(), true);
         T ex = deserialize(existing);
-        ex = merge(ex,t);
+        ObjectUtils.merge(ex, t);
         existing.setPayload(serialize(ex));
         resourceService.updateResource(existing);
         return ex;
@@ -220,34 +220,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return ret;
-    }
-
-    public T merge(T existing, T update){
-        if(!existing.getClass().isAssignableFrom(update.getClass())){
-            return existing;
-        }
-
-        Method[] methods = existing.getClass().getMethods();
-
-        for(Method fromMethod: methods){
-            if(fromMethod.getDeclaringClass().equals(existing.getClass())
-                    && fromMethod.getName().startsWith("get")){
-
-                String fromName = fromMethod.getName();
-                String toName = fromName.replace("get", "set");
-
-                try {
-                    Method toMetod = existing.getClass().getMethod(toName, fromMethod.getReturnType());
-                    Object value = fromMethod.invoke(update, (Object[])null);
-                    if(value != null){
-                        toMetod.invoke(existing, value);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return existing;
     }
 
 }

@@ -4,15 +4,13 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.KeyValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -30,6 +28,7 @@ import static java.util.stream.Collectors.toList;
 public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
+
     public ServiceResourceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
     }
@@ -49,32 +48,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public String getResourceType() {
         return resourceType.getName();
-    }
-
-    //    @Override
-    public InfraService addService(InfraService infraService, Authentication auth) throws Exception {
-        if (exists(infraService)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
-        }
-        String serialized = null;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
-        Resource created = new Resource();
-        created.setPayload(serialized);
-        created.setResourceType(resourceType);
-        resourceService.addResource(created);
-        return infraService;
-    }
-
-    //    @Override
-    public InfraService updateService(InfraService infraService, Authentication auth) throws Exception {
-        String serialized = null;
-        Resource existing = null;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
-        existing = getResource(infraService.getId(), infraService.getVersion());
-        assert existing != null;
-        existing.setPayload(serialized);
-        resourceService.updateResource(existing);
-        return infraService;
     }
 
     @Override
@@ -125,13 +98,13 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public InfraService update(InfraService infraService, Authentication auth) throws ResourceNotFoundException {
-        String serialized;
-        Resource existing;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
-        existing = getResource(infraService.getId(), infraService.getVersion());
+    public InfraService update(InfraService infraService, Authentication auth) {
+        Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
-        existing.setPayload(serialized);
+        InfraService ex = deserialize(existing);
+        assert ex != null;
+        ObjectUtils.merge(ex, infraService);
+        existing.setPayload(serialize(ex));
         resourceService.updateResource(existing);
         return infraService;
     }
@@ -297,7 +270,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
 
-    private RichService FillTransientFields(InfraService infraService){
+    private RichService FillTransientFields(InfraService infraService) {
         //FIXME: vocabularyManager.get() is very slow
         RichService richService = new RichService(infraService);
 

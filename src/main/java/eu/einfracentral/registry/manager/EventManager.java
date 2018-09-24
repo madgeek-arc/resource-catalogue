@@ -1,13 +1,10 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.config.security.AuthenticationDetails;
+import eu.einfracentral.utils.AuthenticationDetails;
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.LogManager;

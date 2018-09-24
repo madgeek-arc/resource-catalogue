@@ -1,4 +1,4 @@
-package eu.einfracentral.config.security;
+package eu.einfracentral.utils;
 
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.Authentication;

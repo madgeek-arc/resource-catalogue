@@ -1,4 +1,4 @@
-package eu.einfracentral.validators;
+package eu.einfracentral.utils;
 
 import eu.einfracentral.domain.InfraService;
 import org.apache.logging.log4j.LogManager;
