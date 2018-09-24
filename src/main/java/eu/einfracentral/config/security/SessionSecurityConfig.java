@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-@Order(1)
+@Order(2)
 public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 
     static final private Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
