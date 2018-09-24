@@ -51,7 +51,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     // FAVORITES -------->
     @ApiOperation("Set a service as favorite for a user.")
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam Integer value, Authentication authentication) throws Exception {
         // TODO: check if user and service exists ?
         return new ResponseEntity<>(service.setFavourite(id, value, authentication), HttpStatus.OK);
@@ -101,7 +101,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     // RATINGS ---------->
     @ApiOperation("Set a rating to a service from the authenticated user.")
     @RequestMapping(path = "rating/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, Authentication authentication) throws Exception {
         // TODO: check if user and service exists ?
         return new ResponseEntity<>(service.setRating(id, rating, authentication), HttpStatus.OK);
