@@ -17,6 +17,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
+@ApiIgnore
 @RestController
 @RequestMapping("event")
 public class EventController extends ResourceController<Event, Authentication> {
