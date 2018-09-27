@@ -31,7 +31,7 @@ import java.util.Optional;
 @Api(value = "Get Information about a Service")
 public class InfraServiceController {
 
-    final static private Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
+    private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
 
     private InfraServiceService<InfraService, InfraService> infraService;
 
@@ -50,9 +50,7 @@ public class InfraServiceController {
         else
             service = infraService.getLatest(id);
         infraService.delete(service);
-//        Service ret = new Service(infraService.getLatest(id));
         return new ResponseEntity<>(HttpStatus.OK);
-        //return super.get(id, jwt);
     }
 
     @RequestMapping(path = {"updateFields/all/"}, method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -60,15 +58,12 @@ public class InfraServiceController {
     public ResponseEntity<InfraService> updateFields(Authentication authentication) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-//        infraService.getAll(ff, null).getResults().parallelStream().map(s -> infraService.eInfraCentralUpdate(s));
         List<InfraService> services = infraService.getAll(ff, null).getResults();
         for (InfraService service : services) {
             infraService.eInfraCentralUpdate(service);
         }
         return new ResponseEntity<>(HttpStatus.OK);
-        //return super.get(id, jwt);
     }
-
 
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
@@ -120,14 +115,14 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.getAll(ff, authentication));
     }
 
-    @ApiOperation(value = "Get a list of services based on a set of IDs")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
-    })
-    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<InfraService>> getSome(@PathVariable String[] ids, Authentication jwt) {
-        return ResponseEntity.ok(infraService.getByIds(ids));
-    }
+//    @ApiOperation(value = "Get a list of services based on a set of IDs")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
+//    })
+//    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public ResponseEntity<List<InfraService>> getSome(@PathVariable String[] ids, Authentication jwt) {
+//        return ResponseEntity.ok(infraService.getByIds(jwt, ids));
+//    }
 
     @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})

@@ -110,7 +110,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication jwt) throws ResourceNotFoundException {
-        Paging<RichService> services = infraService.getRichServices(getFacetFilter(allRequestParams));
+        Paging<RichService> services = infraService.getRichServices(getFacetFilter(allRequestParams), jwt);
         if (services.getResults().isEmpty()) {
             throw new ResourceNotFoundException();
         }
@@ -124,8 +124,17 @@ public class ServiceController {
     @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable String[] ids, Authentication jwt) {
         return ResponseEntity.ok(
-                infraService.getByIds(ids)
+                infraService.getByIds(jwt, ids)
                         .stream().map(Service::new).collect(Collectors.toList()));
+    }
+
+    @ApiOperation(value = "Get a list of rich services based on a set of IDs")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
+    })
+    @RequestMapping(path = "rich/byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<RichService>> getSomeRichServices(@PathVariable String[] ids, Authentication jwt) {
+        return ResponseEntity.ok(infraService.getByIds(jwt, ids));
     }
 
     @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
@@ -170,7 +179,7 @@ public class ServiceController {
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i=0; i < 5; i++) {
-            services = providerService.getServices(providers.get(i).getId());
+            services = providerService.getServices(providers.get(i).getId()); // FIXME returns 0
             if (services.size() > 0) {
                 Random random = new Random();
                 featuredServices.add(services.get(random.nextInt(services.size())));
