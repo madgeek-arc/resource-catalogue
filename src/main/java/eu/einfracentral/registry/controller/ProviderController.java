@@ -60,6 +60,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return super.update(provider, jwt);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get a list of all infraService providers in the catalogue")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
