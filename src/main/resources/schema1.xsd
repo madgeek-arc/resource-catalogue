@@ -371,6 +371,7 @@
           <xs:element name="ratings" type="xs:int"/>
           <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
           <xs:element minOccurs="0" name="subCategoryName" type="xs:string"/>
+          <xs:element name="userRate" type="xs:float"/>
           <xs:element name="views" type="xs:int"/>
         </xs:sequence>
       </xs:extension>

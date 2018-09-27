@@ -1,5 +1,8 @@
 package eu.einfracentral.domain;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 // FIXME: change to composition instead of inheritance.
@@ -12,6 +15,7 @@ public class RichService extends Service{
     private List<String> languageNames;
     private int views;
     private int ratings;
+    private float userRate;
     private float hasRate;
     private int favourites;
     private boolean isFavourite;
@@ -105,11 +109,20 @@ public class RichService extends Service{
         this.favourites = favourites;
     }
 
-    public boolean isFavourite() {
+    public boolean getIsFavourite() {
         return isFavourite;
     }
 
     public void setFavourite(boolean favourite) {
         isFavourite = favourite;
     }
+
+    public float getUserRate() {
+        return userRate;
+    }
+
+    public void setUserRate(float userRate) {
+        this.userRate = userRate;
+    }
+
 }
