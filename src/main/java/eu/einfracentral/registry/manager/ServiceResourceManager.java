@@ -328,15 +328,18 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 .sum());
 
         // set rating
-        List<Event> ratings = eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId());
+        Optional<List<Event>> ratings = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
         Map<String, Float> userRatings = new HashMap<>();
-        ratings.forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue())));
-
+        ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
         float sum = 0;
         for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
             sum += entry.getValue();
         }
-        richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum/userRatings.size()))); //the rating of the specific service as x.xx (3.33)
+        if (!userRatings.isEmpty()) {
+            richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum/userRatings.size()))); //the rating of the specific service as x.xx (3.33)
+        } else {
+            richService.setHasRate(0);
+        }
 
         // set visits
         Map<String, Integer> visits = statisticsService.visits(infraService.getId());
