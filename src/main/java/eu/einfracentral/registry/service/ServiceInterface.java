@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 
+import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -57,18 +58,24 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     Map<String, List<T>> getBy(String field) throws NoSuchFieldException;
 
     /**
-     * Get InfraServices with the specified ids.
+     * Get RichServices with the specified ids.
      *
      * @param ids
      * @return
      */
-    List<T> getByIds(String... ids);
+    List<RichService> getByIds(U authentication, String... ids);
 
     /**
      * @param ff
      * @return
      */
-    Paging<RichService> getRichServices(FacetFilter ff);
+    Paging<RichService> getRichServices(FacetFilter ff, U auth);
+
+    /**
+     *
+     * @return
+     */
+    RichService createRichService(InfraService infraService, U auth);
 
     /**
      * Check if the Service exists.

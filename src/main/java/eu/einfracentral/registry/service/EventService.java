@@ -13,7 +13,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param authentication
      * @return
      */
-    Event setFavourite(String serviceId, Integer value, Authentication authentication) throws Exception;
+    Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws Exception;
 
     /**
      * Set a rating on a service from the given user.
