@@ -4,6 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -17,15 +18,13 @@ import org.springframework.security.core.Authentication;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
+public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService>,
+        ServiceInterface<InfraService, InfraService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
 
@@ -59,8 +58,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public InfraService getLatest(String id) throws ResourceNotFoundException {
         List resources = searchService
-                .cqlQuery("infra_service_id=\"" + id + "\"", "infra_service", 1, 0, "creation_date", "DESC")
-                .getResults();
+//                .cqlQuery(String.format("infra_service_id=\"%s\" AND active=true", id), "infra_service", // TODO: enable when data are fixed
+                .cqlQuery(String.format("infra_service_id=\"%s\"", id), "infra_service",
+                        1, 0, "creation_date", "DESC").getResults();
         if (resources.isEmpty()) {
             throw new ResourceNotFoundException();
         }
@@ -146,8 +146,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public List<InfraService> getByIds(String... ids) {
-        List<InfraService> services;
+    public List<RichService> getByIds(Authentication auth, String... ids) {
+        List<RichService> services;
         services = Arrays.stream(ids).map(id -> {
             try {
                 return getLatest(id);
@@ -155,16 +155,16 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 logger.error("Could not find InfraService with id: " + id, e);
                 throw new ServiceException(e);
             }
-        }).collect(toList());
+        }).map(service -> createRichService(service, auth)).collect(toList());
         return services;
     }
 
     @Override
-    public Browsing<RichService> getRichServices(FacetFilter ff) {
+    public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
         Browsing<InfraService> infraServices = getAll(ff, null);
         List<RichService> services = infraServices.getResults()
                 .parallelStream()
-                .map(this::FillTransientFields)
+                .map(service -> createRichService(service, auth))
                 .collect(toList());
         return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(),
                 infraServices.getTo(), services, infraServices.getFacets());
@@ -228,12 +228,12 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     public Resource getResourceById(String resourceId) {
-        List resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
+        List<Resource> resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
                 1, 0, "registeredAt", "DESC").getResults();
         if (resource.isEmpty()) {
             return null;
         }
-        return (Resource) resource.get(0);
+        return resource.get(0);
     }
 
     public Resource getResource(String serviceId, String serviceVersion) {
@@ -269,9 +269,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return res;
     }
 
-
-    private RichService FillTransientFields(InfraService infraService) {
-        //FIXME: vocabularyManager.get() is very slow
+    @Override
+    public RichService createRichService(InfraService infraService, Authentication auth) {
         RichService richService = new RichService(infraService);
 
         //setCategoryName & setSubcategoryName
@@ -299,36 +298,47 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             richService.setLanguageNames(languageNames);
         }
 
-        //setFavourites & setFavourite
-        Paging<Resource> eventResources = searchService.cqlQuery(String.format("value=1 and type=%s and service=%s",
-                Event.UserActionType.FAVOURITE.getKey(), infraService.getId()), "event");
-        richService.setFavourites(eventResources.getResults().size()); //0 unrated, 1 rated
-
-        for (Resource event : eventResources.getResults()) {
-            Event fav = parserPool.deserialize(event, Event.class);
-            String x1 = fav.getUser(); //getUser of event fav is string, so we save it on a new string - x1
-            // TODO finish this
-//            eventManager.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), authentication);
-            richService.setFavourite(false);
-        }
-
-        //setRatings & setHasRate
-        eventResources = searchService.cqlQuery(String.format("value>0 and type=%s and service=%s",
-                Event.UserActionType.RATING.getKey(), infraService.getId()), "event");
-        richService.setRatings(eventResources.getResults().size()); //how many ratings the specific service has
-        float sum = 0;
-        for (Resource event : eventResources.getResults()) {
-            Event rat = parserPool.deserialize(event, Event.class);
-            String x2 = rat.getValue(); //getValue of event rat is string, so we save it on a new string - x2
-            sum += Float.parseFloat(x2); //we need the sum to be float, so we parseFloat(x2)
-            if (sum == 0) {
-                richService.setHasRate(0);
-            } else {
-                float average = sum / richService.getRatings();
-                richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(average))); //the rating of the specific service as x.xx (3.33)
+        // set favourite
+        List<Event> userEvents;
+        try {
+            userEvents = eventManager.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
+            if (!userEvents.isEmpty()) {
+                richService.setFavourite(userEvents.get(0).getValue().equals("1"));
             }
+            userEvents = eventManager.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
+            if (!userEvents.isEmpty()) {
+                richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
+            }
+        } catch (Exception e) {
+            logger.error(e);
         }
 
+        //set Ratings & Favourites
+        Paging<Resource> favourites = searchService.cqlQuery(String.format("value=1 and type=\"%s\" and service=\"%s\"",
+                Event.UserActionType.FAVOURITE.getKey(), infraService.getId()), "event");
+        Paging<Resource> unfavourites = searchService.cqlQuery(String.format("value=0 and type=\"%s\" and service=\"%s\"",
+                Event.UserActionType.FAVOURITE.getKey(), infraService.getId()), "event");
+        richService.setFavourites(favourites.getTotal() - unfavourites.getTotal());
+
+        richService.setRatings(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
+                .stream()
+                .map(Event::getUser)
+                .distinct()
+                .mapToInt(u -> 1)
+                .sum());
+
+        // set rating
+        List<Event> ratings = eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId());
+        Map<String, Float> userRatings = new HashMap<>();
+        ratings.forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue())));
+
+        float sum = 0;
+        for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
+            sum += entry.getValue();
+        }
+        richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum/userRatings.size()))); //the rating of the specific service as x.xx (3.33)
+
+        // set visits
         Map<String, Integer> visits = statisticsService.visits(infraService.getId());
         List<Integer> visitsList = new ArrayList<>(visits.values());
         int visitSum = 0;

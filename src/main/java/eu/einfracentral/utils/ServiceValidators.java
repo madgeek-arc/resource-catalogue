@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ServiceValidators {
 
-    final static private Logger logger = LogManager.getLogger(ServiceValidators.class);
+    private static final Logger logger = LogManager.getLogger(ServiceValidators.class);
 
     //validates the correctness of Service Name.
     public static void validateName(InfraService service) throws Exception {

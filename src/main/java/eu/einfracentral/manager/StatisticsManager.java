@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -71,18 +72,22 @@ public class StatisticsManager implements StatisticsService {
     }
 
     private InternalDateHistogram histogram(String id, String eventType) {
-        return elastic
+        SearchRequestBuilder searchRequestBuilder = elastic
                 .client()
                 .prepareSearch("event")
                 .setTypes("general")
                 .setQuery(getEventQueryBuilder(id, eventType))
                 .addAggregation(AggregationBuilders
-                                        .dateHistogram("months")
-                                        .field("instant")
-                                        .dateHistogramInterval(DateHistogramInterval.DAY)
-                                        .format("yyyy-MM-dd")
-                                        .subAggregation(AggregationBuilders.terms("value").field("value"))
-                ).execute()
+                        .dateHistogram("months")
+                        .field("instant")
+                        .dateHistogramInterval(DateHistogramInterval.DAY)
+                        .format("yyyy-MM-dd")
+                        .subAggregation(AggregationBuilders.terms("value").field("value"))
+                );
+        searchRequestBuilder.setExplain(true);
+        logger.debug(searchRequestBuilder.toString());
+
+        return searchRequestBuilder.execute()
                 .actionGet()
                 .getAggregations()
                 .get("months");

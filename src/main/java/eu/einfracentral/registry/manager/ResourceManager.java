@@ -82,6 +82,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         T ex = deserialize(existing);
         ObjectUtils.merge(ex, t);
         existing.setPayload(serialize(ex));
+        existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         return ex;
     }

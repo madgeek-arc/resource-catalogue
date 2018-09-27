@@ -137,6 +137,7 @@
       "multivalued": false,
       "name": "active",
       "label": "Published",
+      "defaultValue": false,
       "path": "//*[local-name()='active']/text()",
       "type": "java.lang.Boolean"
     },
