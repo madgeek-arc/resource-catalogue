@@ -5,10 +5,10 @@ import eu.einfracentral.registry.service.IndicatorService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("indicator")

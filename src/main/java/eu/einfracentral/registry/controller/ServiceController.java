@@ -10,7 +10,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 @Api(value = "Get Information about a Service")
 public class ServiceController {
 
-    private static Logger logger = Logger.getLogger(ServiceController.class);
+    private static Logger logger = LogManager.getLogger(ServiceController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
 
@@ -178,7 +179,7 @@ public class ServiceController {
         List<Provider> providers = providerService.getAll(new FacetFilter(), null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
-        for (int i=0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             services = providerService.getServices(providers.get(i).getId()); // FIXME returns 0
             if (services.size() > 0) {
                 Random random = new Random();

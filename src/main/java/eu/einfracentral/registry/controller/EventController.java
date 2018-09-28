@@ -4,8 +4,10 @@ import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+
 import io.swagger.annotations.ApiOperation;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,7 +32,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         this.eventService = eventService;
     }
 
-    private final Logger logger = Logger.getLogger(EventController.class);
+    private final Logger logger = LogManager.getLogger(EventController.class);
 
     @ApiIgnore
     @ApiOperation("Retrieve all events.")

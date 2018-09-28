@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -53,7 +52,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("type", "Language");
-        return new ResponseEntity<>(vocabularyService.getAll(ff,null), HttpStatus.OK);
+        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns the list of categories.")
@@ -62,7 +61,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("type", "Category");
-        return new ResponseEntity<>(vocabularyService.getAll(ff,null), HttpStatus.OK);
+        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns the list of subcategories.")
@@ -71,7 +70,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("type", "Subcategory");
-        return new ResponseEntity<>(vocabularyService.getAll(ff,null), HttpStatus.OK);
+        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
