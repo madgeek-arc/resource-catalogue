@@ -2,9 +2,12 @@ package eu.einfracentral.domain;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
-import javax.xml.bind.annotation.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -34,6 +37,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "users")
     @XmlElement(name = "user")
     @ApiModelProperty(required = true)
+//    @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
     private List<User> users;
 
     @XmlElement

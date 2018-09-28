@@ -1,14 +1,12 @@
 package eu.einfracentral.domain;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 // FIXME: change to composition instead of inheritance.
-public class RichService extends Service{
+public class RichService extends Service {
 
-//    private Service service;
+    //    private Service service;
     private ServiceMetadata serviceMetadata;
     private String categoryName;
     private String subCategoryName;
