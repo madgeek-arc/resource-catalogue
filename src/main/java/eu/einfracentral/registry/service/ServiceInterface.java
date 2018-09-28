@@ -3,7 +3,6 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.RichService;
-import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -17,8 +16,8 @@ import java.util.Map;
 public interface ServiceInterface<T, R, U extends Authentication> extends TransformerCRUDService<T, R, U> {
 
     // TODO: merge with InfraServiceService
+
     /**
-     *
      * @param service, auth
      * @return
      * @throws Exception
@@ -26,7 +25,6 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     T addService(T service, U auth) throws Exception;
 
     /**
-     *
      * @param service, auth
      * @return
      * @throws ResourceNotFoundException
@@ -36,7 +34,8 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
 
     /**
      * Returns the Service.
-     * @param id of the Service.
+     *
+     * @param id      of the Service.
      * @param version of the Service.
      * @return service.
      */
@@ -44,6 +43,7 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
 
     /**
      * Returns the latest Service with the specified id.
+     *
      * @param id of the resource in the index.
      * @return service.
      */
@@ -72,15 +72,15 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     Paging<RichService> getRichServices(FacetFilter ff, U auth);
 
     /**
-     *
      * @return
      */
     RichService createRichService(InfraService infraService, U auth);
 
     /**
      * Check if the Service exists.
+     *
      * @param ids
      * @return
      */
-    boolean exists(SearchService.KeyValue ...ids);
+    boolean exists(SearchService.KeyValue... ids);
 }

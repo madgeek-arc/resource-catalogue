@@ -1,18 +1,11 @@
 package eu.einfracentral.registry.service;
 
 
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceHistory;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.SearchService;
 import org.springframework.security.core.Authentication;
-
-import java.util.List;
-import java.util.Map;
 
 public interface InfraServiceService<T, R extends Service> extends ServiceInterface<T, R, Authentication> {
 
@@ -35,12 +28,14 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
 
     /**
      * Get inactive Services.
+     *
      * @return
      */
     Paging<R> getInactiveServices();
 
     /**
      * Makes bulk updates on services.
+     *
      * @param infraService
      * @return
      */
@@ -48,6 +43,7 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
 
     /**
      * Validates the given service.
+     *
      * @param service
      * @return
      */
