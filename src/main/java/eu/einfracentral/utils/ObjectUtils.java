@@ -1,8 +1,13 @@
 package eu.einfracentral.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.lang.reflect.Method;
 
 public class ObjectUtils {
+
+    private static final Logger logger = LogManager.getLogger(ObjectUtils.class);
 
     public static Object merge(Object existing, Object update){
         if(!existing.getClass().isAssignableFrom(update.getClass())){
@@ -25,7 +30,7 @@ public class ObjectUtils {
                         toMetod.invoke(existing, value);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("ERROR", e);
                 }
             }
         }

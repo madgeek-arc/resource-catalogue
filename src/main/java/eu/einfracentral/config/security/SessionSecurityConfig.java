@@ -1,13 +1,14 @@
 package eu.einfracentral.config.security;
 
 import com.google.common.collect.Sets;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.nimbusds.jose.util.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.OIDCAuthenticationFilter;
@@ -30,10 +31,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
-import springfox.documentation.spring.web.json.Json;
 
 import javax.servlet.http.Cookie;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
 @Order(2)
 public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    static final private Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
+    private static final Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
     @Autowired
     EICAuthoritiesMapper eicAuthoritiesMapper;
     @Value("${webapp.front}")

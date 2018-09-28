@@ -4,6 +4,9 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class MailService {
 
+    private static final Logger logger = LogManager.getLogger(MailService.class);
     private Session session;
 
     @Value("${mail.smtp.auth}")
@@ -66,7 +70,7 @@ public class MailService {
             transport.connect();
             Transport.send(message);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            logger.error("ERROR", e);
         } finally {
             if (transport != null) {
                 transport.close();

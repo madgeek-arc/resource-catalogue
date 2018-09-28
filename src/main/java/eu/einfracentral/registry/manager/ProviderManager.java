@@ -9,8 +9,8 @@ import eu.einfracentral.domain.Utils.States;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.Authentication;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService<Provider, Authentication> {
 
-    final static private Logger logger = LogManager.getLogger(ProviderManager.class);
+    private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired

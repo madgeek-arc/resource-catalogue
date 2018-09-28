@@ -3,23 +3,23 @@ package eu.einfracentral.registry.manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.VocabularyService;
-import java.io.IOException;
-import java.net.*;
-import java.util.*;
-import java.util.stream.Stream;
-import javax.annotation.PostConstruct;
-
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.ServiceException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @Component
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private Map<String, Region> regions = new HashMap<>();
 
-    private static Logger logger = Logger.getLogger(VocabularyManager.class);
+    private static Logger logger = LogManager.getLogger(VocabularyManager.class);
 
     public VocabularyManager() {
         super(Vocabulary.class);

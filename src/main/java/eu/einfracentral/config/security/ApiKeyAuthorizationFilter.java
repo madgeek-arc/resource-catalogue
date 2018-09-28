@@ -26,9 +26,9 @@ import java.io.IOException;
 
 public class ApiKeyAuthorizationFilter extends GenericFilterBean {
 
-    static final private Logger logger = LogManager.getLogger(ApiKeyAuthorizationFilter.class);
+    private static final Logger logger = LogManager.getLogger(ApiKeyAuthorizationFilter.class);
 
-    static final private String AUTHORIZATION_HEADER = "Authorization";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
 
     private ServerConfigurationService serverConfigurationService;
 
@@ -63,7 +63,7 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
             logger.error("JWT Error", e);
             res.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
             ObjectMapper mapper = new ObjectMapper();
-            res.getWriter().append(mapper.writeValueAsString(new ServerError(((HttpServletRequest) req).getRequestURI(),e)));
+            res.getWriter().append(mapper.writeValueAsString(new ServerError(((HttpServletRequest) req).getRequestURI(), e)));
         }
 
     }

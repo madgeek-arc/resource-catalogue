@@ -20,7 +20,7 @@ import org.springframework.web.filter.GenericFilterBean;
 @Order(1)
 public class TokenSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    static final private Logger logger = LogManager.getLogger(TokenSecurityConfig.class);
+    private static final Logger logger = LogManager.getLogger(TokenSecurityConfig.class);
 
     @Autowired
     OIDCAuthenticationProvider openIdConnectAuthenticationProvider;

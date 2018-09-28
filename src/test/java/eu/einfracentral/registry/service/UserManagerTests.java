@@ -1,6 +1,5 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.registry.manager.UserManager;
 import java.io.IOException;
 import java.nio.file.*;
 import java.security.SecureRandom;

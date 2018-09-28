@@ -57,14 +57,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public InfraService getLatest(String id) throws ResourceNotFoundException {
-        List resources = searchService
+        List<Resource> resources = searchService
 //                .cqlQuery(String.format("infra_service_id=\"%s\" AND active=true", id), "infra_service", // TODO: enable when data are fixed
                 .cqlQuery(String.format("infra_service_id=\"%s\"", id), "infra_service",
                         1, 0, "creation_date", "DESC").getResults();
         if (resources.isEmpty()) {
             throw new ResourceNotFoundException();
         }
-        return deserialize((Resource) resources.get(0));
+        return deserialize( resources.get(0));
     }
 
     @Override
@@ -237,7 +237,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     public Resource getResource(String serviceId, String serviceVersion) {
-        Paging resources;
+        Paging<Resource> resources;
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
@@ -247,11 +247,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                     .cqlQuery(String.format("infra_service_id = \"%s\" AND service_version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
         }
         assert resources != null;
-        return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
     private List<Resource> getResourcesWithServiceId(String infraServiceId) {
-        Paging resources;
+        Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
                         resourceType.getName(), 10000, 0, "registeredAt", "DESC");

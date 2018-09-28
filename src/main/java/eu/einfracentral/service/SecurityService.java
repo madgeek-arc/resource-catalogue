@@ -16,7 +16,7 @@ import java.util.Optional;
 @Service("securityService")
 public class SecurityService {
 
-    final static private Logger logger = LogManager.getLogger(SecurityService.class);
+    private static final Logger logger = LogManager.getLogger(SecurityService.class);
     private ProviderManager providerManager;
 
     @Autowired

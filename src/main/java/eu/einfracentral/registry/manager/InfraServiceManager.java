@@ -10,7 +10,8 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,7 +29,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     @Autowired
     private ProviderManager providerManager;
 
-    private Logger logger = Logger.getLogger(InfraServiceManager.class);
+    private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
     public InfraServiceManager() {
         super(InfraService.class);

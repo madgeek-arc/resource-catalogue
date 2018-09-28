@@ -5,31 +5,30 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.service.*;
+import eu.einfracentral.service.AnalyticsService;
+import eu.einfracentral.service.StatisticsService;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.index.fielddata.IndexFieldData;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.PipelineAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
-import org.elasticsearch.search.aggregations.bucket.filter.Filter;
-import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.Global;
-import org.elasticsearch.search.aggregations.bucket.histogram.*;
-import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.pipeline.*;
+import org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders;
+import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class StatisticsManager implements StatisticsService {
@@ -54,11 +53,11 @@ public class StatisticsManager implements StatisticsService {
                 .setTypes("general")
                 .setQuery(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()))
                 .addAggregation(AggregationBuilders.dateHistogram("months")
-                                                   .field("instant")
-                                                   .dateHistogramInterval(DateHistogramInterval.DAY)
-                                                   .format("yyyy-MM-dd")
-                                                   .subAggregation(AggregationBuilders.sum("rating").field("value"))
-                                                   .subAggregation(PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating"))
+                        .field("instant")
+                        .dateHistogramInterval(DateHistogramInterval.DAY)
+                        .format("yyyy-MM-dd")
+                        .subAggregation(AggregationBuilders.sum("rating").field("value"))
+                        .subAggregation(PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating"))
                 ).execute()
                 .actionGet()
                 .getAggregations()
@@ -99,9 +98,9 @@ public class StatisticsManager implements StatisticsService {
         c.setTime(date);
         c.roll(Calendar.MONTH, false);
         return QueryBuilders.boolQuery()
-                            .filter(QueryBuilders.termsQuery("service", serviceId))
-                            .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(new Date().getTime()))
-                            .filter(QueryBuilders.termsQuery("type", eventType));
+                .filter(QueryBuilders.termsQuery("service", serviceId))
+                .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(new Date().getTime()))
+                .filter(QueryBuilders.termsQuery("type", eventType));
     }
 
     @Override
@@ -136,12 +135,12 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Float> pRatings(String id) {
         return providerService.getServices(id)
-                              .stream()
-                              .flatMap(s -> ratings(s.getId()).entrySet().stream())
-                              .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
-                              .entrySet()
-                              .stream()
-                              .collect(Collectors.toMap(Map.Entry::getKey, v -> (float) v.getValue().doubleValue()));
+                .stream()
+                .flatMap(s -> ratings(s.getId()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> (float) v.getValue().doubleValue()));
         //The above 4 lines should be just
         //.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingFloat(Map.Entry::getValue)));
         //but Collectors don't offer a summingFloat for some reason
@@ -151,17 +150,17 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> pExternals(String id) {
         return providerService.getServices(id)
-                              .stream()
-                              .flatMap(s -> externals(s.getId()).entrySet().stream())
-                              .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+                .stream()
+                .flatMap(s -> externals(s.getId()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
 
     @Override
     public Map<String, Integer> pInternals(String id) {
         return providerService.getServices(id)
-                              .stream()
-                              .flatMap(s -> internals(s.getId()).entrySet().stream())
-                              .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+                .stream()
+                .flatMap(s -> internals(s.getId()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
 
     /*@Override
@@ -221,9 +220,9 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> pVisits(String id) {
         return providerService.getServices(id)
-                              .stream()
-                              .flatMap(s -> visits(s.getId()).entrySet().stream())
-                              .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+                .stream()
+                .flatMap(s -> visits(s.getId()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
 
     @Override

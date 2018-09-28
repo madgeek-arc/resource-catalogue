@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
-    final private static Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
-    final private static String ROLE_CLAIMS = "edu_person_entitlements";
+    private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
+//    private static final String ROLE_CLAIMS = "edu_person_entitlements";
     private Map<String, SimpleGrantedAuthority> userRolesMap;
 
     private ProviderManager providerManager;
@@ -52,12 +52,12 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                         .map(User::getEmail))
                 .distinct()
                 .collect(Collectors
-                        .toMap(Function.identity(), (a) -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
+                        .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
 
         userRolesMap.putAll(Arrays.stream(admins.split(","))
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        (a) -> new SimpleGrantedAuthority("ROLE_ADMIN"))
+                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
                 ));
     }
 
