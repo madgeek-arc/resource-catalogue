@@ -314,18 +314,24 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
 
         //set Ratings & Favourites
-        Paging<Resource> favourites = searchService.cqlQuery(String.format("value=1 and type=\"%s\" and service=\"%s\"",
-                Event.UserActionType.FAVOURITE.getKey(), infraService.getId()), "event");
-        Paging<Resource> unfavourites = searchService.cqlQuery(String.format("value=0 and type=\"%s\" and service=\"%s\"",
-                Event.UserActionType.FAVOURITE.getKey(), infraService.getId()), "event");
-        richService.setFavourites(favourites.getTotal() - unfavourites.getTotal());
-
         richService.setRatings(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
                 .stream()
                 .map(Event::getUser)
                 .distinct()
                 .mapToInt(u -> 1)
                 .sum());
+
+        Optional<List<Event>> favourites = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
+        Map<String, Integer> userFavourites = new HashMap<>();
+        favourites.ifPresent(f -> f
+                .stream()
+                .filter(x -> x.getValue() != null)
+                .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
+        int favs = 0;
+        for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
+            favs += entry.getValue();
+        }
+        richService.setFavourites(favs);
 
         // set rating
         Optional<List<Event>> ratings = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
