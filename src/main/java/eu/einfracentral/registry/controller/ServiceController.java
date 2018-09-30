@@ -176,15 +176,21 @@ public class ServiceController {
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
         // TODO: return featured services (now it returns a random infraService for each provider)
-        List<Provider> providers = providerService.getAll(new FacetFilter(), null).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<Provider> providers = providerService.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i = 0; i < 5; i++) {
-            services = providerService.getServices(providers.get(i).getId()); // FIXME returns 0
-            if (services.size() > 0) {
+//        for (int i = 0; i < providers.size(); i++) {
+            Random randomProvider = new Random();
+            int rand = randomProvider.nextInt(providers.size());
+            services = providerService.getServices(providers.get(rand).getId());
+            providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
+            if (!services.isEmpty()) {
                 Random random = new Random();
                 featuredServices.add(services.get(random.nextInt(services.size())));
-            }
+            } else i--; // FIXME remove this (used for displaying always 5 provider services)
         }
         return new ResponseEntity<>(featuredServices, HttpStatus.OK);
 
