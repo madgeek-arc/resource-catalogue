@@ -84,8 +84,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("provider", providerId);
-        ff.setFrom(0);
+        ff.addFilter("providers", providerId);
         ff.setQuantity(10000);
         return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
     }
@@ -94,7 +93,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Service getFeaturedService(String providerId) {
         List<Service> services = getServices(providerId);
         Service featuredService = null;
-        if (services.size() > 0) {
+        if (!services.isEmpty()) {
             Random random = new Random();
             featuredService = services.get(random.nextInt(services.size()));
         }
@@ -113,7 +112,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public List<InfraService> getInactiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("provider", providerId);
+        ff.addFilter("providers", providerId);
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(10000);
