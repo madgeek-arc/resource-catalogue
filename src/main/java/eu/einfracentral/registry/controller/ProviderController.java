@@ -43,7 +43,9 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, Authentication jwt) throws ResourceNotFoundException {
-        return super.get(id, jwt);
+        Provider provider = providerManager.get(id);
+        provider.setUsers(null);
+        return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new Provider")

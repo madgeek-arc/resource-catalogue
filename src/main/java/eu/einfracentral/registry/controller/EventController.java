@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiIgnore
@@ -48,6 +49,25 @@ public class EventController extends ResourceController<Event, Authentication> {
     @RequestMapping(path = "event/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Event> get(@PathVariable String id, Authentication authentication) {
         return new ResponseEntity<>(eventService.get(id), HttpStatus.OK);
+    }
+
+    @ApiIgnore
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @RequestMapping(path = "deleteNull/{type}/", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<String> deleteNullEvents(@PathVariable String type) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("type", type);
+        List<Event> events = eventService.getAll(ff, null).getResults();
+        List<Event> toDelete = new ArrayList<>();
+        for (Event event : events) {
+            if (event.getValue() == null) {
+                toDelete.add(event);
+            }
+        }
+        int size = toDelete.size();
+        eventService.deleteEvents(toDelete);
+        return new ResponseEntity<>("deleted " + size, HttpStatus.NO_CONTENT);
     }
 
 
