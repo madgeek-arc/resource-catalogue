@@ -29,6 +29,7 @@
       "multivalued": false,
       "name": "active",
       "path": "//*[local-name()='active']/text()",
+      "defaultValue": false,
       "type": "java.lang.Boolean"
     },
     {

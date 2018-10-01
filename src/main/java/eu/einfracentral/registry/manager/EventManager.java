@@ -39,6 +39,15 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    public void deleteEvents(List<Event> events) {
+        if (!events.isEmpty()) {
+            for (Event event : events) {
+                this.delete(event);
+            }
+        }
+    }
+
+    @Override
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
