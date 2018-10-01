@@ -56,4 +56,5 @@ public interface EventService extends ResourceService<Event, Authentication> {
      */
     List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception;
 
+    void deleteEvents(List<Event> events);
 }
