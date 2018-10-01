@@ -127,11 +127,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     public Browsing<InfraService> getAll(FacetFilter ff, Authentication authentication) {
-//        ff.addFilter("active", "false");
         return super.getAll(ff, authentication);
-//        Browsing<InfraService> services = super.getAll(ff);
-//        services.setResults(services.getResults().stream().map(this::FillTransientFields).collect(Collectors.toList()));
-//        return services;
     }
 
     @Override
