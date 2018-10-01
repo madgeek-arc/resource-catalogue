@@ -28,6 +28,9 @@ public class Provider implements Identifiable {
     @XmlElement
     private URL publicDescOfResources;
 
+    @XmlElement
+    private URL logo;
+
     @XmlElement(required = true)
     private String additionalInfo;
 
@@ -123,6 +126,14 @@ public class Provider implements Identifiable {
 
     public void setPublicDescOfResources(URL publicDescOfResources) {
         this.publicDescOfResources = publicDescOfResources;
+    }
+
+    public URL getLogo() {
+        return logo;
+    }
+
+    public void setLogo(URL logo) {
+        this.logo = logo;
     }
 
     public String getAdditionalInfo() {
