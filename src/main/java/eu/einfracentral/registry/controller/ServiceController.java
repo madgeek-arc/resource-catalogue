@@ -95,7 +95,9 @@ public class ServiceController {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication authentication) throws ResourceNotFoundException {
-        Paging<InfraService> infraServices = infraService.getAll(getFacetFilter(allRequestParams), null);
+        FacetFilter ff = getFacetFilter(allRequestParams);
+        ff.addFilter("active", "true");
+        Paging<InfraService> infraServices = infraService.getAll(ff, null);
         List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
         if (services.isEmpty()) {
             throw new ResourceNotFoundException();
@@ -111,7 +113,9 @@ public class ServiceController {
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication jwt) throws ResourceNotFoundException {
-        Paging<RichService> services = infraService.getRichServices(getFacetFilter(allRequestParams), jwt);
+        FacetFilter ff = getFacetFilter(allRequestParams);
+        ff.addFilter("active", "true");
+        Paging<RichService> services = infraService.getRichServices(ff, jwt);
         if (services.getResults().isEmpty()) {
             throw new ResourceNotFoundException();
         }
@@ -193,15 +197,6 @@ public class ServiceController {
             } else i--; // FIXME remove this (used for displaying always 5 provider services)
         }
         return new ResponseEntity<>(featuredServices, HttpStatus.OK);
-
-//        List<Service> featuredServices = new ArrayList<>();
-//        services.addAll(infraService.getAll(new FacetFilter()).getResults());
-//        for (Iterator<Service> iterator = services.iterator(); iterator.hasNext(); iterator.next()) {
-//            Service s = iterator.next();
-//            if () {
-//            }
-//        }
-//        return new ResponseEntity<>(featuredServices, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get all inactive services")
