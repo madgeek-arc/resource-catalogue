@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -151,6 +153,8 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     private boolean sameDay(Long instant) {
-        return instant - System.currentTimeMillis() < 43200000;
+        Calendar midnight = new GregorianCalendar();
+        midnight.set(Calendar.HOUR_OF_DAY, 0);
+        return midnight.getTimeInMillis() < instant;
     }
 }
