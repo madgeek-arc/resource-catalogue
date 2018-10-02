@@ -109,4 +109,14 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         List<Provider> ret = providerManager.getInactive();
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
+
+    @ApiOperation(value = "Accept/Reject a provider")
+    @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam Boolean active, Authentication jwt) throws ResourceNotFoundException {
+        Provider provider = providerManager.get(id);
+        provider.setActive(active);
+        return new ResponseEntity<>(providerManager.update(provider, jwt), HttpStatus.OK);
+    }
+
 }
