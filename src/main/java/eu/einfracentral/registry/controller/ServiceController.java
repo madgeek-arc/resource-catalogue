@@ -215,6 +215,15 @@ public class ServiceController {
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
+    @ApiOperation(value = "Set a service active or inactive")
+    @RequestMapping(path = "publish/{id}/{version}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
+                                                  @RequestParam Boolean active, Authentication jwt) throws ResourceNotFoundException {
+        InfraService service = infraService.get(id, version);
+        service.setActive(active);
+        return ResponseEntity.ok(infraService.update(service, jwt));
+    }
+
 
     private FacetFilter getFacetFilter(Map<String, Object> allRequestParams) {
         logger.debug("Request params: " + allRequestParams);
