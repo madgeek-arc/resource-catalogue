@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Service;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -23,4 +25,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
 
     List<InfraService> getInactiveServices(String providerId);
+
+
+    T verifyProvider(String id, Provider.States status, Boolean active, U auth);
 }
