@@ -1,9 +1,7 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -30,19 +28,16 @@ import java.util.stream.Collectors;
 public class ProviderController extends ResourceController<Provider, Authentication> {
 
     private ProviderService<Provider, Authentication> providerManager;
-    private InfraServiceService<InfraService, InfraService> infraService;
 
     @Autowired
-    ProviderController(ProviderService<Provider, Authentication> service,
-                       InfraServiceService<InfraService, InfraService> infraService) {
+    ProviderController(ProviderService<Provider, Authentication> service) {
         super(service);
         this.providerManager = service;
-        this.infraService = infraService;
     }
 
     @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id);
         provider.setUsers(null);
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -98,7 +93,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @ApiOperation(value = "Get the pending services of the given provider")
     @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        // TODO: move getPending to ProviderService
         List<Service> ret = providerManager.getInactiveServices(id).stream().map(Service::new).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
@@ -114,15 +108,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                   @RequestParam(required = false) String status, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        Provider provider = providerManager.get(id);
-        if (active != null) {
-            provider.setActive(active);
-        }
-        if (status != null) {
-            provider.setStatus(status);
-        }
-        return new ResponseEntity<>(providerManager.update(provider, auth), HttpStatus.OK);
+                                                   @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(providerManager.verifyProvider(id, status, active, auth), HttpStatus.OK);
     }
 
 }
