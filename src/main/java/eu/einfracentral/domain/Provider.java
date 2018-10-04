@@ -68,6 +68,24 @@ public class Provider implements Identifiable {
         this.status = status;
     }
 
+    public enum States {
+        APPROVED("approved"),
+        REJECTED("rejected"),
+        PENDING_1("pending initial approval"),
+        PENDING_2("pending service template approval"),
+        REJECTED_ST("rejected service template");
+
+        private final String type;
+
+        States(final String type) {
+            this.type = type;
+        }
+
+        public String getKey() {
+            return type;
+        }
+    }
+
     @Override
     public String getId() {
         return id;
