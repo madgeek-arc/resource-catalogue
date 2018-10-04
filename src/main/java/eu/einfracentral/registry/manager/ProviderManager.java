@@ -5,10 +5,11 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
-import eu.einfracentral.domain.Utils.States;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,11 +62,51 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             throw new AuthorizationServiceException("Could not create Provider", e);
         }
         provider.setActive(false);
-        provider.setStatus(States.ProviderStates.PENDING_1.getKey());
+        provider.setStatus(Provider.States.PENDING_1.getKey());
         return super.add(provider, null);
     }
 
+    @Override
+    public Provider update(Provider provider, Authentication auth) {
+//        update(provider, auth);
+        Resource existing = whereID(provider.getId(), true);
+        Provider ex = deserialize(existing);
+        ObjectUtils.merge(ex, provider);
+        existing.setPayload(serialize(ex));
+        existing.setResourceType(resourceType);
+        resourceService.updateResource(existing);
 
+        return ex;
+    }
+
+    @Override
+    public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
+        Provider provider = get(id);
+        if (active != null) {
+            provider.setActive(active);
+        }
+        switch (status) {
+            case REJECTED:
+                logger.info("Deleting provider: " + provider.getName());
+                this.delete(provider);
+                break;
+            case APPROVED:
+                provider.setActive(true);
+                break;
+            case PENDING_1:
+                provider.setActive(false);
+                break;
+            case PENDING_2:
+                provider.setActive(false);
+                break;
+            case REJECTED_ST:
+                provider.setActive(false);
+                break;
+            default:
+        }
+        provider.setStatus(status.getKey());
+        return update(provider, auth);
+    }
 
     @Override
     public List<Provider> getMyServiceProviders(String email) {
