@@ -42,7 +42,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
 
     @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Provider> get(@PathVariable("id") String id, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Provider provider = providerManager.get(id);
         provider.setUsers(null);
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -51,15 +51,15 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @ApiOperation(value = "Creates a new Provider")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Provider> add(@RequestBody Provider provider, Authentication jwt) throws Exception {
-        return super.add(provider, jwt);
+    public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws Exception {
+        return super.add(provider, auth);
     }
 
     @ApiOperation(value = "Updates Provider info")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerIsActive(#jwt,#provider)")
-    public ResponseEntity<Provider> update(@RequestBody Provider provider, Authentication jwt) throws Exception {
-        return super.update(provider, jwt);
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerIsActive(#auth,#provider)")
+    public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws Exception {
+        return super.update(provider, auth);
     }
 
     @ApiIgnore
@@ -71,13 +71,13 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN')") // TODO
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication jwt) throws ResourceNotFoundException {
-        return super.getAll(allRequestParams, jwt);
+    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        return super.getAll(allRequestParams, auth);
     }
 
     @ApiOperation(value = "Get a list of services offered by a provider")
     @RequestMapping(path = "services/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, Authentication jwt) {
+    public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(providerManager.getServices(id), HttpStatus.OK);
     }
 
@@ -97,7 +97,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
 
     @ApiOperation(value = "Get the pending services of the given provider")
     @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, Authentication jwt) {
+    public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         // TODO: move getPending to ProviderService
         List<Service> ret = providerManager.getInactiveServices(id).stream().map(Service::new).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
@@ -105,7 +105,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
 
     @ApiOperation(value = "Get inactive providers")
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Provider>> getInactive(Authentication jwt) {
+    public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
         List<Provider> ret = providerManager.getInactive();
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
@@ -113,10 +113,16 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @ApiOperation(value = "Accept/Reject a provider")
     @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam Boolean active, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
+                                                   @RequestParam(required = false) String status, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Provider provider = providerManager.get(id);
-        provider.setActive(active);
-        return new ResponseEntity<>(providerManager.update(provider, jwt), HttpStatus.OK);
+        if (active != null) {
+            provider.setActive(active);
+        }
+        if (status != null) {
+            provider.setStatus(status);
+        }
+        return new ResponseEntity<>(providerManager.update(provider, auth), HttpStatus.OK);
     }
 
 }

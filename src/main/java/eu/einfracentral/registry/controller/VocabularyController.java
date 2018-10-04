@@ -74,8 +74,8 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     }
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Vocabulary> get(@PathVariable("id") String id, Authentication jwt) throws ResourceNotFoundException {
-        return super.get(id, jwt);
+    public ResponseEntity<Vocabulary> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        return super.get(id, auth);
     }
 
     @ApiOperation(value = "Get all categories \\ sub categories used in eInfraCentral, etc.")
@@ -85,17 +85,17 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
             @ApiImplicitParam(name = "quantity", value = "Quantity of vocabularies to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication authentication) throws ResourceNotFoundException {
-        return super.getAll(allRequestParams, authentication);
+    public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        return super.getAll(allRequestParams, auth);
     }
 
     @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Vocabulary>> getSome(@PathVariable String[] ids, Authentication jwt) {
-        return super.getSome(ids, jwt);
+    public ResponseEntity<List<Vocabulary>> getSome(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
+        return super.getSome(ids, auth);
     }
 
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, List<Vocabulary>>> getBy(@PathVariable String field, Authentication jwt) {
-        return super.getBy(field, jwt);
+    public ResponseEntity<Map<String, List<Vocabulary>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) {
+        return super.getBy(field, auth);
     }
 }

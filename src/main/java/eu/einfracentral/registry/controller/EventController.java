@@ -47,7 +47,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @ApiIgnore
     @ApiOperation("Retrieve the event with a specific ID.")
     @RequestMapping(path = "event/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Event> get(@PathVariable String id, Authentication authentication) {
+    public ResponseEntity<Event> get(@PathVariable String id, @ApiIgnore Authentication authentication) {
         return new ResponseEntity<>(eventService.get(id), HttpStatus.OK);
     }
 
@@ -75,13 +75,13 @@ public class EventController extends ResourceController<Event, Authentication> {
     @ApiOperation("Set a eventService as favorite for a user.")
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, Authentication authentication) throws Exception {
+    public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
         return new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
     }
 
     @ApiOperation("Check if a eventService is favourited by the authenticated user.")
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<String> getFavourite(@PathVariable String id, Authentication authentication) {
+    public ResponseEntity<String> getFavourite(@PathVariable String id, @ApiIgnore Authentication authentication) {
         List<Event> events;
         try {
             events = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), id, authentication);
@@ -124,13 +124,13 @@ public class EventController extends ResourceController<Event, Authentication> {
     @ApiOperation("Set a rating to a eventService from the authenticated user.")
     @RequestMapping(path = "rating/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, Authentication authentication) throws Exception {
+    public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {
         return new ResponseEntity<>(eventService.setRating(id, rating, authentication), HttpStatus.OK);
     }
 
     @ApiOperation("Get the rating of the authenticated user.")
     @RequestMapping(path = "rating/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<String> getRating(@PathVariable String id, Authentication authentication) {
+    public ResponseEntity<String> getRating(@PathVariable String id, @ApiIgnore Authentication authentication) {
         List<Event> events;
         try {
             events = eventService.getEvents(Event.UserActionType.RATING.getKey(), id, authentication);

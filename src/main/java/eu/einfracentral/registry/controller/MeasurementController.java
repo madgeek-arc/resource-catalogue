@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("measurement")
@@ -20,20 +21,20 @@ public class MeasurementController extends ResourceController<Measurement, Authe
 
     @ApiOperation(value = "Returns the measurement assigned the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> get(@PathVariable("id") String id, Authentication authentication) throws ResourceNotFoundException {
-        return super.get(id, authentication);
+    public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        return super.get(id, auth);
     }
 
     @CrossOrigin
     @ApiOperation(value = "Adds the given measurement.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, Authentication authentication) throws Exception {
-        return super.add(measurement, authentication);
+    public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws Exception {
+        return super.add(measurement, auth);
     }
 
-    @ApiOperation(value = "Updates the measurement assigned the given id with the given measurement, keeping a versions of revisions.")
+    @ApiOperation(value = "Updates the measurement assigned the given id with the given measurement, keeping versions of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, Authentication jwt) throws Exception {
-        return super.update(measurement, jwt);
+    public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws Exception {
+        return super.update(measurement, auth);
     }
 }
