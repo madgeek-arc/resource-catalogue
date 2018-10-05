@@ -149,15 +149,25 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             // FIXME: temporary solution to keep service active field value when provider is deactivated, and restore it when activated
             List<InfraService> services = this.getInfraServices(provider.getId());
             if (!active) {
-                services.forEach(s -> {
-                    s.setStatus(s.getActive().toString());
-                    s.setActive(false);
-                });
+                for (InfraService service : services) {
+                    service.setStatus(service.getActive().toString());
+                    service.setActive(false);
+                    try {
+                        infraServiceService.update(service, null);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error("Could not update service " + service.getName());
+                    }
+                }
             } else {
-                services.forEach(s -> {
-                    s.setActive(s.getStatus().equals("true"));
-                    s.setStatus(null);
-                });
+                for (InfraService service : services) {
+                    service.setActive(service.getStatus().equals("true"));
+                    service.setStatus(null);
+                    try {
+                        infraServiceService.update(service, null);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error("Could not update service " + service.getName());
+                    }
+                }
             }
         }
         provider.setStatus(status.getKey());
