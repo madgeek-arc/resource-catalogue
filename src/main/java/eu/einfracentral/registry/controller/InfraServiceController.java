@@ -84,20 +84,22 @@ public class InfraServiceController {
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<InfraService> add(@RequestBody Service service, Authentication authentication) {
-        return new ResponseEntity<>(infraService.add(new InfraService(service), authentication), HttpStatus.OK);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
+        return new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<InfraService> update(@RequestBody Service service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        return new ResponseEntity<>(infraService.update(new InfraService(service), authentication), HttpStatus.OK);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        return new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Validates the infraService without actually changing the respository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody Service service, Authentication jwt) throws Exception {
-        return ResponseEntity.ok(infraService.validate(new InfraService(service)));
+    public ResponseEntity<Boolean> validate(@RequestBody InfraService service, Authentication jwt) throws Exception {
+        return ResponseEntity.ok(infraService.validate(service));
     }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
