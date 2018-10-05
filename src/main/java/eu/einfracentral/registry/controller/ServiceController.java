@@ -105,6 +105,7 @@ public class ServiceController {
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -133,6 +134,7 @@ public class ServiceController {
                         .stream().map(Service::new).collect(Collectors.toList()));
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get a list of rich services based on a set of IDs")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
@@ -199,6 +201,7 @@ public class ServiceController {
         return new ResponseEntity<>(featuredServices, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get all inactive services")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),

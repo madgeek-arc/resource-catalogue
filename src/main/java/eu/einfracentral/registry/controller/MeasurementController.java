@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+@ApiIgnore
 @RestController
 @RequestMapping("measurement")
 public class MeasurementController extends ResourceController<Measurement, Authentication> {

@@ -97,6 +97,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get inactive providers")
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
@@ -104,6 +105,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Accept/Reject a provider")
     @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")

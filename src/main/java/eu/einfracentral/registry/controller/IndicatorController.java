@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+@ApiIgnore
 @RestController
 @RequestMapping("indicator")
 public class IndicatorController extends ResourceController<Indicator, Authentication> {
