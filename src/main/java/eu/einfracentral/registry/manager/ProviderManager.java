@@ -134,7 +134,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             provider.setActive(active);
         }
         provider.setStatus(status.getKey());
-        return update(provider, auth);
+        return super.update(provider, auth);
     }
 
     @Override
