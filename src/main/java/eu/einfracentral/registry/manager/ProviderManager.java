@@ -1,13 +1,14 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.service.MailService;
-import eu.einfracentral.utils.AuthenticationDetails;
+import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.MailService;
+import eu.einfracentral.utils.AuthenticationDetails;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -15,11 +16,10 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.Authentication;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -32,12 +32,15 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private MailService mailService;
+    private EICAuthoritiesMapper authoritiesMapper;
 
     @Autowired
-    public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService) {
+    public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService,
+                           @Lazy EICAuthoritiesMapper authoritiesMapper) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.mailService = mailService;
+        this.authoritiesMapper = authoritiesMapper;
     }
 
     @Override
@@ -72,6 +75,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             provider.setStatus(Provider.States.PENDING_1.getKey());
 
             ret = super.add(provider, null);
+            authoritiesMapper.mapProviders(provider.getUsers());
 //            mailService.sendMail(email, "", "");
         } catch (Exception e) {
             logger.error(e);
@@ -106,7 +110,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setPayload(serialize(ex));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-
+        authoritiesMapper.mapProviders(provider.getUsers());
         return ex;
     }
 

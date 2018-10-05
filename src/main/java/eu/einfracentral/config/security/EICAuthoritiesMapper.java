@@ -4,6 +4,7 @@ import com.nimbusds.jwt.JWT;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.manager.ProviderManager;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -12,6 +13,7 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -29,11 +31,11 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 //    private static final String ROLE_CLAIMS = "edu_person_entitlements";
     private Map<String, SimpleGrantedAuthority> userRolesMap;
 
-    private ProviderManager providerManager;
+    private ProviderService<Provider, Authentication> providerService;
 
     @Autowired
-    public EICAuthoritiesMapper(@Value("${eic.admins}") String admins, ProviderManager manager) throws Exception {
-        this.providerManager = manager;
+    public EICAuthoritiesMapper(@Value("${eic.admins}") String admins, ProviderService<Provider, Authentication> manager) throws Exception {
+        this.providerService = manager;
         if (admins == null) {
             throw new Exception("No Admins Provided");
         }
@@ -41,7 +43,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        Optional<List<Provider>> providers = Optional.of(providerManager.getAll(ff, null).getResults());
+        Optional<List<Provider>> providers = Optional.of(providerService.getAll(ff, null).getResults());
         userRolesMap = providers.get()
                 .stream()
                 .distinct()
@@ -74,5 +76,14 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             }
         }
         return out;
+    }
+
+    public void mapProviders(List<User> providers) {
+        if (userRolesMap == null) {
+            userRolesMap = new HashMap<>();
+        }
+        for (User user : providers) {
+            userRolesMap.putIfAbsent(user.getEmail(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
+        }
     }
 }
