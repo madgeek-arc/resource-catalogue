@@ -4,6 +4,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -85,9 +86,14 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 // update existing service serviceMetadata
                 ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), getUser(authentication));
                 infraService.setServiceMetadata(serviceMetadata);
+//                ObjectUtils.merge(existingService, infraService); // FIXME: this method does not assign values of Superclass
+                infraService.setActive(existingService.getActive());
+                infraService.setStatus(existingService.getStatus());
                 ret = super.update(infraService, authentication);
 
             } else {
+                infraService.setActive(false);
+//                infraService.setStatus(); // TODO: enable this when services support the Status field
                 ret = add(infraService, authentication);
             }
         } catch (Exception e) {
@@ -188,7 +194,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     private String createServiceId(Service service) {
         String provider = service.getProviders().get(0);
-        return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z\\s]+", "").replaceAll(" ", "_").toLowerCase());
+        return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "").replaceAll(" ", "_").toLowerCase());
     }
 
     private void validateVocabularies(InfraService service) throws Exception {

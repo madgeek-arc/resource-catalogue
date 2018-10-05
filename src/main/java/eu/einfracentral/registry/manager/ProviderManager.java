@@ -11,6 +11,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider add(Provider provider, Authentication auth) {
         List<User> users;
         Provider ret;
+        provider.setId(provider.getId().replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "").replaceAll(" ", "_"));
         try {
             String email = AuthenticationDetails.getEmail(auth);
              String id = AuthenticationDetails.getSub(auth);
@@ -114,6 +116,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         switch (status) {
             case REJECTED:
                 logger.info("Deleting provider: " + provider.getName());
+                List<InfraService> services = this.getInfraServices(provider.getId());
+                services.forEach(s -> {
+                    try {
+                        infraServiceService.delete(s);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error("Error deleting Service", e);
+                    }
+                });
                 this.delete(provider);
                 return null;
             case APPROVED:
@@ -132,6 +142,19 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
         if (active != null) {
             provider.setActive(active);
+            // FIXME: temporary solution to keep service active field value when provider is deactivated, and restore it when activated
+            List<InfraService> services = this.getInfraServices(provider.getId());
+            if (!active) {
+                services.forEach(s -> {
+                    s.setStatus(s.getActive().toString());
+                    s.setActive(false);
+                });
+            } else {
+                services.forEach(s -> {
+                    s.setActive(s.getStatus().equals("true"));
+                    s.setStatus(null);
+                });
+            }
         }
         provider.setStatus(status.getKey());
         return super.update(provider, auth);
@@ -149,6 +172,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public List<InfraService> getInfraServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("providers", providerId);
+        ff.setQuantity(10000);
+        return infraServiceService.getAll(ff, null).getResults();
     }
 
     @Override
