@@ -101,10 +101,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
-        InfraService ex = deserialize(existing);
-        assert ex != null;
-        ObjectUtils.merge(ex, infraService);
-        existing.setPayload(serialize(ex));
+        existing.setPayload(serialize(infraService));
         resourceService.updateResource(existing);
         return infraService;
     }

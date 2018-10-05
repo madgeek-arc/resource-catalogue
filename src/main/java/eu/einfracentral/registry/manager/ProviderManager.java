@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.service.MailService;
 import eu.einfracentral.utils.AuthenticationDetails;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.Authentication;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,11 +30,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private MailService mailService;
 
     @Autowired
-    public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService) {
+    public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -42,8 +47,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public Provider add(Provider provider, Authentication auth) {
         List<User> users;
+        Provider ret;
         try {
             String email = AuthenticationDetails.getEmail(auth);
+             String id = AuthenticationDetails.getSub(auth);
+
             users = provider.getUsers();
             if (users == null) {
                 users = new ArrayList<>();
@@ -51,19 +59,23 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             if (users.stream().noneMatch(user -> user.getEmail().equals(email))) {
                 User user = new User();
                 user.setEmail(email);
+                user.setId(id);
                 user.setId(AuthenticationDetails.getSub(auth));
                 user.setName(AuthenticationDetails.getGivenName(auth));
                 user.setSurname(AuthenticationDetails.getFamilyName(auth));
                 users.add(user);
                 provider.setUsers(users);
             }
+            provider.setActive(false);
+            provider.setStatus(Provider.States.PENDING_1.getKey());
+
+            ret = super.add(provider, null);
+//            mailService.sendMail(email, "", "");
         } catch (Exception e) {
             logger.error(e);
             throw new AuthorizationServiceException("Could not create Provider", e);
         }
-        provider.setActive(false);
-        provider.setStatus(Provider.States.PENDING_1.getKey());
-        return super.add(provider, null);
+        return ret;
     }
 
     @Override
@@ -71,6 +83,23 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 //        update(provider, auth);
         Resource existing = whereID(provider.getId(), true);
         Provider ex = deserialize(existing);
+        provider.setActive(ex.getActive());
+        provider.setStatus(ex.getStatus());
+
+        // TODO: check if user info exists and fill missing info
+        // TODO: do not add user if already exists
+        List<User> users = ex.getUsers() != null ? ex.getUsers() : new ArrayList<>();
+        if (provider.getUsers() != null) {
+            for (User user : provider.getUsers()) {
+                String email = user.getEmail();
+                if (users.stream().noneMatch(u -> u.getEmail().equals(email))) {
+                    users.add(user);
+                }
+            }
+        }
+        provider.setUsers(users);
+
+
         ObjectUtils.merge(ex, provider);
         existing.setPayload(serialize(ex));
         existing.setResourceType(resourceType);
@@ -82,14 +111,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
-        if (active != null) {
-            provider.setActive(active);
-        }
         switch (status) {
             case REJECTED:
                 logger.info("Deleting provider: " + provider.getName());
                 this.delete(provider);
-                break;
+                return null;
             case APPROVED:
                 provider.setActive(true);
                 break;
@@ -103,6 +129,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 provider.setActive(false);
                 break;
             default:
+        }
+        if (active != null) {
+            provider.setActive(active);
         }
         provider.setStatus(status.getKey());
         return update(provider, auth);

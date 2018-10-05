@@ -1,5 +1,7 @@
 package eu.einfracentral.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
@@ -56,14 +58,15 @@ public class MailService {
         });
     }
 
-    public void sendMail(String to, String subject, String text) throws MessagingException {
+    public void sendMail(List<String> to, List<String> cc, String subject, String text) throws MessagingException {
         Transport transport = null;
         try {
             transport = session.getTransport();
             InternetAddress sender = new InternetAddress(user);
             Message message = new MimeMessage(session);
             message.setFrom(sender);
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+            message.setRecipient(Message.RecipientType.TO, new InternetAddress(String.join(",", to)));
+            message.setRecipient(Message.RecipientType.CC, new InternetAddress(String.join(",", cc)));
             message.setRecipient(Message.RecipientType.BCC, sender);
             message.setSubject(subject);
             message.setText(text);
@@ -76,5 +79,17 @@ public class MailService {
                 transport.close();
             }
         }
+    }
+
+    public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
+        List<String> addrTo = new ArrayList<>();
+        addrTo.add(to);
+        List<String> addrCc = new ArrayList<>();
+        addrTo.add(cc);
+        sendMail(addrTo, addrCc, subject, text);
+    }
+
+    public void sendMail(String to, String subject, String text) throws MessagingException {
+        sendMail(to, null, subject, text);
     }
 }
