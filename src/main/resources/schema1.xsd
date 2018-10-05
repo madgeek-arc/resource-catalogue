@@ -345,7 +345,7 @@
       <xs:element minOccurs="0" name="catalogueOfResources" type="xs:anyURI"/>
       <xs:element minOccurs="0" name="contactInformation" type="xs:string"/>
       <xs:element name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="logo" type="xs:string"/>
+      <xs:element minOccurs="0" name="logo" type="xs:anyURI"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="publicDescOfResources" type="xs:anyURI"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
