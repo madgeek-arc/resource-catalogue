@@ -150,7 +150,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             List<InfraService> services = this.getInfraServices(provider.getId());
             if (!active) {
                 for (InfraService service : services) {
-                    service.setStatus(service.getActive().toString());
+                    service.setStatus(service.getActive() != null ? service.getActive().toString() : "true");
                     service.setActive(false);
                     try {
                         infraServiceService.update(service, null);
@@ -160,7 +160,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 }
             } else {
                 for (InfraService service : services) {
-                    service.setActive(service.getStatus().equals("true"));
+                    service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
                     service.setStatus(null);
                     try {
                         infraServiceService.update(service, null);
