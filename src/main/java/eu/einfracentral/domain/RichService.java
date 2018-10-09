@@ -1,17 +1,20 @@
 package eu.einfracentral.domain;
 
+
 import java.util.List;
 
-public class RichService {
+// FIXME: change to composition instead of inheritance.
+public class RichService extends Service {
 
-    private Service service;
+    //    private Service service;
     private ServiceMetadata serviceMetadata;
     private String categoryName;
     private String subCategoryName;
     private List<String> languageNames;
     private int views;
     private int ratings;
-    private int hasRate;
+    private float userRate;
+    private float hasRate;
     private int favourites;
     private boolean isFavourite;
 
@@ -20,8 +23,9 @@ public class RichService {
 
     }
 
-    public RichService(Service service, ServiceMetadata serviceMetadata, String categoryName, String subCategoryName, List<String> languageNames, int views, int ratings, int hasRate, int favourites, boolean isFavourite) {
-        this.service = service;
+    public RichService(Service service, ServiceMetadata serviceMetadata, String categoryName, String subCategoryName, List<String> languageNames, int views, int ratings, float hasRate, int favourites, boolean isFavourite) {
+//        this.service = service;
+        super(service);
         this.serviceMetadata = serviceMetadata;
         this.categoryName = categoryName;
         this.subCategoryName = subCategoryName;
@@ -34,10 +38,18 @@ public class RichService {
     }
 
     public RichService(InfraService service) {
-        this.service = (Service) service;
+//        this.service = (Service) service;
+        super(service);
         this.serviceMetadata = service.getServiceMetadata();
     }
 
+/*    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
+    }*/
 
     public String getCategoryName() {
         return categoryName;
@@ -79,11 +91,11 @@ public class RichService {
         this.ratings = ratings;
     }
 
-    public int getHasRate() {
+    public float getHasRate() {
         return hasRate;
     }
 
-    public void setHasRate(int hasRate) {
+    public void setHasRate(float hasRate) {
         this.hasRate = hasRate;
     }
 
@@ -95,11 +107,20 @@ public class RichService {
         this.favourites = favourites;
     }
 
-    public boolean isFavourite() {
+    public boolean getIsFavourite() {
         return isFavourite;
     }
 
     public void setFavourite(boolean favourite) {
         isFavourite = favourite;
     }
+
+    public float getUserRate() {
+        return userRate;
+    }
+
+    public void setUserRate(float userRate) {
+        this.userRate = userRate;
+    }
+
 }

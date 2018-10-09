@@ -18,6 +18,16 @@ public class Event implements Identifiable {
     @XmlElement()
     private String value;
 
+    public Event() {
+    }
+
+    public Event(String type, String user, String service, String value) {
+        this.type = type;
+        this.user = user;
+        this.service = service;
+        this.value = value;
+    }
+
     @Override
     public String getId() {
         return id;

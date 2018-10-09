@@ -158,7 +158,7 @@
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the information about the payment models that apply, the cost and any related information.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="providers">
+      <xs:element name="providers">
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="provider" type="xs:string"/>
@@ -214,7 +214,7 @@
           <xs:documentation><![CDATA[Short text, catch line or slogan which serves mainly marketing and advertising purposes.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="tags">
+      <xs:element minOccurs="0" name="tags">
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="tag" type="xs:string"/>
@@ -229,7 +229,7 @@
       <xs:element minOccurs="0" name="termsOfUse">
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="termOfUse" type="xs:anyURI"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="termOfUse" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -345,6 +345,7 @@
       <xs:element minOccurs="0" name="catalogueOfResources" type="xs:anyURI"/>
       <xs:element minOccurs="0" name="contactInformation" type="xs:string"/>
       <xs:element name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="logo" type="xs:anyURI"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="publicDescOfResources" type="xs:anyURI"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
@@ -360,18 +361,22 @@
   </xs:complexType>
 
   <xs:complexType name="richService">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="categoryName" type="xs:string"/>
-      <xs:element name="favourites" type="xs:int"/>
-      <xs:element name="hasRate" type="xs:int"/>
-      <xs:element name="isFavourite" type="xs:boolean"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="languageNames" nillable="true" type="xs:string"/>
-      <xs:element name="ratings" type="xs:int"/>
-      <xs:element minOccurs="0" ref="tns:service"/>
-      <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
-      <xs:element minOccurs="0" name="subCategoryName" type="xs:string"/>
-      <xs:element name="views" type="xs:int"/>
-    </xs:sequence>
+    <xs:complexContent>
+      <xs:extension base="tns:service">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="categoryName" type="xs:string"/>
+          <xs:element name="favourites" type="xs:int"/>
+          <xs:element name="hasRate" type="xs:float"/>
+          <xs:element name="isFavourite" type="xs:boolean"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="languageNames" nillable="true" type="xs:string"/>
+          <xs:element name="ratings" type="xs:int"/>
+          <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
+          <xs:element minOccurs="0" name="subCategoryName" type="xs:string"/>
+          <xs:element name="userRate" type="xs:float"/>
+          <xs:element name="views" type="xs:int"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="serviceHistory">

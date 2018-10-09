@@ -2,9 +2,12 @@ package eu.einfracentral.domain;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
-import javax.xml.bind.annotation.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -25,6 +28,9 @@ public class Provider implements Identifiable {
     @XmlElement
     private URL publicDescOfResources;
 
+    @XmlElement
+    private URL logo;
+
     @XmlElement(required = true)
     private String additionalInfo;
 
@@ -34,6 +40,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "users")
     @XmlElement(name = "user")
     @ApiModelProperty(required = true)
+//    @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
     private List<User> users;
 
     @XmlElement
@@ -59,6 +66,24 @@ public class Provider implements Identifiable {
         this.users = users;
         this.active = active;
         this.status = status;
+    }
+
+    public enum States {
+        APPROVED("approved"),
+        REJECTED("rejected"),
+        PENDING_1("pending initial approval"),
+        PENDING_2("pending service template approval"),
+        REJECTED_ST("rejected service template");
+
+        private final String type;
+
+        States(final String type) {
+            this.type = type;
+        }
+
+        public String getKey() {
+            return type;
+        }
     }
 
     @Override
@@ -119,6 +144,14 @@ public class Provider implements Identifiable {
 
     public void setPublicDescOfResources(URL publicDescOfResources) {
         this.publicDescOfResources = publicDescOfResources;
+    }
+
+    public URL getLogo() {
+        return logo;
+    }
+
+    public void setLogo(URL logo) {
+        this.logo = logo;
     }
 
     public String getAdditionalInfo() {

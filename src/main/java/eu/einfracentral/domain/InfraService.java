@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
+// FIXME: change to composition instead of inheritance.
 public class InfraService extends Service {
 
     @XmlElement(name = "serviceMetadata")
