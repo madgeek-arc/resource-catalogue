@@ -1,22 +1,23 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.utils.AuthenticationDetails;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ParserService;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import eu.openminted.registry.core.service.SearchService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @SuppressWarnings("unchecked")
@@ -31,9 +32,21 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Autowired
     private ParserService parserService;
 
+    @Autowired
+    private InfraServiceManager infraServiceManager;
+
     @Override
     public String getResourceType() {
         return "event";
+    }
+
+    @Override
+    public void deleteEvents(List<Event> events) {
+        if (!events.isEmpty()) {
+            for (Event event : events) {
+                this.delete(event);
+            }
+        }
     }
 
     @Override
@@ -43,49 +56,57 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return super.add(event, auth);
     }
 
+    @Override
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         return super.update(event, auth);
     }
 
-    public void delete(Event event) {
-        super.delete(event);
-    }
-
     @Override
-    public Event toggleFavourite(String serviceId, String userId) {
-        List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, userId);
+    public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws Exception {
+        if(!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))){
+                throw new Exception("Resource not found");
+        }
+        String favouriteValue = value ? "1" : "0";
+        List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, authentication);
         Event event;
-        if (events.size() == 0) {
+        if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
+            event = events.get(0);
+            event.setValue(favouriteValue);
+            event = update(event, null);
+        } else {
             event = new Event();
             event.setService(serviceId);
-            event.setUser(userId);
+            event.setUser(AuthenticationDetails.getSub(authentication));
             event.setType(Event.UserActionType.FAVOURITE.getKey());
-            event.setValue("1");
+            event.setValue(favouriteValue);
             event = add(event, null);
-        } else {
-            event = events.get(0);
-            event = booleanToggleValue(event);
-            event = update(event, null);
         }
         return event;
     }
 
     @Override
-    public Event setRating(String serviceId, String userId, String value) {
-        List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, userId);
+    public Event setRating(String serviceId, String value, Authentication authentication) throws Exception {
+        if(!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))){
+            throw new Exception("Resource not found");
+        }
+        if (Long.parseLong(value) <= 0 || Long.parseLong(value) > 5) {
+            throw new Exception("Rating value must be between [1,5]");
+        }
+        List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, authentication);
         Event event;
-        if (events.size() == 0) {
-            event = new Event();
-            event.setService(serviceId);
-            event.setUser(userId);
-            event.setType(Event.UserActionType.RATING.getKey());
-            event.setValue(value);
-            event = add(event, null);
-        } else {
+        if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
             event = events.get(0);
             event.setValue(value);
             event = update(event, null);
+        }
+        else {
+            event = new Event();
+            event.setService(serviceId);
+            event.setUser(AuthenticationDetails.getSub(authentication));
+            event.setType(Event.UserActionType.RATING.getKey());
+            event.setValue(value);
+            event = add(event, null);
         }
         return event;
     }
@@ -93,38 +114,33 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getEvents(String eventType) {
         Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType, "event");
+                .cqlQuery(String.format("type=\"%s\"", eventType), "event",
+                        10000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
     @Override
-    public List<Event> getEvents(String eventType, String serviceId, String userId) {
-        Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType + " AND service=" + serviceId + " AND event_user=" + userId, "event");
+    public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws Exception {
+        Paging<Resource> event_resources = searchService.cqlQuery(
+                String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
+                        eventType, serviceId, AuthenticationDetails.getSub(authentication)), "event",
+                10000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
     @Override
     public List<Event> getServiceEvents(String eventType, String serviceId) {
-        Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType + " AND service=" + serviceId, "event");
+        Paging<Resource> event_resources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
+                        eventType, serviceId), "event", 10000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
     }
 
     @Override
-    public List<Event> getUserEvents(String eventType, String userId) {
-        Paging<Resource> event_resources = searchService
-                .cqlQuery("type=" + eventType + " AND event_user=" + userId, "event", 10000, 0, "instant", "DESC");
+    public List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception {
+        Paging<Resource> event_resources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
+                eventType, AuthenticationDetails.getSub(authentication)), "event",
+                10000, 0, "creation_date", "DESC");
         return pagingToList(event_resources);
-    }
-
-    private Event booleanToggleValue(Event event) {
-        if ("1".equals(event.getValue())) {
-            event.setValue("0");
-        } else {
-            event.setValue("1");
-        }
-        return event;
     }
 
     private List<Event> pagingToList(Paging<Resource> resources) {
@@ -134,5 +150,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
                 .collect(Collectors.toList());
         logger.info(events.toString());
         return events;
+    }
+
+    private boolean sameDay(Long instant) {
+        Calendar midnight = new GregorianCalendar();
+        midnight.set(Calendar.HOUR_OF_DAY, 0);
+        return midnight.getTimeInMillis() < instant;
     }
 }

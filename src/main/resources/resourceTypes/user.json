@@ -2,27 +2,33 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "einfrauser_id",
+      "name": "user_id",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
     {
       "multivalued": false,
-      "name": "organization",
-      "path": "//*[local-name()='organization']/text()",
+      "name": "email",
+      "path": "//*[local-name()='email']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "email",
-      "path": "//*[local-name()='email']/text()",
+      "name": "name",
+      "path": "//*[local-name()='name']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "surname",
+      "path": "//*[local-name()='surname']/text()",
       "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "einfrauser",
+  "name": "user",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/master/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/develop/src/main/resources/schema1.xsd"
 }

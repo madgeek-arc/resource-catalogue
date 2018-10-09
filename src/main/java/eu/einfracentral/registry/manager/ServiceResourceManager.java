@@ -1,11 +1,11 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.RichService;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.ServiceHistory;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ServiceInterface;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
@@ -17,15 +17,14 @@ import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.text.DecimalFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
+public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService>,
+        ServiceInterface<InfraService, InfraService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
 
@@ -34,40 +33,20 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Autowired
-    VersionService versionService;
+    private VersionService versionService;
 
     @Autowired
-    VocabularyManager vocabularyManager;
+    private VocabularyManager vocabularyManager;
+
+    @Autowired
+    private EventManager eventManager;
+
+    @Autowired
+    private StatisticsManager statisticsService;
 
     @Override
     public String getResourceType() {
         return resourceType.getName();
-    }
-
-    //    @Override
-    public InfraService addService(InfraService infraService, Authentication auth) throws Exception {
-        if (exists(infraService)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
-        }
-        String serialized = null;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
-        Resource created = new Resource();
-        created.setPayload(serialized);
-        created.setResourceType(resourceType);
-        resourceService.addResource(created);
-        return infraService;
-    }
-
-    //    @Override
-    public InfraService updateService(InfraService infraService, Authentication auth) throws Exception {
-        String serialized = null;
-        Resource existing = null;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
-        existing = getResource(infraService.getId(), infraService.getVersion());
-        assert existing != null;
-        existing.setPayload(serialized);
-        resourceService.updateResource(existing);
-        return infraService;
     }
 
     @Override
@@ -78,13 +57,14 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
 
     @Override
     public InfraService getLatest(String id) throws ResourceNotFoundException {
-        List resources = searchService
-                .cqlQuery("infra_service_id=\"" + id + "\"", "infra_service", 1, 0, "creation_date", "DESC")
-                .getResults();
+        List<Resource> resources = searchService
+//                .cqlQuery(String.format("infra_service_id=\"%s\" AND active=true", id), "infra_service",
+                .cqlQuery(String.format("infra_service_id=\"%s\"", id), "infra_service", // TODO: verify that the above works
+                        1, 0, "creation_date", "DESC").getResults();
         if (resources.isEmpty()) {
             throw new ResourceNotFoundException();
         }
-        return deserialize((Resource) resources.get(0));
+        return deserialize( resources.get(0));
     }
 
     @Override
@@ -118,13 +98,10 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public InfraService update(InfraService infraService, Authentication auth) throws ResourceNotFoundException {
-        String serialized;
-        Resource existing;
-        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
-        existing = getResource(infraService.getId(), infraService.getVersion());
+    public InfraService update(InfraService infraService, Authentication auth) {
+        Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
-        existing.setPayload(serialized);
+        existing.setPayload(serialize(infraService));
         resourceService.updateResource(existing);
         return infraService;
     }
@@ -140,12 +117,10 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         try {
             serviceField = Service.class.getDeclaredField(field);
         } catch (NoSuchFieldException e) {
-            logger.warn("Attempt to find field " + field + " in Service failed: ", e);
+            logger.warn("Attempt to find field '" + field + "' in Service failed: ", e);
             serviceField = InfraService.class.getDeclaredField(field);
-        } finally {
-            assert serviceField != null;
-            serviceField.setAccessible(true);
         }
+        serviceField.setAccessible(true);
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -168,8 +143,8 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     @Override
-    public List<InfraService> getByIds(String... ids) {
-        List<InfraService> services;
+    public List<RichService> getByIds(Authentication auth, String... ids) {
+        List<RichService> services;
         services = Arrays.stream(ids).map(id -> {
             try {
                 return getLatest(id);
@@ -177,17 +152,16 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
                 logger.error("Could not find InfraService with id: " + id, e);
                 throw new ServiceException(e);
             }
-        }).collect(toList());
+        }).map(service -> createRichService(service, auth)).collect(toList());
         return services;
     }
 
     @Override
-    public Browsing<Service> getRichServices(FacetFilter ff) {
+    public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
         Browsing<InfraService> infraServices = getAll(ff, null);
-        List<Service> services = infraServices.getResults()
-                .stream()
-//                .map(this::FillTransientFields)
-                .map(Service::new)
+        List<RichService> services = infraServices.getResults()
+                .parallelStream()
+                .map(service -> createRichService(service, auth))
                 .collect(toList());
         return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(),
                 infraServices.getTo(), services, infraServices.getFacets());
@@ -251,16 +225,16 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
     }
 
     public Resource getResourceById(String resourceId) {
-        List resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
+        List<Resource> resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
                 1, 0, "registeredAt", "DESC").getResults();
         if (resource.isEmpty()) {
             return null;
         }
-        return (Resource) resource.get(0);
+        return resource.get(0);
     }
 
     public Resource getResource(String serviceId, String serviceVersion) {
-        Paging resources;
+        Paging<Resource> resources;
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
@@ -270,11 +244,11 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
                     .cqlQuery(String.format("infra_service_id = \"%s\" AND service_version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
         }
         assert resources != null;
-        return resources.getTotal() == 0 ? null : (Resource) resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
     private List<Resource> getResourcesWithServiceId(String infraServiceId) {
-        Paging resources;
+        Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
                         resourceType.getName(), 10000, 0, "registeredAt", "DESC");
@@ -292,41 +266,92 @@ public class ServiceResourceManager extends AbstractGenericService<InfraService>
         return res;
     }
 
-
-    private RichService FillTransientFields(InfraService infraService) {
-        //FIXME: vocabularyManager.get() is very slow
+    @Override
+    public RichService createRichService(InfraService infraService, Authentication auth) {
         RichService richService = new RichService(infraService);
-        logger.info("Category: " + infraService.getCategory());
-        logger.info("Subcategory: " + infraService.getSubcategory());
+
+        //setCategoryName & setSubcategoryName
         if (infraService.getCategory() == null) {
             richService.setCategoryName("null");
         } else {
             richService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
         }
+
         if (infraService.getSubcategory() == null) {
             richService.setSubCategoryName("null");
         } else {
-            try {
-                richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
-            } catch (Exception e) {
-                logger.info(e);
-                richService.setSubCategoryName("Not Found");
-            }
+            richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
         }
 
-        //infraService.setLanguageNames(vocabularyManager.multiWhereID("vocabulary_id", infraService.getLanguages()));
+        //setLanguageNames
+        List<String> languageNames = new ArrayList<>();
+        if (infraService.getLanguages() != null) {
+            for (String lang : infraService.getLanguages()) {
+                Vocabulary language = vocabularyManager.get("vocabulary_id", lang);
+                if (language != null) {
+                    languageNames.add(language.getName());
+                }
+            }
+            richService.setLanguageNames(languageNames);
+        }
 
-        //if (infraService.getRatings() == ) {
-        //    infraService.setRatings("unrated");
-        //} else {
-        //    infraService.setRatings(eventManager.get("event_id", infraService.getRatings()).getValue());
-        //}
-        // infraService.setHasRate(vocabularyManager.getInt("vocabulary_id", infraService.getHasRate()).getHasRate());
-        // infraService.setFavourites(vocabularyManager.getInt("vocabulary_id", infraService.getFavourites()).getFavourites());
-        //  infraService.setFavourite(vocabularyManager.getBoolean("vocabulary_id", infraService.isFavourite()).isFavourite());
-        //infraService.setViews(eventManager.get("event_id", infraService.).getViews());
-        //logger.info("service/all end");
-        // TODO complete function
+        // set favourite
+        List<Event> userEvents;
+        try {
+            userEvents = eventManager.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
+            if (!userEvents.isEmpty()) {
+                richService.setFavourite(userEvents.get(0).getValue().equals("1"));
+            }
+            userEvents = eventManager.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
+            if (!userEvents.isEmpty()) {
+                richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
+            }
+        } catch (Exception e) {
+            logger.error(e);
+        }
+
+        //set Ratings & Favourites
+        richService.setRatings(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
+                .stream()
+                .map(Event::getUser)
+                .distinct()
+                .mapToInt(u -> 1)
+                .sum());
+
+        Optional<List<Event>> favourites = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
+        Map<String, Integer> userFavourites = new HashMap<>();
+        favourites.ifPresent(f -> f
+                .stream()
+                .filter(x -> x.getValue() != null)
+                .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
+        int favs = 0;
+        for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
+            favs += entry.getValue();
+        }
+        richService.setFavourites(favs);
+
+        // set rating
+        Optional<List<Event>> ratings = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
+        Map<String, Float> userRatings = new HashMap<>();
+        ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
+        float sum = 0;
+        for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
+            sum += entry.getValue();
+        }
+        if (!userRatings.isEmpty()) {
+            richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum/userRatings.size()))); //the rating of the specific service as x.xx (3.33)
+        } else {
+            richService.setHasRate(0);
+        }
+
+        // set visits
+        Map<String, Integer> visits = statisticsService.visits(infraService.getId());
+        List<Integer> visitsList = new ArrayList<>(visits.values());
+        int visitSum = 0;
+        for (int i : visitsList) {
+            visitSum += i;
+        }
+        richService.setViews(visitSum);
 
         return richService;
     }

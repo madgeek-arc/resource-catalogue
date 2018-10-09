@@ -3,12 +3,13 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.*;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -76,13 +77,14 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return t;
     }
 
-    @Override
     public T update(T t, Authentication auth) {
-        String serialized = serialize(t);
         Resource existing = whereID(t.getId(), true);
-        existing.setPayload(serialized);
+        T ex = deserialize(existing);
+        ObjectUtils.merge(ex, t);
+        existing.setPayload(serialize(ex));
+        existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        return t;
+        return ex;
     }
 
     @Override
@@ -119,7 +121,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public List<T> delAll() {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(10000);
-        return getAll(facetFilter,null).getResults().stream().map(this::del).collect(Collectors.toList());
+        return getAll(facetFilter, null).getResults().stream().map(this::del).collect(Collectors.toList());
     }
 
     @Override
@@ -220,4 +222,5 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         }
         return ret;
     }
+
 }

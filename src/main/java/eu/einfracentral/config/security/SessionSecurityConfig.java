@@ -1,7 +1,12 @@
 package eu.einfracentral.config.security;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.nimbusds.jose.util.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.oauth2.model.ClientDetailsEntity;
@@ -29,14 +34,16 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 
 import javax.servlet.http.Cookie;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Configuration
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-@Order(1)
+@Order(2)
 public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    static final private Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
+    private static final Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
     @Autowired
     EICAuthoritiesMapper eicAuthoritiesMapper;
     @Value("${webapp.front}")
@@ -165,7 +172,18 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         ret.setAuthRequestUrlBuilder(new PlainAuthRequestUrlBuilder());
         ret.setAuthenticationSuccessHandler((httpServletRequest, response, authentication) -> {
             OIDCAuthenticationToken authOIDC = (OIDCAuthenticationToken) authentication;
-            Cookie sessionCookie = new Cookie("info", Base64.encode(authOIDC.getUserInfo().toJson().toString()).toString());
+            JsonObject info = authOIDC.getUserInfo().toJson();
+            logger.info("Authorities: ", StringUtils.join(authentication.getAuthorities().toArray()));
+            List<String> roles = authentication.getAuthorities()
+                    .stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            Gson gson = new Gson();
+            gson.toJson(roles);
+            JsonElement jsonRoles = new JsonParser().parse(gson.toJson(roles));
+            info.add("roles", jsonRoles);
+
+            Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
             int expireSec = -1;
             sessionCookie.setMaxAge(expireSec);
             sessionCookie.setPath("/");
@@ -174,5 +192,6 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         });
         return ret;
     }
+
 
 }
