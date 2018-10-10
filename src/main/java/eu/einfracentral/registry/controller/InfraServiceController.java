@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -10,7 +9,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,6 @@ import java.util.Optional;
 public class InfraServiceController {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
-
     private InfraServiceService<InfraService, InfraService> infraService;
 
     @Autowired
@@ -44,7 +41,7 @@ public class InfraServiceController {
     @ApiIgnore
     @RequestMapping(path = {"delete/{id}/", "delete/{id}/{version}/"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         InfraService service;
         if (version.isPresent())
             service = infraService.get(id, version.get());
@@ -54,29 +51,23 @@ public class InfraServiceController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(path = {"updateFields/all/"}, method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = {"updateFields/all/"}, method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> updateFields(Authentication authentication) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        List<InfraService> services = infraService.getAll(ff, null).getResults();
-        for (InfraService service : services) {
-            infraService.eInfraCentralUpdate(service);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<List<InfraService>> updateFields(InfraService service, Authentication authentication) {
+        return new ResponseEntity<>(infraService.eInfraCentralUpdate(service), HttpStatus.OK);
     }
 
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<InfraService> get(@PathVariable("id") String id, Authentication jwt) throws ResourceNotFoundException {
+    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         return new ResponseEntity<>(infraService.getLatest(id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @PathVariable("version") String version,
-                                            Authentication jwt) {
+                                            Authentication auth) {
         InfraService ret = infraService.get(id, version);
         return new ResponseEntity<>(ret, ret != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
@@ -98,7 +89,7 @@ public class InfraServiceController {
 
     @ApiOperation(value = "Validates the infraService without actually changing the respository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody InfraService service, Authentication jwt) throws Exception {
+    public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.validate(service));
     }
 
@@ -109,7 +100,7 @@ public class InfraServiceController {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<InfraService>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, Authentication authentication) {
+    public ResponseEntity<Paging<InfraService>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -118,25 +109,10 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.getAll(ff, authentication));
     }
 
-//    @ApiOperation(value = "Get a list of services based on a set of IDs")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "ids", value = "Comma-separated list of infraService ids", dataType = "string", paramType = "path")
-//    })
-//    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<List<InfraService>> getSome(@PathVariable String[] ids, Authentication jwt) {
-//        return ResponseEntity.ok(infraService.getByIds(jwt, ids));
-//    }
-
     @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, Authentication jwt) throws NoSuchFieldException {
+    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field));
     }
 
-//    @Deprecated
-//    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
-//    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<List<InfraService>> versions(@PathVariable String id, @PathVariable Optional<String> version, Authentication jwt) throws ResourceNotFoundException {
-//        return ResponseEntity.ok(infraService.versions(id, version.orElse(null)));
-//    }
 }
