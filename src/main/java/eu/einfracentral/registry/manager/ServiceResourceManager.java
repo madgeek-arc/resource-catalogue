@@ -5,7 +5,6 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
-import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
@@ -64,7 +63,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (resources.isEmpty()) {
             throw new ResourceNotFoundException();
         }
-        return deserialize( resources.get(0));
+        return deserialize(resources.get(0));
     }
 
     @Override
@@ -127,17 +126,18 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Browsing<InfraService> services = getAll(ff, null);
 
         final Field f = serviceField;
+        final String undef = "undefined";
         return services.getResults().stream()/*.map(Service::new)*/.collect(Collectors.groupingBy(service -> {
             try {
-                return f.get(service) != null ? f.get(service).toString() : "undefined";
+                return f.get(service) != null ? f.get(service).toString() : undef;
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                logger.warn("Warning", e);
                 try {
-                    return f.get(service) != null ? f.get(service).toString() : "undefined";
+                    return f.get(service) != null ? f.get(service).toString() : undef;
                 } catch (IllegalAccessException e1) {
-                    e1.printStackTrace();
+                    logger.error("ERROR", e1);
                 }
-                return "undefined";
+                return undef;
             }
         }, Collectors.mapping((InfraService service) -> service, toList())));
     }
@@ -180,16 +180,16 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Browsing<ServiceHistory> getHistory(String service_id) {
+    public Browsing<ServiceHistory> getHistory(String serviceId) {
         List<ServiceHistory> history = new ArrayList<>();
 
         // get all resources with the specified Service id
-        List<Resource> resources = getResourcesWithServiceId(service_id);
+        List<Resource> resources = getResourcesWithServiceId(serviceId);
 
         // for each resource (InfraService), get its versions
         for (Resource resource : resources) {
             List<Version> versions = versionService.getVersionsByResource(resource.getId());
-            if (versions.size() == 0) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
+            if (versions.isEmpty()) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
                 InfraService service = deserialize(resource);
                 history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
             } else {
@@ -262,8 +262,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceType.getName());
         ff.setQuantity(1000);
-        Map<String, List<Resource>> res = searchService.searchByCategory(ff, field);
-        return res;
+        return searchService.searchByCategory(ff, field);
     }
 
     @Override
@@ -339,7 +338,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             sum += entry.getValue();
         }
         if (!userRatings.isEmpty()) {
-            richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum/userRatings.size()))); //the rating of the specific service as x.xx (3.33)
+            richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum / userRatings.size()))); //the rating of the specific service as x.xx (3.33)
         } else {
             richService.setHasRate(0);
         }

@@ -52,6 +52,7 @@ public class MailService {
         sessionProps.setProperty("mail.smtp.ssl.enable", ssl);
         sessionProps.setProperty("mail.smtp.user", user);
         session = Session.getInstance(sessionProps, new Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(user, password);
             }

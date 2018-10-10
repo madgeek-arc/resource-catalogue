@@ -13,6 +13,8 @@ import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import freemarker.template.Template;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.Authentication;
 
+import javax.mail.MessagingException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +48,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         this.authoritiesMapper = authoritiesMapper;
     }
 
+
     @Override
     public String getResourceType() {
         return "provider";
@@ -52,10 +58,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider add(Provider provider, Authentication auth) {
         List<User> users;
         Provider ret;
-        provider.setId(provider.getId().replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "").replaceAll(" ", "_"));
+        provider.setId(StringUtils
+                .stripAccents(provider.getId())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replaceAll(" ", "_"));
         try {
             String email = AuthenticationDetails.getEmail(auth);
-             String id = AuthenticationDetails.getSub(auth);
+            String id = AuthenticationDetails.getSub(auth);
 
             users = provider.getUsers();
             if (users == null) {
@@ -117,6 +126,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
+        User user = new User(auth);
+        Template tmpl = null;
+        Writer out = new StringWriter();
+
+
         switch (status) {
             case REJECTED:
                 logger.info("Deleting provider: " + provider.getName());
@@ -134,6 +148,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 provider.setActive(true);
                 break;
             case PENDING_1:
+                try {
+                    mailService.sendMail(user.getEmail(), String.format("[eInfraCentral] Your application for " +
+                                    "registering %s as a new service provider has been received", provider.getName()),
+                            out.toString());
+                } catch (MessagingException e) {
+                    logger.error("Could not send mail", e);
+                }
                 provider.setActive(false);
                 break;
             case PENDING_2:
@@ -144,6 +165,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 break;
             default:
         }
+
         if (active != null) {
             provider.setActive(active);
             // FIXME: temporary solution to keep service active field value when provider is deactivated, and restore it when activated

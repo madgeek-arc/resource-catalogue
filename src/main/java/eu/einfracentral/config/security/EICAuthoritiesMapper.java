@@ -3,7 +3,6 @@ package eu.einfracentral.config.security;
 import com.nimbusds.jwt.JWT;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.User;
-import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.LogManager;
@@ -28,7 +27,6 @@ import java.util.stream.Stream;
 public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
-//    private static final String ROLE_CLAIMS = "edu_person_entitlements";
     private Map<String, SimpleGrantedAuthority> userRolesMap;
 
     private ProviderService<Provider, Authentication> providerService;
@@ -47,7 +45,6 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         userRolesMap = providers.get()
                 .stream()
                 .distinct()
-//                .filter(Provider::getActive) // FIXME: figure out what to do with pending providers
                 .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
                         .stream()
                         .filter(Objects::nonNull)

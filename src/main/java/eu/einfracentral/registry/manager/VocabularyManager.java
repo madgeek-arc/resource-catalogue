@@ -52,7 +52,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
                 region.setMembers(Stream.of(countries).map(e -> e.alpha2Code).toArray(String[]::new));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("ERROR", e);
         }
     }
 

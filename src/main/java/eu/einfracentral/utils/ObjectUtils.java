@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 
 public class ObjectUtils {
 
+    private ObjectUtils() {}
+
     private static final Logger logger = LogManager.getLogger(ObjectUtils.class);
 
     public static Object merge(Object existing, Object update){

@@ -26,7 +26,7 @@ import java.io.IOException;
 
 public class ApiKeyAuthorizationFilter extends GenericFilterBean {
 
-    private static final Logger logger = LogManager.getLogger(ApiKeyAuthorizationFilter.class);
+    private static final Logger log = LogManager.getLogger(ApiKeyAuthorizationFilter.class);
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
@@ -45,7 +45,7 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res,
                          FilterChain chain) throws IOException, ServletException {
-        logger.debug("Attempt Authentication");
+        log.debug("Attempt Authentication");
         HttpServletRequest request = (HttpServletRequest) req;
         String jwt = resolveToken(request);
         PendingOIDCAuthenticationToken token;
@@ -60,7 +60,7 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(req, res);
         } catch (Exception e) {
-            logger.error("JWT Error", e);
+            log.error("JWT Error", e);
             res.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
             ObjectMapper mapper = new ObjectMapper();
             res.getWriter().append(mapper.writeValueAsString(new ServerError(((HttpServletRequest) req).getRequestURI(), e)));
@@ -72,8 +72,7 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            String jwt = bearerToken.substring(7, bearerToken.length());
-            return jwt;
+            return bearerToken.substring(7, bearerToken.length());
         }
         return null;
     }

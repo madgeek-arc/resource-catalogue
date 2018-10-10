@@ -1,10 +1,12 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.utils.AuthenticationDetails;
+import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
+import eu.einfracentral.utils.AuthenticationDetails;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
@@ -63,9 +65,9 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws Exception {
-        if(!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))){
-                throw new Exception("Resource not found");
+    public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws ResourceNotFoundException {
+        if (!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
         }
         String favouriteValue = value ? "1" : "0";
         List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, authentication);
@@ -86,12 +88,12 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    public Event setRating(String serviceId, String value, Authentication authentication) throws Exception {
-        if(!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))){
-            throw new Exception("Resource not found");
+    public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
+        if (!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
         }
         if (Long.parseLong(value) <= 0 || Long.parseLong(value) > 5) {
-            throw new Exception("Rating value must be between [1,5]");
+            throw new NumberParseException(NumberParseException.ErrorType.valueOf(value), "Rating value must be between [1,5]");
         }
         List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, authentication);
         Event event;
@@ -99,8 +101,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event = events.get(0);
             event.setValue(value);
             event = update(event, null);
-        }
-        else {
+        } else {
             event = new Event();
             event.setService(serviceId);
             event.setUser(AuthenticationDetails.getSub(authentication));
@@ -113,34 +114,34 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     public List<Event> getEvents(String eventType) {
-        Paging<Resource> event_resources = searchService
-                .cqlQuery(String.format("type=\"%s\"", eventType), "event",
+        Paging<Resource> eventResources = searchService
+                .cqlQuery(String.format("type=\"%s\"", eventType), getResourceType(),
                         10000, 0, "creation_date", "DESC");
-        return pagingToList(event_resources);
+        return pagingToList(eventResources);
     }
 
     @Override
-    public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws Exception {
-        Paging<Resource> event_resources = searchService.cqlQuery(
+    public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) {
+        Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
-                        eventType, serviceId, AuthenticationDetails.getSub(authentication)), "event",
+                        eventType, serviceId, AuthenticationDetails.getSub(authentication)), getResourceType(),
                 10000, 0, "creation_date", "DESC");
-        return pagingToList(event_resources);
+        return pagingToList(eventResources);
     }
 
     @Override
     public List<Event> getServiceEvents(String eventType, String serviceId) {
-        Paging<Resource> event_resources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
-                        eventType, serviceId), "event", 10000, 0, "creation_date", "DESC");
-        return pagingToList(event_resources);
+        Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
+                eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
+        return pagingToList(eventResources);
     }
 
     @Override
-    public List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception {
-        Paging<Resource> event_resources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
-                eventType, AuthenticationDetails.getSub(authentication)), "event",
+    public List<Event> getUserEvents(String eventType, Authentication authentication) {
+        Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
+                eventType, AuthenticationDetails.getSub(authentication)), getResourceType(),
                 10000, 0, "creation_date", "DESC");
-        return pagingToList(event_resources);
+        return pagingToList(eventResources);
     }
 
     private List<Event> pagingToList(Paging<Resource> resources) {

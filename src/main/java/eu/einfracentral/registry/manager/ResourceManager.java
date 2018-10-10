@@ -77,6 +77,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return t;
     }
 
+    @Override
     public T update(T t, Authentication auth) {
         Resource existing = whereID(t.getId(), true);
         T ex = deserialize(existing);
