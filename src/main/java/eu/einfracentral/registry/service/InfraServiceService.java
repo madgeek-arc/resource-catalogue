@@ -7,6 +7,8 @@ import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+
 public interface InfraServiceService<T, R extends Service> extends ServiceInterface<T, R, Authentication> {
 
     /**
@@ -34,12 +36,11 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
     Paging<R> getInactiveServices();
 
     /**
-     * Makes bulk updates on services.
+     * Makes bulk updates on all services.
      *
-     * @param infraService
      * @return
      */
-    R eInfraCentralUpdate(T infraService);
+    List<R> eInfraCentralUpdate(T service);
 
     /**
      * Validates the given service.
@@ -47,5 +48,5 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
      * @param service
      * @return
      */
-    boolean validate(T service) throws Exception;
+    boolean validate(T service);
 }
