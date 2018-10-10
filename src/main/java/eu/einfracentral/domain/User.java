@@ -1,5 +1,8 @@
 package eu.einfracentral.domain;
 
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import org.springframework.security.core.Authentication;
+
 import javax.xml.bind.annotation.*;
 
 @XmlType
@@ -26,6 +29,17 @@ public class User implements Identifiable {
         this.email = email;
         this.name = name;
         this.surname = surname;
+    }
+
+    public User(Authentication auth) {
+        if (auth instanceof OIDCAuthenticationToken) {
+            this.id = ((OIDCAuthenticationToken) auth).getUserInfo().getSub();
+            this.email = ((OIDCAuthenticationToken) auth).getUserInfo().getEmail();
+            this.name = ((OIDCAuthenticationToken) auth).getUserInfo().getGivenName();
+            this.surname = ((OIDCAuthenticationToken) auth).getUserInfo().getFamilyName();
+        } else {
+            throw new RuntimeException("Could not create user. Authentication is not an instance of OIDCAuthentication");
+        }
     }
 
     @Override
