@@ -3,14 +3,17 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceMetadata;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -18,8 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
@@ -49,7 +57,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public InfraService addService(InfraService infraService, Authentication authentication) throws Exception {
+    public InfraService addService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         try {
             validate(infraService);
@@ -73,7 +81,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public InfraService updateService(InfraService infraService, Authentication authentication) throws Exception {
+    public InfraService updateService(InfraService infraService, Authentication authentication) throws ResourceNotFoundException {
         InfraService ret;
         try {
             validate(infraService);
@@ -96,7 +104,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //                infraService.setStatus(); // TODO: enable this when services support the Status field
                 ret = add(infraService, authentication);
             }
-        } catch (Exception e) {
+        } catch (ResourceNotFoundException e) {
             logger.error(e);
             throw e;
         }
@@ -113,20 +121,28 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public InfraService eInfraCentralUpdate(InfraService infraService) {
-        InfraService ret = null;
-        try {
-            ret = migrate(infraService);
-//            validate(ret);
-            InfraService existingService = getLatest(infraService.getId());
+    public List<InfraService> eInfraCentralUpdate(InfraService service) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> services = getAll(ff, null).getResults();
+        List<InfraService> ret = new ArrayList<>();
+        for (InfraService infraService : services) {
+            try {
+//                migrate(infraService); // use this to make custom changes
+                ObjectUtils.merge(infraService, service); // use this to make bulk changes FIXME: this method does not work as expected
+                validate(infraService);
+                InfraService existingService = getLatest(infraService.getId());
 
-            // update existing service serviceMetadata
-            ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), "eInfraCentral");
-            ret.setServiceMetadata(serviceMetadata);
-            ret = super.update(ret, null);
+                // update existing service serviceMetadata
+                ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), "eInfraCentral");
+                infraService.setServiceMetadata(serviceMetadata);
 
-        } catch (Exception e) {
-            logger.error(e);
+                super.update(infraService, null);
+                ret.add(infraService);
+
+            } catch (Exception e) {
+                logger.error(e);
+            }
         }
         return ret;
     }
@@ -142,12 +158,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public void delete(InfraService o) {
-
-    }
-
-    @Override
-    public boolean validate(InfraService service) throws Exception {
+    public boolean validate(InfraService service) {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
         validateServices(service);
@@ -166,8 +177,42 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
-    private InfraService migrate(InfraService service) {
+    private InfraService migrate(InfraService service) throws DatatypeConfigurationException, MalformedURLException {
+
         service.setActive(true);
+        service.setOrder(service.getRequests() != null ? service.getRequests() : service.getUrl());
+
+
+        if (service.getTags() == null) {
+            List<String> tags = new ArrayList<>();
+            service.setTags(tags);
+        }
+        if (service.getTargetUsers() == null) {
+            service.setTargetUsers("-");
+        }
+        if (service.getPlaces() == null) {
+            List<String> places = new ArrayList<>();
+            places.add("Place-WW");
+            service.setPlaces(places);
+        }
+        if (service.getSymbol() == null) {
+            service.setSymbol(new URL("http://fvtelibrary.com/img/user/NoLogo.png"));
+        }
+        if (service.getLanguages() == null) {
+            List<String> languages = new ArrayList<>();
+            languages.add("Language-en");
+            service.setLanguages(languages);
+        }
+        if (service.getLastUpdate() == null) {
+            GregorianCalendar date = new GregorianCalendar(2000, 1, 1);
+            service.setLastUpdate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
+        }
+        if (service.getVersion() == null) {
+            service.setVersion("0");
+        } else {
+            service.setVersion(service.getVersion());
+        }
+
         return service;
     }
 
@@ -179,7 +224,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             ret = serviceMetadata;
         }
         ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(modifiedBy); //TODO: get actual username from backend
+        ret.setModifiedBy(modifiedBy);
         return ret;
     }
 
@@ -194,66 +239,69 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     private String createServiceId(Service service) {
         String provider = service.getProviders().get(0);
-        return String.format("%s.%s", provider, service.getName().replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "").replaceAll(" ", "_").toLowerCase());
+        return String.format("%s.%s", provider, StringUtils
+                .stripAccents(service.getName())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replaceAll(" ", "_")
+                .toLowerCase());
     }
 
-    private void validateVocabularies(InfraService service) throws Exception {
+    private void validateVocabularies(InfraService service) {
         if (service.getCategory() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Category"),
                 new SearchService.KeyValue("vocabulary_id", service.getCategory()))) {
-            throw new Exception(String.format("Category '%s' does not exist.", service.getCategory()));
+            throw new ValidationException(String.format("Category '%s' does not exist.", service.getCategory()));
         }
         if (service.getSubcategory() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "Subcategory"),
                 new SearchService.KeyValue("vocabulary_id", service.getSubcategory()))) {
-            throw new Exception(String.format("Subcategory '%s' does not exist.", service.getSubcategory()));
+            throw new ValidationException(String.format("Subcategory '%s' does not exist.", service.getSubcategory()));
         }
 
         if (service.getPlaces() != null && CollectionUtils.isNotEmpty(service.getPlaces())) {
             if (!service.getPlaces().parallelStream().allMatch(place -> vocabularyManager.exists(
                     new SearchService.KeyValue("type", "Place"),
                     new SearchService.KeyValue("vocabulary_id", place)))) {
-                throw new Exception("One or more places do not exist.");
+                throw new ValidationException("One or more places do not exist.");
             }
-        } else throw new Exception("field 'places' is obligatory");
+        } else throw new ValidationException("field 'places' is obligatory");
         if (service.getLanguages() != null && CollectionUtils.isNotEmpty(service.getLanguages())) {
             if (!service.getLanguages().parallelStream().allMatch(lang -> vocabularyManager.exists(
                     new SearchService.KeyValue("type", "Language"),
                     new SearchService.KeyValue("vocabulary_id", lang)))) {
-                throw new Exception("One or more languages do not exist.");
+                throw new ValidationException("One or more languages do not exist.");
             }
-        } else throw new Exception("field 'languages' is obligatory");
+        } else throw new ValidationException("field 'languages' is obligatory");
         if (service.getLifeCycleStatus() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "LifeCycleStatus"),
                 new SearchService.KeyValue("vocabulary_id", service.getLifeCycleStatus()))) {
-            throw new Exception(String.format("lifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
+            throw new ValidationException(String.format("lifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
         }
         if (service.getTrl() == null || !vocabularyManager.exists(
                 new SearchService.KeyValue("type", "TRL"),
                 new SearchService.KeyValue("vocabulary_id", service.getTrl()))) {
-            throw new Exception(String.format("trl '%s' does not exist.", service.getTrl()));
+            throw new ValidationException(String.format("trl '%s' does not exist.", service.getTrl()));
         }
     }
 
     //validates the correctness of Providers.
-    private void validateProviders(InfraService service) throws Exception {
+    private void validateProviders(InfraService service) {
         List<String> providers = service.getProviders();
-        List<String> existingProviders = new ArrayList<>();
-        if (providers == null || CollectionUtils.isEmpty(service.getProviders())) {
-            throw new Exception("field 'providers' is obligatory");
+        if ((providers == null) || CollectionUtils.isEmpty(service.getProviders()) ||
+                (service.getProviders().stream().filter(Objects::nonNull).mapToInt(p -> 1).sum() == 0)) {
+            throw new ValidationException("field 'providers' is obligatory");
         }
-        if (service.getProviders().stream().anyMatch(x -> providerManager.getResource(x) == null)) {
-            throw new Exception("Provider does not exist");
+        if (service.getProviders().stream().filter(Objects::nonNull).anyMatch(x -> providerManager.getResource(x) == null)) {
+            throw new ValidationException("Provider does not exist");
         }
     }
 
     //validates the correctness of Related and Required Services.
-    public void validateServices(InfraService service) throws Exception {
+    public void validateServices(InfraService service) {
         List<String> relatedServices = service.getRelatedServices();
         List<String> existingRelatedServices = new ArrayList<>();
         if (relatedServices != null) {
             for (String serviceRel : relatedServices) {
-                //logger.info("Inside loop relatedServices: " + serviceRel);
                 if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel))) {
                     existingRelatedServices.add(serviceRel);
                 }
@@ -261,13 +309,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             service.setRelatedServices(existingRelatedServices);
         }
 
-        //logger.info(infraService.toString());
-
         List<String> requiredServices = service.getRequiredServices();
         List<String> existingRequiredServices = new ArrayList<>();
         if (requiredServices != null) {
             for (String serviceReq : requiredServices) {
-                //logger.info("Inside for requiredServices: " + serviceReq);
                 if (this.exists(
 
                         new SearchService.KeyValue("infra_service_id", serviceReq))) {
@@ -276,6 +321,5 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             }
             service.setRequiredServices(existingRequiredServices);
         }
-        //logger.info(infraService.toString());
     }
 }
