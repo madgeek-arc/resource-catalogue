@@ -55,17 +55,17 @@ public class Provider implements Identifiable {
     public Provider() {
     }
 
-    public Provider(String id, String name, String contactInformation, URL website, URL catalogueOfResources, URL publicDescOfResources, String additionalInfo, List<User> users, Boolean active, String status) {
-        this.id = id;
-        this.name = name;
-        this.contactInformation = contactInformation;
-        this.website = website;
-        this.catalogueOfResources = catalogueOfResources;
-        this.publicDescOfResources = publicDescOfResources;
-        this.additionalInfo = additionalInfo;
-        this.users = users;
-        this.active = active;
-        this.status = status;
+    public Provider(Provider provider) {
+        this.id = provider.getId();
+        this.name = provider.getName();
+        this.contactInformation = provider.getContactInformation();
+        this.website = provider.getWebsite();
+        this.catalogueOfResources = provider.getCatalogueOfResources();
+        this.publicDescOfResources = provider.getPublicDescOfResources();
+        this.additionalInfo = provider.getAdditionalInfo();
+        this.users = provider.getUsers();
+        this.active = provider.getActive();
+        this.status = provider.getStatus();
     }
 
     public enum States {

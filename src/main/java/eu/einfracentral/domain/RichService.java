@@ -23,18 +23,10 @@ public class RichService extends Service {
 
     }
 
-    public RichService(Service service, ServiceMetadata serviceMetadata, String categoryName, String subCategoryName, List<String> languageNames, int views, int ratings, float hasRate, int favourites, boolean isFavourite) {
+    public RichService(Service service, ServiceMetadata serviceMetadata) {
 //        this.service = service;
         super(service);
         this.serviceMetadata = serviceMetadata;
-        this.categoryName = categoryName;
-        this.subCategoryName = subCategoryName;
-        this.languageNames = languageNames;
-        this.views = views;
-        this.ratings = ratings;
-        this.hasRate = hasRate;
-        this.favourites = favourites;
-        this.isFavourite = isFavourite;
     }
 
     public RichService(InfraService service) {
