@@ -9,6 +9,10 @@ public class ValidationException extends RuntimeException {
         this("ValidationException", status);
     }
 
+    public ValidationException(String msg) {
+        this(msg, HttpStatus.CONFLICT);
+    }
+
     public ValidationException(String msg, HttpStatus status) {
         super(msg);
         this.setStatus(status);
