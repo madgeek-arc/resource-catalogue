@@ -22,7 +22,7 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
      * @return
      * @throws Exception
      */
-    T addService(T service, U auth) throws Exception;
+    T addService(T service, U auth);
 
     /**
      * @param service, auth
@@ -30,7 +30,7 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
      * @throws ResourceNotFoundException
      * @throws Exception
      */
-    T updateService(T service, U auth) throws ResourceNotFoundException, Exception;
+    T updateService(T service, U auth) throws ResourceNotFoundException;
 
     /**
      * Returns the Service.
