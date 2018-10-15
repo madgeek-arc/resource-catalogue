@@ -8,27 +8,28 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.MailService;
-import eu.einfracentral.utils.AuthenticationDetails;
 import eu.einfracentral.utils.ObjectUtils;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.Authentication;
 
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service("providerManager")
@@ -38,14 +39,19 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private MailService mailService;
     private EICAuthoritiesMapper authoritiesMapper;
+    private Configuration cfg;
+
+    @Value("${webapp.front:beta.einfracentral.eu}")
+    private String endpoint;
 
     @Autowired
     public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService,
-                           @Lazy EICAuthoritiesMapper authoritiesMapper) {
+                           @Lazy EICAuthoritiesMapper authoritiesMapper, Configuration cfg) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.mailService = mailService;
         this.authoritiesMapper = authoritiesMapper;
+        this.cfg = cfg;
     }
 
 
@@ -57,66 +63,42 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public Provider add(Provider provider, Authentication auth) {
         List<User> users;
+        User authUser = new User(auth);
         Provider ret;
         provider.setId(StringUtils
                 .stripAccents(provider.getId())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replaceAll(" ", "_"));
-        try {
-            String email = AuthenticationDetails.getEmail(auth);
-            String id = AuthenticationDetails.getSub(auth);
 
-            users = provider.getUsers();
-            if (users == null) {
-                users = new ArrayList<>();
-            }
-            if (users.stream().noneMatch(user -> user.getEmail().equals(email))) {
-                User user = new User();
-                user.setEmail(email);
-                user.setId(id);
-                user.setId(AuthenticationDetails.getSub(auth));
-                user.setName(AuthenticationDetails.getGivenName(auth));
-                user.setSurname(AuthenticationDetails.getFamilyName(auth));
-                users.add(user);
-                provider.setUsers(users);
-            }
-            provider.setActive(false);
-            provider.setStatus(Provider.States.PENDING_1.getKey());
-
-            ret = super.add(provider, null);
-            authoritiesMapper.mapProviders(provider.getUsers());
-//            mailService.sendMail(email, "", "");
-        } catch (Exception e) {
-            logger.error(e);
-            throw new AuthorizationServiceException("Could not create Provider", e);
+        users = provider.getUsers();
+        if (users == null) {
+            users = new ArrayList<>();
         }
+        if (users.stream().noneMatch(u -> u.getEmail().equals(authUser.getEmail()))) {
+            users.add(authUser);
+            provider.setUsers(users);
+        }
+        provider.setStatus(Provider.States.INIT.getKey());
+        sendProviderMails(provider, new User(auth), Provider.States.INIT);
+
+        provider.setActive(false);
+        provider.setStatus(Provider.States.PENDING_1.getKey());
+
+        ret = super.add(provider, null);
+        authoritiesMapper.mapProviders(provider.getUsers());
+
+        // TODO: fix function
+//        createProviderMail(provider, new User(auth), Provider.States.INIT);
         return ret;
     }
 
     @Override
     public Provider update(Provider provider, Authentication auth) {
-//        update(provider, auth);
         Resource existing = whereID(provider.getId(), true);
         Provider ex = deserialize(existing);
         provider.setActive(ex.getActive());
         provider.setStatus(ex.getStatus());
-
-        // TODO: check if user info exists and fill missing info
-        // TODO: do not add user if already exists
-        List<User> users = ex.getUsers() != null ? ex.getUsers() : new ArrayList<>();
-        if (provider.getUsers() != null) {
-            for (User user : provider.getUsers()) {
-                String email = user.getEmail();
-                if (users.stream().noneMatch(u -> u.getEmail().equals(email))) {
-                    users.add(user);
-                }
-            }
-        }
-        provider.setUsers(users);
-
-
-        ObjectUtils.merge(ex, provider);
-        existing.setPayload(serialize(ex));
+        existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         authoritiesMapper.mapProviders(provider.getUsers());
@@ -148,13 +130,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 provider.setActive(true);
                 break;
             case PENDING_1:
-                try {
-                    mailService.sendMail(user.getEmail(), String.format("[eInfraCentral] Your application for " +
-                                    "registering %s as a new service provider has been received", provider.getName()),
-                            out.toString());
-                } catch (MessagingException e) {
-                    logger.error("Could not send mail", e);
-                }
+
                 provider.setActive(false);
                 break;
             case PENDING_2:
@@ -165,6 +141,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 break;
             default:
         }
+        sendProviderMails(provider, user, status);
 
         if (active != null) {
             provider.setActive(active);
@@ -253,5 +230,79 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.setFrom(0);
         ff.setQuantity(10000);
         return infraServiceService.getAll(ff, null).getResults();
+    }
+
+    // TODO: complete this method
+    private void sendProviderMails(Provider provider, User user, Provider.States state) {
+        Map<String, Object> root = new HashMap<>();
+        StringWriter out = new StringWriter();
+        String providerMail = null;
+        String regTeamMail = null;
+        root.put("user", user);
+        root.put("provider", provider);
+        root.put("endpoint", endpoint);
+
+        String providerSubject = null;
+        String regTeamSubject = null;
+
+        List<Service> serviceList = getServices(provider.getId());
+        Service serviceTemplate = null;
+        if (!serviceList.isEmpty()) {
+            root.put("service", serviceList.get(0));
+            serviceTemplate = serviceList.get(0);
+        }
+//        switch (Provider.States.valueOf(provider.getStatus())) {
+        switch (state) {
+            case INIT:
+                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been received", provider.getName());
+                regTeamSubject = String.format("[eInfraCentral] A new application for registering [%s] as a new service provider has been submitted", provider.getName());
+                break;
+            case PENDING_1:
+                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been accepted", provider.getName());
+                regTeamSubject = String.format("[eInfraCentral] The application of [%s] for registering as a new service provider has been accepted", provider.getName());
+                break;
+            case PENDING_2:
+                assert serviceTemplate != null;
+                providerSubject = String.format("[eInfraCentral] Your service [%s] has been received and its approval is pending ", serviceTemplate.getName());
+                regTeamSubject = String.format("[eInfraCentral] Approve or reject the information about the new service: [%s] – [%s] ", provider.getName(), serviceTemplate.getName());
+                break;
+            case APPROVED:
+                assert serviceTemplate != null;
+                providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been accepted", provider.getName(), serviceTemplate.getName());
+                regTeamSubject = String.format("[eInfraCentral] The service [%s] has been accepted", serviceTemplate.getId());
+                break;
+            case REJECTED_ST:
+                assert serviceTemplate != null;
+                providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been rejected", provider.getName(), serviceTemplate.getName());
+                regTeamSubject = String.format("[eInfraCentral] The service [%s] has been rejected", serviceTemplate.getId());
+                break;
+            case REJECTED:
+                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been rejected", provider.getName());
+                regTeamSubject = String.format("[eInfraCentral] The application of [%s] for registering as a new service provider has been rejected", provider.getName());
+                break;
+        }
+
+        try {
+            Template temp = cfg.getTemplate("providerMailTemplate.ftl");
+            temp.process(root, out);
+            providerMail = out.getBuffer().toString();
+            out.flush();
+//            out.close();
+            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
+            logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
+            temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
+            temp.process(root, out);
+            regTeamMail = out.getBuffer().toString();
+            out.flush();
+            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+            logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
+            out.close();
+        } catch (IOException e) {
+            logger.error("Error finding mail template", e);
+        } catch (TemplateException e) {
+            logger.error("ERROR", e);
+        } catch (MessagingException e) {
+            logger.error("Could not send mail", e);
+        }
     }
 }

@@ -1,8 +1,8 @@
 package eu.einfracentral.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.*;
@@ -44,11 +44,11 @@ public class MailService {
     @PostConstruct
     private void postConstruct() {
         Properties sessionProps = new Properties();
+        sessionProps.setProperty("mail.transport.protocol", protocol);
         sessionProps.setProperty("mail.smtp.auth", auth);
         sessionProps.setProperty("mail.smtp.host", host);
         sessionProps.setProperty("mail.smtp.password", password);
         sessionProps.setProperty("mail.smtp.port", port);
-        sessionProps.setProperty("mail.smtp.protocol", protocol);
         sessionProps.setProperty("mail.smtp.ssl.enable", ssl);
         sessionProps.setProperty("mail.smtp.user", user);
         session = Session.getInstance(sessionProps, new Authenticator() {
@@ -66,8 +66,12 @@ public class MailService {
             InternetAddress sender = new InternetAddress(user);
             Message message = new MimeMessage(session);
             message.setFrom(sender);
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(String.join(",", to)));
-            message.setRecipient(Message.RecipientType.CC, new InternetAddress(String.join(",", cc)));
+            if (!to.isEmpty()) {
+                message.setRecipient(Message.RecipientType.TO, new InternetAddress(String.join(",", to)));
+            }
+            if (!cc.isEmpty()) {
+                message.setRecipient(Message.RecipientType.CC, new InternetAddress(String.join(",", cc)));
+            }
             message.setRecipient(Message.RecipientType.BCC, sender);
             message.setSubject(subject);
             message.setText(text);
@@ -84,9 +88,13 @@ public class MailService {
 
     public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
         List<String> addrTo = new ArrayList<>();
-        addrTo.add(to);
         List<String> addrCc = new ArrayList<>();
-        addrTo.add(cc);
+        if (to != null) {
+            addrTo.addAll(Arrays.stream(to.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+        }
+        if (cc != null) {
+            addrTo.addAll(Arrays.stream(cc.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+        }
         sendMail(addrTo, addrCc, subject, text);
     }
 
