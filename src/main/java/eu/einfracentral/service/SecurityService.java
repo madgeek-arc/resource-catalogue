@@ -2,7 +2,7 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.utils.AuthenticationDetails;
+import eu.einfracentral.utils.AuthenticationInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class SecurityService {
 
     public boolean providerIsActive(Authentication auth, Provider provider) throws Exception {
         Provider registeredProvider = providerManager.get(provider.getId());
-        String email = AuthenticationDetails.getEmail(auth);
+        String email = AuthenticationInfo.getEmail(auth);
         if (registeredProvider == null) {
             throw new Exception("Provider with id '" + provider.getId() + "' does not exist.");
         }
@@ -32,7 +32,7 @@ public class SecurityService {
     }
 
     public boolean userIsServiceProvider(Authentication auth, eu.einfracentral.domain.Service service) throws Exception {
-        String email = AuthenticationDetails.getEmail(auth);
+        String email = AuthenticationInfo.getEmail(auth);
         Optional<List<String>> providers = Optional.of(service.getProviders());
         return providers
                 .get()

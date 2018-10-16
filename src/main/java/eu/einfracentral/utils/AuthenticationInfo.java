@@ -4,9 +4,9 @@ import eu.einfracentral.exception.OIDCAuthenticationException;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-public class AuthenticationDetails {
+public class AuthenticationInfo {
 
-    private AuthenticationDetails() {}
+    private AuthenticationInfo() {}
 
     public static String getSub(Authentication auth) {
         return getOIDC(auth).getSub();

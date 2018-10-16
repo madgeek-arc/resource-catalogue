@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.utils.AuthenticationDetails;
+import eu.einfracentral.utils.AuthenticationInfo;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -79,7 +79,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         } else {
             event = new Event();
             event.setService(serviceId);
-            event.setUser(AuthenticationDetails.getSub(authentication));
+            event.setUser(AuthenticationInfo.getSub(authentication));
             event.setType(Event.UserActionType.FAVOURITE.getKey());
             event.setValue(favouriteValue);
             event = add(event, null);
@@ -104,7 +104,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         } else {
             event = new Event();
             event.setService(serviceId);
-            event.setUser(AuthenticationDetails.getSub(authentication));
+            event.setUser(AuthenticationInfo.getSub(authentication));
             event.setType(Event.UserActionType.RATING.getKey());
             event.setValue(value);
             event = add(event, null);
@@ -124,7 +124,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) {
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
-                        eventType, serviceId, AuthenticationDetails.getSub(authentication)), getResourceType(),
+                        eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceType(),
                 10000, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
@@ -139,7 +139,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getUserEvents(String eventType, Authentication authentication) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
-                eventType, AuthenticationDetails.getSub(authentication)), getResourceType(),
+                eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
                 10000, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
