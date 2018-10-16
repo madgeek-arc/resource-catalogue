@@ -14,9 +14,9 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
-      "name": "contactInformation",
-      "path": "//*[local-name()='contactInformation']/text()",
+      "multivalued": false,
+      "name": "website",
+      "path": "//*[local-name()='website']/text()",
       "type": "java.lang.String"
     },
     {
@@ -26,9 +26,16 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
-      "name": "services",
-      "path": "//*[local-name()='services']/text()",
+      "multivalued": false,
+      "name": "active",
+      "path": "//*[local-name()='active']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "status",
+      "path": "//*[local-name()='status']/text()",
       "type": "java.lang.String"
     }
   ],
@@ -36,5 +43,5 @@
   "name": "provider",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/master/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/develop/src/main/resources/schema1.xsd"
 }

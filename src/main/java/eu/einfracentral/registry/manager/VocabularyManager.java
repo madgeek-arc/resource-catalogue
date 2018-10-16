@@ -3,23 +3,23 @@ package eu.einfracentral.registry.manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.VocabularyService;
-import java.io.IOException;
-import java.net.*;
-import java.util.*;
-import java.util.stream.Stream;
-import javax.annotation.PostConstruct;
-
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.ServiceException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @Component
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private Map<String, Region> regions = new HashMap<>();
 
-    private static Logger logger = Logger.getLogger(VocabularyManager.class);
+    private static Logger logger = LogManager.getLogger(VocabularyManager.class);
 
     public VocabularyManager() {
         super(Vocabulary.class);
@@ -41,18 +41,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         return region.getMembers();
     }
 
-    @Override
-    public boolean exists(SearchService.KeyValue... ids) {
-        Resource resource;
-        try {
-            resource = this.searchService.searchId(getResourceType(), ids);
-            return resource != null;
-        } catch (UnknownHostException e) {
-            logger.error(e);
-            throw new ServiceException(e);
-        }
-    }
-
     private void fetchRegion(Region region) {
         try {
             HttpURLConnection c = (HttpURLConnection) new URL(region.getSource()).openConnection();
@@ -64,7 +52,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
                 region.setMembers(Stream.of(countries).map(e -> e.alpha2Code).toArray(String[]::new));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("ERROR", e);
         }
     }
 

@@ -1,32 +1,38 @@
 package eu.einfracentral.service;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.*;
-
-import java.io.*;
-import java.net.URL;
-import java.util.*;
-import java.util.stream.*;
-import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class AnalyticsService {
+
+    private static final Logger logger = LogManager.getLogger(AnalyticsService.class);
+    private static final String base = "http://%s:8084/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=1&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
+    private String visits;
 
     @Value("${matomoToken:e235d94544916c326e80b713dd233cd1}")
     String matomoToken;
 
     @Value("${fqdn:beta.einfracentral.eu}")
     String fqdn;
-
-    private String visits;
-
-    final private String base = "http://%s:8084/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=1&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
-
 
     @PostConstruct
     void postConstruct() {
@@ -51,7 +57,7 @@ public class AnalyticsService {
         try {
             return new ObjectMapper(new JsonFactory()).readTree(json);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("ERROR", e);
         }
         return null;
     }
@@ -64,7 +70,7 @@ public class AnalyticsService {
                 ret.append(inputLine).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("ERROR", e);
         }
         return ret.toString();
     }

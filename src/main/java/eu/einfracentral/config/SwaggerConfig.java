@@ -58,22 +58,22 @@ public class SwaggerConfig {
     @Bean
     public Docket getDocket() throws MalformedURLException {
 
-            URL hostURL = new URL(platform + "api");
-            return new Docket(DocumentationType.SWAGGER_2)
-                    .directModelSubstitute(URL.class, String.class)
-                    .directModelSubstitute(XMLGregorianCalendar.class, String.class)
+        URL hostURL = new URL(platform + "api");
+        return new Docket(DocumentationType.SWAGGER_2)
+                .directModelSubstitute(URL.class, String.class)
+                .directModelSubstitute(XMLGregorianCalendar.class, String.class)
 //                .alternateTypeRules(newRule(typeResolver.arrayType(URL.class), typeResolver.arrayType(String.class)))
 //                .alternateTypeRules(newRule(typeResolver.arrayType(XMLGregorianCalendar.class), typeResolver.arrayType(String.class)))
-                    .pathProvider(pathProvider())
-                    .apiInfo(getApiInfo())
-                    .host(isLocalhost ? null : hostURL.getHost() + hostURL.getPath())
-                    .securitySchemes(Collections.singletonList(
-                            new ApiKey("apiKey", "Authorization", "header"))
-                    )
-                    .select()
-                    .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
-                    .paths(PathSelectors.any())
-                    .build();
+                .pathProvider(pathProvider())
+                .apiInfo(getApiInfo())
+                .host(isLocalhost ? null : hostURL.getHost() + hostURL.getPath())
+                .securitySchemes(Collections.singletonList(
+                        new ApiKey("apiKey", "Authorization", "header"))
+                )
+                .select()
+                .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
+                .paths(PathSelectors.any())
+                .build();
     }
 
     private ApiInfo getApiInfo() {

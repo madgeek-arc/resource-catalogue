@@ -3,16 +3,28 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
-import eu.openminted.registry.core.domain.*;
+import eu.einfracentral.utils.ObjectUtils;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.*;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 
-public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T, Authentication> {
+
+    final static private Logger logger = LogManager.getLogger(ResourceManager.class);
+
     @Autowired
     private VersionService versionService;
 
@@ -31,18 +43,29 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
-    public Browsing<T> getAll(FacetFilter ff) {
+    public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
         ff.setBrowseBy(getBrowseBy());
         return getResults(ff);
     }
 
     @Override
-    public Browsing<T> getMy(FacetFilter ff) {
+    public Browsing<T> getMy(FacetFilter ff, Authentication auth) {
         return null;
     }
 
+    public boolean exists(SearchService.KeyValue... ids) {
+        Resource resource;
+        try {
+            resource = this.searchService.searchId(getResourceType(), ids);
+            return resource != null;
+        } catch (UnknownHostException e) {
+            logger.error(e);
+            throw new ServiceException(e);
+        }
+    }
+
     @Override
-    public T add(T t) {
+    public T add(T t, Authentication auth) {
         if (exists(t)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
@@ -55,12 +78,14 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
-    public T update(T t) {
-        String serialized = serialize(t);
+    public T update(T t, Authentication auth) {
         Resource existing = whereID(t.getId(), true);
-        existing.setPayload(serialized);
+        T ex = deserialize(existing);
+        ObjectUtils.merge(ex, t);
+        existing.setPayload(serialize(ex));
+        existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        return t;
+        return ex;
     }
 
     @Override
@@ -77,10 +102,10 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public Map<String, List<T>> getBy(String field) {
         return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                                                                           entry -> entry.getValue()
-                                                                                         .stream()
-                                                                                         .map(resource -> deserialize(whereCoreID(resource.getId())))
-                                                                                         .collect(Collectors.toList())));
+                entry -> entry.getValue()
+                        .stream()
+                        .map(resource -> deserialize(whereCoreID(resource.getId())))
+                        .collect(Collectors.toList())));
     }
 
     @Override
@@ -97,7 +122,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public List<T> delAll() {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(10000);
-        return getAll(facetFilter).getResults().stream().map(this::del).collect(Collectors.toList());
+        return getAll(facetFilter, null).getResults().stream().map(this::del).collect(Collectors.toList());
     }
 
     @Override
@@ -110,11 +135,11 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public List<T> versions(String id, String version) {
         return multiWhereID(id).stream().flatMap(
                 resource -> versionService.getVersionsByResource(resource.getId())
-                                          .stream()
-                                          .filter(Objects::nonNull)
-                                          .map(
-                                                  versionObject -> deserialize(versionObject.getResource())
-                                          )
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(
+                                versionObject -> deserialize(versionObject.getResource())
+                        )
         ).collect(Collectors.toList());
     }
 
@@ -124,14 +149,13 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Deprecated
-    @SuppressWarnings("unchecked")
     protected List<Resource> multiWhere(String field, String value) {
         List<Resource> ret;
         try {
             FacetFilter ff = new FacetFilter();
             ff.setResourceType(resourceType.getName());
             ff.addFilter(field, value);
-            ret = (List<Resource>) searchService.search(ff).getResults(); //TODO: is unchecked, ask core for fix?
+            ret = searchService.search(ff).getResults();
         } catch (UnknownHostException e) {
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -160,16 +184,11 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected String serialize(T t) {
-        try {
-            String ret = parserPool.serialize(t, getCoreFormat()).get();
-            if (ret.equals("failed")) {
-                throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()), HttpStatus.BAD_REQUEST);
-            }
-            return ret;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        String ret = parserPool.serialize(t, getCoreFormat());
+        if (ret.equals("failed")) {
+            throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()), HttpStatus.BAD_REQUEST);
         }
+        return ret;
     }
 
     public ParserService.ParserServiceTypes getCoreFormat() {
@@ -177,12 +196,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected T deserialize(Resource resource) {
-        try {
-            return parserPool.deserialize(resource, typeParameterClass).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return parserPool.deserialize(resource, typeParameterClass);
     }
 
     protected Resource whereID(String id, boolean throwOnNull) {
@@ -209,4 +223,5 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         }
         return ret;
     }
+
 }

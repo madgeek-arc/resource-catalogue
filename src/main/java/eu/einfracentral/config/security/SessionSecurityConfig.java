@@ -1,44 +1,51 @@
 package eu.einfracentral.config.security;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.nimbusds.jose.util.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.OIDCAuthenticationFilter;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
-import org.mitre.openid.connect.client.service.*;
+import org.mitre.openid.connect.client.service.ClientConfigurationService;
+import org.mitre.openid.connect.client.service.IssuerService;
+import org.mitre.openid.connect.client.service.ServerConfigurationService;
 import org.mitre.openid.connect.client.service.impl.*;
 import org.mitre.openid.connect.config.ServerConfiguration;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Configuration
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-@Order(1)
+@Order(2)
 public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    static final private Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
-//    @Autowired
-//    OMTDAuthoritiesMapper omtdAuthoritiesMapper;
+    private static final Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
+    @Autowired
+    EICAuthoritiesMapper eicAuthoritiesMapper;
     @Value("${webapp.front}")
     private String webappFrontUrl;
     @Value("${oidc.issuer}")
@@ -49,13 +56,18 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     private String oidcId;
     @Value("${webapp.home}")
     private String webappHome;
-    @Value("${webapp.front}")
-    private String webappFront;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         logger.info("Register local");
         auth.authenticationProvider(openIdConnectAuthenticationProvider());
+    }
+
+    @Override
+    @Bean
+    public AuthenticationManager authenticationManagerBean()
+            throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Override
@@ -65,7 +77,8 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .headers()
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
-                .authenticationProvider(openIdConnectAuthenticationProvider()).exceptionHandling().and()
+                .authenticationProvider(openIdConnectAuthenticationProvider()).exceptionHandling()
+                .and()
                 .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
                 .logout()
@@ -73,7 +86,9 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true)
                 .logoutUrl("/openid_logout")
                 .logoutSuccessUrl(webappFrontUrl)
-                .and().exceptionHandling().and()
+                .and()
+                .exceptionHandling()
+                .and()
                 .authorizeRequests()
                 .anyRequest()
                 .permitAll()
@@ -94,7 +109,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     OIDCAuthenticationProvider openIdConnectAuthenticationProvider() {
         OIDCAuthenticationProvider ret = new OIDCAuthenticationProvider();
-//        ret.setAuthoritiesMapper(omtdAuthoritiesMapper);
+        ret.setAuthoritiesMapper(eicAuthoritiesMapper);
         return ret;
     }
 
@@ -117,21 +132,21 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         return serverConfiguration;
     }
 
-//    @Bean
-//    ServerConfigurationService serverConfigurationService() {
-//        Map<String, ServerConfiguration> properties = new HashMap<>();
-//        properties.put(oidcIssuer, aaiServerConfiguration());
-//        StaticServerConfigurationService ret = new StaticServerConfigurationService();
-//        ret.setServers(properties);
-//        return ret;
-//    }
+    @Bean
+    ServerConfigurationService serverConfigurationService() {
+        Map<String, ServerConfiguration> properties = new HashMap<>();
+        properties.put(oidcIssuer, aaiServerConfiguration());
+        StaticServerConfigurationService ret = new StaticServerConfigurationService();
+        ret.setServers(properties);
+        return ret;
+    }
 
     @Bean
     RegisteredClient platformClient() {
         RegisteredClient ret = new RegisteredClient();
         ret.setClientId(oidcId);
         ret.setClientSecret(oidcSecret);
-        ret.setScope(Sets.newHashSet("openid"));
+        ret.setScope(Sets.newHashSet("openid", "profile", "email", "refeds_edu"));
         ret.setTokenEndpointAuthMethod(ClientDetailsEntity.AuthMethod.SECRET_BASIC);
         ret.setRedirectUris(Sets.newHashSet(webappHome));
         return ret;
@@ -151,23 +166,32 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         OIDCAuthenticationFilter ret = new OIDCAuthenticationFilter();
         ret.setAuthenticationManager(authenticationManager());
         ret.setIssuerService(issuerService());
-        ret.setServerConfigurationService(new DynamicServerConfigurationService());
+        ret.setServerConfigurationService(serverConfigurationService());
         ret.setClientConfigurationService(clientConfigurationService());
         ret.setAuthRequestOptionsService(new StaticAuthRequestOptionsService());
         ret.setAuthRequestUrlBuilder(new PlainAuthRequestUrlBuilder());
-        ret.setAuthenticationSuccessHandler(new AuthenticationSuccessHandler() {
-            @Override
-            public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                OIDCAuthenticationToken authOIDC = (OIDCAuthenticationToken) authentication;
-                Cookie sessionCookie = new Cookie("name", authOIDC.getSub());
-                int expireSec = -1;
-                sessionCookie.setMaxAge(expireSec);
-                sessionCookie.setPath("/");
-                response.addCookie(sessionCookie);
-                response.sendRedirect(webappFront);
-            }
+        ret.setAuthenticationSuccessHandler((httpServletRequest, response, authentication) -> {
+            OIDCAuthenticationToken authOIDC = (OIDCAuthenticationToken) authentication;
+            JsonObject info = authOIDC.getUserInfo().toJson();
+            logger.info("Authorities: ", StringUtils.join(authentication.getAuthorities().toArray()));
+            List<String> roles = authentication.getAuthorities()
+                    .stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            Gson gson = new Gson();
+            gson.toJson(roles);
+            JsonElement jsonRoles = new JsonParser().parse(gson.toJson(roles));
+            info.add("roles", jsonRoles);
+
+            Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
+            int expireSec = -1;
+            sessionCookie.setMaxAge(expireSec);
+            sessionCookie.setPath("/");
+            response.addCookie(sessionCookie);
+            response.sendRedirect(webappFrontUrl);
         });
         return ret;
     }
+
 
 }
