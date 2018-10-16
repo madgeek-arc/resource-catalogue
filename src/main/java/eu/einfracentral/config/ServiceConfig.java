@@ -1,6 +1,7 @@
 package eu.einfracentral.config;
 
 import eu.einfracentral.domain.*;
+import freemarker.template.TemplateExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,9 @@ import org.springframework.session.web.http.DefaultCookieSerializer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
 
 @Configuration
 @ComponentScan({
@@ -29,6 +33,17 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     JAXBContext eicJAXBContext() throws JAXBException {
         return JAXBContext.newInstance(Event.class, Manager.class, Provider.class,
                 Service.class, User.class, Vocabulary.class, InfraService.class);
+    }
+
+    @Bean
+    freemarker.template.Configuration freeMaker() throws IOException {
+        freemarker.template.Configuration cfg = new freemarker.template.Configuration(freemarker.template.Configuration.VERSION_2_3_28);
+        cfg.setDirectoryForTemplateLoading(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templates")).getFile()));
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        cfg.setLogTemplateExceptions(false);
+        cfg.setWrapUncheckedExceptions(true);
+        return cfg;
     }
 
     @Bean
