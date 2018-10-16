@@ -21,70 +21,70 @@ public class Service implements Identifiable {
      * Global unique and persistent identifier of the service.
      */
     @XmlElement(required = false)
-    @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @ApiModelProperty(position = 1, example = "'(required on PUT only)'")
     private String id; //maybe list
 
     /**
      * The Uniform Resource Locator (web address) to the entry web page of the service usually hosted and maintained by the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "http://service.url (required)", required = true)
+    @ApiModelProperty(position = 2, example = "'http://service.url (required)'", required = true)
     private URL url;
 
     /**
      * Brief and descriptive name of service as assigned by the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "Service Name (required)", required = true)
+    @ApiModelProperty(position = 3, example = "'Service Name (required)'", required = true)
     private String name;
 
     /**
      * Short text, catch line or slogan which serves mainly marketing and advertising purposes.
      */
     @XmlElement
-    @ApiModelProperty(position = 4, example = "Service Slogan (optional)")
+    @ApiModelProperty(position = 4, example = "'Service Slogan (optional)'")
     private String tagline;
 
     /**
      * High-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables access to.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "Service Description (required)", required = true)
+    @ApiModelProperty(position = 5, example = "'Service Description (required)'", required = true)
     private String description;
 
     /**
      * A high-level description of the various options or forms in which the service can be instantiated.
      */
     @XmlElement
-    @ApiModelProperty(position = 6, example = "Service Options (optional)")
+    @ApiModelProperty(position = 6, example = "'Service Options (optional)'")
     private String options;
 
     /**
      * Type of users/customers allowed to commission/benefit from the service.
      */
     @XmlElement
-    @ApiModelProperty(position = 7, example = "Service Target Users (optional)")
+    @ApiModelProperty(position = 7, example = "'Service Target Users (optional)'")
     private String targetUsers; //maybe list
 
     /**
      * Description of the benefit delivered to a customer/user by the service.
      */
     @XmlElement
-    @ApiModelProperty(position = 8, example = "Service User Value (optional)")
+    @ApiModelProperty(position = 8, example = "'Service User Value (optional)'")
     private String userValue;
 
     /**
      * List of customers, communities, users, etc using the service.
      */
     @XmlElement
-    @ApiModelProperty(position = 9, example = "Service User Base (optional)")
+    @ApiModelProperty(position = 9, example = "'Service User Base (optional)'")
     private String userBase;
 
     /**
      * The Uniform Resource Locator (web address) to the logo/visual identity of the service.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 10, example = "http://symbol.url (required)", required = true)
+    @ApiModelProperty(position = 10, example = "'http://symbol.url (required)'", required = true)
     //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL symbol;
 
@@ -92,7 +92,7 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to the multimedia material of the service (screenshots or videos).
      */
     @XmlElement
-    @ApiModelProperty(position = 11, example = "http://multimedia.url (optional)")
+    @ApiModelProperty(position = 11, example = "'http://multimedia.url (optional)'")
     private URL multimediaURL;
 
     //Classification
@@ -101,63 +101,63 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "providers", required = true)
     @XmlElement(name = "provider")
-    @ApiModelProperty(position = 12, dataType = "List", example = "['provider1', 'provider2'] (required)", required = true)
+    @ApiModelProperty(position = 12, dataType = "List", example = "'[provider1, provider2] (required)'", required = true)
     private List<String> providers;
 
     /**
      * Informs about the service version that is in force.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, example = "1.08 (required)", required = true)
+    @ApiModelProperty(position = 13, example = "'1.08 (required)'", required = true)
     private String version;
 
     /**
      * The date of the latest update of the service.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, example = "2018-01-30 (required)", required = true)
+    @ApiModelProperty(position = 14, example = "'2018-01-30 (required)'", required = true)
     private XMLGregorianCalendar lastUpdate;
 
     /**
      * A log of the service features added in the last and previous versions.
      */
     @XmlElement
-    @ApiModelProperty(position = 15, example = "Service Changelog (optional)")
+    @ApiModelProperty(position = 15, example = "'Service Changelog (optional)'")
     private String changeLog;
 
     /**
      * The date up to which the service description is valid.
      */
     @XmlElement
-    @ApiModelProperty(position = 16, example = "2050-04-27 (optional)")
+    @ApiModelProperty(position = 16, example = "'2050-04-27 (optional)'")
     private XMLGregorianCalendar validFor;
 
     /**
      * Used to tag the service to the full service cycle.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 17, example = "LifeCycleStatus-X (required)", required = true)
+    @ApiModelProperty(position = 17, example = "'LifeCycleStatus-X (required)'", required = true)
     private String lifeCycleStatus; //alpha, beta, production
 
     /**
      * Used to tag the service to the Technology Readiness Level, a method of estimating technology ma-turity of critical technology elements. TRL are based on a scale from 1 to 9 with 9 being the most ma-ture technology.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 18, example = "TRL-X (required)", required = true)
+    @ApiModelProperty(position = 18, example = "'TRL-X (required)'", required = true)
     private String trl; //7, 8 , 9
 
     /**
      * A named group of services that offer access to the same type of resource that is of interest to a customer/user.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 19, example = "Category-X (required)", required = true)
+    @ApiModelProperty(position = 19, example = "'Category-X (required)'", required = true)
     private String category; //maybe list
 
     /**
      * Type/Subcategory of service within a category
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 20, example = "Subcategory-X (required)", required = true)
+    @ApiModelProperty(position = 20, example = "'Subcategory-X (required)'", required = true)
     private String subcategory; //maybe list
 
     /**
@@ -165,7 +165,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "places", required = true)
     @XmlElement(name = "place")
-    @ApiModelProperty(position = 21, example = "['Place-X1', 'Place-X2'] (required)", required = true)
+    @ApiModelProperty(position = 21, example = "'[Place-X1, Place-X2] (required)'", required = true)
     private List<String> places;
 
     /**
@@ -173,7 +173,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "languages", required = true)
     @XmlElement(name = "language")
-    @ApiModelProperty(position = 22, example = "['Language-X1', 'Language-X2'] (required)", required = true)
+    @ApiModelProperty(position = 22, example = "'[Language-X1, Language-X2] (required)'", required = true)
     private List<String> languages;
 
     /**
@@ -181,7 +181,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 23, dataType = "List", example = "['tag1', 'tag2'] (optional)")
+    @ApiModelProperty(position = 23, dataType = "List", example = "'[tag1, tag2] (optional)'")
     private List<String> tags;
 
     /**
@@ -189,7 +189,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
-    @ApiModelProperty(position = 24, dataType = "List", example = "['service1', 'service2'] (optional)")
+    @ApiModelProperty(position = 24, dataType = "List", example = "'[service1, service2] (optional)'")
     private List<String> requiredServices;
 
     /**
@@ -197,7 +197,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
-    @ApiModelProperty(position = 25, dataType = "List", example = "['service1', 'service2'] (optional)")
+    @ApiModelProperty(position = 25, dataType = "List", example = "'[service1, service2] (optional)'")
     private List<String> relatedServices;
 
     //Support
@@ -205,7 +205,7 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 26, example = "http://order.url (required)", required = true)
+    @ApiModelProperty(position = 26, example = "'http://order.url (required)", required = true)
     //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL order;
 
@@ -215,35 +215,35 @@ public class Service implements Identifiable {
     @JsonIgnore
     @XmlElement
     @ApiParam(hidden = true)
-    @ApiModelProperty(hidden = true, readOnly = true)
+    @ApiModelProperty(hidden = true)
     private URL requests;
 
     /**
      * The Uniform Resource Locator (web address) to a webpage with the contact person or helpdesk to ask more information from the service provider about this service.
      */
     @XmlElement
-    @ApiModelProperty(position = 27, example = "http://helpdesk.url (optional)")
+    @ApiModelProperty(position = 27, example = "'http://helpdesk.url (optional)'")
     private URL helpdesk;
 
     /**
      * The Uniform Resource Locator (web address) to the service user manual and documentation
      */
     @XmlElement
-    @ApiModelProperty(position = 28, example = "http://manual.url (optional)")
+    @ApiModelProperty(position = 28, example = "'http://manual.url (optional)'")
     private URL userManual;
 
     /**
      * The Uniform Resource Locator (web address) to training information on the service.
      */
     @XmlElement
-    @ApiModelProperty(position = 29, example = "http://training.url (optional)")
+    @ApiModelProperty(position = 29, example = "'http://training.url (optional)'")
     private URL trainingInformation;
 
     /**
      * The Uniform Resource Locator (web address) to the page where customers can provide feedback on the service.
      */
     @XmlElement
-    @ApiModelProperty(position = 30, example = "http://feedback.url (optional)")
+    @ApiModelProperty(position = 30, example = "'http://feedback.url (optional)'")
     private URL feedback;
 
     //Contractual
@@ -251,14 +251,14 @@ public class Service implements Identifiable {
      * The Uniform Resource Locator (web address) to the information about the payment models that apply, the cost and any related information.
      */
     @XmlElement
-    @ApiModelProperty(position = 31, example = "http://price.url (optional)")
+    @ApiModelProperty(position = 31, example = "'http://price.url (optional)'")
     private URL price;
 
     /**
      * The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 32, example = "http://sla.url (required)", required = true)
+    @ApiModelProperty(position = 32, example = "'http://sla.url (required)'", required = true)
     private URL serviceLevelAgreement;
 
     /**
@@ -266,14 +266,14 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "termsOfUse")
     @XmlElement(name = "termOfUse")
-    @ApiModelProperty(position = 33, dataType = "List", example = "['http://terms1.url', 'http://terms2.url'] (optional)")
-    private List<URL> termsOfUse;
+    @ApiModelProperty(position = 33, dataType = "List", example = "'[http://terms1.url, http://terms2.url] (optional)'")
+    private List<String> termsOfUse;
 
     /**
      * Sources of funding for the development and/or operation of the service.
      */
     @XmlElement
-    @ApiModelProperty(position = 34, example = "Service Funding Sources (optional)")
+    @ApiModelProperty(position = 34, example = "'Service Funding Sources (optional)'")
     private String funding;
 
     /**
@@ -621,11 +621,11 @@ public class Service implements Identifiable {
         this.serviceLevelAgreement = serviceLevelAgreement;
     }
 
-    public List<URL> getTermsOfUse() {
+    public List<String> getTermsOfUse() {
         return termsOfUse;
     }
 
-    public void setTermsOfUse(List<URL> termsOfUse) {
+    public void setTermsOfUse(List<String> termsOfUse) {
         this.termsOfUse = termsOfUse;
     }
 

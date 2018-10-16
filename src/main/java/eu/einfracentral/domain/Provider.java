@@ -69,6 +69,8 @@ public class Provider implements Identifiable {
     }
 
     public enum States {
+        // TODO: probably change states
+        INIT("initialized"),
         APPROVED("approved"),
         REJECTED("rejected"),
         PENDING_1("pending initial approval"),
