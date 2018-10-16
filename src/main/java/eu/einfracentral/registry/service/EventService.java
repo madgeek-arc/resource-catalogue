@@ -1,27 +1,28 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Event;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface EventService extends ResourceService<Event> {
+public interface EventService extends ResourceService<Event, Authentication> {
 
     /**
      * Toggle a favourited event true/false.
      * @param serviceId
-     * @param userId
+     * @param authentication
      * @return
      */
-    Event toggleFavourite(String serviceId, String userId);
+    Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws Exception;
 
     /**
      * Set a rating on a service from the given user.
      * @param serviceId
-     * @param userId
+     * @param authentication
      * @param value
      * @return
      */
-    Event setRating(String serviceId, String userId, String value);
+    Event setRating(String serviceId, String value, Authentication authentication) throws Exception;
 
     /**
      * Get all events of a specific type.
@@ -34,10 +35,10 @@ public interface EventService extends ResourceService<Event> {
      * Get events of a specific type, created by a user for a given service.
      * @param eventType
      * @param serviceId
-     * @param userId
+     * @param authentication
      * @return
      */
-    List<Event> getEvents(String eventType, String serviceId, String userId);
+    List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws Exception;
 
     /**
      * Get all events of a specific type about the given service.
@@ -50,9 +51,10 @@ public interface EventService extends ResourceService<Event> {
     /**
      * Get all events of a specific type created by the user.
      * @param eventType
-     * @param userId
+     * @param authentication
      * @return
      */
-    List<Event> getUserEvents(String eventType, String userId);
+    List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception;
 
+    void deleteEvents(List<Event> events);
 }
