@@ -1,8 +1,9 @@
 package eu.einfracentral.domain;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.List;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -30,15 +31,6 @@ public class ServiceMetadata {
     private String modifiedAt;
 
     public ServiceMetadata() {
-    }
-
-    public ServiceMetadata(Addenda addenda) {
-        this.featured = addenda.isFeatured();
-        this.published = addenda.isPublished();
-        this.registeredBy = addenda.getRegisteredBy();
-        this.modifiedBy = addenda.getModifiedBy();
-        this.registeredAt = String.valueOf(addenda.getRegisteredAt());
-        this.modifiedAt = String.valueOf(addenda.getModifiedAt());
     }
 
     public ServiceMetadata(ServiceMetadata serviceMetadata) {

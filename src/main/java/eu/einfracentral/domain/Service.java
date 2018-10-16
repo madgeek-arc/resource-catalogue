@@ -1,220 +1,302 @@
 package eu.einfracentral.domain;
 
-import java.lang.reflect.Field;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
 import java.util.List;
-import javax.xml.bind.annotation.*;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
-    //Basic
+
     /**
      * Global unique and persistent identifier of the service.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = false)
+    @ApiModelProperty(position = 1, example = "'(required on PUT only)'")
     private String id; //maybe list
+
     /**
      * The Uniform Resource Locator (web address) to the entry web page of the service usually hosted and maintained by the service provider.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 2, example = "'http://service.url (required)'", required = true)
     private URL url;
-    /**
-     * The organisation that manages and delivers the service and with whom the customer signs the SLA.
-     */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
-    private String providerName;
+
     /**
      * Brief and descriptive name of service as assigned by the service provider.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 3, example = "'Service Name (required)'", required = true)
     private String name;
+
     /**
      * Short text, catch line or slogan which serves mainly marketing and advertising purposes.
      */
     @XmlElement
+    @ApiModelProperty(position = 4, example = "'Service Slogan (optional)'")
     private String tagline;
+
     /**
      * High-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables access to.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 5, example = "'Service Description (required)'", required = true)
     private String description;
+
     /**
      * A high-level description of the various options or forms in which the service can be instantiated.
      */
     @XmlElement
+    @ApiModelProperty(position = 6, example = "'Service Options (optional)'")
     private String options;
+
     /**
      * Type of users/customers allowed to commission/benefit from the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 7, example = "'Service Target Users (optional)'")
     private String targetUsers; //maybe list
+
     /**
      * Description of the benefit delivered to a customer/user by the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 8, example = "'Service User Value (optional)'")
     private String userValue;
+
     /**
      * List of customers, communities, users, etc using the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 9, example = "'Service User Base (optional)'")
     private String userBase;
+
     /**
      * The Uniform Resource Locator (web address) to the logo/visual identity of the service.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 10, example = "'http://symbol.url (required)'", required = true)
+    //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL symbol;
+
     /**
      * The Uniform Resource Locator (web address) to the multimedia material of the service (screenshots or videos).
      */
     @XmlElement
+    @ApiModelProperty(position = 11, example = "'http://multimedia.url (optional)'")
     private URL multimediaURL;
+
     //Classification
     /**
      * (Deprecated) Organisations that manage and deliver the service and with whom the customer signs the SLA.
      */
-    @XmlElementWrapper(name = "providers")
+    @XmlElementWrapper(name = "providers", required = true)
     @XmlElement(name = "provider")
+    @ApiModelProperty(position = 12, dataType = "List", example = "'[provider1, provider2] (required)'", required = true)
     private List<String> providers;
+
     /**
      * Informs about the service version that is in force.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 13, example = "'1.08 (required)'", required = true)
     private String version;
+
     /**
      * The date of the latest update of the service.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 14, example = "'2018-01-30 (required)'", required = true)
     private XMLGregorianCalendar lastUpdate;
+
     /**
      * A log of the service features added in the last and previous versions.
      */
     @XmlElement
+    @ApiModelProperty(position = 15, example = "'Service Changelog (optional)'")
     private String changeLog;
+
     /**
      * The date up to which the service description is valid.
      */
     @XmlElement
+    @ApiModelProperty(position = 16, example = "'2050-04-27 (optional)'")
     private XMLGregorianCalendar validFor;
+
     /**
      * Used to tag the service to the full service cycle.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 17, example = "'LifeCycleStatus-X (required)'", required = true)
     private String lifeCycleStatus; //alpha, beta, production
+
     /**
      * Used to tag the service to the Technology Readiness Level, a method of estimating technology ma-turity of critical technology elements. TRL are based on a scale from 1 to 9 with 9 being the most ma-ture technology.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 18, example = "'TRL-X (required)'", required = true)
     private String trl; //7, 8 , 9
+
     /**
      * A named group of services that offer access to the same type of resource that is of interest to a customer/user.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 19, example = "'Category-X (required)'", required = true)
     private String category; //maybe list
+
     /**
      * Type/Subcategory of service within a category
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 20, example = "'Subcategory-X (required)'", required = true)
     private String subcategory; //maybe list
+
     /**
      * Regions/Countries Availability
      */
-    @XmlElementWrapper(name = "places", required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElementWrapper(name = "places", required = true)
     @XmlElement(name = "place")
+    @ApiModelProperty(position = 21, example = "'[Place-X1, Place-X2] (required)'", required = true)
     private List<String> places;
+
     /**
      * Languages of the User interface
      */
-    @XmlElementWrapper(name = "languages", required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElementWrapper(name = "languages", required = true)
     @XmlElement(name = "language")
+    @ApiModelProperty(position = 22, example = "'[Language-X1, Language-X2] (required)'", required = true)
     private List<String> languages;
+
     /**
      * Attribute to facilitate searching based on keywords.
      */
-    @XmlElementWrapper(name = "tags", required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
+    @ApiModelProperty(position = 23, dataType = "List", example = "'[tag1, tag2] (optional)'")
     private List<String> tags;
+
     /**
      * Other services that are required with this service.
      */
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
+    @ApiModelProperty(position = 24, dataType = "List", example = "'[service1, service2] (optional)'")
     private List<String> requiredServices;
+
     /**
      * Other services that are commonly used with this service.
      */
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
+    @ApiModelProperty(position = 25, dataType = "List", example = "'[service1, service2] (optional)'")
     private List<String> relatedServices;
+
     //Support
     /**
      * The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 26, example = "'http://order.url (required)", required = true)
+    //trying to actually enforce mandatories here? validate data first, then change this to true
     private URL order;
+
     /**
      * (Deprecated) Link to request the service from the service provider
      */
+    @JsonIgnore
     @XmlElement
-    private URL request;
+    @ApiParam(hidden = true)
+    @ApiModelProperty(hidden = true)
+    private URL requests;
+
     /**
      * The Uniform Resource Locator (web address) to a webpage with the contact person or helpdesk to ask more information from the service provider about this service.
      */
     @XmlElement
+    @ApiModelProperty(position = 27, example = "'http://helpdesk.url (optional)'")
     private URL helpdesk;
+
     /**
      * The Uniform Resource Locator (web address) to the service user manual and documentation
      */
     @XmlElement
+    @ApiModelProperty(position = 28, example = "'http://manual.url (optional)'")
     private URL userManual;
+
     /**
      * The Uniform Resource Locator (web address) to training information on the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 29, example = "'http://training.url (optional)'")
     private URL trainingInformation;
+
     /**
      * The Uniform Resource Locator (web address) to the page where customers can provide feedback on the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 30, example = "'http://feedback.url (optional)'")
     private URL feedback;
+
     //Contractual
     /**
      * The Uniform Resource Locator (web address) to the information about the payment models that apply, the cost and any related information.
      */
     @XmlElement
+    @ApiModelProperty(position = 31, example = "'http://price.url (optional)'")
     private URL price;
+
     /**
      * The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.
      */
-    @XmlElement(required = false) //trying to actually enforce mandatories here? validate data first, then change this to true
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 32, example = "'http://sla.url (required)'", required = true)
     private URL serviceLevelAgreement;
+
     /**
      * The Uniform Resource Locator (web address) to the webpage describing the rules, service conditions and usage policy which one must agree to abide by in order to use the service.
      */
     @XmlElementWrapper(name = "termsOfUse")
     @XmlElement(name = "termOfUse")
-    private List<URL> termsOfUse;
+    @ApiModelProperty(position = 33, dataType = "List", example = "'[http://terms1.url, http://terms2.url] (optional)'")
+    private List<String> termsOfUse;
+
     /**
      * Sources of funding for the development and/or operation of the service.
      */
     @XmlElement
+    @ApiModelProperty(position = 34, example = "'Service Funding Sources (optional)'")
     private String funding;
+
     /**
      * Availability, i.e., the fraction of a time period that an item is in a condition to perform its intended function upon demand (“available” indicates that an item is in this condition); availability is often expressed as a probability.
      */
+    @JsonIgnore
     @XmlElement
     private String availability;
+
     /**
      * Reliability, i.e., the probability that an item will function without failure under stated conditions for a speciﬁed amount of time. “Stated conditions” indicates perquisite conditions external to the item being considered. For example, a stated condition for a supercomputer might be that power and cooling must be available - thus a failure of the power or cooling systems would not be considered a failure of the supercomputer.
      */
+    @JsonIgnore
     @XmlElement
     private String reliability;
+
     /**
      * Serviceability, i.e., the probability that an item will be retained in, or restored to, a condition to per-form its intended function within a speciﬁed period of time Durability, i.e., the ability of a physical product to remain functional, without requiring excessive maintenance or repair, when faced with the challenges of normal operation over its design lifetime.
      */
+    @JsonIgnore
     @XmlElement
     private String serviceability;
+
 
     public Service() {
         // No arg constructor
@@ -233,7 +315,6 @@ public class Service implements Identifiable {
 //        }
         this.id = service.getId();
         this.url = service.getUrl();
-        this.providerName = service.getProviderName();
         this.name = service.getName();
         this.tagline = service.getTagline();
         this.description = service.getDescription();
@@ -258,7 +339,7 @@ public class Service implements Identifiable {
         this.requiredServices = service.getRequiredServices();
         this.relatedServices = service.getRelatedServices();
         this.order = service.getOrder();
-        this.request = service.getRequest();
+        this.requests = service.getRequests();
         this.helpdesk = service.getHelpdesk();
         this.userManual = service.getUserManual();
         this.trainingInformation = service.getTrainingInformation();
@@ -288,14 +369,6 @@ public class Service implements Identifiable {
 
     public void setUrl(URL url) {
         this.url = url;
-    }
-
-    public String getProviderName() {
-        return providerName;
-    }
-
-    public void setProviderName(String providerName) {
-        this.providerName = providerName;
     }
 
     public String getName() {
@@ -490,12 +563,14 @@ public class Service implements Identifiable {
         this.order = order;
     }
 
-    public URL getRequest() {
-        return request;
+    @ApiIgnore
+    public URL getRequests() {
+        return requests;
     }
 
-    public void setRequest(URL request) {
-        this.request = request;
+    @ApiIgnore
+    public void setRequests(URL requests) {
+        this.requests = requests;
     }
 
     public URL getHelpdesk() {
@@ -546,11 +621,11 @@ public class Service implements Identifiable {
         this.serviceLevelAgreement = serviceLevelAgreement;
     }
 
-    public List<URL> getTermsOfUse() {
+    public List<String> getTermsOfUse() {
         return termsOfUse;
     }
 
-    public void setTermsOfUse(List<URL> termsOfUse) {
+    public void setTermsOfUse(List<String> termsOfUse) {
         this.termsOfUse = termsOfUse;
     }
 
@@ -585,4 +660,5 @@ public class Service implements Identifiable {
     public void setServiceability(String serviceability) {
         this.serviceability = serviceability;
     }
+
 }
