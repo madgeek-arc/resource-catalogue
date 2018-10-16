@@ -1,7 +1,13 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>eu.einfracentral</groupId>
+        <artifactId>eic</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
     <modelVersion>4.0.0</modelVersion>
-    <groupId>eu.einfracentral</groupId>
     <artifactId>eic-registry-rest</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <licenses>
@@ -22,7 +28,52 @@
         <url>https://github.com/eInfraCentral/eic-registry-rest.git</url>
     </scm>
     <dependencies>
-        <dependency><groupId>eu.einfracentral</groupId><artifactId>eic-registry-api</artifactId><version>${project.version}</version></dependency>
+        <dependency>
+            <groupId>eu.einfracentral</groupId>
+            <artifactId>eic-registry-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.einfracentral</groupId>
+            <artifactId>eic-registry-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.openminted</groupId>
+            <artifactId>registry-core-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.openminted</groupId>
+            <artifactId>registry-core-helper</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.springfox</groupId>-->
+            <!--<artifactId>springfox-core</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>io.swagger</groupId>-->
+            <!--<artifactId>swagger-annotations</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
     <build>
         <pluginManagement>
