@@ -35,6 +35,17 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         this.providerManager = service;
     }
 
+    @ApiIgnore
+    @ApiOperation(value = "Delete provider with the specified id")
+    @RequestMapping(path = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
+    public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        Provider provider = providerManager.get(id);
+        providerManager.del(provider);
+        return new ResponseEntity<>(provider, HttpStatus.GONE);
+    }
+
+    @Override
     @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
@@ -43,6 +54,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
+    @Override
     @ApiOperation(value = "Creates a new Provider")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -50,13 +62,15 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return super.add(provider, auth);
     }
 
+    @Override
     @ApiOperation(value = "Updates Provider info")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerIsActive(#auth,#provider)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws Exception {
         return super.update(provider, auth);
     }
 
+    @Override
     @ApiIgnore
     @ApiOperation(value = "Get a list of all infraService providers in the catalogue")
     @ApiImplicitParams({
