@@ -1,0 +1,34 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "indicator_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "description",
+      "path": "//*[local-name()='description']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "unit",
+      "path": "//*[local-name()='unit']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "dimensions",
+      "path": "//*[local-name()='dimensions']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "indicator",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/develop/src/main/resources/schema1.xsd"
+}
