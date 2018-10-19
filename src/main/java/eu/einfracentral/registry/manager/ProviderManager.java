@@ -102,16 +102,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         authoritiesMapper.mapProviders(provider.getUsers());
-        return ex;
+        return provider;
     }
 
     @Override
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         User user = new User(auth);
-        Template tmpl = null;
-        Writer out = new StringWriter();
-
 
         switch (status) {
             case REJECTED:
@@ -145,28 +142,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
         if (active != null) {
             provider.setActive(active);
-            // FIXME: temporary solution to keep service active field value when provider is deactivated, and restore it when activated
-            List<InfraService> services = this.getInfraServices(provider.getId());
             if (!active) {
-                for (InfraService service : services) {
-                    service.setStatus(service.getActive() != null ? service.getActive().toString() : "true");
-                    service.setActive(false);
-                    try {
-                        infraServiceService.update(service, null);
-                    } catch (ResourceNotFoundException e) {
-                        logger.error("Could not update service " + service.getName());
-                    }
-                }
+                deactivateServices(provider.getId());
             } else {
-                for (InfraService service : services) {
-                    service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
-                    service.setStatus(null);
-                    try {
-                        infraServiceService.update(service, null);
-                    } catch (ResourceNotFoundException e) {
-                        logger.error("Could not update service " + service.getName());
-                    }
-                }
+                activateServices(provider.getId());
             }
         }
         provider.setStatus(status.getKey());
@@ -232,12 +211,38 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return infraServiceService.getAll(ff, null).getResults();
     }
 
+    public void activateServices(String providerId) { // TODO: decide how to use service.status variable
+        List<InfraService> services = this.getInfraServices(providerId);
+        for (InfraService service : services) {
+            service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
+            service.setStatus(null);
+            try {
+                infraServiceService.update(service, null);
+            } catch (ResourceNotFoundException e) {
+                logger.error("Could not update service " + service.getName());
+            }
+        }
+    }
+
+    public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
+        List<InfraService> services = this.getInfraServices(providerId);
+        for (InfraService service : services) {
+            service.setStatus(service.getActive() != null ? service.getActive().toString() : "true");
+            service.setActive(false);
+            try {
+                infraServiceService.update(service, null);
+            } catch (ResourceNotFoundException e) {
+                logger.error("Could not update service " + service.getName());
+            }
+        }
+    }
+
     // TODO: complete this method
     private void sendProviderMails(Provider provider, User user, Provider.States state) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
-        String providerMail = null;
-        String regTeamMail = null;
+        String providerMail;
+        String regTeamMail;
         root.put("user", user);
         root.put("provider", provider);
         root.put("endpoint", endpoint);
