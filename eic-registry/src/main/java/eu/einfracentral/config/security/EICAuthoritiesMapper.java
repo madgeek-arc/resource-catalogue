@@ -41,17 +41,23 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        Optional<List<Provider>> providers = Optional.of(providerService.getAll(ff, null).getResults());
-        userRolesMap = providers.get()
-                .stream()
-                .distinct()
-                .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
+        try {
+            List<Provider> providers = providerService.getAll(ff, null).getResults();
+            if (providers != null) {
+                userRolesMap = providers
                         .stream()
-                        .filter(Objects::nonNull)
-                        .map(User::getEmail))
-                .distinct()
-                .collect(Collectors
-                        .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
+                        .distinct()
+                        .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
+                                .stream()
+                                .filter(Objects::nonNull)
+                                .map(User::getEmail))
+                        .distinct()
+                        .collect(Collectors
+                                .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
+            }
+        } catch (Exception e) {
+            logger.warn("There are no Provider entries in DB");
+        }
 
         userRolesMap.putAll(Arrays.stream(admins.split(","))
                 .collect(Collectors.toMap(
