@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
@@ -74,7 +75,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
         filter.setBrowseBy(getBrowseBy());
-        return getResults(filter);
+        return getMatchingServices(filter);
     }
 
     @Override
@@ -353,5 +354,38 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         richService.setViews(visitSum);
 
         return richService;
+    }
+
+    private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
+        StringBuilder query = new StringBuilder();
+        Map<String, Object> filters = ff.getFilter();
+
+        if (filters.get("active") != null) {
+            query.append(String.format("active=%s", filters.remove("active")));
+        }
+
+        if (!filters.entrySet().isEmpty()) {
+            query.append(" AND ");
+        }
+
+        if (filters.get("multi-filter") != null) {
+            MultiValueMap<String, String> multiFilter = (MultiValueMap<String, String>) filters.remove("multi-filter");
+
+            for (Iterator iter = multiFilter.entrySet().iterator(); iter.hasNext(); ) {
+                Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) iter.next();
+                List<String> entries = new ArrayList<>();
+                entry.getValue().forEach(e -> entries.add(String.format("%s=%s", entry.getKey(), e)));
+                query.append(String.join(" OR ", entries));
+
+
+                if (iter.hasNext()) {
+                    query.append(" OR ");
+                }
+            }
+        }
+
+        Paging<Resource> results = searchService.cqlQuery(query.toString(), getResourceType(), ff.getQuantity(), ff.getFrom(), "name", "ASC");
+        return new Browsing<>(results.getTotal(), results.getFrom(), results.getTo(),
+                results.getResults().stream().map(this::deserialize).collect(toList()), results.getFacets());
     }
 }

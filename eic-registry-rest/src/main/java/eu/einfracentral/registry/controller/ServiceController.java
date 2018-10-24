@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -94,7 +95,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         FacetFilter ff = getFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
@@ -113,7 +114,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = getFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         Paging<RichService> services = infraService.getRichServices(ff, auth);
@@ -209,7 +210,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Service>> getInactiveServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<Service>> getInactiveServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Paging<InfraService> infraServices = infraService.getInactiveServices();
         List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
         if (services.isEmpty()) {
@@ -228,22 +229,24 @@ public class ServiceController {
     }
 
 
-    private FacetFilter getFacetFilter(Map<String, Object> allRequestParams) {
+    private FacetFilter getFacetFilter(MultiValueMap<String, Object> allRequestParams) {
         logger.debug("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        facetFilter.setFilter(allRequestParams);
+        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");
+        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from").get(0)) : 0);
+        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity").get(0)) : 10);
         Map<String, Object> sort = new HashMap<>();
         Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order").get(0) : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField").get(0) : null;
         if (orderField != null) {
             order.put("order", orderDirection);
             sort.put(orderField, order);
             facetFilter.setOrderBy(sort);
         }
+        Map<String, Object> multiFilter = new HashMap<>();
+        multiFilter.put("multi-filter", allRequestParams);
+        facetFilter.setFilter(multiFilter);
         return facetFilter;
     }
 }
