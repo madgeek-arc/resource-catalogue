@@ -362,10 +362,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         if (filters.get("active") != null) {
             query.append(String.format("active=%s", filters.remove("active")));
-        }
-
-        if (!filters.entrySet().isEmpty()) {
-            query.append(" AND ");
+            if (!filters.entrySet().isEmpty()) {
+                query.append(" AND ");
+            }
         }
 
         if (filters.get("multi-filter") != null) {
@@ -380,7 +379,20 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
                 if (iter.hasNext()) {
                     query.append(" OR ");
+                } else if (!filters.entrySet().isEmpty()) {
+                        query.append(" AND ");
                 }
+            }
+        }
+
+        // FIXME: forEach filter join with AND (after removing multi-filter)
+
+        for (Iterator iter = filters.entrySet().iterator(); iter.hasNext(); ) {
+            query.append(iter.next());
+
+            if (iter.hasNext()) {
+                // TODO: decide if this will be AND or OR
+                query.append(" AND ");
             }
         }
 
