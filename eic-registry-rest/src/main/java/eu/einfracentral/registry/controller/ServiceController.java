@@ -244,9 +244,12 @@ public class ServiceController {
             sort.put(orderField, order);
             facetFilter.setOrderBy(sort);
         }
-        Map<String, Object> multiFilter = new HashMap<>();
-        multiFilter.put("multi-filter", allRequestParams);
-        facetFilter.setFilter(multiFilter);
+        if (!allRequestParams.isEmpty()) {
+
+            Map<String, Object> multiFilter = new HashMap<>();
+            multiFilter.put("multi-filter", allRequestParams);
+            facetFilter.setFilter(multiFilter);
+        }
         return facetFilter;
     }
 }
