@@ -360,13 +360,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         StringBuilder query = new StringBuilder();
         Map<String, Object> filters = ff.getFilter();
 
-        if (filters.get("active") != null) {
-            query.append(String.format("active=%s", filters.remove("active")));
-            if (!filters.entrySet().isEmpty()) {
-                query.append(" AND ");
-            }
-        }
-
+        // check if a MultiValueMap filter exists inside the filter
         if (filters.get("multi-filter") != null) {
             MultiValueMap<String, String> multiFilter = (MultiValueMap<String, String>) filters.remove("multi-filter");
 
@@ -376,7 +370,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 entry.getValue().forEach(e -> entries.add(String.format("%s=%s", entry.getKey(), e)));
                 query.append(String.join(" OR ", entries));
 
-
                 if (iter.hasNext()) {
                     query.append(" OR ");
                 } else if (!filters.entrySet().isEmpty()) {
@@ -385,16 +378,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
         }
 
-        // FIXME: forEach filter join with AND (after removing multi-filter)
-
-        for (Iterator iter = filters.entrySet().iterator(); iter.hasNext(); ) {
-            query.append(iter.next());
-
-            if (iter.hasNext()) {
-                // TODO: decide if this will be AND or OR
-                query.append(" AND ");
-            }
-        }
+        List<String> andFilters = new ArrayList<>();
+        filters.forEach((key, value) -> andFilters.add(String.format("%s=%s", key, value)));
+        query.append(String.join(" AND ", andFilters));
 
         Paging<Resource> results = searchService.cqlQuery(query.toString(), getResourceType(), ff.getQuantity(), ff.getFrom(), "name", "ASC");
         return new Browsing<>(results.getTotal(), results.getFrom(), results.getTo(),
