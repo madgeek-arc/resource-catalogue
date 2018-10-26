@@ -182,7 +182,17 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    public List<Service> getActiveServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("providers", providerId);
+        ff.addFilter("active", "true");
+        ff.setQuantity(10000);
+        return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
+    }
+
+    @Override
     public Service getFeaturedService(String providerId) {
+        // TODO: change this method
         List<Service> services = getServices(providerId);
         Service featuredService = null;
         if (!services.isEmpty()) {

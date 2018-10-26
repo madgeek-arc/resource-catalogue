@@ -192,7 +192,7 @@ public class ServiceController {
 //        for (int i = 0; i < providers.size(); i++) {
             Random randomProvider = new Random();
             int rand = randomProvider.nextInt(providers.size());
-            services = providerService.getServices(providers.get(rand).getId());
+            services = providerService.getActiveServices(providers.get(rand).getId());
             providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
             if (!services.isEmpty()) {
                 Random random = new Random();

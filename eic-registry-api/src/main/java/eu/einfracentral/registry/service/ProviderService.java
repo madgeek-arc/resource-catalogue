@@ -18,6 +18,9 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     List<Service> getServices(String providerId);
 
 
+    List<Service> getActiveServices(String providerId);
+
+
     Service getFeaturedService(String providerId);
 
 
