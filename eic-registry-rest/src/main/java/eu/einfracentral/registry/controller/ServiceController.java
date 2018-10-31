@@ -245,7 +245,17 @@ public class ServiceController {
             facetFilter.setOrderBy(sort);
         }
         if (!allRequestParams.isEmpty()) {
-
+            Set<Map.Entry<String, List<Object>>> filterSet = allRequestParams.entrySet();
+            for (Map.Entry<String, List<Object>> entry: filterSet) {
+                // split values separated by comma to entries and replace existing <key,value> pair with the new one
+                allRequestParams.replace(entry.getKey(), new LinkedList<>(
+                        entry.getValue()
+                                .stream()
+                                .flatMap(e -> Arrays.stream(e.toString().split(",")))
+                                .distinct()
+                                .collect(Collectors.toList()))
+                );
+            }
             Map<String, Object> multiFilter = new HashMap<>();
             multiFilter.put("multi-filter", allRequestParams);
             facetFilter.setFilter(multiFilter);
