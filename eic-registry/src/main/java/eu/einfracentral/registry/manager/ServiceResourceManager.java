@@ -75,7 +75,13 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
         filter.setBrowseBy(getBrowseBy());
-        return getMatchingServices(filter);
+        try {
+            // if getMatchingServices() fails, print error and return getResults()
+            return getMatchingServices(filter);
+        } catch (Exception e) {
+            logger.error("ERROR: getMatchingServices failed", e);
+        }
+        return getResults(filter);
     }
 
     @Override
@@ -382,8 +388,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         filters.forEach((key, value) -> andFilters.add(String.format("%s=%s", key, value)));
         query.append(String.join(" AND ", andFilters));
 
-        Paging<Resource> results = searchService.cqlQuery(query.toString(), getResourceType(), ff.getQuantity(), ff.getFrom(), "name", "ASC");
-        return new Browsing<>(results.getTotal(), results.getFrom(), results.getTo(),
-                results.getResults().stream().map(this::deserialize).collect(toList()), results.getFacets());
+        if (!query.toString().equals("")) {
+            Paging<Resource> results = searchService.cqlQuery(query.toString(), getResourceType(), ff.getQuantity(), ff.getFrom(), "name", "ASC");
+            return new Browsing<>(results.getTotal(), results.getFrom(), results.getTo(),
+                    results.getResults().stream().map(this::deserialize).collect(toList()), results.getFacets());
+        }
+        return getResults(ff);
     }
 }
