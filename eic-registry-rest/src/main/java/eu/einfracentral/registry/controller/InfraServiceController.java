@@ -50,6 +50,19 @@ public class InfraServiceController {
         infraService.delete(service);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    @ApiIgnore
+    @RequestMapping(path = "delete/all/", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> services = infraService.getAll(ff, null).getResults();
+        for (InfraService service : services) {
+            logger.info(String.format("Deleting service with name: %s", service.getName()));
+            infraService.delete(service);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @RequestMapping(path = {"updateFields/all/"}, method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
