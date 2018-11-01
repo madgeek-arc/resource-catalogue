@@ -306,21 +306,23 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             providerMail = out.getBuffer().toString();
             out.flush();
 //            out.close();
-            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
+            // TODO: fix mail service and enable this
+//            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
             temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
             out.flush();
-            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+            // TODO: fix mail service and enable this
+//            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
             out.close();
         } catch (IOException e) {
             logger.error("Error finding mail template", e);
         } catch (TemplateException e) {
             logger.error("ERROR", e);
-        } catch (MessagingException e) {
-            logger.error("Could not send mail", e);
+//        } catch (MessagingException e) {
+//            logger.error("Could not send mail", e);
         }
     }
 }
