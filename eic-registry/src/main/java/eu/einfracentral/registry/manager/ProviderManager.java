@@ -265,6 +265,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         if (!serviceList.isEmpty()) {
             root.put("service", serviceList.get(0));
             serviceTemplate = serviceList.get(0);
+        } else {
+            serviceTemplate = new Service();
+            serviceTemplate.setName("");
         }
 //        switch (Provider.States.valueOf(provider.getStatus())) {
         switch (state) {
