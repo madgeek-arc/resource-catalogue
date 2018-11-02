@@ -8,10 +8,8 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.MailService;
-import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import freemarker.template.Configuration;
@@ -25,10 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -101,8 +97,40 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        authoritiesMapper.mapProviders(provider.getUsers());
+        if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
+            authoritiesMapper.mapProviders(provider.getUsers());
+        }
         return provider;
+    }
+
+    @Override
+    public Browsing<Provider> getAll(FacetFilter ff, Authentication auth) {
+        List<Provider> userProviders = null;
+        if (auth != null && auth.isAuthenticated()) {
+            if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                return super.getAll(ff, auth);
+            }
+            // if user is not an admin, check if he is a provider
+            User authUser = new User(auth);
+            userProviders = getMyServiceProviders(authUser.getEmail(), auth);
+        }
+        Browsing<Provider> providers = super.getAll(ff, auth);
+        List<Provider> modified = providers.getResults()
+                .stream()
+                .map(p -> {
+                    p.setUsers(null);
+                    return p;
+                })
+                .collect(Collectors.toList());
+
+        if (userProviders != null) {
+            userProviders.forEach(x -> {
+                modified.removeIf(provider -> provider.getId().equals(x.getId()));
+                modified.add(x);
+            });
+        }
+        providers.setResults(modified);
+        return providers;
     }
 
     @Override
@@ -153,12 +181,15 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    public List<Provider> getMyServiceProviders(String email) {
+    public List<Provider> getMyServiceProviders(String email, Authentication auth) {
+        if (auth == null) {
+            return new ArrayList<>();
+        }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        return getAll(ff, null).getResults()
+        return getAll(ff, auth).getResults()
                 .stream().map(p -> {
-                    if (p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> u.getEmail().equals(email))) {
+                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> u.getEmail().equals(email))) {
                         return p;
                     } else return null;
                 })

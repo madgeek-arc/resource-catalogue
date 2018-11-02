@@ -3,6 +3,8 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
@@ -48,6 +50,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @Override
     @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id);
         provider.setUsers(null);
@@ -71,7 +74,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     }
 
     @Override
-    @ApiIgnore
     @ApiOperation(value = "Get a list of all infraService providers in the catalogue")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -81,7 +83,12 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN')") // TODO
     public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return super.getAll(allRequestParams, auth);
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        ff.setFilter(allRequestParams);
+        return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
 
     @ApiOperation(value = "Get a list of services offered by a provider")
@@ -100,8 +107,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
 
     @ApiOperation(value = "Get a list of providers in which the given user is an admin")
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Provider>> getMyServiceProviders(@RequestParam("email") String email) {
-        return new ResponseEntity<>(providerManager.getMyServiceProviders(email), HttpStatus.OK);
+    public ResponseEntity<List<Provider>> getMyServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(providerManager.getMyServiceProviders(email, auth), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the pending services of the given provider")

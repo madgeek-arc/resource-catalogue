@@ -4,10 +4,12 @@ import com.nimbusds.jwt.JWT;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.mitre.openid.connect.client.OIDCAuthoritiesMapper;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,10 +32,13 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     private Map<String, SimpleGrantedAuthority> userRolesMap;
 
     private ProviderService<Provider, Authentication> providerService;
+    private SecurityService securityService;
 
     @Autowired
-    public EICAuthoritiesMapper(@Value("${eic.admins}") String admins, ProviderService<Provider, Authentication> manager) throws Exception {
+    public EICAuthoritiesMapper(@Value("${eic.admins}") String admins, ProviderService<Provider, Authentication> manager,
+                                SecurityService securityService) throws Exception {
         this.providerService = manager;
+        this.securityService = securityService;
         if (admins == null) {
             throw new Exception("No Admins Provided");
         }
@@ -42,7 +47,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         try {
-            List<Provider> providers = providerService.getAll(ff, null).getResults();
+            List<Provider> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
             if (providers != null) {
                 userRolesMap = providers
                         .stream()

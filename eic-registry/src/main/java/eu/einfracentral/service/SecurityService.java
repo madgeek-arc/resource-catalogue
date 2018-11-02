@@ -7,13 +7,14 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.AuthenticationInfo;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service("securityService")
 public class SecurityService {
@@ -25,6 +26,12 @@ public class SecurityService {
     SecurityService(ProviderManager providerManager, InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.providerManager = providerManager;
         this.infraServiceService = infraServiceService;
+    }
+
+    public Authentication getAdminAccess() {
+        List<GrantedAuthority> roles = new ArrayList<>();
+        roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        return new OIDCAuthenticationToken("", "", null, roles, null, "", "");
     }
 
     public boolean userIsProviderAdmin(Authentication auth, Provider provider) {

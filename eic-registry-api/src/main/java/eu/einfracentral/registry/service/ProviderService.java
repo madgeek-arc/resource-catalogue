@@ -3,6 +3,8 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -12,7 +14,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     @Override
     Provider add(Provider provider, Authentication authentication);
 
-    List<T> getMyServiceProviders(String email);
+    List<T> getMyServiceProviders(String email, Authentication authentication);
 
 
     List<Service> getServices(String providerId);
