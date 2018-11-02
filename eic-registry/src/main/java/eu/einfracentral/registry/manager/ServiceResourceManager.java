@@ -273,25 +273,28 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (infraService.getCategory() == null) {
             richService.setCategoryName("null");
         } else {
-            richService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getName());
+//            richService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getId());
+            richService.setCategoryName(infraService.getCategory());
         }
 
         if (infraService.getSubcategory() == null) {
             richService.setSubCategoryName("null");
         } else {
-            richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
+//            richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
+            richService.setSubCategoryName(infraService.getSubcategory());
         }
 
         //setLanguageNames
-        List<String> languageNames = new ArrayList<>();
+//        List<String> languageNames = new ArrayList<>();
         if (infraService.getLanguages() != null) {
-            for (String lang : infraService.getLanguages()) {
-                Vocabulary language = vocabularyManager.get("vocabulary_id", lang);
-                if (language != null) {
-                    languageNames.add(language.getName());
-                }
-            }
-            richService.setLanguageNames(languageNames);
+//            for (String lang : infraService.getLanguages()) {
+//                Vocabulary language = vocabularyManager.get("vocabulary_id", lang);
+                richService.setLanguageNames(infraService.getLanguages());
+//                if (language != null) {
+//                    languageNames.add(language.getName());
+//                }
+//            }
+//            richService.setLanguageNames(languageNames);
         }
 
         // set favourite
@@ -345,13 +348,16 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         // set visits
         Map<String, Integer> visits = statisticsService.visits(infraService.getId());
-        List<Integer> visitsList = new ArrayList<>(visits.values());
-        int visitSum = 0;
-        for (int i : visitsList) {
-            visitSum += i;
+        if (visits == null) {
+            richService.setViews(0);
+        } else {
+            List<Integer> visitsList = new ArrayList<>(visits.values());
+            int visitSum = 0;
+            for (int i : visitsList) {
+                visitSum += i;
+            }
+            richService.setViews(visitSum);
         }
-        richService.setViews(visitSum);
-
         return richService;
     }
 }

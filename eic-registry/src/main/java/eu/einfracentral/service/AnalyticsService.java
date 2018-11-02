@@ -40,13 +40,18 @@ public class AnalyticsService {
     }
 
     public Map<String, Integer> getVisitsForLabel(String label) {
-        return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label).fields(), Spliterator.NONNULL), false).collect(
-                Collectors.toMap(
-                        Map.Entry::getKey,
-                        dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
-                )
-        );
+        try {
+            return StreamSupport.stream(
+                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label).fields(), Spliterator.NONNULL), false).collect(
+                    Collectors.toMap(
+                            Map.Entry::getKey,
+                            dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
+                    )
+            );
+        } catch (Exception e){
+            logger.error("Cannot find visits for the specific Service.", e);
+        }
+        return null;
     }
 
     private JsonNode getAnalyticsForLabel(String label) {

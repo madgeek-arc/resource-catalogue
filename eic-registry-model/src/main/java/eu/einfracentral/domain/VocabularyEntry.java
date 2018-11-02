@@ -21,7 +21,7 @@ public class VocabularyEntry {
     @XmlElement(name = "child")
     private List<VocabularyEntry> children;
 
-    @XmlJavaTypeAdapter(MapAdapter.class)
+    @XmlJavaTypeAdapter(ExtrasMapAdapter.class)
     private Map<String, String> extras = new HashMap<>();
 
     public String getId() {
