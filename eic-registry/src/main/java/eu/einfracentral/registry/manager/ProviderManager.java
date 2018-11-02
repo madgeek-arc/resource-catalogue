@@ -183,7 +183,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public List<Provider> getMyServiceProviders(String email, Authentication auth) {
         if (auth == null) {
-            return new ArrayList<>();
+            return null;
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);

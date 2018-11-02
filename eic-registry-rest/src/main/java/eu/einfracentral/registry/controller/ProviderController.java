@@ -108,7 +108,11 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @ApiOperation(value = "Get a list of providers in which the given user is an admin")
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getMyServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(providerManager.getMyServiceProviders(email, auth), HttpStatus.OK);
+        List<Provider> providers = providerManager.getMyServiceProviders(email, auth);
+        if (providers == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the pending services of the given provider")
