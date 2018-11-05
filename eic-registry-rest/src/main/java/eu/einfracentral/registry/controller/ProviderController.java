@@ -50,10 +50,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @Override
     @ApiOperation(value = "Get provider’s data providing the provider id")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.get(id);
-        provider.setUsers(null);
+        Provider provider = providerManager.get(id, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -104,11 +102,20 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Get a list of providers in which the given user is an admin")
+    @RequestMapping(path = "getServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
+        List<Provider> providers = providerManager.getServiceProviders(email, auth);
+        if (providers == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(providers, HttpStatus.OK);
+    }
 
     @ApiOperation(value = "Get a list of providers in which the given user is an admin")
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Provider>> getMyServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
-        List<Provider> providers = providerManager.getMyServiceProviders(email, auth);
+    public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
+        List<Provider> providers = providerManager.getMyServiceProviders(auth);
         if (providers == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }

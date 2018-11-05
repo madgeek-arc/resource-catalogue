@@ -34,6 +34,10 @@ public class SecurityService {
         return new OIDCAuthenticationToken("", "", null, roles, null, "", "");
     }
 
+    public boolean hasRole(Authentication auth, String role) {
+        return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
     public boolean userIsProviderAdmin(Authentication auth, Provider provider) {
         Provider registeredProvider = providerManager.get(provider.getId());
         String email = AuthenticationInfo.getEmail(auth);

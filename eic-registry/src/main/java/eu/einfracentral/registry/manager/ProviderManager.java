@@ -8,6 +8,7 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.MailService;
+import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -21,7 +22,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -36,18 +39,21 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private MailService mailService;
     private EICAuthoritiesMapper authoritiesMapper;
     private Configuration cfg;
+    private SecurityService securityService;
 
     @Value("${webapp.front:beta.einfracentral.eu}")
     private String endpoint;
 
     @Autowired
     public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService,
-                           @Lazy EICAuthoritiesMapper authoritiesMapper, Configuration cfg) {
+                           @Lazy EICAuthoritiesMapper authoritiesMapper, Configuration cfg,
+                           @Lazy SecurityService securityService) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.mailService = mailService;
         this.authoritiesMapper = authoritiesMapper;
         this.cfg = cfg;
+        this.securityService = securityService;
     }
 
 
@@ -104,15 +110,29 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    public Provider get(String id, Authentication auth) {
+        Provider provider = get(id);
+        if (auth == null) {
+            provider.setUsers(null);
+        } else if (securityService.hasRole(auth, "ROLE_ADMIN")) { // TODO: consider making a method for this
+            return provider;
+        }
+        else if (securityService.hasRole(auth, "ROLE_PROVIDER") && securityService.userIsProviderAdmin(auth, provider)) {
+            return provider;
+        }
+        return provider;
+    }
+
+    @Override
     public Browsing<Provider> getAll(FacetFilter ff, Authentication auth) {
         List<Provider> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
-            if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            if (securityService.hasRole(auth, "ROLE_ADMIN")) {
                 return super.getAll(ff, auth);
             }
             // if user is not an admin, check if he is a provider
             User authUser = new User(auth);
-            userProviders = getMyServiceProviders(authUser.getEmail(), auth);
+            userProviders = getMyServiceProviders(auth);
         }
         Browsing<Provider> providers = super.getAll(ff, auth);
         List<Provider> modified = providers.getResults()
@@ -180,16 +200,42 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return super.update(provider, auth);
     }
 
+    // TODO: CHECK THIS!!!
     @Override
-    public List<Provider> getMyServiceProviders(String email, Authentication auth) {
+    public List<Provider> getServiceProviders(String email, Authentication auth) {
+        List<Provider> providers;
+        if (auth == null) {
+            return null;
+        } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
+            FacetFilter ff = new FacetFilter();
+            ff.setQuantity(10000);
+            providers = super.getAll(ff, null).getResults();
+        } else if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
+            providers = getMyServiceProviders(auth);
+        } else {
+            providers = new ArrayList<>();
+        }
+        return providers
+                .stream()
+                .map(p -> {
+                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> u.getEmail().equals(email))) {
+                        return p;
+                    } else return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Provider> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
             return null;
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        return getAll(ff, auth).getResults()
+        return super.getAll(ff, null).getResults()
                 .stream().map(p -> {
-                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> u.getEmail().equals(email))) {
+                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> u.getEmail().equals(new User(auth).getEmail()))) {
                         return p;
                     } else return null;
                 })

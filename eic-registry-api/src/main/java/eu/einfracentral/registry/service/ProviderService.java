@@ -14,7 +14,14 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     @Override
     Provider add(Provider provider, Authentication authentication);
 
-    List<T> getMyServiceProviders(String email, Authentication authentication);
+    
+    Provider get(String id, Authentication auth);
+
+
+    List<Provider> getServiceProviders(String email, Authentication authentication);
+
+
+    List<Provider> getMyServiceProviders(Authentication authentication);
 
 
     List<Service> getServices(String providerId);
@@ -26,11 +33,11 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     Service getFeaturedService(String providerId);
 
 
-    List<T> getInactive();
+    List<Provider> getInactive();
 
 
     List<InfraService> getInactiveServices(String providerId);
 
 
-    T verifyProvider(String id, Provider.States status, Boolean active, U auth);
+    Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth);
 }
