@@ -17,6 +17,24 @@ public class Vocabulary implements Identifiable {
     @XmlJavaTypeAdapter(EntryMapAdapter.class)
     private Map<String, VocabularyEntry> entries;  // = new HashMap<>();
 
+    public enum Types {
+        CATEGORIES("categories"),
+        LANGUAGES("languages"),
+        PLACES("places"),
+        TRL("trl"),
+        LIFE_CYCLE_STATUS("lifecyclestatus");
+
+        private final String type;
+
+        Types(final String type) {
+            this.type = type;
+        }
+
+        public String getKey() {
+            return type;
+        }
+    }
+
     @Override
     public String getId() {
         return id;

@@ -6,6 +6,8 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,51 +47,21 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return new ResponseEntity<>(vocabularyService.getRegion("WW"), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the list of languages.")
-    @RequestMapping(path = "languages", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getLanguages() {
+    @ApiOperation(value = "Returns the entries of the specified vocabulary type")
+    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<Vocabulary>> get(@RequestParam Vocabulary.Types type) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("vocabulary_id", "languages");
+        ff.addFilter("vocabulary_id", type.getKey());
         return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the list of places.")
-    @RequestMapping(path = "places", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getPlaces() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("vocabulary_id", "places");
-        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns the list of categories.")
-    @RequestMapping(path = "categories", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getCategories() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("vocabulary_id", "categories");
-        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns the list of lifeCycleStatus.")
-    @RequestMapping(path = "lifeCycleStatus", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getLifeCycleStatus() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("vocabulary_id", "lifecyclestatus");
-        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns the list of TRL.")
-    @RequestMapping(path = "TRL", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getTRL() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("vocabulary_id", "trl");
-        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
-    }
-
+    @ApiOperation(value = "Returns all vocabularies")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
+    })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Paging<Vocabulary> vocabularies = super.getAll(allRequestParams, auth).getBody();
