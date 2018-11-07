@@ -1,25 +1,21 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import java.util.List;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Map;
 
-@XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Vocabulary implements Identifiable {
+
     @XmlElement(required = true)
     private String id;
+
     @XmlElement(required = true)
     private String name;
-    @XmlElement(required = true)
-    private String type;
-    @XmlElement
-    private String parent;
-    @XmlElementWrapper(name = "extras")
-    @XmlElement(name = "extra")
-    private List<String> extras;
+
+    @XmlJavaTypeAdapter(EntryMapAdapter.class)
+    private Map<String, VocabularyEntry> entries;  // = new HashMap<>();
 
     @Override
     public String getId() {
@@ -39,27 +35,11 @@ public class Vocabulary implements Identifiable {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public Map<String, VocabularyEntry> getEntries() {
+        return entries;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getParent() {
-        return parent;
-    }
-
-    public void setParent(String parent) {
-        this.parent = parent;
-    }
-
-    public List<String> getExtras() {
-        return extras;
-    }
-
-    public void setExtras(List<String> extras) {
-        this.extras = extras;
+    public void setEntries(Map<String, VocabularyEntry> entries) {
+        this.entries = entries;
     }
 }

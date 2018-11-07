@@ -1,10 +1,9 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.ServiceMetadata;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.Browsing;
@@ -50,10 +49,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     private String getUser(Authentication auth) {
-        if (auth instanceof OIDCAuthenticationToken) {
             return ((OIDCAuthenticationToken) auth).getUserInfo().getName();
-        } else
-            throw new AccessDeniedException("not an OIDCAuthentication");
+
     }
 
     @Override
@@ -162,7 +159,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
         validateServices(service);
-        validateProviders(service);
         validateVocabularies(service);
         ServiceValidators.validateName(service);
         ServiceValidators.validateURL(service);
@@ -173,48 +169,108 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ServiceValidators.validateOrder(service);
         ServiceValidators.validateSLA(service);
         ServiceValidators.validateMaxLength(service);
+        validateProviders(service);
         return true;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
-    private InfraService migrate(InfraService service) throws DatatypeConfigurationException, MalformedURLException {
+//    private InfraService migrate(InfraService service) throws MalformedURLException {
+//        service.setActive(true);
+//        service.setOrder(service.getRequests() != null ? service.getRequests() : service.getUrl());
+//
+//        //Change Service's trl according to the new vocabularies
+//        String trl = service.getTrl();
+//        service.setTrl(trl.toLowerCase());
+//
+//        //Change Service's lifeCycleStatus according to the new vocabularies
+//        String lifecyclestatus = service.getLifeCycleStatus();
+//        String[] lfc = lifecyclestatus.split("-");
+//        String lfc2 = lfc.length == 2 ? lfc[1] : lfc[0];
+//        service.setLifeCycleStatus(lfc2.toLowerCase());
+//
+//        //Change Service's categories according to the new vocabularies
+//        String category = service.getCategory();
+//        String [] ctg = category.split("-");
+//        String ctg2 = ctg.length == 2 ? ctg[1] : ctg[0];
+//        service.setCategory(ctg2.toLowerCase());
+//
+//        //Change Service's subcategories according to the new vocabularies
+//        String subcategory = service.getSubcategory();
+//        subcategory = subcategory.replace("Subcategory-","");
+//        service.setSubcategory(subcategory.toLowerCase());
+//
+//        //Change Service's places according to the new vocabularies
+//        List<String> places = service.getPlaces();
+//        List<String> placesNew = new ArrayList<>();
+//        for (int i=0; i<places.size(); i++){
+//            if (places.get(i).contains("-")){
+//                String[] pl = places.get(i).split("-");
+//                String pl2 = pl[1];
+//                if (pl2.equals("WW")){
+//                    pl2 = "world";
+//                } else {
+//                    pl2 = "europe";
+//                }
+//                placesNew.add(pl2);
+//            }
+//        }
+//        service.setPlaces(placesNew);
+//
+//        //Change Service's languages according to the new vocabularies
+//        List<String> languages = service.getLanguages();
+//        List<String> languagesNew = new ArrayList<>();
+//        if (languages.size() == 1){
+//            languagesNew.add("english");
+//        } else {
+//            languagesNew.add("english");
+//            languagesNew.add("french");
+//            languagesNew.add("danish");
+//            languagesNew.add("bulgarian");
+//            languagesNew.add("german");
+//            languagesNew.add("greek");
+//            languagesNew.add("albanian");
+//        }
+//        service.setLanguages(languagesNew);
+//
+//
+//        String id = service.getId();
+//        if (id.equals("egi.egi_marketplace")){
+//            List<String> languagesNew = new ArrayList<>();
+//            languagesNew.add("english");
+//            service.setLanguages(languagesNew);
+//            service.setSubcategory("tools");
+//            service.setCategory("operations");
+//            List<String> placesNew = new ArrayList<>();
+//            placesNew.add("europe");
+//            service.setPlaces(placesNew);
+//            service.setLifeCycleStatus("production");
+//            service.setTrl("trl-9");
+//        }
 
-        service.setActive(true);
-        service.setOrder(service.getRequests() != null ? service.getRequests() : service.getUrl());
 
 
-        if (service.getTags() == null) {
-            List<String> tags = new ArrayList<>();
-            service.setTags(tags);
-        }
-        if (service.getTargetUsers() == null) {
-            service.setTargetUsers("-");
-        }
-        if (service.getPlaces() == null) {
-            List<String> places = new ArrayList<>();
-            places.add("Place-WW");
-            service.setPlaces(places);
-        }
-        if (service.getSymbol() == null) {
-            service.setSymbol(new URL("http://fvtelibrary.com/img/user/NoLogo.png"));
-        }
-        if (service.getLanguages() == null) {
-            List<String> languages = new ArrayList<>();
-            languages.add("Language-en");
-            service.setLanguages(languages);
-        }
-        if (service.getLastUpdate() == null) {
-            GregorianCalendar date = new GregorianCalendar(2000, 1, 1);
-            service.setLastUpdate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
-        }
-        if (service.getVersion() == null) {
-            service.setVersion("0");
-        } else {
-            service.setVersion(service.getVersion());
-        }
+//        if (service.getTags() == null) {
+//            List<String> tags = new ArrayList<>();
+//            service.setTags(tags);
+//        }
+//        if (service.getTargetUsers() == null) {
+//            service.setTargetUsers("-");
+//        }
+//        if (service.getSymbol() == null) {
+//            service.setSymbol(new URL("http://fvtelibrary.com/img/user/NoLogo.png"));
+//        }
+//        if (service.getLastUpdate() == null) {
+//            GregorianCalendar date = new GregorianCalendar(2000, 1, 1);
+//            service.setLastUpdate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
+//        }
+//        if (service.getVersion() == null) {
+//            service.setVersion("0");
+//        } else {
+//            service.setVersion(service.getVersion());
+//        }
 
-        return service;
-    }
+//        return service;
+//    }
 
     private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
         ServiceMetadata ret;
@@ -247,41 +303,75 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     private void validateVocabularies(InfraService service) {
-        if (service.getCategory() == null || !vocabularyManager.exists(
-                new SearchService.KeyValue("type", "Category"),
-                new SearchService.KeyValue("vocabulary_id", service.getCategory()))) {
-            throw new ValidationException(String.format("Category '%s' does not exist.", service.getCategory()));
-        }
-        if (service.getSubcategory() == null || !vocabularyManager.exists(
-                new SearchService.KeyValue("type", "Subcategory"),
-                new SearchService.KeyValue("vocabulary_id", service.getSubcategory()))) {
-            throw new ValidationException(String.format("Subcategory '%s' does not exist.", service.getSubcategory()));
-        }
 
-        if (service.getPlaces() != null && CollectionUtils.isNotEmpty(service.getPlaces())) {
-            if (!service.getPlaces().parallelStream().allMatch(place -> vocabularyManager.exists(
-                    new SearchService.KeyValue("type", "Place"),
-                    new SearchService.KeyValue("vocabulary_id", place)))) {
-                throw new ValidationException("One or more places do not exist.");
+        //Validate Categories/Subcategories
+        if (service.getCategory() != null) {
+            Vocabulary categories = vocabularyManager.get("categories");
+            VocabularyEntry category = categories.getEntries().get(service.getCategory());
+            if (category == null) throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
+            List<VocabularyEntry> subcategory = category.getChildren();
+            if (service.getSubcategory() == null) {
+                throw new ValidationException("Field 'subcategory' is mandatory.");
             }
-        } else throw new ValidationException("field 'places' is obligatory");
-        if (service.getLanguages() != null && CollectionUtils.isNotEmpty(service.getLanguages())) {
-            if (!service.getLanguages().parallelStream().allMatch(lang -> vocabularyManager.exists(
-                    new SearchService.KeyValue("type", "Language"),
-                    new SearchService.KeyValue("vocabulary_id", lang)))) {
-                throw new ValidationException("One or more languages do not exist.");
+            boolean flag = false;
+            for (VocabularyEntry aSubcategory : subcategory) {
+                if (aSubcategory.getId().equals(service.getSubcategory())) {
+                    flag = true;
+                    break;
+                }
             }
-        } else throw new ValidationException("field 'languages' is obligatory");
-        if (service.getLifeCycleStatus() == null || !vocabularyManager.exists(
-                new SearchService.KeyValue("type", "LifeCycleStatus"),
-                new SearchService.KeyValue("vocabulary_id", service.getLifeCycleStatus()))) {
-            throw new ValidationException(String.format("lifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
-        }
-        if (service.getTrl() == null || !vocabularyManager.exists(
-                new SearchService.KeyValue("type", "TRL"),
-                new SearchService.KeyValue("vocabulary_id", service.getTrl()))) {
-            throw new ValidationException(String.format("trl '%s' does not exist.", service.getTrl()));
-        }
+            if (!flag) {
+                throw new ValidationException(String.format("subcategory '%s' does not exist.", service.getSubcategory()));
+            }
+        }  else throw new ValidationException("Field 'category' is mandatory.");
+
+        //Validate Places
+        if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
+            Map<String, VocabularyEntry> places = vocabularyManager.get("places").getEntries();
+            List<String> servicePlaces = service.getPlaces();
+            List<String> notFoundPlaces = new ArrayList<>();
+            for (String place :servicePlaces) {
+                VocabularyEntry placeFound = places.get(place);
+                if (placeFound == null) {
+                    notFoundPlaces.add(place);
+                }
+            }
+            if (!notFoundPlaces.isEmpty()) {
+                throw new ValidationException(String.format("Places not found: %s", String.join(", ", notFoundPlaces)));
+            }
+        } else throw new ValidationException("Field 'places' is mandatory.");
+
+        //Validate Languages
+        if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
+            Map<String, VocabularyEntry> languages = vocabularyManager.get("languages").getEntries();
+            List<String> serviceLanguages = service.getLanguages();
+            List<String> notFoundLanguages = new ArrayList<>();
+            for (String language :serviceLanguages) {
+                VocabularyEntry languageFound = languages.get(language);
+                if (languageFound == null) {
+                    notFoundLanguages.add(language);
+                }
+            }
+            if (!notFoundLanguages.isEmpty()) {
+                throw new ValidationException(String.format("Languages not found: %s", String.join(", ", notFoundLanguages)));
+            }
+        } else throw new ValidationException("Field 'languages' is mandatory.");
+
+        //Validate LifeCycleStatus
+        if (service.getLifeCycleStatus() != null) {
+            Vocabulary lifecyclestatus = vocabularyManager.get("lifecyclestatus");
+            VocabularyEntry lfc = lifecyclestatus.getEntries().get(service.getLifeCycleStatus());
+            if (lfc == null)
+                throw new ValidationException(String.format("LifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
+        } else throw new ValidationException("Field 'lifeCycleStatus' is mandatory.");
+
+        //Validate TRL
+        if (service.getTrl() != null) {
+            Vocabulary trl = vocabularyManager.get("trl");
+            VocabularyEntry TRL = trl.getEntries().get(service.getTrl());
+            if (TRL == null)
+                throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
+        } else throw new ValidationException("Field 'trl' is mandatory.");
     }
 
     //validates the correctness of Providers.
