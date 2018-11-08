@@ -28,7 +28,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         ServiceInterface<InfraService, InfraService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
-    private Map<String, String> labels;
+    private Map<String, String> labels = null;
 
     public ServiceResourceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
@@ -396,11 +396,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             ff.setFilter(null);
             Paging<Resource> results = searchService.cqlQuery(ff);
 
-            // TODO: get this from core or find a way to get it from AbstractGenericService
-            labels = new HashMap<>();
-            Set<IndexField> indexFields = resourceTypeService.getResourceTypeIndexFields(getResourceType());
-            indexFields.forEach(f -> labels.put(f.getName(), f.getLabel()));
+            // TODO: get labels from core or find a way to get them from AbstractGenericService
+            if (labels == null) {
+                labels = new HashMap<>();
+                Set<IndexField> indexFields = resourceTypeService.getResourceTypeIndexFields(getResourceType());
+                indexFields.forEach(f -> labels.put(f.getName(), f.getLabel()));
+            }
 
+            // set facet labels (because cqlQuery does not return them)
             results.getFacets().forEach(f -> f.setLabel(labels.get(f.getField())));
             return new Browsing<>(results.getTotal(), results.getFrom(), results.getTo(),
                     results.getResults().stream().map(this::deserialize).collect(toList()), results.getFacets());
