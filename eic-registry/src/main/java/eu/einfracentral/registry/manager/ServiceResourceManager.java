@@ -6,6 +6,7 @@ import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +28,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         ServiceInterface<InfraService, InfraService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
+    private Map<String, String> labels;
 
     public ServiceResourceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
@@ -380,7 +382,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 if (iter.hasNext()) {
                     query.append(" OR ");
                 } else if (!filters.entrySet().isEmpty()) {
-                        query.append(" AND ");
+                    query.append(" AND ");
                 }
             }
         }
@@ -393,6 +395,13 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             ff.setKeyword(query.toString());
             ff.setFilter(null);
             Paging<Resource> results = searchService.cqlQuery(ff);
+
+            // TODO: get this from core or find a way to get it from AbstractGenericService
+            labels = new HashMap<>();
+            Set<IndexField> indexFields = resourceTypeService.getResourceTypeIndexFields(getResourceType());
+            indexFields.forEach(f -> labels.put(f.getName(), f.getLabel()));
+
+            results.getFacets().forEach(f -> f.setLabel(labels.get(f.getField())));
             return new Browsing<>(results.getTotal(), results.getFrom(), results.getTo(),
                     results.getResults().stream().map(this::deserialize).collect(toList()), results.getFacets());
         }
