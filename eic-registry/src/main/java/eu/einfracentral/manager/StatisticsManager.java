@@ -24,10 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -129,7 +126,12 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> visits(String id) {
-        return analyticsService.getVisitsForLabel("service/" + id);
+        try {
+            return analyticsService.getVisitsForLabel("service/" + id);
+        } catch (Exception e) {
+            logger.error("Could not find Matomo analytics", e);
+        }
+        return new HashMap<>();
     }
 
     @Override
