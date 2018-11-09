@@ -113,8 +113,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider get(String id, Authentication auth) {
         Provider provider = get(id);
         if (auth == null) {
-//            provider.setUsers(null); // TODO: enable this to send 401
-            provider.setUsers(new ArrayList<>());
+            provider.setUsers(null);
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) { // TODO: consider making a method for this
             return provider;
         }
