@@ -157,7 +157,10 @@ public class ServiceController {
         }
         Map<String, List<Service>> serviceResults = new HashMap<>();
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
-            serviceResults.put(services.getKey(), services.getValue().stream().filter(InfraService::getActive).map(Service::new).collect(Collectors.toList()));
+            List<Service> items = services.getValue().stream().filter(s -> s.getActive() != null ? s.getActive() : false).map(Service::new).collect(Collectors.toList());
+            if (!items.isEmpty()) {
+                serviceResults.put(services.getKey(), items);
+            }
         }
         return ResponseEntity.ok(serviceResults);
     }
