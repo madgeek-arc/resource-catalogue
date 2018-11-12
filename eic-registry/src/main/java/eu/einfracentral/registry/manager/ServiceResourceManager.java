@@ -378,7 +378,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 entry.getValue().forEach(e -> entries.add(String.format("%s=%s", entry.getKey(), e)));
                 query.append(String.join(" OR ", entries));
 
-                if (iter.hasNext()) {
+                if (iter.hasNext() || !filters.isEmpty()) {
                     query.append(" AND ");
                 }
             }
@@ -386,9 +386,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         List<String> andFilters = new ArrayList<>();
         filters.forEach((key, value) -> andFilters.add(String.format("%s=%s", key, value)));
-        if (!andFilters.isEmpty()) {
-            query.append(" AND ");
-        }
         query.append(String.join(" AND ", andFilters));
 
         if (!query.toString().equals("")) {
