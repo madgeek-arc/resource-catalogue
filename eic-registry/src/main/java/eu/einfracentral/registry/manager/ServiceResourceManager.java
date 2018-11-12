@@ -76,13 +76,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
         filter.setBrowseBy(getBrowseBy());
         filter.setResourceType(getResourceType());
-        try {
-            // if getMatchingServices() fails, print error and return getResults()
-            return getMatchingServices(filter);
-        } catch (Exception e) {
-            logger.error("ERROR: getMatchingServices failed", e);
-        }
-        return getResults(filter);
+        return getMatchingServices(filter);
     }
 
     @Override
@@ -370,6 +364,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
+        Browsing<InfraService> services = null;
         StringBuilder query = new StringBuilder();
         Map<String, Object> filters = ff.getFilter();
 
@@ -384,24 +379,45 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 query.append(String.join(" OR ", entries));
 
                 if (iter.hasNext()) {
-                    query.append(" OR ");
-                } else if (!filters.entrySet().isEmpty()) {
-                        query.append(" AND ");
+                    query.append(" AND ");
                 }
             }
         }
 
         List<String> andFilters = new ArrayList<>();
         filters.forEach((key, value) -> andFilters.add(String.format("%s=%s", key, value)));
+        if (!andFilters.isEmpty()) {
+            query.append(" AND ");
+        }
         query.append(String.join(" AND ", andFilters));
 
         if (!query.toString().equals("")) {
             ff.setKeyword(query.toString());
             ff.setFilter(null);
-            Paging<Resource> results = searchService.cqlQuery(ff);
-            return new Browsing<>(results.getTotal(), results.getFrom(), results.getTo(),
-                    results.getResults().stream().map(this::deserialize).collect(toList()), results.getFacets());
+            services = cqlQuery(ff);
+        } else {
+            services = getResults(ff);
         }
-        return getResults(ff);
+        services.setFacets(createFacetValueLabels(services.getFacets()));
+        return services;
+    }
+
+    // FIXME: replace this method
+    List<Facet> createFacetValueLabels(List<Facet> facets) { // TODO: core should probably return these values
+        return facets.stream()
+                .peek(f -> f.setValues(f.getValues()
+                        .stream()
+                        .peek(value -> {
+                            String val = value.getValue();
+                            value.setLabel(toProperCase(toProperCase(val, "-", "-"), "_", " "));
+                        })
+                        .collect(Collectors.toList())))
+                .collect(Collectors.toList());
+    }
+
+    // FIXME: remove this as well
+    String toProperCase(String str, String delimiter, String newDelimiter) {
+        return String.join(newDelimiter, Arrays.stream(str.split(delimiter)).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
+                .collect(Collectors.toList()));
     }
 }
