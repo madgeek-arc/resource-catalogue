@@ -24,7 +24,7 @@ import java.util.Objects;
         "eu.openminted.registry.core.service",
         "eu.einfracentral.manager",
         "eu.einfracentral.registry.manager",
-//        "eu.einfracentral.core",
+        "eu.einfracentral.utils",
         "eu.einfracentral.service"})
 @EnableSpringHttpSession
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {

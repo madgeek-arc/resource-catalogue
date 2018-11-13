@@ -10,7 +10,10 @@ public class RichService extends Service {
     private ServiceMetadata serviceMetadata;
     private String categoryName;
     private String subCategoryName;
+    private String trlName;
+    private String lifeCycleStatusName;
     private List<String> languageNames;
+    private List<String> placeNames;
     private int views;
     private int ratings;
     private float userRate;
@@ -115,4 +118,27 @@ public class RichService extends Service {
         this.userRate = userRate;
     }
 
+    public String getTrlName() {
+        return trlName;
+    }
+
+    public void setTrlName(String trlName) {
+        this.trlName = trlName;
+    }
+
+    public String getLifeCycleStatusName() {
+        return lifeCycleStatusName;
+    }
+
+    public void setLifeCycleStatusName(String lifeCycleStatusName) {
+        this.lifeCycleStatusName = lifeCycleStatusName;
+    }
+
+    public List<String> getPlaceNames() {
+        return placeNames;
+    }
+
+    public void setPlaceNames(List<String> placeNames) {
+        this.placeNames = placeNames;
+    }
 }

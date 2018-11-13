@@ -3,8 +3,11 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.manager.StatisticsManager;
+import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
+import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
@@ -36,13 +39,16 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private VersionService versionService;
 
     @Autowired
-    private VocabularyManager vocabularyManager;
+    private VocabularyService vocabularyManager;
 
     @Autowired
-    private EventManager eventManager;
+    private EventService eventManager;
 
     @Autowired
     private StatisticsManager statisticsService;
+
+    @Autowired
+    private FacetLabelService facetLabelService;
 
     @Override
     public String getResourceType() {
@@ -270,33 +276,59 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public RichService createRichService(InfraService infraService, Authentication auth) {
         RichService richService = new RichService(infraService);
+        List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
 
-        //setCategoryName & setSubcategoryName
-        if (infraService.getCategory() == null) {
-            richService.setCategoryName("null");
-        } else {
-//            richService.setCategoryName(vocabularyManager.get("vocabulary_id", infraService.getCategory()).getId());
-            richService.setCategoryName(infraService.getCategory());
-        }
+        for (Vocabulary vocabulary : vocabularies) {
+            switch (vocabulary.getId()) {
+                case "categories":
+                    if (infraService.getCategory() != null) {
+                        richService.setCategoryName(vocabulary.getEntries().get(infraService.getCategory()).getName());
+                    }
 
-        if (infraService.getSubcategory() == null) {
-            richService.setSubCategoryName("null");
-        } else {
-//            richService.setSubCategoryName(vocabularyManager.get("vocabulary_id", infraService.getSubcategory()).getName());
-            richService.setSubCategoryName(infraService.getSubcategory());
-        }
+                    if (infraService.getSubcategory() != null) {
+                        List<VocabularyEntry> subcategories = vocabulary.getEntries().get(infraService.getCategory()).getChildren();
+                        for (VocabularyEntry entry : subcategories) {
+                            if (entry.getId().equals(infraService.getSubcategory())) {
+                                richService.setSubCategoryName(entry.getName());
+                                break;
+                            }
+                        }
+                    }
+                    break;
 
-        //setLanguageNames
-//        List<String> languageNames = new ArrayList<>();
-        if (infraService.getLanguages() != null) {
-//            for (String lang : infraService.getLanguages()) {
-//                Vocabulary language = vocabularyManager.get("vocabulary_id", lang);
-                richService.setLanguageNames(infraService.getLanguages());
-//                if (language != null) {
-//                    languageNames.add(language.getName());
-//                }
-//            }
-//            richService.setLanguageNames(languageNames);
+                case "languages":
+                    if (infraService.getLanguages() != null) {
+                        richService.setLanguageNames(infraService.getLanguages()
+                                .stream()
+                                .map(l -> vocabulary.getEntries().get(l).getName())
+                                .collect(Collectors.toList())
+                        );
+                    }
+                    break;
+
+                case "places":
+                    if (infraService.getPlaces() != null) {
+                        richService.setPlaceNames(infraService.getPlaces()
+                                .stream()
+                                .map(p -> vocabulary.getEntries().get(p).getName())
+                                .collect(Collectors.toList())
+                        );
+                    }
+                    break;
+
+                case "trl":
+                    if (infraService.getTrl() != null) {
+                        richService.setTrlName(vocabulary.getEntries().get(infraService.getTrl()).getName());
+                    }
+                    break;
+
+                case "lifecyclestatus":
+                    if (infraService.getLifeCycleStatus() != null) {
+                        richService.setLifeCycleStatusName(vocabulary.getEntries().get(infraService.getLifeCycleStatus()).getName());
+                    }
+                    break;
+                default:
+            }
         }
 
         // set favourite
@@ -395,26 +427,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         } else {
             services = getResults(ff);
         }
-        services.setFacets(createFacetValueLabels(services.getFacets()));
+
+        facetLabelService.createLabels(services.getFacets());
         return services;
     }
 
-    // FIXME: replace this method
-    List<Facet> createFacetValueLabels(List<Facet> facets) { // TODO: core should probably return these values
-        return facets.stream()
-                .peek(f -> f.setValues(f.getValues()
-                        .stream()
-                        .peek(value -> {
-                            String val = value.getValue();
-                            value.setLabel(toProperCase(toProperCase(val, "-", "-"), "_", " "));
-                        })
-                        .collect(Collectors.toList())))
-                .collect(Collectors.toList());
-    }
-
-    // FIXME: remove this as well
-    String toProperCase(String str, String delimiter, String newDelimiter) {
-        return String.join(newDelimiter, Arrays.stream(str.split(delimiter)).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
-                .collect(Collectors.toList()));
-    }
 }

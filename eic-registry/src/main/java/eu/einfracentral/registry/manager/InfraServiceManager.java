@@ -3,7 +3,6 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.Browsing;
@@ -17,16 +16,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
@@ -49,7 +44,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     private String getUser(Authentication auth) {
-            return ((OIDCAuthenticationToken) auth).getUserInfo().getName();
+        return ((OIDCAuthenticationToken) auth).getUserInfo().getName();
 
     }
 
@@ -248,7 +243,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //        }
 
 
-
 //        if (service.getTags() == null) {
 //            List<String> tags = new ArrayList<>();
 //            service.setTags(tags);
@@ -308,7 +302,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         if (service.getCategory() != null) {
             Vocabulary categories = vocabularyManager.get("categories");
             VocabularyEntry category = categories.getEntries().get(service.getCategory());
-            if (category == null) throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
+            if (category == null)
+                throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
             List<VocabularyEntry> subcategory = category.getChildren();
             if (service.getSubcategory() == null) {
                 throw new ValidationException("Field 'subcategory' is mandatory.");
@@ -323,14 +318,14 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             if (!flag) {
                 throw new ValidationException(String.format("subcategory '%s' does not exist.", service.getSubcategory()));
             }
-        }  else throw new ValidationException("Field 'category' is mandatory.");
+        } else throw new ValidationException("Field 'category' is mandatory.");
 
         //Validate Places
         if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
             Map<String, VocabularyEntry> places = vocabularyManager.get("places").getEntries();
             List<String> servicePlaces = service.getPlaces();
             List<String> notFoundPlaces = new ArrayList<>();
-            for (String place :servicePlaces) {
+            for (String place : servicePlaces) {
                 VocabularyEntry placeFound = places.get(place);
                 if (placeFound == null) {
                     notFoundPlaces.add(place);
@@ -346,7 +341,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             Map<String, VocabularyEntry> languages = vocabularyManager.get("languages").getEntries();
             List<String> serviceLanguages = service.getLanguages();
             List<String> notFoundLanguages = new ArrayList<>();
-            for (String language :serviceLanguages) {
+            for (String language : serviceLanguages) {
                 VocabularyEntry languageFound = languages.get(language);
                 if (languageFound == null) {
                     notFoundLanguages.add(language);
