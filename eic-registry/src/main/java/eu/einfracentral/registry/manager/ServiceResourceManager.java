@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.EventService;
@@ -342,8 +343,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             if (!userEvents.isEmpty()) {
                 richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
             }
-        } catch (Exception e) {
-            logger.error(e);
+        } catch (OIDCAuthenticationException e) {
+            // user not logged in
+            logger.debug("Silent Exception", e);
+        } catch (Exception e2) {
+            logger.error(e2);
         }
 
         //set Ratings & Favourites

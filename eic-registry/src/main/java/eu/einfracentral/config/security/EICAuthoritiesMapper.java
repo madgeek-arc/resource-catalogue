@@ -9,7 +9,6 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.mitre.openid.connect.client.OIDCAuthoritiesMapper;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,11 +35,11 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
     @Autowired
     public EICAuthoritiesMapper(@Value("${eic.admins}") String admins, ProviderService<Provider, Authentication> manager,
-                                SecurityService securityService) throws Exception {
+                                SecurityService securityService) {
         this.providerService = manager;
         this.securityService = securityService;
         if (admins == null) {
-            throw new Exception("No Admins Provided");
+            throw new RuntimeException("No Admins Provided");
         }
         userRolesMap = new HashMap<>();
 

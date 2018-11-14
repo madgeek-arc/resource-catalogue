@@ -34,7 +34,6 @@ public class ServiceController {
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
 
-
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider) {
         infraService = service;
@@ -46,7 +45,6 @@ public class ServiceController {
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Service ret = new Service((Service) infraService.getLatest(id));
         return new ResponseEntity<>(ret, HttpStatus.OK);
-        //return super.get(id, auth);
     }
 
     @ApiOperation(value = "Get the specified version of an infraService providing the infraService ID")
@@ -69,7 +67,7 @@ public class ServiceController {
     @ApiOperation(value = "Adds the given infraService.")
     @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#service.id)")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) throws Exception {
+    public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
@@ -84,7 +82,7 @@ public class ServiceController {
 
     @ApiOperation(value = "Validates the service without actually changing the respository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody Service service, @ApiIgnore Authentication auth) throws Exception {
+    public ResponseEntity<Boolean> validate(@RequestBody Service service, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.validate(new InfraService(service)));
     }
 
@@ -164,15 +162,6 @@ public class ServiceController {
         }
         return ResponseEntity.ok(serviceResults);
     }
-//
-//    @Deprecated
-//    @ApiOperation(value = "Get a past version of a specific infraService providing the infraService ID and a version identifier")
-//    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public ResponseEntity<List<Service>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-//        return ResponseEntity.ok(
-//                infraService.versions(id, version.toString())
-//                        .stream().map(Service::new).collect(Collectors.toList()));
-//    }
 
     @ApiOperation(value = "Get all modifications of a specific infraService providing the infraService ID and a version identifier")
     @RequestMapping(path = {"history/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -230,7 +219,6 @@ public class ServiceController {
         service.setActive(active);
         return ResponseEntity.ok(infraService.update(service, auth));
     }
-
 
     private FacetFilter getFacetFilter(MultiValueMap<String, Object> allRequestParams) {
         logger.debug("Request params: " + allRequestParams);

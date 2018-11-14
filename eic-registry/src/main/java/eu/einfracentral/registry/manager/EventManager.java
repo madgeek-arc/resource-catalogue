@@ -145,12 +145,10 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     private List<Event> pagingToList(Paging<Resource> resources) {
-        List<Event> events = resources.getResults()
+        return resources.getResults()
                 .stream()
                 .map(resource -> parserService.deserialize(resource, Event.class))
                 .collect(Collectors.toList());
-        logger.info(events.toString());
-        return events;
     }
 
     private boolean sameDay(Long instant) {
