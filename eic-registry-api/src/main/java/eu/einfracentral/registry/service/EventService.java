@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.exception.OIDCAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param authentication
      * @return
      */
-    List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws Exception;
+    List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws OIDCAuthenticationException;
 
     /**
      * Get all events of a specific type about the given service.
@@ -54,7 +55,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param authentication
      * @return
      */
-    List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception;
+    List<Event> getUserEvents(String eventType, Authentication authentication) throws OIDCAuthenticationException;
 
     void deleteEvents(List<Event> events);
 }

@@ -22,9 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -113,11 +111,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider get(String id, Authentication auth) {
         Provider provider = get(id);
         if (auth == null) {
-            provider.setUsers(null);
-        } else if (securityService.hasRole(auth, "ROLE_ADMIN")) { // TODO: consider making a method for this
+//            provider.setUsers(null); // TODO: enable this at some point
+            provider.setUsers(new ArrayList<>());
+        } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
-        }
-        else if (securityService.hasRole(auth, "ROLE_PROVIDER") && securityService.userIsProviderAdmin(auth, provider)) {
+        } else if (securityService.hasRole(auth, "ROLE_PROVIDER") && securityService.userIsProviderAdmin(auth, provider)) {
             return provider;
         }
         return provider;
