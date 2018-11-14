@@ -111,8 +111,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider get(String id, Authentication auth) {
         Provider provider = get(id);
         if (auth == null) {
-//            provider.setUsers(null); // TODO: enable this at some point
-            provider.setUsers(new ArrayList<>());
+            provider.setUsers(null);
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER") && securityService.userIsProviderAdmin(auth, provider)) {
@@ -203,7 +202,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public List<Provider> getServiceProviders(String email, Authentication auth) {
         List<Provider> providers;
         if (auth == null) {
-            return null;
+//            return null; // TODO: enable this when front end can handle 401 properly
+            return new ArrayList<>();
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(10000);
@@ -211,7 +211,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
             providers = getMyServiceProviders(auth);
         } else {
-            providers = new ArrayList<>();
+            return new ArrayList<>();
         }
         return providers
                 .stream()
@@ -227,7 +227,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public List<Provider> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
-            return null;
+//            return null; // TODO: enable this when front end can handle 401 properly
+            return new ArrayList<>();
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
