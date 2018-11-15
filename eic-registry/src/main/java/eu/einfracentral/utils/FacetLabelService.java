@@ -6,6 +6,8 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.Value;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @Component
 public class FacetLabelService {
 
+    private static final Logger logger = LogManager.getLogger(FacetLabelService.class);
     private ProviderService<Provider, Authentication> providerService;
     private VocabularyService vocabularyService;
 
@@ -34,9 +37,13 @@ public class FacetLabelService {
     @PostConstruct
     void createSubcategoriesMap() {
         subcategoryNames = new HashMap<>();
-        Map<String, VocabularyEntry> categories = vocabularyService.get("categories").getEntries();
-        for (Map.Entry<String, VocabularyEntry> entry : categories.entrySet()){
-            entry.getValue().getChildren().forEach(sub -> subcategoryNames.put(sub.getId(), sub.getName()));
+        try {
+            Map<String, VocabularyEntry> categories = vocabularyService.get("categories").getEntries();
+            for (Map.Entry<String, VocabularyEntry> entry : categories.entrySet()) {
+                entry.getValue().getChildren().forEach(sub -> subcategoryNames.put(sub.getId(), sub.getName()));
+            }
+        } catch (Exception e) {
+            logger.error("ERROR", e);
         }
     }
 
