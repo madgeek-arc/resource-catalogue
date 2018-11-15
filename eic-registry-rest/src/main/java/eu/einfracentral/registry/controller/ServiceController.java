@@ -49,10 +49,10 @@ public class ServiceController {
 
     @ApiOperation(value = "Get the specified version of an infraService providing the infraService ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> getService(@PathVariable("id") String id, @PathVariable("version") String version,
-                                              @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
+                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret;
-        try {
+        try { // probably remove try catch
             ret = infraService.get(id, version);
         } catch (Exception e) {
             ret = infraService.getLatest(id);
@@ -60,7 +60,29 @@ public class ServiceController {
                 throw e;
             }
         }
+        if ("rich".equals(id)) { // wrong call
+            return getRichService(version, "latest", auth);
+        }
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get the specified version of an infraService providing the infraService ID")
+    @RequestMapping(path = "rich/{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
+                                                      @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService ret;
+        if ("latest".equals(version)) {
+            return new ResponseEntity<>(infraService.createRichService(infraService.getLatest(id), auth), HttpStatus.OK);
+        }
+        try { // probably remove try catch
+            ret = infraService.get(id, version);
+        } catch (Exception e) {
+            ret = infraService.getLatest(id);
+            if (!version.equals(ret.getVersion())) {
+                throw e;
+            }
+        }
+        return new ResponseEntity<>(infraService.createRichService(ret, auth), HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -238,7 +260,7 @@ public class ServiceController {
         }
         if (!allRequestParams.isEmpty()) {
             Set<Map.Entry<String, List<Object>>> filterSet = allRequestParams.entrySet();
-            for (Map.Entry<String, List<Object>> entry: filterSet) {
+            for (Map.Entry<String, List<Object>> entry : filterSet) {
                 // split values separated by comma to entries and replace existing <key,value> pair with the new one
                 allRequestParams.replace(entry.getKey(), new LinkedList<>(
                         entry.getValue()
