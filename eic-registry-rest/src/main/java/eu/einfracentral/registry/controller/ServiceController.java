@@ -119,6 +119,7 @@ public class ServiceController {
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         FacetFilter ff = getFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
+        ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
         List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
         if (services.isEmpty()) {
@@ -138,6 +139,7 @@ public class ServiceController {
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = getFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
+        ff.addFilter("latest", "true");
         Paging<RichService> services = infraService.getRichServices(ff, auth);
         if (services.getResults().isEmpty()) {
             throw new ResourceNotFoundException();
