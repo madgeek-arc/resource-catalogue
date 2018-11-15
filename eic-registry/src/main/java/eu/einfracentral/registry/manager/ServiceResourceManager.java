@@ -425,7 +425,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         query.append(String.join(" AND ", andFilters));
 
         if (!query.toString().equals("")) {
-            ff.setKeyword(query.toString());
+            ff.setKeyword(String.format("searchableArea=%s AND %s", ff.getKeyword(), query.toString()));
             ff.setFilter(null);
             services = cqlQuery(ff);
         } else {
