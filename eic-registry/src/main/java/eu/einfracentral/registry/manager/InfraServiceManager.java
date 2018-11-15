@@ -92,6 +92,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 ret = super.update(infraService, authentication);
 
             } else {
+                // set previous version not latest
+                existingService.setLatest(false);
+                super.update(infraService, authentication);
+
+                infraService.setLatest(true);
                 infraService.setActive(false);
 //                infraService.setStatus(); // TODO: enable this when services support the Status field
                 ret = add(infraService, authentication);

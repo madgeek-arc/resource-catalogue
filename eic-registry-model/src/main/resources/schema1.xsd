@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://einfracentral.eu" elementFormDefault="qualified" targetNamespace="http://einfracentral.eu" version="1.0">
 
+  <xs:import schemaLocation="schema2.xsd"/>
+
   <xs:element name="dimension" type="tns:dimension"/>
 
   <xs:element name="event" type="tns:event"/>
@@ -27,8 +29,35 @@
 
   <xs:element name="vocabulary" type="tns:vocabulary"/>
 
+  <xs:element name="vocabularyEntry" type="tns:vocabularyEntry"/>
+
+  <xs:element name="vocabularyOld" type="tns:vocabularyOld"/>
+
   <xs:complexType name="dimension">
     <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType final="extension restriction" name="entryMapAdapter">
+    <xs:complexContent>
+      <xs:extension base="xmlAdapter">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="vocabularyEntry">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="children">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="child" type="tns:vocabularyEntry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="entryId" type="xs:string"/>
+      <xs:element minOccurs="0" name="entryName" type="xs:string"/>
+      <xs:element minOccurs="0" name="extras" type="extrasMap"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="event">
@@ -40,6 +69,14 @@
       <xs:element name="user" type="xs:string"/>
       <xs:element minOccurs="0" name="value" type="xs:string"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType final="extension restriction" name="extrasMapAdapter">
+    <xs:complexContent>
+      <xs:extension base="xmlAdapter">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="indicator">
@@ -60,6 +97,7 @@
       <xs:extension base="tns:service">
         <xs:sequence>
           <xs:element minOccurs="0" name="active" type="xs:boolean"/>
+          <xs:element name="latest" type="xs:boolean"/>
           <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
           <xs:element minOccurs="0" name="status" type="xs:string"/>
         </xs:sequence>
@@ -369,9 +407,12 @@
           <xs:element name="hasRate" type="xs:float"/>
           <xs:element name="isFavourite" type="xs:boolean"/>
           <xs:element maxOccurs="unbounded" minOccurs="0" name="languageNames" nillable="true" type="xs:string"/>
+          <xs:element minOccurs="0" name="lifeCycleStatusName" type="xs:string"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="placeNames" nillable="true" type="xs:string"/>
           <xs:element name="ratings" type="xs:int"/>
           <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
           <xs:element minOccurs="0" name="subCategoryName" type="xs:string"/>
+          <xs:element minOccurs="0" name="trlName" type="xs:string"/>
           <xs:element name="userRate" type="xs:float"/>
           <xs:element name="views" type="xs:int"/>
         </xs:sequence>
@@ -391,6 +432,14 @@
   </xs:complexType>
 
   <xs:complexType name="vocabulary">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="entries" type="genericMap"/>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="vocabularyOld">
     <xs:sequence>
       <xs:element minOccurs="0" name="extras">
         <xs:complexType>
