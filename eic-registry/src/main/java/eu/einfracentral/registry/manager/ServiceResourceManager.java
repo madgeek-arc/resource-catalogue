@@ -426,7 +426,17 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         if (!query.toString().equals("")) {
             if (ff.getKeyword() != null && !ff.getKeyword().replaceAll(" ", "").equals("")) {
-                ff.setKeyword(String.format("searchableArea=%s AND %s", ff.getKeyword(), query.toString()));
+                String keywordQuery;
+                List<String> searchKeywords = Arrays.asList(ff.getKeyword().split(" "));
+                // filter search keywords, trim whitespace and create search statements
+                searchKeywords = searchKeywords
+                        .stream()
+                        .map(k -> k.replaceAll(" ", ""))
+                        .filter(k -> !k.equals(""))
+                        .map(k -> String.format("searchableArea=%s", k))
+                        .collect(Collectors.toList());
+                keywordQuery = String.join(" OR ", searchKeywords);
+                ff.setKeyword(String.format("%s AND %s", keywordQuery, query.toString()));
             } else {
                 ff.setKeyword(query.toString());
             }
