@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://einfracentral.eu" version="1.0">
+
+  <xs:import namespace="http://einfracentral.eu" schemaLocation="schema1.xsd"/>
+
+  <xs:complexType abstract="true" name="xmlAdapter">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="genericMap">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" type="genericMapEntry"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="genericMapEntry">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="key" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="ns1:vocabularyEntry"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="extrasMap">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" type="extras"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="extras">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="key" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
