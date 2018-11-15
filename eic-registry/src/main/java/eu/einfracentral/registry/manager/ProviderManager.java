@@ -256,6 +256,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerId);
+        ff.addFilter("latest", "true");
         ff.setQuantity(10000);
         return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
     }
@@ -265,6 +266,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerId);
         ff.addFilter("active", "true");
+        ff.addFilter("latest", "true"); // TODO: check if it is needed
         ff.setQuantity(10000);
         return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
     }
