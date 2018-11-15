@@ -65,7 +65,8 @@ public class ServiceController {
 
     @CrossOrigin
     @ApiOperation(value = "Adds the given infraService.")
-    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#service.id)")
+    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#service)" +
+            "and @securityService.providerCanAddServices(#auth, #service)")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
@@ -73,9 +74,9 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
-    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#service.id)")
+    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#service)")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws Exception {
+    public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret = this.infraService.updateService(new InfraService(service), auth);
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
