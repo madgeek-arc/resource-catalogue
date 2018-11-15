@@ -65,6 +65,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         List<User> users;
         User authUser = new User(auth);
         Provider ret;
+        if (provider.getId() == null) {
+            provider.setId(provider.getName());
+        }
         provider.setId(StringUtils
                 .stripAccents(provider.getId())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
