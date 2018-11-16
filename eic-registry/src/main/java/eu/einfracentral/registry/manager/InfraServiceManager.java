@@ -55,6 +55,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             validate(infraService);
             infraService.setActive(false);
             String id = createServiceId(infraService);
+            infraService.setLatest(true);
             infraService.setId(id);
             logger.info("Created service with id: " + id);
             logger.info("Providers: " + infraService.getProviders());
