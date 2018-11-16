@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
@@ -87,12 +88,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
-        ret = super.add(provider, null);
+//        ret = super.add(provider, null);
         authoritiesMapper.mapProviders(provider.getUsers());
 
         // TODO: fix function
 //        createProviderMail(provider, new User(auth), Provider.States.INIT);
-        return ret;
+        return null;
+//        return ret;
     }
 
     @Override
@@ -386,24 +388,27 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             temp.process(root, out);
             providerMail = out.getBuffer().toString();
             out.flush();
-//            out.close();
+
             // TODO: fix mail service and enable this
-//            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
+            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
             temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
+//            out = new StringWriter();
+            out.getBuffer().setLength(0);
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
             out.flush();
+
             // TODO: fix mail service and enable this
-//            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
             out.close();
         } catch (IOException e) {
             logger.error("Error finding mail template", e);
         } catch (TemplateException e) {
             logger.error("ERROR", e);
-//        } catch (MessagingException e) {
-//            logger.error("Could not send mail", e);
+        } catch (MessagingException e) {
+            logger.error("Could not send mail", e);
         }
     }
 }
