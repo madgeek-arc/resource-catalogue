@@ -83,18 +83,18 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             provider.setUsers(users);
         }
         provider.setStatus(Provider.States.INIT.getKey());
-        sendProviderMails(provider, new User(auth), Provider.States.INIT);
+//        sendProviderMails(provider, new User(auth), Provider.States.INIT);
 
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
-//        ret = super.add(provider, null);
+        ret = super.add(provider, null);
         authoritiesMapper.mapProviders(provider.getUsers());
 
         // TODO: fix function
-//        createProviderMail(provider, new User(auth), Provider.States.INIT);
-        return null;
-//        return ret;
+//        sendProviderMails(provider, new User(auth), Provider.States.PENDING_1);
+//        return null;
+        return ret;
     }
 
     @Override
@@ -390,7 +390,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             out.flush();
 
             // TODO: fix mail service and enable this
-            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
+//            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
             temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
 //            out = new StringWriter();
@@ -400,15 +400,15 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             out.flush();
 
             // TODO: fix mail service and enable this
-            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+//            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
             out.close();
         } catch (IOException e) {
             logger.error("Error finding mail template", e);
         } catch (TemplateException e) {
             logger.error("ERROR", e);
-        } catch (MessagingException e) {
-            logger.error("Could not send mail", e);
+//        } catch (MessagingException e) {
+//            logger.error("Could not send mail", e);
         }
     }
 }
