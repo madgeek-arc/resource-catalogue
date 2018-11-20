@@ -180,7 +180,7 @@ public class ServiceController {
         }
         Map<String, List<Service>> serviceResults = new HashMap<>();
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
-            List<Service> items = services.getValue().stream().filter(s -> s.getActive() != null ? s.getActive() : false).map(Service::new).collect(Collectors.toList());
+            List<Service> items = services.getValue().stream().filter(s -> s.isActive() != null ? s.isActive() : false).map(Service::new).collect(Collectors.toList());
             if (!items.isEmpty()) {
                 serviceResults.put(services.getKey(), items);
             }
@@ -238,6 +238,7 @@ public class ServiceController {
 
     @ApiOperation(value = "Set a service active or inactive")
     @RequestMapping(path = "publish/{id}/{version}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = infraService.get(id, version);

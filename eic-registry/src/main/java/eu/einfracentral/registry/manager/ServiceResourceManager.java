@@ -12,6 +12,7 @@ import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public InfraService add(InfraService infraService, Authentication auth) {
+        if (infraService.getId() == null) {
+            String provider = infraService.getProviders().get(0);
+            infraService.setId(String.format("%s.%s", provider, StringUtils
+                    .stripAccents(infraService.getName())
+                    .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                    .replaceAll(" ", "_")
+                    .toLowerCase()));
+        }
         if (exists(infraService)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }

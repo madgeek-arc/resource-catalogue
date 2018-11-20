@@ -320,7 +320,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
         for (InfraService service : services) {
-            service.setStatus(service.getActive() != null ? service.getActive().toString() : "true");
+            service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
             service.setActive(false);
             try {
                 infraServiceService.update(service, null);
