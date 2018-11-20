@@ -53,7 +53,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         InfraService ret;
         try {
             validate(infraService);
-            infraService.setActive(true);
+            infraService.setActive(providerManager.get(infraService.getProviders().get(0)).getActive());
             String id = createServiceId(infraService);
             infraService.setLatest(true);
             infraService.setId(id);
@@ -98,8 +98,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 existingService.setLatest(false);
                 super.update(infraService, authentication);
 
-                infraService.setLatest(true);
-//                infraService.setActive(true);
 //                infraService.setStatus(); // TODO: enable this when services support the Status field
                 ret = add(infraService, authentication);
             }
