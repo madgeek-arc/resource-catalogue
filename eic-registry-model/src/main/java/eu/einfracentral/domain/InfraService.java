@@ -43,7 +43,7 @@ public class InfraService extends Service {
         this.serviceMetadata = serviceMetadata;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {
         return active;
     }
 

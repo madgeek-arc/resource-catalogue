@@ -79,6 +79,21 @@ public class SecurityService {
                 .anyMatch(x -> x.getEmail().equals(email));
     }
 
+    public boolean userIsServiceProviderAdmin(Authentication auth, String serviceId) throws ResourceNotFoundException {
+        String email = AuthenticationInfo.getEmail(auth);
+        InfraService service = infraServiceService.getLatest(serviceId);
+        if (service.getProviders().isEmpty()) {
+            throw new ValidationException("Service has no providers");
+        }
+        Optional<List<String>> providers = Optional.of(service.getProviders());
+        return providers
+                .get()
+                .stream()
+                .map(id -> providerManager.get(id))
+                .flatMap(x -> x.getUsers().stream().filter(Objects::nonNull))
+                .anyMatch(x -> x.getEmail().equals(email));
+    }
+
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
         User user = new User(auth);
 
