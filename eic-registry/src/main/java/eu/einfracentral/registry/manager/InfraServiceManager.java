@@ -89,7 +89,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 infraService.setServiceMetadata(serviceMetadata);
 //                ObjectUtils.merge(existingService, infraService); // FIXME: this method does not assign values of Superclass
                 infraService.setActive(existingService.isActive());
-                infraService.setActive(existingService.isLatest());
+                infraService.setLatest(existingService.isLatest());
                 infraService.setStatus(existingService.getStatus());
                 ret = super.update(infraService, authentication);
 
