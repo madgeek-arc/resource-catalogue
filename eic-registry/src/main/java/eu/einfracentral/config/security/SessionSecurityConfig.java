@@ -199,7 +199,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
             info.add("roles", jsonRoles);
 
             // TODO: remove log
-            logger.info("AAI DEBUG: ", info.toString());
+            logger.info(String.format("AAI DEBUG: %s", info.toString()));
 
             Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
             int expireSec = -1;
