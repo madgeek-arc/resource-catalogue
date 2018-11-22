@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -126,6 +127,22 @@ public class InfraServiceController {
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field));
+    }
+
+    @ApiOperation(value = "Set a service active or inactive")
+    @RequestMapping(path = "publish/{id}/{version}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
+                                                  @RequestParam Boolean active, @RequestParam Boolean latest,
+                                                  @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService service = infraService.get(id, version);
+        service.setActive(active);
+        service.setLatest(latest);
+        ServiceMetadata sm = service.getServiceMetadata();
+        sm.setModifiedBy("system");
+        sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+        service.setServiceMetadata(sm);
+        return ResponseEntity.ok(infraService.update(service, auth));
     }
 
 }
