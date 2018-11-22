@@ -54,7 +54,12 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                         .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
                                 .stream()
                                 .filter(Objects::nonNull)
-                                .map(User::getEmail))
+                                .map(u -> {
+                                    if (u.getId() != null) {
+                                        return u.getId();
+                                    }
+                                    return u.getEmail();
+                                } ))
                         .distinct()
                         .collect(Collectors
                                 .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
@@ -63,7 +68,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             logger.warn("There are no Provider entries in DB");
         }
 
-        userRolesMap.putAll(Arrays.stream(admins.split(","))
+        userRolesMap.putAll(Arrays.stream(admins.replaceAll(" ", "").split(","))
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
@@ -73,15 +78,20 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     @Override
     public Collection<? extends GrantedAuthority> mapAuthorities(JWT idToken, UserInfo userInfo) {
         Set<GrantedAuthority> out = new HashSet<>();
+        SimpleGrantedAuthority authority;
         out.add(new SimpleGrantedAuthority("ROLE_USER"));
-        if (userInfo.getEmail() != null) {
-            String email = userInfo.getEmail();
-            SimpleGrantedAuthority authority = userRolesMap.get(email);
-
-            if (authority != null) {
-                logger.info(String.format("%s mapped as %s", email, authority.getAuthority()));
-                out.add(authority);
+        if (userRolesMap.get(userInfo.getSub()) != null) {
+            if (userRolesMap.get(userInfo.getEmail()) != null) { // if there is also an email entry then user must be admin
+                authority = userRolesMap.get(userInfo.getEmail());
+            } else {
+                authority = userRolesMap.get(userInfo.getSub());
             }
+        } else {
+            authority = userRolesMap.get(userInfo.getEmail());
+        }
+        if (authority != null) {
+            logger.info(String.format("User %s with email %s mapped as %s", userInfo.getSub(), userInfo.getEmail(), authority.getAuthority()));
+            out.add(authority);
         }
         return out;
     }
@@ -91,7 +101,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             userRolesMap = new HashMap<>();
         }
         for (User user : providers) {
-            userRolesMap.putIfAbsent(user.getEmail(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
+            userRolesMap.putIfAbsent(user.getId(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
         }
     }
 }
