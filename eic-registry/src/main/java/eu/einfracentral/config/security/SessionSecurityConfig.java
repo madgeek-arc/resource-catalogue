@@ -198,9 +198,6 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
             JsonElement jsonRoles = new JsonParser().parse(gson.toJson(roles));
             info.add("roles", jsonRoles);
 
-            // TODO: remove log
-            logger.info(String.format("AAI DEBUG: %s", info.toString()));
-
             Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
             int expireSec = -1;
             sessionCookie.setMaxAge(expireSec);
