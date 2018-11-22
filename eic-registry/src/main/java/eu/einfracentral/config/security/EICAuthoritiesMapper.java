@@ -78,13 +78,6 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             String email = userInfo.getEmail();
             SimpleGrantedAuthority authority = userRolesMap.get(email);
 
-            // TODO: remove this
-            logger.info(String.format("AAI DEBUG:  userInfo: ", userInfo.toJson().toString()));
-            logger.info(String.format("AAI DEBUG:  email: ", userInfo.getEmail()));
-            logger.info(String.format("AAI DEBUG:  sub: ", userInfo.getSub()));
-            logger.info(String.format("AAI DEBUG:  given name: ", userInfo.getGivenName()));
-            logger.info(String.format("AAI DEBUG:  family name: ", userInfo.getFamilyName()));
-
             if (authority != null) {
                 logger.info(String.format("%s mapped as %s", email, authority.getAuthority()));
                 out.add(authority);
