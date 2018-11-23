@@ -44,7 +44,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id);
         providerManager.del(provider);
-        return new ResponseEntity<>(provider, HttpStatus.GONE);
+        return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
     @Override

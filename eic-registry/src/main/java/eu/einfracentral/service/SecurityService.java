@@ -42,31 +42,27 @@ public class SecurityService {
     }
 
     public boolean userIsProviderAdmin(Authentication auth, Provider provider) {
-        Provider registeredProvider = providerManager.get(provider.getId());
-        String email = AuthenticationInfo.getEmail(auth);
-        if (registeredProvider == null) {
-            throw new ServiceException("Provider with id '" + provider.getId() + "' does not exist.");
-        } else if (!registeredProvider.getActive()) {
-            throw new ServiceException("Provider is not active");
-        }
-        return registeredProvider.getActive() &&
-                registeredProvider.getUsers().parallelStream().anyMatch(s -> s.getEmail().equals(email));
+        return userIsProviderAdmin(auth, provider.getId());
     }
 
     public boolean userIsProviderAdmin(Authentication auth, String providerId) {
         Provider registeredProvider = providerManager.get(providerId);
-        String email = AuthenticationInfo.getEmail(auth);
+        User user = new User(auth);
         if (registeredProvider == null) {
             throw new ServiceException("Provider with id '" + providerId + "' does not exist.");
-        } else if (!registeredProvider.getActive()) {
-            throw new ServiceException("Provider is not active");
         }
-        return registeredProvider.getActive() &&
-                registeredProvider.getUsers().parallelStream().anyMatch(s -> s.getEmail().equals(email));
+        return registeredProvider.getUsers()
+                        .parallelStream()
+                        .anyMatch(u -> {
+                            if (u.getId() != null) {
+                                return u.getId().equals(user.getId())
+                                        || u.getEmail().equals(user.getEmail());
+                            }
+                            return u.getEmail().equals(user.getEmail());
+                        });
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
-        String email = AuthenticationInfo.getEmail(auth);
         if (service.getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
         }
@@ -74,13 +70,11 @@ public class SecurityService {
         return providers
                 .get()
                 .stream()
-                .map(id -> providerManager.get(id))
-                .flatMap(x -> x.getUsers().stream().filter(Objects::nonNull))
-                .anyMatch(x -> x.getEmail().equals(email));
+                .filter(Objects::nonNull)
+                .anyMatch(id -> userIsProviderAdmin(auth, id));
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, String serviceId) throws ResourceNotFoundException {
-        String email = AuthenticationInfo.getEmail(auth);
         InfraService service = infraServiceService.getLatest(serviceId);
         if (service.getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
@@ -89,27 +83,42 @@ public class SecurityService {
         return providers
                 .get()
                 .stream()
-                .map(id -> providerManager.get(id))
-                .flatMap(x -> x.getUsers().stream().filter(Objects::nonNull))
-                .anyMatch(x -> x.getEmail().equals(email));
+                .filter(Objects::nonNull)
+                .anyMatch(id -> userIsProviderAdmin(auth, id));
     }
 
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
-        User user = new User(auth);
-
         List<String> providerNames = service.getProviders();
         for (String providerName : providerNames) {
-            Provider provider = providerManager.get(providerName, getAdminAccess());
+            Provider provider = providerManager.get(providerName);
             if (provider.getActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
-                if (provider.getUsers().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
-                    return true;
-                }
+                return userIsProviderAdmin(auth, provider);
             } else if (provider.getStatus().equals(Provider.States.PENDING_2.getKey())) {
                 FacetFilter ff = new FacetFilter();
                 ff.addFilter("providers", provider.getId());
                 if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                     return true;
                 }
+                throw new ServiceException("You have already created a Service Template.");
+            }
+        }
+        return false;
+    }
+
+    public boolean providerIsActive(String providerId) {
+        Provider provider = providerManager.get(providerId);
+        if (!provider.getActive()) {
+            throw new ServiceException(String.format("Provider with id '%s' is not active yet.", provider.getName()));
+        }
+        return provider.getActive();
+    }
+
+    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) throws ResourceNotFoundException {
+        InfraService service = infraServiceService.getLatest(serviceId);
+        for(String providerId : service.getProviders()) {
+            Provider provider = providerManager.get(providerId);
+            if (provider.getActive()) {
+                return userIsProviderAdmin(auth, provider);
             }
         }
         return false;
