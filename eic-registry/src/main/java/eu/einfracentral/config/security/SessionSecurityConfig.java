@@ -81,7 +81,6 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .headers()
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
-                .authenticationProvider(openIdConnectAuthenticationProvider()).exceptionHandling()
                 .and()
                 .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
