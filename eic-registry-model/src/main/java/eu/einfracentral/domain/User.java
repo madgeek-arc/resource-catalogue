@@ -34,7 +34,13 @@ public class User implements Identifiable {
     public User(Authentication auth) {
         if (auth instanceof OIDCAuthenticationToken) {
             this.id = ((OIDCAuthenticationToken) auth).getUserInfo().getSub();
+            if (this.id == null) {
+                this.id = "_null_";
+            }
             this.email = ((OIDCAuthenticationToken) auth).getUserInfo().getEmail();
+            if (this.email == null) {
+                this.email = "_null_";
+            }
             this.name = ((OIDCAuthenticationToken) auth).getUserInfo().getGivenName();
             this.surname = ((OIDCAuthenticationToken) auth).getUserInfo().getFamilyName();
         } else {
