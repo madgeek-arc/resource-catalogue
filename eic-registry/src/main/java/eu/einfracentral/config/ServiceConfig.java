@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Random;
 
 @Configuration
 @ComponentScan({
@@ -60,5 +61,10 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     @Bean
     public SessionRepository sessionRepository() {
         return new MapSessionRepository();
+    }
+
+    @Bean
+    public Random randomNumberGenerator() {
+        return new Random();
     }
 }
