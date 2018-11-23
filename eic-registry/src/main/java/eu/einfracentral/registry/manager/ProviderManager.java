@@ -39,6 +39,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private EICAuthoritiesMapper authoritiesMapper;
     private Configuration cfg;
     private SecurityService securityService;
+    private Random randomNumberGenerator;
 
     @Value("${webapp.front:beta.einfracentral.eu}")
     private String endpoint;
@@ -46,13 +47,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Autowired
     public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService,
                            @Lazy EICAuthoritiesMapper authoritiesMapper, Configuration cfg,
-                           @Lazy SecurityService securityService) {
+                           @Lazy SecurityService securityService, Random randomNumberGenerator) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.mailService = mailService;
         this.authoritiesMapper = authoritiesMapper;
         this.cfg = cfg;
         this.securityService = securityService;
+        this.randomNumberGenerator = randomNumberGenerator;
     }
 
 
@@ -133,7 +135,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 return super.getAll(ff, auth);
             }
             // if user is not an admin, check if he is a provider
-            User authUser = new User(auth);
             userProviders = getMyServiceProviders(auth);
         }
         Browsing<Provider> providers = super.getAll(ff, auth);
@@ -239,7 +240,16 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.setQuantity(10000);
         return super.getAll(ff, null).getResults()
                 .stream().map(p -> {
-                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> u.getEmail().equals(new User(auth).getEmail()))) {
+                    if (p.getUsers() != null && p.getUsers()
+                                                    .stream()
+                                                    .filter(Objects::nonNull)
+                                                    .anyMatch(u -> {
+                                                        if (u.getId() != null) {
+                                                            return u.getId().equals(new User(auth).getId())
+                                                                    || u.getEmail().equals(new User(auth).getEmail());
+                                                        }
+                                                        return u.getEmail().equals(new User(auth).getEmail());
+                                                    })) {
                         return p;
                     } else return null;
                 })
@@ -279,8 +289,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         List<Service> services = getServices(providerId);
         Service featuredService = null;
         if (!services.isEmpty()) {
-            Random random = new Random();
-            featuredService = services.get(random.nextInt(services.size()));
+            featuredService = services.get(randomNumberGenerator.nextInt(services.size()));
         }
         return featuredService;
     }
