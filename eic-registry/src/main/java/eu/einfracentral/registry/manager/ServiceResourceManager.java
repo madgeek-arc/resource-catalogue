@@ -15,6 +15,7 @@ import eu.openminted.registry.core.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jcp.xml.dsig.internal.dom.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -235,6 +236,12 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
         }
 
+        history.sort((serviceHistory, t1) -> {
+            if (Long.parseLong(serviceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
+                return 1;
+            }
+            return -1;
+        });
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
