@@ -79,7 +79,8 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         logger.info("Configure AAI Security Config");
         http
                 .headers()
-                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
+                .frameOptions().disable()
+//                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
                 .and()
                 .addFilterBefore(openIdConnectAuthenticationFilter(),
