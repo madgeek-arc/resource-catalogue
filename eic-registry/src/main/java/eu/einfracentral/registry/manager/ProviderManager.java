@@ -137,7 +137,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             // if user is not an admin, check if he is a provider
             userProviders = getMyServiceProviders(auth);
         }
+
+        // retrieve providers
         Browsing<Provider> providers = super.getAll(ff, auth);
+
+        // create a list of providers without their users
         List<Provider> modified = providers.getResults()
                 .stream()
                 .map(p -> {
@@ -147,6 +151,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 .collect(Collectors.toList());
 
         if (userProviders != null) {
+            // replace user providers having null users with complete provider entries
             userProviders.forEach(x -> {
                 modified.removeIf(provider -> provider.getId().equals(x.getId()));
                 modified.add(x);
@@ -222,7 +227,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return providers
                 .stream()
                 .map(p -> {
-                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> u.getEmail().equals(email))) {
+                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> {
+                        if (u.getEmail() != null ) {
+                            return u.getEmail().equals(email);
+                        }
+                        return false;
+                    })) {
                         return p;
                     } else return null;
                 })
@@ -240,16 +250,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.setQuantity(10000);
         return super.getAll(ff, null).getResults()
                 .stream().map(p -> {
-                    if (p.getUsers() != null && p.getUsers()
-                                                    .stream()
-                                                    .filter(Objects::nonNull)
-                                                    .anyMatch(u -> {
-                                                        if (u.getId() != null) {
-                                                            return u.getId().equals(new User(auth).getId())
-                                                                    || u.getEmail().equals(new User(auth).getEmail());
-                                                        }
-                                                        return u.getEmail().equals(new User(auth).getEmail());
-                                                    })) {
+                    if (securityService.userIsProviderAdmin(auth, p)) {
                         return p;
                     } else return null;
                 })
