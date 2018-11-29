@@ -134,7 +134,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         try {
             serviceField = Service.class.getDeclaredField(field);
         } catch (NoSuchFieldException e) {
-            logger.warn("Attempt to find field '" + field + "' in Service failed: ", e);
+            logger.warn("Attempt to find field '" + field + "' in Service failed. Trying in InfraService...");
             serviceField = InfraService.class.getDeclaredField(field);
         }
         serviceField.setAccessible(true);
