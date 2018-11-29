@@ -60,6 +60,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                                     }
                                     return u.getEmail();
                                 } ))
+                        .filter(Objects::nonNull)
                         .distinct()
                         .collect(Collectors
                                 .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
