@@ -101,7 +101,7 @@ public class InfraServiceController {
         return new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Validates the infraService without actually changing the respository")
+    @ApiOperation(value = "Validates the infraService without actually changing the repository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.validate(service));

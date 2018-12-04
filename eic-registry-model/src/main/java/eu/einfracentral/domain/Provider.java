@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 @XmlType
@@ -70,7 +71,7 @@ public class Provider implements Identifiable {
 
     public enum States {
         // TODO: probably change states
-        INIT("initialized"),
+        ST_SUBMISSION("service template submission"),
         APPROVED("approved"),
         REJECTED("rejected"),
         PENDING_1("pending initial approval"),
@@ -85,6 +86,17 @@ public class Provider implements Identifiable {
 
         public String getKey() {
             return type;
+        }
+
+        /**
+         * @return the Enum representation for the given string.
+         * @throws IllegalArgumentException if unknown string.
+         */
+        public static States fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(States.values())
+                    .filter(v -> v.type.equals(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
         }
     }
 
