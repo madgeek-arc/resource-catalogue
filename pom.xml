@@ -41,10 +41,11 @@
         <junit-toolbox.version>2.2</junit-toolbox.version>
         <commons-fileupload.version>1.2.1</commons-fileupload.version>
         <commons-io.version>2.4</commons-io.version>
-        <registry-core.version>2.0.2-SNAPSHOT</registry-core.version>
+        <!--<registry-core.version>2.0.2-SNAPSHOT</registry-core.version>-->
+        <registry-core.version>2.1.1-SNAPSHOT</registry-core.version>
         <jjwt.version>0.7.0</jjwt.version>
         <springfox.version>2.7.0</springfox.version>
-        <javax.mail-version>1.6.1</javax.mail-version>
+        <javax.mail-version>1.4.3</javax.mail-version>
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
         <jaxb-api.version>2.1</jaxb-api.version>
         <junit.version>4.12</junit.version>
@@ -52,7 +53,8 @@
         <json.version>20171018</json.version>
         <jaxb2-basics-runtime.version>0.11.1</jaxb2-basics-runtime.version>
         <runtime.version>0.4.1.5</runtime.version>
-        <spring.version>4.2.3.RELEASE</spring.version>
+        <!--<spring.version>4.2.3.RELEASE</spring.version>-->
+        <spring.version>4.3.4.RELEASE</spring.version>
         <jaxb2-maven-plugin.version>2.3.1</jaxb2-maven-plugin.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>2.8</maven-dependency-plugin.version>
@@ -118,6 +120,12 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-core</artifactId>
                 <version>${springfox.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.bytebuddy</groupId>
+                        <artifactId>byte-buddy</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -136,8 +144,8 @@
             </dependency>
             <dependency>
                 <groupId>com.sun.mail</groupId>
-                <artifactId>javax.mail</artifactId>
-                <version>${javax.mail-version}</version>
+                <artifactId>smtp</artifactId>
+                <version>1.4.5</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -157,7 +165,8 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>${javax.servlet-api.version}</version>
+                <version>4.0.1</version>
+                <!--<version>${javax.servlet-api.version}</version>-->
             </dependency>
             <dependency>
                 <groupId>javax.xml.bind</groupId>
@@ -219,6 +228,11 @@
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>5.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.session</groupId>
+                <artifactId>spring-session-data-redis</artifactId>
+                <version>1.3.3.RELEASE</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
