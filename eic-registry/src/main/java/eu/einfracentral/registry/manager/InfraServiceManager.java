@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.Browsing;
@@ -16,15 +17,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
+
+    private RegistrationMailService registrationMailService;
 
     @Autowired
     private VocabularyManager vocabularyManager;
@@ -34,8 +35,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
-    public InfraServiceManager() {
+    @Autowired
+    public InfraServiceManager(@Lazy RegistrationMailService registrationMailService) {
         super(InfraService.class);
+        this.registrationMailService = registrationMailService;
     }
 
     @Override
@@ -66,6 +69,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             }
 
             ret = super.add(infraService, authentication);
+
+            //FIXME: IF THE USER PROVIDES MORE THAN 1 PROVIDER, AND THE 1ST PROVIDER IS ALREADY REGISTERED THEN THE EMAIL WILL BE SEND WRONG
+            if (providerManager.getServices(infraService.getProviders().get(0)).size() == 1){ // user just added the service
+                providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.ST_SUBMISSION, null, authentication);
+            }
         } catch (Exception e) {
             logger.error(e);
             throw e;

@@ -8,6 +8,7 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.MailService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -36,6 +37,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private MailService mailService;
+    private RegistrationMailService registrationMailService;
     private EICAuthoritiesMapper authoritiesMapper;
     private Configuration cfg;
     private SecurityService securityService;
@@ -46,11 +48,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Autowired
     public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService,
+                           @Lazy RegistrationMailService registrationMailService,
                            @Lazy EICAuthoritiesMapper authoritiesMapper, Configuration cfg,
                            @Lazy SecurityService securityService, Random randomNumberGenerator) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.mailService = mailService;
+        this.registrationMailService = registrationMailService;
         this.authoritiesMapper = authoritiesMapper;
         this.cfg = cfg;
         this.securityService = securityService;
@@ -84,17 +88,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             users.add(authUser);
             provider.setUsers(users);
         }
-        provider.setStatus(Provider.States.INIT.getKey());
-//        sendProviderMails(provider, new User(auth), Provider.States.INIT);
-
-        provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ret = super.add(provider, null);
         authoritiesMapper.mapProviders(provider.getUsers());
 
-        // TODO: fix function
-//        sendProviderMails(provider, new User(auth), Provider.States.PENDING_1);
+        registrationMailService.sendProviderMails(provider, new User(auth));
 //        return null;
         return ret;
     }
@@ -165,7 +164,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         User user = new User(auth);
-
+        provider.setStatus(status.getKey());
         switch (status) {
             case REJECTED:
                 logger.info("Deleting provider: " + provider.getName());
@@ -177,24 +176,31 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                         logger.error("Error deleting Service", e);
                     }
                 });
+                registrationMailService.sendProviderMails(provider, user);
                 this.delete(provider);
                 return null;
             case APPROVED:
                 provider.setActive(true);
+                if (active == null) {
+                    active = true;
+                }
                 break;
-            case PENDING_1:
 
-                provider.setActive(false);
-                break;
-            case PENDING_2:
-                provider.setActive(false);
-                break;
-            case REJECTED_ST:
-                provider.setActive(false);
-                break;
+//            case PENDING_1:
+//                provider.setActive(false);
+//                break;
+//            case PENDING_2:
+//                provider.setActive(false);
+//                break;
+//            case ST_SUBMISSION:
+//                provider.setActive(false);
+//                break;
+//            case REJECTED_ST:
+//                provider.setActive(false);
+//                break;
             default:
+                provider.setActive(false);
         }
-        sendProviderMails(provider, user, status);
 
         if (active != null) {
             provider.setActive(active);
@@ -204,7 +210,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 activateServices(provider.getId());
             }
         }
-        provider.setStatus(status.getKey());
+
+        registrationMailService.sendProviderMails(provider, user);
         return super.update(provider, auth);
     }
 
@@ -337,88 +344,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service " + service.getName());
             }
-        }
-    }
-
-    // TODO: complete this method
-    private void sendProviderMails(Provider provider, User user, Provider.States state) {
-        Map<String, Object> root = new HashMap<>();
-        StringWriter out = new StringWriter();
-        String providerMail;
-        String regTeamMail;
-        root.put("user", user);
-        root.put("provider", provider);
-        root.put("endpoint", endpoint);
-
-        String providerSubject = null;
-        String regTeamSubject = null;
-
-        List<Service> serviceList = getServices(provider.getId());
-        Service serviceTemplate = null;
-        if (!serviceList.isEmpty()) {
-            root.put("service", serviceList.get(0));
-            serviceTemplate = serviceList.get(0);
-        } else {
-            serviceTemplate = new Service();
-            serviceTemplate.setName("");
-        }
-//        switch (Provider.States.valueOf(provider.getStatus())) {
-        switch (state) {
-            case INIT:
-                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been received", provider.getName());
-                regTeamSubject = String.format("[eInfraCentral] A new application for registering [%s] as a new service provider has been submitted", provider.getName());
-                break;
-            case PENDING_1:
-                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been accepted", provider.getName());
-                regTeamSubject = String.format("[eInfraCentral] The application of [%s] for registering as a new service provider has been accepted", provider.getName());
-                break;
-            case PENDING_2:
-                assert serviceTemplate != null;
-                providerSubject = String.format("[eInfraCentral] Your service [%s] has been received and its approval is pending ", serviceTemplate.getName());
-                regTeamSubject = String.format("[eInfraCentral] Approve or reject the information about the new service: [%s] – [%s] ", provider.getName(), serviceTemplate.getName());
-                break;
-            case APPROVED:
-                assert serviceTemplate != null;
-                providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been accepted", provider.getName(), serviceTemplate.getName());
-                regTeamSubject = String.format("[eInfraCentral] The service [%s] has been accepted", serviceTemplate.getId());
-                break;
-            case REJECTED_ST:
-                assert serviceTemplate != null;
-                providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been rejected", provider.getName(), serviceTemplate.getName());
-                regTeamSubject = String.format("[eInfraCentral] The service [%s] has been rejected", serviceTemplate.getId());
-                break;
-            case REJECTED:
-                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been rejected", provider.getName());
-                regTeamSubject = String.format("[eInfraCentral] The application of [%s] for registering as a new service provider has been rejected", provider.getName());
-                break;
-        }
-
-        try {
-            Template temp = cfg.getTemplate("providerMailTemplate.ftl");
-            temp.process(root, out);
-            providerMail = out.getBuffer().toString();
-            out.flush();
-
-            // TODO: fix mail service and enable this
-//            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
-            logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
-            temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
-//            out = new StringWriter();
-            out.getBuffer().setLength(0);
-            temp.process(root, out);
-            regTeamMail = out.getBuffer().toString();
-            out.flush();
-
-            // TODO: fix mail service and enable this
-//            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
-            logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
-            out.close();
-        } catch (IOException e) {
-            logger.error("Error finding mail template", e);
-        } catch (TemplateException e) {
-            logger.error("ERROR", e);
-//        } catch (MessagingException e) {
-//            logger.error("Could not send mail", e);
         }
     }
 }
