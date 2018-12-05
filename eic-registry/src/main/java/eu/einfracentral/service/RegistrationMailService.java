@@ -45,14 +45,14 @@ public class RegistrationMailService {
         this.providerManager = providerManager;
     }
 
-    public void sendProviderMails(Provider provider, User user) {
+    public void sendProviderMails(Provider provider, List<User> users) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
         String providerMail;
         String regTeamMail;
-        root.put("user", user);
-        root.put("provider", provider);
-        root.put("endpoint", endpoint);
+//        root.put("user", user);
+//        root.put("provider", provider);
+//        root.put("endpoint", endpoint);
 
         String providerSubject = null;
         String regTeamSubject = null;
@@ -96,20 +96,31 @@ public class RegistrationMailService {
                 break;
         }
 
-        try {
-            Template temp = cfg.getTemplate("providerMailTemplate.ftl");
-            temp.process(root, out);
-            providerMail = out.getBuffer().toString();
+        root.put("provider", provider);
+        root.put("endpoint", endpoint);
+        root.put("user", users.get(0)); // get the first user's information for the registration team email
 
-            mailService.sendMail(user.getEmail(), providerSubject, providerMail);
-            logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
-            out.getBuffer().setLength(0);
-            temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
+        try {
+            Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
-
             mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
+
+            temp = cfg.getTemplate("providerMailTemplate.ftl");
+            for (User user : users) {
+                if (user.getEmail() == null || user.getEmail().equals("")) {
+                    continue;
+                }
+                root.remove("user");
+                out.getBuffer().setLength(0);
+                root.put("user", user);
+                temp.process(root, out);
+                providerMail = out.getBuffer().toString();
+                mailService.sendMail(user.getEmail(), providerSubject, providerMail);
+                logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
+            }
+
             out.close();
         } catch (IOException e) {
             logger.error("Error finding mail template", e);

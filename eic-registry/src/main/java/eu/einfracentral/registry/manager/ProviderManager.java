@@ -93,7 +93,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ret = super.add(provider, null);
         authoritiesMapper.mapProviders(provider.getUsers());
 
-        registrationMailService.sendProviderMails(provider, new User(auth));
+        registrationMailService.sendProviderMails(provider, users);
 //        return null;
         return ret;
     }
@@ -163,7 +163,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
-        User user = new User(auth);
+        List<User> users = provider.getUsers();
         provider.setStatus(status.getKey());
         switch (status) {
             case REJECTED:
@@ -176,7 +176,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                         logger.error("Error deleting Service", e);
                     }
                 });
-                registrationMailService.sendProviderMails(provider, user);
+                registrationMailService.sendProviderMails(provider, users);
                 this.delete(provider);
                 return null;
             case APPROVED:
@@ -211,7 +211,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         }
 
-        registrationMailService.sendProviderMails(provider, user);
+        registrationMailService.sendProviderMails(provider, users);
         return super.update(provider, auth);
     }
 
