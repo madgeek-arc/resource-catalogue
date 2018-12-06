@@ -121,9 +121,6 @@ public class ServiceController {
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
         List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
-        if (services.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
@@ -140,9 +137,6 @@ public class ServiceController {
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<RichService> services = infraService.getRichServices(ff, auth);
-        if (services.getResults().isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
         return ResponseEntity.ok(services);
     }
 
@@ -208,8 +202,8 @@ public class ServiceController {
         List<Provider> providers = providerService.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
-        for (int i = 0; i < 5; i++) {
-//        for (int i = 0; i < providers.size(); i++) {
+//        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < providers.size(); i++) {
             Random randomProvider = new Random();
             int rand = randomProvider.nextInt(providers.size());
             services = providerService.getActiveServices(providers.get(rand).getId());
