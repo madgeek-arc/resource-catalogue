@@ -165,6 +165,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         Provider provider = get(id);
         List<User> users = provider.getUsers();
         provider.setStatus(status.getKey());
+        registrationMailService.sendProviderMails(provider, users);
         switch (status) {
             case REJECTED:
                 logger.info("Deleting provider: " + provider.getName());
@@ -176,9 +177,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                         logger.error("Error deleting Service", e);
                     }
                 });
-                registrationMailService.sendProviderMails(provider, users);
                 this.delete(provider);
                 return null;
+
             case APPROVED:
                 provider.setActive(true);
                 if (active == null) {
@@ -186,13 +187,16 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 }
                 break;
 
+            case ST_SUBMISSION:
+                provider.setStatus(Provider.States.PENDING_2.getKey());
+                provider.setActive(false);
+                break;
+
 //            case PENDING_1:
+//                provider.setStatus(Provider.States.ST_SUBMISSION.getKey());
 //                provider.setActive(false);
 //                break;
 //            case PENDING_2:
-//                provider.setActive(false);
-//                break;
-//            case ST_SUBMISSION:
 //                provider.setActive(false);
 //                break;
 //            case REJECTED_ST:
@@ -210,8 +214,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 activateServices(provider.getId());
             }
         }
-
-        registrationMailService.sendProviderMails(provider, users);
         return super.update(provider, auth);
     }
 
