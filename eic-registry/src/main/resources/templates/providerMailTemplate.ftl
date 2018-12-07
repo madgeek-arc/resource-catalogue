@@ -4,13 +4,13 @@ Dear ${user.name},
 You have applied for registering your organization [${provider.id}] - [${provider.name}] as a new service provider in eInfraCentral.
 Your application will be reviewed by the administration team and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your organization.
 </#if>
-<#if provider.status == "pending service template approval">
+<#if provider.status == "pending service template submission">
 You have applied for registering your organization [${provider.id}] - [${provider.name}] as a new service provider in eInfraCentral.
 Your application has been approved and you may proceed with providing one of your services ${endpoint}/newServiceProvider, which can help eInfraCentral assess the type of the service you want to offer.
 The service should be described according to the eInfraCentral’s Service Description Template (SDT), which has been adopted by flagship initiatives such as the EOSC-hub (EGI, EUDAT), GÉANT, OpenAIRE(-Advance) and PRACE, as the standard with which EOSC portal will be populated.
 The latest version of the SDT is available here [https://legacy.gitbook.com/@jnp]. The SDT offers recommendations, best practices for all service attributes and a classification of scientific resources in categories and subcategories to allow for the description of any resource in a catalogue.
 </#if>
-<#if provider.status == "service template submission">
+<#if provider.status == "pending service template approval">
 You have provided a new service [${service.id}] – [${service.name}] in eInfraCentral.
 The information provided will be reviewed by the administration team and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your services.
 </#if>

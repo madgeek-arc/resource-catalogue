@@ -70,13 +70,12 @@ public class Provider implements Identifiable {
     }
 
     public enum States {
-        // TODO: probably change states
-        ST_SUBMISSION("service template submission"),
-        APPROVED("approved"),
-        REJECTED("rejected"),
         PENDING_1("pending initial approval"),
+        ST_SUBMISSION("pending service template submission"),
         PENDING_2("pending service template approval"),
-        REJECTED_ST("rejected service template");
+        REJECTED_ST("rejected service template"),
+        APPROVED("approved"),
+        REJECTED("rejected");
 
         private final String type;
 

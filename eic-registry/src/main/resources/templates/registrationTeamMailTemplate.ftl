@@ -4,11 +4,11 @@ Dear Registration Team,
 A new application by [${user.name}] – [${user.email}] has been received for registering [${provider.id}] – [${provider.name}] as a new service provider in eInfraCentral.
 You can review the application at ${endpoint}/serviceProvidersList and approve or reject it.
 </#if>
-<#if provider.status == "pending service template approval">
+<#if provider.status == "pending service template submission">
 The application by [${user.name}] – [${user.email}] for registering [${provider.id}] has been accepted.
 You can view the application status ${endpoint}/serviceProvidersList.
 </#if>
-<#if provider.status == "service template submission">
+<#if provider.status == "pending service template approval">
 Information about the new service: [${service.id}] has been provided by [${user.name}] – [${user.email}].
 You can review the information ${endpoint}/service/${service.id} and approve or reject it.
 </#if>
