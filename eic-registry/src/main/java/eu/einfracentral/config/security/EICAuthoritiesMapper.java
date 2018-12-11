@@ -2,7 +2,6 @@ package eu.einfracentral.config.security;
 
 import com.nimbusds.jwt.JWT;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -34,6 +33,9 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     private ProviderService<Provider, Authentication> providerService;
     private SecurityService securityService;
 
+    @Value("${eic.admins}")
+    String eicAdmins;
+
     @Autowired
     public EICAuthoritiesMapper(@Value("${eic.admins}") String admins, ProviderService<Provider, Authentication> manager,
                                 SecurityService securityService) {
@@ -42,8 +44,37 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         if (admins == null) {
             throw new RuntimeException("No Admins Provided");
         }
-        userRolesMap = new HashMap<>();
+        mapAuthorities(admins);
+    }
 
+    @Override
+    public Collection<? extends GrantedAuthority> mapAuthorities(JWT idToken, UserInfo userInfo) {
+        Set<GrantedAuthority> out = new HashSet<>();
+        SimpleGrantedAuthority authority;
+        out.add(new SimpleGrantedAuthority("ROLE_USER"));
+        if (userRolesMap.get(userInfo.getSub()) != null) {
+            if (userRolesMap.get(userInfo.getEmail()) != null) { // if there is also an email entry then user must be admin
+                authority = userRolesMap.get(userInfo.getEmail());
+            } else {
+                authority = userRolesMap.get(userInfo.getSub());
+            }
+        } else {
+            authority = userRolesMap.get(userInfo.getEmail());
+        }
+        if (authority != null) {
+            logger.info(String.format("User %s with email %s mapped as %s", userInfo.getSub(), userInfo.getEmail(), authority.getAuthority()));
+            out.add(authority);
+        }
+        return out;
+    }
+
+    @JmsListener(containerFactory = "jmsTopicListenerContainerFactory", destination = "eicRoleMapper")
+    public void mapAuthoritiesListener(Provider provider) {
+        mapAuthorities(eicAdmins);
+    }
+
+    private void mapAuthorities(String admins) {
+        userRolesMap = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         try {
@@ -75,41 +106,5 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
                 ));
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> mapAuthorities(JWT idToken, UserInfo userInfo) {
-        Set<GrantedAuthority> out = new HashSet<>();
-        SimpleGrantedAuthority authority;
-        out.add(new SimpleGrantedAuthority("ROLE_USER"));
-        if (userRolesMap.get(userInfo.getSub()) != null) {
-            if (userRolesMap.get(userInfo.getEmail()) != null) { // if there is also an email entry then user must be admin
-                authority = userRolesMap.get(userInfo.getEmail());
-            } else {
-                authority = userRolesMap.get(userInfo.getSub());
-            }
-        } else {
-            authority = userRolesMap.get(userInfo.getEmail());
-        }
-        if (authority != null) {
-            logger.info(String.format("User %s with email %s mapped as %s", userInfo.getSub(), userInfo.getEmail(), authority.getAuthority()));
-            out.add(authority);
-        }
-        return out;
-    }
-
-    @JmsListener(containerFactory = "jmsTopicListenerContainerFactory", destination = "eicRoleMapper")
-    public void mapProviders(Provider provider) {
-        logger.info("mapping new providers");
-        if (userRolesMap == null) {
-            userRolesMap = new HashMap<>();
-        }
-        for (User user : provider.getUsers()) {
-            if (user.getEmail() != null) {
-                userRolesMap.putIfAbsent(user.getEmail(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
-            } else {
-                userRolesMap.putIfAbsent(user.getId(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
-            }
-        }
     }
 }
