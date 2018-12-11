@@ -99,7 +99,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     }
 
     @JmsListener(containerFactory = "jmsTopicListenerContainerFactory", destination = "eicRoleMapper")
-    public void receiveMessage(Provider provider) {
+    public void mapProviders(Provider provider) {
         logger.info("mapping new providers");
         if (userRolesMap == null) {
             userRolesMap = new HashMap<>();
