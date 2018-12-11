@@ -98,7 +98,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         return out;
     }
 
-    @JmsListener(destination = "eicRoleMapper")
+    @JmsListener(containerFactory = "jmsTopicListenerContainerFactory", destination = "eicRoleMapper")
     public void receiveMessage(Provider provider) {
         logger.info("mapping new providers");
         if (userRolesMap == null) {
