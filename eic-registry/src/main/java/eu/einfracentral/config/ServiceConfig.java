@@ -2,9 +2,23 @@ package eu.einfracentral.config;
 
 import eu.einfracentral.domain.*;
 import freemarker.template.TemplateExceptionHandler;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.jms.annotation.EnableJms;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessageType;
 import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
@@ -27,8 +41,28 @@ import java.util.Random;
         "eu.einfracentral.registry.manager",
         "eu.einfracentral.utils",
         "eu.einfracentral.service"})
+@PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
+@EnableCaching
+@EnableJms
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
+
+    private static final Logger logger = LogManager.getLogger(ServiceConfig.class);
+
+    @Value("${jms.host}")
+    private String jmsHost;
+
+    @Value("${jms.prefix}")
+    private String jmsPrefix;
+
+    @Value("${redis.host}")
+    private String redisHost;
+
+    @Value("${redis.port}")
+    private String redisPort;
+
+    @Value("${redis.password:#{null}}")
+    private String password;
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
@@ -56,6 +90,44 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
         defaultCookieSerializer.setUseHttpOnlyCookie(true);
 //        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
         return defaultCookieSerializer;
+    }
+
+
+    @Bean
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
+        connectionFactory.setBrokerURL(jmsHost);
+        connectionFactory.setConnectionIDPrefix(jmsPrefix);
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(jacksonJmsMessageConverter());
+        logger.info("ActiveMQConnection Factory created for " + jmsHost);
+        return factory;
+    }
+
+    @Bean // Serialize message content to json using TextMessage
+    public MessageConverter jacksonJmsMessageConverter() {
+        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+        converter.setTargetType(MessageType.TEXT);
+        converter.setTypeIdPropertyName("_type");
+        return converter;
+    }
+
+    @Bean
+    JedisConnectionFactory jedisConnectionFactory() {
+        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
+        jedisConnectionFactory.setHostName(redisHost);
+        jedisConnectionFactory.setPort(Integer.parseInt(redisPort));
+        if (password != null) jedisConnectionFactory.setPassword(password);
+        return jedisConnectionFactory;
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate() {
+        final RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(jedisConnectionFactory());
+        template.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+        return template;
     }
 
     @Bean
