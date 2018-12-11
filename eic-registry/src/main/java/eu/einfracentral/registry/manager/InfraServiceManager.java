@@ -72,7 +72,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
             //FIXME: IF THE USER PROVIDES MORE THAN 1 PROVIDER, AND THE 1ST PROVIDER IS ALREADY REGISTERED THEN THE EMAIL WILL BE SEND WRONG
             if (providerManager.getServices(infraService.getProviders().get(0)).size() == 1){ // user just added the service
-                providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.ST_SUBMISSION, null, authentication);
+                providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.PENDING_2, null, authentication);
             }
         } catch (Exception e) {
             logger.error(e);
