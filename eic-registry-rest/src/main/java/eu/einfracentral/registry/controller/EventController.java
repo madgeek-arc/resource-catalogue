@@ -104,12 +104,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @ApiOperation("Retrieve all the favourited events of the authenticated user.")
     @RequestMapping(path = "favourites", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getUserFavourites(Authentication authentication) {
-        try {
-            return new ResponseEntity<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication), HttpStatus.OK);
-        } catch (Exception e) {
-            logger.info(e + "\nReturning favourites=0");
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication), HttpStatus.OK);
     }
 
     @ApiOperation("Retrieve all the favourited events of a infraService with the specified ID.")
