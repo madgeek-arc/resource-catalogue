@@ -15,20 +15,20 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service("providerManager")
@@ -42,6 +42,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private Configuration cfg;
     private SecurityService securityService;
     private Random randomNumberGenerator;
+
+    @Autowired
+    @Qualifier("jmsQueueTemplate")
+    private JmsTemplate jmsTemplate;
+
+    @Value("${jms.prefix:#{null}}")
+    private String jmsPrefix;
 
     @Value("${webapp.front:beta.einfracentral.eu}")
     private String endpoint;
@@ -91,9 +98,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ret = super.add(provider, null);
-        authoritiesMapper.mapProviders(provider.getUsers());
 
-        registrationMailService.sendProviderMails(provider, users);
+        jmsTemplate.convertAndSend("eicRoleMapper", provider);
+        jmsTemplate.convertAndSend(jmsPrefix, provider);
+
+//        authoritiesMapper.mapProviders(provider.getUsers());
+//        registrationMailService.sendProviderMails(provider, users);
 //        return null;
         return ret;
     }
@@ -108,7 +118,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
-            authoritiesMapper.mapProviders(provider.getUsers());
+            jmsTemplate.convertAndSend("eicRoleMapper", provider.getUsers());
         }
         return provider;
     }
@@ -163,9 +173,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
-        List<User> users = provider.getUsers();
         provider.setStatus(status.getKey());
-        registrationMailService.sendProviderMails(provider, users);
+//        registrationMailService.sendProviderMails(provider);
+        jmsTemplate.convertAndSend(jmsPrefix, provider);
         switch (status) {
             case REJECTED:
                 logger.info("Deleting provider: " + provider.getName());
@@ -187,13 +197,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 }
                 break;
 
-            case ST_SUBMISSION:
-                provider.setStatus(Provider.States.PENDING_2.getKey());
-                provider.setActive(false);
-                break;
-
+//            case ST_SUBMISSION:
+//                provider.setActive(false);
+//                break;
 //            case PENDING_1:
-//                provider.setStatus(Provider.States.ST_SUBMISSION.getKey());
 //                provider.setActive(false);
 //                break;
 //            case PENDING_2:
@@ -237,7 +244,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 .stream()
                 .map(p -> {
                     if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> {
-                        if (u.getEmail() != null ) {
+                        if (u.getEmail() != null) {
                             return u.getEmail().equals(email);
                         }
                         return false;
