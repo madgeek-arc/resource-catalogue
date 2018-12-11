@@ -104,7 +104,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
-            jmsTopicTemplate.convertAndSend("eicRoleMapper", provider.getUsers());
+            jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
         }
         return provider;
     }
