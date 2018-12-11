@@ -1,25 +1,20 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.service.MailService;
-import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import freemarker.template.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
@@ -36,19 +31,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private InfraServiceService<InfraService, InfraService> infraServiceService;
-    private MailService mailService;
-    private RegistrationMailService registrationMailService;
-    private EICAuthoritiesMapper authoritiesMapper;
-    private Configuration cfg;
     private SecurityService securityService;
     private Random randomNumberGenerator;
 
     @Autowired
-//    @Qualifier("jmsQueueTemplate")
     private JmsTemplate jmsQueueTemplate;
 
     @Autowired
-//    @Qualifier("jmsTopicTemplate")
     private JmsTemplate jmsTopicTemplate;
 
     @Value("${jms.prefix:#{null}}")
@@ -58,16 +47,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private String endpoint;
 
     @Autowired
-    public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService, MailService mailService,
-                           @Lazy RegistrationMailService registrationMailService,
-                           @Lazy EICAuthoritiesMapper authoritiesMapper, Configuration cfg,
+    public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
-        this.mailService = mailService;
-        this.registrationMailService = registrationMailService;
-        this.authoritiesMapper = authoritiesMapper;
-        this.cfg = cfg;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
     }
@@ -101,7 +84,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
-//        ret = super.add(provider, null);
+        ret = super.add(provider, null);
 
         // inform all backends for new provider roles
         jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
@@ -109,10 +92,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         // send messages to queue
         jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
 
-//        authoritiesMapper.mapProviders(provider.getUsers());
-//        registrationMailService.sendProviderMails(provider, users);
-        return null;
-//        return ret;
+        return ret;
     }
 
     @Override
@@ -181,7 +161,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         provider.setStatus(status.getKey());
-//        registrationMailService.sendProviderMails(provider);
         jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
         switch (status) {
             case REJECTED:
@@ -204,18 +183,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 }
                 break;
 
-//            case ST_SUBMISSION:
-//                provider.setActive(false);
-//                break;
-//            case PENDING_1:
-//                provider.setActive(false);
-//                break;
-//            case PENDING_2:
-//                provider.setActive(false);
-//                break;
-//            case REJECTED_ST:
-//                provider.setActive(false);
-//                break;
             default:
                 provider.setActive(false);
         }
