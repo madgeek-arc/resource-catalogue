@@ -41,7 +41,7 @@ public class RegistrationMailService {
         this.providerManager = providerManager;
     }
 
-    @JmsListener(destination = "${jms.prefix}")
+    @JmsListener(containerFactory = "jmsQueueListenerContainerFactory", destination = "${jms.prefix}")
     public void sendProviderMails(Provider provider) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
@@ -98,7 +98,7 @@ public class RegistrationMailService {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
-            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+//            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");

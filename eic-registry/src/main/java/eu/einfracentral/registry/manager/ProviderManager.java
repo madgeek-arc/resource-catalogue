@@ -44,8 +44,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private Random randomNumberGenerator;
 
     @Autowired
-    @Qualifier("jmsQueueTemplate")
-    private JmsTemplate jmsTemplate;
+//    @Qualifier("jmsQueueTemplate")
+    private JmsTemplate jmsQueueTemplate;
+
+    @Autowired
+//    @Qualifier("jmsTopicTemplate")
+    private JmsTemplate jmsTopicTemplate;
 
     @Value("${jms.prefix:#{null}}")
     private String jmsPrefix;
@@ -97,15 +101,18 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
-        ret = super.add(provider, null);
+//        ret = super.add(provider, null);
 
-        jmsTemplate.convertAndSend("eicRoleMapper", provider);
-        jmsTemplate.convertAndSend(jmsPrefix, provider);
+        // inform all backends for new provider roles
+        jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
+
+        // send messages to queue
+        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
 
 //        authoritiesMapper.mapProviders(provider.getUsers());
 //        registrationMailService.sendProviderMails(provider, users);
-//        return null;
-        return ret;
+        return null;
+//        return ret;
     }
 
     @Override
@@ -118,7 +125,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
-            jmsTemplate.convertAndSend("eicRoleMapper", provider.getUsers());
+            jmsTopicTemplate.convertAndSend("eicRoleMapper", provider.getUsers());
         }
         return provider;
     }
@@ -175,7 +182,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         Provider provider = get(id);
         provider.setStatus(status.getKey());
 //        registrationMailService.sendProviderMails(provider);
-        jmsTemplate.convertAndSend(jmsPrefix, provider);
+        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
         switch (status) {
             case REJECTED:
                 logger.info("Deleting provider: " + provider.getName());
