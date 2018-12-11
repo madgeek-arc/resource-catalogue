@@ -33,11 +33,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private SecurityService securityService;
     private Random randomNumberGenerator;
-
-    @Autowired
     private JmsTemplate jmsQueueTemplate;
-
-    @Autowired
     private JmsTemplate jmsTopicTemplate;
 
     @Value("${jms.prefix:#{null}}")
@@ -48,11 +44,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Autowired
     public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService,
-                           @Lazy SecurityService securityService, Random randomNumberGenerator) {
+                           @Lazy SecurityService securityService, Random randomNumberGenerator,
+                           JmsTemplate jmsQueueTemplate, JmsTemplate jmsTopicTemplate) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
+        this.jmsQueueTemplate = jmsQueueTemplate;
+        this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
 
