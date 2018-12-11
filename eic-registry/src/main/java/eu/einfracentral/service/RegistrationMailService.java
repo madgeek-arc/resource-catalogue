@@ -1,12 +1,9 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.openminted.registry.core.domain.FacetFilter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -14,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -22,13 +20,11 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class RegistrationMailService {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
     private MailService mailService;
     private Configuration cfg;
     private ProviderManager providerManager;
@@ -38,21 +34,19 @@ public class RegistrationMailService {
     private String endpoint;
 
     @Autowired
-    public RegistrationMailService (MailService mailService, Configuration cfg, InfraServiceService infraServiceService, ProviderManager providerManager) {
+    public RegistrationMailService(MailService mailService, Configuration cfg,
+                                   ProviderManager providerManager) {
         this.mailService = mailService;
         this.cfg = cfg;
-        this.infraServiceService = infraServiceService;
         this.providerManager = providerManager;
     }
 
-    public void sendProviderMails(Provider provider, List<User> users) {
+    @JmsListener(destination = "${jms.prefix}")
+    public void sendProviderMails(Provider provider) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
         String providerMail;
         String regTeamMail;
-//        root.put("user", user);
-//        root.put("provider", provider);
-//        root.put("endpoint", endpoint);
 
         String providerSubject = null;
         String regTeamSubject = null;
@@ -98,7 +92,7 @@ public class RegistrationMailService {
 
         root.put("provider", provider);
         root.put("endpoint", endpoint);
-        root.put("user", users.get(0)); // get the first user's information for the registration team email
+        root.put("user", provider.getUsers().get(0)); // get the first user's information for the registration team email
 
         try {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
@@ -108,7 +102,7 @@ public class RegistrationMailService {
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");
-            for (User user : users) {
+            for (User user : provider.getUsers()) {
                 if (user.getEmail() == null || user.getEmail().equals("")) {
                     continue;
                 }

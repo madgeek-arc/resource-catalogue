@@ -13,6 +13,7 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -59,7 +60,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                                         return u.getId();
                                     }
                                     return u.getEmail();
-                                } ))
+                                }))
                         .filter(Objects::nonNull)
                         .distinct()
                         .collect(Collectors
@@ -97,12 +98,18 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         return out;
     }
 
-    public void mapProviders(List<User> providers) {
+    @JmsListener(destination = "eicRoleMapper")
+    public void receiveMessage(Provider provider) {
+        logger.info("mapping new providers");
         if (userRolesMap == null) {
             userRolesMap = new HashMap<>();
         }
-        for (User user : providers) {
-            userRolesMap.putIfAbsent(user.getId(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
+        for (User user : provider.getUsers()) {
+            if (user.getEmail() != null) {
+                userRolesMap.putIfAbsent(user.getEmail(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
+            } else {
+                userRolesMap.putIfAbsent(user.getId(), new SimpleGrantedAuthority("ROLE_PROVIDER"));
+            }
         }
     }
 }
