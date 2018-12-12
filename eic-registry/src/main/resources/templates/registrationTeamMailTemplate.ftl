@@ -13,8 +13,13 @@ Information about the new service: [${service.id}] has been provided by [${user.
 You can review the information ${endpoint}/service/${service.id} and approve or reject it.
 </#if>
 <#if provider.status == "approved">
+    <#if provider.active == true>
 The service: [${service.id}] provided by [${user.name}] – [${user.email}] has been accepted.
 You can view the application status ${endpoint}/serviceProvidersList.
+    <#else>
+The service provider [${provider.name}] has been set to inactive.
+You can view the application status here ${endpoint}/serviceProvidersList.
+    </#if>
 </#if>
 <#if provider.status == "rejected service template">
 The service: [${service.id}] provided by [${user.name}] – [${user.email}] has been rejected.

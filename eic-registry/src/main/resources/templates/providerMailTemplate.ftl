@@ -15,7 +15,11 @@ You have provided a new service [${service.id}] – [${service.name}] in eInfraC
 The information provided will be reviewed by the administration team and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your services.
 </#if>
 <#if provider.status == "approved">
+    <#if provider.active == true>
 The information for the service [${service.id}] – [${service.name}] has been reviewed and has been successfully added to the eInfraCentral Catalogue. You can view the new service ${endpoint}/service/${service.id}. You may now login and proceed with providing more services for [${provider.id}].
+    <#else>
+Your service provider [${provider.name}] has been set to inactive. For any further clarifications please contact registration office of eInfraCentral at regitration@eInfraCentral.eu.
+    </#if>
 </#if>
 <#if provider.status == "rejected service template">
 The information for the service [${service.id}] – [${service.name}] has been reviewed and unfortunately does not comply with the SDT and the type of services being published in eInfraCentral Catalogue. For any further clarifications please contact registration office of eInfraCentral at regitration@eInfraCentral.eu.

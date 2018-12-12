@@ -79,10 +79,17 @@ public class RegistrationMailService {
                 regTeamSubject = String.format("[eInfraCentral] Approve or reject the information about the new service: [%s] – [%s] ", provider.getName(), serviceTemplate.getName());
                 break;
             case APPROVED:
-                assert serviceTemplate != null;
-                providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been accepted", provider.getName(), serviceTemplate.getName());
-                regTeamSubject = String.format("[eInfraCentral] The service [%s] has been accepted", serviceTemplate.getId());
-                break;
+                if (provider.getActive()) {
+                    assert serviceTemplate != null;
+                    providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been accepted", provider.getName(), serviceTemplate.getName());
+                    regTeamSubject = String.format("[eInfraCentral] The service [%s] has been accepted", serviceTemplate.getId());
+                    break;
+                } else {
+                    assert serviceTemplate != null;
+                    providerSubject = String.format("[eInfraCentral] Your service provider [%s] has been set to inactive.", provider.getName());
+                    regTeamSubject = String.format("[eInfraCentral] The service provider [%s] has been set to inactive", provider.getName());
+                    break;
+                }
             case REJECTED_ST:
                 assert serviceTemplate != null;
                 providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been rejected", provider.getName(), serviceTemplate.getName());

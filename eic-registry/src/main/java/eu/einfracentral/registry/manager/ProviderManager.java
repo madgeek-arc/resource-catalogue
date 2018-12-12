@@ -160,6 +160,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         provider.setStatus(status.getKey());
+        if (active == null) {
+            provider.setActive(false);
+        } else {
+            provider.setActive(active);
+        }
         jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
         switch (status) {
             case REJECTED:
