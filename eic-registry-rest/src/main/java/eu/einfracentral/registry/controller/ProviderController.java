@@ -1,7 +1,10 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.ServiceMetadata;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -11,6 +14,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,12 +35,16 @@ import java.util.stream.Collectors;
 @Api(value = "Get information about a Provider")
 public class ProviderController extends ResourceController<Provider, Authentication> {
 
+    private static final Logger logger = LogManager.getLogger(ProviderController.class);
     private ProviderService<Provider, Authentication> providerManager;
+    private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    ProviderController(ProviderService<Provider, Authentication> service) {
+    ProviderController(ProviderService<Provider, Authentication> service,
+                       InfraServiceService<InfraService, InfraService> infraServiceService) {
         super(service);
         this.providerManager = service;
+        this.infraServiceService = infraServiceService;
     }
 
     @ApiIgnore
@@ -44,7 +53,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id);
-        providerManager.del(provider);
+        logger.info("Deleting provider: " + provider.getName());
+        providerManager.delete(provider);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -82,7 +92,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             @ApiImplicitParam(name = "order", value = "Ascending / Descending", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN')") // TODO
     public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
@@ -157,5 +166,29 @@ public class ProviderController extends ResourceController<Provider, Authenticat
                                                    @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(providerManager.verifyProvider(id, status, active, auth), HttpStatus.OK);
     }
+
+    @ApiIgnore
+    @ApiOperation(value = "Publish all provider services")
+    @RequestMapping(path = "publishServices", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
+                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+//        List<InfraService> services = providerManager.getInactiveServices(id);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("providers", id);
+        List<InfraService> services = infraServiceService.getAll(ff, auth).getResults();
+        for (InfraService service : services) {
+            service.setActive(active);
+//            service.setStatus(status.getKey());
+            service.setLatest(active);
+            ServiceMetadata sm = service.getServiceMetadata();
+            sm.setModifiedBy("system");
+            sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            infraServiceService.update(service, auth);
+        }
+        return new ResponseEntity<>(services, HttpStatus.OK);
+    }
+
 
 }

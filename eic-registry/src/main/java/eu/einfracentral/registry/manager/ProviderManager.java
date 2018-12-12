@@ -157,29 +157,26 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    public void delete(Provider provider) {
+        List<InfraService> services = this.getInfraServices(provider.getId());
+        services.forEach(s -> {
+            try {
+                if (s.getProviders().size() == 1) {
+                    infraServiceService.delete(s);
+                }
+            } catch (ResourceNotFoundException e) {
+                logger.error("Error deleting Service", e);
+            }
+        });
+        super.delete(provider);
+//        this.del(provider);
+    }
+
+    @Override
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         provider.setStatus(status.getKey());
-        if (active == null) {
-            provider.setActive(false);
-        } else {
-            provider.setActive(active);
-        }
-        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
         switch (status) {
-            case REJECTED:
-                logger.info("Deleting provider: " + provider.getName());
-                List<InfraService> services = this.getInfraServices(provider.getId());
-                services.forEach(s -> {
-                    try {
-                        infraServiceService.delete(s);
-                    } catch (ResourceNotFoundException e) {
-                        logger.error("Error deleting Service", e);
-                    }
-                });
-                this.delete(provider);
-                return null;
-
             case APPROVED:
                 provider.setActive(true);
                 if (active == null) {
@@ -190,6 +187,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             default:
                 provider.setActive(false);
         }
+
+        // send registration emails
+        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
 
         if (active != null) {
             provider.setActive(active);
@@ -252,6 +252,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<InfraService> getInfraServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerId);
