@@ -3,8 +3,6 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -14,7 +12,15 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     @Override
     Provider add(Provider provider, Authentication authentication);
 
-    
+    /**
+     * Deletes the provider and all the corresponding services.
+     * (Does not delete services that have other providers as well)
+     * @param provider
+     */
+    @Override
+    void delete(Provider provider);
+
+
     Provider get(String id, Authentication auth);
 
 
@@ -22,6 +28,9 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
 
     List<Provider> getMyServiceProviders(Authentication authentication);
+
+
+    List<InfraService> getInfraServices(String providerId);
 
 
     List<Service> getServices(String providerId);
