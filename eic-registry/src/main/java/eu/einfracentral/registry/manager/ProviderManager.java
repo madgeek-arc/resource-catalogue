@@ -182,10 +182,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         provider.setStatus(status.getKey());
         switch (status) {
             case APPROVED:
-                provider.setActive(true);
                 if (active == null) {
                     active = true;
                 }
+                provider.setActive(active);
                 break;
 
             default:
