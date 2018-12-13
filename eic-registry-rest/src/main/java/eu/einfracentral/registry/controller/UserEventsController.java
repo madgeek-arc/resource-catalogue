@@ -1,14 +1,11 @@
 package eu.einfracentral.registry.controller;
+
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.RichService;
-import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.ApiOperation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,13 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("userEvent")
+@RequestMapping("userEvents")
 public class UserEventsController {
 
-    private static final Logger logger = LogManager.getLogger(UserEventsController.class);
     private EventService eventService;
     private InfraServiceService<InfraService, InfraService> infraServiceService;
 
@@ -37,22 +36,17 @@ public class UserEventsController {
 
     @ApiOperation("Retrieve all the favourite services of the authenticated user.")
     @RequestMapping(path = "favourites", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> favourites(Authentication auth) {
+    public ResponseEntity<List<RichService>> favourites(Authentication auth) {
 
         Map<String, String> favouriteServices = new HashMap<>();
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), auth);
-        List<Service> services = new ArrayList<>();
-        Service service = null;
+        List<RichService> services = new ArrayList<>();
         for (Event userEvent : userEvents) {
             favouriteServices.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
-        for (Map.Entry <String, String> favouriteService : favouriteServices.entrySet()) {
+        for (Map.Entry<String, String> favouriteService : favouriteServices.entrySet()) {
             if (favouriteService.getValue().equals("1")) {
-                try {
-                    services.add(infraServiceService.getLatest(favouriteService.getKey()));
-                } catch (ResourceNotFoundException e) {
-                    logger.warn("Could not find service: " + favouriteService.getKey());
-                }
+                services.add(infraServiceService.createRichService(infraServiceService.get(favouriteService.getKey()), auth));
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -71,13 +65,9 @@ public class UserEventsController {
         }
         Map<String, RichService> services = new HashMap<>();
         for (Map.Entry<String, Float> entry : serviceRatings.entrySet()) {
-            try {
-                RichService richService = infraServiceService.createRichService(infraServiceService.getLatest(entry.getKey()), auth);
-                richService.setHasRate(entry.getValue());
-                services.put(entry.getKey(), richService);
-            } catch (ResourceNotFoundException e) {
-                logger.warn("Could not find service: " + entry.getKey());
-            }
+            RichService richService = infraServiceService.createRichService(infraServiceService.get(entry.getKey()), auth);
+            richService.setHasRate(entry.getValue());
+            services.put(entry.getKey(), richService);
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

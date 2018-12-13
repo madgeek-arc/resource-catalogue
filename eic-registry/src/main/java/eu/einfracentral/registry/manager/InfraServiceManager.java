@@ -25,30 +25,21 @@ import java.util.*;
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
 
-    private RegistrationMailService registrationMailService;
-
-    @Autowired
     private VocabularyManager vocabularyManager;
-
-    @Autowired
     private ProviderManager providerManager;
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
     @Autowired
-    public InfraServiceManager(@Lazy RegistrationMailService registrationMailService) {
+    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager) {
         super(InfraService.class);
-        this.registrationMailService = registrationMailService;
+        this.vocabularyManager = vocabularyManager;
+        this.providerManager = providerManager;
     }
 
     @Override
     public String getResourceType() {
         return "infra_service";
-    }
-
-    private String getUser(Authentication auth) {
-        return ((OIDCAuthenticationToken) auth).getUserInfo().getName();
-
     }
 
     @Override
@@ -64,7 +55,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             logger.info("Providers: " + infraService.getProviders());
 
             if (infraService.getServiceMetadata() == null) {
-                ServiceMetadata serviceMetadata = createServiceMetadata(getUser(authentication));
+                ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
                 infraService.setServiceMetadata(serviceMetadata);
             }
 
@@ -82,36 +73,31 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public InfraService updateService(InfraService infraService, Authentication authentication) throws ResourceNotFoundException {
+    public InfraService updateService(InfraService infraService, Authentication authentication) {
         InfraService ret;
-        try {
-            validate(infraService);
-            InfraService existingService = getLatest(infraService.getId());
-            if (authentication != null) {
-                logger.info("User: " + authentication.getDetails());
-            }
+        validate(infraService);
+        InfraService existingService = get(infraService.getId());
+        if (authentication != null) {
+            logger.info("User: " + authentication.getDetails());
+        }
 
-            if (infraService.getVersion().equals(existingService.getVersion())) {
-                // update existing service serviceMetadata
-                ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), getUser(authentication));
-                infraService.setServiceMetadata(serviceMetadata);
+        if (infraService.getVersion().equals(existingService.getVersion())) {
+            // update existing service serviceMetadata
+            ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
+            infraService.setServiceMetadata(serviceMetadata);
 //                ObjectUtils.merge(existingService, infraService); // FIXME: this method does not assign values of Superclass
-                infraService.setActive(existingService.isActive());
-                infraService.setLatest(existingService.isLatest());
-                infraService.setStatus(existingService.getStatus());
-                ret = super.update(infraService, authentication);
+            infraService.setActive(existingService.isActive());
+            infraService.setLatest(existingService.isLatest());
+            infraService.setStatus(existingService.getStatus());
+            ret = super.update(infraService, authentication);
 
-            } else {
-                // set previous version not latest
-                existingService.setLatest(false);
-                super.update(existingService, authentication);
+        } else {
+            // set previous version not latest
+            existingService.setLatest(false);
+            super.update(existingService, authentication);
 
 //                infraService.setStatus(); // TODO: enable this when services support the Status field
-                ret = add(infraService, authentication);
-            }
-        } catch (ResourceNotFoundException e) {
-            logger.error(e);
-            throw e;
+            ret = add(infraService, authentication);
         }
         return ret;
     }
@@ -136,7 +122,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //                migrate(infraService); // use this to make custom changes
                 ObjectUtils.merge(infraService, service); // use this to make bulk changes FIXME: this method does not work as expected
                 validate(infraService);
-                InfraService existingService = getLatest(infraService.getId());
+                InfraService existingService = get(infraService.getId());
 
                 // update existing service serviceMetadata
                 ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), "eInfraCentral");

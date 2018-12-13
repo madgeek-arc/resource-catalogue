@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -61,23 +62,15 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService get(String id, String version) {
         Resource resource = getResource(id, version);
         return resource != null ? deserialize(resource) : null;
-    }
-
-    @Override
-    public InfraService getLatest(String id) throws ResourceNotFoundException {
-        List<Resource> resources = searchService
-//                .cqlQuery(String.format("infra_service_id=\"%s\" AND active=true", id), "infra_service",
-                .cqlQuery(String.format("infra_service_id=\"%s\"", id), "infra_service", // TODO: verify that the above works
-                        1, 0, "creation_date", "DESC").getResults();
-        if (resources.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        return deserialize(resources.get(0));
+//        if (resource == null) {
+//            throw new ServiceException(String.format("Could not find service with id: %s", id));
+//        }
+//        return deserialize(resource);
     }
 
     @Override
     public InfraService get(String id) {
-        throw new UnsupportedOperationException("Not Implemented");
+        return get(id, "latest");
     }
 
     @Override
@@ -163,14 +156,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public List<RichService> getByIds(Authentication auth, String... ids) {
         List<RichService> services;
-        services = Arrays.stream(ids).map(id -> {
-            try {
-                return getLatest(id);
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not find InfraService with id: " + id, e);
-                throw new ServiceException(e);
-            }
-        }).map(service -> createRichService(service, auth)).collect(toList());
+        services = Arrays.stream(ids).map(id -> getRichService(id, "latest", auth)).collect(toList());
         return services;
     }
 
@@ -273,7 +259,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     public Resource getResource(String serviceId, String serviceVersion) {
         Paging<Resource> resources;
-        if (serviceVersion == null || "".equals(serviceVersion)) {
+        if (serviceVersion == null || "".equals(serviceVersion) || "latest".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
                             resourceType.getName(), 1, 0, "registeredAt", "DESC");
@@ -304,6 +290,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    public RichService getRichService(String id, String version, Authentication auth) {
+        InfraService infraService;
+        infraService = get(id, version);
+        return createRichService(infraService, auth);
+    }
+
+    @Override
+    @Cacheable(value = "richService", key = "#infraService.id")
     public RichService createRichService(InfraService infraService, Authentication auth) {
         RichService richService = new RichService(infraService);
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
