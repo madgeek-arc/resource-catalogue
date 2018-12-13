@@ -31,16 +31,17 @@ import java.util.stream.Collectors;
 public class StatisticsManager implements StatisticsService {
 
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
-
-    @Autowired
-    EventService eventService;
-
-    @Autowired
     private ElasticConfiguration elastic;
-    @Autowired
     private AnalyticsService analyticsService;
-    @Autowired
     private ProviderService<Provider, Authentication> providerService;
+
+    @Autowired
+    StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
+                      ProviderService<Provider, Authentication> providerService) {
+        this.elastic = elastic;
+        this.analyticsService = analyticsService;
+        this.providerService = providerService;
+    }
 
     @Override
     public Map<String, Float> ratings(String id) {

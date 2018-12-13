@@ -33,56 +33,38 @@ public class ServiceController {
     private static Logger logger = LogManager.getLogger(ServiceController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
+    private Random randomNumberGenerator;
 
     @Autowired
-    ServiceController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider) {
-        infraService = service;
-        providerService = provider;
+    ServiceController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider,
+                      Random randomNumberGenerator) {
+        this.infraService = service;
+        this.providerService = provider;
+        this.randomNumberGenerator = randomNumberGenerator;
     }
 
     @ApiOperation(value = "Get the most current version of a specific Service providing the service ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        Service ret = new Service((Service) infraService.getLatest(id));
+    public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        Service ret = new Service(infraService.get(id));
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the specified version of an Service providing the service ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
-                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService ret;
-        try { // probably remove try catch
-            ret = infraService.get(id, version);
-        } catch (Exception e) {
-            ret = infraService.getLatest(id);
-            if (!version.equals(ret.getVersion())) {
-                throw e;
-            }
-        }
-        if ("rich".equals(id)) { // wrong call
+                                        @ApiIgnore Authentication auth) {
+        if ("rich".equals(id)) { // wrong controller (id = rich, version = serviceId)
             return getRichService(version, "latest", auth);
         }
-        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
+        return new ResponseEntity<>(new Service(infraService.get(id, version)), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the specified version of a Service providing the service ID")
     @RequestMapping(path = "rich/{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
-                                                      @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService ret;
-        if ("latest".equals(version)) {
-            return new ResponseEntity<>(infraService.createRichService(infraService.getLatest(id), auth), HttpStatus.OK);
-        }
-        try { // probably remove try catch
-            ret = infraService.get(id, version);
-        } catch (Exception e) {
-            ret = infraService.getLatest(id);
-            if (!version.equals(ret.getVersion())) {
-                throw e;
-            }
-        }
-        return new ResponseEntity<>(infraService.createRichService(ret, auth), HttpStatus.OK);
+                                                      @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(infraService.getRichService(id, version, auth), HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -115,7 +97,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = getFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
@@ -132,7 +114,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = getFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
@@ -164,7 +146,7 @@ public class ServiceController {
     @ApiOperation(value = "Get all Services in the catalogue organized by an attribute, e.g. get services organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
-        Map<String, List<InfraService>> results = null;
+        Map<String, List<InfraService>> results;
         try {
             results = infraService.getBy(field);
         } catch (NoSuchFieldException e) {
@@ -204,14 +186,14 @@ public class ServiceController {
         List<Service> services;
 //        for (int i = 0; i < 5; i++) {
         for (int i = 0; i < providers.size(); i++) {
-            Random randomProvider = new Random();
-            int rand = randomProvider.nextInt(providers.size());
+//            Random randomProvider = new Random();
+            int rand = randomNumberGenerator.nextInt(providers.size());
             services = providerService.getActiveServices(providers.get(rand).getId());
             providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
             if (!services.isEmpty()) {
-                Random random = new Random();
-                featuredServices.add(services.get(random.nextInt(services.size())));
-            } else i--; // FIXME remove this (used for displaying always 5 provider services)
+//                Random random = new Random();
+                featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
+            } /*else i--; // FIXME remove this (used for displaying always 5 provider services)*/
         }
         return new ResponseEntity<>(featuredServices, HttpStatus.OK);
     }

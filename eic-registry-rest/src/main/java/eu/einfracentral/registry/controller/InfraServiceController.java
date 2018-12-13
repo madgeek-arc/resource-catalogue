@@ -47,7 +47,7 @@ public class InfraServiceController {
         if (version.isPresent())
             service = infraService.get(id, version.get());
         else
-            service = infraService.getLatest(id);
+            service = infraService.get(id);
         infraService.delete(service);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -74,8 +74,8 @@ public class InfraServiceController {
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return new ResponseEntity<>(infraService.getLatest(id), HttpStatus.OK);
+    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(infraService.get(id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")

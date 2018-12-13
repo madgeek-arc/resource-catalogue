@@ -6,9 +6,7 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.utils.AuthenticationInfo;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service("securityService")
 public class SecurityService {
@@ -52,17 +53,17 @@ public class SecurityService {
             throw new ServiceException("Provider with id '" + providerId + "' does not exist.");
         }
         return registeredProvider.getUsers()
-                        .parallelStream()
-                        .anyMatch(u -> {
-                            if (u.getId() != null) {
-                                if (u.getEmail() != null) {
-                                    return u.getId().equals(new User(auth).getId())
-                                            || u.getEmail().equals(new User(auth).getEmail());
-                                }
-                                return u.getId().equals(new User(auth).getId());
-                            }
-                            return u.getEmail().equals(user.getEmail());
-                        });
+                .parallelStream()
+                .anyMatch(u -> {
+                    if (u.getId() != null) {
+                        if (u.getEmail() != null) {
+                            return u.getId().equals(new User(auth).getId())
+                                    || u.getEmail().equals(new User(auth).getEmail());
+                        }
+                        return u.getId().equals(new User(auth).getId());
+                    }
+                    return u.getEmail().equals(user.getEmail());
+                });
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
@@ -77,8 +78,8 @@ public class SecurityService {
                 .anyMatch(id -> userIsProviderAdmin(auth, id));
     }
 
-    public boolean userIsServiceProviderAdmin(Authentication auth, String serviceId) throws ResourceNotFoundException {
-        InfraService service = infraServiceService.getLatest(serviceId);
+    public boolean userIsServiceProviderAdmin(Authentication auth, String serviceId) {
+        InfraService service = infraServiceService.get(serviceId);
         if (service.getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
         }
@@ -116,9 +117,9 @@ public class SecurityService {
         return provider.getActive();
     }
 
-    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) throws ResourceNotFoundException {
-        InfraService service = infraServiceService.getLatest(serviceId);
-        for(String providerId : service.getProviders()) {
+    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
+        InfraService service = infraServiceService.get(serviceId);
+        for (String providerId : service.getProviders()) {
             Provider provider = providerManager.get(providerId);
             if (provider.getActive()) {
                 return userIsProviderAdmin(auth, provider);

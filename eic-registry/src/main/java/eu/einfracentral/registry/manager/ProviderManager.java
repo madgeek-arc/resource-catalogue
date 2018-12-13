@@ -11,6 +11,7 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,7 +44,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private String endpoint;
 
     @Autowired
-    public ProviderManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+    public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            JmsTemplate jmsQueueTemplate, JmsTemplate jmsTopicTemplate) {
         super(Provider.class);
@@ -72,6 +73,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 .stripAccents(provider.getId())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replaceAll(" ", "_"));
+        if ("".equals(provider.getId())) {
+            throw new ServiceException("Provider id not valid. Special characters are ignored.");
+        }
 
         users = provider.getUsers();
         if (users == null) {

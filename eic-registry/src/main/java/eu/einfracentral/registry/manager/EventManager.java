@@ -2,7 +2,9 @@ package eu.einfracentral.registry.manager;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.registry.service.EventService;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.AuthenticationInfo;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -26,16 +28,15 @@ import java.util.stream.Collectors;
 public class EventManager extends ResourceManager<Event> implements EventService {
 
     private static final Logger logger = LogManager.getLogger(EventManager.class);
-
-    public EventManager() {
-        super(Event.class);
-    }
-
-    @Autowired
     private ParserService parserService;
+    private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    private InfraServiceManager infraServiceManager;
+    public EventManager(ParserService parserService, InfraServiceService<InfraService, InfraService> infraServiceService) {
+        super(Event.class);
+        this.parserService = parserService;
+        this.infraServiceService = infraServiceService;
+    }
 
     @Override
     public String getResourceType() {
@@ -66,7 +67,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws ResourceNotFoundException {
-        if (!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
         String favouriteValue = value ? "1" : "0";
@@ -89,7 +90,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
-        if (!infraServiceManager.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
         if (Long.parseLong(value) <= 0 || Long.parseLong(value) > 5) {
