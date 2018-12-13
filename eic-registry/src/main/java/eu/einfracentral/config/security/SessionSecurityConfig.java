@@ -199,7 +199,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
             info.add("roles", jsonRoles);
 
             Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
-            int expireSec = -1;
+            int expireSec = 3600;
             sessionCookie.setMaxAge(expireSec);
             sessionCookie.setPath("/");
             response.addCookie(sessionCookie);
