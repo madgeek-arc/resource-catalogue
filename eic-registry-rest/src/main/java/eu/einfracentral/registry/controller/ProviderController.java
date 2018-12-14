@@ -6,7 +6,6 @@ import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -70,7 +69,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @ApiOperation(value = "Creates a new Provider")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws Exception {
+    public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         return super.add(provider, auth);
     }
 
@@ -78,7 +77,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @ApiOperation(value = "Updates Provider info")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#provider.id)")
-    public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws Exception {
+    public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         return super.update(provider, auth);
     }
 
@@ -92,7 +91,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             @ApiImplicitParam(name = "order", value = "Ascending / Descending", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -172,7 +171,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @RequestMapping(path = "publishServices", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
-                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                              @ApiIgnore Authentication auth) throws ResourceNotFoundException {
 //        List<InfraService> services = providerManager.getInactiveServices(id);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
