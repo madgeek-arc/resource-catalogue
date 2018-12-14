@@ -45,8 +45,8 @@ public class UserEventsController {
             favouriteServices.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, String> favouriteService : favouriteServices.entrySet()) {
-            if (favouriteService.getValue().equals("1")) {
-                services.add(infraServiceService.createRichService(infraServiceService.get(favouriteService.getKey()), auth));
+            if ("1".equals(favouriteService.getValue())) { // "1" is true
+                services.add(infraServiceService.getRichService(favouriteService.getKey(), "latest", auth));
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -64,7 +64,7 @@ public class UserEventsController {
             serviceRatings.putIfAbsent(userEvent.getService(), Float.parseFloat(userEvent.getValue()));
         }
         for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
-                services.add(infraServiceService.createRichService(infraServiceService.get(serviceRating.getKey()), auth));
+            services.add(infraServiceService.getRichService(serviceRating.getKey(), "latest", auth));
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

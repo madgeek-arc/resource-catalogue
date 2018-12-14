@@ -63,7 +63,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
             @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         Paging<Vocabulary> vocabularies = super.getAll(allRequestParams, auth).getBody();
         return new ResponseEntity<>(vocabularies, HttpStatus.OK);
     }

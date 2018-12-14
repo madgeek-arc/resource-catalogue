@@ -105,7 +105,7 @@ public class RegistrationMailService {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
-//            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");
