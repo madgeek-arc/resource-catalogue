@@ -47,6 +47,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @ApiIgnore
     @ApiOperation("Retrieve the event with a specific ID.")
     @RequestMapping(path = "event/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @Override
     public ResponseEntity<Event> get(@PathVariable String id, @ApiIgnore Authentication authentication) {
         return new ResponseEntity<>(eventService.get(id), HttpStatus.OK);
     }
