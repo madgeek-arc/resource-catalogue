@@ -55,19 +55,16 @@ public class UserEventsController {
 
     @ApiOperation("Retrieve all the rated services of the authenticated user.")
     @RequestMapping(path = "ratings", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, RichService>> ratings(Authentication auth) {
+    public ResponseEntity<List<RichService>> ratings(Authentication auth) {
 
-        List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.RATING.getKey(), auth);
         Map<String, Float> serviceRatings = new HashMap<>();
-
+        List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.RATING.getKey(), auth);
+        List <RichService> services = new ArrayList<>();
         for (Event userEvent : userEvents) {
             serviceRatings.putIfAbsent(userEvent.getService(), Float.parseFloat(userEvent.getValue()));
         }
-        Map<String, RichService> services = new HashMap<>();
-        for (Map.Entry<String, Float> entry : serviceRatings.entrySet()) {
-            RichService richService = infraServiceService.createRichService(infraServiceService.get(entry.getKey()), auth);
-            richService.setHasRate(entry.getValue());
-            services.put(entry.getKey(), richService);
+        for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
+                services.add(infraServiceService.createRichService(infraServiceService.get(serviceRating.getKey()), auth));
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
