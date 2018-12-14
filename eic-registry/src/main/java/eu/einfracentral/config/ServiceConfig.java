@@ -5,7 +5,9 @@ import freemarker.template.TemplateExceptionHandler;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -74,6 +76,11 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
         cfg.setLogTemplateExceptions(false);
         cfg.setWrapUncheckedExceptions(true);
         return cfg;
+    }
+
+    @Bean
+    public CacheManager cacheManager() {
+        return new ConcurrentMapCacheManager("resourceTypes", "resourceTypesIndexFields", "richService");
     }
 
     @Bean
