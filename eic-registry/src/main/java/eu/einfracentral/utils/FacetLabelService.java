@@ -47,20 +47,6 @@ public class FacetLabelService {
         }
     }
 
-    // FIXME: replace this method
-    List<Facet> createFacetValueLabels(List<Facet> facets) { // TODO: core should probably return these values
-        return facets.stream()
-                .peek(f -> f.setValues(f.getValues()
-                        .stream()
-                        .peek(value -> {
-                            String val = value.getValue();
-                            value.setLabel(toProperCase(toProperCase(val, "-", "-"), "_", " "));
-                        })
-                        .collect(Collectors.toList())))
-                .collect(Collectors.toList());
-    }
-
-    // FIXME: remove this as well
     String toProperCase(String str, String delimiter, String newDelimiter) {
         return String.join(newDelimiter, Arrays.stream(str.split(delimiter)).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
                 .collect(Collectors.toList()));

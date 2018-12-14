@@ -47,6 +47,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @ApiIgnore
     @ApiOperation("Retrieve the event with a specific ID.")
     @RequestMapping(path = "event/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @Override
     public ResponseEntity<Event> get(@PathVariable String id, @ApiIgnore Authentication authentication) {
         return new ResponseEntity<>(eventService.get(id), HttpStatus.OK);
     }
@@ -72,14 +73,14 @@ public class EventController extends ResourceController<Event, Authentication> {
 
 
     // FAVORITES -------->
-    @ApiOperation("Set a eventService as favorite for a user.")
+    @ApiOperation("Set a Service as favorite for a user.")
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
         return new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
     }
 
-    @ApiOperation("Check if a eventService is favourited by the authenticated user.")
+    @ApiOperation("Check if a Service is favourited by the authenticated user.")
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String> getFavourite(@PathVariable String id, @ApiIgnore Authentication authentication) {
         List<Event> events;
@@ -116,7 +117,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
 
     // RATINGS ---------->
-    @ApiOperation("Set a rating to a eventService from the authenticated user.")
+    @ApiOperation("Set a rating to a Service from the authenticated user.")
     @RequestMapping(path = "rating/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {

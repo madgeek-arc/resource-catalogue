@@ -3,24 +3,23 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
@@ -61,7 +60,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
             ret = super.add(infraService, authentication);
 
-            if (providerManager.getServices(infraService.getProviders().get(0)).size() == 1){ // user just added the service
+            if (providerManager.getServices(infraService.getProviders().get(0)).size() == 1) { // user just added the service
                 providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.PENDING_2, null, authentication);
             }
         } catch (Exception e) {
@@ -135,11 +134,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             }
         }
         return ret;
-    }
-
-    @Override
-    public Browsing<InfraService> getAll(FacetFilter ff, Authentication authentication) {
-        return super.getAll(ff, authentication);
     }
 
     @Override
@@ -361,8 +355,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         //Validate TRL
         if (service.getTrl() != null) {
             Vocabulary trl = vocabularyManager.get("trl");
-            VocabularyEntry TRL = trl.getEntries().get(service.getTrl());
-            if (TRL == null)
+            VocabularyEntry trlEntry = trl.getEntries().get(service.getTrl());
+            if (trlEntry == null)
                 throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
         } else throw new ValidationException("Field 'trl' is mandatory.");
     }

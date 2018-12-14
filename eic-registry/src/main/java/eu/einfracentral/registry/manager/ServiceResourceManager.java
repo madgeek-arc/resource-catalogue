@@ -10,13 +10,12 @@ import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -61,11 +60,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public InfraService get(String id, String version) {
         Resource resource = getResource(id, version);
-        return resource != null ? deserialize(resource) : null;
-//        if (resource == null) {
-//            throw new ServiceException(String.format("Could not find service with id: %s", id));
-//        }
-//        return deserialize(resource);
+//        return resource != null ? deserialize(resource) : null;
+        if (resource == null) {
+            throw new ServiceException(String.format("Could not find service with id: %s", id));
+        }
+        return deserialize(resource);
     }
 
     @Override
@@ -290,6 +289,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    @CachePut(value = "richService", key = "#id")
     public RichService getRichService(String id, String version, Authentication auth) {
         InfraService infraService;
         infraService = get(id, version);
@@ -297,7 +297,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @Cacheable(value = "richService", key = "#infraService.id")
+    @CachePut(value = "richService", key = "#infraService.id")
     public RichService createRichService(InfraService infraService, Authentication auth) {
         RichService richService = new RichService(infraService);
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
@@ -355,7 +355,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
         }
 
-        // set favourite
+        // set user favourite and rate
         List<Event> userEvents;
         try {
             userEvents = eventManager.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
@@ -373,7 +373,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             logger.error(e2);
         }
 
-        //set Ratings & Favourites
+        //set Ratings & Favourites sums
         richService.setRatings(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
                 .stream()
                 .map(Event::getUser)
@@ -393,7 +393,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
         richService.setFavourites(favs);
 
-        // set rating
+        // set rating of the service
         Optional<List<Event>> ratings = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
         Map<String, Float> userRatings = new HashMap<>();
         ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
