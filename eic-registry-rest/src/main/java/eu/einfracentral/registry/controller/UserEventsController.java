@@ -45,8 +45,9 @@ public class UserEventsController {
             favouriteServices.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, String> favouriteService : favouriteServices.entrySet()) {
-            if (favouriteService.getValue().equals("1")) {
-                services.add(infraServiceService.createRichService(infraServiceService.get(favouriteService.getKey()), auth));
+            if ("1".equals(favouriteService.getValue())) { // "1" is true
+//                services.add(infraServiceService.createRichService(infraServiceService.get(favouriteService.getKey()), auth)); // TODO remove
+                services.add(infraServiceService.getRichService(favouriteService.getKey(), "latest", auth));
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -65,7 +66,8 @@ public class UserEventsController {
         }
         Map<String, RichService> services = new HashMap<>();
         for (Map.Entry<String, Float> entry : serviceRatings.entrySet()) {
-            RichService richService = infraServiceService.createRichService(infraServiceService.get(entry.getKey()), auth);
+//            RichService richService = infraServiceService.createRichService(infraServiceService.get(entry.getKey()), auth); // TODO remove
+            RichService richService = infraServiceService.getRichService(entry.getKey(), "latest", auth);
             richService.setHasRate(entry.getValue());
             services.put(entry.getKey(), richService);
         }
