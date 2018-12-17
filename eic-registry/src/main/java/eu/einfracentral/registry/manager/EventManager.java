@@ -14,6 +14,7 @@ import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    public EventManager(ParserService parserService, InfraServiceService<InfraService, InfraService> infraServiceService) {
+    public EventManager(ParserService parserService, @Lazy InfraServiceService<InfraService, InfraService> infraServiceService) {
         super(Event.class);
         this.parserService = parserService;
         this.infraServiceService = infraServiceService;
