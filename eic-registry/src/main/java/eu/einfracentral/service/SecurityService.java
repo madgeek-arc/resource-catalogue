@@ -8,7 +8,10 @@ import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
+import org.mitre.openid.connect.model.DefaultAddress;
+import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,7 +38,12 @@ public class SecurityService {
     public Authentication getAdminAccess() {
         List<GrantedAuthority> roles = new ArrayList<>();
         roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        return new OIDCAuthenticationToken("", "", null, roles, null, "", "");
+        DefaultUserInfo userInfo = new DefaultUserInfo();
+        userInfo.setEmail("no-reply@einfracentral.eu");
+        userInfo.setId(1L);
+        userInfo.setGivenName("eInfraCentral");
+        userInfo.setFamilyName("");
+        return new OIDCAuthenticationToken("", "", userInfo, roles, null, "", "");
     }
 
     public boolean hasRole(Authentication auth, String role) {
