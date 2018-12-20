@@ -33,6 +33,10 @@ public class RegistrationMailService {
     @Value("${webapp.front:beta.einfracentral.eu}")
     private String endpoint;
 
+    @Value("${einfracentral.debug:false}")
+    private boolean debug;
+
+
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
                                    ProviderManager providerManager) {
@@ -105,7 +109,9 @@ public class RegistrationMailService {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
-            mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+            if (!debug) {
+                mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+            }
             logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");
@@ -118,7 +124,9 @@ public class RegistrationMailService {
                 root.put("user", user);
                 temp.process(root, out);
                 providerMail = out.getBuffer().toString();
-                mailService.sendMail(user.getEmail(), providerSubject, providerMail);
+                if (!debug) {
+                    mailService.sendMail(user.getEmail(), providerSubject, providerMail);
+                }
                 logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
             }
 
