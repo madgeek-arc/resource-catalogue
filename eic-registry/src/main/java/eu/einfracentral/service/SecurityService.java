@@ -28,14 +28,14 @@ public class SecurityService {
 
     private ProviderManager providerManager;
     private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private OIDCAuthenticationToken adminAccess;
 
     @Autowired
     SecurityService(ProviderManager providerManager, InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.providerManager = providerManager;
         this.infraServiceService = infraServiceService;
-    }
 
-    public Authentication getAdminAccess() {
+        // create admin access
         List<GrantedAuthority> roles = new ArrayList<>();
         roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         DefaultUserInfo userInfo = new DefaultUserInfo();
@@ -43,7 +43,11 @@ public class SecurityService {
         userInfo.setId(1L);
         userInfo.setGivenName("eInfraCentral");
         userInfo.setFamilyName("");
-        return new OIDCAuthenticationToken("", "", userInfo, roles, null, "", "");
+        adminAccess = new OIDCAuthenticationToken("", "", userInfo, roles, null, "", "");
+    }
+
+    public Authentication getAdminAccess() {
+        return adminAccess;
     }
 
     public boolean hasRole(Authentication auth, String role) {
