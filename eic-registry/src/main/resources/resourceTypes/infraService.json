@@ -146,11 +146,17 @@
       "name": "status",
       "path": "//*[local-name()='status']/text()",
       "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latest",
+      "path": "//*[local-name()='latest']/text()",
+      "type": "java.lang.Boolean"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
   "name": "infra_service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/develop/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }
