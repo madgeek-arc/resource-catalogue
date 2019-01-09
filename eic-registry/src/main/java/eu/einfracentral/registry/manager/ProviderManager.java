@@ -123,6 +123,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER") && securityService.userIsProviderAdmin(auth, provider)) {
             return provider;
         }
+        provider.setUsers(null);
         return provider;
     }
 
