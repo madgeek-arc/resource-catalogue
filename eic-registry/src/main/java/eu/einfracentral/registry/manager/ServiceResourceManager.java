@@ -44,7 +44,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private VocabularyService vocabularyManager;
 
     @Autowired
-    private EventService eventManager;
+    private EventService eventService;
 
     @Autowired
     private StatisticsManager statisticsService;
@@ -358,11 +358,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         // set user favourite and rate
         List<Event> userEvents;
         try {
-            userEvents = eventManager.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
+            userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
             if (!userEvents.isEmpty()) {
                 richService.setFavourite(userEvents.get(0).getValue().equals("1"));
             }
-            userEvents = eventManager.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
+            userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
             if (!userEvents.isEmpty()) {
                 richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
             }
@@ -374,14 +374,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
 
         //set Ratings & Favourites sums
-        richService.setRatings(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
+        richService.setRatings(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
                 .stream()
                 .map(Event::getUser)
                 .distinct()
                 .mapToInt(u -> 1)
                 .sum());
 
-        Optional<List<Event>> favourites = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
+        Optional<List<Event>> favourites = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
         Map<String, Integer> userFavourites = new HashMap<>();
         favourites.ifPresent(f -> f
                 .stream()
@@ -394,7 +394,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         richService.setFavourites(favs);
 
         // set rating of the service
-        Optional<List<Event>> ratings = Optional.ofNullable(eventManager.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
+        Optional<List<Event>> ratings = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
         Map<String, Float> userRatings = new HashMap<>();
         ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
         float sum = 0;
