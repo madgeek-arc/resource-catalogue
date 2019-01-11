@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -46,8 +47,21 @@ public class InfraServiceController {
         if (version.isPresent())
             service = infraService.get(id, version.get());
         else
-            service = infraService.getLatest(id);
+            service = infraService.get(id);
         infraService.delete(service);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @ApiIgnore
+    @RequestMapping(path = "delete/all/", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> services = infraService.getAll(ff, null).getResults();
+        for (InfraService service : services) {
+            logger.info(String.format("Deleting service with name: %s", service.getName()));
+            infraService.delete(service);
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -60,8 +74,8 @@ public class InfraServiceController {
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return new ResponseEntity<>(infraService.getLatest(id), HttpStatus.OK);
+    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(infraService.get(id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
@@ -87,7 +101,7 @@ public class InfraServiceController {
         return new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Validates the infraService without actually changing the respository")
+    @ApiOperation(value = "Validates the infraService without actually changing the repository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.validate(service));
@@ -113,6 +127,22 @@ public class InfraServiceController {
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field));
+    }
+
+    @ApiOperation(value = "Set a service active or inactive")
+    @RequestMapping(path = "publish/{id}/{version}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
+                                                  @RequestParam Boolean active, @RequestParam Boolean latest,
+                                                  @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService service = infraService.get(id, version);
+        service.setActive(active);
+        service.setLatest(latest);
+        ServiceMetadata sm = service.getServiceMetadata();
+        sm.setModifiedBy("system");
+        sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+        service.setServiceMetadata(sm);
+        return ResponseEntity.ok(infraService.update(service, auth));
     }
 
 }

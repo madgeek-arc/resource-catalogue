@@ -9,6 +9,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
 
     /**
      * Toggle a favourited event true/false.
+     *
      * @param serviceId
      * @param authentication
      * @return
@@ -17,6 +18,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
 
     /**
      * Set a rating on a service from the given user.
+     *
      * @param serviceId
      * @param authentication
      * @param value
@@ -26,6 +28,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
 
     /**
      * Get all events of a specific type.
+     *
      * @param eventType
      * @return
      */
@@ -33,15 +36,17 @@ public interface EventService extends ResourceService<Event, Authentication> {
 
     /**
      * Get events of a specific type, created by a user for a given service.
+     *
      * @param eventType
      * @param serviceId
      * @param authentication
      * @return
      */
-    List<Event> getEvents(String eventType, String serviceId, Authentication authentication) throws Exception;
+    List<Event> getEvents(String eventType, String serviceId, Authentication authentication);
 
     /**
      * Get all events of a specific type about the given service.
+     *
      * @param eventType
      * @param serviceId
      * @return
@@ -50,11 +55,12 @@ public interface EventService extends ResourceService<Event, Authentication> {
 
     /**
      * Get all events of a specific type created by the user.
+     *
      * @param eventType
      * @param authentication
      * @return
      */
-    List<Event> getUserEvents(String eventType, Authentication authentication) throws Exception;
+    List<Event> getUserEvents(String eventType, Authentication authentication);
 
     void deleteEvents(List<Event> events);
 }

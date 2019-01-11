@@ -3,7 +3,9 @@ package eu.einfracentral.domain;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -34,7 +36,13 @@ public class User implements Identifiable {
     public User(Authentication auth) {
         if (auth instanceof OIDCAuthenticationToken) {
             this.id = ((OIDCAuthenticationToken) auth).getUserInfo().getSub();
+            if (this.id == null) {
+                this.id = "";
+            }
             this.email = ((OIDCAuthenticationToken) auth).getUserInfo().getEmail();
+            if (this.email == null) {
+                this.email = "";
+            }
             this.name = ((OIDCAuthenticationToken) auth).getUserInfo().getGivenName();
             this.surname = ((OIDCAuthenticationToken) auth).getUserInfo().getFamilyName();
         } else {
@@ -76,4 +84,7 @@ public class User implements Identifiable {
         this.surname = surname;
     }
 
+    public String getFullName() {
+        return String.format("%s %s", this.name, this.surname);
+    }
 }

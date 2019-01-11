@@ -2,7 +2,6 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.VocabularyService;
-import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -15,10 +14,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -35,67 +36,35 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     }
 
     @ApiOperation(value = "Returns the list of EU countries.")
-    @RequestMapping(path = "getEU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "countries/EU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String[]> getEU() {
         return new ResponseEntity<>(vocabularyService.getRegion("EU"), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns the list of WW countries.")
-    @RequestMapping(path = "getWW", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "countries/WW", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String[]> getWW() {
         return new ResponseEntity<>(vocabularyService.getRegion("WW"), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the list of languages.")
-    @RequestMapping(path = "languages", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Browsing<Vocabulary>> getLanguages() {
+    @ApiOperation(value = "Returns the entries of the specified vocabulary type")
+    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<Vocabulary>> get(@RequestParam Vocabulary.Types type) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("type", "Language");
+        ff.addFilter("vocabulary_id", type.getKey());
         return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the list of categories.")
-    @RequestMapping(path = "categories", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Browsing<Vocabulary>> getCategories() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("type", "Category");
-        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns the list of subcategories.")
-    @RequestMapping(path = "subcategories", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Browsing<Vocabulary>> getSubcategories() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("type", "Subcategory");
-        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
-    }
-
-    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Vocabulary> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return super.get(id, auth);
-    }
-
-    @ApiOperation(value = "Get all categories \\ sub categories used in eInfraCentral, etc.")
+    @ApiOperation(value = "Returns all vocabularies")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity of vocabularies to be fetched", dataType = "string", paramType = "query")
+            @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return super.getAll(allRequestParams, auth);
-    }
-
-    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Vocabulary>> getSome(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
-        return super.getSome(ids, auth);
-    }
-
-    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, List<Vocabulary>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) {
-        return super.getBy(field, auth);
+    public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        Paging<Vocabulary> vocabularies = super.getAll(allRequestParams, auth).getBody();
+        return new ResponseEntity<>(vocabularies, HttpStatus.OK);
     }
 }

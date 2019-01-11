@@ -18,6 +18,9 @@ public class InfraService extends Service {
     @XmlElement
     private String status;
 
+    @XmlElement
+    private boolean latest;
+
 
     public InfraService() {
     }
@@ -40,7 +43,7 @@ public class InfraService extends Service {
         this.serviceMetadata = serviceMetadata;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {
         return active;
     }
 
@@ -54,5 +57,13 @@ public class InfraService extends Service {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isLatest() {
+        return latest;
+    }
+
+    public void setLatest(boolean latest) {
+        this.latest = latest;
     }
 }

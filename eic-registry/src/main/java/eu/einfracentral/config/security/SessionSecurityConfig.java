@@ -31,8 +31,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.Cookie;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,9 +79,9 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         logger.info("Configure AAI Security Config");
         http
                 .headers()
-                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
+                .frameOptions().disable()
+//                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
-                .authenticationProvider(openIdConnectAuthenticationProvider()).exceptionHandling()
                 .and()
                 .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
@@ -104,6 +108,17 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     public void registerGlobal(AuthenticationManagerBuilder auth) throws Exception {
         logger.info("Register Global");
         auth.authenticationProvider(openIdConnectAuthenticationProvider());
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource()
+    {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*")); // TODO: set origins
+        configuration.setAllowedMethods(Arrays.asList("*")); // TODO: set methods
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
@@ -179,12 +194,12 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                     .map(Object::toString)
                     .collect(Collectors.toList());
             Gson gson = new Gson();
-            gson.toJson(roles);
             JsonElement jsonRoles = new JsonParser().parse(gson.toJson(roles));
             info.add("roles", jsonRoles);
+            int expireSec = 3600;
+            info.add("expireSec", new JsonParser().parse(gson.toJson(expireSec)));
 
             Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
-            int expireSec = -1;
             sessionCookie.setMaxAge(expireSec);
             sessionCookie.setPath("/");
             response.addCookie(sessionCookie);
