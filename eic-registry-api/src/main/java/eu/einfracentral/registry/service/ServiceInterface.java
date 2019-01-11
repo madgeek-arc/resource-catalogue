@@ -33,21 +33,14 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     T updateService(T service, U auth) throws ResourceNotFoundException;
 
     /**
-     * Returns the Service.
+     * Returns the Service with the specified id and version.
+     * If the version is null, empty or "latest" the method returns the latest service.
      *
      * @param id      of the Service.
      * @param version of the Service.
      * @return service.
      */
     R get(String id, String version);
-
-    /**
-     * Returns the latest Service with the specified id.
-     *
-     * @param id of the resource in the index.
-     * @return service.
-     */
-    R getLatest(String id) throws ResourceNotFoundException;
 
     /**
      * Get InfraServices by a specific field.
@@ -70,6 +63,14 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
      * @return
      */
     Paging<RichService> getRichServices(FacetFilter ff, U auth);
+
+    /**
+     *
+     * @param id
+     * @param auth
+     * @return
+     */
+    RichService getRichService(String id, String version, Authentication auth);
 
     /**
      * @return

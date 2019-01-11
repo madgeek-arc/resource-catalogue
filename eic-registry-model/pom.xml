@@ -103,6 +103,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <sources>
+                        <source>${basedir}/src/main/java/eu/einfracentral/domain</source>
+                    </sources>
                     <outputDirectory>${basedir}/src/main/resources</outputDirectory>
                 </configuration>
             </plugin>

@@ -1,17 +1,17 @@
 package eu.einfracentral.service;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.mail.*;
-import javax.mail.internet.*;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})

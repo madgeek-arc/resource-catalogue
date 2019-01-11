@@ -22,20 +22,23 @@ public class MeasurementController extends ResourceController<Measurement, Authe
 
     @ApiOperation(value = "Returns the measurement assigned the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    @Override
+    public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @CrossOrigin
     @ApiOperation(value = "Adds the given measurement.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws Exception {
+    @Override
+    public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) {
         return super.add(measurement, auth);
     }
 
     @ApiOperation(value = "Updates the measurement assigned the given id with the given measurement, keeping versions of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws Exception {
+    @Override
+    public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         return super.update(measurement, auth);
     }
 }
