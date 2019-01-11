@@ -1,22 +1,37 @@
 {
   "indexFields": [
     {
+      "defaultValue": null,
+      "label": "vocabulary_id",
       "multivalued": false,
       "name": "vocabulary_id",
       "path": "//*[local-name()='id']/text()",
-      "type": "java.lang.String",
-      "primaryKey": true
-    },
-    {
-      "multivalued": false,
-      "name": "name",
-      "path": "//*[local-name()='name']/text()",
+      "primaryKey": true,
       "type": "java.lang.String"
     },
     {
+      "defaultValue": null,
+      "label": "name",
       "multivalued": false,
-      "name": "type",
-      "path": "//*[local-name()='type']/text()",
+      "name": "name",
+      "path": "//*[local-name()='name']/text()",
+      "primaryKey": false,
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": null,
+      "multivalued": true,
+      "name": "entry_keys",
+      "path": "//*[local-name()='entries']/*[local-name()='entry']/*[local-name()='key']/text()",
+      "primaryKey": false,
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": null,
+      "multivalued": true,
+      "name": "entries_children",
+      "path": "//*[local-name()='entries']/*[local-name()='entry']/*[local-name()='value']/*[local-name()='children']/*[local-name()='child']/*[local-name()='entryId']/text()",
+      "primaryKey": false,
       "type": "java.lang.String"
     }
   ],
@@ -24,5 +39,5 @@
   "name": "vocabulary",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/develop/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }
