@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @RestController
-@RequestMapping("INFO")
+@RequestMapping("info")
 @Api(value = "Get General Information")
 public class InfoController {
 
