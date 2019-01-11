@@ -31,8 +31,6 @@
 
   <xs:element name="vocabularyEntry" type="tns:vocabularyEntry"/>
 
-  <xs:element name="vocabularyOld" type="tns:vocabularyOld"/>
-
   <xs:complexType name="dimension">
     <xs:sequence/>
   </xs:complexType>
@@ -436,22 +434,6 @@
       <xs:element minOccurs="0" name="entries" type="genericMap"/>
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="vocabularyOld">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="extras">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="extra" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="id" type="xs:string"/>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="parent" type="xs:string"/>
-      <xs:element name="type" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

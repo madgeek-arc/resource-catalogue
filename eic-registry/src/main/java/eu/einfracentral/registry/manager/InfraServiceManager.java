@@ -5,7 +5,6 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
-import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.service.SearchService;
@@ -134,11 +133,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             }
         }
         return ret;
-    }
-
-    @Override
-    public Browsing<InfraService> getMy(FacetFilter facetFilter, Authentication authentication) {
-        return null;
     }
 
     @Override

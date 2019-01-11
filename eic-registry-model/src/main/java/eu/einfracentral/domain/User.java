@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
@@ -84,6 +85,7 @@ public class User implements Identifiable {
         this.surname = surname;
     }
 
+    @JsonIgnore
     public String getFullName() {
         return String.format("%s %s", this.name, this.surname);
     }
