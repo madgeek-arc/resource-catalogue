@@ -109,7 +109,7 @@ public class SecurityService {
             Provider provider = providerManager.get(providerName);
             if (provider.getActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
                 return userIsProviderAdmin(auth, provider);
-            } else if (provider.getStatus().equals(Provider.States.PENDING_2.getKey())) {
+            } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
                 FacetFilter ff = new FacetFilter();
                 ff.addFilter("providers", provider.getId());
                 if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
