@@ -424,48 +424,16 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
         Browsing<InfraService> services = null;
-        StringBuilder query = new StringBuilder();
-        Map<String, Object> filters = ff.getFilter();
 
-        // check if a MultiValueMap filter exists inside the filter
-        if (filters.get("multi-filter") != null) {
-            MultiValueMap<String, String> multiFilter = (MultiValueMap<String, String>) filters.remove("multi-filter");
+        Map<String, List<String>> allFilters = getFacetFilterFilters(ff);
+        String keyword = createQuery(allFilters, ff.getKeyword());
 
-            for (Iterator iter = multiFilter.entrySet().iterator(); iter.hasNext(); ) {
-                Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) iter.next();
-                List<String> entries = new ArrayList<>();
-                entry.getValue().forEach(e -> entries.add(String.format("%s=%s", entry.getKey(), e)));
-                query.append(String.join(" OR ", entries));
-
-                if (iter.hasNext() || !filters.isEmpty()) {
-                    query.append(" AND ");
-                }
-            }
-        }
-
-        List<String> andFilters = new ArrayList<>();
-        filters.forEach((key, value) -> andFilters.add(String.format("%s=%s", key, value)));
-        query.append(String.join(" AND ", andFilters));
-
-        if (!query.toString().equals("")) {
-            if (ff.getKeyword() != null && !ff.getKeyword().replaceAll(" ", "").equals("")) {
-                String keywordQuery;
-                List<String> searchKeywords = Arrays.asList(ff.getKeyword().split(" "));
-                // filter search keywords, trim whitespace and create search statements
-                searchKeywords = searchKeywords
-                        .stream()
-                        .map(k -> k.replaceAll(" ", ""))
-                        .filter(k -> !k.equals(""))
-                        .map(k -> String.format("searchableArea=%s", k))
-                        .collect(Collectors.toList());
-                keywordQuery = String.join(" OR ", searchKeywords);
-                ff.setKeyword(String.format("%s AND %s", keywordQuery, query.toString()));
-            } else {
-                ff.setKeyword(query.toString());
-            }
+        if (!keyword.equals("")) {
             logger.debug(String.format("Searching using keyword: %s", ff.getKeyword()));
             ff.setFilter(null);
+            ff.setKeyword(keyword);
             services = cqlQuery(ff);
+
         } else {
             services = getResults(ff);
         }
@@ -474,4 +442,64 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return services;
     }
 
+    private List<Facet> getServiceFacets(FacetFilter ff) {
+        return cqlQuery(ff).getFacets();
+    }
+
+    private Map<String, List<String>> getFacetFilterFilters(FacetFilter ff) {
+        Map<String, Object> filters = ff.getFilter();
+        Map<String, List<String>> allFilters = new HashMap<>();
+
+        // check if a MultiValueMap filter exists inside the filter
+        if (filters.get("multi-filter") != null) {
+            MultiValueMap<String, String> multiFilter = (MultiValueMap<String, String>) filters.remove("multi-filter");
+
+            for (Map.Entry<String, List<String>> entry : multiFilter.entrySet()) {
+                // fill the variable with the multiple filters
+                allFilters.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        // fill the variable with the rest of the filters
+        for (Map.Entry<String, Object> ffEntry : filters.entrySet()) {
+            allFilters.put(ffEntry.getKey(), Collections.singletonList(ffEntry.getValue().toString()));
+        }
+
+        return allFilters;
+    }
+
+    private String createQuery(Map<String, List<String>> filters, String keyword) {
+        StringBuilder query = new StringBuilder();
+
+        if (keyword != null && !keyword.replaceAll(" ", "").equals("")) {
+            String keywordQuery;
+            List<String> searchKeywords = Arrays.asList(keyword.split(" "));
+            // filter search keywords, trim whitespace and create search statements
+            searchKeywords = searchKeywords
+                    .stream()
+                    .map(k -> k.replaceAll(" ", ""))
+                    .filter(k -> !k.equals(""))
+                    .map(k -> String.format("searchableArea=%s", k))
+                    .collect(Collectors.toList());
+            keywordQuery = String.join(" OR ", searchKeywords);
+            query.append(String.format("( %s )", keywordQuery));
+
+            if (!filters.isEmpty()) {
+                query.append(" AND ");
+            }
+        }
+
+        for (Iterator iter = filters.entrySet().iterator(); iter.hasNext(); ) {
+            Map.Entry<String, List<String>> filter = (Map.Entry<String, List<String>>) iter.next();
+            List<String> entries = new ArrayList<>();
+            filter.getValue().forEach(e -> entries.add(String.format("%s=%s", filter.getKey(), e)));
+            query.append(String.format("( %s )", String.join(" OR ", entries)));
+
+            if (iter.hasNext()) {
+                query.append(" AND ");
+            }
+        }
+
+        return query.toString();
+    }
 }
