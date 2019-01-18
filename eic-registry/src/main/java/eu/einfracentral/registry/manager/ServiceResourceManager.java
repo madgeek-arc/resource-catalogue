@@ -425,7 +425,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
         Browsing<InfraService> services;
 
-        if (ff.getFilter() != null && !ff.getFilter().isEmpty()) {
+        if (ff.getFilter() != null && ff.getFilter().get("multi-filter") != null) {
             services = getServicesWithCorrectFacets(ff);
         } else {
             services = getResults(ff);
@@ -463,7 +463,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
             searchQuery = createQuery(someFilters, searchKeyword);
             ffWithoutFacetCategory.setKeyword(searchQuery);
-            List<Facet> facetsCategory = getServiceFacets(ffWithoutFacetCategory);
+            List<Facet> facetsCategory = cqlQuery(ffWithoutFacetCategory).getFacets();
 
             for (Facet facet : serviceFacets) {
                 if (facet.getField().equals(filter.getKey())) {
@@ -533,7 +533,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             Map.Entry<String, List<String>> filter = (Map.Entry<String, List<String>>) iter.next();
             List<String> entries = new ArrayList<>();
             filter.getValue().forEach(e -> entries.add(String.format("%s=%s", filter.getKey(), e)));
-            query.append(String.format("( %s )", String.join(" OR ", entries)));
+            if (entries.size() > 1) {
+                query.append(String.format("( %s )", String.join(" OR ", entries)));
+            } else { // this is important to skip adding parentheses when we have zero or only 1 filter
+                query.append(String.join("", entries));
+            }
 
             if (iter.hasNext()) {
                 query.append(" AND ");
