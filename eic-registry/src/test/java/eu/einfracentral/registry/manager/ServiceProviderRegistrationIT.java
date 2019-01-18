@@ -94,7 +94,7 @@ public class ServiceProviderRegistrationIT {
             logger.error("ERROR", e);
         } finally {
             provider = providerService.get(providerId, securityService.getAdminAccess());
-            logger.info("Deleting provider with id: ", provider.getId());
+            logger.info(String.format("Deleting provider with id: %s", provider.getId()));
             providerService.delete(provider);
         }
 
