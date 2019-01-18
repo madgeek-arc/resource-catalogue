@@ -423,23 +423,63 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
-        Browsing<InfraService> services = null;
+        Browsing<InfraService> services;
 
-        Map<String, List<String>> allFilters = getFacetFilterFilters(ff);
-        String keyword = createQuery(allFilters, ff.getKeyword());
-
-        if (!keyword.equals("")) {
-            logger.debug(String.format("Searching using keyword: %s", ff.getKeyword()));
-            ff.setFilter(null);
-            ff.setKeyword(keyword);
-            services = cqlQuery(ff);
-
+        if (ff.getFilter() != null && !ff.getFilter().isEmpty()) {
+            services = getServicesWithCorrectFacets(ff);
         } else {
             services = getResults(ff);
         }
 
         facetLabelService.createLabels(services.getFacets());
         return services;
+    }
+
+    private Browsing<InfraService> getServicesWithCorrectFacets (FacetFilter ff){
+        List<Facet> serviceFacets;
+
+        FacetFilter ffWithoutFacetCategory = new FacetFilter(ff.getBrowseBy());
+        ffWithoutFacetCategory.setQuantity(0);
+        ffWithoutFacetCategory.setFilter(null);
+        String searchKeyword = ff.getKeyword();
+
+        // retrieve filters from FacetFilter object
+        Map<String, List<String>> allFilters = getFacetFilterFilters(ff);
+
+        // create a query based on the filters and the search keywords
+        String searchQuery = createQuery(allFilters, searchKeyword);
+
+        ff.setFilter(null);
+        ff.setKeyword(searchQuery);
+        logger.debug(String.format("Searching services using keyword: %s", ff.getKeyword()));
+
+        Browsing<InfraService> services = cqlQuery(ff);
+        serviceFacets = services.getFacets();
+
+        for(Map.Entry<String, List<String>> filter : allFilters.entrySet()) {
+            Map<String, List<String>> someFilters = new HashMap<>(allFilters);
+
+            someFilters.remove(filter.getKey());
+
+            searchQuery = createQuery(someFilters, searchKeyword);
+            ffWithoutFacetCategory.setKeyword(searchQuery);
+            List<Facet> facetsCategory = getServiceFacets(ffWithoutFacetCategory);
+
+            for (Facet facet : serviceFacets) {
+                if (facet.getField().equals(filter.getKey())) {
+                    for (Facet facetCategory : facetsCategory) {
+                        if (facetCategory.getField().equals(filter.getKey())) {
+                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        services.setFacets(serviceFacets);
+        return services;
+
     }
 
     private List<Facet> getServiceFacets(FacetFilter ff) {
