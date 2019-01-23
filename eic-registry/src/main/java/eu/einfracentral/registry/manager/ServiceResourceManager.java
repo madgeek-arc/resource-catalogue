@@ -428,6 +428,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (ff.getFilter() != null && ff.getFilter().get("multi-filter") != null) {
             services = getServicesWithCorrectFacets(ff);
         } else {
+            // Return all services if user enters blank keyword on search
+            if (StringUtils.isBlank(ff.getKeyword())){
+                ff.setKeyword("");
+            }
             services = getResults(ff);
         }
 
