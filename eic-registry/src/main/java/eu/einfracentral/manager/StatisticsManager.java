@@ -3,7 +3,6 @@ package eu.einfracentral.manager;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
@@ -128,7 +127,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> visits(String id) {
         try {
-            return analyticsService.getVisitsForLabel("service/" + id);
+            return analyticsService.getVisitsForLabel("/service/" + id);
         } catch (Exception e) {
             logger.error("Could not find Matomo analytics", e);
         }
