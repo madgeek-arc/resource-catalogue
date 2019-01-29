@@ -98,7 +98,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
-        FacetFilter ff = getFacetFilter(allRequestParams);
+        FacetFilter ff = createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
@@ -115,7 +115,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-        FacetFilter ff = getFacetFilter(allRequestParams);
+        FacetFilter ff = createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<RichService> services = infraService.getRichServices(ff, auth);
@@ -225,7 +225,7 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
-    private FacetFilter getFacetFilter(MultiValueMap<String, Object> allRequestParams) {
+    private FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
         logger.debug("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");
