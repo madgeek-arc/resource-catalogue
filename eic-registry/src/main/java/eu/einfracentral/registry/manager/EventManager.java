@@ -49,6 +49,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         if (!events.isEmpty()) {
             for (Event event : events) {
                 this.delete(event);
+                logger.info(String.format("deleting event:%n-id: %s%n-service: %s%n-type: %s", event.getId(), event.getService(), event.getType()));
             }
         }
     }
