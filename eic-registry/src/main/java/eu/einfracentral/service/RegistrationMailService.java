@@ -79,8 +79,8 @@ public class RegistrationMailService {
                 break;
             case PENDING_2:
                 assert serviceTemplate != null;
-                providerSubject = String.format("[eInfraCentral] Your service [%s] has been received and its approval is pending ", serviceTemplate.getName());
-                regTeamSubject = String.format("[eInfraCentral] Approve or reject the information about the new service: [%s] – [%s] ", provider.getName(), serviceTemplate.getName());
+                providerSubject = String.format("[eInfraCentral] Your service [%s] has been received and its approval is pending", serviceTemplate.getName());
+                regTeamSubject = String.format("[eInfraCentral] Approve or reject the information about the new service: [%s] – [%s]", provider.getName(), serviceTemplate.getName());
                 break;
             case APPROVED:
                 if (provider.getActive()) {
@@ -90,7 +90,7 @@ public class RegistrationMailService {
                     break;
                 } else {
                     assert serviceTemplate != null;
-                    providerSubject = String.format("[eInfraCentral] Your service provider [%s] has been set to inactive.", provider.getName());
+                    providerSubject = String.format("[eInfraCentral] Your service provider [%s] has been set to inactive", provider.getName());
                     regTeamSubject = String.format("[eInfraCentral] The service provider [%s] has been set to inactive", provider.getName());
                     break;
                 }
