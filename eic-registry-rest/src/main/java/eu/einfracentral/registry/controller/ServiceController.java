@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -228,7 +229,7 @@ public class ServiceController {
     @ApiOperation(value = "Get all pending Service Templates")
     @RequestMapping(path = "template/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
+    public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
         List<Provider> pendingProviders = providerService.getInactive();
         List<Service> serviceTemplates = new ArrayList<>();
         for (Provider provider : pendingProviders) {
@@ -236,7 +237,8 @@ public class ServiceController {
                 serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()));
             }
         }
-        return ResponseEntity.ok(serviceTemplates);
+        Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
+        return ResponseEntity.ok(services);
     }
 
     private FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
