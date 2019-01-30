@@ -225,6 +225,20 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
+    @ApiOperation(value = "Get all pending Service Templates")
+    @RequestMapping(path = "template/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
+        List<Provider> pendingProviders = providerService.getInactive();
+        List<Service> serviceTemplates = new ArrayList<>();
+        for (Provider provider : pendingProviders) {
+            if (Provider.States.fromString(provider.getStatus()) == Provider.States.PENDING_2) {
+                serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()));
+            }
+        }
+        return ResponseEntity.ok(serviceTemplates);
+    }
+
     private FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
         logger.debug("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
