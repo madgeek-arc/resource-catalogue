@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -98,7 +99,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
-        FacetFilter ff = getFacetFilter(allRequestParams);
+        FacetFilter ff = createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
@@ -115,7 +116,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-        FacetFilter ff = getFacetFilter(allRequestParams);
+        FacetFilter ff = createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<RichService> services = infraService.getRichServices(ff, auth);
@@ -225,7 +226,22 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
-    private FacetFilter getFacetFilter(MultiValueMap<String, Object> allRequestParams) {
+    @ApiOperation(value = "Get all pending Service Templates")
+    @RequestMapping(path = "template/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
+        List<Provider> pendingProviders = providerService.getInactive();
+        List<Service> serviceTemplates = new ArrayList<>();
+        for (Provider provider : pendingProviders) {
+            if (Provider.States.fromString(provider.getStatus()) == Provider.States.PENDING_2) {
+                serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()));
+            }
+        }
+        Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
+        return ResponseEntity.ok(services);
+    }
+
+    private FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
         logger.debug("Request params: " + allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");

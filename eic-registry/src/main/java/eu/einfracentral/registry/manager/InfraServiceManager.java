@@ -46,10 +46,12 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         try {
             validate(infraService);
             infraService.setActive(providerManager.get(infraService.getProviders().get(0)).getActive());
-            String id = createServiceId(infraService);
+            if ((infraService.getId() == null) || ("".equals(infraService.getId()))) {
+                String id = createServiceId(infraService);
+                infraService.setId(id);
+            }
             infraService.setLatest(true);
-            infraService.setId(id);
-            logger.info("Created service with id: " + id);
+            logger.info("Creating service with id: " + infraService.getId() + " and version:" + infraService.getVersion());
             logger.info("Providers: " + infraService.getProviders());
 
             if (infraService.getServiceMetadata() == null) {
@@ -59,7 +61,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
             ret = super.add(infraService, authentication);
 
-            if (providerManager.getServices(infraService.getProviders().get(0)).size() == 1) { // user just added the service
+            // search if there are other provider services
+            FacetFilter ff = new FacetFilter();
+            ff.addFilter("providers", infraService.getProviders().get(0));
+            if (this.getAll(ff, null).getTotal() == 1) { // user just added the service
                 providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.PENDING_2, null, authentication);
             }
         } catch (Exception e) {
@@ -94,7 +99,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             super.update(existingService, authentication);
 
 //                infraService.setStatus(); // TODO: enable this when services support the Status field
-            ret = add(infraService, authentication);
+            ret = addService(infraService, authentication);
         }
         return ret;
     }
@@ -273,14 +278,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return ret;
     }
 
-    private String createServiceId(Service service) {
-        String provider = service.getProviders().get(0);
-        return String.format("%s.%s", provider, StringUtils
-                .stripAccents(service.getName())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replaceAll(" ", "_")
-                .toLowerCase());
-    }
 
     private void validateVocabularies(InfraService service) {
 
