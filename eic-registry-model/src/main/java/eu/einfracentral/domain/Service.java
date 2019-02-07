@@ -276,6 +276,7 @@ public class Service implements Identifiable {
     @ApiModelProperty(position = 34, example = "'Service Funding Sources' (optional)")
     private String funding;
 
+    //Level Targets and Performance Information
     /**
      * Availability, i.e., the fraction of a time period that an item is in a condition to perform its intended function upon demand (“available” indicates that an item is in this condition); availability is often expressed as a probability.
      */
@@ -296,6 +297,21 @@ public class Service implements Identifiable {
     @JsonIgnore
     @XmlElement
     private String serviceability;
+
+    /**
+     * Other Service Level Target or Performance Infdicator
+     */
+    @JsonIgnore
+    @XmlElement
+    private String performanceIndicatorName;
+
+    /**
+     * Indicator Value Measurement of Other Indicator
+     */
+    @JsonIgnore
+    @XmlElement
+    private String performanceIndicatorValue;
+
 
 
     public Service() {
@@ -351,6 +367,8 @@ public class Service implements Identifiable {
         this.availability = service.getAvailability();
         this.reliability = service.getReliability();
         this.serviceability = service.getServiceability();
+        this.performanceIndicatorName = service.getPerformanceIndicatorName();
+        this.performanceIndicatorValue = service.getPerformanceIndicatorValue();
     }
 
     @Override
@@ -658,6 +676,22 @@ public class Service implements Identifiable {
     }
 
     public void setServiceability(String serviceability) {
+        this.serviceability = serviceability;
+    }
+
+    public String getPerformanceIndicatorName() {
+        return serviceability;
+    }
+
+    public void setPerformanceIndicatorName(String serviceability) {
+        this.serviceability = serviceability;
+    }
+
+    public String getPerformanceIndicatorValue() {
+        return serviceability;
+    }
+
+    public void setPerformanceIndicatorValue(String serviceability) {
         this.serviceability = serviceability;
     }
 

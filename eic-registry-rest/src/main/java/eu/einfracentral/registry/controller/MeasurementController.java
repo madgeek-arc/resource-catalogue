@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-@ApiIgnore
+//@ApiIgnore
 @RestController
 @RequestMapping("measurement")
 public class MeasurementController extends ResourceController<Measurement, Authentication> {
@@ -35,7 +35,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return super.add(measurement, auth);
     }
 
-    @ApiOperation(value = "Updates the measurement assigned the given id with the given measurement, keeping versions of revisions.")
+    @ApiOperation(value = "Updates the measurement assigned the given id with the given measurement, keeping version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @Override
     public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {

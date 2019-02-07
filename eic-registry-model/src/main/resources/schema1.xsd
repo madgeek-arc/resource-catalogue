@@ -80,14 +80,22 @@
   <xs:complexType name="indicator">
     <xs:sequence>
       <xs:element name="description" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" name="dimensions" type="tns:dimension"/>
+      <xs:element minOccurs="0" name="dimensions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="dimension" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="id" type="xs:string"/>
-      <xs:element ref="tns:unit"/>
+      <xs:element minOccurs="0" name="units">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="unit" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="unit">
-    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="infraService">
@@ -180,6 +188,16 @@
       <xs:element name="order" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="performanceIndicatorName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Other Service Level Target or Performance Infdicator]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="performanceIndicatorValue" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Indicator Value Measurement of Other Indicator]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="places">
@@ -327,10 +345,17 @@
   <xs:complexType name="measurement">
     <xs:sequence>
       <xs:element name="id" type="xs:string"/>
-      <xs:element ref="tns:indicator"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="location" type="xs:string"/>
+      <xs:element name="indicatorId" type="xs:string"/>
+      <xs:element minOccurs="0" name="locations">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="location" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="serviceId" type="xs:string"/>
       <xs:element minOccurs="0" name="time" type="xs:anySimpleType"/>
-      <xs:element name="value" type="xs:anyType"/>
+      <xs:element name="value" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -427,6 +452,10 @@
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="unit">
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="vocabulary">
