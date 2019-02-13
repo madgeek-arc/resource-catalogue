@@ -32,4 +32,19 @@
       <xs:element minOccurs="0" name="value" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:simpleType name="dimensionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TIME"/>
+      <xs:enumeration value="LOCATION"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="unitType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PCT"/>
+      <xs:enumeration value="BOOL"/>
+      <xs:enumeration value="NUM"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
