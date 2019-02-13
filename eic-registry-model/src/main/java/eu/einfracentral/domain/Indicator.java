@@ -20,10 +20,10 @@ public class Indicator implements Identifiable {
     @XmlElementWrapper(name = "dimensions")
     @XmlElement(name = "dimension")
     @ApiModelProperty(position = 3, example = "['TIME', 'LOCATION'] (at least one)", required = true)
-    private List<DimensionType> dimensions;
+    private List<String> dimensions;
     @XmlElement(name = "unit")
     @ApiModelProperty(position = 4, example = "'PCT', 'NUM' or 'BOOL'", required = true)
-    private UnitType unit;
+    private String unit;
 
     public Indicator() {
 
@@ -110,19 +110,19 @@ public class Indicator implements Identifiable {
         this.description = description;
     }
 
-    public UnitType getUnit() {
+    public String getUnit() {
         return unit;
     }
 
-    public void setUnit(UnitType unit) {
+    public void setUnit(String unit) {
         this.unit = unit;
     }
 
-    public List<DimensionType> getDimensions() {
+    public List<String> getDimensions() {
         return dimensions;
     }
 
-    public void setDimensions(List<DimensionType> dimensions) {
+    public void setDimensions(List<String> dimensions) {
         this.dimensions = dimensions;
     }
 }
