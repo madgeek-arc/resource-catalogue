@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -19,10 +20,10 @@ public class Indicator implements Identifiable {
     private String description;
     @XmlElementWrapper(name = "dimensions")
     @XmlElement(name = "dimension")
-    @ApiModelProperty(position = 3, example = "['TIME', 'LOCATION'] (at least one)", required = true)
+    @ApiModelProperty(position = 3, example = "['time', 'location'] (at least one)", required = true)
     private List<String> dimensions;
     @XmlElement(name = "unit")
-    @ApiModelProperty(position = 4, example = "'PCT', 'NUM' or 'BOOL'", required = true)
+    @ApiModelProperty(position = 4, example = "'percentage', 'numeric' or 'boolean'", required = true)
     private String unit;
 
     public Indicator() {
@@ -60,7 +61,10 @@ public class Indicator implements Identifiable {
             return Arrays.stream(UnitType.values())
                     .filter(v -> v.unitType.equals(s))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown value: " + s + " ; Valid options: "
+                                    + Arrays.stream(values())
+                                    .map(UnitType::getKey)
+                                    .collect(Collectors.joining(", "))));
         }
 
     }
@@ -87,7 +91,10 @@ public class Indicator implements Identifiable {
             return Arrays.stream(DimensionType.values())
                     .filter(v -> v.dimensionType.equals(s))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown value: " + s + " ; Valid options: "
+                            + Arrays.stream(values())
+                            .map(DimensionType::getKey)
+                            .collect(Collectors.joining(", "))));
         }
 
     }

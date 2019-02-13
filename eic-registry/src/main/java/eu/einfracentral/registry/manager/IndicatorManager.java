@@ -44,7 +44,6 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
     @Override
     public Indicator validate(Indicator indicator){
 
-        //TODO: Add validation for existing Indicator ID
         // Validates Indicator's ID
         if (indicator.getId() == null || indicator.getId().equals("")) {
             throw new ValidationException("Indicator's id cannot be 'null' or 'empty'");
@@ -73,8 +72,11 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
         //Validates Indicator's unit
         if (indicator.getUnit() == null) {
-            throw new ValidationException("Indicator's dimensions cannot be 'null' or 'empty'");
+            throw new ValidationException("Indicator's unit cannot be 'null' or 'empty'");
         }
+
+        // throws exception if value does not exist
+        Indicator.UnitType.fromString(indicator.getUnit());
 
         return indicator;
     }
