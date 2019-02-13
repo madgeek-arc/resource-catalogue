@@ -61,7 +61,7 @@
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
-        <typescript-generator-maven-plugin.version>1.27.339</typescript-generator-maven-plugin.version>
+        <typescript-generator-maven-plugin.version>2.6.433</typescript-generator-maven-plugin.version>
         <maven-model.version>3.3.9</maven-model.version>
         <spring-security-config.version>4.1.5.RELEASE</spring-security-config.version>
     </properties>
