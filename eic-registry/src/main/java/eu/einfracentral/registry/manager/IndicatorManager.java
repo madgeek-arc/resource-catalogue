@@ -60,13 +60,13 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
             throw new ValidationException("Indicator's dimensions cannot be 'null' or 'empty'");
         }
 
-        List<Indicator.DimensionType> validatedDimensions = new ArrayList<>();
-        for (int i=0; i<indicator.getDimensions().size(); i++){
-            if (indicator.getDimensions().get(i) == Indicator.DimensionType.TIME && !validatedDimensions.contains(Indicator.DimensionType.TIME)){
-                validatedDimensions.add(indicator.getDimensions().get(i));
+        List<String> validatedDimensions = new ArrayList<>();
+        for (String dimension : indicator.getDimensions()) {
+            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.TIME  && !validatedDimensions.contains(Indicator.DimensionType.TIME)) {
+                validatedDimensions.add(dimension);
             }
-            if (indicator.getDimensions().get(i) == Indicator.DimensionType.LOCATION && !validatedDimensions.contains(Indicator.DimensionType.LOCATION)){
-                validatedDimensions.add(indicator.getDimensions().get(i));
+            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATION  && !validatedDimensions.contains(Indicator.DimensionType.LOCATION)) {
+                validatedDimensions.add(dimension);
             }
         }
         indicator.setDimensions(validatedDimensions);
