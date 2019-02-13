@@ -51,23 +51,24 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public Measurement validate(Measurement measurement) {
 
-        //TODO: Add validation for existing Measurement ID
         // Validates Measurement's ID
         if (measurement.getId() == null || measurement.getId().equals("")) {
             throw new ValidationException("Indicator's id cannot be 'null' or 'empty'");
         }
 
         // Validates Indicator's ID
-//        if (!measurement.getId().equals(indicatorManager.get("id").toString())) {
-//            throw new ValidationException("Indicator's id doesn't exist");
-//        }
+        if (indicatorManager.get(measurement.getIndicatorId()) == null) {
+            throw new ValidationException("Indicator with id: " + measurement.getIndicatorId() + " does not exist");
+        }
 
-        // Validates Service's ID
-        infraService.get(measurement.getServiceId());
+        // Validates Service existence
+        if (infraService.get(measurement.getServiceId()) == null) {
+            throw new ValidationException("Service with id: " + measurement.getServiceId() + " does not exist");
+        }
 
         // Validates that at least one of time, locations is mandatory
         if (measurement.getLocations() == null && measurement.getTime() == null){
-            throw new ValidationException("You must provide at least one of: locations, time");
+            throw new ValidationException("You must provide at least one of: locations, time"); // TODO: get values from type
         } else if (measurement.getLocations() == null && measurement.getTime().toString().equals("")){
             throw new ValidationException(("Measurement's time cannot be empty"));
         } else if (measurement.getTime() == null && measurement.getLocations().isEmpty()){
@@ -83,7 +84,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                     verifiedLocations.add(location);
                 }
             }
-            if (verifiedLocations.size() == 0){
+            if (verifiedLocations.isEmpty()){
                 throw new ValidationException("One or more of the locations given is wrong. Accepted format according to ISO 3166-1 alpha-2");
             }
 
