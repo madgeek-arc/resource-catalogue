@@ -83,18 +83,12 @@
       <xs:element minOccurs="0" name="dimensions">
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="dimension" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="dimension" type="dimensionType"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="units">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="unit" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element minOccurs="0" name="unit" type="unitType"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -113,11 +107,6 @@
 
   <xs:complexType name="service">
     <xs:sequence>
-      <xs:element minOccurs="0" name="availability" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Availability, i.e., the fraction of a time period that an item is in a condition to perform its intended function upon demand (“available” indicates that an item is in this condition); availability is often expressed as a probability.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element name="category" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A named group of services that offer access to the same type of resource that is of interest to a customer/user.]]></xs:documentation>
@@ -190,16 +179,6 @@
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="performanceIndicatorName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Other Service Level Target or Performance Infdicator]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="performanceIndicatorValue" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Indicator Value Measurement of Other Indicator]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element name="places">
         <xs:complexType>
           <xs:sequence>
@@ -226,11 +205,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="reliability" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Reliability, i.e., the probability that an item will function without failure under stated conditions for a speciﬁed amount of time. “Stated conditions” indicates perquisite conditions external to the item being considered. For example, a stated condition for a supercomputer might be that power and cooling must be available - thus a failure of the power or cooling systems would not be considered a failure of the supercomputer.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element minOccurs="0" name="requests" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[(Deprecated) Link to request the service from the service provider]]></xs:documentation>
@@ -246,11 +220,6 @@
       <xs:element name="serviceLevelAgreement" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="serviceability" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Serviceability, i.e., the probability that an item will be retained in, or restored to, a condition to per-form its intended function within a speciﬁed period of time Durability, i.e., the ability of a physical product to remain functional, without requiring excessive maintenance or repair, when faced with the challenges of normal operation over its design lifetime.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="subcategory" type="xs:string">

@@ -1,33 +1,35 @@
 package eu.einfracentral.domain;
 
-import org.springframework.util.MultiValueMap;
-
+import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Measurement<T> implements Identifiable {
+public class Measurement implements Identifiable {
     @XmlElement(required = true)
+    @ApiModelProperty(position = 1, example = "Measurement's ID")
     private String id;
     @XmlElement(required = true)
+    @ApiModelProperty(position = 2, example = "Indicator's ID")
     private String indicatorId;
     @XmlElement(required = true)
+    @ApiModelProperty(position = 3, example = "Service's ID")
     private String serviceId;
-    @XmlElement(required = true)
-    private String value; //value can be PCT, NUM or BOOL
     @XmlElement
+    @ApiModelProperty(position = 4, example = "Timestamp of the specific measurement")
     private XMLGregorianCalendar time;
-
-    //TODO: we need vocabulary type of location, so to not have problems with the design tool later!
     @XmlElementWrapper(name = "locations")
     @XmlElement(name = "location")
+    @ApiModelProperty(position = 5, example = "['l1', 'l2']")
     private List<String> locations;
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 6, example = "Actual value of the measurement")
+    private String value;
 
-//    @XmlElementWrapper(name="dimensionValues", required = true)
-//    @XmlElement(name="dimensionValue")
-//    private List<String> dimensionValues;
+
+    //TODO: Make at least one of time, locations mandatory!
 
 
     public Measurement() {
