@@ -39,6 +39,13 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     }
 
     @Override
+    public Measurement update(Measurement measurement, Authentication auth) {
+        validate(measurement);
+        super.update(measurement, auth);
+        return measurement;
+    }
+
+    @Override
     public Measurement get(String id, Authentication auth) {
         return null;
     }
