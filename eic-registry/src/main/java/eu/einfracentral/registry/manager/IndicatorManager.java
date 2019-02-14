@@ -59,14 +59,10 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
     public void delete(Indicator indicator) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("indicator", indicator.getId());
-        try{
             Browsing<Measurement> measurements = measurementManager.getAll(ff, null);
             if (measurements.getTotal() > 0){
                 throw new ValidationException("You can't delete the specific Indicator, as it's related to one or more Measurements");
             }
-        } catch (ResourceException e) {
-            logger.error(e);
-        }
         logger.info("Deleting indicator: " + indicator.getId());
         super.delete(indicator);
     }
