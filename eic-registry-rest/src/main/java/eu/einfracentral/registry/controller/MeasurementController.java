@@ -43,8 +43,20 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return super.get(id, auth);
     }
 
+    @ApiOperation(value = "Returns the measurement assigned the given id.")
+    @RequestMapping(path = "service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<Measurement>> getServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return ResponseEntity.ok(measurementManager.getServiceMeasurements(id, auth));
+    }
+
+    @ApiOperation(value = "Returns the measurement assigned the given id.")
+    @RequestMapping(path = "service/latest/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<Measurement>> getLatestServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
+    }
+
     @Override
-    @ApiOperation(value = "Filter a list of measurements based on a set of filters or get a list of all measurements in the eInfraCentral Catalogue")
+    @ApiOperation(value = "Filter a list of measurements based on a set of filters or get a list of all measurements")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
