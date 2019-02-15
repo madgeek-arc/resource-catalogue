@@ -41,6 +41,13 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public Measurement update(Measurement measurement, Authentication auth) {
         validate(measurement);
+        Measurement previous = get(measurement.getId());
+        if (!previous.getServiceId().equals(measurement.getServiceId())) {
+            throw new ValidationException("You cannot change the Service id of the measurement");
+        }
+        if (!previous.getIndicatorId().equals(measurement.getIndicatorId())) {
+            throw new ValidationException("You cannot change the Indicator of the measurement");
+        }
         super.update(measurement, auth);
         return measurement;
     }
