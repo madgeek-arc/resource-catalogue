@@ -4,12 +4,17 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
+import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.ParserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class MeasurementManager extends ResourceManager<Measurement> implements MeasurementService<Measurement, Authentication> {
@@ -19,7 +24,8 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     private InfraServiceService<InfraService, InfraService> infraService;
 
     @Autowired
-    public MeasurementManager(IndicatorManager indicatorManager, VocabularyManager vocabularyManager, InfraServiceService<InfraService, InfraService> service) {
+    public MeasurementManager(IndicatorManager indicatorManager, VocabularyManager vocabularyManager,
+                              InfraServiceService<InfraService, InfraService> service) {
         super(Measurement.class);
         this.vocabularyManager = vocabularyManager;
         this.infraService = service;
@@ -53,8 +59,22 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     }
 
     @Override
-    public Measurement get(String id, Authentication auth) {
-        return null;
+    public Paging<Measurement> getServiceMeasurements(String serviceId, Authentication authentication) {
+        // TODO: create method for cqlQuery returning Paging<MyClass>
+        Paging<Resource> measurementResources = searchService.cqlQuery(String.format("service=\"%s\"", serviceId), getResourceType(),
+                10000, 0, "creation_date", "DESC");
+        List<Measurement> measurements = measurementResources
+                .getResults()
+                .stream()
+                .map(resource -> parserPool.deserialize(resource, Measurement.class))
+                .collect(Collectors.toList());
+        return new Paging<>(measurementResources.getTotal(), measurementResources.getFrom(),
+                measurementResources.getTotal(), measurements, measurementResources.getFacets());
+    }
+
+    @Override
+    public Paging<Measurement> getLatestServiceMeasurements(String serviceId, Authentication authentication) {
+        return null; // TODO complete method
     }
 
     @Override
