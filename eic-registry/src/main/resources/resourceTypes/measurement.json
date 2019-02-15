@@ -10,7 +10,13 @@
     {
       "multivalued": false,
       "name": "indicator",
-      "path": "//*[local-name()='indicator']/text()",
+      "path": "//*[local-name()='indicatorId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "service",
+      "path": "//*[local-name()='serviceId']/text()",
       "type": "java.lang.String"
     },
     {
@@ -36,5 +42,5 @@
   "name": "measurement",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic-registry-model/develop/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/kpis/eic-registry-model/src/main/resources/schema1.xsd"
 }
