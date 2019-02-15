@@ -25,6 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+@ApiIgnore
 @RestController
 @RequestMapping("exportToCSV")
 public class CSVController {

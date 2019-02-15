@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@ApiIgnore
 @RestController
 @RequestMapping("info")
 @Api(value = "Get General Information")
