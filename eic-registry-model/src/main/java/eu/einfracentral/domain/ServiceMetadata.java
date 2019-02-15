@@ -10,7 +10,7 @@ import java.util.List;
 public class ServiceMetadata {
 
     @XmlElement
-    private List<Measurement<?>> performanceData;
+    private List<Measurement> performanceData;
 
     @XmlElement(defaultValue = "false")
     private boolean featured;
@@ -42,11 +42,11 @@ public class ServiceMetadata {
         this.modifiedAt = serviceMetadata.getModifiedAt();
     }
 
-    public List<Measurement<?>> getPerformanceData() {
+    public List<Measurement> getPerformanceData() {
         return performanceData;
     }
 
-    public void setPerformanceData(List<Measurement<?>> performanceData) {
+    public void setPerformanceData(List<Measurement> performanceData) {
         this.performanceData = performanceData;
     }
 
