@@ -11,8 +11,6 @@
 
   <xs:element name="infraService" type="tns:infraService"/>
 
-  <xs:element name="manager" type="tns:manager"/>
-
   <xs:element name="measurement" type="tns:measurement"/>
 
   <xs:element name="membership" type="tns:membership"/>
@@ -75,6 +73,21 @@
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="funder">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="logo" type="xs:anyURI"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="services">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="service" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="indicator">
@@ -328,37 +341,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="manager">
-    <xs:sequence>
-      <xs:element name="contactInformation" type="xs:string"/>
-      <xs:element name="id" type="xs:string"/>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="services">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="service" type="tns:user"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="users">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:user"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="user">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="email" type="xs:string"/>
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="surname" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="membership">
     <xs:sequence>
       <xs:element minOccurs="0" name="grant" type="xs:string"/>
@@ -387,6 +369,15 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="website" type="xs:anyURI"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="user">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="email" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="surname" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
