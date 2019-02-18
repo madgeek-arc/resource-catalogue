@@ -3,8 +3,6 @@
 
   <xs:import schemaLocation="schema2.xsd"/>
 
-  <xs:element name="dimension" type="tns:dimension"/>
-
   <xs:element name="event" type="tns:event"/>
 
   <xs:element name="indicator" type="tns:indicator"/>
@@ -13,25 +11,17 @@
 
   <xs:element name="measurement" type="tns:measurement"/>
 
-  <xs:element name="membership" type="tns:membership"/>
-
   <xs:element name="provider" type="tns:provider"/>
 
   <xs:element name="service" type="tns:service"/>
 
   <xs:element name="serviceMetadata" type="tns:serviceMetadata"/>
 
-  <xs:element name="unit" type="tns:unit"/>
-
   <xs:element name="user" type="tns:user"/>
 
   <xs:element name="vocabulary" type="tns:vocabulary"/>
 
   <xs:element name="vocabularyEntry" type="tns:vocabularyEntry"/>
-
-  <xs:complexType name="dimension">
-    <xs:sequence/>
-  </xs:complexType>
 
   <xs:complexType final="extension restriction" name="entryMapAdapter">
     <xs:complexContent>
@@ -341,15 +331,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="membership">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="grant" type="xs:string"/>
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="provider" type="xs:string"/>
-      <xs:element minOccurs="0" name="user" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="provider">
     <xs:sequence>
       <xs:element minOccurs="0" name="active" type="xs:boolean"/>
@@ -412,10 +393,6 @@
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="unit">
-    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="vocabulary">
