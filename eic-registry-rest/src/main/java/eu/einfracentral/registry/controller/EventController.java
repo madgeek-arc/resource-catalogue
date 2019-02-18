@@ -5,6 +5,8 @@ import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +21,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @ApiIgnore
 @RestController
@@ -37,11 +40,16 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     @ApiIgnore
     @ApiOperation("Retrieve all events.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
     @RequestMapping(path = "events/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Event>> getAll(Authentication authentication) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        return new ResponseEntity<>(eventService.getAll(ff, authentication), HttpStatus.OK);
+    public ResponseEntity<Paging<Event>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
+        return super.getAll(allRequestParams, authentication);
     }
 
     @ApiIgnore
