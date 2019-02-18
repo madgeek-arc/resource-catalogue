@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.Indicator;
 import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.registry.service.MeasurementService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
@@ -20,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -59,8 +61,10 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @ApiOperation(value = "Filter a list of measurements based on a set of filters or get a list of all measurements")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity of services to be fetched", dataType = "string", paramType = "query")
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Measurement>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
