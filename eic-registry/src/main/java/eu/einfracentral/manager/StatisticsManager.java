@@ -7,6 +7,10 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -19,6 +23,7 @@ import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistog
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders;
 import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -33,6 +38,12 @@ public class StatisticsManager implements StatisticsService {
     private ElasticConfiguration elastic;
     private AnalyticsService analyticsService;
     private ProviderService<Provider, Authentication> providerService;
+
+    @Autowired
+    SearchService searchService;
+
+    @Autowired
+    ParserService parserService;
 
     @Autowired
     StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
@@ -235,5 +246,84 @@ public class StatisticsManager implements StatisticsService {
         ));
         int grandTotal = counts.values().stream().mapToInt(Integer::intValue).sum();
         return counts.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> ((float) v.getValue()) / grandTotal));
+    }
+
+    public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by) {
+        Map<DateTime, Map<String, Long>> results = new LinkedHashMap<>();
+        Paging<Resource> resources = searchService.cqlQuery(
+                String.format("type=\"%s\" AND creation_date > %s AND creation_date < %s",
+                        type, from.toInstant().toEpochMilli(), to.toInstant().toEpochMilli()), "event",
+                10000, 0, "creation_date", "ASC");
+        List<Event> events = resources
+                .getResults()
+                .stream()
+                .map(resource -> parserService.deserialize(resource, Event.class))
+                .collect(Collectors.toList());
+
+
+        DateTime start = new DateTime(from);
+        DateTime stop = new DateTime(to);
+
+        Map<DateTime, List<Event>> eventsByDate = new LinkedHashMap<>();
+
+        start.plusWeeks(1);
+        while (start.getMillis() <= stop.getMillis()) {
+            DateTime endDate = addInterval(start, by);
+            List<Event> weekEvents = new LinkedList<>();
+
+            events = events
+                    .stream()
+                    .map(event -> {
+                        if (endDate.isAfter(event.getInstant())) {
+                            weekEvents.add(event);
+                            return null;
+                        } else
+                            return event;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+//            weekEvents.sort(Comparator.comparing(Event::getService));
+            eventsByDate.put(start, weekEvents);
+            start = endDate;
+        }
+
+        for (Map.Entry<DateTime, List<Event>> weekEntry : eventsByDate.entrySet()) {
+            Map<String, Long> weekResults = weekEntry.getValue()
+                    .stream()
+                    .collect(Collectors.groupingBy(Event::getService, Collectors.counting()));
+
+            weekResults = weekResults.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+            results.put(weekEntry.getKey(), weekResults);
+        }
+
+
+
+        return results;
+
+    }
+
+    private DateTime addInterval(DateTime date, Interval by) {
+        DateTime duration;
+        switch (by) {
+            case DAY:
+                duration = date.plusDays(1);
+                break;
+            case WEEK:
+                duration = date.plusWeeks(1);
+                break;
+            case MONTH:
+                duration = date.plusMonths(1);
+                break;
+            case YEAR:
+                duration = date.plusYears(1);
+                break;
+            default:
+                duration = date;
+        }
+        return duration;
     }
 }
