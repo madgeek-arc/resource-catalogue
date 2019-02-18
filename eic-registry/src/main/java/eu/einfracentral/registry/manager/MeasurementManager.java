@@ -11,9 +11,8 @@ import eu.openminted.registry.core.service.ParserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,6 +38,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Override
     public Measurement add(Measurement measurement, Authentication auth) {
+        measurement.setId(UUID.randomUUID().toString());
         validate(measurement);
         super.add(measurement, auth);
         return measurement;
@@ -60,7 +60,13 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Override
     public Paging<Measurement> getServiceMeasurements(String serviceId, Authentication authentication) {
-        // TODO: create method for cqlQuery returning Paging<MyClass>
+        Paging<Resource> measurementResources = searchService.cqlQuery(String.format("service=\"%s\"", serviceId), getResourceType(),
+                10000, 0, "creation_date", "DESC");
+        return pagingResourceToMeasurement(measurementResources);
+    }
+
+    @Override
+    public Paging<Measurement> getLatestServiceMeasurements(String serviceId, Authentication authentication) {
         Paging<Resource> measurementResources = searchService.cqlQuery(String.format("service=\"%s\"", serviceId), getResourceType(),
                 10000, 0, "creation_date", "DESC");
         List<Measurement> measurements = measurementResources
@@ -68,13 +74,19 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                 .stream()
                 .map(resource -> parserPool.deserialize(resource, Measurement.class))
                 .collect(Collectors.toList());
-        return new Paging<>(measurementResources.getTotal(), measurementResources.getFrom(),
-                measurementResources.getTotal(), measurements, measurementResources.getFacets());
-    }
-
-    @Override
-    public Paging<Measurement> getLatestServiceMeasurements(String serviceId, Authentication authentication) {
-        return null; // TODO complete method
+        Map<String, Measurement> measurementMap = new HashMap<>();
+        for (Measurement measurement : measurements) {
+            String id = measurement.getIndicatorId(); // create an id using indicator, locations and time fields
+            if (measurement.getLocations() != null) {
+                id += String.join("", measurement.getLocations());
+            }
+            if (measurement.getTime() != null) {
+                id += measurement.getTime();
+            }
+            measurementMap.putIfAbsent(id, measurement); // put only the first occurred item with that id
+        }
+        measurements = new ArrayList<>(measurementMap.values());
+        return new Paging<>(measurements.size(), 0, measurements.size(), measurements, null);
     }
 
     @Override
@@ -84,11 +96,6 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Override
     public Measurement validate(Measurement measurement) {
-
-        // Validates Measurement's ID
-        if (measurement.getId() == null || measurement.getId().equals("")) {
-            throw new ValidationException("Indicator's id cannot be 'null' or 'empty'");
-        }
 
         // Validates Indicator's ID
         if (indicatorManager.get(measurement.getIndicatorId()) == null) {
@@ -138,5 +145,15 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         return measurement;
     }
 
+
+    private Paging<Measurement> pagingResourceToMeasurement(Paging<Resource> measurementResources) {
+        List<Measurement> measurements = measurementResources
+                .getResults()
+                .stream()
+                .map(resource -> parserPool.deserialize(resource, Measurement.class))
+                .collect(Collectors.toList());
+        return new Paging<>(measurementResources.getTotal(), measurementResources.getFrom(),
+                measurementResources.getTotal(), measurements, measurementResources.getFacets());
+    }
 
 }
