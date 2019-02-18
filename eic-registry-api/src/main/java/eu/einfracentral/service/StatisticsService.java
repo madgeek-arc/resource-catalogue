@@ -1,5 +1,9 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.domain.Event;
+import org.joda.time.DateTime;
+
+import java.util.Date;
 import java.util.Map;
 
 public interface StatisticsService {
@@ -14,4 +18,13 @@ public interface StatisticsService {
     Map<String, Integer> pFavourites(String id);
     Map<String, Integer> pVisits(String id);
     Map<String, Float> pVisitation(String id);
+
+    Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by);
+
+    enum Interval {
+        DAY,
+        WEEK,
+        MONTH,
+        YEAR
+    }
 }
