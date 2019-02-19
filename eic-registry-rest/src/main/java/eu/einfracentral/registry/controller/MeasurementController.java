@@ -52,7 +52,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     @ApiOperation(value = "Returns the measurement assigned the given id.")
-    @RequestMapping(path = "service/latest/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "latest/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Measurement>> getLatestServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
