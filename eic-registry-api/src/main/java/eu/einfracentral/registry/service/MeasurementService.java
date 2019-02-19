@@ -12,7 +12,7 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
      * @param authentication
      * @return
      */
-    Paging<T> getServiceMeasurements(String serviceId, U authentication);
+    Paging<T> getAll(String serviceId, U authentication);
 
     /**
      *
@@ -21,4 +21,15 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
      * @return
      */
     Paging<T> getLatestServiceMeasurements(String serviceId, U authentication);
+
+    /**
+     * Paging with all measurements for the specified {@param indicatorId} and {@param serviceId}.
+     *
+     * @param indicatorId
+     * @param serviceId
+     * @param authentication
+     * @return
+     */
+    Paging<T> getAll(String indicatorId, String serviceId, U authentication);
+
 }
