@@ -19,7 +19,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Map;
 
-@ApiIgnore
 @RestController
 @RequestMapping("funder")
 public class FunderController extends ResourceController<Funder, Authentication> {
