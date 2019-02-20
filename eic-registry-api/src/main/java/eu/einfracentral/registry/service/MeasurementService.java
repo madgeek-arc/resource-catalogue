@@ -32,4 +32,18 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
      */
     Paging<T> getAll(String indicatorId, String serviceId, U authentication);
 
+    /**
+     * Searches if an identical measurement exists (except Id field)
+     * @param measurement
+     * @return
+     */
+    boolean existsIdentical(T measurement);
+
+    /**
+     * Ensures Measurement abides by Indicator's structure
+     * @param measurement
+     * @return
+     */
+    boolean validateMeasurementStructure(T measurement);
+
 }
