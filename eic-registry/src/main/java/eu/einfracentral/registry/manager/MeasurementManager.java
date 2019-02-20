@@ -7,7 +7,6 @@ import eu.einfracentral.registry.service.MeasurementService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.ParserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -40,6 +39,8 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     public Measurement add(Measurement measurement, Authentication auth) {
         measurement.setId(UUID.randomUUID().toString());
         validate(measurement);
+        existsIdentical(measurement);
+        validateMeasurementStructure(measurement);
         super.add(measurement, auth);
         return measurement;
     }
@@ -152,6 +153,46 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         }
 
         return measurement;
+    }
+
+    // Validates if Measurement's index complies with Indicator's structure
+    public boolean validateMeasurementStructure(Measurement measurement){
+        Indicator existingIndicator = indicatorManager.get(measurement.getIndicatorId());
+
+        for (String dimension : existingIndicator.getDimensions()){
+            if ((Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATION && measurement.getLocations() == null) ||
+                (Indicator.DimensionType.fromString(dimension) != Indicator.DimensionType.LOCATION && measurement.getLocations() != null) ||
+                (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.TIME && measurement.getTime() == null) ||
+                (Indicator.DimensionType.fromString(dimension) != Indicator.DimensionType.TIME && measurement.getTime() != null)){
+                throw new ValidationException("Measurement's index does not comply with the specific Indicator's structure. Please review the dimensions the specific Indicator supports.");
+            }
+        }
+
+        return true;
+    }
+
+    // Assures that no other Measurement with the same fields (IndicatorId, ServiceId, Locations, Time) exists.
+    public boolean existsIdentical(Measurement measurement){
+        Paging<Measurement> existingMeasurements = getAll(measurement.getIndicatorId(), measurement.getServiceId(), null);
+        for (Measurement entry : existingMeasurements.getResults()) {
+            if (entry.getLocations() == null && measurement.getLocations() == null){
+                if(entry.getTime().equals(measurement.getTime())){
+                    throw new ValidationException("Measurement with IndicatorId " +measurement.getIndicatorId()+ " and ServiceId " +measurement.getServiceId()+
+                            " for the specific timestamp already exists!");
+                }
+            } else if (entry.getTime() == null && measurement.getTime() == null){
+                if(entry.getLocations().equals(measurement.getLocations())){
+                    throw new ValidationException("Measurement with IndicatorId " +measurement.getIndicatorId()+ " and ServiceId " +measurement.getServiceId()+
+                            " for the specific location-s already exists!");
+                }
+            } else if (entry.getTime() != null && entry.getLocations() != null && measurement.getLocations() != null && measurement.getTime() != null){
+                if(entry.getTime().equals(measurement.getTime()) && entry.getLocations().equals(measurement.getLocations())){
+                    throw new ValidationException("Measurement with IndicatorId " +measurement.getIndicatorId()+ " and ServiceId " +measurement.getServiceId()+
+                            " for the specific timestamp and location-s already exists!");
+                }
+            }
+        }
+        return true;
     }
 
 

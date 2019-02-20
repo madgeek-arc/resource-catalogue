@@ -2,7 +2,6 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Indicator;
 import eu.einfracentral.domain.Measurement;
-import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.IndicatorService;
 import eu.openminted.registry.core.domain.Browsing;
@@ -13,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
