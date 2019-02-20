@@ -14,6 +14,9 @@ import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -55,6 +58,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @CacheEvict(value = "events")
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
@@ -62,6 +66,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @CacheEvict(value = "events")
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         return super.update(event, auth);
@@ -124,6 +129,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @Cacheable(value = "events", key = "#eventType+#serviceId+#authentication")
     public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) {
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
@@ -133,6 +139,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @Cacheable(value = "events", key = "#eventType+#serviceId")
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
                 eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
@@ -140,6 +147,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @Cacheable(value = "events", key = "#eventType+#authentication")
     public List<Event> getUserEvents(String eventType, Authentication authentication) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
                 eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),

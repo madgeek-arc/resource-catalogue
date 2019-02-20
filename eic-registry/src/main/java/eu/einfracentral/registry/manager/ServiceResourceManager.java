@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -284,7 +283,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CachePut(value = "richService", key = "#id")
     public RichService getRichService(String id, String version, Authentication auth) {
         InfraService infraService;
         infraService = get(id, version);
@@ -292,7 +290,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CachePut(value = "richService", key = "#infraService.id")
     public RichService createRichService(InfraService infraService, Authentication auth) {
         RichService richService = new RichService(infraService);
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
@@ -368,8 +365,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             logger.error(e2);
         }
 
+        List<Event> serviceRatingEvents = eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId());
+
         //set Ratings & Favourites sums
-        richService.setRatings(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
+        richService.setRatings(serviceRatingEvents
                 .stream()
                 .map(Event::getUser)
                 .distinct()
@@ -389,7 +388,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         richService.setFavourites(favs);
 
         // set rating of the service
-        Optional<List<Event>> ratings = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
+        Optional<List<Event>> ratings = Optional.ofNullable(serviceRatingEvents);
         Map<String, Float> userRatings = new HashMap<>();
         ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
         float sum = 0;
@@ -433,7 +432,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             services = getServicesWithCorrectFacets(ff);
         } else {
             // Return all services if user enters blank keyword on search
-            if (StringUtils.isBlank(ff.getKeyword())){
+            if (StringUtils.isBlank(ff.getKeyword())) {
                 ff.setKeyword("");
             }
             services = getResults(ff);
@@ -443,7 +442,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return services;
     }
 
-    private Browsing<InfraService> getServicesWithCorrectFacets (FacetFilter ff){
+    private Browsing<InfraService> getServicesWithCorrectFacets(FacetFilter ff) {
         List<Facet> serviceFacets;
 
         FacetFilter ffWithoutFacetCategory = new FacetFilter(ff.getBrowseBy());
@@ -464,7 +463,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Browsing<InfraService> services = cqlQuery(ff);
         serviceFacets = services.getFacets();
 
-        for(Map.Entry<String, List<String>> filter : allFilters.entrySet()) {
+        for (Map.Entry<String, List<String>> filter : allFilters.entrySet()) {
             Map<String, List<String>> someFilters = new HashMap<>(allFilters);
 
             someFilters.remove(filter.getKey());

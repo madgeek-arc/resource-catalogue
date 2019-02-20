@@ -1,12 +1,16 @@
 package eu.einfracentral.manager;
 
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
@@ -25,6 +29,11 @@ import org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders
 import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -32,12 +41,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@EnableScheduling
 public class StatisticsManager implements StatisticsService {
 
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
     private ElasticConfiguration elastic;
     private AnalyticsService analyticsService;
     private ProviderService<Provider, Authentication> providerService;
+    private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
     SearchService searchService;
@@ -47,10 +58,12 @@ public class StatisticsManager implements StatisticsService {
 
     @Autowired
     StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
-                      ProviderService<Provider, Authentication> providerService) {
+                      ProviderService<Provider, Authentication> providerService,
+                      @Lazy InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.elastic = elastic;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
+        this.infraServiceService = infraServiceService;
     }
 
     @Override
@@ -135,7 +148,19 @@ public class StatisticsManager implements StatisticsService {
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
     }
 
+    @Scheduled(cron = "0 0/5 * * * ?") // every five minutes
+    @CacheEvict(value = "visits")
+    public void updateVisitsCache() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
+        Browsing<InfraService> services = infraServiceService.getAll(ff, null);
+        services.getResults().forEach(s -> visits(s.getId()));
+    }
+
     @Override
+    @Cacheable(value = "visits", key = "#id")
     public Map<String, Integer> visits(String id) {
         try {
             return analyticsService.getVisitsForLabel("/service/" + id);
@@ -299,7 +324,6 @@ public class StatisticsManager implements StatisticsService {
 
             results.put(weekEntry.getKey(), weekResults);
         }
-
 
 
         return results;
