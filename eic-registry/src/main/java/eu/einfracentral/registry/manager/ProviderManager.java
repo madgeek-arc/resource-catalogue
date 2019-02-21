@@ -247,7 +247,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @Cacheable(value = "providers", key = "#auth == null ? 'null' : #auth")
+    @Cacheable(value = "providers", key = "#auth == null ? 'null' : #auth.getPrincipal().toString()")
     public List<Provider> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
 //            return null; // TODO: enable this when front end can handle 401 properly
