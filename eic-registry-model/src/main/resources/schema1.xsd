@@ -5,6 +5,8 @@
 
   <xs:element name="event" type="tns:event"/>
 
+  <xs:element name="funder" type="tns:funder"/>
+
   <xs:element name="indicator" type="tns:indicator"/>
 
   <xs:element name="infraService" type="tns:infraService"/>
