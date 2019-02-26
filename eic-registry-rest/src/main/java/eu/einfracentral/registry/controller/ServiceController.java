@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+import springfox.documentation.annotations.Cacheable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -179,7 +180,6 @@ public class ServiceController {
         return ResponseEntity.ok(history);
     }
 
-    @ApiIgnore // TODO enable in a future release
     @ApiOperation(value = "Get all featured services")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
@@ -189,16 +189,13 @@ public class ServiceController {
         List<Provider> providers = providerService.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
-//        for (int i = 0; i < 5; i++) {
         for (int i = 0; i < providers.size(); i++) {
-//            Random randomProvider = new Random();
             int rand = randomNumberGenerator.nextInt(providers.size());
             services = providerService.getActiveServices(providers.get(rand).getId());
             providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
             if (!services.isEmpty()) {
-//                Random random = new Random();
                 featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
-            } /*else i--; // FIXME remove this (used for displaying always 5 provider services)*/
+            }
         }
         return new ResponseEntity<>(featuredServices, HttpStatus.OK);
     }
