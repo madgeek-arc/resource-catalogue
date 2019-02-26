@@ -81,7 +81,7 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("resourceTypes", "resourceTypesIndexFields", "events", "visits", "providers");
+        return new ConcurrentMapCacheManager("resourceTypes", "resourceTypesIndexFields", "events", "visits", "providers", "vocabularies");
     }
 
     @Bean

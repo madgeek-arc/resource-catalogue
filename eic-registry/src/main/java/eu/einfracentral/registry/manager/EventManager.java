@@ -131,7 +131,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events", key = "#authentication == null ? #eventType+#serviceId : #eventType+#serviceId+#authentication.getPrincipal().toString()")
+    @Cacheable(value = "events")
     public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) {
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
@@ -141,7 +141,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events", key = "#eventType+#serviceId")
+    @Cacheable(value = "events")
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
                 eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
@@ -149,7 +149,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events", key = "#authentication == null ? #eventType : #eventType+#authentication.getPrincipal().toString()")
+    @Cacheable(value = "events")
     public List<Event> getUserEvents(String eventType, Authentication authentication) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
                 eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),

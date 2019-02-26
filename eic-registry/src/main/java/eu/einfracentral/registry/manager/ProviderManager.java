@@ -117,7 +117,21 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return provider;
     }
 
+    /**
+     * Do not expose this method to users because it returns sensitive information about providers.
+     *
+     * @param id
+     * @return
+     */
     @Override
+    @Cacheable("providers")
+    public Provider get(String id) {
+        Provider provider = super.get(id);
+        return provider;
+    }
+
+    @Override
+    @Cacheable("providers")
     public Provider get(String id, Authentication auth) {
         Provider provider = get(id);
         if (auth == null) {
@@ -132,6 +146,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    @Cacheable(value = "providers")
     public Browsing<Provider> getAll(FacetFilter ff, Authentication auth) {
         List<Provider> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -179,7 +194,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         });
         super.delete(provider);
-//        this.del(provider);
     }
 
     @Override
@@ -213,9 +227,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return super.update(provider, auth);
     }
 
-    // TODO: CHECK THIS!!!
     @Override
-//    @Cacheable(value = "providers", key = "#email+#auth")
+    @Cacheable(value = "providers")
     public List<Provider> getServiceProviders(String email, Authentication auth) {
         List<Provider> providers;
         if (auth == null) {
@@ -247,7 +260,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @Cacheable(value = "providers", key = "#auth == null ? 'null' : #auth.getPrincipal().toString()")
+    @Cacheable(value = "providers")
     public List<Provider> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
 //            return null; // TODO: enable this when front end can handle 401 properly
