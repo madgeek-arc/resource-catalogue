@@ -95,7 +95,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     @CacheEvict(value = "events", allEntries = true)
-    public Event setRating(String serviceId, String value, Authentication authentgitication) throws ResourceNotFoundException, NumberParseException {
+    public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
