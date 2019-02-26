@@ -34,36 +34,28 @@ public class InfoController {
     private static final String INFO = "general_INFO";
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
-    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    InfoController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider, RedisTemplate redisTemplate) {
+    InfoController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
-        this.redisTemplate = redisTemplate;
     }
 
     @ApiOperation(value = "Get Info about #SPs, #Services etc.")
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@ApiIgnore Authentication authentication) {
         Map<Object, Object> servicesInfo = new HashMap<>();
-        if (redisTemplate.hasKey(INFO)) {
-            servicesInfo = redisTemplate.opsForHash().entries(INFO);
-        } else {
-            FacetFilter ff = new FacetFilter();
-            ff.addFilter("active", "true");
-            servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
-            ff.addFilter("latest", "true");
-            Paging<InfraService> infraServices = infraService.getAll(ff, null);
-            servicesInfo.put("services", (long) infraServices.getTotal());
-            for (Facet f : infraServices.getFacets()) {
-                if (f.getField().equals("resourceType")) {
-                    continue;
-                }
-                servicesInfo.putIfAbsent(f.getField(), (long) f.getValues().size());
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("active", "true");
+        servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
+        ff.addFilter("latest", "true");
+        Paging<InfraService> infraServices = infraService.getAll(ff, null);
+        servicesInfo.put("services", (long) infraServices.getTotal());
+        for (Facet f : infraServices.getFacets()) {
+            if (f.getField().equals("resourceType")) {
+                continue;
             }
-            redisTemplate.opsForHash().putAll(INFO, servicesInfo);
-            redisTemplate.expire(INFO, 5, TimeUnit.MINUTES);
+            servicesInfo.putIfAbsent(f.getField(), (long) f.getValues().size());
         }
         return ResponseEntity.ok(servicesInfo);
     }
