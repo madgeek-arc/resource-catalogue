@@ -347,22 +347,25 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
         }
 
-        // set user favourite and rate
-        List<Event> userEvents;
-        try {
-            userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
-            if (!userEvents.isEmpty()) {
-                richService.setFavourite(userEvents.get(0).getValue().equals("1"));
+        // set user favourite and rate if auth != null
+        if (auth != null) {
+
+            List<Event> userEvents;
+            try {
+                userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
+                if (!userEvents.isEmpty()) {
+                    richService.setFavourite(userEvents.get(0).getValue().equals("1"));
+                }
+                userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
+                if (!userEvents.isEmpty()) {
+                    richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
+                }
+            } catch (OIDCAuthenticationException e) {
+                // user not logged in
+                logger.warn("Authentication Exception", e);
+            } catch (Exception e2) {
+                logger.error(e2);
             }
-            userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
-            if (!userEvents.isEmpty()) {
-                richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
-            }
-        } catch (OIDCAuthenticationException e) {
-            // user not logged in
-            logger.debug("Silent Exception", e);
-        } catch (Exception e2) {
-            logger.error(e2);
         }
 
         List<Event> serviceRatingEvents = eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId());
