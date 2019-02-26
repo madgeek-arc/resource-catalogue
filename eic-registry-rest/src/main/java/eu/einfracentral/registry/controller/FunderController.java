@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Funder;
-import eu.einfracentral.domain.Indicator;
 import eu.einfracentral.registry.service.FunderService;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
