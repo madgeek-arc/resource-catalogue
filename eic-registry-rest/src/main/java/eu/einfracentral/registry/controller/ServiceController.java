@@ -22,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-import springfox.documentation.annotations.Cacheable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,14 +34,12 @@ public class ServiceController {
     private static Logger logger = LogManager.getLogger(ServiceController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
-    private Random randomNumberGenerator;
 
     @Autowired
-    ServiceController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider,
-                      Random randomNumberGenerator) {
+    ServiceController(InfraServiceService<InfraService, InfraService> service,
+                      ProviderService<Provider, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
-        this.randomNumberGenerator = randomNumberGenerator;
     }
 
     @ApiOperation(value = "Get the most current version of a specific Service providing the service ID")
@@ -183,21 +180,7 @@ public class ServiceController {
     @ApiOperation(value = "Get all featured services")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
-        // TODO: return featured services (now it returns a random infraService for each provider)
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        List<Provider> providers = providerService.getAll(ff, null).getResults();
-        List<Service> featuredServices = new ArrayList<>();
-        List<Service> services;
-        for (int i = 0; i < providers.size(); i++) {
-            int rand = randomNumberGenerator.nextInt(providers.size());
-            services = providerService.getActiveServices(providers.get(rand).getId());
-            providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
-            if (!services.isEmpty()) {
-                featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
-            }
-        }
-        return new ResponseEntity<>(featuredServices, HttpStatus.OK);
+        return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
     }
 
     @ApiIgnore

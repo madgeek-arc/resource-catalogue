@@ -49,4 +49,11 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
      * @return
      */
     boolean validate(T service);
+
+    /**
+     * Create a list of random services.
+     *
+     * @return
+     */
+    public List<Service> createFeaturedServices();
 }
