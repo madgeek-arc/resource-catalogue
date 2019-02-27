@@ -75,6 +75,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         return getAll(ff, authentication);
     }
 
+    // Gets ONLY the latest Measurements
     @Override
     public Paging<Measurement> getLatestServiceMeasurements(String serviceId, Authentication authentication) {
         Paging<Resource> measurementResources = searchService.cqlQuery(String.format("service=\"%s\"", serviceId), getResourceType(),

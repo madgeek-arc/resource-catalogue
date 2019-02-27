@@ -4,7 +4,6 @@ import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -47,7 +46,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return new ResponseEntity<>(vocabularyService.getRegion("WW"), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the entries of the specified vocabulary type")
+    @ApiOperation(value = "Returns the entries of the specified Vocabulary type")
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Vocabulary>> get(@RequestParam Vocabulary.Types type) {
         FacetFilter ff = new FacetFilter();
@@ -56,7 +55,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns all vocabularies")
+    @ApiOperation(value = "Returns all Vocabularies")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the resultset", dataType = "string", paramType = "query"),

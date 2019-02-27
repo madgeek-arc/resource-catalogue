@@ -5,16 +5,13 @@ import eu.einfracentral.domain.VocabularyEntry;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Facet;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Value;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
