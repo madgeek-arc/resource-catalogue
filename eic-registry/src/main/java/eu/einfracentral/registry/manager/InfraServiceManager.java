@@ -12,12 +12,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
@@ -110,6 +110,32 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ff.setFrom(0);
         ff.setQuantity(10000);
         return getAll(ff, null);
+    }
+
+    @Scheduled(cron = "0 0 12 1/1 * ?") // daily at 12:00 PM
+    @CacheEvict(value = "featuredServices", allEntries = true)
+    public void refreshFeatured() {
+    }
+
+    @Override
+    @Cacheable("featuredServices")
+    public List<Service> createFeaturedServices() {
+        Random random = new Random();
+        // TODO: return featured services (for now, it returns a random infraService for each provider)
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<Provider> providers = providerManager.getAll(ff, null).getResults();
+        List<Service> featuredServices = new ArrayList<>();
+        List<Service> services;
+        for (int i = 0; i < providers.size(); i++) {
+            int rand = random.nextInt(providers.size());
+            services = providerManager.getActiveServices(providers.get(rand).getId());
+            providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
+            if (!services.isEmpty()) {
+                featuredServices.add(services.get(random.nextInt(services.size())));
+            }
+        }
+        return featuredServices;
     }
 
     @Override
