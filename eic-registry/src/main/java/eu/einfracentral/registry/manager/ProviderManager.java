@@ -300,11 +300,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerId);
         ff.addFilter("active", "true");
-        ff.addFilter("latest", "true"); // TODO: check if it is needed
+        ff.addFilter("latest", "true");
         ff.setQuantity(10000);
         return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
     }
 
+    //Gets random Services to be featured at the Carousel
     @Override
     public Service getFeaturedService(String providerId) {
         // TODO: change this method
