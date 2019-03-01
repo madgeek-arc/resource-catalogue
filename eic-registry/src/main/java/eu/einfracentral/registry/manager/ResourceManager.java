@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiable;
-import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.utils.ObjectUtils;
@@ -54,16 +53,16 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return null;
     }
 
-    public boolean exists(SearchService.KeyValue... ids) {
-        Resource resource;
-        try {
-            resource = this.searchService.searchId(getResourceType(), ids);
-            return resource != null;
-        } catch (UnknownHostException e) {
-            logger.error(e);
-            throw new ServiceException(e);
-        }
-    }
+//    public boolean exists(SearchService.KeyValue... ids) {
+//        Resource resource;
+//        try {
+//            resource = this.searchService.searchId(getResourceType(), ids);
+//            return resource != null;
+//        } catch (UnknownHostException e) {
+//            logger.error(e);
+//            throw new ServiceException(e);
+//        }
+//    }
 
     @Override
     public T add(T t, Authentication auth) {

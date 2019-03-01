@@ -36,7 +36,7 @@ public class UserEventsController {
         this.infraServiceService = infraServiceService;
     }
 
-    @ApiOperation("Retrieve all the favourite services of the authenticated user.")
+    @ApiOperation("Retrieve all the favourite Services of the authenticated user.")
     @RequestMapping(path = "favourites", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> favourites(Authentication auth) {
 
@@ -55,7 +55,7 @@ public class UserEventsController {
     }
 
 
-    @ApiOperation("Retrieve all the rated services of the authenticated user.")
+    @ApiOperation("Retrieve all the rated Services of the authenticated user.")
     @RequestMapping(path = "ratings", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> ratings(Authentication auth) {
 

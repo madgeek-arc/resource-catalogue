@@ -42,14 +42,14 @@ public class ServiceController {
         this.providerService = provider;
     }
 
-    @ApiOperation(value = "Get the most current version of a specific Service providing the service ID")
+    @ApiOperation(value = "Get the most current version of a specific Service providing the Service ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Service ret = new Service(infraService.get(id));
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get the specified version of an Service providing the service ID")
+    @ApiOperation(value = "Get the specified version of an Service providing the Service ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
                                         @ApiIgnore Authentication auth) {
@@ -59,7 +59,7 @@ public class ServiceController {
         return new ResponseEntity<>(new Service(infraService.get(id, version)), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get the specified version of a Service providing the service ID")
+    @ApiOperation(value = "Get the specified version of a RichService providing the Service ID")
     @RequestMapping(path = "rich/{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
                                                       @ApiIgnore Authentication auth) {
@@ -137,7 +137,7 @@ public class ServiceController {
     }
 
     @ApiIgnore
-    @ApiOperation(value = "Get a list of Rich Services based on a set of IDs")
+    @ApiOperation(value = "Get a list of RichServices based on a set of IDs")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
     })
@@ -146,7 +146,7 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.getByIds(auth, ids));
     }
 
-    @ApiOperation(value = "Get all Services in the catalogue organized by an attribute, e.g. get services organized in categories ")
+    @ApiOperation(value = "Get all Services in the catalogue organized by an attribute, e.g. get Services organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         Map<String, List<InfraService>> results;
@@ -170,21 +170,21 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
-    @ApiOperation(value = "Get all modifications of a specific Service providing the service ID and a version identifier")
+    @ApiOperation(value = "Get all modifications of a specific Service providing the Service ID and a version identifier")
     @RequestMapping(path = {"history/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
         Paging<ServiceHistory> history = infraService.getHistory(id);
         return ResponseEntity.ok(history);
     }
 
-    @ApiOperation(value = "Get all featured services")
+    @ApiOperation(value = "Get all featured Services")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
         return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
     }
 
     @ApiIgnore
-    @ApiOperation(value = "Get all inactive services")
+    @ApiOperation(value = "Get all inactive Services")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -202,7 +202,7 @@ public class ServiceController {
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
-    @ApiOperation(value = "Set a service active or inactive")
+    @ApiOperation(value = "Set a Service active or inactive")
     @RequestMapping(path = "publish/{id}/{version}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
