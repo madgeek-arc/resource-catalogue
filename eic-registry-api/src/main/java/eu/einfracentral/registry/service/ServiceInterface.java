@@ -78,6 +78,12 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     RichService createRichService(InfraService infraService, U auth);
 
     /**
+     * @return
+     */
+    List<RichService> createRichServices(List<InfraService> infraServiceList, Authentication auth);
+
+
+    /**
      * Check if the Service exists.
      *
      * @param ids
