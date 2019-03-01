@@ -1,9 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Indicator;
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.registry.service.IndicatorService;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
@@ -39,7 +37,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
 
 
     @Override
-    @ApiOperation(value = "Returns the indicator assigned the given id.")
+    @ApiOperation(value = "Returns the Indicator assigned the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
@@ -60,7 +58,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     @Override
-    @ApiOperation(value = "Adds the given indicator.")
+    @ApiOperation(value = "Adds the given Indicator.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
@@ -68,7 +66,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     @Override
-    @ApiOperation(value = "Updates the indicator assigned the given id with the given indicator, keeping a version of revisions.")
+    @ApiOperation(value = "Updates the Indicator assigned the given id with the given Indicator, keeping a version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -76,7 +74,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
 
-    @ApiOperation(value = "Deletes the given indicator")
+    @ApiOperation(value = "Deletes the given Indicator")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {

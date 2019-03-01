@@ -72,13 +72,13 @@ public class InfraServiceController {
     }
 
 
-    @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
+    @ApiOperation(value = "Get the most current version of a specific InfraService providing the InfraService ID")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get the most current version of a specific infraService providing the infraService ID")
+    @ApiOperation(value = "Get the most current version of a specific InfraService providing the InfraService ID")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @PathVariable("version") String version,
                                             Authentication auth) {
@@ -87,21 +87,21 @@ public class InfraServiceController {
     }
 
     @CrossOrigin
-    @ApiOperation(value = "Adds the given infraService.")
+    @ApiOperation(value = "Adds the given InfraService.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
         return new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Updates the infraService assigned the given id with the given infraService, keeping a history of revisions.")
+    @ApiOperation(value = "Updates the InfraService assigned the given id with the given InfraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         return new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Validates the infraService without actually changing the repository")
+    @ApiOperation(value = "Validates the InfraService without actually changing the repository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.validate(service));
@@ -125,7 +125,7 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.getAll(ff, authentication));
     }
 
-    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get infraService organized in categories ")
+    @ApiOperation(value = "Get all services in the catalogue organized by an attribute, e.g. get InfraService organized in categories ")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field));

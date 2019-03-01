@@ -153,6 +153,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return services;
     }
 
+    //Gets Services with extra fields like views and ratings
     @Override
     public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
         Browsing<InfraService> infraServices = getAll(ff, null);
@@ -289,6 +290,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return createRichService(infraService, auth);
     }
 
+    //Creates some extra fields (like views and ratings) for each Service
     @Override
     public RichService createRichService(InfraService infraService, Authentication auth) {
         RichService richService = new RichService(infraService);
@@ -445,6 +447,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return services;
     }
 
+    // Gets all Services abiding by the specific FacetFilter (filters & keywords)
     private Browsing<InfraService> getServicesWithCorrectFacets(FacetFilter ff) {
         List<Facet> serviceFacets;
 
@@ -496,6 +499,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return cqlQuery(ff).getFacets();
     }
 
+    // Gets all given filters
     private Map<String, List<String>> getFacetFilterFilters(FacetFilter ff) {
         Map<String, Object> filters = ff.getFilter();
         Map<String, List<String>> allFilters = new HashMap<>();
@@ -518,6 +522,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return allFilters;
     }
 
+    // Creates a Query consisted of all given filters and keywords
     private String createQuery(Map<String, List<String>> filters, String keyword) {
         StringBuilder query = new StringBuilder();
 

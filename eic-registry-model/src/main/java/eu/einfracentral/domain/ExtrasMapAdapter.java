@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 
+// Important for the serialization and deserialization of EntryMap (created mainly for VocabularyEntry Class)
 public final class ExtrasMapAdapter extends XmlAdapter<ExtrasMapAdapter.ExtrasMap, Map<String, String>> {
 
     public Map<String, String> unmarshal(ExtrasMap map) {
