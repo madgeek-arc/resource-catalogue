@@ -153,24 +153,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return services;
     }
 
-    //Gets Services with extra fields like views and ratings
-    @Override
-    public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
-//        Browsing<InfraService> infraServices = getAll(ff, null);
-//        List<RichService> services = infraServices.getResults()
-//                .parallelStream()
-//                .map(service -> createRichService(service, auth))
-//                .collect(toList());
-//        return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(),
-//                infraServices.getTo(), services, infraServices.getFacets());
-
-        Browsing<InfraService> infraServices = getAll(ff, null);
-        List<InfraService> infraServiceList = getAll(ff, null).getResults();
-        List<RichService> richServiceList = createRichServices(infraServiceList, null);
-        return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(),
-                richServiceList, infraServices.getFacets());
-    }
-
     @Override
     public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
@@ -296,139 +278,20 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return createRichService(infraService, auth);
     }
 
-    //Creates some extra fields (like views and ratings) for each Service
     @Override
-    public RichService createRichService(InfraService infraService, Authentication auth) {
-        RichService richService = new RichService(infraService);
-        List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
-
-        for (Vocabulary vocabulary : vocabularies) {
-            switch (vocabulary.getId()) {
-                case "categories":
-                    if (infraService.getCategory() != null) {
-                        richService.setCategoryName(vocabulary.getEntries().get(infraService.getCategory()).getName());
-                    }
-
-                    if (infraService.getSubcategory() != null) {
-                        List<VocabularyEntry> subcategories = vocabulary.getEntries().get(infraService.getCategory()).getChildren();
-                        for (VocabularyEntry entry : subcategories) {
-                            if (entry.getId().equals(infraService.getSubcategory())) {
-                                richService.setSubCategoryName(entry.getName());
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-                case "languages":
-                    if (infraService.getLanguages() != null) {
-                        richService.setLanguageNames(infraService.getLanguages()
-                                .stream()
-                                .map(l -> vocabulary.getEntries().get(l).getName())
-                                .collect(Collectors.toList())
-                        );
-                    }
-                    break;
-
-                case "places":
-                    if (infraService.getPlaces() != null) {
-                        richService.setPlaceNames(infraService.getPlaces()
-                                .stream()
-                                .map(p -> vocabulary.getEntries().get(p).getName())
-                                .collect(Collectors.toList())
-                        );
-                    }
-                    break;
-
-                case "trl":
-                    if (infraService.getTrl() != null) {
-                        richService.setTrlName(vocabulary.getEntries().get(infraService.getTrl()).getName());
-                    }
-                    break;
-
-                case "lifecyclestatus":
-                    if (infraService.getLifeCycleStatus() != null) {
-                        richService.setLifeCycleStatusName(vocabulary.getEntries().get(infraService.getLifeCycleStatus()).getName());
-                    }
-                    break;
-                default:
-            }
-        }
-
-        // set user favourite and rate if auth != null
-        if (auth != null) {
-
-            List<Event> userEvents;
-            try {
-                userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
-                if (!userEvents.isEmpty()) {
-                    richService.setFavourite(userEvents.get(0).getValue().equals("1"));
-                }
-                userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
-                if (!userEvents.isEmpty()) {
-                    richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
-                }
-            } catch (OIDCAuthenticationException e) {
-                // user not logged in
-                logger.warn("Authentication Exception", e);
-            } catch (Exception e2) {
-                logger.error(e2);
-            }
-        }
-
-        List<Event> serviceRatingEvents = eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId());
-
-        //set Ratings & Favourites sums
-        richService.setRatings(serviceRatingEvents
-                .stream()
-                .map(Event::getUser)
-                .distinct()
-                .mapToInt(u -> 1)
-                .sum());
-
-        Optional<List<Event>> favourites = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
-        Map<String, Integer> userFavourites = new HashMap<>();
-        favourites.ifPresent(f -> f
-                .stream()
-                .filter(x -> x.getValue() != null)
-                .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
-        int favs = 0;
-        for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
-            favs += entry.getValue();
-        }
-        richService.setFavourites(favs);
-
-        // set rating of the service
-        Optional<List<Event>> ratings = Optional.ofNullable(serviceRatingEvents);
-        Map<String, Float> userRatings = new HashMap<>();
-        ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
-        float sum = 0;
-        for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
-            sum += entry.getValue();
-        }
-        if (!userRatings.isEmpty()) {
-            richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum / userRatings.size()))); //the rating of the specific service as x.xx (3.33)
-        } else {
-            richService.setHasRate(0);
-        }
-
-        // set visits
-        Map<String, Integer> visits = statisticsService.visits(infraService.getId());
-        if (visits == null) {
-            richService.setViews(0);
-        } else {
-            List<Integer> visitsList = new ArrayList<>(visits.values());
-            int visitSum = 0;
-            for (int i : visitsList) {
-                visitSum += i;
-            }
-            richService.setViews(visitSum);
-        }
-        return richService;
+    public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
+        Browsing<InfraService> infraServices = getAll(ff, null);
+        List<RichService> richServiceList = createRichServices(infraServices.getResults(), null);
+        return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(),
+                richServiceList, infraServices.getFacets());
     }
 
-    //FIXME: Purpose of this method is to optimize the timings for getRichServices call. Bad duplicated code
-//    @Override
+    @Override
+    public RichService createRichService(InfraService infraService, Authentication auth) {
+        return createRichServices(Collections.singletonList(infraService), auth).get(0);
+    }
+
+    @Override
     public List<RichService> createRichServices(List<InfraService> infraServices, Authentication auth) {
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
         List<RichService> richServices = new ArrayList<>();

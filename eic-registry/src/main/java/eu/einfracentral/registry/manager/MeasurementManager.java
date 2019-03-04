@@ -161,8 +161,8 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         Indicator existingIndicator = indicatorManager.get(measurement.getIndicatorId());
 
         for (String dimension : existingIndicator.getDimensions()){
-            if ((Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATION && measurement.getLocations() == null) ||
-                (Indicator.DimensionType.fromString(dimension) != Indicator.DimensionType.LOCATION && measurement.getLocations() != null) ||
+            if ((Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATIONS && measurement.getLocations() == null) ||
+                (Indicator.DimensionType.fromString(dimension) != Indicator.DimensionType.LOCATIONS && measurement.getLocations() != null) ||
                 (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.TIME && measurement.getTime() == null) ||
                 (Indicator.DimensionType.fromString(dimension) != Indicator.DimensionType.TIME && measurement.getTime() != null)){
                 throw new ValidationException("Measurement's index does not comply with the specific Indicator's structure. Please review the dimensions the specific Indicator supports.");
