@@ -71,7 +71,7 @@ public class Indicator implements Identifiable {
 
     public enum DimensionType {
         TIME("time"),
-        LOCATION("location");
+        LOCATIONS("locations");
 
         private final String dimensionType;
 

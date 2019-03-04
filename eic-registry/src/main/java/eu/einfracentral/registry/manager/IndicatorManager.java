@@ -88,7 +88,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
             if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.TIME  && !validatedDimensions.contains(Indicator.DimensionType.TIME)) {
                 validatedDimensions.add(dimension);
             }
-            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATION  && !validatedDimensions.contains(Indicator.DimensionType.LOCATION)) {
+            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATIONS  && !validatedDimensions.contains(Indicator.DimensionType.LOCATIONS)) {
                 validatedDimensions.add(dimension);
             }
         }
