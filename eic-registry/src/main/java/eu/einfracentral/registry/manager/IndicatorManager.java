@@ -6,12 +6,13 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.IndicatorService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,21 +57,26 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
     public void delete(Indicator indicator) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("indicator", indicator.getId());
-            Browsing<Measurement> measurements = measurementManager.getAll(ff, null);
-            if (measurements.getTotal() > 0){
-                throw new ValidationException("You can't delete the specific Indicator, as it's related to one or more Measurements");
-            }
+        Browsing<Measurement> measurements = measurementManager.getAll(ff, null);
+        if (measurements.getTotal() > 0) {
+            throw new ValidationException("You can't delete the specific Indicator, as it's related to one or more Measurements");
+        }
         logger.info("Deleting indicator: " + indicator.getId());
         super.delete(indicator);
     }
 
 
     @Override
-    public Indicator validate(Indicator indicator){
+    public Indicator validate(Indicator indicator) {
 
         // Validates Indicator's ID
         if (indicator.getId() == null || indicator.getId().equals("")) {
             throw new ValidationException("Indicator's id cannot be 'null' or 'empty'");
+        }
+
+        // Validates Indicator's name
+        if (indicator.getName() == null || indicator.getName().equals("")) {
+            throw new ValidationException("Indicator's name cannot be 'null' or 'empty'");
         }
 
         // Validates Indicator's description
@@ -78,23 +84,25 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
             throw new ValidationException("Indicator's description cannot be 'null' or 'empty'");
         }
 
-        //Validates Indicator's dimensions
+        // Validates Indicator's dimensions
         if (indicator.getDimensions() == null || indicator.getDimensions().isEmpty()) {
             throw new ValidationException("Indicator's dimensions cannot be 'null' or 'empty'");
         }
 
         List<String> validatedDimensions = new ArrayList<>();
         for (String dimension : indicator.getDimensions()) {
-            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.TIME  && !validatedDimensions.contains(Indicator.DimensionType.TIME)) {
+            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.TIME
+                    && !validatedDimensions.contains(Indicator.DimensionType.TIME.getKey())) {
                 validatedDimensions.add(dimension);
             }
-            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATIONS  && !validatedDimensions.contains(Indicator.DimensionType.LOCATIONS)) {
+            if (Indicator.DimensionType.fromString(dimension) == Indicator.DimensionType.LOCATIONS
+                    && !validatedDimensions.contains(Indicator.DimensionType.LOCATIONS.getKey())) {
                 validatedDimensions.add(dimension);
             }
         }
         indicator.setDimensions(validatedDimensions);
 
-        //Validates Indicator's unit
+        // Validates Indicator's unit
         if (indicator.getUnit() == null) {
             throw new ValidationException("Indicator's unit cannot be 'null' or 'empty'");
         }
