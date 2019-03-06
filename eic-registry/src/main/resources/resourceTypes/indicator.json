@@ -9,8 +9,8 @@
     },
     {
       "multivalued": false,
-      "name": "description",
-      "path": "//*[local-name()='description']/text()",
+      "name": "name",
+      "path": "//*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
