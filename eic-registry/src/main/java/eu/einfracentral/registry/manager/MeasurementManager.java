@@ -148,9 +148,32 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("Measurement's time cannot be empty");
         }
 
-        //Validates Measurement's value
+        // Validate that Measurement's value exists
         if (measurement.getValue() == null || measurement.getValue().equals("")) {
             throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
+        }
+
+        // Validates if value provided complies with the Indicator's UnitType
+        switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
+            case NUM:
+                long longValue = Long.parseLong(measurement.getValue());
+                if (longValue < 0) {
+                    throw new ValidationException("Measurement's value cannot be negative");
+                }
+                break;
+            case PCT:
+                float floatValue = Float.parseFloat(measurement.getValue());
+                if (floatValue < 0 || floatValue > 1) {
+                    throw new ValidationException("Measurement's value should be between [0, 1]");
+                }
+                break;
+            case BOOL:
+                if (!"true".equals(measurement.getValue()) && !"false".equals(measurement.getValue())) {
+                    throw new ValidationException("Measurement's value should be either 'true' or 'false'");
+                }
+                break;
+            default:
+                // should never enter this
         }
 
         return measurement;
