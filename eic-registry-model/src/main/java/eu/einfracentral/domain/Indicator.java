@@ -12,18 +12,25 @@ import java.util.stream.Collectors;
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Indicator implements Identifiable {
-    @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "Indicator's ID")
-    private String id;
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "Indicator's short description")
+    private String id;
+
+    @ApiModelProperty(position = 2, example = "Indicator's name")
+    @XmlElement(required = true)
+    private String name;
+
+    @ApiModelProperty(position = 3, example = "Indicator's short description")
+    @XmlElement(required = true)
     private String description;
+
+    @ApiModelProperty(position = 4, example = "['time', 'location'] (at least one)", required = true)
     @XmlElementWrapper(name = "dimensions")
     @XmlElement(name = "dimension")
-    @ApiModelProperty(position = 3, example = "['time', 'location'] (at least one)", required = true)
     private List<String> dimensions;
+
+    @ApiModelProperty(position = 5, example = "'percentage', 'numeric' or 'boolean'", required = true)
     @XmlElement(name = "unit")
-    @ApiModelProperty(position = 4, example = "'percentage', 'numeric' or 'boolean'", required = true)
     private String unit;
 
     public Indicator() {
@@ -32,6 +39,7 @@ public class Indicator implements Identifiable {
 
     public Indicator(Indicator indicator) {
         this.id = indicator.getId();
+        this.name = indicator.getName();
         this.description = indicator.getDescription();
         this.unit = indicator.getUnit();
         this.dimensions = indicator.getDimensions();
@@ -107,6 +115,14 @@ public class Indicator implements Identifiable {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
