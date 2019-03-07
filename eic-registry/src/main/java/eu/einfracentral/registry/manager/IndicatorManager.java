@@ -73,6 +73,11 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
             throw new ValidationException("Indicator's id cannot be 'null' or 'empty'");
         }
 
+        // Validates Indicator's name
+        if (indicator.getName() == null || indicator.getName().equals("")) {
+            throw new ValidationException("Indicator's name cannot be 'null' or 'empty'");
+        }
+
         // Validates Indicator's description
         if (indicator.getDescription() == null || indicator.getDescription().equals("")) {
             throw new ValidationException("Indicator's description cannot be 'null' or 'empty'");
