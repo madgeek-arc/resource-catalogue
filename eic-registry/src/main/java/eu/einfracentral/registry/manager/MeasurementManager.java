@@ -156,15 +156,25 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         // Validates if value provided complies with the Indicator's UnitType
         switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
             case NUM:
-                long longValue = Long.parseLong(measurement.getValue());
-                if (longValue < 0) {
-                    throw new ValidationException("Measurement's value cannot be negative");
+                try {
+                    long longValue = Long.parseLong(measurement.getValue());
+                    if (longValue < 0) {
+                        throw new ValidationException("Measurement's value cannot be negative");
+                    }
+                    measurement.setValue(Long.toString(longValue));
+                } catch (NumberFormatException e) {
+                    throw new ValidationException("Measurement's value must be numeric");
                 }
                 break;
             case PCT:
-                float floatValue = Float.parseFloat(measurement.getValue());
-                if (floatValue < 0 || floatValue > 1) {
-                    throw new ValidationException("Measurement's value should be between [0, 1]");
+                try {
+                    float floatValue = Float.parseFloat(measurement.getValue());
+                    if (floatValue < 0 || floatValue > 1) {
+                        throw new ValidationException("Measurement's value should be between [0, 1]");
+                    }
+                    measurement.setValue(Float.toString(floatValue));
+                } catch (NumberFormatException e) {
+                    throw new ValidationException("Measurement's value must be a percentage");
                 }
                 break;
             case BOOL:
