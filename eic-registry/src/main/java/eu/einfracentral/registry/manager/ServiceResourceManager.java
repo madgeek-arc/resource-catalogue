@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.utils.FacetLabelService;
+import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.*;
 import org.apache.commons.lang3.StringUtils;
@@ -91,6 +92,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (exists(infraService)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
+
+        // add spaces after ',' if they don't already exist and remove spaces before
+        prettifyServiceTextFields(infraService, ",");
+
         String serialized;
         serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
         Resource created = new Resource();
@@ -104,6 +109,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
+
+        // add spaces after ',' if they don't already exist and remove spaces before
+        prettifyServiceTextFields(infraService, ",");
+
         existing.setPayload(serialize(infraService));
         resourceService.updateResource(existing);
         return infraService;
@@ -432,6 +441,18 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replaceAll(" ", "_")
                 .toLowerCase());
+    }
+
+    private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
+        infraService.setTagline(TextUtils.prettifyText(infraService.getTagline(), specialCharacters));
+        infraService.setDescription(TextUtils.prettifyText(infraService.getDescription(), specialCharacters));
+        infraService.setUserBase(TextUtils.prettifyText(infraService.getUserBase(), specialCharacters));
+        infraService.setUserValue(TextUtils.prettifyText(infraService.getUserValue(), specialCharacters));
+        infraService.setTargetUsers(TextUtils.prettifyText(infraService.getTargetUsers(), specialCharacters));
+        infraService.setFunding(TextUtils.prettifyText(infraService.getFunding(), specialCharacters));
+        infraService.setChangeLog(TextUtils.prettifyText(infraService.getChangeLog(), specialCharacters));
+        infraService.setOptions(TextUtils.prettifyText(infraService.getOptions(), specialCharacters));
+        return infraService;
     }
 
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
