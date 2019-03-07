@@ -153,6 +153,9 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
         }
 
+        // trim whitespace from value
+        measurement.setValue(measurement.getValue().replaceAll(" ", ""));
+
         // Validates if value provided complies with the Indicator's UnitType
         switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
             case NUM:
@@ -166,13 +169,23 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                     throw new ValidationException("Measurement's value must be numeric");
                 }
                 break;
-            case PCT:
+            case PCT: // FIXME: this is too complicated
                 try {
-                    float floatValue = Float.parseFloat(measurement.getValue());
-                    if (floatValue < 0 || floatValue > 1) {
-                        throw new ValidationException("Measurement's value should be between [0, 1]");
+                    float floatValue;
+                    if (measurement.getValue().endsWith("%")) { // if user has provided an explicit percentage value
+                        measurement.setValue(measurement.getValue().replaceAll("%", ""));
+                        floatValue = Float.parseFloat(measurement.getValue());
+                        if (floatValue < 0 || floatValue > 100) {
+                            throw new ValidationException("Measurement's value should be between [0, 1] or an explicit percentage value 0% - 100%");
+                        }
+                        measurement.setValue(floatValue+"%");
+                    } else { // if value is in range [0, 1]
+                        floatValue = Float.parseFloat(measurement.getValue());
+                        if (floatValue < 0 || floatValue > 1) {
+                            throw new ValidationException("Measurement's value should be between [0, 1] or an explicit percentage value 0% - 100%");
+                        }
+                        measurement.setValue((floatValue * 100)+"%");
                     }
-                    measurement.setValue(Float.toString(floatValue));
                 } catch (NumberFormatException e) {
                     throw new ValidationException("Measurement's value must be a percentage");
                 }
