@@ -113,5 +113,22 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
         return indicator;
     }
 
+    boolean hasTime(Indicator indicator){
+        for (String dimension: indicator.getDimensions()){
+            if (dimension.equals("time")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean hasLocations(Indicator indicator){
+        for (String dimension: indicator.getDimensions()){
+            if (dimension.equals("locations")){
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
