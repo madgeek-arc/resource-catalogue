@@ -18,15 +18,11 @@ import java.util.Map;
 @Component
 public class FunderManager extends ResourceManager<Funder> implements FunderService {
 
-    private InfraServiceManager infraServiceManager;
-    private FunderService funderService;
-    private InfraServiceService infraServiceService;
+    private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    public FunderManager(@Lazy InfraServiceManager infraServiceManager, @Lazy FunderService funderService, @Lazy InfraServiceService infraServiceService) {
+    public FunderManager(InfraServiceService<InfraService, InfraService> infraServiceService) {
         super(Funder.class);
-        this.infraServiceManager = infraServiceManager;
-        this.funderService = funderService;
         this.infraServiceService = infraServiceService;
     }
 
@@ -54,7 +50,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<String> verifiedServices = new ArrayList<>();
-        List<InfraService> infraServiceList = infraServiceManager.getAll(ff, null).getResults();
+        List<InfraService> infraServiceList = infraServiceService.getAll(ff, null).getResults();
         for (int i=0; i<infraServiceList.size(); i++){
             for (int j=0; j<funder.getServices().size(); j++){
                 if (infraServiceList.get(i).getId().matches(funder.getServices().get(j))) {
@@ -71,14 +67,14 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
 
     public Map<String, Double> getFunderStats(String funderId, String field, Authentication auth) {
         if (funderId.equals("all") && field.equals("services")){
-            List<Funder> funderList = funderService.getAll(new FacetFilter(), null).getResults();
+            List<Funder> funderList = this.getAll(new FacetFilter(), null).getResults();
             Map<String, Double> funderNoOfServices = new HashMap<>();
             for (int i=0; i<funderList.size(); i++){
                 funderNoOfServices.put(funderList.get(i).getId(), (double) funderList.get(i).getServices().size());
             }
             return funderNoOfServices;
         } else{
-            Funder funder = funderService.get(funderId);
+            Funder funder = this.get(funderId);
             List<String> funderServices = funder.getServices();
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(10000);
