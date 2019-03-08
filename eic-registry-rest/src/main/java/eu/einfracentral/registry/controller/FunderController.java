@@ -77,7 +77,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
 
 //    @Override
     @ApiOperation(value = "Returns various stats about the specific Funder")
-    @RequestMapping(path = "funderServices/{funderId}/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "funderServices/{funderId}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public Map<String, Map<String, Double>> getFunderStats(@PathVariable("funderId") String funderId, @ApiIgnore Authentication auth) {
         return funderService.getFunderStats(funderId, auth);
     }
