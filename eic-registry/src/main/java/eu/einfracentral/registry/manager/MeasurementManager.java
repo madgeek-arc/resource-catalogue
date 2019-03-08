@@ -178,13 +178,13 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                         if (floatValue < 0 || floatValue > 100) {
                             throw new ValidationException("Measurement's value should be between [0, 1] or an explicit percentage value 0% - 100%");
                         }
-                        measurement.setValue(floatValue+"%");
+                        measurement.setValue(String.format("%.0f", floatValue) + "%");
                     } else { // if value is in range [0, 1]
                         floatValue = Float.parseFloat(measurement.getValue());
                         if (floatValue < 0 || floatValue > 1) {
                             throw new ValidationException("Measurement's value should be between [0, 1] or an explicit percentage value 0% - 100%");
                         }
-                        measurement.setValue((floatValue * 100)+"%");
+                        measurement.setValue(String.format("%.0f", (floatValue * 100)) + "%");
                     }
                 } catch (NumberFormatException e) {
                     throw new ValidationException("Measurement's value must be a percentage");
