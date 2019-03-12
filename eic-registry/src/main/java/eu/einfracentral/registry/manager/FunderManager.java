@@ -69,54 +69,61 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         ff.addFilter("latest", "true");
         ff.addFilter("active", "true");
         List<InfraService> serviceList = infraServiceService.getAll(ff, null).getResults();
-
-        List<String> serviceListIds = new ArrayList<>();
-        List<String> serviceListCategories = new ArrayList<>();
-        for (InfraService infraService : serviceList) {
-            serviceListIds.add(infraService.getId());
-            if (!serviceListCategories.contains(infraService.getCategory())) {
-                serviceListCategories.add(infraService.getCategory());
-            }
-        }
         Map<String, Map<String, Double>> funderStats = new HashMap<>();
-        Map<String, Double> innerMap;
+        Map<String, Double> servicesMap;
 
         if (funderId.matches("all")) {
-            innerMap = new HashMap<>();
+            List<String> serviceListIds = new ArrayList<>();
+            for (InfraService infraService : serviceList) {
+                serviceListIds.add(infraService.getId());
+            }
+            servicesMap = new HashMap<>();
             for (Funder funder : funderList) {
                 int count = 0;
                 for (int i = 0; i < funder.getServices().size(); i++) {
                     if (serviceListIds.contains(funder.getServices().get(i))) {
-                        innerMap.put(funder.getName(), (double) ++count);
+                        servicesMap.put(funder.getName(), (double) ++count);
                     }
                 }
-                funderStats.put("all", innerMap);
+
             }
-            return funderStats;
+            funderStats.put("All Services", servicesMap);
+
+            return createFunderStats(funderStats, serviceList);
+
+        } else{
+            Funder funder = get(funderId);
+            List<InfraService> funderServices = new ArrayList<>();
+            for (InfraService infraService : serviceList) {
+                if (funder.getServices().contains(infraService.getId())){
+                    funderServices.add(infraService);
+                }
+            }
+
+            return createFunderStats(funderStats, funderServices);
         }
-
-        Funder validatedFunder = get(funderId);
-
-        funderStats.put("Categories", createMap("Category", serviceList, validatedFunder));
-        funderStats.put("Subcategories", createMap("Subcategory", serviceList, validatedFunder));
-        funderStats.put("TRL", createMap("trl", serviceList, validatedFunder));
-        funderStats.put("Lifecycle Status", createMap("LifeCycleStatus", serviceList, validatedFunder));
-        funderStats.put("Languages", createMap("Languages", serviceList, validatedFunder));
-        funderStats.put("Places", createMap("Places", serviceList, validatedFunder));
-        funderStats.put("Providers", createMap("Providers", serviceList, validatedFunder));
-
-        return funderStats;
 
     }
 
-    Map<String, Double> createMap(String fieldName, List<InfraService> services, Funder funder) {
+    private Map<String, Map<String, Double>> createFunderStats(Map<String, Map<String, Double>> funderStats, List<InfraService> services){
+        funderStats.put("Categories", createMap("Category", services));
+        funderStats.put("Subcategories", createMap("Subcategory", services));
+        funderStats.put("TRL", createMap("trl", services));
+        funderStats.put("Lifecycle Status", createMap("LifeCycleStatus", services));
+        funderStats.put("Languages", createMap("Languages", services));
+        funderStats.put("Places", createMap("Places", services));
+        funderStats.put("Providers", createMap("Providers", services));
+
+        return  funderStats;
+    }
+
+    private Map<String, Double> createMap(String fieldName, List<InfraService> services) {
         Map<String, Double> data = new HashMap<>();
 
         // create getter method name
         String methodName = "get" + TextUtils.capitalizeFirstLetter(fieldName);
 
         for (InfraService service : services) {
-            if (funder.getServices().contains(service.getId())) {
                 Object typeValue;
                 try {
                     Method getter = InfraService.class.getMethod(methodName);
@@ -142,7 +149,6 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     logger.error("ERROR: " + methodName, e);
                 }
-            }
         }
 
         return data;
