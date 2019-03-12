@@ -27,4 +27,13 @@ public class TextUtils {
         text = text.replaceAll("(\\s)$", "");
         return text;
     }
+
+    /**
+     * Capitalizes first letter.
+     * @param text
+     * @return
+     */
+    public static String capitalizeFirstLetter(String text) {
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
+    }
 }
