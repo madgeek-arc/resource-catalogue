@@ -5,9 +5,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.registry.service.FunderService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.TextUtils;
-import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +129,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
                     }
                     if (values != null && !values.isEmpty()) {
                         for (int i = 0; i < values.size(); i++) {
-                            String value = ((ArrayList) typeValue).get(i).toString();
+                            String value = values.get(i).toString();
                             if (data.containsKey(value)) {
                                 data.put(value, (data.get(value) + 1));
                             } else {
