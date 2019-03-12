@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
 import java.util.Map;
 
 @RestController
@@ -75,7 +76,6 @@ public class FunderController extends ResourceController<Funder, Authentication>
         return new ResponseEntity<>(funder, HttpStatus.OK);
     }
 
-//    @Override
     @ApiOperation(value = "Returns various stats about the specific Funder")
     @RequestMapping(path = "funderServices/{funderId}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public Map<String, Map<String, Double>> getFunderStats(@PathVariable("funderId") String funderId, @ApiIgnore Authentication auth) {
