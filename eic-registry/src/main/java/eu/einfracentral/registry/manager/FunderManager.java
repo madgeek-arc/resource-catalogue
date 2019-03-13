@@ -69,7 +69,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         ff.addFilter("latest", "true");
         ff.addFilter("active", "true");
         List<InfraService> serviceList = infraServiceService.getAll(ff, null).getResults();
-        Map<String, Map<String, Double>> funderStats = new HashMap<>();
+        Map<String, Map<String, Double>> funderStats = new LinkedHashMap<>();
         Map<String, Double> servicesMap;
 
         if (funderId.matches("all")) {
@@ -87,7 +87,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
                 }
 
             }
-            funderStats.put("All Services", servicesMap);
+            funderStats.put("Funders", servicesMap);
 
             return createFunderStats(funderStats, serviceList);
 
