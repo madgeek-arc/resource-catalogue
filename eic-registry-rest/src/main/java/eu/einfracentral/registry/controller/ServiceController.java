@@ -42,14 +42,14 @@ public class ServiceController {
         this.providerService = provider;
     }
 
-    @ApiOperation(value = "Get the most current version of a specific Service providing the Service ID")
+    @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Service ret = new Service(infraService.get(id));
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get the specified version of an Service providing the Service ID")
+    @ApiOperation(value = "Get the specified version of a Service, providing the Service id and version.")
     @RequestMapping(path = "{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
                                         @ApiIgnore Authentication auth) {
@@ -59,7 +59,7 @@ public class ServiceController {
         return new ResponseEntity<>(new Service(infraService.get(id, version)), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get the specified version of a RichService providing the Service ID")
+    @ApiOperation(value = "Get the specified version of a RichService providing the Service id and version.")
     @RequestMapping(path = "rich/{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
                                                       @ApiIgnore Authentication auth) {
@@ -67,7 +67,7 @@ public class ServiceController {
     }
 
     @CrossOrigin
-    @ApiOperation(value = "Adds the given Service.")
+    @ApiOperation(value = "Creates a new Service.")
     @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerCanAddServices(#auth, #service)")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
@@ -75,7 +75,7 @@ public class ServiceController {
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a history of revisions.")
+    @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a version of revisions.")
     @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#service)")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -83,13 +83,13 @@ public class ServiceController {
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Validates the Service without actually changing the repository")
+    @ApiOperation(value = "Validates the Service without actually changing the repository.")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Service service, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.validate(new InfraService(service)));
     }
 
-    @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue  ")
+    @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -108,7 +108,7 @@ public class ServiceController {
     }
 
     @ApiIgnore
-    @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue  ")
+    @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -125,7 +125,7 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-    @ApiOperation(value = "Get a list of Services based on a set of IDs")
+    @ApiOperation(value = "Get a list of Services based on a set of ids.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
     })
@@ -137,7 +137,7 @@ public class ServiceController {
     }
 
     @ApiIgnore
-    @ApiOperation(value = "Get a list of RichServices based on a set of IDs")
+    @ApiOperation(value = "Get a list of RichServices based on a set of ids.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
     })
@@ -146,7 +146,7 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.getByIds(auth, ids));
     }
 
-    @ApiOperation(value = "Get all Services in the catalogue organized by an attribute, e.g. get Services organized in categories ")
+    @ApiOperation(value = "Get all Services in the catalogue organized by an attribute, e.g. get Services organized in categories.")
     @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         Map<String, List<InfraService>> results;
@@ -170,21 +170,21 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
-    @ApiOperation(value = "Get all modifications of a specific Service providing the Service ID and a version identifier")
+    @ApiOperation(value = "Get all modification details of a specific Service providing the Service id.")
     @RequestMapping(path = {"history/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
         Paging<ServiceHistory> history = infraService.getHistory(id);
         return ResponseEntity.ok(history);
     }
 
-    @ApiOperation(value = "Get all featured Services")
+    @ApiOperation(value = "Get all featured Services.")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
         return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
     }
 
     @ApiIgnore
-    @ApiOperation(value = "Get all inactive Services")
+    @ApiOperation(value = "Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -202,7 +202,7 @@ public class ServiceController {
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
-    @ApiOperation(value = "Set a Service active or inactive")
+    @ApiOperation(value = "Providing the Service id and version, set the Service to active or inactive.")
     @RequestMapping(path = "publish/{id}/{version}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
@@ -212,8 +212,8 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
-    @ApiOperation(value = "Get all pending Service Templates")
-    @RequestMapping(path = "template/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @ApiOperation(value = "Get all pending Service Templates.")
+    @RequestMapping(path = "pending/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
         List<Provider> pendingProviders = providerService.getInactive();
