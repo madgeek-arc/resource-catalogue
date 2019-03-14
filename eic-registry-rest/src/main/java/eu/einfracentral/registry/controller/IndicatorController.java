@@ -23,7 +23,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("indicator")
-@Api(value = "Get information about an Indicator")
+@Api(value = "Get information about an Indicator.")
 public class IndicatorController extends ResourceController<Indicator, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(IndicatorController.class);
@@ -37,14 +37,14 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
 
 
     @Override
-    @ApiOperation(value = "Returns the Indicator assigned the given id.")
+    @ApiOperation(value = "Returns the Indicator with the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @Override
-    @ApiOperation(value = "Filter a list of Indicators based on a set of filters or get a list of all Indicators in the eInfraCentral Catalogue")
+    @ApiOperation(value = "Filter a list of Indicators based on a set of filters or get a list of all Indicators in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -58,7 +58,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     @Override
-    @ApiOperation(value = "Adds the given Indicator.")
+    @ApiOperation(value = "Creates a new Indicator.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
@@ -74,7 +74,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
 
-    @ApiOperation(value = "Deletes the given Indicator")
+    @ApiOperation(value = "Deletes the Indicator with the given id.")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {

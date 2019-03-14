@@ -38,7 +38,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
     }
 
     @Override
-    @ApiOperation(value = "Filter a list of Funders based on a set of filters or get a list of all Funders.")
+    @ApiOperation(value = "Filter a list of Funders based on a set of filters or get a list of all Funders in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -52,7 +52,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
     }
 
     @Override
-    @ApiOperation(value = "Adds the given Funder.")
+    @ApiOperation(value = "Creates a new Funder.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> add(@RequestBody Funder funder, @ApiIgnore Authentication auth) {
@@ -67,7 +67,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
         return super.update(funder, auth);
     }
 
-    @ApiOperation(value = "Deletes the given Funder")
+    @ApiOperation(value = "Deletes the Funder with the given id.")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -76,9 +76,9 @@ public class FunderController extends ResourceController<Funder, Authentication>
         return new ResponseEntity<>(funder, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns various stats about the specific Funder")
-    @RequestMapping(path = "funderServices/{funderId}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public Map<String, Map<String, Double>> getFunderStats(@PathVariable("funderId") String funderId, @ApiIgnore Authentication auth) {
+    @ApiOperation(value = "Returns various stats about all or a specific Funder.")
+    @RequestMapping(path = "funderStats/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public Map<String, Map<String, Double>> getFunderStats(@PathVariable("id") String funderId, @ApiIgnore Authentication auth) {
         return funderService.getFunderStats(funderId, auth);
     }
 
