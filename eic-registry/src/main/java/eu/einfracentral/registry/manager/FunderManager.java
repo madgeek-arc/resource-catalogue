@@ -1,9 +1,10 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Funder;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.FunderService;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
@@ -21,11 +22,16 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
 
     private static final Logger logger = LogManager.getLogger(FunderManager.class);
     private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private ProviderService providerService;
+    private SecurityService securityService;
 
     @Autowired
-    public FunderManager(InfraServiceService<InfraService, InfraService> infraServiceService) {
+    public FunderManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+                         ProviderService providerService, SecurityService securityService) {
         super(Funder.class);
         this.infraServiceService = infraServiceService;
+        this.providerService = providerService;
+        this.securityService = securityService;
     }
 
     @Override
@@ -68,14 +74,14 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         List<Funder> funderList = this.getAll(ff, null).getResults();
         ff.addFilter("latest", "true");
         ff.addFilter("active", "true");
-        List<InfraService> serviceList = infraServiceService.getAll(ff, null).getResults();
+        List<RichService> richServiceList = infraServiceService.getRichServices(ff, null).getResults();
         Map<String, Map<String, Double>> funderStats = new LinkedHashMap<>();
         Map<String, Double> servicesMap;
 
         if (funderId.matches("all")) {
             List<String> serviceListIds = new ArrayList<>();
-            for (InfraService infraService : serviceList) {
-                serviceListIds.add(infraService.getId());
+            for (RichService richService : richServiceList) {
+                serviceListIds.add(richService.getId());
             }
             servicesMap = new HashMap<>();
             for (Funder funder : funderList) {
@@ -89,14 +95,14 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
             }
             funderStats.put("Funders", servicesMap);
 
-            return createFunderStats(funderStats, serviceList);
+            return createFunderStats(funderStats, richServiceList);
 
         } else{
             Funder funder = get(funderId);
-            List<InfraService> funderServices = new ArrayList<>();
-            for (InfraService infraService : serviceList) {
-                if (funder.getServices().contains(infraService.getId())){
-                    funderServices.add(infraService);
+            List<RichService> funderServices = new ArrayList<>();
+            for (RichService richService : richServiceList) {
+                if (funder.getServices().contains(richService.getId())){
+                    funderServices.add(richService);
                 }
             }
 
@@ -105,28 +111,40 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
 
     }
 
-    private Map<String, Map<String, Double>> createFunderStats(Map<String, Map<String, Double>> funderStats, List<InfraService> services){
-        funderStats.put("Categories", createMap("Category", services));
-        funderStats.put("Subcategories", createMap("Subcategory", services));
-        funderStats.put("TRL", createMap("trl", services));
-        funderStats.put("Lifecycle Status", createMap("LifeCycleStatus", services));
-        funderStats.put("Languages", createMap("Languages", services));
-        funderStats.put("Places", createMap("Places", services));
-        funderStats.put("Providers", createMap("Providers", services));
+    private Map<String, Map<String, Double>> createFunderStats(Map<String, Map<String, Double>> funderStats, List<RichService> services){
+        funderStats.put("Categories", createMap("CategoryName", services));
+        funderStats.put("Subcategories", createMap("SubCategoryName", services));
+        funderStats.put("TRL", createMap("TrlName", services));
+        funderStats.put("Lifecycle Status", createMap("LifeCycleStatusName", services));
+        funderStats.put("Languages", createMap("LanguageNames", services));
+        funderStats.put("Places", createMap("PlaceNames", services));
+
+        Map<String, Double> providerMap = new HashMap<>();
+        for (RichService service : services) {
+            for (String provider : service.getProviders()) {
+                String providerName = providerService.get(provider, securityService.getAdminAccess()).getName();
+                if (providerMap.containsKey(providerName)){
+                    providerMap.put(providerName, (providerMap.get(providerName) + 1));
+                } else{
+                    providerMap.put(providerName, 1.0);
+                }
+            }
+        }
+        funderStats.put("Providers", providerMap);
 
         return  funderStats;
     }
 
-    private Map<String, Double> createMap(String fieldName, List<InfraService> services) {
+    private Map<String, Double> createMap(String fieldName, List<RichService> services) {
         Map<String, Double> data = new HashMap<>();
 
         // create getter method name
         String methodName = "get" + TextUtils.capitalizeFirstLetter(fieldName);
 
-        for (InfraService service : services) {
+        for (RichService service : services) {
                 Object typeValue;
                 try {
-                    Method getter = InfraService.class.getMethod(methodName);
+                    Method getter = RichService.class.getMethod(methodName);
                     typeValue = getter.invoke(service);
                     List<?> values = null;
                     if (String.class.isAssignableFrom(getter.getReturnType())) {
