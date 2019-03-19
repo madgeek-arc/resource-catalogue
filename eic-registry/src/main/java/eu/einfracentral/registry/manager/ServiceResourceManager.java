@@ -221,6 +221,42 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
+    @Override
+    public Map<String, Service> getVersionHistory(String serviceId) {
+        Map<String, Service> history = new LinkedHashMap<>();
+
+        // get all resources with the specified Service id
+        List<Resource> resources = getResourcesWithServiceId(serviceId);
+
+        // for each resource (InfraService), get its versions
+        if (resources != null) {
+            for (Resource resource : resources) {
+                List<Version> versions = versionService.getVersionsByResource(resource.getId());
+                versions.sort((version, t1) -> {
+                    if ((version.getCreationDate().getTime()) < (t1.getCreationDate().getTime())) {
+                        return 1;
+                    }
+                    return -1;
+                });
+                for (Version version : versions) {
+                    Resource tempResource = version.getResource();
+                    tempResource.setPayload(version.getPayload());
+                    Service service = deserialize(tempResource);
+                    if (service != null) {
+                        try {
+                            history.put(version.getVersion(), service);
+                        } catch (NullPointerException e) {
+                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
+                        }
+                    }
+                }
+            }
+        }
+
+        return history;
+    }
+
+
     public String serialize(InfraService infraService) {
         String serialized;
         serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
