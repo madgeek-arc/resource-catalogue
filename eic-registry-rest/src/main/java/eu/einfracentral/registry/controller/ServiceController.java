@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ServiceInterface;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -170,11 +171,18 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
-    @ApiOperation(value = "Get all modification details of a specific Service providing the Service id.")
+    @ApiOperation(value = "Get all modification details of a specific Service, providing the Service id.")
     @RequestMapping(path = {"history/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
         Paging<ServiceHistory> history = infraService.getHistory(id);
         return ResponseEntity.ok(history);
+    }
+
+    @ApiOperation(value = "Get all versions and modifications of a specific Service in chronological order, providing the Service id.")
+    @RequestMapping(path = {"versionHistory/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Map<String, Service>> versionHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Map<String, Service> versionHistory = infraService.getVersionHistory(id);
+        return ResponseEntity.ok(versionHistory);
     }
 
     @ApiOperation(value = "Get all featured Services.")
