@@ -29,9 +29,6 @@ public class Measurement implements Identifiable {
     private String value;
 
 
-    //TODO: Make at least one of time, locations mandatory!
-
-
     public Measurement() {
 
     }
