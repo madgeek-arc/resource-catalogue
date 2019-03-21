@@ -185,6 +185,14 @@ public class ServiceController {
         return ResponseEntity.ok(allVersionHistory);
     }
 
+    @ApiOperation(value = "Get all modifications of a specific Service, providing the Service id and the resource Version id.")
+    @RequestMapping(path = {"VersionHistory/{serviceId}/{versionId}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Service> getVersionHistory(@PathVariable String serviceId, @PathVariable String versionId, @ApiIgnore Authentication auth) {
+        Service service = infraService.getVersionHistory(serviceId, versionId);
+        return ResponseEntity.ok(service);
+    }
+
+
     @ApiOperation(value = "Get all featured Services.")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {

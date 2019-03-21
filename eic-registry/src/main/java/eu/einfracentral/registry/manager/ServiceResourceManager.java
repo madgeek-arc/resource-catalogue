@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -254,6 +255,32 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
 
         return history;
+    }
+
+    @Override
+    public Service getVersionHistory(String serviceId, String versionId){
+        List<Resource> resources = getResourcesWithServiceId(serviceId);
+        Service service = new Service();
+        List<Version> versions = new ArrayList<>();
+        List<Version> allVersions = new ArrayList<>();
+
+        if (resources != null) {
+            for (Resource resource : resources) {
+                versions = versionService.getVersionsByResource(resource.getId());
+                allVersions.addAll(versions);
+            }
+            for (Version version : allVersions){
+                if (version.getId().matches(versionId)){
+                    Resource tempResource = version.getResource();
+                    tempResource.setPayload(version.getPayload());
+                    service = deserialize(tempResource);
+                    break;
+                }
+            }
+            return service;
+        } else{
+            throw new ValidationException("Service with id '" +serviceId+ "' does not exist.");
+        }
     }
 
 
