@@ -38,6 +38,15 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
     Map<String, Service> getAllVersionsHistory(String id);
 
     /**
+     * Get the History of a specific resource version of the InfraService with the specified id.
+     *
+     * @param serviceId
+     * @param versionId
+     * @return
+     */
+    Service getVersionHistory(String serviceId, String versionId);
+
+    /**
      * Get inactive Services.
      *
      * @return
