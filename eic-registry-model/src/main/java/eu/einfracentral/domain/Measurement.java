@@ -25,8 +25,11 @@ public class Measurement implements Identifiable {
     @ApiModelProperty(position = 5, example = "['l1', 'l2']")
     private List<String> locations;
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "Actual value of the measurement")
-    private String value;
+    @ApiModelProperty(position = 6, example = "Starting value of the measurement")
+    private String startValue;
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 7, example = "Ending value of the measurement")
+    private String endValue;
 
 
     public Measurement() {
@@ -37,7 +40,8 @@ public class Measurement implements Identifiable {
         this.id = measurement.getId();
         this.indicatorId = measurement.getIndicatorId();
         this.serviceId = measurement.getServiceId();
-        this.value = measurement.getValue();
+        this.startValue = measurement.getStartValue();
+        this.endValue = measurement.getEndValue();
         this.time = measurement.getTime();
         this.locations = measurement.getLocations();
     }
@@ -61,12 +65,20 @@ public class Measurement implements Identifiable {
         this.indicatorId = indicatorId;
     }
 
-    public String getValue() {
-        return value;
+    public String getStartValue() {
+        return startValue;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setStartValue(String startValue) {
+        this.startValue = startValue;
+    }
+
+    public String getEndValue() {
+        return endValue;
+    }
+
+    public void setEndValue(String endValue) {
+        this.endValue = endValue;
     }
 
     public XMLGregorianCalendar getTime() {
