@@ -178,11 +178,11 @@ public class ServiceController {
         return ResponseEntity.ok(history);
     }
 
-    @ApiOperation(value = "Get all versions and modifications of a specific Service in chronological order, providing the Service id.")
-    @RequestMapping(path = {"versionHistory/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, Service>> versionHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Map<String, Service> versionHistory = infraService.getVersionHistory(id);
-        return ResponseEntity.ok(versionHistory);
+    @ApiOperation(value = "Get all modifications of a specific Service in chronological order, providing the Service id.")
+    @RequestMapping(path = {"allVersionHistory/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Map<String, Service>> getAllVersionsHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Map<String, Service> allVersionHistory = infraService.getAllVersionsHistory(id);
+        return ResponseEntity.ok(allVersionHistory);
     }
 
     @ApiOperation(value = "Get all featured Services.")

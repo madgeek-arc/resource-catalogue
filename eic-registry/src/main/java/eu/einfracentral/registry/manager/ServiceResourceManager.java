@@ -185,28 +185,28 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (resources != null) {
             for (Resource resource : resources) {
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
-                if (versions.isEmpty()) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
-                    InfraService service = deserialize(resource);
-                    if (service != null) {
-                        try {
-                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
-                        } catch (NullPointerException e) {
-                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
-                        }
-                    }
-                } else {
+//                if (versions.isEmpty()) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
+//                    InfraService service = deserialize(resource);
+//                    if (service != null) {
+//                        try {
+//                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
+//                        } catch (NullPointerException e) {
+//                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
+//                        }
+//                    }
+//                } else {
                     for (Version version : versions) {
                         Resource tempResource = version.getResource();
                         tempResource.setPayload(version.getPayload());
                         InfraService service = deserialize(tempResource);
                         if (service != null) {
                             try {
-                                history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
+                                history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion(), version.getId()));
                             } catch (NullPointerException e) {
                                 logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                             }
                         }
-                    }
+//                    }
                     history.get(history.size() - 1).setVersionChange(true);
                 }
             }
@@ -222,7 +222,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Map<String, Service> getVersionHistory(String serviceId) {
+    public Map<String, Service> getAllVersionsHistory(String serviceId) {
         Map<String, Service> history = new LinkedHashMap<>();
 
         // get all resources with the specified Service id
@@ -244,7 +244,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                     Service service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            history.put(version.getVersion(), service);
+                            history.put(version.getId(), service);
                         } catch (NullPointerException e) {
                             logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                         }
