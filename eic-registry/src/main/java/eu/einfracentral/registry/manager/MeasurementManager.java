@@ -153,12 +153,11 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("Measurement's time cannot be empty");
         }
 
-        // Validate that Measurement's value exists
-        if (measurement.getValue() == null || "".equals(measurement.getValue())) {
-            throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
-        }
-
         if (!measurement.getValueIsRange()) {
+            // Validate that Measurement's value exists
+            if (measurement.getValue() == null || "".equals(measurement.getValue())) {
+                throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
+            }
             // trim whitespace from value
             measurement.setValue(measurement.getValue().replaceAll(" ", ""));
 
