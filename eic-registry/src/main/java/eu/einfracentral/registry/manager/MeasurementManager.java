@@ -153,42 +153,6 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("Measurement's time cannot be empty");
         }
 
-        // Validate Measurement's value
-        if (!measurement.getValueIsRange()) {
-            // Validate that Measurement's value exists
-            if (measurement.getValue() == null || "".equals(measurement.getValue())) {
-                throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
-            }
-            // trim whitespace from value
-            measurement.setValue(measurement.getValue().replaceAll(" ", ""));
-            // Validate that rangeValue is null
-            if (measurement.getRangeValue() != null){
-                throw new ValidationException("valueIsRange is set to false. You can't have a rangeValue.");
-            }
-        } else {
-            if (measurement.getRangeValue() != null) {
-                // Validate that Measurement's rangeValue.fromValue exists
-                if (measurement.getRangeValue().getFromValue() == null || "".equals(measurement.getRangeValue().getFromValue())) {
-                    throw new ValidationException("Measurement's fromValue cannot be 'null' or 'empty'");
-                }
-                // Validate that Measurement's rangeValue.toValue exists
-                if (measurement.getRangeValue().getToValue() == null || "".equals(measurement.getRangeValue().getToValue())) {
-                    throw new ValidationException("Measurement's toValue cannot be 'null' or 'empty'");
-                }
-                // Validate that value is null
-                if (measurement.getValue() != null) {
-                    throw new ValidationException("valueIsRange is set to true. You can't have a value.");
-                }
-                // Validate that fromValue > toValue //TODO: TEST THIS!
-                if(!(Float.parseFloat(measurement.getRangeValue().getFromValue()) < Float.parseFloat(measurement.getRangeValue().getToValue()))){
-                    throw new ValidationException("toValue can't be less than or equal to fromValue.");
-                }
-            } else {
-                throw new ValidationException("valueIsRange is set to true - rangeValue cannot be null.");
-            }
-        }
-
-
         // Validates if values provided complies with the Indicator's UnitType
         switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
 
@@ -232,6 +196,41 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                 break;
             default:
                 // should never enter this
+        }
+
+        // Validate Measurement's value
+        if (!measurement.getValueIsRange()) {
+            // Validate that Measurement's value exists
+            if (measurement.getValue() == null || "".equals(measurement.getValue())) {
+                throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
+            }
+            // trim whitespace from value
+            measurement.setValue(measurement.getValue().replaceAll(" ", ""));
+            // Validate that rangeValue is null
+            if (measurement.getRangeValue() != null){
+                throw new ValidationException("valueIsRange is set to false. You can't have a rangeValue.");
+            }
+        } else {
+            if (measurement.getRangeValue() != null) {
+                // Validate that Measurement's rangeValue.fromValue exists
+                if (measurement.getRangeValue().getFromValue() == null || "".equals(measurement.getRangeValue().getFromValue())) {
+                    throw new ValidationException("Measurement's fromValue cannot be 'null' or 'empty'");
+                }
+                // Validate that Measurement's rangeValue.toValue exists
+                if (measurement.getRangeValue().getToValue() == null || "".equals(measurement.getRangeValue().getToValue())) {
+                    throw new ValidationException("Measurement's toValue cannot be 'null' or 'empty'");
+                }
+                // Validate that value is null
+                if (measurement.getValue() != null) {
+                    throw new ValidationException("valueIsRange is set to true. You can't have a value.");
+                }
+                // Validate that fromValue > toValue
+                if(!(Float.parseFloat(measurement.getRangeValue().getFromValue()) < Float.parseFloat(measurement.getRangeValue().getToValue()))){
+                    throw new ValidationException("toValue can't be less than or equal to fromValue.");
+                }
+            } else {
+                throw new ValidationException("valueIsRange is set to true - rangeValue cannot be null.");
+            }
         }
 
         return measurement;
