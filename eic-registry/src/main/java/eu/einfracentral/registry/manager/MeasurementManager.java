@@ -179,10 +179,9 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                 if (measurement.getValue() != null) {
                     throw new ValidationException("valueIsRange is set to true. You can't have a value.");
                 }
-                // Validate that fromValue != toValue
-                if(measurement.getRangeValue().getFromValue().equals(measurement.getRangeValue().getToValue())){
-                    throw new ValidationException("The values you provided are the same. If you want only one value," +
-                            " you can set valueIsRange to false and use the 'value' field instead.");
+                // Validate that fromValue > toValue //TODO: TEST THIS!
+                if(!(Float.parseFloat(measurement.getRangeValue().getFromValue()) < Float.parseFloat(measurement.getRangeValue().getToValue()))){
+                    throw new ValidationException("toValue can't be less than or equal to fromValue.");
                 }
             } else {
                 throw new ValidationException("valueIsRange is set to true - rangeValue cannot be null.");
@@ -289,21 +288,21 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     private String createPercentageValue(String value) {
         value = TextUtils.trimWhitespace(value);
-        float floatValue;
+        Float floatValue;
         if (value.endsWith("%")) { // if user has provided an explicit percentage value
             value = value.replaceAll("%", "");
             floatValue = Float.parseFloat(value);
             if (floatValue < 0 || floatValue > 100) {
                 throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
             }
-            return String.format("%.0f", floatValue);
         } else { // if value is in range [0, 1]
             floatValue = Float.parseFloat(value);
             if (floatValue < 0 || floatValue > 1) {
                 throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
             }
-            return String.format("%.2f", (floatValue * 100));
+            floatValue = floatValue*100;
         }
+        return floatValue.toString();
     }
 
     private String createNumericValue(String value) {
