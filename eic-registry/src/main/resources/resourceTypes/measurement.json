@@ -21,8 +21,27 @@
     },
     {
       "multivalued": false,
+      "name": "valueIsRange",
+      "defaultValue": false,
+      "path": "//*[local-name()='valueIsRange']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
       "name": "value",
       "path": "//*[local-name()='value']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "rangeFrom",
+      "path": "//*[local-name()='rangeValue']/*[local-name()='fromValue']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "rangeTo",
+      "path": "//*[local-name()='rangeValue']/*[local-name()='toValue']/text()",
       "type": "java.lang.String"
     },
     {
