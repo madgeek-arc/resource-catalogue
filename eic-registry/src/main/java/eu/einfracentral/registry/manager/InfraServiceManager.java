@@ -24,14 +24,16 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     private VocabularyManager vocabularyManager;
     private ProviderManager providerManager;
+    private Random randomNumberGenerator;
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
     @Autowired
-    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager) {
+    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager, Random randomNumberGenerator) {
         super(InfraService.class);
         this.vocabularyManager = vocabularyManager;
         this.providerManager = providerManager;
+        this.randomNumberGenerator = randomNumberGenerator;
     }
 
     @Override
@@ -82,11 +84,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             logger.info("User: " + authentication.getDetails());
         }
 
+        // update existing service serviceMetadata
+        ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
+        infraService.setServiceMetadata(serviceMetadata);
+
         if (infraService.getVersion().equals(existingService.getVersion())) {
-            // update existing service serviceMetadata
-            ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
-            infraService.setServiceMetadata(serviceMetadata);
-//                ObjectUtils.merge(existingService, infraService); // FIXME: this method does not assign values of Superclass
             infraService.setActive(existingService.isActive());
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
@@ -120,7 +122,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     @Override
     @Cacheable("featuredServices")
     public List<Service> createFeaturedServices() {
-        Random random = new Random();
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -128,11 +129,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
-            int rand = random.nextInt(providers.size());
+            int rand = randomNumberGenerator.nextInt(providers.size());
             services = providerManager.getActiveServices(providers.get(rand).getId());
             providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
             if (!services.isEmpty()) {
-                featuredServices.add(services.get(random.nextInt(services.size())));
+                featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
             }
         }
         return featuredServices;
