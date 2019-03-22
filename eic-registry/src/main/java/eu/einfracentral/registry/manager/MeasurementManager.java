@@ -4,6 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
+import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -38,7 +39,6 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public Measurement add(Measurement measurement, Authentication auth) {
         measurement.setId(UUID.randomUUID().toString());
-        validateMeasurementStructure(measurement);
         existsIdentical(measurement);
         validate(measurement);
         super.add(measurement, auth);
@@ -108,6 +108,11 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public Measurement validate(Measurement measurement) {
 
+        // validate measurement fields
+        validateMeasurementStructure(measurement);
+
+        // validate measurement values // TODO: move methods below to a function
+
         // Validates Indicator's ID
         if (indicatorManager.get(measurement.getIndicatorId()) == null) {
             throw new ValidationException("Indicator with id: " + measurement.getIndicatorId() + " does not exist");
@@ -144,95 +149,71 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         }
 
         // Validates Measurement's time
-        if (measurement.getTime() != null && measurement.getTime().toString().equals("")) {
+        if (measurement.getTime() != null && "".equals(measurement.getTime().toString())) {
             throw new ValidationException("Measurement's time cannot be empty");
         }
 
-        // Validate that Measurement's start value exists
-        if (measurement.getStartValue() == null || measurement.getStartValue().equals("")) {
-            throw new ValidationException("Measurement's start value cannot be 'null' or 'empty'");
+        // Validate that Measurement's value exists
+        if (measurement.getValue() == null || "".equals(measurement.getValue())) {
+            throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
         }
 
-        // trim whitespace from value
-        measurement.setStartValue(measurement.getStartValue().replaceAll(" ", ""));
+        if (!measurement.getValueIsRange()) {
+            // trim whitespace from value
+            measurement.setValue(measurement.getValue().replaceAll(" ", ""));
 
-        // Validate that Measurement's end value exists
-        if (measurement.getEndValue() == null || measurement.getEndValue().equals("")) {
-            throw new ValidationException("Measurement's end value cannot be 'null' or 'empty'");
+        } else {
+            // Validate that Measurement's rangeValue.fromValue exists
+            if (measurement.getRangeValue().getFromValue() == null || "".equals(measurement.getRangeValue().getFromValue())) {
+                throw new ValidationException("Measurement's fromValue cannot be 'null' or 'empty'");
+            }
+            // Validate that Measurement's rangeValue.toValue exists
+            if (measurement.getRangeValue().getToValue() == null || "".equals(measurement.getRangeValue().getToValue())) {
+                throw new ValidationException("Measurement's toValue cannot be 'null' or 'empty'");
+            }
         }
 
-        // trim whitespace from value
-        measurement.setEndValue(measurement.getEndValue().replaceAll(" ", ""));
 
         // Validates if values provided complies with the Indicator's UnitType
         switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
+
             case NUM:
                 try {
-                    long longStartValue = Long.parseLong(measurement.getStartValue());
-                    if (longStartValue < 0) {
-                        throw new ValidationException("Measurement's start value cannot be negative");
-                    }
-                    measurement.setStartValue(Long.toString(longStartValue));
-                    long longEndValue = Long.parseLong(measurement.getEndValue());
-                    if (longEndValue < 0) {
-                        throw new ValidationException("Measurement's end value cannot be negative");
-                    }
-                    measurement.setEndValue(Long.toString(longEndValue));
-                    if (Long.parseLong(measurement.getStartValue()) > Long.parseLong(measurement.getEndValue())){
-                        throw new ValidationException("Value range is negative. Please confirm that endValue is higher than startValue");
-                    } else if (Float.parseFloat(measurement.getStartValue()) > Float.parseFloat(measurement.getEndValue())){
-                        measurement.setStartValue(measurement.getEndValue());
+                    if (measurement.getValueIsRange()) {
+                        RangeValue rangeValue = measurement.getRangeValue();
+                        rangeValue.setFromValue(createNumericValue(rangeValue.getFromValue()));
+                        rangeValue.setToValue(createNumericValue(rangeValue.getToValue()));
+                        measurement.setRangeValue(rangeValue);
+                    } else {
+                        measurement.setValue(createNumericValue(measurement.getValue()));
                     }
                 } catch (NumberFormatException e) {
-                    throw new ValidationException("Measurement's start/end values must be numeric");
+                    throw new ValidationException("Measurement's values must be numeric");
                 }
                 break;
-            case PCT: // FIXME: this is too complicated
+
+            case PCT:
                 try {
-                    float floatStartValue;
-                    if (measurement.getStartValue().endsWith("%")) { // if user has provided an explicit percentage value
-                        measurement.setStartValue(measurement.getStartValue().replaceAll("%", ""));
-                        floatStartValue = Float.parseFloat(measurement.getStartValue());
-                        if (floatStartValue < 0 || floatStartValue > 100) {
-                            throw new ValidationException("Measurement's start value should be between [0, 1] or an explicit percentage value 0% - 100%");
-                        }
-                        measurement.setStartValue(String.format("%.0f", floatStartValue) + "%");
-                    } else { // if value is in range [0, 1]
-                        floatStartValue = Float.parseFloat(measurement.getStartValue());
-                        if (floatStartValue < 0 || floatStartValue > 1) {
-                            throw new ValidationException("Measurement's start value should be between [0, 1] or an explicit percentage value 0% - 100%");
-                        }
-                        measurement.setStartValue(String.format("%.0f", (floatStartValue * 100)) + "%");
-                    }
-                    float floatEndValue;
-                    if (measurement.getEndValue().endsWith("%")) { // if user has provided an explicit percentage value
-                        measurement.setEndValue(measurement.getEndValue().replaceAll("%", ""));
-                        floatEndValue = Float.parseFloat(measurement.getEndValue());
-                        if (floatEndValue < 0 || floatEndValue > 100) {
-                            throw new ValidationException("Measurement's end value should be between [0, 1] or an explicit percentage value 0% - 100%");
-                        }
-                        measurement.setEndValue(String.format("%.0f", floatEndValue));
-                    } else { // if value is in range [0, 1]
-                        floatEndValue = Float.parseFloat(measurement.getEndValue());
-                        if (floatEndValue < 0 || floatEndValue > 1) {
-                            throw new ValidationException("Measurement's end value should be between [0, 1] or an explicit percentage value 0% - 100%");
-                        }
-                        measurement.setEndValue(String.format("%.0f", (floatEndValue * 100)));
-                    }
-                    if (Float.parseFloat(measurement.getStartValue()) > Float.parseFloat(measurement.getEndValue())){
-                        throw new ValidationException("Value range is negative. Please confirm that endValue is higher than startValue");
-                    } else if (Float.parseFloat(measurement.getStartValue()) > Float.parseFloat(measurement.getEndValue())){
-                        measurement.setStartValue(measurement.getEndValue());
+                    if (measurement.getValueIsRange()) {
+                        RangeValue rangeValue = measurement.getRangeValue();
+                        rangeValue.setFromValue(createPercentageValue(rangeValue.getFromValue()));
+                        rangeValue.setToValue(createPercentageValue(rangeValue.getToValue()));
+                        measurement.setRangeValue(rangeValue);
+                    } else {
+                        measurement.setValue(createPercentageValue(measurement.getValue()));
                     }
                 } catch (NumberFormatException e) {
-                    throw new ValidationException("Measurement's start/end values must be a percentage");
+                    throw new ValidationException("Measurement's values must be percentages");
                 }
                 break;
+
             case BOOL:
-                if (!"true".equals(measurement.getStartValue()) && !"false".equals(measurement.getStartValue())) {
+                if (measurement.getValueIsRange()) {
+                    throw new ValidationException("Boolean UnitType cannot be a RangeValue");
+                }
+                if (!"true".equals(measurement.getValue()) && !"false".equals(measurement.getValue())) {
                     throw new ValidationException("Measurement's value should be either 'true' or 'false'");
                 }
-                measurement.setEndValue(measurement.getStartValue());
                 break;
             default:
                 // should never enter this
@@ -288,6 +269,34 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                 .collect(Collectors.toList());
         return new Paging<>(measurementResources.getTotal(), measurementResources.getFrom(),
                 measurementResources.getTotal(), measurements, measurementResources.getFacets());
+    }
+
+    private String createPercentageValue(String value) {
+        value = TextUtils.trimWhitespace(value);
+        float floatValue;
+        if (value.endsWith("%")) { // if user has provided an explicit percentage value
+            value = value.replaceAll("%", "");
+            floatValue = Float.parseFloat(value);
+            if (floatValue < 0 || floatValue > 100) {
+                throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
+            }
+            return String.format("%.0f", floatValue);
+        } else { // if value is in range [0, 1]
+            floatValue = Float.parseFloat(value);
+            if (floatValue < 0 || floatValue > 1) {
+                throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
+            }
+            return String.format("%.2f", (floatValue * 100));
+        }
+    }
+
+    private String createNumericValue(String value) {
+        value = TextUtils.trimWhitespace(value);
+        long longValue = Long.parseLong(value);
+        if (longValue < 0) {
+            throw new ValidationException("Measurement's value cannot be negative");
+        }
+        return Long.toString(longValue);
     }
 
 }
