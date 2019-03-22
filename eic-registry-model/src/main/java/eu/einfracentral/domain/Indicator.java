@@ -24,7 +24,7 @@ public class Indicator implements Identifiable {
     @XmlElement(required = true)
     private String description;
 
-    @ApiModelProperty(position = 4, example = "['time', 'location'] (at least one)", required = true)
+    @ApiModelProperty(position = 4, example = "['time', 'locations'] (at least one)", required = true)
     @XmlElementWrapper(name = "dimensions")
     @XmlElement(name = "dimension")
     private List<String> dimensions;
