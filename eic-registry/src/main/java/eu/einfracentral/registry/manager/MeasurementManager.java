@@ -124,24 +124,24 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         }
 
         // Validates that at least one of time, locations is mandatory
-        if (measurement.getLocations() == null && measurement.getTime() == null){
+        if (measurement.getLocations() == null && measurement.getTime() == null) {
             throw new ValidationException("You must provide at least one of: locations, time"); // TODO: get values from type
-        } else if (measurement.getLocations() == null && measurement.getTime().toString().equals("")){
+        } else if (measurement.getLocations() == null && measurement.getTime().toString().equals("")) {
             throw new ValidationException(("Measurement's time cannot be empty"));
-        } else if (measurement.getTime() == null && measurement.getLocations().isEmpty()){
+        } else if (measurement.getTime() == null && measurement.getLocations().isEmpty()) {
             throw new ValidationException(("Measurement's locations cannot be empty"));
         }
 
-        if (measurement.getLocations() != null){
+        if (measurement.getLocations() != null) {
             List<String> verifiedLocations = new ArrayList<>();
             Vocabulary placesVocabulary = vocabularyManager.get("places");
             Map<String, VocabularyEntry> places = placesVocabulary.getEntries();
-            for (String location : measurement.getLocations()){
-                if (places.containsKey(location) && !verifiedLocations.contains(location)){
+            for (String location : measurement.getLocations()) {
+                if (places.containsKey(location) && !verifiedLocations.contains(location)) {
                     verifiedLocations.add(location);
                 }
             }
-            if (verifiedLocations.isEmpty()){
+            if (verifiedLocations.isEmpty()) {
                 throw new ValidationException("One or more of the locations given is wrong. Accepted format according to ISO 3166-1 alpha-2");
             }
 
@@ -207,7 +207,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             // trim whitespace from value
             measurement.setValue(measurement.getValue().replaceAll(" ", ""));
             // Validate that rangeValue is null
-            if (measurement.getRangeValue() != null){
+            if (measurement.getRangeValue() != null) {
                 throw new ValidationException("valueIsRange is set to false. You can't have a rangeValue.");
             }
         } else {
@@ -225,7 +225,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                     throw new ValidationException("valueIsRange is set to true. You can't have a value.");
                 }
                 // Validate that fromValue > toValue
-                if(!(Float.parseFloat(measurement.getRangeValue().getFromValue()) < Float.parseFloat(measurement.getRangeValue().getToValue()))){
+                if (!(Float.parseFloat(measurement.getRangeValue().getFromValue()) < Float.parseFloat(measurement.getRangeValue().getToValue()))) {
                     throw new ValidationException("toValue can't be less than or equal to fromValue.");
                 }
             } else {
@@ -237,43 +237,42 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     }
 
     // Validates if Measurement's index complies with Indicator's structure
-    public boolean validateMeasurementStructure(Measurement measurement){
+    public boolean validateMeasurementStructure(Measurement measurement) {
         Indicator existingIndicator = indicatorManager.get(measurement.getIndicatorId());
 
         if ((indicatorManager.hasTime(existingIndicator) && measurement.getTime() == null) ||
-           (!indicatorManager.hasTime(existingIndicator) && measurement.getTime() != null) ||
-           (indicatorManager.hasLocations(existingIndicator) && measurement.getLocations() == null) ||
-           (!indicatorManager.hasLocations(existingIndicator) && measurement.getLocations() != null)){
-           throw new ValidationException("Measurement's index does not comply with the specific Indicator's structure. Please review the dimensions the specific Indicator supports.");
+                (!indicatorManager.hasTime(existingIndicator) && measurement.getTime() != null) ||
+                (indicatorManager.hasLocations(existingIndicator) && measurement.getLocations() == null) ||
+                (!indicatorManager.hasLocations(existingIndicator) && measurement.getLocations() != null)) {
+            throw new ValidationException("Measurement's index does not comply with the specific Indicator's structure. Please review the dimensions the specific Indicator supports.");
         }
-        return  true;
+        return true;
 
     }
 
     // Assures that no other Measurement with the same fields (IndicatorId, ServiceId, Locations, Time) exists.
-    public boolean existsIdentical(Measurement measurement){
+    public boolean existsIdentical(Measurement measurement) {
         Paging<Measurement> existingMeasurements = getAll(measurement.getIndicatorId(), measurement.getServiceId(), null);
         for (Measurement entry : existingMeasurements.getResults()) {
-            if (entry.getLocations() == null && measurement.getLocations() == null){
-                if(entry.getTime().equals(measurement.getTime())){
-                    throw new ValidationException("Measurement with IndicatorId " +measurement.getIndicatorId()+ " and ServiceId " +measurement.getServiceId()+
+            if (entry.getLocations() == null && measurement.getLocations() == null) {
+                if (entry.getTime().equals(measurement.getTime())) {
+                    throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
                             " for the specific timestamp already exists!");
                 }
-            } else if (entry.getTime() == null && measurement.getTime() == null){
-                if(entry.getLocations().equals(measurement.getLocations())){
-                    throw new ValidationException("Measurement with IndicatorId " +measurement.getIndicatorId()+ " and ServiceId " +measurement.getServiceId()+
+            } else if (entry.getTime() == null && measurement.getTime() == null) {
+                if (entry.getLocations().equals(measurement.getLocations())) {
+                    throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
                             " for the specific location-s already exists!");
                 }
-            } else if (entry.getTime() != null && entry.getLocations() != null && measurement.getLocations() != null && measurement.getTime() != null){
-                if(entry.getTime().equals(measurement.getTime()) && entry.getLocations().equals(measurement.getLocations())){
-                    throw new ValidationException("Measurement with IndicatorId " +measurement.getIndicatorId()+ " and ServiceId " +measurement.getServiceId()+
+            } else if (entry.getTime() != null && entry.getLocations() != null && measurement.getLocations() != null && measurement.getTime() != null) {
+                if (entry.getTime().equals(measurement.getTime()) && entry.getLocations().equals(measurement.getLocations())) {
+                    throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
                             " for the specific timestamp and location-s already exists!");
                 }
             }
         }
         return true;
     }
-
 
     private Paging<Measurement> pagingResourceToMeasurement(Paging<Resource> measurementResources) {
         List<Measurement> measurements = measurementResources
@@ -287,21 +286,21 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     private String createPercentageValue(String value) {
         value = TextUtils.trimWhitespace(value);
-        Float floatValue;
+        float floatValue;
         if (value.endsWith("%")) { // if user has provided an explicit percentage value
             value = value.replaceAll("%", "");
             floatValue = Float.parseFloat(value);
             if (floatValue < 0 || floatValue > 100) {
                 throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
             }
+            return Float.toString(floatValue * 100);
         } else { // if value is in range [0, 1]
             floatValue = Float.parseFloat(value);
             if (floatValue < 0 || floatValue > 1) {
                 throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
             }
-            floatValue = floatValue*100;
+            return Float.toString(floatValue);
         }
-        return floatValue.toString();
     }
 
     private String createNumericValue(String value) {
