@@ -29,7 +29,7 @@ public class Measurement implements Identifiable {
     @ApiModelProperty(position = 5)
     private List<String> locations;
 
-    @XmlElement
+    @XmlElement(required = true)
     @ApiModelProperty(position = 6)
     private boolean valueIsRange;
 
