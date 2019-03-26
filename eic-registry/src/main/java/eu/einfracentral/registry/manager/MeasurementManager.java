@@ -43,7 +43,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         measurement.setId(UUID.randomUUID().toString());
         existsIdentical(measurement);
         validate(measurement);
-        super.add(measurement, auth);
+//        super.add(measurement, auth);
         return measurement;
     }
 
@@ -155,6 +155,41 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("Measurement's time cannot be empty");
         }
 
+        // Validate Measurement's value
+        if (!measurement.getValueIsRange()) {
+            // Validate that Measurement's value exists
+            if (measurement.getValue() == null || "".equals(measurement.getValue())) {
+                throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
+            }
+            // trim whitespace from value
+            measurement.setValue(measurement.getValue().replaceAll(" ", ""));
+            // Validate that rangeValue is null
+            if (measurement.getRangeValue() != null) {
+                throw new ValidationException("valueIsRange is set to false. You can't have a rangeValue.");
+            }
+        } else {
+            if (measurement.getRangeValue() != null) {
+                // Validate that Measurement's rangeValue.fromValue exists
+                if (measurement.getRangeValue().getFromValue() == null || "".equals(measurement.getRangeValue().getFromValue())) {
+                    throw new ValidationException("Measurement's fromValue cannot be 'null' or 'empty'");
+                }
+                // Validate that Measurement's rangeValue.toValue exists
+                if (measurement.getRangeValue().getToValue() == null || "".equals(measurement.getRangeValue().getToValue())) {
+                    throw new ValidationException("Measurement's toValue cannot be 'null' or 'empty'");
+                }
+                // Validate that value is null
+                if (measurement.getValue() != null) {
+                    throw new ValidationException("valueIsRange is set to true. You can't have a value.");
+                }
+                // Validate that fromValue > toValue
+                if (Float.parseFloat(measurement.getRangeValue().getFromValue()) >= Float.parseFloat(measurement.getRangeValue().getToValue())) {
+                    throw new ValidationException("toValue can't be less than or equal to fromValue.");
+                }
+            } else {
+                throw new ValidationException("valueIsRange is set to true - rangeValue cannot be null.");
+            }
+        }
+
         // Validates if values provided complies with the Indicator's UnitType
         switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
 
@@ -196,45 +231,12 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                     throw new ValidationException("Measurement's value should be either 'true' or 'false'");
                 }
                 break;
+
             default:
                 // should never enter this
         }
 
-        // Validate Measurement's value
-        if (!measurement.getValueIsRange()) {
-            // Validate that Measurement's value exists
-            if (measurement.getValue() == null || "".equals(measurement.getValue())) {
-                throw new ValidationException("Measurement's value cannot be 'null' or 'empty'");
-            }
-            // trim whitespace from value
-            measurement.setValue(measurement.getValue().replaceAll(" ", ""));
-            // Validate that rangeValue is null
-            if (measurement.getRangeValue() != null) {
-                throw new ValidationException("valueIsRange is set to false. You can't have a rangeValue.");
-            }
-        } else {
-            if (measurement.getRangeValue() != null) {
-                // Validate that Measurement's rangeValue.fromValue exists
-                if (measurement.getRangeValue().getFromValue() == null || "".equals(measurement.getRangeValue().getFromValue())) {
-                    throw new ValidationException("Measurement's fromValue cannot be 'null' or 'empty'");
-                }
-                // Validate that Measurement's rangeValue.toValue exists
-                if (measurement.getRangeValue().getToValue() == null || "".equals(measurement.getRangeValue().getToValue())) {
-                    throw new ValidationException("Measurement's toValue cannot be 'null' or 'empty'");
-                }
-                // Validate that value is null
-                if (measurement.getValue() != null) {
-                    throw new ValidationException("valueIsRange is set to true. You can't have a value.");
-                }
-                // Validate that fromValue > toValue
-                if (Float.parseFloat(measurement.getRangeValue().getFromValue()) >= Float.parseFloat(measurement.getRangeValue().getToValue())) {
-                    throw new ValidationException("toValue can't be less than or equal to fromValue.");
-                }
-            } else {
-                throw new ValidationException("valueIsRange is set to true - rangeValue cannot be null.");
-            }
-        }
-
+        validateMeasurementUnit(measurement);
         return measurement;
     }
 
@@ -286,21 +288,47 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                 measurementResources.getTotal(), measurements, measurementResources.getFacets());
     }
 
+    private Measurement validateMeasurementUnit (Measurement measurement) {
+
+        switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
+
+            case NUM:
+                if (measurement.getMeasurementUnit() == null || "".equals(measurement.getMeasurementUnit())) {
+                    throw new ValidationException("Measurement's measurementUnit cannot be null or empty. Please provide a legitimate measurementUnit.");
+                }
+                break;
+
+            case PCT:
+                Float floatValue;
+                if (measurement.getValue() != null) {
+                    floatValue = Float.parseFloat(measurement.getValue());
+                } else {
+                    floatValue = Float.parseFloat(measurement.getRangeValue().getToValue());
+                }
+                if (floatValue >= 0 && floatValue <= 100) {
+                    measurement.setMeasurementUnit("%");
+                } else {
+                    throw new ValidationException("Percentage value should be an explicit percentage value 0% - 100%");
+                }
+                break;
+
+            case BOOL:
+                measurement.setMeasurementUnit(null);
+                break;
+
+            default:
+        }
+
+        return measurement;
+    }
+
+
     private String createPercentageValue(String value) {
         value = TextUtils.trimWhitespace(value);
         float floatValue;
-        if (value.endsWith("%")) { // if user has provided an explicit percentage value
-            value = value.replaceAll("%", "");
-            floatValue = Float.parseFloat(value);
-            if (floatValue < 0 || floatValue > 100) {
-                throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
-            }
-            floatValue *= 100;
-        } else { // if value is in range [0, 1]
-            floatValue = Float.parseFloat(value);
-            if (floatValue < 0 || floatValue > 1) {
-                throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
-            }
+        floatValue = Float.parseFloat(value);
+        if (floatValue < 0 || floatValue > 100) {
+            throw new ValidationException("Percentage value should be an explicit percentage value 0% - 100%");
         }
 //        return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
         return Float.toString(floatValue);
