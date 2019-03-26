@@ -90,14 +90,14 @@
       <xs:element minOccurs="0" name="dimensions">
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="dimension" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" name="dimension" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="unit" type="xs:string"/>
-      <xs:element minOccurs="0" name="unitName" type="xs:string"/>
+      <xs:element name="unit" type="xs:string"/>
+      <xs:element name="unitName" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
