@@ -97,6 +97,7 @@
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="unit" type="xs:string"/>
+      <xs:element minOccurs="0" name="unitName" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 

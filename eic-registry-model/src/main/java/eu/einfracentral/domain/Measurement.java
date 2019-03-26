@@ -41,10 +41,6 @@ public class Measurement implements Identifiable {
     @ApiModelProperty(position = 8)
     private RangeValue rangeValue;
 
-    @XmlElement
-    @ApiModelProperty(position = 9)
-    private String measurementUnit;
-
 
     public Measurement() {
 
@@ -59,7 +55,6 @@ public class Measurement implements Identifiable {
         this.rangeValue = measurement.getRangeValue();
         this.time = measurement.getTime();
         this.locations = measurement.getLocations();
-        this.measurementUnit = measurement.getMeasurementUnit();
     }
 
     @Override
@@ -126,13 +121,5 @@ public class Measurement implements Identifiable {
 
     public void setValueIsRange(boolean valueIsRange) {
         this.valueIsRange = valueIsRange;
-    }
-
-    public String getMeasurementUnit() {
-        return measurementUnit;
-    }
-
-    public void setMeasurementUnit(String measurementUnit) {
-        this.measurementUnit = measurementUnit;
     }
 }

@@ -8,18 +8,19 @@ import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class MeasurementManager extends ResourceManager<Measurement> implements MeasurementService<Measurement, Authentication> {
 
+    private static final Logger logger = LogManager.getLogger(MeasurementManager.class);
     private IndicatorManager indicatorManager;
     private VocabularyManager vocabularyManager;
     private InfraServiceService<InfraService, InfraService> infraService;
@@ -43,7 +44,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         measurement.setId(UUID.randomUUID().toString());
         existsIdentical(measurement);
         validate(measurement);
-//        super.add(measurement, auth);
+        super.add(measurement, auth);
         return measurement;
     }
 
@@ -110,13 +111,15 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public Measurement validate(Measurement measurement) {
 
+        Indicator indicator = indicatorManager.get(measurement.getIndicatorId());
+
         // validate measurement fields
         validateMeasurementStructure(measurement);
 
         // validate measurement values // TODO: move methods below to a function
 
         // Validates Indicator's ID
-        if (indicatorManager.get(measurement.getIndicatorId()) == null) {
+        if (indicator == null) {
             throw new ValidationException("Indicator with id: " + measurement.getIndicatorId() + " does not exist");
         }
 
@@ -182,8 +185,13 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                     throw new ValidationException("valueIsRange is set to true. You can't have a value.");
                 }
                 // Validate that fromValue > toValue
-                if (Float.parseFloat(measurement.getRangeValue().getFromValue()) >= Float.parseFloat(measurement.getRangeValue().getToValue())) {
-                    throw new ValidationException("toValue can't be less than or equal to fromValue.");
+                try {
+                    if (Float.parseFloat(measurement.getRangeValue().getFromValue()) >= Float.parseFloat(measurement.getRangeValue().getToValue())) {
+                        throw new ValidationException("toValue can't be less than or equal to fromValue.");
+                    }
+                } catch (ValidationException e) {
+                    logger.error(e);
+                    throw new ValidationException("Value provided is not a number");
                 }
             } else {
                 throw new ValidationException("valueIsRange is set to true - rangeValue cannot be null.");
@@ -191,7 +199,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         }
 
         // Validates if values provided complies with the Indicator's UnitType
-        switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
+        switch (Indicator.UnitType.fromString(indicator.getUnit())) {
 
             case NUM:
                 try {
@@ -236,7 +244,6 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                 // should never enter this
         }
 
-        validateMeasurementUnit(measurement);
         return measurement;
     }
 
@@ -287,41 +294,6 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         return new Paging<>(measurementResources.getTotal(), measurementResources.getFrom(),
                 measurementResources.getTotal(), measurements, measurementResources.getFacets());
     }
-
-    private Measurement validateMeasurementUnit (Measurement measurement) {
-
-        switch (Indicator.UnitType.fromString(indicatorManager.get(measurement.getIndicatorId()).getUnit())) {
-
-            case NUM:
-                if (measurement.getMeasurementUnit() == null || "".equals(measurement.getMeasurementUnit())) {
-                    throw new ValidationException("Measurement's measurementUnit cannot be null or empty. Please provide a legitimate measurementUnit.");
-                }
-                break;
-
-            case PCT:
-                Float floatValue;
-                if (measurement.getValue() != null) {
-                    floatValue = Float.parseFloat(measurement.getValue());
-                } else {
-                    floatValue = Float.parseFloat(measurement.getRangeValue().getToValue());
-                }
-                if (floatValue >= 0 && floatValue <= 100) {
-                    measurement.setMeasurementUnit("%");
-                } else {
-                    throw new ValidationException("Percentage value should be an explicit percentage value 0% - 100%");
-                }
-                break;
-
-            case BOOL:
-                measurement.setMeasurementUnit(null);
-                break;
-
-            default:
-        }
-
-        return measurement;
-    }
-
 
     private String createPercentageValue(String value) {
         value = TextUtils.trimWhitespace(value);
