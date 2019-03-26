@@ -107,6 +107,27 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
             throw new ValidationException("Indicator's unit cannot be 'null' or 'empty'");
         }
 
+        // Validates Indicator's unitName
+        switch (Indicator.UnitType.fromString(indicator.getUnit())) {
+            case NUM:
+                if (indicator.getUnitName() == null || "".equals(indicator.getUnitName())) {
+                    throw new ValidationException("Please specify a unitName.");
+                }
+                break;
+            case PCT:
+                if (indicator.getUnitName() != null && !"%".equals(indicator.getUnitName())) {
+                    throw new ValidationException("unitName for 'percentage' unit must be set to '%'");
+                } else {
+                    indicator.setUnitName("%");
+                }
+                break;
+            case BOOL:
+                if (indicator.getUnitName() != null) {
+                    throw new ValidationException("unitName for 'boolean' unit must be null");
+                }
+                break;
+        }
+
         // throws exception if value does not exist
         Indicator.UnitType.fromString(indicator.getUnit());
 

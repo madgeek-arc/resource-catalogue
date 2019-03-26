@@ -24,14 +24,18 @@ public class Indicator implements Identifiable {
     @XmlElement(required = true)
     private String description;
 
-    @ApiModelProperty(position = 4, example = "['time', 'locations'] (at least one)", required = true)
+    @ApiModelProperty(position = 4, example = "['time', 'locations'] (at least one)")
     @XmlElementWrapper(name = "dimensions")
-    @XmlElement(name = "dimension")
+    @XmlElement(name = "dimension", required = true)
     private List<String> dimensions;
 
-    @ApiModelProperty(position = 5, example = "'percentage', 'numeric' or 'boolean'", required = true)
-    @XmlElement(name = "unit")
+    @ApiModelProperty(position = 5, example = "'percentage', 'numeric' or 'boolean'")
+    @XmlElement(required = true)
     private String unit;
+
+    @ApiModelProperty(position = 6, example= "'days', 'km', etc")
+    @XmlElement(required = true)
+    private String unitName;
 
     public Indicator() {
 
@@ -43,6 +47,7 @@ public class Indicator implements Identifiable {
         this.description = indicator.getDescription();
         this.unit = indicator.getUnit();
         this.dimensions = indicator.getDimensions();
+        this.unitName = indicator.getUnitName();
     }
 
 
@@ -147,5 +152,13 @@ public class Indicator implements Identifiable {
 
     public void setDimensions(List<String> dimensions) {
         this.dimensions = dimensions;
+    }
+
+    public String getUnitName() {
+        return unitName;
+    }
+
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
     }
 }
