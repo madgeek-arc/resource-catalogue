@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -225,7 +227,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                     throw new ValidationException("valueIsRange is set to true. You can't have a value.");
                 }
                 // Validate that fromValue > toValue
-                if (!(Float.parseFloat(measurement.getRangeValue().getFromValue()) < Float.parseFloat(measurement.getRangeValue().getToValue()))) {
+                if (Float.parseFloat(measurement.getRangeValue().getFromValue()) >= Float.parseFloat(measurement.getRangeValue().getToValue())) {
                     throw new ValidationException("toValue can't be less than or equal to fromValue.");
                 }
             } else {
@@ -293,23 +295,25 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             if (floatValue < 0 || floatValue > 100) {
                 throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
             }
-            return Float.toString(floatValue * 100);
+            floatValue *= 100;
         } else { // if value is in range [0, 1]
             floatValue = Float.parseFloat(value);
             if (floatValue < 0 || floatValue > 1) {
                 throw new ValidationException("Percentage value should be between [0, 1] or an explicit percentage value 0% - 100%");
             }
-            return Float.toString(floatValue);
         }
+//        return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
+        return Float.toString(floatValue);
     }
 
     private String createNumericValue(String value) {
         value = TextUtils.trimWhitespace(value);
-        long longValue = Long.parseLong(value);
-        if (longValue < 0) {
+        float floatValue = Float.parseFloat(value);
+        if (floatValue < 0) {
             throw new ValidationException("Measurement's value cannot be negative");
         }
-        return Long.toString(longValue);
+//        return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
+        return Float.toString(floatValue);
     }
 
 }
