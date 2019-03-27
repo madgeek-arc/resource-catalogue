@@ -62,7 +62,7 @@ public class TextUtils {
             if (parts[1].length() > precision) {
                 parts[1] = parts[1].substring(0, precision);
             }
-            if (precision > 0) {
+            if (precision > 0 && !parts[1].matches("^0+$")) {
                 return String.join(".", parts);
             }
             return parts[0];

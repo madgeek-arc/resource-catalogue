@@ -302,8 +302,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         if (floatValue < 0 || floatValue > 100) {
             throw new ValidationException("Percentage value should be an explicit percentage value 0% - 100%");
         }
-//        return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
-        return Float.toString(floatValue);
+        return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
     }
 
     private String createNumericValue(String value) {
@@ -312,8 +311,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         if (floatValue < 0) {
             throw new ValidationException("Measurement's value cannot be negative");
         }
-//        return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
-        return Float.toString(floatValue);
+        return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
     }
 
 }
