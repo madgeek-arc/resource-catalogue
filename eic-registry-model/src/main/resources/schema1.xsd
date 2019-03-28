@@ -310,11 +310,8 @@
 
   <xs:complexType name="serviceMetadata">
     <xs:sequence>
-      <xs:element default="false" name="featured" type="xs:boolean"/>
       <xs:element default="null" minOccurs="0" name="modifiedAt" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="performanceData" type="tns:measurement"/>
-      <xs:element default="false" name="published" type="xs:boolean"/>
       <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
     </xs:sequence>
