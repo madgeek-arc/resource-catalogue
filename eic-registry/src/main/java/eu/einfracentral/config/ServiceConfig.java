@@ -63,8 +63,9 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
-        return JAXBContext.newInstance(Event.class, Manager.class, Provider.class,
-                Service.class, User.class, Vocabulary.class, InfraService.class, VocabularyEntry.class);
+        return JAXBContext.newInstance(Event.class, Funder.class, Provider.class,
+                Service.class, User.class, Vocabulary.class, InfraService.class, VocabularyEntry.class,
+                Indicator.class, Measurement.class, RangeValue.class);
     }
 
     @Bean
@@ -80,7 +81,8 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("resourceTypes", "resourceTypesIndexFields", "richService");
+        return new ConcurrentMapCacheManager("resourceTypes", "resourceTypesIndexFields", "events",
+                "visits", "providers", "vocabularies", "featuredServices");
     }
 
     @Bean

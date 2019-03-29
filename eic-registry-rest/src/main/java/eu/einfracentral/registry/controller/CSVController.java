@@ -25,6 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+@ApiIgnore
 @RestController
 @RequestMapping("exportToCSV")
 public class CSVController {
@@ -39,7 +40,7 @@ public class CSVController {
         this.providerService = provider;
     }
 
-    @ApiOperation(value = "Downloads a csv file with Provider entries")
+    @ApiOperation(value = "Downloads a csv file with Service entries")
     @RequestMapping(path = "services", method = RequestMethod.GET, produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {

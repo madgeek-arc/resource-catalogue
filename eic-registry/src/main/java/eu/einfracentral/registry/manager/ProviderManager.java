@@ -17,6 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
@@ -62,6 +64,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public Provider add(Provider provider, Authentication auth) {
         List<User> users;
         User authUser = new User(auth);
@@ -99,6 +102,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public Provider update(Provider provider, Authentication auth) {
         Resource existing = whereID(provider.getId(), true);
         Provider ex = deserialize(existing);
@@ -113,7 +117,21 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return provider;
     }
 
+    /**
+     * Do not expose this method to users because it returns sensitive information about providers.
+     *
+     * @param id
+     * @return
+     */
     @Override
+    @Cacheable("providers")
+    public Provider get(String id) {
+        Provider provider = super.get(id);
+        return provider;
+    }
+
+    @Override
+    @Cacheable("providers")
     public Provider get(String id, Authentication auth) {
         Provider provider = get(id);
         if (auth == null) {
@@ -128,6 +146,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    @Cacheable(value = "providers")
     public Browsing<Provider> getAll(FacetFilter ff, Authentication auth) {
         List<Provider> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -162,6 +181,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public void delete(Provider provider) {
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
@@ -174,10 +194,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         });
         super.delete(provider);
-//        this.del(provider);
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         provider.setStatus(status.getKey());
@@ -207,8 +227,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return super.update(provider, auth);
     }
 
-    // TODO: CHECK THIS!!!
     @Override
+    @Cacheable(value = "providers")
     public List<Provider> getServiceProviders(String email, Authentication auth) {
         List<Provider> providers;
         if (auth == null) {
@@ -240,6 +260,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
+    @Cacheable(value = "providers")
     public List<Provider> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
 //            return null; // TODO: enable this when front end can handle 401 properly
@@ -279,11 +300,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerId);
         ff.addFilter("active", "true");
-        ff.addFilter("latest", "true"); // TODO: check if it is needed
+        ff.addFilter("latest", "true");
         ff.setQuantity(10000);
         return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
     }
 
+    //Gets random Services to be featured at the Carousel
     @Override
     public Service getFeaturedService(String providerId) {
         // TODO: change this method

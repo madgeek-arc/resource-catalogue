@@ -9,30 +9,31 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
 
     private VocabularyManager vocabularyManager;
     private ProviderManager providerManager;
+    private Random randomNumberGenerator;
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
     @Autowired
-    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager) {
+    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager, Random randomNumberGenerator) {
         super(InfraService.class);
         this.vocabularyManager = vocabularyManager;
         this.providerManager = providerManager;
+        this.randomNumberGenerator = randomNumberGenerator;
     }
 
     @Override
@@ -83,11 +84,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             logger.info("User: " + authentication.getDetails());
         }
 
+        // update existing service serviceMetadata
+        ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
+        infraService.setServiceMetadata(serviceMetadata);
+
         if (infraService.getVersion().equals(existingService.getVersion())) {
-            // update existing service serviceMetadata
-            ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
-            infraService.setServiceMetadata(serviceMetadata);
-//                ObjectUtils.merge(existingService, infraService); // FIXME: this method does not assign values of Superclass
             infraService.setActive(existingService.isActive());
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
@@ -111,6 +112,31 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ff.setFrom(0);
         ff.setQuantity(10000);
         return getAll(ff, null);
+    }
+
+    @Scheduled(cron = "0 0 12 1/1 * ?") // daily at 12:00 PM
+    @CacheEvict(value = "featuredServices", allEntries = true)
+    public void refreshFeatured() {
+    }
+
+    @Override
+    @Cacheable("featuredServices")
+    public List<Service> createFeaturedServices() {
+        // TODO: return featured services (for now, it returns a random infraService for each provider)
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<Provider> providers = providerManager.getAll(ff, null).getResults();
+        List<Service> featuredServices = new ArrayList<>();
+        List<Service> services;
+        for (int i = 0; i < providers.size(); i++) {
+            int rand = randomNumberGenerator.nextInt(providers.size());
+            services = providerManager.getActiveServices(providers.get(rand).getId());
+            providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
+            if (!services.isEmpty()) {
+                featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
+            }
+        }
+        return featuredServices;
     }
 
     @Override

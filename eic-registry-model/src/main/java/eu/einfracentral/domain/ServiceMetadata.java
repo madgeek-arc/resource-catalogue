@@ -3,20 +3,10 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ServiceMetadata {
-
-    @XmlElement
-    private List<Measurement<?>> performanceData;
-
-    @XmlElement(defaultValue = "false")
-    private boolean featured;
-
-    @XmlElement(defaultValue = "false")
-    private boolean published;
 
     @XmlElement(defaultValue = "null")
     private String registeredBy;
@@ -34,36 +24,10 @@ public class ServiceMetadata {
     }
 
     public ServiceMetadata(ServiceMetadata serviceMetadata) {
-        this.featured = serviceMetadata.isFeatured();
-        this.published = serviceMetadata.isPublished();
         this.registeredBy = serviceMetadata.getRegisteredBy();
         this.modifiedBy = serviceMetadata.getModifiedBy();
         this.registeredAt = serviceMetadata.getRegisteredAt();
         this.modifiedAt = serviceMetadata.getModifiedAt();
-    }
-
-    public List<Measurement<?>> getPerformanceData() {
-        return performanceData;
-    }
-
-    public void setPerformanceData(List<Measurement<?>> performanceData) {
-        this.performanceData = performanceData;
-    }
-
-    public boolean isFeatured() {
-        return featured;
-    }
-
-    public void setFeatured(boolean featured) {
-        this.featured = featured;
-    }
-
-    public boolean isPublished() {
-        return published;
-    }
-
-    public void setPublished(boolean published) {
-        this.published = published;
     }
 
     public String getRegisteredBy() {

@@ -6,6 +6,8 @@ public class ServiceHistory extends ServiceMetadata {
 
     private boolean versionChange;
 
+    private String coreVersionId;
+
     public ServiceHistory() {
     }
 
@@ -19,6 +21,12 @@ public class ServiceHistory extends ServiceMetadata {
         super(serviceMetadata);
         this.version = version;
         this.versionChange = versionChange;
+    }
+
+    public ServiceHistory(ServiceMetadata serviceMetadata, String version, String coreVersionId) {
+        super(serviceMetadata);
+        this.version = version;
+        this.coreVersionId = coreVersionId;
     }
 
     public void setVersion(String version) {
@@ -36,4 +44,13 @@ public class ServiceHistory extends ServiceMetadata {
     public void setVersionChange(boolean versionChange) {
         this.versionChange = versionChange;
     }
+
+    public void setCoreVersionId(String coreVersionId) {
+        this.coreVersionId = coreVersionId;
+    }
+
+    public String getCoreVersionId() {
+        return coreVersionId;
+    }
+
 }

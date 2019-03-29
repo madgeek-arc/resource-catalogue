@@ -160,19 +160,20 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <jsonLibrary>jackson2</jsonLibrary>
-                            <classPatterns>
-                                <pattern>eu.einfracentral.domain.*</pattern>
-                            </classPatterns>
-                            <outputFile>target/eic-model.ts</outputFile>
-                            <outputKind>module</outputKind>
-                            <outputFileType>implementationFile</outputFileType>
-                            <mapEnum>asEnum</mapEnum>
-                            <mapClasses>asClasses</mapClasses>
-                        </configuration>
+                        <phase>process-classes</phase>
                     </execution>
                 </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <classPatterns>
+                        <pattern>eu.einfracentral.domain.*</pattern>
+                    </classPatterns>
+                    <outputFile>target/eic-model.ts</outputFile>
+                    <outputKind>module</outputKind>
+                    <outputFileType>implementationFile</outputFileType>
+                    <mapEnum>asEnum</mapEnum>
+                    <mapClasses>asClasses</mapClasses>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>external.atlassian.jgitflow</groupId>

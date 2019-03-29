@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,25 +25,23 @@ public class FacetLabelService {
     private ProviderService<Provider, Authentication> providerService;
     private VocabularyService vocabularyService;
 
-    private Map<String, String> subcategoryNames;
-
     @Autowired
     FacetLabelService(ProviderService<Provider, Authentication> providerService, VocabularyService vocabularyService) {
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;
     }
 
-    @PostConstruct
-    void createSubcategoriesMap() {
-        subcategoryNames = new HashMap<>();
+    private Map<String, String> createSubcategoriesMap() {
+        Map<String, String> subcategoryNamesMap = new HashMap<>();
         try {
             Map<String, VocabularyEntry> categories = vocabularyService.get("categories").getEntries();
             for (Map.Entry<String, VocabularyEntry> entry : categories.entrySet()) {
-                entry.getValue().getChildren().forEach(sub -> subcategoryNames.put(sub.getId(), sub.getName()));
+                entry.getValue().getChildren().forEach(sub -> subcategoryNamesMap.put(sub.getId(), sub.getName()));
             }
         } catch (Exception e) {
             logger.error("ERROR", e);
         }
+        return subcategoryNamesMap;
     }
 
     String toProperCase(String str, String delimiter, String newDelimiter) {
@@ -61,6 +58,7 @@ public class FacetLabelService {
     }
 
     public void createLabels(List<Facet> facets) {
+        Map<String, String> subcategoryNames = createSubcategoriesMap();
         for (Facet facet : facets) {
             for (Value value : facet.getValues()) {
                 switch (facet.getField()) {
