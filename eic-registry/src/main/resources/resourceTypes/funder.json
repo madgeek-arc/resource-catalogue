@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "provider_id",
+      "name": "funder_id",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
@@ -14,33 +14,14 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "website",
-      "path": "//*[local-name()='website']/text()",
-      "type": "java.lang.String"
-    },
-    {
       "multivalued": true,
-      "name": "users",
-      "path": "//*[local-name()='users']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "active",
-      "path": "//*[local-name()='active']/text()",
-      "defaultValue": false,
-      "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
-      "name": "status",
-      "path": "//*[local-name()='status']/text()",
+      "name": "services",
+      "path": "//*[local-name()='service']/text()",
       "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "provider",
+  "name": "funder",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/develop/eic-registry-model/src/main/resources/schema1.xsd"

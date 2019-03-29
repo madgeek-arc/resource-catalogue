@@ -14,12 +14,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@ApiIgnore
 @RestController
 @RequestMapping("userEvents")
 public class UserEventsController {
@@ -34,7 +36,7 @@ public class UserEventsController {
         this.infraServiceService = infraServiceService;
     }
 
-    @ApiOperation("Retrieve all the favourite services of the authenticated user.")
+    @ApiOperation("Retrieve all the favourite Services of the authenticated user.")
     @RequestMapping(path = "favourites", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> favourites(Authentication auth) {
 
@@ -53,7 +55,7 @@ public class UserEventsController {
     }
 
 
-    @ApiOperation("Retrieve all the rated services of the authenticated user.")
+    @ApiOperation("Retrieve all the rated Services of the authenticated user.")
     @RequestMapping(path = "ratings", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> ratings(Authentication auth) {
 

@@ -3,19 +3,20 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.utils.FacetLabelService;
+import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -92,6 +93,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (exists(infraService)) {
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
+
+        // add spaces after ',' if they don't already exist and remove spaces before
+        prettifyServiceTextFields(infraService, ",");
+
         String serialized;
         serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
         Resource created = new Resource();
@@ -105,6 +110,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
+
+        // add spaces after ',' if they don't already exist and remove spaces before
+        prettifyServiceTextFields(infraService, ",");
+
         existing.setPayload(serialize(infraService));
         resourceService.updateResource(existing);
         return infraService;
@@ -155,17 +164,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
-        Browsing<InfraService> infraServices = getAll(ff, null);
-        List<RichService> services = infraServices.getResults()
-                .parallelStream()
-                .map(service -> createRichService(service, auth))
-                .collect(toList());
-        return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(),
-                infraServices.getTo(), services, infraServices.getFacets());
-    }
-
-    @Override
     public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
         try {
@@ -188,28 +186,28 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (resources != null) {
             for (Resource resource : resources) {
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
-                if (versions.isEmpty()) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
-                    InfraService service = deserialize(resource);
-                    if (service != null) {
-                        try {
-                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
-                        } catch (NullPointerException e) {
-                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
-                        }
-                    }
-                } else {
+//                if (versions.isEmpty()) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
+//                    InfraService service = deserialize(resource);
+//                    if (service != null) {
+//                        try {
+//                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
+//                        } catch (NullPointerException e) {
+//                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
+//                        }
+//                    }
+//                } else {
                     for (Version version : versions) {
                         Resource tempResource = version.getResource();
                         tempResource.setPayload(version.getPayload());
                         InfraService service = deserialize(tempResource);
                         if (service != null) {
                             try {
-                                history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
+                                history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion(), version.getId()));
                             } catch (NullPointerException e) {
                                 logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                             }
                         }
-                    }
+//                    }
                     history.get(history.size() - 1).setVersionChange(true);
                 }
             }
@@ -223,6 +221,68 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         });
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
+
+    @Override
+    public Map<String, Service> getAllVersionsHistory(String serviceId) {
+        Map<String, Service> history = new LinkedHashMap<>();
+
+        // get all resources with the specified Service id
+        List<Resource> resources = getResourcesWithServiceId(serviceId);
+
+        // for each resource (InfraService), get its versions
+        if (resources != null) {
+            for (Resource resource : resources) {
+                List<Version> versions = versionService.getVersionsByResource(resource.getId());
+                versions.sort((version, t1) -> {
+                    if ((version.getCreationDate().getTime()) < (t1.getCreationDate().getTime())) {
+                        return 1;
+                    }
+                    return -1;
+                });
+                for (Version version : versions) {
+                    Resource tempResource = version.getResource();
+                    tempResource.setPayload(version.getPayload());
+                    Service service = deserialize(tempResource);
+                    if (service != null) {
+                        try {
+                            history.put(version.getId(), service);
+                        } catch (NullPointerException e) {
+                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
+                        }
+                    }
+                }
+            }
+        }
+
+        return history;
+    }
+
+    @Override
+    public Service getVersionHistory(String serviceId, String versionId){
+        List<Resource> resources = getResourcesWithServiceId(serviceId);
+        Service service = new Service();
+        List<Version> versions = new ArrayList<>();
+        List<Version> allVersions = new ArrayList<>();
+
+        if (resources != null) {
+            for (Resource resource : resources) {
+                versions = versionService.getVersionsByResource(resource.getId());
+                allVersions.addAll(versions);
+            }
+            for (Version version : allVersions){
+                if (version.getId().matches(versionId)){
+                    Resource tempResource = version.getResource();
+                    tempResource.setPayload(version.getPayload());
+                    service = deserialize(tempResource);
+                    break;
+                }
+            }
+            return service;
+        } else{
+            throw new ValidationException("Service with id '" +serviceId+ "' does not exist.");
+        }
+    }
+
 
     public String serialize(InfraService infraService) {
         String serialized;
@@ -284,7 +344,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CachePut(value = "richService", key = "#id")
     public RichService getRichService(String id, String version, Authentication auth) {
         InfraService infraService;
         infraService = get(id, version);
@@ -292,129 +351,150 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CachePut(value = "richService", key = "#infraService.id")
+    public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
+        Browsing<InfraService> infraServices = getAll(ff, null);
+        List<RichService> richServiceList = createRichServices(infraServices.getResults(), null);
+        return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(),
+                richServiceList, infraServices.getFacets());
+    }
+
+    @Override
     public RichService createRichService(InfraService infraService, Authentication auth) {
-        RichService richService = new RichService(infraService);
+        return createRichServices(Collections.singletonList(infraService), auth).get(0);
+    }
+
+    @Override
+    public List<RichService> createRichServices(List<InfraService> infraServices, Authentication auth) {
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
+        List<RichService> richServices = new ArrayList<>();
+        for (InfraService infraService : infraServices) {
+            RichService richService = new RichService(infraService);
 
-        for (Vocabulary vocabulary : vocabularies) {
-            switch (vocabulary.getId()) {
-                case "categories":
-                    if (infraService.getCategory() != null) {
-                        richService.setCategoryName(vocabulary.getEntries().get(infraService.getCategory()).getName());
-                    }
+            for (Vocabulary vocabulary : vocabularies) {
+                switch (vocabulary.getId()) {
+                    case "categories":
+                        if (infraService.getCategory() != null) {
+                            richService.setCategoryName(vocabulary.getEntries().get(infraService.getCategory()).getName());
+                        }
 
-                    if (infraService.getSubcategory() != null) {
-                        List<VocabularyEntry> subcategories = vocabulary.getEntries().get(infraService.getCategory()).getChildren();
-                        for (VocabularyEntry entry : subcategories) {
-                            if (entry.getId().equals(infraService.getSubcategory())) {
-                                richService.setSubCategoryName(entry.getName());
-                                break;
+                        if (infraService.getSubcategory() != null) {
+                            List<VocabularyEntry> subcategories = vocabulary.getEntries().get(infraService.getCategory()).getChildren();
+                            for (VocabularyEntry entry : subcategories) {
+                                if (entry.getId().equals(infraService.getSubcategory())) {
+                                    richService.setSubCategoryName(entry.getName());
+                                    break;
+                                }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case "languages":
-                    if (infraService.getLanguages() != null) {
-                        richService.setLanguageNames(infraService.getLanguages()
-                                .stream()
-                                .map(l -> vocabulary.getEntries().get(l).getName())
-                                .collect(Collectors.toList())
-                        );
-                    }
-                    break;
+                    case "languages":
+                        if (infraService.getLanguages() != null) {
+                            richService.setLanguageNames(infraService.getLanguages()
+                                    .stream()
+                                    .map(l -> vocabulary.getEntries().get(l).getName())
+                                    .collect(Collectors.toList())
+                            );
+                        }
+                        break;
 
-                case "places":
-                    if (infraService.getPlaces() != null) {
-                        richService.setPlaceNames(infraService.getPlaces()
-                                .stream()
-                                .map(p -> vocabulary.getEntries().get(p).getName())
-                                .collect(Collectors.toList())
-                        );
-                    }
-                    break;
+                    case "places":
+                        if (infraService.getPlaces() != null) {
+                            richService.setPlaceNames(infraService.getPlaces()
+                                    .stream()
+                                    .map(p -> vocabulary.getEntries().get(p).getName())
+                                    .collect(Collectors.toList())
+                            );
+                        }
+                        break;
 
-                case "trl":
-                    if (infraService.getTrl() != null) {
-                        richService.setTrlName(vocabulary.getEntries().get(infraService.getTrl()).getName());
-                    }
-                    break;
+                    case "trl":
+                        if (infraService.getTrl() != null) {
+                            richService.setTrlName(vocabulary.getEntries().get(infraService.getTrl()).getName());
+                        }
+                        break;
 
-                case "lifecyclestatus":
-                    if (infraService.getLifeCycleStatus() != null) {
-                        richService.setLifeCycleStatusName(vocabulary.getEntries().get(infraService.getLifeCycleStatus()).getName());
-                    }
-                    break;
-                default:
+                    case "lifecyclestatus":
+                        if (infraService.getLifeCycleStatus() != null) {
+                            richService.setLifeCycleStatusName(vocabulary.getEntries().get(infraService.getLifeCycleStatus()).getName());
+                        }
+                        break;
+                    default:
+                }
             }
-        }
 
-        // set user favourite and rate
-        List<Event> userEvents;
-        try {
-            userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
-            if (!userEvents.isEmpty()) {
-                richService.setFavourite(userEvents.get(0).getValue().equals("1"));
+            // set user favourite and rate if auth != null
+            if (auth != null) {
+
+                List<Event> userEvents;
+                try {
+                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
+                    if (!userEvents.isEmpty()) {
+                        richService.setFavourite(userEvents.get(0).getValue().equals("1"));
+                    }
+                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
+                    if (!userEvents.isEmpty()) {
+                        richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
+                    }
+                } catch (OIDCAuthenticationException e) {
+                    // user not logged in
+                    logger.warn("Authentication Exception", e);
+                } catch (Exception e2) {
+                    logger.error(e2);
+                }
             }
-            userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
-            if (!userEvents.isEmpty()) {
-                richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
+
+            List<Event> serviceRatingEvents = eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId());
+
+            //set Ratings & Favourites sums
+            richService.setRatings(serviceRatingEvents
+                    .stream()
+                    .map(Event::getUser)
+                    .distinct()
+                    .mapToInt(u -> 1)
+                    .sum());
+
+            Optional<List<Event>> favourites = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
+            Map<String, Integer> userFavourites = new HashMap<>();
+            favourites.ifPresent(f -> f
+                    .stream()
+                    .filter(x -> x.getValue() != null)
+                    .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
+            int favs = 0;
+            for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
+                favs += entry.getValue();
             }
-        } catch (OIDCAuthenticationException e) {
-            // user not logged in
-            logger.debug("Silent Exception", e);
-        } catch (Exception e2) {
-            logger.error(e2);
-        }
+            richService.setFavourites(favs);
 
-        //set Ratings & Favourites sums
-        richService.setRatings(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId())
-                .stream()
-                .map(Event::getUser)
-                .distinct()
-                .mapToInt(u -> 1)
-                .sum());
-
-        Optional<List<Event>> favourites = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
-        Map<String, Integer> userFavourites = new HashMap<>();
-        favourites.ifPresent(f -> f
-                .stream()
-                .filter(x -> x.getValue() != null)
-                .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
-        int favs = 0;
-        for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
-            favs += entry.getValue();
-        }
-        richService.setFavourites(favs);
-
-        // set rating of the service
-        Optional<List<Event>> ratings = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId()));
-        Map<String, Float> userRatings = new HashMap<>();
-        ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
-        float sum = 0;
-        for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
-            sum += entry.getValue();
-        }
-        if (!userRatings.isEmpty()) {
-            richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum / userRatings.size()))); //the rating of the specific service as x.xx (3.33)
-        } else {
-            richService.setHasRate(0);
-        }
-
-        // set visits
-        Map<String, Integer> visits = statisticsService.visits(infraService.getId());
-        if (visits == null) {
-            richService.setViews(0);
-        } else {
-            List<Integer> visitsList = new ArrayList<>(visits.values());
-            int visitSum = 0;
-            for (int i : visitsList) {
-                visitSum += i;
+            // set rating of the service
+            Optional<List<Event>> ratings = Optional.ofNullable(serviceRatingEvents);
+            Map<String, Float> userRatings = new HashMap<>();
+            ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
+            float sum = 0;
+            for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
+                sum += entry.getValue();
             }
-            richService.setViews(visitSum);
+            if (!userRatings.isEmpty()) {
+                richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum / userRatings.size()))); //the rating of the specific service as x.xx (3.33)
+            } else {
+                richService.setHasRate(0);
+            }
+
+            // set visits
+            Map<String, Integer> visits = statisticsService.visits(infraService.getId());
+            if (visits == null) {
+                richService.setViews(0);
+            } else {
+                List<Integer> visitsList = new ArrayList<>(visits.values());
+                int visitSum = 0;
+                for (int i : visitsList) {
+                    visitSum += i;
+                }
+                richService.setViews(visitSum);
+            }
+            richServices.add(richService);
         }
-        return richService;
+        return richServices;
     }
 
     public String createServiceId(Service service) {
@@ -426,6 +506,18 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 .toLowerCase());
     }
 
+    private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
+        infraService.setTagline(TextUtils.prettifyText(infraService.getTagline(), specialCharacters));
+        infraService.setDescription(TextUtils.prettifyText(infraService.getDescription(), specialCharacters));
+        infraService.setUserBase(TextUtils.prettifyText(infraService.getUserBase(), specialCharacters));
+        infraService.setUserValue(TextUtils.prettifyText(infraService.getUserValue(), specialCharacters));
+        infraService.setTargetUsers(TextUtils.prettifyText(infraService.getTargetUsers(), specialCharacters));
+        infraService.setFunding(TextUtils.prettifyText(infraService.getFunding(), specialCharacters));
+        infraService.setChangeLog(TextUtils.prettifyText(infraService.getChangeLog(), specialCharacters));
+        infraService.setOptions(TextUtils.prettifyText(infraService.getOptions(), specialCharacters));
+        return infraService;
+    }
+
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
         Browsing<InfraService> services;
 
@@ -433,7 +525,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             services = getServicesWithCorrectFacets(ff);
         } else {
             // Return all services if user enters blank keyword on search
-            if (StringUtils.isBlank(ff.getKeyword())){
+            if (StringUtils.isBlank(ff.getKeyword())) {
                 ff.setKeyword("");
             }
             services = getResults(ff);
@@ -443,7 +535,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return services;
     }
 
-    private Browsing<InfraService> getServicesWithCorrectFacets (FacetFilter ff){
+    // Gets all Services abiding by the specific FacetFilter (filters & keywords)
+    private Browsing<InfraService> getServicesWithCorrectFacets(FacetFilter ff) {
         List<Facet> serviceFacets;
 
         FacetFilter ffWithoutFacetCategory = new FacetFilter(ff.getBrowseBy());
@@ -464,7 +557,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Browsing<InfraService> services = cqlQuery(ff);
         serviceFacets = services.getFacets();
 
-        for(Map.Entry<String, List<String>> filter : allFilters.entrySet()) {
+        for (Map.Entry<String, List<String>> filter : allFilters.entrySet()) {
             Map<String, List<String>> someFilters = new HashMap<>(allFilters);
 
             someFilters.remove(filter.getKey());
@@ -494,6 +587,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return cqlQuery(ff).getFacets();
     }
 
+    // Gets all given filters
     private Map<String, List<String>> getFacetFilterFilters(FacetFilter ff) {
         Map<String, Object> filters = ff.getFilter();
         Map<String, List<String>> allFilters = new HashMap<>();
@@ -516,6 +610,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return allFilters;
     }
 
+    // Creates a Query consisted of all given filters and keywords
     private String createQuery(Map<String, List<String>> filters, String keyword) {
         StringBuilder query = new StringBuilder();
 

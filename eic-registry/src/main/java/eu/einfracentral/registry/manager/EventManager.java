@@ -14,14 +14,13 @@ import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -55,6 +54,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @CacheEvict(value = "events", allEntries = true)
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
@@ -62,12 +62,14 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @CacheEvict(value = "events", allEntries = true)
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         return super.update(event, auth);
     }
 
     @Override
+    @CacheEvict(value = "events", allEntries = true)
     public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -91,6 +93,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @CacheEvict(value = "events", allEntries = true)
     public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -124,7 +127,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @Cacheable(value = "events")
     public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) {
+        if (authentication == null) {
+            return new ArrayList<>();
+        }
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
                         eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceType(),
@@ -133,6 +140,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @Cacheable(value = "events")
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
                 eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
@@ -140,7 +148,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
+    @Cacheable(value = "events")
     public List<Event> getUserEvents(String eventType, Authentication authentication) {
+        if (authentication == null) {
+            return new ArrayList<>();
+        }
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
                 eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
                 10000, 0, "creation_date", "DESC");

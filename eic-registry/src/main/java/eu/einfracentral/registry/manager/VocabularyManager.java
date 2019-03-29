@@ -3,8 +3,13 @@ package eu.einfracentral.registry.manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +30,36 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         super(Vocabulary.class);
         regions.put("EU", new Region("https://restcountries.eu/rest/v2/regionalbloc/EU?fields=alpha2Code"));
         regions.put("WW", new Region("https://restcountries.eu/rest/v2?fields=alpha2Code"));
+    }
+
+    @Override
+    @Cacheable(value = "vocabularies")
+    public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
+        return super.getAll(ff, auth);
+    }
+
+    @Override
+    @Cacheable(value = "vocabularies", key = "#id")
+    public Vocabulary get(String id) {
+        return super.get(id);
+    }
+
+    @Override
+    @CacheEvict(value = "vocabularies", allEntries = true)
+    public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
+        return super.add(vocabulary, auth);
+    }
+
+    @Override
+    @CacheEvict(value = "vocabularies", allEntries = true)
+    public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
+        return super.update(vocabulary, auth);
+    }
+
+    @Override
+    @CacheEvict(value = "vocabularies", allEntries = true)
+    public void delete(Vocabulary vocabulary) {
+        super.delete(vocabulary);
     }
 
     @Override

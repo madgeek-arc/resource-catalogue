@@ -59,13 +59,14 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     List<RichService> getByIds(U authentication, String... ids);
 
     /**
+     * Gets all Services with extra fields like views and ratings
      * @param ff
      * @return
      */
     Paging<RichService> getRichServices(FacetFilter ff, U auth);
 
     /**
-     *
+     * Gets the specific Service with extra fields like views and ratings
      * @param id
      * @param auth
      * @return
@@ -73,9 +74,17 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
     RichService getRichService(String id, String version, Authentication auth);
 
     /**
+     * Creates a RichService for the specific Service
      * @return
      */
     RichService createRichService(InfraService infraService, U auth);
+
+    /**
+     * Creates RichServices for a list of given Services
+     * @return
+     */
+    List<RichService> createRichServices(List<InfraService> infraServiceList, Authentication auth);
+
 
     /**
      * Check if the Service exists.

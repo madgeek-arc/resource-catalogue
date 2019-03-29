@@ -105,12 +105,6 @@
     },
     {
       "multivalued": false,
-      "name": "featured",
-      "path": "//*[local-name()='featured']/text()",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
       "name": "registeredBy",
       "path": "//*[local-name()='registeredBy']/text()",
       "type": "java.lang.String"
@@ -136,7 +130,6 @@
     {
       "multivalued": false,
       "name": "active",
-      "label": "Published",
       "defaultValue": false,
       "path": "//*[local-name()='active']/text()",
       "type": "java.lang.Boolean"

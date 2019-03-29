@@ -8,6 +8,7 @@ import eu.openminted.registry.core.domain.Resource;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Map;
 
 public interface InfraServiceService<T, R extends Service> extends ServiceInterface<T, R, Authentication> {
 
@@ -27,6 +28,23 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
      * @return
      */
     Paging<ServiceHistory> getHistory(String id);
+
+    /**
+     * Get the History of all versions of the InfraService with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Map<String, Service> getAllVersionsHistory(String id);
+
+    /**
+     * Get the History of a specific resource version of the InfraService with the specified id.
+     *
+     * @param serviceId
+     * @param versionId
+     * @return
+     */
+    Service getVersionHistory(String serviceId, String versionId);
 
     /**
      * Get inactive Services.
@@ -49,4 +67,11 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
      * @return
      */
     boolean validate(T service);
+
+    /**
+     * Create a list of random services.
+     *
+     * @return
+     */
+    public List<Service> createFeaturedServices();
 }

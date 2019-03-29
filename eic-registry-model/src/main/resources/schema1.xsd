@@ -3,37 +3,29 @@
 
   <xs:import schemaLocation="schema2.xsd"/>
 
-  <xs:element name="dimension" type="tns:dimension"/>
-
   <xs:element name="event" type="tns:event"/>
+
+  <xs:element name="funder" type="tns:funder"/>
 
   <xs:element name="indicator" type="tns:indicator"/>
 
   <xs:element name="infraService" type="tns:infraService"/>
 
-  <xs:element name="manager" type="tns:manager"/>
-
   <xs:element name="measurement" type="tns:measurement"/>
 
-  <xs:element name="membership" type="tns:membership"/>
-
   <xs:element name="provider" type="tns:provider"/>
+
+  <xs:element name="rangeValue" type="tns:rangeValue"/>
 
   <xs:element name="service" type="tns:service"/>
 
   <xs:element name="serviceMetadata" type="tns:serviceMetadata"/>
-
-  <xs:element name="unit" type="tns:unit"/>
 
   <xs:element name="user" type="tns:user"/>
 
   <xs:element name="vocabulary" type="tns:vocabulary"/>
 
   <xs:element name="vocabularyEntry" type="tns:vocabularyEntry"/>
-
-  <xs:complexType name="dimension">
-    <xs:sequence/>
-  </xs:complexType>
 
   <xs:complexType final="extension restriction" name="entryMapAdapter">
     <xs:complexContent>
@@ -77,17 +69,36 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="indicator">
+  <xs:complexType name="funder">
     <xs:sequence>
-      <xs:element name="description" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" name="dimensions" type="tns:dimension"/>
-      <xs:element name="id" type="xs:string"/>
-      <xs:element ref="tns:unit"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="logo" type="xs:anyURI"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="services">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="service" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="unit">
-    <xs:sequence/>
+  <xs:complexType name="indicator">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string"/>
+      <xs:element minOccurs="0" name="dimensions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="dimension" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="unit" type="xs:string"/>
+      <xs:element name="unitName" type="xs:string"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="infraService">
@@ -105,11 +116,6 @@
 
   <xs:complexType name="service">
     <xs:sequence>
-      <xs:element minOccurs="0" name="availability" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Availability, i.e., the fraction of a time period that an item is in a condition to perform its intended function upon demand (“available” indicates that an item is in this condition); availability is often expressed as a probability.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element name="category" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A named group of services that offer access to the same type of resource that is of interest to a customer/user.]]></xs:documentation>
@@ -208,11 +214,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="reliability" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Reliability, i.e., the probability that an item will function without failure under stated conditions for a speciﬁed amount of time. “Stated conditions” indicates perquisite conditions external to the item being considered. For example, a stated condition for a supercomputer might be that power and cooling must be available - thus a failure of the power or cooling systems would not be considered a failure of the supercomputer.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element minOccurs="0" name="requests" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[(Deprecated) Link to request the service from the service provider]]></xs:documentation>
@@ -228,11 +229,6 @@
       <xs:element name="serviceLevelAgreement" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="serviceability" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Serviceability, i.e., the probability that an item will be retained in, or restored to, a condition to per-form its intended function within a speciﬁed period of time Durability, i.e., the ability of a physical product to remain functional, without requiring excessive maintenance or repair, when faced with the challenges of normal operation over its design lifetime.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="subcategory" type="xs:string">
@@ -314,11 +310,8 @@
 
   <xs:complexType name="serviceMetadata">
     <xs:sequence>
-      <xs:element default="false" name="featured" type="xs:boolean"/>
       <xs:element default="null" minOccurs="0" name="modifiedAt" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="performanceData" type="tns:measurement"/>
-      <xs:element default="false" name="published" type="xs:boolean"/>
       <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
     </xs:sequence>
@@ -327,50 +320,26 @@
   <xs:complexType name="measurement">
     <xs:sequence>
       <xs:element name="id" type="xs:string"/>
-      <xs:element ref="tns:indicator"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="location" type="xs:string"/>
+      <xs:element name="indicatorId" type="xs:string"/>
+      <xs:element minOccurs="0" name="locations">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="location" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" ref="tns:rangeValue"/>
+      <xs:element name="serviceId" type="xs:string"/>
       <xs:element minOccurs="0" name="time" type="xs:anySimpleType"/>
-      <xs:element name="value" type="xs:anyType"/>
+      <xs:element minOccurs="0" name="value" type="xs:string"/>
+      <xs:element name="valueIsRange" type="xs:boolean"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="manager">
+  <xs:complexType name="rangeValue">
     <xs:sequence>
-      <xs:element name="contactInformation" type="xs:string"/>
-      <xs:element name="id" type="xs:string"/>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="services">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="service" type="tns:user"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="users">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:user"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="user">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="email" type="xs:string"/>
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="surname" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="membership">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="grant" type="xs:string"/>
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="provider" type="xs:string"/>
-      <xs:element minOccurs="0" name="user" type="xs:string"/>
+      <xs:element minOccurs="0" name="fromValue" type="xs:string"/>
+      <xs:element minOccurs="0" name="toValue" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -393,6 +362,15 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="website" type="xs:anyURI"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="user">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="email" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="surname" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -422,6 +400,7 @@
     <xs:complexContent>
       <xs:extension base="tns:serviceMetadata">
         <xs:sequence>
+          <xs:element minOccurs="0" name="coreVersionId" type="xs:string"/>
           <xs:element minOccurs="0" name="version" type="xs:string"/>
           <xs:element name="versionChange" type="xs:boolean"/>
         </xs:sequence>
