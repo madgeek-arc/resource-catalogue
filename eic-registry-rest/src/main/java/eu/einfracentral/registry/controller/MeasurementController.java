@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -82,6 +83,13 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         return super.update(measurement, auth);
+    }
+
+    @ApiOperation(value = "Updates existing Measurements of a specific Service, or/and adds new ones.")
+    @RequestMapping(path = "updateAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth)")
+    public List<Measurement> updateAll(@RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
+        return measurementManager.updateAll(allMeasurements, auth);
     }
 
     @ApiOperation(value = "Deletes the Measurement with the given id.")
