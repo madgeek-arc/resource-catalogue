@@ -12,9 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
@@ -52,14 +49,6 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     @Value("${jms.prefix}")
     private String jmsPrefix;
 
-    @Value("${redis.host}")
-    private String redisHost;
-
-    @Value("${redis.port}")
-    private String redisPort;
-
-    @Value("${redis.password:#{null}}")
-    private String password;
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
@@ -94,24 +83,6 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
         defaultCookieSerializer.setUseHttpOnlyCookie(true);
 //        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
         return defaultCookieSerializer;
-    }
-
-
-    @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
-        jedisConnectionFactory.setHostName(redisHost);
-        jedisConnectionFactory.setPort(Integer.parseInt(redisPort));
-        if (password != null) jedisConnectionFactory.setPassword(password);
-        return jedisConnectionFactory;
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        final RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
-        template.setValueSerializer(new GenericToStringSerializer<>(Object.class));
-        return template;
     }
 
     @Bean
