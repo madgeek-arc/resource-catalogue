@@ -62,6 +62,30 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         return measurement;
     }
 
+
+    public List<Measurement> updateAll(List<Measurement> allMeasurements, Authentication auth){
+        List<Measurement> updatedMeasurements = new ArrayList<>();
+        String serviceId = allMeasurements.get(0).getServiceId();
+        List<Measurement> existingMeasurements = getAll(serviceId, auth).getResults();
+        for (Measurement existingMeasurement : existingMeasurements){
+            for (int i=0; i<allMeasurements.size(); i++){
+                if (existingMeasurement.getId().equals(allMeasurements.get(i).getId())){
+                    update(allMeasurements.get(i), auth);
+                    updatedMeasurements.add(allMeasurements.get(i));
+                    allMeasurements.remove(allMeasurements.get(i));
+                    break;
+                }
+            }
+        }
+        for (Measurement measurement : allMeasurements){
+            add(measurement, auth);
+            updatedMeasurements.add(measurement);
+        }
+
+        return updatedMeasurements;
+    }
+
+
     @Override
     public Paging<Measurement> getAll(String serviceId, Authentication authentication) {
         Paging<Resource> measurementResources = searchService.cqlQuery(String.format("service=\"%s\"", serviceId), getResourceType(),
