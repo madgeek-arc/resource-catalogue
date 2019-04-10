@@ -352,8 +352,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
-        Browsing<InfraService> infraServices = getAll(ff, null);
-        List<RichService> richServiceList = createRichServices(infraServices.getResults(), null);
+        Browsing<InfraService> infraServices = getAll(ff, auth);
+        List<RichService> richServiceList = createRichServices(infraServices.getResults(), auth);
         return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(),
                 richServiceList, infraServices.getFacets());
     }
