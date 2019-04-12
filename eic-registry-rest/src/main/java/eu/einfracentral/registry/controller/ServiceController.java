@@ -4,9 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ServiceInterface;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -182,9 +180,14 @@ public class ServiceController {
     @RequestMapping(path = {"allVersionHistory/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, Service>> getAllVersionsHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
         Map<String, Service> allVersionHistory = infraService.getAllVersionsHistory(id);
-        return ResponseEntity.ok(allVersionHistory);
+        Map<String, Service> versions = new TreeMap<>();
+        for (Map.Entry<String, Service> version : allVersionHistory.entrySet()) {
+            versions.put(version.getKey(), new Service(version.getValue()));
+        }
+        return ResponseEntity.ok(versions);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get all modifications of a specific Service, providing the Service id and the resource Version id.")
     @RequestMapping(path = {"VersionHistory/{serviceId}/{versionId}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getVersionHistory(@PathVariable String serviceId, @PathVariable String versionId, @ApiIgnore Authentication auth) {
