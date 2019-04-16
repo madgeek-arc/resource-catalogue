@@ -334,15 +334,20 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             Map<String, VocabularyEntry> places = vocabularyManager.get("places").getEntries();
             List<String> servicePlaces = service.getPlaces();
             List<String> notFoundPlaces = new ArrayList<>();
+            List<String> foundPlaces = new ArrayList<>();
             for (String place : servicePlaces) {
                 VocabularyEntry placeFound = places.get(place);
                 if (placeFound == null) {
                     notFoundPlaces.add(place);
                 }
+                if (places.containsKey(place) && !foundPlaces.contains(place)){
+                    foundPlaces.add(place);
+                }
             }
             if (!notFoundPlaces.isEmpty()) {
                 throw new ValidationException(String.format("Places not found: %s", String.join(", ", notFoundPlaces)));
             }
+            service.setPlaces(foundPlaces);
         } else throw new ValidationException("Field 'places' is mandatory.");
 
         //Validate Languages
@@ -350,15 +355,20 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             Map<String, VocabularyEntry> languages = vocabularyManager.get("languages").getEntries();
             List<String> serviceLanguages = service.getLanguages();
             List<String> notFoundLanguages = new ArrayList<>();
+            List<String> foundLanguages = new ArrayList<>();
             for (String language : serviceLanguages) {
                 VocabularyEntry languageFound = languages.get(language);
                 if (languageFound == null) {
                     notFoundLanguages.add(language);
                 }
+                if (languages.containsKey(language) && !foundLanguages.contains(language)){
+                    foundLanguages.add(language);
+                }
             }
             if (!notFoundLanguages.isEmpty()) {
                 throw new ValidationException(String.format("Languages not found: %s", String.join(", ", notFoundLanguages)));
             }
+            service.setLanguages(foundLanguages);
         } else throw new ValidationException("Field 'languages' is mandatory.");
 
         //Validate LifeCycleStatus
@@ -396,7 +406,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         List<String> existingRelatedServices = new ArrayList<>();
         if (relatedServices != null) {
             for (String serviceRel : relatedServices) {
-                if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel))) {
+                if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel)) && !existingRelatedServices.contains(serviceRel)) {
                     existingRelatedServices.add(serviceRel);
                 }
             }
@@ -407,9 +417,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         List<String> existingRequiredServices = new ArrayList<>();
         if (requiredServices != null) {
             for (String serviceReq : requiredServices) {
-                if (this.exists(
-
-                        new SearchService.KeyValue("infra_service_id", serviceReq))) {
+                if (this.exists(new SearchService.KeyValue("infra_service_id", serviceReq)) && !existingRequiredServices.contains(serviceReq)) {
                     existingRequiredServices.add(serviceReq);
                 }
             }
