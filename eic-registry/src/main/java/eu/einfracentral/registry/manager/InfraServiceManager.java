@@ -391,6 +391,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     //validates the correctness of Providers.
     private void validateProviders(InfraService service) {
         List<String> providers = service.getProviders();
+        List<String> validProviders = new ArrayList<>();
         if ((providers == null) || CollectionUtils.isEmpty(service.getProviders()) ||
                 (service.getProviders().stream().filter(Objects::nonNull).mapToInt(p -> 1).sum() == 0)) {
             throw new ValidationException("field 'providers' is obligatory");
@@ -398,6 +399,12 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         if (service.getProviders().stream().filter(Objects::nonNull).anyMatch(x -> providerManager.getResource(x) == null)) {
             throw new ValidationException("Provider does not exist");
         }
+        for (String provider: providers){
+            if (!validProviders.contains(provider)){
+                validProviders.add(provider);
+            }
+        }
+        service.setProviders(validProviders);
     }
 
     //validates the correctness of Related and Required Services.
