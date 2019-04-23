@@ -67,10 +67,10 @@ public class SecurityService {
                 .anyMatch(u -> {
                     if (u.getId() != null) {
                         if (u.getEmail() != null) {
-                            return u.getId().equals(new User(auth).getId())
-                                    || u.getEmail().equals(new User(auth).getEmail());
+                            return u.getId().equals(user.getId())
+                                    || u.getEmail().equals(user.getEmail());
                         }
-                        return u.getId().equals(new User(auth).getId());
+                        return u.getId().equals(user.getId());
                     }
                     return u.getEmail().equals(user.getEmail());
                 });

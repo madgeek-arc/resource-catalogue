@@ -24,6 +24,7 @@ import org.springframework.util.MultiValueMap;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -186,16 +187,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (resources != null) {
             for (Resource resource : resources) {
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
-//                if (versions.isEmpty()) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
-//                    InfraService service = deserialize(resource);
-//                    if (service != null) {
-//                        try {
-//                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
-//                        } catch (NullPointerException e) {
-//                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
-//                        }
-//                    }
-//                } else {
                     for (Version version : versions) {
                         Resource tempResource = version.getResource();
                         tempResource.setPayload(version.getPayload());
@@ -207,7 +198,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                                 logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                             }
                         }
-//                    }
                     history.get(history.size() - 1).setVersionChange(true);
                 }
             }
@@ -219,12 +209,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
             return -1;
         });
+
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
+    //FIXME: Fix the 3 versions created when submitting a ST and when accepting it.
     @Override
     public Map<String, Service> getAllVersionsHistory(String serviceId) {
-        Map<String, Service> history = new LinkedHashMap<>();
+        Map<String, Service> history = new TreeMap<>();
 
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(serviceId);
@@ -233,19 +225,15 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (resources != null) {
             for (Resource resource : resources) {
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
-                versions.sort((version, t1) -> {
-                    if ((version.getCreationDate().getTime()) < (t1.getCreationDate().getTime())) {
-                        return 1;
-                    }
-                    return -1;
-                });
                 for (Version version : versions) {
                     Resource tempResource = version.getResource();
                     tempResource.setPayload(version.getPayload());
-                    Service service = deserialize(tempResource);
+                    InfraService service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            history.put(version.getId(), service);
+                            SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+                            Date date = new Date(Long.parseLong(service.getServiceMetadata().getModifiedAt()));
+                            history.put(sf.format(date), service);
                         } catch (NullPointerException e) {
                             logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                         }
@@ -282,7 +270,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             throw new ValidationException("Service with id '" +serviceId+ "' does not exist.");
         }
     }
-
 
     public String serialize(InfraService infraService) {
         String serialized;
