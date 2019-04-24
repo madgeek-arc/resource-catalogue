@@ -81,6 +81,11 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             add(measurement, auth);
             updatedMeasurements.add(measurement);
         }
+        for (Measurement existingMeasurement : existingMeasurements){
+            if (!updatedMeasurements.contains(existingMeasurement)){
+                delete(existingMeasurement);
+            }
+        }
 
         return updatedMeasurements;
     }
