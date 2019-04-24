@@ -38,11 +38,15 @@ public class StatisticsController {
         return externals(id, auth);
     }
 
+    @Deprecated
+    @ApiIgnore
     @RequestMapping(path = "service/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> externals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(statisticsService.externals(id), HttpStatus.OK);
     }
 
+    @Deprecated
+    @ApiIgnore
     @RequestMapping(path = "service/internals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> internals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(statisticsService.internals(id), HttpStatus.OK);
@@ -66,6 +70,8 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.pVisits(id), HttpStatus.OK);
     }
 
+    @Deprecated
+    @ApiIgnore
     @RequestMapping(path = "provider/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pExternals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(statisticsService.pExternals(id), HttpStatus.OK);
@@ -77,6 +83,8 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.pExternals(id), HttpStatus.OK);
     }
 
+    @Deprecated
+    @ApiIgnore
     @RequestMapping(path = "provider/internals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pInternals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(statisticsService.pInternals(id), HttpStatus.OK);
