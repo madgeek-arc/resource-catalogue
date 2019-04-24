@@ -25,18 +25,21 @@ import java.util.stream.StreamSupport;
 public class AnalyticsService {
 
     private static final Logger logger = LogManager.getLogger(AnalyticsService.class);
-    private static final String base = "http://%s:8084/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=1&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
+    private static final String base = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
     private String visits;
 
-    @Value("${matomoToken:e235d94544916c326e80b713dd233cd1}")
+    @Value("${matomoHost:localhost}")
+    String matomoHost;
+
+    @Value("${matomoToken:}")
     String matomoToken;
 
-    @Value("${fqdn:beta.einfracentral.eu}")
-    String fqdn;
+    @Value("${matomoSiteId:1}")
+    String matomoSiteId;
 
     @PostConstruct
     void postConstruct() {
-        visits = String.format(base, fqdn, matomoToken, "%s", "%s");
+        visits = String.format(base, matomoHost, matomoToken, matomoSiteId, "%s", "%s", "%s");
     }
 
     public Map<String, Integer> getVisitsForLabel(String label) {

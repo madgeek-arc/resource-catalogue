@@ -67,6 +67,11 @@ jms.prefix=<local>
 webapp.home=http://localhost:8080/eic-registry/openid_connect_login
 webapp.front=http://localhost:3000
 
+## AAI Properties ##
+oidc.issuer=
+oidc.secret=
+oidc.id=
+
 
 #########################
 ## Optional Properties ##
@@ -75,11 +80,6 @@ webapp.front=http://localhost:3000
 ## eic Properties ##
 eic.admins=test@email.com, test2@email.com
 einfracentral.debug=false
-
-## AAI Properties ##
-oidc.issuer=
-oidc.secret=
-oidc.id=
 
 ## Mail Properties ##
 mail.smtp.auth=
@@ -93,6 +93,7 @@ mail.smtp.ssl.enable=
 ## Matomo Properties ##
 matomoHost=
 matomoToken=
+matomoSiteId=
 ```
 
 - - -
