@@ -20,12 +20,14 @@
 #### Build
 `mvn clean package`
 
-#### PostgreSQL - Create DB ___registry___
+#### PostgreSQL - Create DB
 ```sql
 CREATE USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
 
-CREATE DATABASE registry WITH OWNER <user>;
+CREATE DATABASE db WITH OWNER <user>;
 ```
+1. Log in to the created db using: `sudo -u postgres psql  db`
+2. Execute the following command: `CREATE EXTENSION tablefunc;`
 
 #### Deploy
 1. Ensure that PostgreSQL, ActiveMQ and Elasticsearch are up and running.
@@ -48,18 +50,18 @@ registry.host=http://${fqdn}:8080/eic-registry/
 
 
 ## DB Properties ##
-jdbc.url=jdbc:postgresql://${fqdn}:5432/registry
-jdbc.username=
-jdbc.password=
+jdbc.url=jdbc:postgresql://${fqdn}:5432/db
+jdbc.username=<user>
+jdbc.password=<your-password>
 
 ## Elastisearch Properties ##
 elasticsearch.url=${fqdn}
 elasticsearch.port=9300
-elasticsearch.cluster={{clusterName}}
+elasticsearch.cluster=<clusterName>
 
 ## JMS Properties ##
 jms.host=tcp://${fqdn}:61616
-jms.prefix={{e.g. registry}}
+jms.prefix=<local>
 
 ## eic Properties ##
 webapp.home=http://localhost:8080/eic-registry/openid_connect_login
@@ -89,6 +91,7 @@ mail.smtp.protocol=
 mail.smtp.ssl.enable=
 
 ## Matomo Properties ##
+matomoHost=
 matomoToken=
 ```
 
