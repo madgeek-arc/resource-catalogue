@@ -257,10 +257,13 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> pVisits(String id) {
-        return providerService.getServices(id)
+        Map<String, Integer> results = providerService.getServices(id)
                 .stream()
                 .flatMap(s -> visits(s.getId()).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+
+        Map<String, Integer> sortedResults = new TreeMap<>(results);
+        return sortedResults;
     }
 
     @Override
