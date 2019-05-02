@@ -36,6 +36,15 @@ CREATE DATABASE db WITH OWNER <user>;
 
 3. Deploy the webapp on Tomcat.
 
+4. *Before you begin using it for the __first time__, you must [add the resourceTypes](#Add-resourceTypes).*
+
+- - -
+
+###### Add resourceTypes (only the first time you deploy the project)
+1. Navigate to eic/eic-registry/src/main/resources/resourceTypes
+
+2. Execute `bash loadResourceTypes.sh localhost` (replace localhost with your host)
+
 - - -
 
 
