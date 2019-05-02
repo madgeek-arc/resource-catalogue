@@ -15,7 +15,10 @@ public class TextUtils {
      * @return
      */
     public static String trimWhitespace(String text) {
-        return text.replaceAll("\\s+", " ");
+        if (text != null) {
+            return text.replaceAll("\\s+", " ");
+        }
+        return null;
     }
 
     /**
@@ -25,11 +28,13 @@ public class TextUtils {
      * @return
      */
     public static String prettifyText(String text, String characters) {
-        text = trimWhitespace(text);
-        for (char c : characters.toCharArray()) {
-            text = text.replaceAll("(\\s)?"+String.format("\\%s", c)+"(\\s)?", c+" ");
+        if (text != null) {
+            text = trimWhitespace(text);
+            for (char c : characters.toCharArray()) {
+                text = text.replaceAll("(\\s)?"+String.format("\\%s", c)+"(\\s)?", c+" ");
+            }
+            text = text.replaceAll("(\\s)$", "");
         }
-        text = text.replaceAll("(\\s)$", "");
         return text;
     }
 
