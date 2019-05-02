@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -44,13 +45,15 @@ public class AnalyticsService {
 
     public Map<String, Integer> getVisitsForLabel(String label) {
         try {
-            return StreamSupport.stream(
+            Map<String, Integer> results = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label).fields(), Spliterator.NONNULL), false).collect(
                     Collectors.toMap(
                             Map.Entry::getKey,
                             dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
                     )
             );
+            Map<String, Integer> sortedResults = new TreeMap<>(results);
+            return sortedResults;
         } catch (Exception e){
             logger.error("Cannot find visits for the specific Service.", e);
         }
