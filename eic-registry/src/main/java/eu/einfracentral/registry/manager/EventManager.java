@@ -79,8 +79,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         Event event;
         if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
             event = events.get(0);
-            event.setValue(favouriteValue);
-            event = update(event, null);
+            delete(event);
         } else {
             event = new Event();
             event.setService(serviceId);
