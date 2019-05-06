@@ -84,6 +84,10 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
+                .authorizeRequests()
+                .regexMatchers("/restore/", "/resource.*", "/resourceType.*")
+                .hasAnyRole("ADMIN")
+                .and()
                 .logout()
                 .deleteCookies("SESSION")
                 .invalidateHttpSession(true)
@@ -91,10 +95,6 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessUrl(webappFrontUrl)
                 .and()
                 .exceptionHandling()
-                .and()
-                .authorizeRequests()
-                .anyRequest()
-                .permitAll()
                 .and()
                 .csrf()
                 .disable()
@@ -110,8 +110,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource()
-    {
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("*")); // TODO: set origins
         configuration.setAllowedMethods(Arrays.asList("*")); // TODO: set methods
