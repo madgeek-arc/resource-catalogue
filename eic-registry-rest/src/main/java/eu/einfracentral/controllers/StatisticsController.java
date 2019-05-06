@@ -32,6 +32,7 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.visits(id), HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Returns the time series of service page visits in the provider's site.")
     @RequestMapping(path = "service/orders/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> externalsAlias(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
@@ -54,14 +55,14 @@ public class StatisticsController {
 
     @ApiOperation(value = "Get favourites per day for a service.")
     @RequestMapping(path = "service/favourites/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> favourites(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.favourites(id), HttpStatus.OK);
+    public ResponseEntity<Map<String, Integer>> favourites(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.favourites(id, by), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get average ratings per day for a service.")
     @RequestMapping(path = "service/ratings/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Float>> ratings(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.ratings(id), HttpStatus.OK);
+    public ResponseEntity<Map<String, Float>> ratings(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.ratings(id, by), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get aggregate visits per day for all services offered by a provider.")
@@ -77,6 +78,7 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.pExternals(id), HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Returns the time series of service page visits in the provider's site for all of the provider's services.")
     @RequestMapping(path = "provider/orders/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pExternalsAlias(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
@@ -92,14 +94,14 @@ public class StatisticsController {
 
     @ApiOperation(value = "Get aggregate 'favourites per day' for all services offered by a provider.")
     @RequestMapping(path = "provider/favourites/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> pFavourites(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.pFavourites(id), HttpStatus.OK);
+    public ResponseEntity<Map<String, Integer>> pFavourites(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.pFavourites(id, by), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get average ratings per day for all services offered by a provider.")
     @RequestMapping(path = "provider/ratings/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Float>> pRatings(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.pRatings(id), HttpStatus.OK);
+    public ResponseEntity<Map<String, Float>> pRatings(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.pRatings(id, by), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get percentage of visits for all services offered by a provider.")

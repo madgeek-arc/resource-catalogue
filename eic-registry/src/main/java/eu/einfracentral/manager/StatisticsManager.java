@@ -67,176 +67,66 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Float> ratings(String id) {
-        List<InternalDateHistogram.Bucket> buckets = ((InternalDateHistogram) (elastic
+    public Map<String, Float> ratings(String id, Interval by) {
+
+        String dateFormat;
+        String aggregationName;
+        DateHistogramInterval dateHistogramInterval;
+
+        switch (StatisticsService.Interval.fromString(by.getKey())) {
+            case DAY:
+                dateFormat = "yyyy-MM-dd";
+                aggregationName = "day";
+                dateHistogramInterval = DateHistogramInterval.DAY;
+                break;
+            case WEEK:
+                dateFormat = "yyyy-MM-dd";
+                aggregationName = "week";
+                dateHistogramInterval = DateHistogramInterval.WEEK;
+                break;
+            case YEAR:
+                dateFormat = "yyyy";
+                aggregationName = "year";
+                dateHistogramInterval = DateHistogramInterval.YEAR;
+                break;
+            default:
+                dateFormat = "yyyy-MM";
+                aggregationName = "month";
+                dateHistogramInterval = DateHistogramInterval.MONTH;
+        }
+
+        List<InternalDateHistogram.Bucket> bucketsDay = ((InternalDateHistogram) (elastic
                 .client()
                 .prepareSearch("event")
                 .setTypes("general")
                 .setQuery(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()))
-                .addAggregation(AggregationBuilders.dateHistogram("months")
+                .addAggregation(AggregationBuilders.dateHistogram(aggregationName)
                         .field("instant")
-                        .dateHistogramInterval(DateHistogramInterval.DAY)
-                        .format("yyyy-MM-dd")
+                        .dateHistogramInterval(dateHistogramInterval)
+                        .format(dateFormat)
                         .subAggregation(AggregationBuilders.sum("rating").field("value"))
+                        .subAggregation(AggregationBuilders.count("rating_count").field("value"))
                         .subAggregation(PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating"))
+                        .subAggregation(PipelineAggregatorBuilders.cumulativeSum("ratings_num", "rating_count"))
                 ).execute()
                 .actionGet()
                 .getAggregations()
-                .get("months")))
+                .get(aggregationName)))
                 .getBuckets();
-        long totalDocCount = buckets.stream().mapToLong(MultiBucketsAggregation.Bucket::getDocCount).sum();
-        return buckets.stream().collect(Collectors.toMap(
+
+        Map<String, Float> bucketMap = bucketsDay.stream().collect(Collectors.toMap(
                 MultiBucketsAggregation.Bucket::getKeyAsString,
-                e -> Float.parseFloat(((SimpleValue) e.getAggregations().get("cum_sum")).getValueAsString()) / totalDocCount
+                e -> Float.parseFloat(((SimpleValue) e.getAggregations().get("cum_sum")).getValueAsString()) / Float.parseFloat(((SimpleValue) e.getAggregations().get("ratings_num")).getValueAsString())
         ));
-    }
 
-    private InternalDateHistogram histogram(String id, String eventType) {
-        SearchRequestBuilder searchRequestBuilder = elastic
-                .client()
-                .prepareSearch("event")
-                .setTypes("general")
-                .setQuery(getEventQueryBuilder(id, eventType))
-                .addAggregation(AggregationBuilders
-                        .dateHistogram("months")
-                        .field("instant")
-                        .dateHistogramInterval(DateHistogramInterval.DAY)
-                        .format("yyyy-MM-dd")
-                        .subAggregation(AggregationBuilders.terms("value").field("value"))
-                );
-        searchRequestBuilder.setExplain(true);
-        logger.debug(searchRequestBuilder.toString());
-
-        return searchRequestBuilder.execute()
-                .actionGet()
-                .getAggregations()
-                .get("months");
-    }
-
-    private QueryBuilder getEventQueryBuilder(String serviceId, String eventType) {
-        Date date = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(date);
-        c.roll(Calendar.MONTH, false);
-        return QueryBuilders.boolQuery()
-                .filter(QueryBuilders.termsQuery("service", serviceId))
-                .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(new Date().getTime()))
-                .filter(QueryBuilders.termsQuery("type", eventType));
+        return new TreeMap<>(bucketMap);
     }
 
     @Override
-    public Map<String, Integer> externals(String id) {
-        return counts(id, Event.UserActionType.EXTERNAL.getKey());
-    }
-
-    private Map<String, Integer> counts(String id, String eventType) {
-        return histogram(id, eventType).getBuckets().stream().collect(
-                Collectors.toMap(MultiBucketsAggregation.Bucket::getKeyAsString, e -> (int) e.getDocCount())
-        );
-    }
-
-    @Override
-    public Map<String, Integer> internals(String id) {
-        return counts(id, Event.UserActionType.INTERNAL.getKey());
-    }
-
-    @Override
-    public Map<String, Integer> pFavourites(String id) {
-        return providerService.getServices(id)
-                .stream()
-                .flatMap(s -> favourites(s.getId()).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
-    }
-
-    @Scheduled(cron = "0 0/5 * * * ?") // every five minutes
-    @CacheEvict(value = "visits")
-    public void updateVisitsCache() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
-        Browsing<InfraService> services = infraServiceService.getAll(ff, null);
-        services.getResults().forEach(s -> visits(s.getId()));
-    }
-
-    @Override
-    @Cacheable(value = "visits", key = "#id")
-    public Map<String, Integer> visits(String id) {
-        try {
-            return analyticsService.getVisitsForLabel("/service/" + id);
-        } catch (Exception e) {
-            logger.error("Could not find Matomo analytics", e);
-        }
-        return new HashMap<>();
-    }
-
-    @Override
-    public Map<String, Float> pRatings(String id) {
-        return providerService.getServices(id)
-                .stream()
-                .flatMap(s -> ratings(s.getId()).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, v -> (float) v.getValue().doubleValue()));
-        //The above 4 lines should be just
-        //.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingFloat(Map.Entry::getValue)));
-        //but Collectors don't offer a summingFloat for some reason
-        //if they ever offer that, you know what to do
-    }
-
-    @Override
-    public Map<String, Integer> pExternals(String id) {
-        return providerService.getServices(id)
-                .stream()
-                .flatMap(s -> externals(s.getId()).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
-    }
-
-    @Override
-    public Map<String, Integer> pInternals(String id) {
-        return providerService.getServices(id)
-                .stream()
-                .flatMap(s -> internals(s.getId()).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
-    }
-
-    /*@Override
-    public Map<String, Integer> favourites(String id) {
-        InternalDateHistogram histogram = elastic
-                .client()
-                .prepareSearch("event")
-                .setTypes("general")
-                .setQuery(getEventQueryBuilder(id, Event.UserActionType.FAVOURITE.getKey()))
-                .addAggregation(AggregationBuilders
-                        .dateHistogram("months")
-                        .field("instant")
-                        .dateHistogramInterval(DateHistogramInterval.DAY)
-                        .format("yyyy-MM-dd")
-                        .subAggregation(AggregationBuilders.filter("values", QueryBuilders.termQuery("value", "1")))
-                ).execute()
-                .actionGet()
-                .getAggregations()
-                .get("months");
-
-        List<InternalDateHistogram.Bucket> buckets = histogram.getBuckets();
-
-        return buckets.stream().collect(
-                Collectors.toMap(
-                        MultiBucketsAggregation.Bucket::getKeyAsString,
-                        bucket -> {
-                            Filter subTerm = bucket.getAggregations().get("values");
-                            return (int) subTerm.getDocCount();
-                        }
-                )
-        );
-    }*/
-
-    @Override
-    public Map<String, Integer> favourites(String id) {
+    public Map<String, Integer> favourites(String id, Interval by) {
         final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
-        List<InternalDateHistogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey()).getBuckets();
-        return buckets.stream().collect(
+        List<InternalDateHistogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey(), by).getBuckets();
+        return new TreeMap<>(buckets.stream().collect(
                 Collectors.toMap(
                         MultiBucketsAggregation.Bucket::getKeyAsString,
                         bucket -> {
@@ -249,10 +139,109 @@ public class StatisticsManager implements StatisticsService {
                                         subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
                                 ).sum();
                             }
+//                            logger.warn(String.format("Favs: %s - Unfavs: %s", totalDocCounts[1], totalDocCounts[0]));
                             return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
                         }
                 )
-        );
+        ));
+    }
+
+    private InternalDateHistogram histogram(String id, String eventType, Interval by) {
+
+        String dateFormat;
+        String aggregationName;
+        DateHistogramInterval dateHistogramInterval;
+
+        switch (StatisticsService.Interval.fromString(by.getKey())) {
+            case DAY:
+                dateFormat = "yyyy-MM-dd";
+                aggregationName = "day";
+                dateHistogramInterval = DateHistogramInterval.DAY;
+                break;
+            case WEEK:
+                dateFormat = "yyyy-MM-dd";
+                aggregationName = "week";
+                dateHistogramInterval = DateHistogramInterval.WEEK;
+                break;
+            case YEAR:
+                dateFormat = "yyyy";
+                aggregationName = "year";
+                dateHistogramInterval = DateHistogramInterval.YEAR;
+                break;
+            default:
+                dateFormat = "yyyy-MM";
+                aggregationName = "month";
+                dateHistogramInterval = DateHistogramInterval.MONTH;
+        }
+
+        SearchRequestBuilder searchRequestBuilder = elastic
+                .client()
+                .prepareSearch("event")
+                .setTypes("general")
+                .setQuery(getEventQueryBuilder(id, eventType))
+                .addAggregation(AggregationBuilders
+                        .dateHistogram(aggregationName)
+                        .field("instant")
+                        .dateHistogramInterval(dateHistogramInterval)
+                        .format(dateFormat)
+                        .subAggregation(AggregationBuilders.terms("value").field("value"))
+                );
+        searchRequestBuilder.setExplain(true);
+        logger.debug(searchRequestBuilder.toString());
+
+        return searchRequestBuilder.execute()
+                .actionGet()
+                .getAggregations()
+                .get(aggregationName);
+    }
+
+    private QueryBuilder getEventQueryBuilder(String serviceId, String eventType) {
+        Date date = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.roll(Calendar.ERA, false);
+        return QueryBuilders.boolQuery()
+                .filter(QueryBuilders.termsQuery("service", serviceId))
+                .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(new Date().getTime()))
+                .filter(QueryBuilders.termsQuery("type", eventType));
+    }
+
+    @Override
+    public Map<String, Float> pRatings(String id, Interval by) {
+        Map<String, Float> providerRatings = providerService.getServices(id)
+                .stream()
+                .flatMap(s -> ratings(s.getId(), by).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> (float) v.getValue().doubleValue()));
+        //The above 4 lines should be just
+        //.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingFloat(Map.Entry::getValue)));
+        //but Collectors don't offer a summingFloat for some reason
+        //if they ever offer that, you know what to do
+
+        return new TreeMap<>(providerRatings);
+    }
+
+    @Override
+    public Map<String, Integer> pFavourites(String id, Interval by) {
+        Map<String, Integer> providerFavorites = providerService.getServices(id)
+                .stream()
+                .flatMap(s -> favourites(s.getId(), by).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+
+        return new TreeMap<>(providerFavorites);
+    }
+
+    @Override
+    @Cacheable(value = "visits", key = "#id")
+    public Map<String, Integer> visits(String id) {
+        try {
+            return analyticsService.getVisitsForLabel("/service/" + id);
+        } catch (Exception e) {
+            logger.error("Could not find Matomo analytics", e);
+        }
+        return new HashMap<>();
     }
 
     @Override
@@ -274,6 +263,17 @@ public class StatisticsManager implements StatisticsService {
         ));
         int grandTotal = counts.values().stream().mapToInt(Integer::intValue).sum();
         return counts.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> ((float) v.getValue()) / grandTotal));
+    }
+
+    @Scheduled(cron = "0 0/5 * * * ?") // every five minutes
+    @CacheEvict(value = "visits")
+    public void updateVisitsCache() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
+        Browsing<InfraService> services = infraServiceService.getAll(ff, null);
+        services.getResults().forEach(s -> visits(s.getId()));
     }
 
     public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by) {
@@ -353,4 +353,37 @@ public class StatisticsManager implements StatisticsService {
         }
         return duration;
     }
+
+    @Override
+    public Map<String, Integer> externals(String id) {
+        return counts(id, Event.UserActionType.EXTERNAL.getKey());
+    }
+
+    @Override
+    public Map<String, Integer> internals(String id) {
+        return counts(id, Event.UserActionType.INTERNAL.getKey());
+    }
+
+    @Override
+    public Map<String, Integer> pExternals(String id) {
+        return providerService.getServices(id)
+                .stream()
+                .flatMap(s -> externals(s.getId()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+    }
+
+    @Override
+    public Map<String, Integer> pInternals(String id) {
+        return providerService.getServices(id)
+                .stream()
+                .flatMap(s -> internals(s.getId()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+    }
+
+    private Map<String, Integer> counts(String id, String eventType) {
+        return histogram(id, eventType, Interval.DAY).getBuckets().stream().collect(
+                Collectors.toMap(MultiBucketsAggregation.Bucket::getKeyAsString, e -> (int) e.getDocCount())
+        );
+    }
+
 }
