@@ -190,19 +190,19 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (resources != null) {
             for (Resource resource : resources) {
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
-                    for (Version version : versions) {
-                        Resource tempResource = version.getResource();
-                        tempResource.setPayload(version.getPayload());
-                        InfraService service = deserialize(tempResource);
-                        if (service != null) {
-                            try {
-                                history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion(), version.getId()));
-                            } catch (NullPointerException e) {
-                                logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
-                            }
+                for (Version version : versions) {
+                    Resource tempResource = version.getResource();
+                    tempResource.setPayload(version.getPayload());
+                    InfraService service = deserialize(tempResource);
+                    if (service != null) {
+                        try {
+                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion(), version.getId()));
+                        } catch (NullPointerException e) {
+                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                         }
-                    history.get(history.size() - 1).setVersionChange(true);
+                    }
                 }
+                history.get(history.size() - 1).setVersionChange(true);
             }
         }
 
