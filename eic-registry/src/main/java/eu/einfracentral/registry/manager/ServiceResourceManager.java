@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -87,6 +88,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    @CacheEvict(cacheNames = {"visits", "providers", "featuredServices"}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         if (infraService.getId() == null) {
             infraService.setId(createServiceId(infraService));
@@ -108,6 +110,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    @CacheEvict(cacheNames = {"visits", "providers", "featuredServices"}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
