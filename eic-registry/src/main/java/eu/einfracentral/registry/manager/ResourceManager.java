@@ -80,12 +80,10 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T update(T t, Authentication auth) {
         Resource existing = whereID(t.getId(), true);
-        T ex = deserialize(existing);
-        ObjectUtils.merge(ex, t);
-        existing.setPayload(serialize(ex));
+        existing.setPayload(serialize(t));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        return ex;
+        return t;
     }
 
     @Override
