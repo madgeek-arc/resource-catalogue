@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -70,21 +71,37 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         for (Measurement existingMeasurement : existingMeasurements){
             for (int i=0; i<allMeasurements.size(); i++){
                 if (existingMeasurement.getId().equals(allMeasurements.get(i).getId())){
-                    update(allMeasurements.get(i), auth);
+                    String existingObject = new Gson().toJson(existingMeasurement);
+                    String newObject = new Gson().toJson(allMeasurements.get(i));
+
+                    //if not identical, update
+                    if(!existingObject.equals(newObject)){
+                        update(allMeasurements.get(i), auth);
+                    }
                     updatedMeasurements.add(allMeasurements.get(i));
                     allMeasurements.remove(allMeasurements.get(i));
                     break;
                 }
             }
         }
+
+        //if there are new Measurements, add them
         for (Measurement measurement : allMeasurements){
             add(measurement, auth);
             updatedMeasurements.add(measurement);
         }
-        for (Measurement existingMeasurement : existingMeasurements){
-            if (!updatedMeasurements.contains(existingMeasurement)){
-                delete(existingMeasurement);
+
+        //Measurement's not given will be deleted
+        for (Measurement updatedMeasurement : updatedMeasurements){
+            for (Measurement existingMeasurement : existingMeasurements){
+                if (existingMeasurement.getId().equals(updatedMeasurement.getId())){
+                    existingMeasurements.remove(existingMeasurement);
+                    break;
+                }
             }
+        }
+        for (Measurement existing : existingMeasurements){
+            delete(existing);
         }
 
         return updatedMeasurements;
