@@ -189,111 +189,18 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
 //    private InfraService migrate(InfraService service) throws MalformedURLException {
-//        service.setActive(true);
-//        service.setOrder(service.getRequests() != null ? service.getRequests() : service.getUrl());
-//
-//        //Change Service's trl according to the new vocabularies
-//        String trl = service.getTrl();
-//        service.setTrl(trl.toLowerCase());
-//
-//        //Change Service's lifeCycleStatus according to the new vocabularies
-//        String lifecyclestatus = service.getLifeCycleStatus();
-//        String[] lfc = lifecyclestatus.split("-");
-//        String lfc2 = lfc.length == 2 ? lfc[1] : lfc[0];
-//        service.setLifeCycleStatus(lfc2.toLowerCase());
-//
-//        //Change Service's categories according to the new vocabularies
-//        String category = service.getCategory();
-//        String [] ctg = category.split("-");
-//        String ctg2 = ctg.length == 2 ? ctg[1] : ctg[0];
-//        service.setCategory(ctg2.toLowerCase());
-//
-//        //Change Service's subcategories according to the new vocabularies
-//        String subcategory = service.getSubcategory();
-//        subcategory = subcategory.replace("Subcategory-","");
-//        service.setSubcategory(subcategory.toLowerCase());
-//
-//        //Change Service's places according to the new vocabularies
-//        List<String> places = service.getPlaces();
-//        List<String> placesNew = new ArrayList<>();
-//        for (int i=0; i<places.size(); i++){
-//            if (places.get(i).contains("-")){
-//                String[] pl = places.get(i).split("-");
-//                String pl2 = pl[1];
-//                if (pl2.equals("WW")){
-//                    pl2 = "world";
-//                } else {
-//                    pl2 = "europe";
-//                }
-//                placesNew.add(pl2);
-//            }
-//        }
-//        service.setPlaces(placesNew);
-//
-//        //Change Service's languages according to the new vocabularies
-//        List<String> languages = service.getLanguages();
-//        List<String> languagesNew = new ArrayList<>();
-//        if (languages.size() == 1){
-//            languagesNew.add("english");
-//        } else {
-//            languagesNew.add("english");
-//            languagesNew.add("french");
-//            languagesNew.add("danish");
-//            languagesNew.add("bulgarian");
-//            languagesNew.add("german");
-//            languagesNew.add("greek");
-//            languagesNew.add("albanian");
-//        }
-//        service.setLanguages(languagesNew);
-//
-//
-//        String id = service.getId();
-//        if (id.equals("egi.egi_marketplace")){
-//            List<String> languagesNew = new ArrayList<>();
-//            languagesNew.add("english");
-//            service.setLanguages(languagesNew);
-//            service.setSubcategory("tools");
-//            service.setCategory("operations");
-//            List<String> placesNew = new ArrayList<>();
-//            placesNew.add("europe");
-//            service.setPlaces(placesNew);
-//            service.setLifeCycleStatus("production");
-//            service.setTrl("trl-9");
-//        }
-
-
-//        if (service.getTags() == null) {
-//            List<String> tags = new ArrayList<>();
-//            service.setTags(tags);
-//        }
-//        if (service.getTargetUsers() == null) {
-//            service.setTargetUsers("-");
-//        }
-//        if (service.getSymbol() == null) {
-//            service.setSymbol(new URL("http://fvtelibrary.com/img/user/NoLogo.png"));
-//        }
-//        if (service.getLastUpdate() == null) {
-//            GregorianCalendar date = new GregorianCalendar(2000, 1, 1);
-//            service.setLastUpdate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
-//        }
-//        if (service.getVersion() == null) {
-//            service.setVersion("0");
-//        } else {
-//            service.setVersion(service.getVersion());
-//        }
-
 //        return service;
 //    }
 
     private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
         ServiceMetadata ret;
-        if (serviceMetadata == null) {
-            ret = createServiceMetadata(modifiedBy);
+        if (serviceMetadata != null) {
+            ret = new ServiceMetadata(serviceMetadata);
+            ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            ret.setModifiedBy(modifiedBy);
         } else {
-            ret = serviceMetadata;
+            ret = createServiceMetadata(modifiedBy);
         }
-        ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(modifiedBy);
         return ret;
     }
 
