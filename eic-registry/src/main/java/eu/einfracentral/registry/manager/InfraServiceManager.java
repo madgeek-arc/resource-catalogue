@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -22,18 +23,22 @@ import java.util.*;
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
 
+    private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
+
     private VocabularyManager vocabularyManager;
     private ProviderManager providerManager;
     private Random randomNumberGenerator;
+    private SynchronizerService synchronizerService;
 
-    private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
     @Autowired
-    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager, Random randomNumberGenerator) {
+    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager,
+                               Random randomNumberGenerator, SynchronizerService synchronizerService) {
         super(InfraService.class);
         this.vocabularyManager = vocabularyManager;
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
+        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -61,6 +66,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             }
 
             ret = super.add(infraService, authentication);
+            synchronizerService.syncAdd(infraService);
 
             // search if there are other provider services
             FacetFilter ff = new FacetFilter();
@@ -97,14 +103,23 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         } else {
             // create new service and AFTERWARDS update the previous one (in case the new service cannot be created)
 //                infraService.setStatus(); // TODO: enable this when services support the Status field
-            ret = addService(infraService, authentication);
+            // set new service as latest
+            infraService.setLatest(true);
+            ret = super.add(infraService, authentication);
 
-            // set previous version not latest
+            // set previous service not latest
             existingService.setLatest(false);
             super.update(existingService, authentication);
 
         }
+        synchronizerService.syncUpdate(infraService);
         return ret;
+    }
+
+    @Override
+    public void delete(InfraService infraService) {
+        synchronizerService.syncDelete(infraService);
+        super.delete(infraService);
     }
 
     @Override
