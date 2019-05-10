@@ -124,6 +124,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    @CacheEvict(cacheNames = {"visits", "providers", "featuredServices"}, allEntries = true)
     public void delete(InfraService infraService) {
         resourceService.deleteResource(getResource(infraService.getId(), infraService.getVersion()).getId());
     }
@@ -181,7 +182,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<ServiceHistory> getHistory(String serviceId) {
-        List<ServiceHistory> history = new ArrayList<>();
+        Map<String, ServiceHistory> historyMap = new TreeMap<>();
 
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(serviceId);
@@ -189,23 +190,52 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         // for each resource (InfraService), get its versions
         if (resources != null) {
             for (Resource resource : resources) {
+                InfraService service;
+                Resource tempResource = resource;
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
+                versions.sort((version, t1) -> {
+                    if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
+                        return -1;
+                    }
+                    return 1;
+                });
+
+                // create the Major Change entry (when service version has changed)
+                if (!versions.isEmpty()) {
+                    tempResource.setPayload(versions.get(0).getPayload());
+                    service = deserialize(tempResource);
+                    if (service != null && service.getServiceMetadata() != null) {
+                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
+                    }
+                    versions.remove(0);
+                } else {
+                    service = deserialize(tempResource);
+                    if (service != null && service.getServiceMetadata() != null) {
+                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, true));
+                    }
+                }
+
+                // create service update entries
                 for (Version version : versions) {
-                    Resource tempResource = version.getResource();
+                    tempResource = version.getResource();
                     tempResource.setPayload(version.getPayload());
-                    InfraService service = deserialize(tempResource);
+                    service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion(), version.getId()));
+                            historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
                             logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                         }
                     }
                 }
-                history.get(history.size() - 1).setVersionChange(true);
+                service = deserialize(resource);
+                if (service != null && service.getServiceMetadata() != null) {
+                    historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, false));
+                }
             }
         }
 
+        List<ServiceHistory> history = new ArrayList<>(historyMap.values());
         history.sort((serviceHistory, t1) -> {
             if (Long.parseLong(serviceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
                 return 1;
@@ -249,7 +279,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Service getVersionHistory(String serviceId, String versionId){
+    public Service getVersionHistory(String serviceId, String versionId) {
         List<Resource> resources = getResourcesWithServiceId(serviceId);
         Service service = new Service();
         List<Version> versions = new ArrayList<>();
@@ -260,8 +290,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 versions = versionService.getVersionsByResource(resource.getId());
                 allVersions.addAll(versions);
             }
-            for (Version version : allVersions){
-                if (version.getId().matches(versionId)){
+            for (Version version : allVersions) {
+                if (version.getId().matches(versionId)) {
                     Resource tempResource = version.getResource();
                     tempResource.setPayload(version.getPayload());
                     service = deserialize(tempResource);
@@ -269,8 +299,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 }
             }
             return service;
-        } else{
-            throw new ValidationException("Service with id '" +serviceId+ "' does not exist.");
+        } else {
+            throw new ValidationException("Service with id '" + serviceId + "' does not exist.");
         }
     }
 
@@ -294,7 +324,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     public Resource getResourceById(String resourceId) {
         List<Resource> resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
-                1, 0, "registeredAt", "DESC").getResults();
+                1, 0, "modifiedAt", "DESC").getResults();
         if (resource.isEmpty()) {
             return null;
         }
@@ -306,7 +336,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (serviceVersion == null || "".equals(serviceVersion) || "latest".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
-                            resourceType.getName(), 1, 0, "registeredAt", "DESC");
+                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
         } else {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\" AND service_version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
@@ -319,7 +349,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
-                        resourceType.getName(), 10000, 0, "registeredAt", "DESC");
+                        resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();
