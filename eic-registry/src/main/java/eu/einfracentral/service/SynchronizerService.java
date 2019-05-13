@@ -1,6 +1,7 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Measurement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @Service
 public class SynchronizerService {
@@ -72,5 +74,25 @@ public class SynchronizerService {
                 logger.error("Could not execute syncDelete method", e);
             }
         }
+    }
+
+    @Async
+    public void syncAdd(Measurement measurement) {
+        throw new UnsupportedOperationException("Method not implemented, yet");
+    }
+
+    @Async
+    public void syncUpdate(Measurement measurement) {
+        throw new UnsupportedOperationException("Method not implemented, yet");
+    }
+
+    @Async
+    public void syncUpdateAll (List<Measurement> allMeasurements) {
+        throw new UnsupportedOperationException("Method not implemented, yet");
+    }
+
+    @Async
+    public void syncDelete(Measurement measurement) {
+        throw new UnsupportedOperationException("Method not implemented, yet");
     }
 }
