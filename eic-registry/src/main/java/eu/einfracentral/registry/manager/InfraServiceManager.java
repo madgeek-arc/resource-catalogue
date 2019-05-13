@@ -48,35 +48,36 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     @Override
     public InfraService addService(InfraService infraService, Authentication authentication) {
         InfraService ret;
-        try {
-            validate(infraService);
-            infraService.setActive(providerManager.get(infraService.getProviders().get(0)).getActive());
-            if ((infraService.getId() == null) || ("".equals(infraService.getId()))) {
-                String id = createServiceId(infraService);
-                infraService.setId(id);
-            }
-            infraService.setLatest(true);
-            logger.info("Creating service with id: " + infraService.getId() + " and version:" + infraService.getVersion());
-            logger.info("Providers: " + infraService.getProviders());
-
-            if (infraService.getServiceMetadata() == null) {
-                ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
-                infraService.setServiceMetadata(serviceMetadata);
-            }
-
-            ret = super.add(infraService, authentication);
-            synchronizerService.syncAdd(infraService);
-
-            // search if there are other provider services
-            FacetFilter ff = new FacetFilter();
-            ff.addFilter("providers", infraService.getProviders().get(0));
-            if (this.getAll(ff, null).getTotal() == 1) { // user just added the service
-                providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.PENDING_2, null, authentication);
-            }
-        } catch (Exception e) {
-            logger.error(e);
-            throw e;
+        validate(infraService);
+        infraService.setActive(providerManager.get(infraService.getProviders().get(0)).getActive());
+        if ((infraService.getId() == null) || ("".equals(infraService.getId()))) {
+            String id = createServiceId(infraService);
+            infraService.setId(id);
         }
+        infraService.setLatest(true);
+        logger.info("Creating service with id: " + infraService.getId() + " and version:" + infraService.getVersion());
+        logger.info("Providers: " + infraService.getProviders());
+
+        if (infraService.getServiceMetadata() == null) {
+            ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
+            infraService.setServiceMetadata(serviceMetadata);
+        }
+
+        ret = super.add(infraService, authentication);
+        try {
+            synchronizerService.syncAdd(infraService);
+        } catch (Exception e) {
+            logger.error("syncAdd failed, Service id: " + infraService.getId(), e);
+        }
+
+
+        // search if there are other provider services
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("providers", infraService.getProviders().get(0));
+        if (this.getAll(ff, null).getTotal() == 1) { // user just added the service
+            providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.PENDING_2, null, authentication);
+        }
+
         return ret;
     }
 
@@ -111,13 +112,21 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             super.update(existingService, authentication);
 
         }
-        synchronizerService.syncUpdate(infraService);
+        try {
+            synchronizerService.syncUpdate(infraService);
+        } catch (Exception e) {
+            logger.error("syncUpdate failed, Service id: " + infraService.getId(), e);
+        }
         return ret;
     }
 
     @Override
     public void delete(InfraService infraService) {
-        synchronizerService.syncDelete(infraService);
+        try {
+            synchronizerService.syncDelete(infraService);
+        } catch (Exception e) {
+            logger.error("syncDelete failed, Service id: " + infraService.getId(), e);
+        }
         super.delete(infraService);
     }
 
