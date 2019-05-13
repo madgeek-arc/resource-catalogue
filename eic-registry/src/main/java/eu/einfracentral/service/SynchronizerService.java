@@ -1,6 +1,8 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.InfraService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -14,6 +16,8 @@ import java.net.URISyntaxException;
 
 @Service
 public class SynchronizerService {
+
+    private static final Logger logger = LogManager.getLogger(SynchronizerService.class);
 
     private RestTemplate restTemplate;
     private HttpHeaders headers;
@@ -41,6 +45,7 @@ public class SynchronizerService {
     public void syncAdd(InfraService infraService) {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
+            logger.info(String.format("Posting service with id: %s - Host: %s", infraService.getId(), host));
             restTemplate.postForObject(url.normalize(), request, InfraService.class);
         }
     }
@@ -49,6 +54,7 @@ public class SynchronizerService {
     public void syncUpdate(InfraService infraService) {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
+            logger.info(String.format("Updating service with id: %s - Host: %s", infraService.getId(), host));
             restTemplate.put(url.normalize().toString(), request, InfraService.class);
         }
     }
@@ -59,9 +65,10 @@ public class SynchronizerService {
             HttpEntity<String> request = new HttpEntity<>(infraService.getId(), headers);
             // FIXME
             try {
+                logger.info(String.format("Deleting service with id: %s - Host: %s", infraService.getId(), host));
                 restTemplate.delete(new URI(host + "/infraService").normalize().toString(), request, String.class);
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                logger.error("Could not execute syncDelete method", e);
             }
         }
     }
