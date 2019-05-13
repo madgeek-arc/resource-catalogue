@@ -8,12 +8,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class SynchronizerService {
@@ -63,11 +66,11 @@ public class SynchronizerService {
     @Async
     public void syncDelete(InfraService infraService) {
         if (active) {
-            HttpEntity<String> request = new HttpEntity<>(infraService.getId(), headers);
-            // FIXME
+            HttpEntity request = new HttpEntity<>(headers);
             try {
                 logger.info(String.format("Deleting service with id: %s - Host: %s", infraService.getId(), host));
-                restTemplate.delete(new URI(host + "/infraService").normalize().toString(), request, String.class);
+                URI uri = new URI(String.format("%s/infraService/%s/%s/", host, infraService.getId(), infraService.getVersion()));
+                restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
             } catch (URISyntaxException e) {
                 logger.error("Could not execute syncDelete method", e);
             }
