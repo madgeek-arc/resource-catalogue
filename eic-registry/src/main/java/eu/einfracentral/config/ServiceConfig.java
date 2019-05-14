@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jms.annotation.EnableJms;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
@@ -38,6 +39,7 @@ import java.util.Random;
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
 @EnableCaching
+@EnableAsync
 @EnableJms
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
