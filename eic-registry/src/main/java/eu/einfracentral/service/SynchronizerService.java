@@ -15,7 +15,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class SynchronizerService {
@@ -24,7 +25,6 @@ public class SynchronizerService {
 
     private RestTemplate restTemplate;
     private HttpHeaders headers;
-    private URI url;
     private boolean active = false;
     private String host;
     private String token;
@@ -39,60 +39,71 @@ public class SynchronizerService {
         headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
         if (!"".equals(token) && !"".equals(host)) {
-            url = new URI(host + "/service");
             active = true;
         }
     }
 
     @Async
-    public void syncAdd(InfraService infraService) {
+    public void syncAdd(InfraService infraService) throws URISyntaxException {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
             logger.info(String.format("Posting service with id: %s - Host: %s", infraService.getId(), host));
-            restTemplate.postForObject(url.normalize(), request, InfraService.class);
+            URI uri = new URI(host + "/service");
+            restTemplate.postForObject(uri.normalize(), request, InfraService.class);
         }
     }
 
     @Async
-    public void syncUpdate(InfraService infraService) {
+    public void syncUpdate(InfraService infraService) throws URISyntaxException {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
             logger.info(String.format("Updating service with id: %s - Host: %s", infraService.getId(), host));
-            restTemplate.put(url.normalize().toString(), request, InfraService.class);
+            URI uri = new URI(host + "/service");
+            restTemplate.put(uri.normalize().toString(), request, InfraService.class);
         }
     }
 
     @Async
-    public void syncDelete(InfraService infraService) {
+    public void syncDelete(InfraService infraService) throws URISyntaxException {
         if (active) {
             HttpEntity request = new HttpEntity<>(headers);
-            try {
-                logger.info(String.format("Deleting service with id: %s - Host: %s", infraService.getId(), host));
-                URI uri = new URI(String.format("%s/infraService/%s/%s/", host, infraService.getId(), infraService.getVersion()));
-                restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
-            } catch (URISyntaxException e) {
-                logger.error("Could not execute syncDelete method", e);
-            }
+            logger.info(String.format("Deleting service with id: %s - Host: %s", infraService.getId(), host));
+            URI uri = new URI(String.format("%s/infraService/%s/%s/", host, infraService.getId(), infraService.getVersion()));
+            restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
         }
     }
 
     @Async
-    public void syncAdd(Measurement measurement) {
-        throw new UnsupportedOperationException("Method not implemented, yet");
+    public void syncAdd(Measurement measurement) throws URISyntaxException {
+        if (active) {
+            HttpEntity<Measurement> request = new HttpEntity<>(measurement, headers);
+            logger.info(String.format("Posting measurement with id: %s - Host: %s", measurement.getId(), host));
+            URI uri = new URI(host + "/measurement");
+            restTemplate.postForObject(uri.normalize(), request, Measurement.class);
+        }
     }
 
     @Async
-    public void syncUpdate(Measurement measurement) {
-        throw new UnsupportedOperationException("Method not implemented, yet");
+    public void syncUpdate(Measurement measurement) throws URISyntaxException {
+        if (active) {
+            HttpEntity<Measurement> request = new HttpEntity<>(measurement, headers);
+            logger.info(String.format("Updating measurement with id: %s - Host: %s", measurement.getId(), host));
+            URI uri = new URI(host + "/measurement");
+            restTemplate.put(uri.normalize().toString(), request, Measurement.class);
+        }
     }
 
     @Async
-    public void syncUpdateAll (List<Measurement> allMeasurements) {
-        throw new UnsupportedOperationException("Method not implemented, yet");
-    }
-
-    @Async
-    public void syncDelete(Measurement measurement) {
-        throw new UnsupportedOperationException("Method not implemented, yet");
+    public void syncDelete(Measurement measurement) throws URISyntaxException {
+        if (active) {
+            HttpEntity request = new HttpEntity<>(headers);
+            logger.info(String.format("Deleting measurement with id: %s - Host: %s", measurement.getId(), host));
+            URI uri2 = new URI(String.format("%s/measurement/%s", host, measurement.getId()));
+//            restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
+            URI uri = new URI(host + "/measurement/");
+            Map<String, String> params = new HashMap<>();
+            params.put("id", measurement.getId());
+            restTemplate.delete(uri.normalize().toString(), params);
+        }
     }
 }
