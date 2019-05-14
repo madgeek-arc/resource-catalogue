@@ -14,9 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class SynchronizerService {
@@ -32,7 +29,7 @@ public class SynchronizerService {
     // TODO: load token from file, to enable changing it on the fly
 
     @Autowired
-    public SynchronizerService(@Value("${sync.host:}") String host, @Value("${sync.token:}") String token) throws URISyntaxException {
+    public SynchronizerService(@Value("${sync.host:}") String host, @Value("${sync.token:}") String token) {
         this.host = host;
         this.token = token;
         restTemplate = new RestTemplate();
@@ -44,66 +41,86 @@ public class SynchronizerService {
     }
 
     @Async
-    public void syncAdd(InfraService infraService) throws URISyntaxException {
+    public void syncAdd(InfraService infraService) {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
             logger.info(String.format("Posting service with id: %s - Host: %s", infraService.getId(), host));
-            URI uri = new URI(host + "/service");
-            restTemplate.postForObject(uri.normalize(), request, InfraService.class);
+            try {
+                URI uri = new URI(host + "/service");
+                restTemplate.postForObject(uri.normalize(), request, InfraService.class);
+            } catch (Exception e) {
+                logger.error("syncAdd failed, Service id: " + infraService.getId(), e);
+            }
         }
     }
 
     @Async
-    public void syncUpdate(InfraService infraService) throws URISyntaxException {
+    public void syncUpdate(InfraService infraService) {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
             logger.info(String.format("Updating service with id: %s - Host: %s", infraService.getId(), host));
-            URI uri = new URI(host + "/service");
-            restTemplate.put(uri.normalize().toString(), request, InfraService.class);
+            try {
+                URI uri = new URI(host + "/service");
+                restTemplate.put(uri.normalize().toString(), request, InfraService.class);
+            } catch (Exception e) {
+                logger.error("syncUpdate failed, Service id: " + infraService.getId(), e);
+            }
         }
     }
 
     @Async
-    public void syncDelete(InfraService infraService) throws URISyntaxException {
+    public void syncDelete(InfraService infraService) {
         if (active) {
             HttpEntity request = new HttpEntity<>(headers);
             logger.info(String.format("Deleting service with id: %s - Host: %s", infraService.getId(), host));
-            URI uri = new URI(String.format("%s/infraService/%s/%s/", host, infraService.getId(), infraService.getVersion()));
-            restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
+            try {
+                URI uri = new URI(String.format("%s/infraService/%s/%s/", host, infraService.getId(), infraService.getVersion()));
+                restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
+            } catch (Exception e) {
+                logger.error("syncDelete failed, Service id: " + infraService.getId(), e);
+            }
         }
     }
 
     @Async
-    public void syncAdd(Measurement measurement) throws URISyntaxException {
+    public void syncAdd(Measurement measurement) {
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, headers);
             logger.info(String.format("Posting measurement with id: %s - Host: %s", measurement.getId(), host));
-            URI uri = new URI(host + "/measurement");
-            restTemplate.postForObject(uri.normalize(), request, Measurement.class);
+            try {
+                URI uri = new URI(host + "/measurement");
+                restTemplate.postForObject(uri.normalize(), request, Measurement.class);
+            } catch (Exception e) {
+                logger.error("syncAdd failed, Measurement id: " + measurement.getId(), e);
+            }
         }
     }
 
     @Async
-    public void syncUpdate(Measurement measurement) throws URISyntaxException {
+    public void syncUpdate(Measurement measurement) {
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, headers);
             logger.info(String.format("Updating measurement with id: %s - Host: %s", measurement.getId(), host));
-            URI uri = new URI(host + "/measurement");
-            restTemplate.put(uri.normalize().toString(), request, Measurement.class);
+            try {
+                URI uri = new URI(host + "/measurement");
+                restTemplate.put(uri.normalize().toString(), request, Measurement.class);
+            } catch (Exception e) {
+                logger.error("syncUpdate failed, Measurement id: " + measurement.getId(), e);
+            }
         }
     }
 
     @Async
-    public void syncDelete(Measurement measurement) throws URISyntaxException {
+    public void syncDelete(Measurement measurement) {
         if (active) {
             HttpEntity request = new HttpEntity<>(headers);
             logger.info(String.format("Deleting measurement with id: %s - Host: %s", measurement.getId(), host));
-            URI uri2 = new URI(String.format("%s/measurement/%s", host, measurement.getId()));
-//            restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
-            URI uri = new URI(host + "/measurement/");
-            Map<String, String> params = new HashMap<>();
-            params.put("id", measurement.getId());
-            restTemplate.delete(uri.normalize().toString(), params);
+            try {
+                URI uri = new URI(String.format("%s/measurement/%s", host, measurement.getId()));
+                restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
+            } catch (Exception e) {
+                logger.error("syncDelete failed, Measurement id: " + measurement.getId(), e);
+            }
         }
     }
 }
