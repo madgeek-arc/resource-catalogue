@@ -5,6 +5,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -25,14 +26,17 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     private IndicatorManager indicatorManager;
     private VocabularyManager vocabularyManager;
     private InfraServiceService<InfraService, InfraService> infraService;
+    private SynchronizerService synchronizerService;
 
     @Autowired
     public MeasurementManager(IndicatorManager indicatorManager, VocabularyManager vocabularyManager,
-                              InfraServiceService<InfraService, InfraService> service) {
+                              InfraServiceService<InfraService, InfraService> service,
+                              SynchronizerService synchronizerService) {
         super(Measurement.class);
         this.vocabularyManager = vocabularyManager;
         this.infraService = service;
         this.indicatorManager = indicatorManager;
+        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -42,10 +46,17 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Override
     public Measurement add(Measurement measurement, Authentication auth) {
-        measurement.setId(UUID.randomUUID().toString());
+        if (measurement.getId().equals("") || measurement.getId() == null) {
+            measurement.setId(UUID.randomUUID().toString());
+        }
         existsIdentical(measurement);
         validate(measurement);
         super.add(measurement, auth);
+        try {
+            synchronizerService.syncAdd(measurement);
+        } catch (Exception e) {
+            logger.error("syncAdd failed, Measurement id: " + measurement.getId(), e);
+        }
         return measurement;
     }
 
@@ -60,22 +71,27 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("You cannot change the Indicator of the measurement");
         }
         super.update(measurement, auth);
+        try {
+            synchronizerService.syncUpdate(measurement);
+        } catch (Exception e) {
+            logger.error("syncUpdate failed, Measurement id: " + measurement.getId(), e);
+        }
         return measurement;
     }
 
 
-    public List<Measurement> updateAll(List<Measurement> allMeasurements, Authentication auth){
+    public List<Measurement> updateAll(List<Measurement> allMeasurements, Authentication auth) {
         List<Measurement> updatedMeasurements = new ArrayList<>();
         String serviceId = allMeasurements.get(0).getServiceId();
         List<Measurement> existingMeasurements = getAll(serviceId, auth).getResults();
-        for (Measurement existingMeasurement : existingMeasurements){
-            for (int i=0; i<allMeasurements.size(); i++){
-                if (existingMeasurement.getId().equals(allMeasurements.get(i).getId())){
+        for (Measurement existingMeasurement : existingMeasurements) {
+            for (int i = 0; i < allMeasurements.size(); i++) {
+                if (existingMeasurement.getId().equals(allMeasurements.get(i).getId())) {
                     String existingObject = new Gson().toJson(existingMeasurement);
                     String newObject = new Gson().toJson(allMeasurements.get(i));
 
                     //if not identical, update
-                    if(!existingObject.equals(newObject)){
+                    if (!existingObject.equals(newObject)) {
                         update(allMeasurements.get(i), auth);
                     }
                     updatedMeasurements.add(allMeasurements.get(i));
@@ -86,21 +102,21 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         }
 
         //if there are new Measurements, add them
-        for (Measurement measurement : allMeasurements){
+        for (Measurement measurement : allMeasurements) {
             add(measurement, auth);
             updatedMeasurements.add(measurement);
         }
 
         //Measurement's not given will be deleted
-        for (Measurement updatedMeasurement : updatedMeasurements){
-            for (Measurement existingMeasurement : existingMeasurements){
-                if (existingMeasurement.getId().equals(updatedMeasurement.getId())){
+        for (Measurement updatedMeasurement : updatedMeasurements) {
+            for (Measurement existingMeasurement : existingMeasurements) {
+                if (existingMeasurement.getId().equals(updatedMeasurement.getId())) {
                     existingMeasurements.remove(existingMeasurement);
                     break;
                 }
             }
         }
-        for (Measurement existing : existingMeasurements){
+        for (Measurement existing : existingMeasurements) {
             delete(existing);
         }
 
@@ -152,6 +168,11 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public void delete(Measurement measurement) {
         super.delete(measurement);
+        try {
+            synchronizerService.syncDelete(measurement);
+        } catch (Exception e) {
+            logger.error("syncDelete failed, Measurement id: " + measurement.getId(), e);
+        }
     }
 
     @Override
