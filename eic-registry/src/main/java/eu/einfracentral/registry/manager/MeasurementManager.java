@@ -52,11 +52,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         existsIdentical(measurement);
         validate(measurement);
         super.add(measurement, auth);
-        try {
-            synchronizerService.syncAdd(measurement);
-        } catch (Exception e) {
-            logger.error("syncAdd failed, Measurement id: " + measurement.getId(), e);
-        }
+        synchronizerService.syncAdd(measurement);
         return measurement;
     }
 
@@ -71,11 +67,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("You cannot change the Indicator of the measurement");
         }
         super.update(measurement, auth);
-        try {
-            synchronizerService.syncUpdate(measurement);
-        } catch (Exception e) {
-            logger.error("syncUpdate failed, Measurement id: " + measurement.getId(), e);
-        }
+        synchronizerService.syncUpdate(measurement);
         return measurement;
     }
 
@@ -168,11 +160,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public void delete(Measurement measurement) {
         super.delete(measurement);
-        try {
-            synchronizerService.syncDelete(measurement);
-        } catch (Exception e) {
-            logger.error("syncDelete failed, Measurement id: " + measurement.getId(), e);
-        }
+        synchronizerService.syncDelete(measurement);
     }
 
     @Override

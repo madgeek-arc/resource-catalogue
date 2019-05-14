@@ -64,12 +64,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
 
         ret = super.add(infraService, authentication);
-        try {
-            synchronizerService.syncAdd(infraService);
-        } catch (Exception e) {
-            logger.error("syncAdd failed, Service id: " + infraService.getId(), e);
-        }
-
+        synchronizerService.syncAdd(infraService);
 
         // search if there are other provider services
         FacetFilter ff = new FacetFilter();
@@ -112,21 +107,14 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             super.update(existingService, authentication);
 
         }
-        try {
-            synchronizerService.syncUpdate(infraService);
-        } catch (Exception e) {
-            logger.error("syncUpdate failed, Service id: " + infraService.getId(), e);
-        }
+        synchronizerService.syncUpdate(infraService);
+
         return ret;
     }
 
     @Override
     public void delete(InfraService infraService) {
-        try {
-            synchronizerService.syncDelete(infraService);
-        } catch (Exception e) {
-            logger.error("syncDelete failed, Service id: " + infraService.getId(), e);
-        }
+        synchronizerService.syncDelete(infraService);
         super.delete(infraService);
     }
 
