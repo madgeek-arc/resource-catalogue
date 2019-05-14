@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,7 +39,6 @@ public class SynchronizerService {
         }
     }
 
-    @Async
     public void syncAdd(InfraService infraService) {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
@@ -54,7 +52,6 @@ public class SynchronizerService {
         }
     }
 
-    @Async
     public void syncUpdate(InfraService infraService) {
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, headers);
@@ -68,7 +65,6 @@ public class SynchronizerService {
         }
     }
 
-    @Async
     public void syncDelete(InfraService infraService) {
         if (active) {
             HttpEntity request = new HttpEntity<>(headers);
@@ -82,7 +78,6 @@ public class SynchronizerService {
         }
     }
 
-    @Async
     public void syncAdd(Measurement measurement) {
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, headers);
@@ -96,7 +91,6 @@ public class SynchronizerService {
         }
     }
 
-    @Async
     public void syncUpdate(Measurement measurement) {
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, headers);
@@ -110,7 +104,6 @@ public class SynchronizerService {
         }
     }
 
-    @Async
     public void syncDelete(Measurement measurement) {
         if (active) {
             HttpEntity request = new HttpEntity<>(headers);
