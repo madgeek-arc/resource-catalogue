@@ -91,6 +91,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ret = super.add(provider, null);
+        logger.info("Adding Provider " + provider);
 
         // inform all backends for new provider roles
         jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
@@ -114,6 +115,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
             jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
         }
+        logger.info("Updating Provider " + provider);
         return provider;
     }
 
@@ -194,6 +196,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         });
         super.delete(provider);
+        logger.info("Deleting Provider " + provider);
     }
 
     @Override
@@ -224,6 +227,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 activateServices(provider.getId());
             }
         }
+        logger.info("Verifying Provider " + provider);
         return super.update(provider, auth);
     }
 
@@ -338,11 +342,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     public void activateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
+        logger.info("Activating all Services of the Provider with id " + providerId);
         for (InfraService service : services) {
             service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
             service.setStatus(null);
             try {
                 infraServiceService.update(service, null);
+                logger.info("Setting Service " + service.getName() + " as active");
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service " + service.getName());
             }
@@ -351,11 +357,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
+        logger.info("Deactivating all Services of the Provider with id " + providerId);
         for (InfraService service : services) {
             service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
             service.setActive(false);
             try {
                 infraServiceService.update(service, null);
+                logger.info("Setting Service " + service.getName() + " as inactive");
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service " + service.getName());
             }

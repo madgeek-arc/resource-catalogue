@@ -7,6 +7,8 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.exception.ServerError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,8 @@ import java.util.Optional;
 public class ResourceController<T extends Identifiable, U extends Authentication> {
     protected final ResourceService<T, U> service;
 
+    private static final Logger logger = LogManager.getLogger(ResourceController.class);
+
     ResourceController(ResourceService<T, U> service) {
         this.service = service;
     }
@@ -37,27 +41,37 @@ public class ResourceController<T extends Identifiable, U extends Authentication
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore U auth) {
-        return new ResponseEntity<>(service.add(t, auth), HttpStatus.OK);
+        ResponseEntity<T> ret = new ResponseEntity<>(service.add(t, auth), HttpStatus.OK);
+        logger.debug("User " + auth.getName() + " created a new Resource with id " + t.getId());
+        return ret;
     }
 
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> update(@RequestBody T t, @ApiIgnore U auth) throws ResourceNotFoundException {
-        return new ResponseEntity<>(service.update(t, auth), HttpStatus.OK);
+        ResponseEntity<T> ret = new ResponseEntity<>(service.update(t, auth), HttpStatus.OK);
+        logger.debug("User " + auth.getName() + " updated Resource with id " + t.getId());
+        return ret;
     }
 
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> validate(@RequestBody T t, @ApiIgnore U auth) {
-        return new ResponseEntity<>(service.validate(t), HttpStatus.OK);
+        ResponseEntity<T> ret = new ResponseEntity<>(service.validate(t), HttpStatus.OK);
+        logger.debug("User " + auth.getName() + " validated Resource with id " + t.getId());
+        return ret;
     }
 
     @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore U auth) {
-        return new ResponseEntity<>(service.del(t), HttpStatus.OK);
+        ResponseEntity<T> ret = new ResponseEntity<>(service.del(t), HttpStatus.OK);
+        logger.debug("User " + auth.getName() + " deleted Resource with id " + t.getId());
+        return ret;
     }
 
     @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<T>> delAll(@ApiIgnore U auth) {
-        return new ResponseEntity<>(service.delAll(), HttpStatus.OK);
+        ResponseEntity<List<T>> ret = new ResponseEntity<>(service.delAll(), HttpStatus.OK);
+        logger.debug("User " + auth.getName() + " deleted a list of resources " + ret);
+        return ret;
     }
 
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})

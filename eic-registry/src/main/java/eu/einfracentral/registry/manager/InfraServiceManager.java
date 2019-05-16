@@ -55,8 +55,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             infraService.setId(id);
         }
         infraService.setLatest(true);
-        logger.info("Creating service with id: " + infraService.getId() + " and version:" + infraService.getVersion());
-        logger.info("Providers: " + infraService.getProviders());
 
         if (infraService.getServiceMetadata() == null) {
             ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
@@ -64,6 +62,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
 
         ret = super.add(infraService, authentication);
+        logger.info("Adding Service " + infraService);
         synchronizerService.syncAdd(infraService);
 
         // search if there are other provider services
@@ -81,9 +80,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         InfraService ret;
         validate(infraService);
         InfraService existingService = get(infraService.getId());
-        if (authentication != null) {
-            logger.info("User: " + authentication.getDetails());
-        }
 
         // update existing service serviceMetadata
         ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
@@ -94,6 +90,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
+            logger.info("Updating Service " + infraService + " with no version changes");
+            logger.info("Service Version: " + infraService.getVersion());
 
         } else {
             // create new service and AFTERWARDS update the previous one (in case the new service cannot be created)
@@ -101,10 +99,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             // set new service as latest
             infraService.setLatest(true);
             ret = super.add(infraService, authentication);
+            logger.info("Updating Service " + infraService + " with version changes (super.add)");
 
             // set previous service not latest
             existingService.setLatest(false);
             super.update(existingService, authentication);
+            logger.info("Updating Service " + infraService + " with version changes (super.update)");
+            logger.info("Service Version: " + infraService.getVersion());
 
         }
         synchronizerService.syncUpdate(infraService);
@@ -116,6 +117,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public void delete(InfraService infraService) {
         synchronizerService.syncDelete(infraService);
         super.delete(infraService);
+        logger.info("Deleting Service " + infraService);
     }
 
     @Override
@@ -172,6 +174,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 infraService.setServiceMetadata(serviceMetadata);
 
                 super.update(infraService, null);
+                logger.info("Updating Service " + infraService + " through merging");
                 ret.add(infraService);
 
             } catch (Exception e) {
