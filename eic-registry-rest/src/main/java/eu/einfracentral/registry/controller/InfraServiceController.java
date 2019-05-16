@@ -50,8 +50,10 @@ public class InfraServiceController {
         else
             service = infraService.get(id);
         infraService.delete(service);
+        logger.info("User " + authentication.getName() + " deleted InfraService " + service.getName() + " with id: " + service.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @ApiIgnore
     @RequestMapping(path = "delete/all/", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -92,20 +94,27 @@ public class InfraServiceController {
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
-        return new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
+        ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
+        logger.info("User " + authentication.getName() + " added InfraService " + service.getName() + " with id: " + service.getId() + " and version: " + service.getVersion());
+        logger.info(" Service Providers: " + service.getProviders());
+        return ret;
     }
 
     @ApiOperation(value = "Updates the InfraService assigned the given id with the given InfraService, keeping a history of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        return new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
+        ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
+        logger.info("User " + authentication.getName() + " updated InfraService " + service.getName() + " with id: " + service.getId());
+        return ret;
     }
 
     @ApiOperation(value = "Validates the InfraService without actually changing the repository")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
-        return ResponseEntity.ok(infraService.validate(service));
+        ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(service));
+        logger.info("Validating InfraService " + service.getName());
+        return ret;
     }
 
     @ApiOperation(value = "Filter a list of services based on a set of filters or get a list of all services in the eInfraCentral Catalogue  ")
@@ -145,6 +154,11 @@ public class InfraServiceController {
         sm.setModifiedBy("system");
         sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
         service.setServiceMetadata(sm);
+        if (active) {
+            logger.info("User " + auth.getName() + " set InfraService " + service.getName() + " with id: " + service.getId() + " to active");
+        } else {
+            logger.info("User " + auth.getName() + " set InfraService " + service.getName() + " with id: " + service.getId() + " to inactive");
+        }
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
