@@ -7,6 +7,8 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class FunderController extends ResourceController<Funder, Authentication> {
 
     private FunderService funderService;
+    private static final Logger logger = LogManager.getLogger(FunderController.class);
 
     @Autowired
     FunderController(FunderService funderService) {
@@ -56,7 +59,9 @@ public class FunderController extends ResourceController<Funder, Authentication>
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> add(@RequestBody Funder funder, @ApiIgnore Authentication auth) {
-        return super.add(funder, auth);
+        ResponseEntity<Funder> ret = new ResponseEntity<>(funderService.add(funder, auth), HttpStatus.OK);
+        logger.info("User " + auth.getName() + " created a new Funder " + funder.getName() + " with id " + funder.getId());
+        return ret;
     }
 
     @Override
@@ -64,7 +69,9 @@ public class FunderController extends ResourceController<Funder, Authentication>
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> update(@RequestBody Funder funder, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return super.update(funder, auth);
+        ResponseEntity<Funder> ret = super.update(funder, auth);
+        logger.info("User " + auth.getName() + " updated Funder " + funder.getName() + " with id " + funder.getId());
+        return ret;
     }
 
     @ApiOperation(value = "Deletes the Funder with the given id.")
@@ -73,6 +80,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
     public ResponseEntity<Funder> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Funder funder = funderService.get(id);
         funderService.delete(funder);
+        logger.info("User " + auth.getName() + " deleted Funder " + funder.getName() + " with id " + funder.getId());
         return new ResponseEntity<>(funder, HttpStatus.OK);
     }
 

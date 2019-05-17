@@ -27,7 +27,7 @@ import java.util.Map;
 @Api(value = "Get information about a Measurement")
 public class MeasurementController extends ResourceController<Measurement, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(IndicatorController.class);
+    private static final Logger logger = LogManager.getLogger(MeasurementController.class);
     private MeasurementService<Measurement, Authentication> measurementManager;
 
     @Autowired
@@ -74,7 +74,10 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) {
-        return super.add(measurement, auth);
+        ResponseEntity<Measurement> ret = super.add(measurement, auth);
+        logger.info("User " + auth.getName() + " created a new Measurement with id " + measurement.getId());
+        logger.info("Indicator id: " + measurement.getIndicatorId() + " and Service id: " + measurement.getServiceId());
+        return ret;
     }
 
     @Override
@@ -82,14 +85,19 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return super.update(measurement, auth);
+        ResponseEntity<Measurement> ret = super.update(measurement, auth);
+        logger.info("User " + auth.getName() + " updated Measurement with id " + measurement.getId());
+        logger.info("Indicator id: " + measurement.getIndicatorId() + " and Service id: " + measurement.getServiceId());
+        return ret;
     }
 
     @ApiOperation(value = "Updates existing Measurements of a specific Service, or/and adds new ones.")
     @RequestMapping(path = "updateAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth)")
     public List<Measurement> updateAll(@RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
-        return measurementManager.updateAll(allMeasurements, auth);
+        List<Measurement> ret = measurementManager.updateAll(allMeasurements, auth);
+        logger.info("User " + auth.getName() + " updated a list of Measurements " + ret);
+        return ret;
     }
 
     @ApiOperation(value = "Deletes the Measurement with the given id.")
@@ -97,8 +105,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Measurement> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Measurement measurement = measurementManager.get(id);
-        logger.info("Deleting measurement: " + measurement.getId());
         measurementManager.delete(measurement);
+        logger.info("User " + auth.getName() + " deleted Measurement with id " + measurement.getId());
         return new ResponseEntity<>(measurement, HttpStatus.OK);
     }
 

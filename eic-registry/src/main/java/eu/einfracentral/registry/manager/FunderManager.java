@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Funder;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.RichService;
 import eu.einfracentral.registry.service.FunderService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -43,6 +45,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
     public Funder add(Funder funder, Authentication auth) {
         validateFunderServices(funder);
         super.add(funder, auth);
+        logger.info("Adding Funder " + funder);
         return funder;
     }
 
@@ -97,11 +100,11 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
 
             return createFunderStats(funderStats, richServiceList);
 
-        } else{
+        } else {
             Funder funder = get(funderId);
             List<RichService> funderServices = new ArrayList<>();
             for (RichService richService : richServiceList) {
-                if (funder.getServices().contains(richService.getId())){
+                if (funder.getServices().contains(richService.getId())) {
                     funderServices.add(richService);
                 }
             }
@@ -111,7 +114,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
 
     }
 
-    private Map<String, Map<String, Double>> createFunderStats(Map<String, Map<String, Double>> funderStats, List<RichService> services){
+    private Map<String, Map<String, Double>> createFunderStats(Map<String, Map<String, Double>> funderStats, List<RichService> services) {
         funderStats.put("Categories", createMap("CategoryName", services));
         funderStats.put("Subcategories", createMap("SubCategoryName", services));
         funderStats.put("TRL", createMap("TrlName", services));
@@ -123,16 +126,16 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         for (RichService service : services) {
             for (String provider : service.getProviders()) {
                 String providerName = providerService.get(provider, securityService.getAdminAccess()).getName();
-                if (providerMap.containsKey(providerName)){
+                if (providerMap.containsKey(providerName)) {
                     providerMap.put(providerName, (providerMap.get(providerName) + 1));
-                } else{
+                } else {
                     providerMap.put(providerName, 1.0);
                 }
             }
         }
         funderStats.put("Providers", providerMap);
 
-        return  funderStats;
+        return funderStats;
     }
 
     private Map<String, Double> createMap(String fieldName, List<RichService> services) {
@@ -142,31 +145,31 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         String methodName = "get" + TextUtils.capitalizeFirstLetter(fieldName);
 
         for (RichService service : services) {
-                Object typeValue;
-                try {
-                    Method getter = RichService.class.getMethod(methodName);
-                    typeValue = getter.invoke(service);
-                    List<?> values = null;
-                    if (String.class.isAssignableFrom(getter.getReturnType())) {
-                        values = Collections.singletonList(typeValue.toString());
-                    } else if (List.class.isAssignableFrom(getter.getReturnType())) {
-                        values = (List<?>) typeValue;
-                    }
-                    if (values != null && !values.isEmpty()) {
-                        for (int i = 0; i < values.size(); i++) {
-                            String value = values.get(i).toString();
-                            if (data.containsKey(value)) {
-                                data.put(value, (data.get(value) + 1));
-                            } else {
-                                data.put(value, 1.0);
-                            }
+            Object typeValue;
+            try {
+                Method getter = RichService.class.getMethod(methodName);
+                typeValue = getter.invoke(service);
+                List<?> values = null;
+                if (String.class.isAssignableFrom(getter.getReturnType())) {
+                    values = Collections.singletonList(typeValue.toString());
+                } else if (List.class.isAssignableFrom(getter.getReturnType())) {
+                    values = (List<?>) typeValue;
+                }
+                if (values != null && !values.isEmpty()) {
+                    for (int i = 0; i < values.size(); i++) {
+                        String value = values.get(i).toString();
+                        if (data.containsKey(value)) {
+                            data.put(value, (data.get(value) + 1));
+                        } else {
+                            data.put(value, 1.0);
                         }
                     }
-                } catch (NoSuchMethodException e) {
-                    logger.error("ERROR: could not find method " + methodName, e);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    logger.error("ERROR: " + methodName, e);
                 }
+            } catch (NoSuchMethodException e) {
+                logger.error("ERROR: could not find method " + methodName, e);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                logger.error("ERROR: " + methodName, e);
+            }
         }
 
         return data;

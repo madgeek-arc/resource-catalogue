@@ -47,19 +47,24 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     @CacheEvict(value = "vocabularies", allEntries = true)
     public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
-        return super.add(vocabulary, auth);
+        Vocabulary ret = super.add(vocabulary, auth);
+        logger.info("Adding Vocabulary " + vocabulary);
+        return ret;
     }
 
     @Override
     @CacheEvict(value = "vocabularies", allEntries = true)
     public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
-        return super.update(vocabulary, auth);
+        Vocabulary ret = super.update(vocabulary, auth);
+        logger.info("Updating Vocabulary " + vocabulary);
+        return ret;
     }
 
     @Override
     @CacheEvict(value = "vocabularies", allEntries = true)
     public void delete(Vocabulary vocabulary) {
         super.delete(vocabulary);
+        logger.info("Deleting Vocabulary " + vocabulary);
     }
 
     @Override
@@ -99,9 +104,13 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     private static class Country {
         private String alpha2Code;
 
-        public String getAlpha2Code() { return alpha2Code; }
+        public String getAlpha2Code() {
+            return alpha2Code;
+        }
 
-        public void setAlpha2Code(String alpha2Code) { this.alpha2Code = alpha2Code; }
+        public void setAlpha2Code(String alpha2Code) {
+            this.alpha2Code = alpha2Code;
+        }
     }
 
     private static class Region {
