@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.einfracentral.config.CacheConfig.*;
 import static java.util.stream.Collectors.toList;
 
 public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService>,
@@ -89,7 +90,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {"visits", "providers", "featuredServices"}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         if (infraService.getId() == null) {
             infraService.setId(createServiceId(infraService));
@@ -111,7 +112,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {"visits", "providers", "featuredServices"}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
@@ -125,7 +126,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {"visits", "providers", "featuredServices"}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public void delete(InfraService infraService) {
         resourceService.deleteResource(getResource(infraService.getId(), infraService.getVersion()).getId());
     }

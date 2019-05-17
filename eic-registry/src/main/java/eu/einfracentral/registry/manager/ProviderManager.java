@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService<Provider, Authentication> {
 
@@ -64,7 +66,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider add(Provider provider, Authentication auth) {
         List<User> users;
         User authUser = new User(auth);
@@ -103,7 +105,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider update(Provider provider, Authentication auth) {
         Resource existing = whereID(provider.getId(), true);
         Provider ex = deserialize(existing);
@@ -126,14 +128,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
      * @return
      */
     @Override
-    @Cacheable("providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public Provider get(String id) {
         Provider provider = super.get(id);
         return provider;
     }
 
     @Override
-    @Cacheable("providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public Provider get(String id, Authentication auth) {
         Provider provider = get(id);
         if (auth == null) {
@@ -148,7 +150,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @Cacheable(value = "providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public Browsing<Provider> getAll(FacetFilter ff, Authentication auth) {
         List<Provider> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -183,7 +185,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(Provider provider) {
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
@@ -200,7 +202,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         provider.setStatus(status.getKey());
@@ -232,7 +234,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @Cacheable(value = "providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public List<Provider> getServiceProviders(String email, Authentication auth) {
         List<Provider> providers;
         if (auth == null) {
@@ -264,7 +266,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @Cacheable(value = "providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public List<Provider> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
 //            return null; // TODO: enable this when front end can handle 401 properly

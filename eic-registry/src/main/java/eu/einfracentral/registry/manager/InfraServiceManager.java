@@ -10,14 +10,14 @@ import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
@@ -129,14 +129,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return getAll(ff, null);
     }
 
-    @Scheduled(cron = "0 0 12 1/1 * ?") // daily at 12:00 PM
-    @CacheEvict(value = "featuredServices", allEntries = true)
-    public void refreshFeatured() {
-        logger.info("Deleting cache: 'featuredServices'");
-    }
-
     @Override
-    @Cacheable("featuredServices")
+    @Cacheable(CACHE_FEATURED)
     public List<Service> createFeaturedServices() {
         logger.info("Creating and caching 'featuredServices'");
         // TODO: return featured services (for now, it returns a random infraService for each provider)
