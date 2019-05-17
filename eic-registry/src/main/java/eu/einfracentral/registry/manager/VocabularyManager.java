@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static eu.einfracentral.config.CacheConfig.CACHE_VOCABULARIES;
+
 @Component
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private Map<String, Region> regions = new HashMap<>();
@@ -33,19 +35,19 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = "vocabularies")
+    @Cacheable(value = CACHE_VOCABULARIES)
     public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
     }
 
     @Override
-    @Cacheable(value = "vocabularies", key = "#id")
+    @Cacheable(value = CACHE_VOCABULARIES, key = "#id")
     public Vocabulary get(String id) {
         return super.get(id);
     }
 
     @Override
-    @CacheEvict(value = "vocabularies", allEntries = true)
+    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
         Vocabulary ret = super.add(vocabulary, auth);
         logger.info("Adding Vocabulary " + vocabulary);
@@ -53,7 +55,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = "vocabularies", allEntries = true)
+    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
         Vocabulary ret = super.update(vocabulary, auth);
         logger.info("Updating Vocabulary " + vocabulary);
@@ -61,7 +63,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = "vocabularies", allEntries = true)
+    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public void delete(Vocabulary vocabulary) {
         super.delete(vocabulary);
         logger.info("Deleting Vocabulary " + vocabulary);

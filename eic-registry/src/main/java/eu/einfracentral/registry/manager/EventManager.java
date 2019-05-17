@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.einfracentral.config.CacheConfig.CACHE_EVENTS;
+
 @Component
 @SuppressWarnings("unchecked")
 public class EventManager extends ResourceManager<Event> implements EventService {
@@ -54,7 +56,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
@@ -64,7 +66,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         Event ret = super.update(event, auth);
@@ -73,7 +75,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -98,7 +100,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -134,7 +136,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events")
+    @Cacheable(value = CACHE_EVENTS)
     public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) {
         if (authentication == null) {
             return new ArrayList<>();
@@ -147,7 +149,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events")
+    @Cacheable(value = CACHE_EVENTS)
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
                 eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
@@ -155,7 +157,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events")
+    @Cacheable(value = CACHE_EVENTS)
     public List<Event> getUserEvents(String eventType, Authentication authentication) {
         if (authentication == null) {
             return new ArrayList<>();
