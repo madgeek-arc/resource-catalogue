@@ -26,17 +26,17 @@ import java.util.stream.StreamSupport;
 public class AnalyticsService {
 
     private static final Logger logger = LogManager.getLogger(AnalyticsService.class);
-    private static final String base = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&period=day&flat=1&filter_limit=100&period=day&label=%s&date=last30";
+    private static final String base = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&period=day&flat=1&filter_limit=100&period=%s&label=%s&date=last30";
     private String visits;
 
     @Value("${matomoHost:localhost}")
-    String matomoHost;
+    private String matomoHost;
 
     @Value("${matomoToken:}")
-    String matomoToken;
+    private String matomoToken;
 
     @Value("${matomoSiteId:1}")
-    String matomoSiteId;
+    private String matomoSiteId;
 
     @PostConstruct
     void postConstruct() {
@@ -46,7 +46,7 @@ public class AnalyticsService {
     public Map<String, Integer> getVisitsForLabel(String label) {
         try {
             Map<String, Integer> results = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label).fields(), Spliterator.NONNULL), false).collect(
+                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label, StatisticsService.Interval.YEAR).fields(), Spliterator.NONNULL), false).collect(
                     Collectors.toMap(
                             Map.Entry::getKey,
                             dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
@@ -60,8 +60,25 @@ public class AnalyticsService {
         return null;
     }
 
-    private JsonNode getAnalyticsForLabel(String label) {
-        return parse(getURL(String.format(visits, label)));
+    public Map<String, Integer> getVisitsForLabel(String label, StatisticsService.Interval by) {
+        try {
+            Map<String, Integer> results = StreamSupport.stream(
+                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label, by).fields(), Spliterator.NONNULL), false).collect(
+                    Collectors.toMap(
+                            Map.Entry::getKey,
+                            dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
+                    )
+            );
+            Map<String, Integer> sortedResults = new TreeMap<>(results);
+            return sortedResults;
+        } catch (Exception e){
+            logger.error("Cannot find visits for the specific Service.", e);
+        }
+        return null;
+    }
+
+    private JsonNode getAnalyticsForLabel(String label, StatisticsService.Interval by) {
+        return parse(getURL(String.format(visits, by.getKey(), label)));
     }
 
     private static JsonNode parse(String json) {

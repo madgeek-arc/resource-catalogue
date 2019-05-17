@@ -28,8 +28,8 @@ public class StatisticsController {
 
     @ApiOperation(value = "Get visits per day for a service.")
     @RequestMapping(path = "service/visits/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> visits(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.visits(id), HttpStatus.OK);
+    public ResponseEntity<Map<String, Integer>> visits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
     }
 
     @ApiIgnore
@@ -67,8 +67,8 @@ public class StatisticsController {
 
     @ApiOperation(value = "Get aggregate visits per day for all services offered by a provider.")
     @RequestMapping(path = "provider/visits/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> pVisits(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.pVisits(id), HttpStatus.OK);
+    public ResponseEntity<Map<String, Integer>> pVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.pVisits(id, by), HttpStatus.OK);
     }
 
     @Deprecated
@@ -106,8 +106,8 @@ public class StatisticsController {
 
     @ApiOperation(value = "Get percentage of visits for all services offered by a provider.")
     @RequestMapping(path = "provider/visitation/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Float>> pVisitation(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.pVisitation(id), HttpStatus.OK);
+    public ResponseEntity<Map<String, Float>> pVisitation(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.pVisitation(id, by), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns the time series of the specified Event type.")

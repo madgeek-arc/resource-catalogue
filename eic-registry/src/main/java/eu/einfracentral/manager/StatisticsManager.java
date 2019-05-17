@@ -235,9 +235,9 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     @Cacheable(value = "visits", key = "#id")
-    public Map<String, Integer> visits(String id) {
+    public Map<String, Integer> visits(String id, Interval by) {
         try {
-            return analyticsService.getVisitsForLabel("/service/" + id);
+            return analyticsService.getVisitsForLabel("/service/" + id, by);
         } catch (Exception e) {
             logger.error("Could not find Matomo analytics", e);
         }
@@ -245,10 +245,10 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Integer> pVisits(String id) {
+    public Map<String, Integer> pVisits(String id, Interval by) {
         Map<String, Integer> results = providerService.getServices(id)
                 .stream()
-                .flatMap(s -> visits(s.getId()).entrySet().stream())
+                .flatMap(s -> visits(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
 
         Map<String, Integer> sortedResults = new TreeMap<>(results);
@@ -256,10 +256,10 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Float> pVisitation(String id) {
+    public Map<String, Float> pVisitation(String id, Interval by) {
         Map<String, Integer> counts = providerService.getServices(id).stream().collect(Collectors.toMap(
                 Service::getName,
-                s -> visits(s.getId()).values().stream().mapToInt(Integer::intValue).sum()
+                s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
         ));
         int grandTotal = counts.values().stream().mapToInt(Integer::intValue).sum();
         return counts.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> ((float) v.getValue()) / grandTotal));
@@ -273,7 +273,7 @@ public class StatisticsManager implements StatisticsService {
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
         Browsing<InfraService> services = infraServiceService.getAll(ff, null);
-        services.getResults().forEach(s -> visits(s.getId()));
+        services.getResults().forEach(s -> visits(s.getId(), Interval.YEAR));
     }
 
     public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by) {

@@ -13,13 +13,13 @@ public interface StatisticsService {
     Map<String, Integer> externals(String id);
     Map<String, Integer> internals(String id);
     Map<String, Integer> favourites(String id, Interval by);
-    Map<String, Integer> visits(String id);
+    Map<String, Integer> visits(String id, Interval by);
     Map<String, Float> pRatings(String id, Interval by);
     Map<String, Integer> pExternals(String id);
     Map<String, Integer> pInternals(String id);
     Map<String, Integer> pFavourites(String id, Interval by);
-    Map<String, Integer> pVisits(String id);
-    Map<String, Float> pVisitation(String id);
+    Map<String, Integer> pVisits(String id, Interval by);
+    Map<String, Float> pVisitation(String id, Interval by);
 
     Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by);
 

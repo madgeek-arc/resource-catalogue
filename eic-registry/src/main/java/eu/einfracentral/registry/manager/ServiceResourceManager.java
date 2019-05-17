@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.service.StatisticsService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
@@ -501,7 +502,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // set visits
-            Map<String, Integer> visits = statisticsService.visits(infraService.getId());
+            Map<String, Integer> visits = statisticsService.visits(infraService.getId(), StatisticsService.Interval.YEAR);
             if (visits == null) {
                 richService.setViews(0);
             } else {
