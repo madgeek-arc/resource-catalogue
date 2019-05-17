@@ -3,11 +3,13 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
-import eu.einfracentral.utils.ObjectUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.*;
+import eu.openminted.registry.core.service.AbstractGenericService;
+import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +76,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);
+        logger.info("Adding Resource " + t);
         return t;
     }
 
@@ -83,17 +86,20 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         existing.setPayload(serialize(t));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
+        logger.info("Updating Resource " + t);
         return t;
     }
 
     @Override
     public void delete(T t) {
         del(t);
+        logger.info("Deleting Resource " + t);
     }
 
     @Override
     public T del(T t) {
         resourceService.deleteResource(whereID(t.getId(), true).getId());
+        logger.info("Deleting Resource " + t);
         return t;
     }
 
@@ -120,11 +126,13 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public List<T> delAll() {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(10000);
+        logger.info("Deleting all Resources");
         return getAll(facetFilter, null).getResults().stream().map(this::del).collect(Collectors.toList());
     }
 
     @Override
     public T validate(T t) {
+        logger.info("Validating Resource " + t);
         return t;
     }
 

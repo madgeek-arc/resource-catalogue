@@ -3,8 +3,9 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ServiceInterface;
-import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -71,6 +72,7 @@ public class ServiceController {
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
+        logger.info("User " + auth.getName() + " created a new Service " + service.getName() + " with id " + service.getId());
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
@@ -79,13 +81,16 @@ public class ServiceController {
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret = this.infraService.updateService(new InfraService(service), auth);
+        logger.info("User " + auth.getName() + " updated Service " + service.getName() + " with id " + service.getId());
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Validates the Service without actually changing the repository.")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Service service, @ApiIgnore Authentication auth) {
-        return ResponseEntity.ok(infraService.validate(new InfraService(service)));
+        ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(new InfraService(service)));
+        logger.info("User " + auth.getName() + " validated Service " + service.getName() + " with id " + service.getId());
+        return ret;
     }
 
     @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue.")
@@ -176,6 +181,7 @@ public class ServiceController {
         return ResponseEntity.ok(history);
     }
 
+    @Deprecated
     @ApiOperation(value = "Get all modifications of a specific Service in chronological order, providing the Service id.")
     @RequestMapping(path = {"allVersionHistory/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, Service>> getAllVersionsHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
@@ -228,6 +234,7 @@ public class ServiceController {
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = infraService.get(id, version);
         service.setActive(active);
+        logger.info("User " + auth.getName() + " set Service " + service.getName() + " with id " + service.getId() + " to active");
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
