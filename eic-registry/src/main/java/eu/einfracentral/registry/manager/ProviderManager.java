@@ -6,6 +6,7 @@ import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -38,7 +39,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private SecurityService securityService;
     private Random randomNumberGenerator;
-    private JmsTemplate jmsQueueTemplate;
+    private RegistrationMailService registrationMailService;
     private JmsTemplate jmsTopicTemplate;
 
     @Value("${jms.prefix:#{null}}")
@@ -50,12 +51,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           JmsTemplate jmsQueueTemplate, JmsTemplate jmsTopicTemplate) {
+                           @Lazy RegistrationMailService registrationMailService, JmsTemplate jmsTopicTemplate) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.jmsQueueTemplate = jmsQueueTemplate;
+        this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
@@ -99,7 +100,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
 
         // send messages to queue
-        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
+        registrationMailService.sendProviderMails(provider);
 
         return ret;
     }
@@ -219,7 +220,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // send registration emails
-        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
+        registrationMailService.sendProviderMails(provider);
 
         if (active != null) {
             provider.setActive(active);
@@ -359,7 +360,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
-        logger.info("Deactivating all Services of the Provider with id " + providerId);
         for (InfraService service : services) {
             service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
             service.setActive(false);
