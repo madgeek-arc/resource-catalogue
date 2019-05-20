@@ -9,8 +9,6 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
@@ -29,16 +27,16 @@ import org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders
 import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static eu.einfracentral.config.CacheConfig.CACHE_VISITS;
 
 @Component
 @EnableScheduling
@@ -234,7 +232,7 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    @Cacheable(value = "visits", key = "#id")
+    @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
         try {
             return analyticsService.getVisitsForLabel("/service/" + id, by);
@@ -263,17 +261,6 @@ public class StatisticsManager implements StatisticsService {
         ));
         int grandTotal = counts.values().stream().mapToInt(Integer::intValue).sum();
         return counts.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> ((float) v.getValue()) / grandTotal));
-    }
-
-    @Scheduled(cron = "0 0/5 * * * ?") // every five minutes
-    @CacheEvict(value = "visits")
-    public void updateVisitsCache() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
-        Browsing<InfraService> services = infraServiceService.getAll(ff, null);
-        services.getResults().forEach(s -> visits(s.getId(), Interval.YEAR));
     }
 
     public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by) {
