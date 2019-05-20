@@ -11,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -45,7 +44,6 @@ public class RegistrationMailService {
         this.providerManager = providerManager;
     }
 
-    @JmsListener(containerFactory = "jmsQueueListenerContainerFactory", destination = "${jms.prefix}")
     public void sendProviderMails(Provider provider) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
