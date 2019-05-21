@@ -169,11 +169,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                    @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
         ResponseEntity<Provider> ret = new ResponseEntity<>(providerManager.verifyProvider(id, status, active, auth), HttpStatus.OK);
-        if (active) {
-            logger.info("User " + auth.getName() + " accepted the provider " + providerManager.get(id).getName() + " with status " + status);
-        } else {
-            logger.info("User " + auth.getName() + " rejected the provider " + providerManager.get(id).getName() + " with status " + status);
-        }
+        logger.info("User " + auth.getName() + " updated Provider " + providerManager.get(id).getName() + " {status: " +status+ "} {active: " +active+ "}");
         return ret;
     }
 
