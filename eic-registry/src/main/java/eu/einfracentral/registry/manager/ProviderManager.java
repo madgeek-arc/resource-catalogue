@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
@@ -17,11 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -40,24 +39,19 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private SecurityService securityService;
     private Random randomNumberGenerator;
     private RegistrationMailService registrationMailService;
-    private JmsTemplate jmsTopicTemplate;
-
-    @Value("${jms.prefix:#{null}}")
-    private String jmsPrefix;
-
-    @Value("${webapp.front:beta.einfracentral.eu}")
-    private String endpoint;
+    private EICAuthoritiesMapper eicAuthoritiesMapper;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           @Lazy RegistrationMailService registrationMailService, JmsTemplate jmsTopicTemplate) {
+                           @Lazy RegistrationMailService registrationMailService, /*JmsTemplate jmsTopicTemplate*/
+                           @Lazy EICAuthoritiesMapper eicAuthoritiesMapper) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
         this.registrationMailService = registrationMailService;
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.eicAuthoritiesMapper = eicAuthoritiesMapper;
     }
 
 
@@ -96,8 +90,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ret = super.add(provider, null);
         logger.info("Adding Provider " + provider);
 
-        // inform all backends for new provider roles
-        jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
 
         // send messages to queue
         registrationMailService.sendProviderMails(provider);
@@ -115,10 +109,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
-            jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
-        }
         logger.info("Updating Provider " + provider);
+
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
+
         return provider;
     }
 
@@ -200,6 +195,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         });
         super.delete(provider);
         logger.info("Deleting Provider " + provider);
+
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
     }
 
     @Override
