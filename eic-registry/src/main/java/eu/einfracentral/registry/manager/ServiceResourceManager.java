@@ -248,7 +248,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
-    //FIXME: Fix the 3 versions created when submitting a ST and when accepting it.
+    @Deprecated
     @Override
     public Map<String, Service> getAllVersionsHistory(String serviceId) {
         Map<String, Service> history = new TreeMap<>();
