@@ -105,6 +105,9 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Measurement> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Measurement measurement = measurementManager.get(id);
+        if (measurement == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
         measurementManager.delete(measurement);
         logger.info("User " + auth.getName() + " deleted Measurement with id " + measurement.getId());
         return new ResponseEntity<>(measurement, HttpStatus.OK);
