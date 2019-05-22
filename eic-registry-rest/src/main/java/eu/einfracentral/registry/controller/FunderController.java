@@ -79,6 +79,9 @@ public class FunderController extends ResourceController<Funder, Authentication>
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Funder funder = funderService.get(id);
+        if (funder == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
         funderService.delete(funder);
         logger.info("User " + auth.getName() + " deleted Funder " + funder.getName() + " with id " + funder.getId());
         return new ResponseEntity<>(funder, HttpStatus.OK);

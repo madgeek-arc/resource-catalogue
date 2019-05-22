@@ -83,6 +83,9 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Indicator indicator = indicatorManager.get(id);
+        if (indicator == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
         indicatorManager.delete(indicator);
         logger.info("User " + auth.getName() + " deleted the Indicator " + indicator.getName() + " with id " + indicator.getId());
         return new ResponseEntity<>(indicator, HttpStatus.OK);

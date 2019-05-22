@@ -52,6 +52,9 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id);
+        if (provider == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
         logger.info("Deleting provider: " + provider.getName());
         providerManager.delete(provider);
         logger.info("User " + auth.getName() + " deleted the Provider " + provider.getName() + " with id " + provider.getId());
