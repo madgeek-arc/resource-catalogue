@@ -371,4 +371,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         }
     }
+
+    public void verifyNewProviders(List<String> providers, Authentication authentication) {
+        for (String serviceProvider : providers) {
+            Provider provider = get(serviceProvider);
+            if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                verifyProvider(provider.getId(), Provider.States.PENDING_2, false, authentication);
+            }
+        }
+    }
+
 }
