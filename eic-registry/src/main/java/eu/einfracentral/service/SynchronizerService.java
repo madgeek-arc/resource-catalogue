@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
@@ -79,6 +80,8 @@ public class SynchronizerService {
                 }
             } catch (URISyntaxException e) {
                 logger.error("syncAdd failed, Service id: " + infraService.getId(), e);
+            } catch (HttpServerErrorException e) {
+                logger.error(String.format("Failed to post Service with id %s to host %s", infraService.getId(), host), e);
             }
         }
     }
@@ -94,8 +97,10 @@ public class SynchronizerService {
                     logger.error(String.format("Updating service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 }
-            } catch (Exception e) {
+            } catch (URISyntaxException e) {
                 logger.error("syncUpdate failed, Service id: " + infraService.getId(), e);
+            } catch (HttpServerErrorException e) {
+                logger.error(String.format("Failed to update Service with id %s to host %s", infraService.getId(), host), e);
             }
         }
     }
@@ -113,6 +118,8 @@ public class SynchronizerService {
                 }
             } catch (URISyntaxException e) {
                 logger.error("syncDelete failed, Service id: " + infraService.getId(), e);
+            } catch (HttpServerErrorException e) {
+                logger.error(String.format("Failed to delete Service with id %s to host %s", infraService.getId(), host), e);
             }
         }
     }
@@ -130,6 +137,8 @@ public class SynchronizerService {
                 }
             } catch (URISyntaxException e) {
                 logger.error("syncAdd failed, Measurement id: " + measurement.getId(), e);
+            } catch (HttpServerErrorException e) {
+                logger.error(String.format("Failed to post Measurement with id %s to host %s", measurement.getId(), host), e);
             }
         }
     }
@@ -147,6 +156,8 @@ public class SynchronizerService {
                 }
             } catch (URISyntaxException e) {
                 logger.error("syncUpdate failed, Measurement id: " + measurement.getId(), e);
+            } catch (HttpServerErrorException e) {
+                logger.error(String.format("Failed to update Measurement with id %s to host %s", measurement.getId(), host), e);
             }
         }
     }
@@ -164,6 +175,8 @@ public class SynchronizerService {
                 }
             } catch (URISyntaxException e) {
                 logger.error("syncDelete failed, Measurement id: " + measurement.getId(), e);
+            } catch (HttpServerErrorException e) {
+                logger.error(String.format("Failed to delete Measurement with id %s to host %s", measurement.getId(), host), e);
             }
         }
     }
