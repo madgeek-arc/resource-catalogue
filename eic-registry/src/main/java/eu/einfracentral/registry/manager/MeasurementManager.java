@@ -46,7 +46,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Override
     public Measurement add(Measurement measurement, Authentication auth) {
-        if (measurement.getId().equals("") || measurement.getId() == null) {
+        if ((measurement.getId() == null) || measurement.getId().equals("")) {
             measurement.setId(UUID.randomUUID().toString());
         }
         existsIdentical(measurement);
