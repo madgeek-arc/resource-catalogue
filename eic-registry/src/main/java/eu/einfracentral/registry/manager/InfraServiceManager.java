@@ -1,39 +1,43 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.service.SearchService;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
 
-    private VocabularyManager vocabularyManager;
-    private ProviderManager providerManager;
-    private Random randomNumberGenerator;
-
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
+    private ServiceValidators serviceValidators;
+    private ProviderManager providerManager;
+    private Random randomNumberGenerator;
+    private SynchronizerService synchronizerService;
+
+
     @Autowired
-    public InfraServiceManager(VocabularyManager vocabularyManager, ProviderManager providerManager, Random randomNumberGenerator) {
+    public InfraServiceManager(ServiceValidators serviceValidators, ProviderManager providerManager,
+                               Random randomNumberGenerator, SynchronizerService synchronizerService) {
         super(InfraService.class);
-        this.vocabularyManager = vocabularyManager;
+        this.serviceValidators = serviceValidators;
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
+        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -44,34 +48,25 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     @Override
     public InfraService addService(InfraService infraService, Authentication authentication) {
         InfraService ret;
-        try {
-            validate(infraService);
-            infraService.setActive(providerManager.get(infraService.getProviders().get(0)).getActive());
-            if ((infraService.getId() == null) || ("".equals(infraService.getId()))) {
-                String id = createServiceId(infraService);
-                infraService.setId(id);
-            }
-            infraService.setLatest(true);
-            logger.info("Creating service with id: " + infraService.getId() + " and version:" + infraService.getVersion());
-            logger.info("Providers: " + infraService.getProviders());
-
-            if (infraService.getServiceMetadata() == null) {
-                ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
-                infraService.setServiceMetadata(serviceMetadata);
-            }
-
-            ret = super.add(infraService, authentication);
-
-            // search if there are other provider services
-            FacetFilter ff = new FacetFilter();
-            ff.addFilter("providers", infraService.getProviders().get(0));
-            if (this.getAll(ff, null).getTotal() == 1) { // user just added the service
-                providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.PENDING_2, null, authentication);
-            }
-        } catch (Exception e) {
-            logger.error(e);
-            throw e;
+        validate(infraService);
+        infraService.setActive(providerManager.get(infraService.getProviders().get(0)).getActive());
+        if ((infraService.getId() == null) || ("".equals(infraService.getId()))) {
+            String id = createServiceId(infraService);
+            infraService.setId(id);
         }
+        infraService.setLatest(true);
+
+        if (infraService.getServiceMetadata() == null) {
+            ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
+            infraService.setServiceMetadata(serviceMetadata);
+        }
+
+        ret = super.add(infraService, authentication);
+        logger.info("Adding Service " + infraService);
+        synchronizerService.syncAdd(infraService);
+
+        providerManager.verifyNewProviders(infraService.getProviders(), authentication);
+
         return ret;
     }
 
@@ -80,9 +75,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         InfraService ret;
         validate(infraService);
         InfraService existingService = get(infraService.getId());
-        if (authentication != null) {
-            logger.info("User: " + authentication.getDetails());
-        }
 
         // update existing service serviceMetadata
         ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
@@ -93,16 +85,34 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
+            logger.info("Updating Service " + infraService + " with no version changes");
+            logger.info("Service Version: " + infraService.getVersion());
 
         } else {
-            // set previous version not latest
+            // create new service and AFTERWARDS update the previous one (in case the new service cannot be created)
+//                infraService.setStatus(); // TODO: enable this when services support the Status field
+            // set new service as latest
+            infraService.setLatest(true);
+            ret = super.add(infraService, authentication);
+            logger.info("Updating Service " + infraService + " with version changes (super.add)");
+
+            // set previous service not latest
             existingService.setLatest(false);
             super.update(existingService, authentication);
+            logger.info("Updating Service " + infraService + " with version changes (super.update)");
+            logger.info("Service Version: " + infraService.getVersion());
 
-//                infraService.setStatus(); // TODO: enable this when services support the Status field
-            ret = addService(infraService, authentication);
         }
+        synchronizerService.syncUpdate(infraService);
+
         return ret;
+    }
+
+    @Override
+    public void delete(InfraService infraService) {
+        synchronizerService.syncDelete(infraService);
+        super.delete(infraService);
+        logger.info("Deleting Service " + infraService);
     }
 
     @Override
@@ -114,14 +124,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return getAll(ff, null);
     }
 
-    @Scheduled(cron = "0 0 12 1/1 * ?") // daily at 12:00 PM
-    @CacheEvict(value = "featuredServices", allEntries = true)
-    public void refreshFeatured() {
-    }
-
     @Override
-    @Cacheable("featuredServices")
+    @Cacheable(CACHE_FEATURED)
     public List<Service> createFeaturedServices() {
+        logger.info("Creating and caching 'featuredServices'");
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -157,6 +163,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 infraService.setServiceMetadata(serviceMetadata);
 
                 super.update(infraService, null);
+                logger.info("Updating Service " + infraService + " through merging");
                 ret.add(infraService);
 
             } catch (Exception e) {
@@ -170,128 +177,36 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public boolean validate(InfraService service) {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
-        validateServices(service);
-        validateVocabularies(service);
-        ServiceValidators.validateName(service);
-        ServiceValidators.validateURL(service);
-        ServiceValidators.validateDescription(service);
-        ServiceValidators.validateSymbol(service);
-        ServiceValidators.validateVersion(service);
-        ServiceValidators.validateLastUpdate(service);
-        ServiceValidators.validateOrder(service);
-        ServiceValidators.validateSLA(service);
-        ServiceValidators.validateMaxLength(service);
-        validateProviders(service);
+        logger.debug("Validating Service with id: " + service.getId());
+        serviceValidators.validateServices(service);
+        serviceValidators.validateVocabularies(service);
+        serviceValidators.validateName(service);
+        serviceValidators.validateURL(service);
+        serviceValidators.validateDescription(service);
+        serviceValidators.validateSymbol(service);
+        serviceValidators.validateVersion(service);
+        serviceValidators.validateLastUpdate(service);
+        serviceValidators.validateOrder(service);
+        serviceValidators.validateSLA(service);
+        serviceValidators.validateMaxLength(service);
+        serviceValidators.validateProviders(service);
         return true;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
 //    private InfraService migrate(InfraService service) throws MalformedURLException {
-//        service.setActive(true);
-//        service.setOrder(service.getRequests() != null ? service.getRequests() : service.getUrl());
-//
-//        //Change Service's trl according to the new vocabularies
-//        String trl = service.getTrl();
-//        service.setTrl(trl.toLowerCase());
-//
-//        //Change Service's lifeCycleStatus according to the new vocabularies
-//        String lifecyclestatus = service.getLifeCycleStatus();
-//        String[] lfc = lifecyclestatus.split("-");
-//        String lfc2 = lfc.length == 2 ? lfc[1] : lfc[0];
-//        service.setLifeCycleStatus(lfc2.toLowerCase());
-//
-//        //Change Service's categories according to the new vocabularies
-//        String category = service.getCategory();
-//        String [] ctg = category.split("-");
-//        String ctg2 = ctg.length == 2 ? ctg[1] : ctg[0];
-//        service.setCategory(ctg2.toLowerCase());
-//
-//        //Change Service's subcategories according to the new vocabularies
-//        String subcategory = service.getSubcategory();
-//        subcategory = subcategory.replace("Subcategory-","");
-//        service.setSubcategory(subcategory.toLowerCase());
-//
-//        //Change Service's places according to the new vocabularies
-//        List<String> places = service.getPlaces();
-//        List<String> placesNew = new ArrayList<>();
-//        for (int i=0; i<places.size(); i++){
-//            if (places.get(i).contains("-")){
-//                String[] pl = places.get(i).split("-");
-//                String pl2 = pl[1];
-//                if (pl2.equals("WW")){
-//                    pl2 = "world";
-//                } else {
-//                    pl2 = "europe";
-//                }
-//                placesNew.add(pl2);
-//            }
-//        }
-//        service.setPlaces(placesNew);
-//
-//        //Change Service's languages according to the new vocabularies
-//        List<String> languages = service.getLanguages();
-//        List<String> languagesNew = new ArrayList<>();
-//        if (languages.size() == 1){
-//            languagesNew.add("english");
-//        } else {
-//            languagesNew.add("english");
-//            languagesNew.add("french");
-//            languagesNew.add("danish");
-//            languagesNew.add("bulgarian");
-//            languagesNew.add("german");
-//            languagesNew.add("greek");
-//            languagesNew.add("albanian");
-//        }
-//        service.setLanguages(languagesNew);
-//
-//
-//        String id = service.getId();
-//        if (id.equals("egi.egi_marketplace")){
-//            List<String> languagesNew = new ArrayList<>();
-//            languagesNew.add("english");
-//            service.setLanguages(languagesNew);
-//            service.setSubcategory("tools");
-//            service.setCategory("operations");
-//            List<String> placesNew = new ArrayList<>();
-//            placesNew.add("europe");
-//            service.setPlaces(placesNew);
-//            service.setLifeCycleStatus("production");
-//            service.setTrl("trl-9");
-//        }
-
-
-//        if (service.getTags() == null) {
-//            List<String> tags = new ArrayList<>();
-//            service.setTags(tags);
-//        }
-//        if (service.getTargetUsers() == null) {
-//            service.setTargetUsers("-");
-//        }
-//        if (service.getSymbol() == null) {
-//            service.setSymbol(new URL("http://fvtelibrary.com/img/user/NoLogo.png"));
-//        }
-//        if (service.getLastUpdate() == null) {
-//            GregorianCalendar date = new GregorianCalendar(2000, 1, 1);
-//            service.setLastUpdate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
-//        }
-//        if (service.getVersion() == null) {
-//            service.setVersion("0");
-//        } else {
-//            service.setVersion(service.getVersion());
-//        }
-
 //        return service;
 //    }
 
     private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
         ServiceMetadata ret;
-        if (serviceMetadata == null) {
-            ret = createServiceMetadata(modifiedBy);
+        if (serviceMetadata != null) {
+            ret = new ServiceMetadata(serviceMetadata);
+            ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            ret.setModifiedBy(modifiedBy);
         } else {
-            ret = serviceMetadata;
+            ret = createServiceMetadata(modifiedBy);
         }
-        ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(modifiedBy);
         return ret;
     }
 
@@ -302,118 +217,5 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ret.setModifiedBy(registeredBy);
         ret.setModifiedAt(ret.getRegisteredAt());
         return ret;
-    }
-
-
-    private void validateVocabularies(InfraService service) {
-
-        //Validate Categories/Subcategories
-        if (service.getCategory() != null) {
-            Vocabulary categories = vocabularyManager.get("categories");
-            VocabularyEntry category = categories.getEntries().get(service.getCategory());
-            if (category == null)
-                throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
-            List<VocabularyEntry> subcategory = category.getChildren();
-            if (service.getSubcategory() == null) {
-                throw new ValidationException("Field 'subcategory' is mandatory.");
-            }
-            boolean flag = false;
-            for (VocabularyEntry aSubcategory : subcategory) {
-                if (aSubcategory.getId().equals(service.getSubcategory())) {
-                    flag = true;
-                    break;
-                }
-            }
-            if (!flag) {
-                throw new ValidationException(String.format("subcategory '%s' does not exist.", service.getSubcategory()));
-            }
-        } else throw new ValidationException("Field 'category' is mandatory.");
-
-        //Validate Places
-        if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
-            Map<String, VocabularyEntry> places = vocabularyManager.get("places").getEntries();
-            List<String> servicePlaces = service.getPlaces();
-            List<String> notFoundPlaces = new ArrayList<>();
-            for (String place : servicePlaces) {
-                VocabularyEntry placeFound = places.get(place);
-                if (placeFound == null) {
-                    notFoundPlaces.add(place);
-                }
-            }
-            if (!notFoundPlaces.isEmpty()) {
-                throw new ValidationException(String.format("Places not found: %s", String.join(", ", notFoundPlaces)));
-            }
-        } else throw new ValidationException("Field 'places' is mandatory.");
-
-        //Validate Languages
-        if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
-            Map<String, VocabularyEntry> languages = vocabularyManager.get("languages").getEntries();
-            List<String> serviceLanguages = service.getLanguages();
-            List<String> notFoundLanguages = new ArrayList<>();
-            for (String language : serviceLanguages) {
-                VocabularyEntry languageFound = languages.get(language);
-                if (languageFound == null) {
-                    notFoundLanguages.add(language);
-                }
-            }
-            if (!notFoundLanguages.isEmpty()) {
-                throw new ValidationException(String.format("Languages not found: %s", String.join(", ", notFoundLanguages)));
-            }
-        } else throw new ValidationException("Field 'languages' is mandatory.");
-
-        //Validate LifeCycleStatus
-        if (service.getLifeCycleStatus() != null) {
-            Vocabulary lifecyclestatus = vocabularyManager.get("lifecyclestatus");
-            VocabularyEntry lfc = lifecyclestatus.getEntries().get(service.getLifeCycleStatus());
-            if (lfc == null)
-                throw new ValidationException(String.format("LifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
-        } else throw new ValidationException("Field 'lifeCycleStatus' is mandatory.");
-
-        //Validate TRL
-        if (service.getTrl() != null) {
-            Vocabulary trl = vocabularyManager.get("trl");
-            VocabularyEntry trlEntry = trl.getEntries().get(service.getTrl());
-            if (trlEntry == null)
-                throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
-        } else throw new ValidationException("Field 'trl' is mandatory.");
-    }
-
-    //validates the correctness of Providers.
-    private void validateProviders(InfraService service) {
-        List<String> providers = service.getProviders();
-        if ((providers == null) || CollectionUtils.isEmpty(service.getProviders()) ||
-                (service.getProviders().stream().filter(Objects::nonNull).mapToInt(p -> 1).sum() == 0)) {
-            throw new ValidationException("field 'providers' is obligatory");
-        }
-        if (service.getProviders().stream().filter(Objects::nonNull).anyMatch(x -> providerManager.getResource(x) == null)) {
-            throw new ValidationException("Provider does not exist");
-        }
-    }
-
-    //validates the correctness of Related and Required Services.
-    public void validateServices(InfraService service) {
-        List<String> relatedServices = service.getRelatedServices();
-        List<String> existingRelatedServices = new ArrayList<>();
-        if (relatedServices != null) {
-            for (String serviceRel : relatedServices) {
-                if (this.exists(new SearchService.KeyValue("infra_service_id", serviceRel))) {
-                    existingRelatedServices.add(serviceRel);
-                }
-            }
-            service.setRelatedServices(existingRelatedServices);
-        }
-
-        List<String> requiredServices = service.getRequiredServices();
-        List<String> existingRequiredServices = new ArrayList<>();
-        if (requiredServices != null) {
-            for (String serviceReq : requiredServices) {
-                if (this.exists(
-
-                        new SearchService.KeyValue("infra_service_id", serviceReq))) {
-                    existingRequiredServices.add(serviceReq);
-                }
-            }
-            service.setRequiredServices(existingRequiredServices);
-        }
     }
 }

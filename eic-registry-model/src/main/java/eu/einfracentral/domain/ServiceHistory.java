@@ -4,18 +4,17 @@ public class ServiceHistory extends ServiceMetadata {
 
     private String version;
 
-    private boolean versionChange;
+    private boolean versionChange = false;
 
-    private String coreVersionId;
+    private String coreVersionId = null;
 
     public ServiceHistory() {
     }
 
-    public ServiceHistory(ServiceMetadata serviceMetadata, String version) {
-        super(serviceMetadata);
-        this.version = version;
-        this.versionChange = false;
-    }
+//    public ServiceHistory(ServiceMetadata serviceMetadata, String version) {
+//        super(serviceMetadata);
+//        this.version = version;
+//    }
 
     public ServiceHistory(ServiceMetadata serviceMetadata, String version, boolean versionChange) {
         super(serviceMetadata);
@@ -23,10 +22,30 @@ public class ServiceHistory extends ServiceMetadata {
         this.versionChange = versionChange;
     }
 
-    public ServiceHistory(ServiceMetadata serviceMetadata, String version, String coreVersionId) {
+//    public ServiceHistory(ServiceMetadata serviceMetadata, String version, String coreVersionId) {
+//        super(serviceMetadata);
+//        this.version = version;
+//        this.coreVersionId = coreVersionId;
+//    }
+
+    public ServiceHistory(ServiceMetadata serviceMetadata, String version, String coreVersionId, boolean versionChange) {
         super(serviceMetadata);
         this.version = version;
         this.coreVersionId = coreVersionId;
+        this.versionChange = versionChange;
+    }
+
+    public ServiceHistory(InfraService service, boolean versionChange) {
+        super(service.getServiceMetadata());
+        this.version = service.getVersion();
+        this.versionChange = versionChange;
+    }
+
+    public ServiceHistory(InfraService service, String coreVersionId, boolean versionChange) {
+        super(service.getServiceMetadata());
+        this.version = service.getVersion();
+        this.coreVersionId = coreVersionId;
+        this.versionChange = versionChange;
     }
 
     public void setVersion(String version) {

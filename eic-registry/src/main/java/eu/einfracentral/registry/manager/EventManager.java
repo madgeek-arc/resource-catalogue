@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.einfracentral.config.CacheConfig.CACHE_EVENTS;
+
 @Component
 @SuppressWarnings("unchecked")
 public class EventManager extends ResourceManager<Event> implements EventService {
@@ -48,28 +50,32 @@ public class EventManager extends ResourceManager<Event> implements EventService
         if (!events.isEmpty()) {
             for (Event event : events) {
                 this.delete(event);
-                logger.info(String.format("deleting event:%n-id: %s%n-service: %s%n-type: %s", event.getId(), event.getService(), event.getType()));
+                logger.info(String.format("Deleting Event:%n-id: %s%n-Service: %s%n-Type: %s", event.getId(), event.getService(), event.getType()));
             }
         }
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
-        return super.add(event, auth);
+        Event ret = super.add(event, auth);
+        logger.info("Adding Event " + event);
+        return ret;
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
-        return super.update(event, auth);
+        Event ret = super.update(event, auth);
+        logger.info("Updating Event " + event);
+        return ret;
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -79,8 +85,8 @@ public class EventManager extends ResourceManager<Event> implements EventService
         Event event;
         if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
             event = events.get(0);
-            event.setValue(favouriteValue);
-            event = update(event, null);
+            delete(event);
+            logger.debug("Deleting previous FAVORITE Event " + event + " because it happened more than once in the same day.");
         } else {
             event = new Event();
             event.setService(serviceId);
@@ -88,12 +94,13 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setType(Event.UserActionType.FAVOURITE.getKey());
             event.setValue(favouriteValue);
             event = add(event, null);
+            logger.debug("Adding a new FAVORITE Event " + event);
         }
         return event;
     }
 
     @Override
-    @CacheEvict(value = "events", allEntries = true)
+    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
     public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -107,6 +114,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event = events.get(0);
             event.setValue(value);
             event = update(event, null);
+            logger.debug("Updating RATING Event " + event);
         } else {
             event = new Event();
             event.setService(serviceId);
@@ -114,6 +122,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setType(Event.UserActionType.RATING.getKey());
             event.setValue(value);
             event = add(event, null);
+            logger.debug("Adding a new RATING Event " + event);
         }
         return event;
     }
@@ -127,7 +136,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events")
+    @Cacheable(value = CACHE_EVENTS)
     public List<Event> getEvents(String eventType, String serviceId, Authentication authentication) {
         if (authentication == null) {
             return new ArrayList<>();
@@ -140,7 +149,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events")
+    @Cacheable(value = CACHE_EVENTS)
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
                 eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
@@ -148,7 +157,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = "events")
+    @Cacheable(value = CACHE_EVENTS)
     public List<Event> getUserEvents(String eventType, Authentication authentication) {
         if (authentication == null) {
             return new ArrayList<>();

@@ -52,8 +52,12 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id);
+        if (provider == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
         logger.info("Deleting provider: " + provider.getName());
         providerManager.delete(provider);
+        logger.info("User " + auth.getName() + " deleted the Provider " + provider.getName() + " with id " + provider.getId());
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -70,7 +74,9 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
-        return super.add(provider, auth);
+        ResponseEntity<Provider> ret = super.add(provider, auth);
+        logger.info("User " + auth.getName() + " added the Provider " + provider.getName() + " with id " + provider.getId());
+        return ret;
     }
 
     @Override
@@ -78,7 +84,9 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return super.update(provider, auth);
+        ResponseEntity<Provider> ret = super.update(provider, auth);
+        logger.info("User " + auth.getName() + " updated the Provider " + provider.getName() + " with id " + provider.getId());
+        return ret;
     }
 
     @Override
@@ -163,7 +171,9 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                    @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(providerManager.verifyProvider(id, status, active, auth), HttpStatus.OK);
+        ResponseEntity<Provider> ret = new ResponseEntity<>(providerManager.verifyProvider(id, status, active, auth), HttpStatus.OK);
+        logger.info("User " + auth.getName() + " updated Provider " + providerManager.get(id).getName() + " {status: " +status+ "} {active: " +active+ "}");
+        return ret;
     }
 
     @ApiIgnore
@@ -185,6 +195,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             sm.setModifiedBy("system");
             sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             infraServiceService.update(service, auth);
+            logger.info("User " + auth.getName() + " published(updated) all Services " + services + " of the Provider " + providerManager.get(id).getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

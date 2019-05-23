@@ -74,7 +74,7 @@ public class ServiceProviderRegistrationIT {
             provider = updateProvider(providerId);
             assert provider != null;
 
-//            providerService.verifyProvider(providerId, Provider.States.ST_SUBMISSION, true, securityService.getAdminAccess());
+            providerService.verifyProvider(providerId, Provider.States.ST_SUBMISSION, true, securityService.getAdminAccess());
 
             infraService = new InfraService(createService("TestService", provider));
 

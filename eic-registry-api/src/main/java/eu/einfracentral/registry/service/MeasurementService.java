@@ -4,6 +4,8 @@ import eu.einfracentral.domain.Measurement;
 import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+
 public interface MeasurementService<T, U extends Authentication> extends ResourceService<Measurement, Authentication> {
 
     /**
@@ -45,5 +47,13 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
      * @return
      */
     boolean validateMeasurementStructure(T measurement);
+
+    /**
+     * Updates existing Measurements of a specific Service, or/and adds new ones
+     * @param allMeasurements
+     * @param authentication
+     * @return
+     */
+    List<Measurement> updateAll (List<Measurement> allMeasurements, U authentication);
 
 }
