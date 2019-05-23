@@ -12,7 +12,6 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -68,8 +67,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         return out;
     }
 
-    @JmsListener(containerFactory = "jmsTopicListenerContainerFactory", destination = "eicRoleMapper")
-    public void mapAuthoritiesListener(Provider provider) {
+    public void updateAuthorities() {
         mapAuthorities(eicAdmins);
     }
 

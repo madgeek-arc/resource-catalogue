@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -59,6 +60,7 @@ public class MailService {
         });
     }
 
+    @Async
     public void sendMail(List<String> to, List<String> cc, String subject, String text) throws MessagingException {
         Transport transport = null;
         try {
@@ -86,6 +88,7 @@ public class MailService {
         }
     }
 
+    @Async
     public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
         List<String> addrTo = new ArrayList<>();
         List<String> addrCc = new ArrayList<>();
@@ -98,6 +101,7 @@ public class MailService {
         sendMail(addrTo, addrCc, subject, text);
     }
 
+    @Async
     public void sendMail(String to, String subject, String text) throws MessagingException {
         sendMail(to, null, subject, text);
     }

@@ -41,7 +41,7 @@ public class InfraServiceController {
 
     @ApiIgnore
 //    @ApiOperation(value = "Deletes the infraService with the given id.")
-    @RequestMapping(path = {"{id}/", "{id}/{version}/"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = {"{id}", "{id}/{version}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         InfraService service;
@@ -49,13 +49,16 @@ public class InfraServiceController {
             service = infraService.get(id, version.get());
         else
             service = infraService.get(id);
+        if (service == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
         infraService.delete(service);
         logger.info("User " + authentication.getName() + " deleted InfraService " + service.getName() + " with id: " + service.getId());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ApiIgnore
-    @RequestMapping(path = "delete/all/", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = "delete/all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         FacetFilter ff = new FacetFilter();
@@ -65,10 +68,10 @@ public class InfraServiceController {
             logger.info(String.format("Deleting service with name: %s", service.getName()));
             infraService.delete(service);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @RequestMapping(path = {"updateFields/all/"}, method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @RequestMapping(path = {"updateFields/all"}, method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> updateFields(InfraService service, Authentication authentication) {
         return new ResponseEntity<>(infraService.eInfraCentralUpdate(service), HttpStatus.OK);
