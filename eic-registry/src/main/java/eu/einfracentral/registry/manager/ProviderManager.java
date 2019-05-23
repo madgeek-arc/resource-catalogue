@@ -1,11 +1,13 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -16,11 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -38,25 +38,20 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private SecurityService securityService;
     private Random randomNumberGenerator;
-    private JmsTemplate jmsQueueTemplate;
-    private JmsTemplate jmsTopicTemplate;
-
-    @Value("${jms.prefix:#{null}}")
-    private String jmsPrefix;
-
-    @Value("${webapp.front:beta.einfracentral.eu}")
-    private String endpoint;
+    private RegistrationMailService registrationMailService;
+    private EICAuthoritiesMapper eicAuthoritiesMapper;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           JmsTemplate jmsQueueTemplate, JmsTemplate jmsTopicTemplate) {
+                           @Lazy RegistrationMailService registrationMailService, /*JmsTemplate jmsTopicTemplate*/
+                           @Lazy EICAuthoritiesMapper eicAuthoritiesMapper) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.jmsQueueTemplate = jmsQueueTemplate;
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.registrationMailService = registrationMailService;
+        this.eicAuthoritiesMapper = eicAuthoritiesMapper;
     }
 
 
@@ -95,11 +90,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ret = super.add(provider, null);
         logger.info("Adding Provider " + provider);
 
-        // inform all backends for new provider roles
-        jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
 
         // send messages to queue
-        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
+        registrationMailService.sendProviderMails(provider);
 
         return ret;
     }
@@ -114,10 +109,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
-            jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
-        }
         logger.info("Updating Provider " + provider);
+
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
+
         return provider;
     }
 
@@ -199,6 +195,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         });
         super.delete(provider);
         logger.info("Deleting Provider " + provider);
+
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
     }
 
     @Override
@@ -219,7 +218,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // send registration emails
-        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
+        registrationMailService.sendProviderMails(provider);
 
         if (active != null) {
             provider.setActive(active);
@@ -359,7 +358,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
-        logger.info("Deactivating all Services of the Provider with id " + providerId);
         for (InfraService service : services) {
             service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
             service.setActive(false);
@@ -371,4 +369,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         }
     }
+
+    public void verifyNewProviders(List<String> providers, Authentication authentication) {
+        for (String serviceProvider : providers) {
+            Provider provider = get(serviceProvider);
+            if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                verifyProvider(provider.getId(), Provider.States.PENDING_2, false, authentication);
+            }
+        }
+    }
+
 }

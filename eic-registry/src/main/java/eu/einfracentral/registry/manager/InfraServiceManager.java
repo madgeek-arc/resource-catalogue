@@ -65,12 +65,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         logger.info("Adding Service " + infraService);
         synchronizerService.syncAdd(infraService);
 
-        // search if there are other provider services
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("providers", infraService.getProviders().get(0));
-        if (this.getAll(ff, null).getTotal() == 1) { // user just added the service
-            providerManager.verifyProvider(infraService.getProviders().get(0), Provider.States.PENDING_2, null, authentication);
-        }
+        providerManager.verifyNewProviders(infraService.getProviders(), authentication);
 
         return ret;
     }
