@@ -219,7 +219,10 @@ public class ServiceController {
     })
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Service>> getInactiveServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        Paging<InfraService> infraServices = infraService.getInactiveServices();
+        FacetFilter ff = createMultiFacetFilter(allRequestParams);
+        ff.addFilter("active", "false");
+        Paging<InfraService> infraServices = infraService.getAll(ff, auth);
+//        Paging<InfraService> infraServices = infraService.getInactiveServices();
         List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
         if (services.isEmpty()) {
             throw new ResourceNotFoundException();
