@@ -96,7 +96,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             infraService.setId(createServiceId(infraService));
         }
         if (exists(infraService)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+            throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
 
         // add spaces after ',' if they don't already exist and remove spaces before
