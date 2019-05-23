@@ -1,11 +1,13 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -16,11 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceManager<Provider> implements ProviderService<Provider, Authentication> {
 
@@ -36,25 +38,20 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private SecurityService securityService;
     private Random randomNumberGenerator;
-    private JmsTemplate jmsQueueTemplate;
-    private JmsTemplate jmsTopicTemplate;
-
-    @Value("${jms.prefix:#{null}}")
-    private String jmsPrefix;
-
-    @Value("${webapp.front:beta.einfracentral.eu}")
-    private String endpoint;
+    private RegistrationMailService registrationMailService;
+    private EICAuthoritiesMapper eicAuthoritiesMapper;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           JmsTemplate jmsQueueTemplate, JmsTemplate jmsTopicTemplate) {
+                           @Lazy RegistrationMailService registrationMailService, /*JmsTemplate jmsTopicTemplate*/
+                           @Lazy EICAuthoritiesMapper eicAuthoritiesMapper) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.jmsQueueTemplate = jmsQueueTemplate;
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.registrationMailService = registrationMailService;
+        this.eicAuthoritiesMapper = eicAuthoritiesMapper;
     }
 
 
@@ -64,7 +61,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider add(Provider provider, Authentication auth) {
         List<User> users;
         User authUser = new User(auth);
@@ -91,18 +88,19 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ret = super.add(provider, null);
+        logger.info("Adding Provider " + provider);
 
-        // inform all backends for new provider roles
-        jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
 
         // send messages to queue
-        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
+        registrationMailService.sendProviderMails(provider);
 
         return ret;
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider update(Provider provider, Authentication auth) {
         Resource existing = whereID(provider.getId(), true);
         Provider ex = deserialize(existing);
@@ -111,9 +109,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        if (provider.getUsers() != null && !provider.getUsers().isEmpty()) {
-            jmsTopicTemplate.convertAndSend("eicRoleMapper", provider);
-        }
+        logger.info("Updating Provider " + provider);
+
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
+
         return provider;
     }
 
@@ -124,14 +124,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
      * @return
      */
     @Override
-    @Cacheable("providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public Provider get(String id) {
         Provider provider = super.get(id);
         return provider;
     }
 
     @Override
-    @Cacheable("providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public Provider get(String id, Authentication auth) {
         Provider provider = get(id);
         if (auth == null) {
@@ -146,7 +146,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @Cacheable(value = "providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public Browsing<Provider> getAll(FacetFilter ff, Authentication auth) {
         List<Provider> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
@@ -181,7 +181,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(Provider provider) {
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
@@ -194,10 +194,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         });
         super.delete(provider);
+        logger.info("Deleting Provider " + provider);
+
+        // update provider roles
+        eicAuthoritiesMapper.updateAuthorities();
     }
 
     @Override
-    @CacheEvict(value = "providers", allEntries = true)
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
         Provider provider = get(id);
         provider.setStatus(status.getKey());
@@ -214,7 +218,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // send registration emails
-        jmsQueueTemplate.convertAndSend(jmsPrefix, provider);
+        registrationMailService.sendProviderMails(provider);
 
         if (active != null) {
             provider.setActive(active);
@@ -224,11 +228,12 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 activateServices(provider.getId());
             }
         }
+        logger.info("Verifying Provider " + provider);
         return super.update(provider, auth);
     }
 
     @Override
-    @Cacheable(value = "providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public List<Provider> getServiceProviders(String email, Authentication auth) {
         List<Provider> providers;
         if (auth == null) {
@@ -260,7 +265,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    @Cacheable(value = "providers")
+    @Cacheable(value = CACHE_PROVIDERS)
     public List<Provider> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
 //            return null; // TODO: enable this when front end can handle 401 properly
@@ -338,11 +343,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     public void activateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
+        logger.info("Activating all Services of the Provider with id " + providerId);
         for (InfraService service : services) {
             service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
             service.setStatus(null);
             try {
                 infraServiceService.update(service, null);
+                logger.info("Setting Service " + service.getName() + " as active");
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service " + service.getName());
             }
@@ -356,9 +363,20 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             service.setActive(false);
             try {
                 infraServiceService.update(service, null);
+                logger.info("Setting Service " + service.getName() + " as inactive");
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service " + service.getName());
             }
         }
     }
+
+    public void verifyNewProviders(List<String> providers, Authentication authentication) {
+        for (String serviceProvider : providers) {
+            Provider provider = get(serviceProvider);
+            if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                verifyProvider(provider.getId(), Provider.States.PENDING_2, false, authentication);
+            }
+        }
+    }
+
 }

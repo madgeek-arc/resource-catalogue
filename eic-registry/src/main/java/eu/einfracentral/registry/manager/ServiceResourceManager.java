@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.service.StatisticsService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -24,9 +26,11 @@ import org.springframework.util.MultiValueMap;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.einfracentral.config.CacheConfig.*;
 import static java.util.stream.Collectors.toList;
 
 public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService>,
@@ -86,12 +90,13 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         if (infraService.getId() == null) {
             infraService.setId(createServiceId(infraService));
         }
         if (exists(infraService)) {
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+            throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
 
         // add spaces after ',' if they don't already exist and remove spaces before
@@ -107,6 +112,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         assert existing != null;
@@ -120,6 +126,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public void delete(InfraService infraService) {
         resourceService.deleteResource(getResource(infraService.getId(), infraService.getVersion()).getId());
     }
@@ -177,7 +184,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<ServiceHistory> getHistory(String serviceId) {
-        List<ServiceHistory> history = new ArrayList<>();
+        Map<String, ServiceHistory> historyMap = new TreeMap<>();
 
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(serviceId);
@@ -185,46 +192,66 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         // for each resource (InfraService), get its versions
         if (resources != null) {
             for (Resource resource : resources) {
+                InfraService service;
+                Resource tempResource = resource;
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
-//                if (versions.isEmpty()) { // if there are no versions, keep the service resource (fix for when getting 0 versions)
-//                    InfraService service = deserialize(resource);
-//                    if (service != null) {
-//                        try {
-//                            history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion()));
-//                        } catch (NullPointerException e) {
-//                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
-//                        }
-//                    }
-//                } else {
-                    for (Version version : versions) {
-                        Resource tempResource = version.getResource();
-                        tempResource.setPayload(version.getPayload());
-                        InfraService service = deserialize(tempResource);
-                        if (service != null) {
-                            try {
-                                history.add(new ServiceHistory(service.getServiceMetadata(), service.getVersion(), version.getId()));
-                            } catch (NullPointerException e) {
-                                logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
-                            }
+                versions.sort((version, t1) -> {
+                    if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
+                        return -1;
+                    }
+                    return 1;
+                });
+
+                // create the Major Change entry (when service version has changed)
+                if (!versions.isEmpty()) {
+                    tempResource.setPayload(versions.get(0).getPayload());
+                    service = deserialize(tempResource);
+                    if (service != null && service.getServiceMetadata() != null) {
+                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
+                    }
+                    versions.remove(0);
+                } else {
+                    service = deserialize(tempResource);
+                    if (service != null && service.getServiceMetadata() != null) {
+                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, true));
+                    }
+                }
+
+                // create service update entries
+                for (Version version : versions) {
+                    tempResource = version.getResource();
+                    tempResource.setPayload(version.getPayload());
+                    service = deserialize(tempResource);
+                    if (service != null) {
+                        try {
+                            historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
+                        } catch (NullPointerException e) {
+                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                         }
-//                    }
-                    history.get(history.size() - 1).setVersionChange(true);
+                    }
+                }
+                service = deserialize(resource);
+                if (service != null && service.getServiceMetadata() != null) {
+                    historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, false));
                 }
             }
         }
 
+        List<ServiceHistory> history = new ArrayList<>(historyMap.values());
         history.sort((serviceHistory, t1) -> {
             if (Long.parseLong(serviceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
                 return 1;
             }
             return -1;
         });
+
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
+    @Deprecated
     @Override
     public Map<String, Service> getAllVersionsHistory(String serviceId) {
-        Map<String, Service> history = new LinkedHashMap<>();
+        Map<String, Service> history = new TreeMap<>();
 
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(serviceId);
@@ -233,19 +260,15 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (resources != null) {
             for (Resource resource : resources) {
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
-                versions.sort((version, t1) -> {
-                    if ((version.getCreationDate().getTime()) < (t1.getCreationDate().getTime())) {
-                        return 1;
-                    }
-                    return -1;
-                });
                 for (Version version : versions) {
                     Resource tempResource = version.getResource();
                     tempResource.setPayload(version.getPayload());
-                    Service service = deserialize(tempResource);
+                    InfraService service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            history.put(version.getId(), service);
+                            SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+                            Date date = new Date(Long.parseLong(service.getServiceMetadata().getModifiedAt()));
+                            history.put(sf.format(date), service);
                         } catch (NullPointerException e) {
                             logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
                         }
@@ -258,7 +281,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Service getVersionHistory(String serviceId, String versionId){
+    public Service getVersionHistory(String serviceId, String versionId) {
         List<Resource> resources = getResourcesWithServiceId(serviceId);
         Service service = new Service();
         List<Version> versions = new ArrayList<>();
@@ -269,8 +292,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 versions = versionService.getVersionsByResource(resource.getId());
                 allVersions.addAll(versions);
             }
-            for (Version version : allVersions){
-                if (version.getId().matches(versionId)){
+            for (Version version : allVersions) {
+                if (version.getId().matches(versionId)) {
                     Resource tempResource = version.getResource();
                     tempResource.setPayload(version.getPayload());
                     service = deserialize(tempResource);
@@ -278,11 +301,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 }
             }
             return service;
-        } else{
-            throw new ValidationException("Service with id '" +serviceId+ "' does not exist.");
+        } else {
+            throw new ValidationException("Service with id '" + serviceId + "' does not exist.");
         }
     }
-
 
     public String serialize(InfraService infraService) {
         String serialized;
@@ -304,7 +326,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     public Resource getResourceById(String resourceId) {
         List<Resource> resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
-                1, 0, "registeredAt", "DESC").getResults();
+                1, 0, "modifiedAt", "DESC").getResults();
         if (resource.isEmpty()) {
             return null;
         }
@@ -316,7 +338,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (serviceVersion == null || "".equals(serviceVersion) || "latest".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
-                            resourceType.getName(), 1, 0, "registeredAt", "DESC");
+                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
         } else {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\" AND service_version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
@@ -329,7 +351,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
-                        resourceType.getName(), 10000, 0, "registeredAt", "DESC");
+                        resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();
@@ -352,8 +374,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
-        Browsing<InfraService> infraServices = getAll(ff, null);
-        List<RichService> richServiceList = createRichServices(infraServices.getResults(), null);
+        Browsing<InfraService> infraServices = getAll(ff, auth);
+        List<RichService> richServiceList = createRichServices(infraServices.getResults(), auth);
         return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(),
                 richServiceList, infraServices.getFacets());
     }
@@ -481,7 +503,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // set visits
-            Map<String, Integer> visits = statisticsService.visits(infraService.getId());
+            Map<String, Integer> visits = statisticsService.visits(infraService.getId(), StatisticsService.Interval.YEAR);
             if (visits == null) {
                 richService.setViews(0);
             } else {

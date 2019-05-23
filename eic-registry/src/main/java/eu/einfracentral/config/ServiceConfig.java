@@ -5,17 +5,12 @@ import freemarker.template.TemplateExceptionHandler;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.jms.annotation.EnableJms;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
@@ -34,13 +29,14 @@ import java.util.Random;
 @ComponentScan({
         "eu.openminted.registry.core",
         "eu.openminted.registry.core.service",
+        "eu.einfracentral.config",
         "eu.einfracentral.manager",
         "eu.einfracentral.registry.manager",
         "eu.einfracentral.utils",
         "eu.einfracentral.service"})
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
-@EnableCaching
+@EnableAsync
 @EnableJms
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
@@ -52,14 +48,6 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     @Value("${jms.prefix}")
     private String jmsPrefix;
 
-    @Value("${redis.host}")
-    private String redisHost;
-
-    @Value("${redis.port}")
-    private String redisPort;
-
-    @Value("${redis.password:#{null}}")
-    private String password;
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
@@ -80,12 +68,6 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     }
 
     @Bean
-    public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("resourceTypes", "resourceTypesIndexFields", "events",
-                "visits", "providers", "vocabularies", "featuredServices");
-    }
-
-    @Bean
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
         defaultCookieSerializer.setCookieName("EICSESSION");
@@ -94,24 +76,6 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
         defaultCookieSerializer.setUseHttpOnlyCookie(true);
 //        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
         return defaultCookieSerializer;
-    }
-
-
-    @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
-        jedisConnectionFactory.setHostName(redisHost);
-        jedisConnectionFactory.setPort(Integer.parseInt(redisPort));
-        if (password != null) jedisConnectionFactory.setPassword(password);
-        return jedisConnectionFactory;
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        final RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
-        template.setValueSerializer(new GenericToStringSerializer<>(Object.class));
-        return template;
     }
 
     @Bean

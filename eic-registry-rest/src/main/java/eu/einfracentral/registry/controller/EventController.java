@@ -72,10 +72,12 @@ public class EventController extends ResourceController<Event, Authentication> {
         for (Event event : events) {
             if (event.getValue() == null) {
                 toDelete.add(event);
+                logger.info("Null event to be deleted: " + event);
             }
         }
         int size = toDelete.size();
         eventService.deleteEvents(toDelete);
+        logger.info("Admin deleting null events");
         return new ResponseEntity<>("deleted " + size, HttpStatus.NO_CONTENT);
     }
 
@@ -85,7 +87,13 @@ public class EventController extends ResourceController<Event, Authentication> {
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
-        return new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
+        if (value) {
+            logger.info("User " + authentication.getName() + " set Service with id " + id + " as FAVORITE");
+        } else {
+            logger.info("User " + authentication.getName() + " set Service with id " + id + " as UNFAVORITE");
+        }
+        return ret;
     }
 
     @ApiOperation("Check if a Service is favourited by the authenticated user.")
@@ -129,7 +137,9 @@ public class EventController extends ResourceController<Event, Authentication> {
     @RequestMapping(path = "rating/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {
-        return new ResponseEntity<>(eventService.setRating(id, rating, authentication), HttpStatus.OK);
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setRating(id, rating, authentication), HttpStatus.OK);
+        logger.info("User " + authentication.getName() + " rated Service with id " + id + " with " + rating);
+        return ret;
     }
 
     @ApiOperation("Get the rating of the authenticated user.")

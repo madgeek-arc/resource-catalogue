@@ -62,7 +62,9 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
-        return super.add(indicator, auth);
+        ResponseEntity<Indicator> ret = super.add(indicator, auth);
+        logger.info("User " + auth.getName() + " created a new Indicator " + indicator.getName() + " with id " + indicator.getId());
+        return ret;
     }
 
     @Override
@@ -70,7 +72,9 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        return super.update(indicator, auth);
+        ResponseEntity<Indicator> ret = super.update(indicator, auth);
+        logger.info("User " + auth.getName() + " updated the Indicator " + indicator.getName() + " with id " + indicator.getId());
+        return ret;
     }
 
 
@@ -79,7 +83,11 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Indicator indicator = indicatorManager.get(id);
+        if (indicator == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
         indicatorManager.delete(indicator);
+        logger.info("User " + auth.getName() + " deleted the Indicator " + indicator.getName() + " with id " + indicator.getId());
         return new ResponseEntity<>(indicator, HttpStatus.OK);
     }
 
