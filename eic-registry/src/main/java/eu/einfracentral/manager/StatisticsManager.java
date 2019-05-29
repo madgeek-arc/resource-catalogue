@@ -1,10 +1,8 @@
 package eu.einfracentral.manager;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
@@ -28,7 +26,6 @@ import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -46,22 +43,18 @@ public class StatisticsManager implements StatisticsService {
     private ElasticConfiguration elastic;
     private AnalyticsService analyticsService;
     private ProviderService<Provider, Authentication> providerService;
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
-
-    @Autowired
-    SearchService searchService;
-
-    @Autowired
-    ParserService parserService;
+    private SearchService searchService;
+    private ParserService parserService;
 
     @Autowired
     StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
                       ProviderService<Provider, Authentication> providerService,
-                      @Lazy InfraServiceService<InfraService, InfraService> infraServiceService) {
+                      SearchService searchService, ParserService parserService) {
         this.elastic = elastic;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
-        this.infraServiceService = infraServiceService;
+        this.searchService = searchService;
+        this.parserService = parserService;
     }
 
     @Override
@@ -339,38 +332,6 @@ public class StatisticsManager implements StatisticsService {
                 duration = date;
         }
         return duration;
-    }
-
-    @Override
-    public Map<String, Integer> externals(String id) {
-        return counts(id, Event.UserActionType.EXTERNAL.getKey());
-    }
-
-    @Override
-    public Map<String, Integer> internals(String id) {
-        return counts(id, Event.UserActionType.INTERNAL.getKey());
-    }
-
-    @Override
-    public Map<String, Integer> pExternals(String id) {
-        return providerService.getServices(id)
-                .stream()
-                .flatMap(s -> externals(s.getId()).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
-    }
-
-    @Override
-    public Map<String, Integer> pInternals(String id) {
-        return providerService.getServices(id)
-                .stream()
-                .flatMap(s -> internals(s.getId()).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
-    }
-
-    private Map<String, Integer> counts(String id, String eventType) {
-        return histogram(id, eventType, Interval.DAY).getBuckets().stream().collect(
-                Collectors.toMap(MultiBucketsAggregation.Bucket::getKeyAsString, e -> (int) e.getDocCount())
-        );
     }
 
 }

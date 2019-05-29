@@ -12,7 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
 
 @RestController
 @RequestMapping("stats")
@@ -32,27 +33,6 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Returns the time series of service page visits in the provider's site.")
-    @RequestMapping(path = "service/orders/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> externalsAlias(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return externals(id, auth);
-    }
-
-    @Deprecated
-    @ApiIgnore
-    @RequestMapping(path = "service/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> externals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.externals(id), HttpStatus.OK);
-    }
-
-    @Deprecated
-    @ApiIgnore
-    @RequestMapping(path = "service/internals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> internals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.internals(id), HttpStatus.OK);
-    }
-
     @ApiOperation(value = "Get favourites per day for a service.")
     @RequestMapping(path = "service/favourites/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> favourites(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
@@ -69,27 +49,6 @@ public class StatisticsController {
     @RequestMapping(path = "provider/visits/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Map<String, Integer>> pVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(statisticsService.pVisits(id, by), HttpStatus.OK);
-    }
-
-    @Deprecated
-    @ApiIgnore
-    @RequestMapping(path = "provider/externals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> pExternals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.pExternals(id), HttpStatus.OK);
-    }
-
-    @ApiIgnore
-    @ApiOperation(value = "Returns the time series of service page visits in the provider's site for all of the provider's services.")
-    @RequestMapping(path = "provider/orders/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> pExternalsAlias(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.pExternals(id), HttpStatus.OK);
-    }
-
-    @Deprecated
-    @ApiIgnore
-    @RequestMapping(path = "provider/internals/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Map<String, Integer>> pInternals(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.pInternals(id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get aggregate 'favourites per day' for all services offered by a provider.")

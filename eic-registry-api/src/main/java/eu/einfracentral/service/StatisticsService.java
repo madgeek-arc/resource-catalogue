@@ -10,13 +10,9 @@ import java.util.stream.Collectors;
 
 public interface StatisticsService {
     Map<String, Float> ratings(String id, Interval by);
-    Map<String, Integer> externals(String id);
-    Map<String, Integer> internals(String id);
     Map<String, Integer> favourites(String id, Interval by);
     Map<String, Integer> visits(String id, Interval by);
     Map<String, Float> pRatings(String id, Interval by);
-    Map<String, Integer> pExternals(String id);
-    Map<String, Integer> pInternals(String id);
     Map<String, Integer> pFavourites(String id, Interval by);
     Map<String, Integer> pVisits(String id, Interval by);
     Map<String, Float> pVisitation(String id, Interval by);
