@@ -32,7 +32,7 @@ CREATE DATABASE db WITH OWNER <user>;
 #### Deploy
 1. Ensure that PostgreSQL, ActiveMQ and Elasticsearch are up and running.
 
-2. Create a file named `registry.properties` inside the /lib folder of your Tomcat installation and populate it with the [Application Properties Example](#Application-Properties-Example) (or edit the `application.properties` file of the project).
+2. Create a file named `registry.properties` inside the /lib folder of your Tomcat installation and populate it with the [Application Properties Example](#Application-Properties-Example) (or edit the `application.properties` file of the project before you [Build](#Build) it).
 
 3. Deploy the webapp on Tomcat.
 
