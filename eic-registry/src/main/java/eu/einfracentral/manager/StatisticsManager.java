@@ -198,7 +198,7 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Float> pRatings(String id, Interval by) {
+    public Map<String, Float> providerRatings(String id, Interval by) {
         Map<String, Float> providerRatings = providerService.getServices(id)
                 .stream()
                 .flatMap(s -> ratings(s.getId(), by).entrySet().stream())
@@ -215,7 +215,7 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Integer> pFavourites(String id, Interval by) {
+    public Map<String, Integer> providerFavourites(String id, Interval by) {
         Map<String, Integer> providerFavorites = providerService.getServices(id)
                 .stream()
                 .flatMap(s -> favourites(s.getId(), by).entrySet().stream())
@@ -236,7 +236,7 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Integer> pVisits(String id, Interval by) {
+    public Map<String, Integer> providerVisits(String id, Interval by) {
         Map<String, Integer> results = providerService.getServices(id)
                 .stream()
                 .flatMap(s -> visits(s.getId(), by).entrySet().stream())
@@ -247,7 +247,7 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Float> pVisitation(String id, Interval by) {
+    public Map<String, Float> providerVisitation(String id, Interval by) {
         Map<String, Integer> counts = providerService.getServices(id).stream().collect(Collectors.toMap(
                 Service::getName,
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()

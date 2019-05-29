@@ -9,14 +9,79 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public interface StatisticsService {
-    Map<String, Float> ratings(String id, Interval by);
-    Map<String, Integer> favourites(String id, Interval by);
-    Map<String, Integer> visits(String id, Interval by);
-    Map<String, Float> pRatings(String id, Interval by);
-    Map<String, Integer> pFavourites(String id, Interval by);
-    Map<String, Integer> pVisits(String id, Interval by);
-    Map<String, Float> pVisitation(String id, Interval by);
 
+    /**
+     * Get time series of ratings for a service.
+     *
+     * @param serviceId
+     * @param by
+     * @return
+     */
+    Map<String, Float> ratings(String serviceId, Interval by);
+
+    /**
+     * Get time series of favourites for a service.
+     *
+     * @param serviceId
+     * @param by
+     * @return
+     */
+    Map<String, Integer> favourites(String serviceId, Interval by);
+
+    /**
+     * Get time series of visits for a service.
+     *
+     * @param serviceId
+     * @param by
+     * @return
+     */
+    Map<String, Integer> visits(String serviceId, Interval by);
+
+    /**
+     * Get time series of aggregate ratings for all services offered by a provider.
+     *
+     * @param providerId
+     * @param by
+     * @return
+     */
+    Map<String, Float> providerRatings(String providerId, Interval by);
+
+    /**
+     * Get time series of aggregate favourites for all services offered by a provider.
+     *
+     * @param providerId
+     * @param by
+     * @return
+     */
+    Map<String, Integer> providerFavourites(String providerId, Interval by);
+
+    /**
+     * Get time series of aggregate visits for all services offered by a provider.
+     *
+     * @param providerId
+     * @param by
+     * @return
+     */
+    Map<String, Integer> providerVisits(String providerId, Interval by);
+
+    /**
+     * Get visitation percentages of a provider's services for the specified interval.
+     *
+     * @param providerId
+     * @param by
+     * @return
+     */
+    Map<String, Float> providerVisitation(String providerId, Interval by);
+
+    /**
+     * Get the time series of the specified Event type.
+     *
+     * @param type
+     * @param from
+     * @param to
+     * @param by
+     * @return
+     */
     Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by);
 
     enum Interval {
