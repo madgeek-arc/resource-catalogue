@@ -346,8 +346,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         logger.info("Activating all Services of the Provider with id " + providerId);
         for (InfraService service : services) {
 //            service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
+//            service.setStatus(null);
             service.setActive(true);
-            service.setStatus(null);
             try {
                 infraServiceService.update(service, null);
                 logger.info("Setting Service " + service.getName() + " as active");
@@ -361,7 +361,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         List<InfraService> services = this.getInfraServices(providerId);
         for (InfraService service : services) {
 //            service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
-            service.setStatus(null);
+//            service.setStatus(null);
             service.setActive(false);
             try {
                 infraServiceService.update(service, null);
