@@ -71,7 +71,7 @@ public class SynchronizerService {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
             logger.info(String.format("Posting service with id: %s - Host: %s", infraService.getId(), host));
             try {
-                URI uri = new URI(host + "/service");
+                URI uri = new URI(host + "/infraService");
                 ResponseEntity re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, InfraService.class);
                 if (re.getStatusCode() != HttpStatus.CREATED) {
                     logger.error(String.format("Adding service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
@@ -92,7 +92,7 @@ public class SynchronizerService {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
             logger.info(String.format("Updating service with id: %s - Host: %s", infraService.getId(), host));
             try {
-                URI uri = new URI(host + "/service");
+                URI uri = new URI(host + "/infraService");
                 ResponseEntity re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.PUT, request, InfraService.class);
                 if (re.getStatusCode() != HttpStatus.OK) {
                     logger.error(String.format("Updating service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
