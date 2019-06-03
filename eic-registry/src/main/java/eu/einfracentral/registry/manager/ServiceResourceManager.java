@@ -10,6 +10,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.StatisticsService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
@@ -57,6 +58,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Autowired
     private FacetLabelService facetLabelService;
 
+    @Autowired
+    private SynchronizerService synchronizerService;
+
     @Override
     public String getResourceType() {
         return resourceType.getName();
@@ -65,7 +69,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public InfraService get(String id, String version) {
         Resource resource = getResource(id, version);
-//        return resource != null ? deserialize(resource) : null;
         if (resource == null) {
             throw new ServiceException(String.format("Could not find service with id: %s", id));
         }
@@ -95,6 +98,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (infraService.getId() == null) {
             infraService.setId(createServiceId(infraService));
         }
+        synchronizerService.syncAdd(infraService);
         if (exists(infraService)) {
             throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
@@ -115,7 +119,12 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
-        assert existing != null;
+        if (existing == null) {
+            throw new ServiceException(
+                String.format("Could not update service with id '%s' and version '%s', because it does not exist",
+                        infraService.getId(), infraService.getVersion()));
+        }
+        synchronizerService.syncUpdate(infraService);
 
         // add spaces after ',' if they don't already exist and remove spaces before
         prettifyServiceTextFields(infraService, ",");
@@ -128,6 +137,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public void delete(InfraService infraService) {
+        if (infraService == null || infraService.getId() == null) {
+            throw new ServiceException("You cannot delete a null service or service with null id field");
+        }
+        synchronizerService.syncDelete(infraService);
         resourceService.deleteResource(getResource(infraService.getId(), infraService.getVersion()).getId());
     }
 
