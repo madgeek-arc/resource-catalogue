@@ -356,10 +356,9 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         value = TextUtils.trimWhitespace(value);
         float floatValue;
         floatValue = Float.parseFloat(value);
-        if (floatValue < 0 || floatValue > 1) {
-            throw new ValidationException("Please enter a valid number in the range [0,1]");
+        if (floatValue < 0 || floatValue > 100) {
+            throw new ValidationException("Please enter a valid number in the range [0,100]");
         }
-        floatValue = floatValue * 100;
         return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
     }
 
