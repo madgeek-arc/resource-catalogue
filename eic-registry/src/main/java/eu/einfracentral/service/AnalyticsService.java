@@ -14,10 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -72,9 +69,9 @@ public class AnalyticsService {
             Map<String, Integer> sortedResults = new TreeMap<>(results);
             return sortedResults;
         } catch (Exception e){
-            logger.error("Cannot find visits for the specific Service.", e);
+            logger.debug("Cannot find visits for the specific Service.", e);
         }
-        return null;
+        return new HashMap<>();
     }
 
     private JsonNode getAnalyticsForLabel(String label, StatisticsService.Interval by) {
