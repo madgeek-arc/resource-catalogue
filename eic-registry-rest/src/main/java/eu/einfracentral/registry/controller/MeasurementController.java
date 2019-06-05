@@ -93,7 +93,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
 
     @ApiOperation(value = "Updates existing Measurements of a specific Service, or/and adds new ones.")
     @RequestMapping(path = "updateAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
         List<Measurement> ret = measurementManager.updateAll(serviceId, allMeasurements, auth);
         logger.info("User " + auth.getName() + " updated a list of Measurements " + ret);
