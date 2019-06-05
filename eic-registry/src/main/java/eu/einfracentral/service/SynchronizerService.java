@@ -48,8 +48,8 @@ public class SynchronizerService {
         if (!"".equals(host)) {
             active = true;
         }
-        if (!"".equals(filename)) {
-            logger.warn("");
+        if ("".equals(filename)) {
+            logger.warn("'sync.token.filepath' value not set");
         }
     }
 
