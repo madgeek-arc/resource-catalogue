@@ -27,17 +27,17 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private ServiceValidators serviceValidators;
     private ProviderManager providerManager;
     private Random randomNumberGenerator;
-    private SynchronizerService synchronizerService;
+//    private SynchronizerService synchronizerService;
 
 
     @Autowired
     public InfraServiceManager(ServiceValidators serviceValidators, ProviderManager providerManager,
-                               Random randomNumberGenerator, SynchronizerService synchronizerService) {
+                               Random randomNumberGenerator/*, SynchronizerService synchronizerService*/) {
         super(InfraService.class);
         this.serviceValidators = serviceValidators;
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.synchronizerService = synchronizerService;
+//        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -63,7 +63,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
         ret = super.add(infraService, authentication);
         logger.info("Adding Service " + infraService);
-        synchronizerService.syncAdd(infraService);
 
         providerManager.verifyNewProviders(infraService.getProviders(), authentication);
 
@@ -101,16 +100,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             super.update(existingService, authentication);
             logger.info("Updating Service " + infraService + " with version changes (super.update)");
             logger.info("Service Version: " + infraService.getVersion());
-
         }
-        synchronizerService.syncUpdate(infraService);
 
         return ret;
     }
 
     @Override
     public void delete(InfraService infraService) {
-        synchronizerService.syncDelete(infraService);
         super.delete(infraService);
         logger.info("Deleting Service " + infraService);
     }

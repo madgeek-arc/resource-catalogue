@@ -174,9 +174,8 @@ public class ServiceValidators {
             throw new ValidationException("field 'name' is obligatory");
         }
         //TODO: Core should check the max length
-        // ||||| changed this validation x2 |||||
         if (service.getName().length() > 160) {
-            throw new ValidationException("max length for 'name' is 80 chars");
+            throw new ValidationException("max length for 'name' is 160 chars");
         }
     }
 
@@ -193,9 +192,8 @@ public class ServiceValidators {
             throw new ValidationException("field 'description' is mandatory");
         }
         //TODO: Core should check the max length
-        // ||||| changed this validation x3 |||||
         if (service.getDescription().length() > 3000) {
-            throw new ValidationException("max length for 'description' is 1000 chars");
+            throw new ValidationException("max length for 'description' is 3000 chars");
         }
     }
 
@@ -212,9 +210,8 @@ public class ServiceValidators {
             throw new ValidationException("field 'version' is mandatory");
         }
         //TODO: Core should check the max length
-        // ||||| changed this validation x2 |||||
         if (service.getVersion().length() > 20) {
-            throw new ValidationException("max length for 'version' is 10 chars");
+            throw new ValidationException("max length for 'version' is 20 chars");
         }
     }
 
@@ -241,28 +238,27 @@ public class ServiceValidators {
 
     //validates the max length of various variables.
     //FIXME: Core should check the max length
-    // ||||| changed all validations x3 |||||
     public void validateMaxLength(InfraService service) {
         if (service.getTagline() != null && service.getTagline().length() > 300) {
-            throw new ValidationException("max length for 'tagline' is 100 chars");
+            throw new ValidationException("max length for 'tagline' is 300 chars");
         }
         if (service.getOptions() != null && service.getOptions().length() > 3000) {
-            throw new ValidationException("max length for 'options' is 1000 chars");
+            throw new ValidationException("max length for 'options' is 3000 chars");
         }
         if (service.getTargetUsers() != null && service.getTargetUsers().length() > 3000) {
-            throw new ValidationException("max length for 'targetUsers' is 1000 chars");
+            throw new ValidationException("max length for 'targetUsers' is 3000 chars");
         }
         if (service.getUserValue() != null && service.getUserValue().length() > 3000) {
-            throw new ValidationException("max length for 'userValue' is 1000 chars");
+            throw new ValidationException("max length for 'userValue' is 3000 chars");
         }
         if (service.getUserBase() != null && service.getUserBase().length() > 3000) {
-            throw new ValidationException("max length for 'userBase' is 1000 chars");
+            throw new ValidationException("max length for 'userBase' is 3000 chars");
         }
         if (service.getChangeLog() != null && service.getChangeLog().length() > 3000) {
-            throw new ValidationException("max length for 'changeLog' is 1000 chars");
+            throw new ValidationException("max length for 'changeLog' is 3000 chars");
         }
         if (service.getFunding() != null && service.getFunding().length() > 1500) {
-            throw new ValidationException("max length for 'funding' is 500 chars");
+            throw new ValidationException("max length for 'funding' is 1500 chars");
         }
     }
 }

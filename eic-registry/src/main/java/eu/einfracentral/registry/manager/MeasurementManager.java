@@ -74,9 +74,8 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     }
 
 
-    public List<Measurement> updateAll(List<Measurement> allMeasurements, Authentication auth) {
+    public List<Measurement> updateAll(String serviceId, List<Measurement> allMeasurements, Authentication auth) {
         List<Measurement> updatedMeasurements = new ArrayList<>();
-        String serviceId = allMeasurements.get(0).getServiceId();
         List<Measurement> existingMeasurements = getAll(serviceId, auth).getResults();
         for (Measurement existingMeasurement : existingMeasurements) {
             for (int i = 0; i < allMeasurements.size(); i++) {
@@ -358,7 +357,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         float floatValue;
         floatValue = Float.parseFloat(value);
         if (floatValue < 0 || floatValue > 100) {
-            throw new ValidationException("Percentage value should be an explicit percentage value 0% - 100%");
+            throw new ValidationException("Please enter a valid number in the range [0,100]");
         }
         return TextUtils.formatArithmeticPrecision(Float.toString(floatValue), 4); // enable if you want to force max decimal digits
     }

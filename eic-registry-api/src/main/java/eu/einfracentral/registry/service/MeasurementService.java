@@ -10,6 +10,7 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
 
     /**
      * Paging with all measurements of the service with id {@param serviceId}
+     *
      * @param serviceId
      * @param authentication
      * @return
@@ -17,7 +18,6 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
     Paging<T> getAll(String serviceId, U authentication);
 
     /**
-     *
      * @param serviceId
      * @param authentication
      * @return
@@ -36,6 +36,7 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
 
     /**
      * Searches if an identical measurement exists (except Id field)
+     *
      * @param measurement
      * @return
      */
@@ -43,6 +44,7 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
 
     /**
      * Ensures Measurement abides by Indicator's structure
+     *
      * @param measurement
      * @return
      */
@@ -50,10 +52,11 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
 
     /**
      * Updates existing Measurements of a specific Service, or/and adds new ones
+     *
      * @param allMeasurements
      * @param authentication
      * @return
      */
-    List<Measurement> updateAll (List<Measurement> allMeasurements, U authentication);
+    List<Measurement> updateAll(String serviceId, List<Measurement> allMeasurements, U authentication);
 
 }
