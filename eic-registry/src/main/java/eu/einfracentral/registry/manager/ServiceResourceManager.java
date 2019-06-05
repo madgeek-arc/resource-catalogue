@@ -179,7 +179,18 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public List<RichService> getByIds(Authentication auth, String... ids) {
         List<RichService> services;
-        services = Arrays.stream(ids).map(id -> getRichService(id, "latest", auth)).collect(toList());
+        services = Arrays.stream(ids)
+                .map(id ->
+                {
+                    try {
+                        return getRichService(id, "latest", auth);
+                    } catch (ServiceException e) {
+                        return null;
+                    }
+
+                })
+                .filter(Objects::nonNull)
+                .collect(toList());
         return services;
     }
 
