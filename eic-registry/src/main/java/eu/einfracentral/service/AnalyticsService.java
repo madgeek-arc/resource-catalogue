@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,8 +24,10 @@ import java.util.stream.StreamSupport;
 public class AnalyticsService {
 
     private static final Logger logger = LogManager.getLogger(AnalyticsService.class);
-    private static final String base = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&period=day&flat=1&filter_limit=100&period=%s&label=%s&date=last30";
+    private static final String visitsTemplate = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&period=day&flat=1&filter_limit=100&period=%s&date=last30";
+    private static final String serviceVisitsTemplate = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&flat=1&period=range&date=2017-01-01,%s";
     private String visits;
+    private String serviceVisits;
 
     @Value("${matomoHost:localhost}")
     private String matomoHost;
@@ -37,24 +40,29 @@ public class AnalyticsService {
 
     @PostConstruct
     void postConstruct() {
-        visits = String.format(base, matomoHost, matomoToken, matomoSiteId, "%s", "%s", "%s");
+        visits = String.format(visitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s", "%s", "%s");
+        serviceVisits = String.format(serviceVisitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s", "%s", "%s");
     }
 
-    public Map<String, Integer> getVisitsForLabel(String label) {
-        try {
-            Map<String, Integer> results = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label, StatisticsService.Interval.YEAR).fields(), Spliterator.NONNULL), false).collect(
-                    Collectors.toMap(
-                            Map.Entry::getKey,
-                            dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
-                    )
-            );
-            Map<String, Integer> sortedResults = new TreeMap<>(results);
-            return sortedResults;
-        } catch (Exception e){
-            logger.error("Cannot find visits for the specific Service.", e);
+    public Map<String, Integer> getAllServiceVisits() {
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        JsonNode json = parse(getURL(String.format(serviceVisits, date)));
+        if (json != null) {
+            try {
+                Spliterators.spliteratorUnknownSize(json.iterator(), Spliterator.NONNULL);
+                Map<String, Integer> results = new HashMap<>();
+                for (JsonNode node : json) {
+                    String[] labelValues = node.path("label").textValue().split("/service/");
+                    if (labelValues.length == 2) {
+                        results.putIfAbsent(labelValues[1], node.path("nb_visits").asInt(0));
+                    }
+                }
+                return results;
+            } catch (Exception e){
+                logger.error("Cannot find visits for the specific Service.", e);
+            }
         }
-        return null;
+        return new HashMap<>();
     }
 
     public Map<String, Integer> getVisitsForLabel(String label, StatisticsService.Interval by) {
@@ -75,7 +83,7 @@ public class AnalyticsService {
     }
 
     private JsonNode getAnalyticsForLabel(String label, StatisticsService.Interval by) {
-        return parse(getURL(String.format(visits, by.getKey(), label)));
+        return parse(getURL(String.format(visits, by.getKey()) +"&label=" + label));
     }
 
     private static JsonNode parse(String json) {
