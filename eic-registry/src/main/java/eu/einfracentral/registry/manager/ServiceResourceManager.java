@@ -4,12 +4,11 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.manager.StatisticsManager;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
-import eu.einfracentral.service.StatisticsService;
+import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
@@ -53,13 +52,13 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private EventService eventService;
 
     @Autowired
-    private StatisticsManager statisticsService;
-
-    @Autowired
     private FacetLabelService facetLabelService;
 
     @Autowired
     private SynchronizerService synchronizerService;
+
+    @Autowired
+    private AnalyticsService analyticsService;
 
     @Override
     public String getResourceType() {
@@ -121,8 +120,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         if (existing == null) {
             throw new ServiceException(
-                String.format("Could not update service with id '%s' and version '%s', because it does not exist",
-                        infraService.getId(), infraService.getVersion()));
+                    String.format("Could not update service with id '%s' and version '%s', because it does not exist",
+                            infraService.getId(), infraService.getVersion()));
         }
         synchronizerService.syncUpdate(infraService);
 
@@ -411,6 +410,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public List<RichService> createRichServices(List<InfraService> infraServices, Authentication auth) {
+        // FIXME: when the list of services contains only 1 entry, 'analyticsService.getAllServiceVisits()' may
+        //  slow down the method
+        Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
         List<RichService> richServices = new ArrayList<>();
         for (InfraService infraService : infraServices) {
@@ -527,16 +529,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // set visits
-            Map<String, Integer> visits = statisticsService.visits(infraService.getId(), StatisticsService.Interval.YEAR);
-            if (visits == null) {
-                richService.setViews(0);
+            Integer views = serviceVisits.get(richService.getId());
+            if (views != null) {
+                richService.setViews(views);
             } else {
-                List<Integer> visitsList = new ArrayList<>(visits.values());
-                int visitSum = 0;
-                for (int i : visitsList) {
-                    visitSum += i;
-                }
-                richService.setViews(visitSum);
+                richService.setViews(0);
             }
             richServices.add(richService);
         }
