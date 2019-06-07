@@ -412,131 +412,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public List<RichService> createRichServices(List<InfraService> infraServices, Authentication auth) {
         // FIXME: when the list of services contains only 1 entry, 'analyticsService.getAllServiceVisits()' may
         //  slow down the method
-        Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
-        List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
-        List<RichService> richServices = new ArrayList<>();
-        for (InfraService infraService : infraServices) {
-            RichService richService = new RichService(infraService);
+        List<RichService> richServices = createRichVocabularies(infraServices);
 
-            for (Vocabulary vocabulary : vocabularies) {
-                switch (vocabulary.getId()) {
-                    case "categories":
-                        if (infraService.getCategory() != null) {
-                            richService.setCategoryName(vocabulary.getEntries().get(infraService.getCategory()).getName());
-                        }
+        createRichStatistics(richServices, auth);
 
-                        if (infraService.getSubcategory() != null) {
-                            List<VocabularyEntry> subcategories = vocabulary.getEntries().get(infraService.getCategory()).getChildren();
-                            for (VocabularyEntry entry : subcategories) {
-                                if (entry.getId().equals(infraService.getSubcategory())) {
-                                    richService.setSubCategoryName(entry.getName());
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-
-                    case "languages":
-                        if (infraService.getLanguages() != null) {
-                            richService.setLanguageNames(infraService.getLanguages()
-                                    .stream()
-                                    .map(l -> vocabulary.getEntries().get(l).getName())
-                                    .collect(Collectors.toList())
-                            );
-                        }
-                        break;
-
-                    case "places":
-                        if (infraService.getPlaces() != null) {
-                            richService.setPlaceNames(infraService.getPlaces()
-                                    .stream()
-                                    .map(p -> vocabulary.getEntries().get(p).getName())
-                                    .collect(Collectors.toList())
-                            );
-                        }
-                        break;
-
-                    case "trl":
-                        if (infraService.getTrl() != null) {
-                            richService.setTrlName(vocabulary.getEntries().get(infraService.getTrl()).getName());
-                        }
-                        break;
-
-                    case "lifecyclestatus":
-                        if (infraService.getLifeCycleStatus() != null) {
-                            richService.setLifeCycleStatusName(vocabulary.getEntries().get(infraService.getLifeCycleStatus()).getName());
-                        }
-                        break;
-                    default:
-                }
-            }
-
-            // set user favourite and rate if auth != null
-            if (auth != null) {
-
-                List<Event> userEvents;
-                try {
-                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId(), auth);
-                    if (!userEvents.isEmpty()) {
-                        richService.setFavourite(userEvents.get(0).getValue().equals("1"));
-                    }
-                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), infraService.getId(), auth);
-                    if (!userEvents.isEmpty()) {
-                        richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
-                    }
-                } catch (OIDCAuthenticationException e) {
-                    // user not logged in
-                    logger.warn("Authentication Exception", e);
-                } catch (Exception e2) {
-                    logger.error(e2);
-                }
-            }
-
-            List<Event> serviceRatingEvents = eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), infraService.getId());
-
-            //set Ratings & Favourites sums
-            richService.setRatings(serviceRatingEvents
-                    .stream()
-                    .map(Event::getUser)
-                    .distinct()
-                    .mapToInt(u -> 1)
-                    .sum());
-
-            Optional<List<Event>> favourites = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), infraService.getId()));
-            Map<String, Integer> userFavourites = new HashMap<>();
-            favourites.ifPresent(f -> f
-                    .stream()
-                    .filter(x -> x.getValue() != null)
-                    .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
-            int favs = 0;
-            for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
-                favs += entry.getValue();
-            }
-            richService.setFavourites(favs);
-
-            // set rating of the service
-            Optional<List<Event>> ratings = Optional.ofNullable(serviceRatingEvents);
-            Map<String, Float> userRatings = new HashMap<>();
-            ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
-            float sum = 0;
-            for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
-                sum += entry.getValue();
-            }
-            if (!userRatings.isEmpty()) {
-                richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum / userRatings.size()))); //the rating of the specific service as x.xx (3.33)
-            } else {
-                richService.setHasRate(0);
-            }
-
-            // set visits
-            Integer views = serviceVisits.get(richService.getId());
-            if (views != null) {
-                richService.setViews(views);
-            } else {
-                richService.setViews(0);
-            }
-            richServices.add(richService);
-        }
         return richServices;
     }
 
@@ -692,4 +571,141 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         return query.toString();
     }
+
+    public List<RichService> createRichVocabularies(List<InfraService> infraServices){
+        List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
+        List<RichService> richServices = new ArrayList<>();
+
+        for (InfraService infraService : infraServices){
+            RichService richService = new RichService(infraService);
+            for (Vocabulary vocabulary : vocabularies) {
+                switch (vocabulary.getId()) {
+                    case "categories":
+                        if (infraService.getCategory() != null) {
+                            richService.setCategoryName(vocabulary.getEntries().get(infraService.getCategory()).getName());
+                        }
+
+                        if (infraService.getSubcategory() != null) {
+                            List<VocabularyEntry> subcategories = vocabulary.getEntries().get(infraService.getCategory()).getChildren();
+                            for (VocabularyEntry entry : subcategories) {
+                                if (entry.getId().equals(infraService.getSubcategory())) {
+                                    richService.setSubCategoryName(entry.getName());
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "languages":
+                        if (infraService.getLanguages() != null) {
+                            richService.setLanguageNames(infraService.getLanguages()
+                                    .stream()
+                                    .map(l -> vocabulary.getEntries().get(l).getName())
+                                    .collect(Collectors.toList())
+                            );
+                        }
+                        break;
+
+                    case "places":
+                        if (infraService.getPlaces() != null) {
+                            richService.setPlaceNames(infraService.getPlaces()
+                                    .stream()
+                                    .map(p -> vocabulary.getEntries().get(p).getName())
+                                    .collect(Collectors.toList())
+                            );
+                        }
+                        break;
+
+                    case "trl":
+                        if (infraService.getTrl() != null) {
+                            richService.setTrlName(vocabulary.getEntries().get(infraService.getTrl()).getName());
+                        }
+                        break;
+
+                    case "lifecyclestatus":
+                        if (infraService.getLifeCycleStatus() != null) {
+                            richService.setLifeCycleStatusName(vocabulary.getEntries().get(infraService.getLifeCycleStatus()).getName());
+                        }
+                        break;
+                    default:
+                }
+            }
+            richServices.add(richService);
+        }
+        return (richServices);
+    }
+
+    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth){
+        Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
+
+        for (RichService richService : richServices){
+
+            // set user favourite and rate if auth != null
+            if (auth != null) {
+
+                List<Event> userEvents;
+                try {
+                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richService.getId(), auth);
+                    if (!userEvents.isEmpty()) {
+                        richService.setFavourite(userEvents.get(0).getValue().equals("1"));
+                    }
+                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richService.getId(), auth);
+                    if (!userEvents.isEmpty()) {
+                        richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
+                    }
+                } catch (OIDCAuthenticationException e) {
+                    // user not logged in
+                    logger.warn("Authentication Exception", e);
+                } catch (Exception e2) {
+                    logger.error(e2);
+                }
+            }
+
+            List<Event> serviceRatingEvents = eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), richService.getId());
+
+            //set Ratings & Favourites sums
+            richService.setRatings(serviceRatingEvents
+                    .stream()
+                    .map(Event::getUser)
+                    .distinct()
+                    .mapToInt(u -> 1)
+                    .sum());
+
+            Optional<List<Event>> favourites = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), richService.getId()));
+            Map<String, Integer> userFavourites = new HashMap<>();
+            favourites.ifPresent(f -> f
+                    .stream()
+                    .filter(x -> x.getValue() != null)
+                    .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
+            int favs = 0;
+            for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
+                favs += entry.getValue();
+            }
+            richService.setFavourites(favs);
+
+            // set rating of the service
+            Optional<List<Event>> ratings = Optional.ofNullable(serviceRatingEvents);
+            Map<String, Float> userRatings = new HashMap<>();
+            ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
+            float sum = 0;
+            for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
+                sum += entry.getValue();
+            }
+            if (!userRatings.isEmpty()) {
+                richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum / userRatings.size()))); //the rating of the specific service as x.xx (3.33)
+            } else {
+                richService.setHasRate(0);
+            }
+
+            // set visits
+            Integer views = serviceVisits.get(richService.getId());
+            if (views != null) {
+                richService.setViews(views);
+            } else {
+                richService.setViews(0);
+            }
+        }
+        return richServices;
+    }
+
 }

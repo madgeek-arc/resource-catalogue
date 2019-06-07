@@ -26,14 +26,16 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private ProviderService providerService;
     private SecurityService securityService;
+    private ServiceResourceManager serviceResourceManager;
 
     @Autowired
     public FunderManager(InfraServiceService<InfraService, InfraService> infraServiceService,
-                         ProviderService providerService, SecurityService securityService) {
+                         ProviderService providerService, SecurityService securityService, ServiceResourceManager serviceResourceManager) {
         super(Funder.class);
         this.infraServiceService = infraServiceService;
         this.providerService = providerService;
         this.securityService = securityService;
+        this.serviceResourceManager = serviceResourceManager;
     }
 
     @Override
@@ -77,7 +79,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         List<Funder> funderList = this.getAll(ff, null).getResults();
         ff.addFilter("latest", "true");
         ff.addFilter("active", "true");
-        List<RichService> richServiceList = infraServiceService.getRichServices(ff, null).getResults();
+        List<RichService> richServiceList = serviceResourceManager.createRichVocabularies(infraServiceService.getAll(ff, auth).getResults());
         Map<String, Map<String, Double>> funderStats = new LinkedHashMap<>();
         Map<String, Double> servicesMap;
 
