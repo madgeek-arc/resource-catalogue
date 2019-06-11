@@ -6,6 +6,8 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.AuthenticationInfo;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -166,6 +168,46 @@ public class EventManager extends ResourceManager<Event> implements EventService
                 eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
                 10000, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
+    }
+
+    @Override
+    @Cacheable(value = CACHE_EVENTS)
+    public Map<String, List<Float>> getAllServiceEvents(String eventType, Authentication authentication) {
+        Map<String, List<Float>> allServiceEvents = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("type", eventType);
+        Map<String, Object> order = new HashMap<>();
+        Map<String, Object> sort = new HashMap<>();
+        order.put("order", "desc");
+        sort.put("instant", order);
+        ff.setOrderBy(sort);
+        List<Event> events = getAll(ff, authentication).getResults();
+        List<String> userList = events.stream().map(Event::getUser).distinct().collect(Collectors.toList());
+        List<String> serviceList = events.stream().map(Event::getService).distinct().collect(Collectors.toList());
+
+        // for each service
+        for (String service : serviceList) {
+            List<Event> serviceEvents = events.stream()
+                    .filter(e -> e.getService().equals(service))
+                    .collect(Collectors.toList());
+
+            Map<String, Event> userEventsMap = new HashMap<>();
+
+            // for each event, save only the latest user events (events order is descending on field 'instant')
+            for (Event event : serviceEvents) {
+                userEventsMap.putIfAbsent(event.getUser(), event);
+            }
+
+            List<Float> eventsValues = userEventsMap.values()
+                    .stream()
+                    .map(Event::getValue)
+                    .map(Float::parseFloat)
+                    .collect(Collectors.toList());
+            allServiceEvents.put(service, eventsValues);
+        }
+
+        return allServiceEvents;
     }
 
     private List<Event> pagingToList(Paging<Resource> resources) {

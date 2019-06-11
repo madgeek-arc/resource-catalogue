@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static eu.einfracentral.config.CacheConfig.CACHE_VISITS;
 
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
@@ -53,6 +56,7 @@ public class AnalyticsService {
         serviceVisits = String.format(serviceVisitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
     }
 
+    @Cacheable(value = CACHE_VISITS)
     public Map<String, Integer> getAllServiceVisits() {
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         JsonNode json = parse(getMatomoResponse(String.format(serviceVisits, date)));

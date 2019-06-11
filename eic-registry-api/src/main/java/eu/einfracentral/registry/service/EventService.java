@@ -4,6 +4,7 @@ import eu.einfracentral.domain.Event;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EventService extends ResourceService<Event, Authentication> {
 
@@ -61,6 +62,14 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @return
      */
     List<Event> getUserEvents(String eventType, Authentication authentication);
+
+    /**
+     *
+     * @param eventType
+     * @param authentication
+     * @return
+     */
+    Map<String, List<Float>> getAllServiceEvents(String eventType, Authentication authentication);
 
     void deleteEvents(List<Event> events);
 }

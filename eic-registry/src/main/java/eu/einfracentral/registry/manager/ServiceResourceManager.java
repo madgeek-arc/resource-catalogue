@@ -637,6 +637,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth){
         Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
+        Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEvents(Event.UserActionType.FAVOURITE.getKey(), auth);
+        Map<String, List<Float>> serviceRatings = eventService.getAllServiceEvents(Event.UserActionType.RATING.getKey(), auth);
 
         for (RichService richService : richServices){
 
@@ -661,40 +663,17 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 }
             }
 
-            List<Event> serviceRatingEvents = eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), richService.getId());
+            if (serviceRatings.containsKey(richService.getId())) {
+                int ratings = serviceRatings.get(richService.getId()).size();
+                float rating = serviceRatings.get(richService.getId()).stream().reduce((float) 0.0, Float::sum);
+                richService.setRatings(ratings);
+                richService.setHasRate(rating);
 
-            //set Ratings & Favourites sums
-            richService.setRatings(serviceRatingEvents
-                    .stream()
-                    .map(Event::getUser)
-                    .distinct()
-                    .mapToInt(u -> 1)
-                    .sum());
-
-            Optional<List<Event>> favourites = Optional.ofNullable(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), richService.getId()));
-            Map<String, Integer> userFavourites = new HashMap<>();
-            favourites.ifPresent(f -> f
-                    .stream()
-                    .filter(x -> x.getValue() != null)
-                    .forEach(e -> userFavourites.putIfAbsent(e.getUser(), Integer.parseInt(e.getValue()))));
-            int favs = 0;
-            for (Map.Entry<String, Integer> entry : userFavourites.entrySet()) {
-                favs += entry.getValue();
             }
-            richService.setFavourites(favs);
 
-            // set rating of the service
-            Optional<List<Event>> ratings = Optional.ofNullable(serviceRatingEvents);
-            Map<String, Float> userRatings = new HashMap<>();
-            ratings.ifPresent(r -> r.stream().filter(x -> x.getValue() != null).forEach(rating -> userRatings.putIfAbsent(rating.getUser(), Float.parseFloat(rating.getValue()))));
-            float sum = 0;
-            for (Map.Entry<String, Float> entry : userRatings.entrySet()) {
-                sum += entry.getValue();
-            }
-            if (!userRatings.isEmpty()) {
-                richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(sum / userRatings.size()))); //the rating of the specific service as x.xx (3.33)
-            } else {
-                richService.setHasRate(0);
+            if (serviceFavourites.containsKey(richService.getId())) {
+                int favourites = serviceFavourites.get(richService.getId()).stream().mapToInt(Float::intValue).sum();
+                richService.setFavourites(favourites);
             }
 
             // set visits
