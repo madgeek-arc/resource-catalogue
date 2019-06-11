@@ -64,12 +64,13 @@ public interface EventService extends ResourceService<Event, Authentication> {
     List<Event> getUserEvents(String eventType, Authentication authentication);
 
     /**
+     * Retrieve a map with service IDs as keys and list of float event values for each service.
      *
      * @param eventType
      * @param authentication
      * @return
      */
-    Map<String, List<Float>> getAllServiceEvents(String eventType, Authentication authentication);
+    Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication);
 
     void deleteEvents(List<Event> events);
 }
