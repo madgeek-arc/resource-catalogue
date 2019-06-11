@@ -637,8 +637,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth){
         Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
-        Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEvents(Event.UserActionType.FAVOURITE.getKey(), auth);
-        Map<String, List<Float>> serviceRatings = eventService.getAllServiceEvents(Event.UserActionType.RATING.getKey(), auth);
+        Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
+        Map<String, List<Float>> serviceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
         for (RichService richService : richServices){
 

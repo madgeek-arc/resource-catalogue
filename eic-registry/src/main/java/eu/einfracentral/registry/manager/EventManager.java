@@ -172,7 +172,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     @Cacheable(value = CACHE_EVENTS)
-    public Map<String, List<Float>> getAllServiceEvents(String eventType, Authentication authentication) {
+    public Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication) {
         Map<String, List<Float>> allServiceEvents = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
