@@ -667,7 +667,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 int ratings = serviceRatings.get(richService.getId()).size();
                 float rating = serviceRatings.get(richService.getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
                 richService.setRatings(ratings);
-                richService.setHasRate(rating);
+                richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
 
             }
 
