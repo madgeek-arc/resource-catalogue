@@ -665,7 +665,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
             if (serviceRatings.containsKey(richService.getId())) {
                 int ratings = serviceRatings.get(richService.getId()).size();
-                float rating = serviceRatings.get(richService.getId()).stream().reduce((float) 0.0, Float::sum);
+                float rating = serviceRatings.get(richService.getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
                 richService.setRatings(ratings);
                 richService.setHasRate(rating);
 
