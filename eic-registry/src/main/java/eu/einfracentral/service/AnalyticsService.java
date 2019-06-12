@@ -3,7 +3,6 @@ package eu.einfracentral.service;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.einfracentral.domain.InfraService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -112,13 +111,12 @@ public class AnalyticsService {
             HttpEntity<String> request = new HttpEntity<>(headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
             if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                logger.error(String.format("Could not retrieve analytics from matomo%nResponse Code: %s%nResponse Body: %s" +
-                                "",
+                logger.error(String.format("Could not retrieve analytics from matomo%nResponse Code: %s%nResponse Body: %s",
                         responseEntity.getStatusCode().toString(), responseEntity.getBody()));
             }
             return responseEntity.getBody();
         } catch (RuntimeException e) {
-            logger.error("Could not retrieve analytics from matomo" , e);
+            logger.error("Could not retrieve analytics from matomo", e);
         }
         return "";
     }
