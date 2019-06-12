@@ -63,7 +63,7 @@ jdbc.url=jdbc:postgresql://${fqdn}:5432/db
 jdbc.username=<user>
 jdbc.password=<your-password>
 
-## Elastisearch Properties ##
+## Elasticsearch Properties ##
 elasticsearch.url=${fqdn}
 elasticsearch.port=9300
 elasticsearch.cluster=<clusterName>
