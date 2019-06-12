@@ -13,6 +13,8 @@
 
   <xs:element name="measurement" type="tns:measurement"/>
 
+  <xs:element name="newVocabulary" type="tns:newVocabulary"/>
+
   <xs:element name="provider" type="tns:provider"/>
 
   <xs:element name="rangeValue" type="tns:rangeValue"/>
@@ -340,6 +342,17 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="fromValue" type="xs:string"/>
       <xs:element minOccurs="0" name="toValue" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="newVocabulary">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="description" type="xs:string"/>
+      <xs:element minOccurs="0" name="extras" type="extrasMap"/>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="parentId" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
