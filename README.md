@@ -90,6 +90,10 @@ oidc.id=
 eic.admins=test@email.com, test2@email.com
 einfracentral.debug=false
 
+## sync ##
+sync.host=
+sync.token.filepath=
+
 ## Mail Properties ##
 mail.smtp.auth=
 mail.smtp.host=
@@ -103,6 +107,7 @@ mail.smtp.ssl.enable=
 matomoHost=
 matomoToken=
 matomoSiteId=
+matomoAuthorizationHeader=
 ```
 
 - - -
