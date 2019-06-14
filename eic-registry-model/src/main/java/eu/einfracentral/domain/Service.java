@@ -421,6 +421,12 @@ public class Service implements Identifiable {
         return Objects.equals(list1, list2);
     }
 
+    /**
+     * Method checking if a {@link List<String>} object is null or is empty or it contains only one entry
+     * with an empty String ("")
+     * @param list
+     * @return
+     */
     private boolean stringListIsEmpty(List<String> list) {
         if (list == null || list.isEmpty()) {
             return true;
