@@ -92,8 +92,9 @@ public class SynchronizerService {
                 if (re.getStatusCode() != HttpStatus.CREATED) {
                     logger.error(String.format("Adding service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                } else {
+                    retryKey = false;
                 }
-                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -124,8 +125,9 @@ public class SynchronizerService {
                 if (re.getStatusCode() != HttpStatus.OK) {
                     logger.error(String.format("Updating service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                } else {
+                    retryKey = false;
                 }
-                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -156,8 +158,9 @@ public class SynchronizerService {
                 if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
                     logger.error(String.format("Deleting service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                } else {
+                    retryKey = false;
                 }
-                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -188,8 +191,9 @@ public class SynchronizerService {
                 if (re.getStatusCode() != HttpStatus.CREATED) {
                     logger.error(String.format("Adding measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                } else {
+                    retryKey = false;
                 }
-                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -220,8 +224,9 @@ public class SynchronizerService {
                 if (re.getStatusCode() != HttpStatus.OK) {
                     logger.error(String.format("Updating measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                } else {
+                    retryKey = false;
                 }
-                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -252,8 +257,9 @@ public class SynchronizerService {
                 if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
                     logger.error(String.format("Deleting measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                } else {
+                    retryKey = false;
                 }
-                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
