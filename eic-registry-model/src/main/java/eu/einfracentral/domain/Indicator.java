@@ -113,6 +113,18 @@ public class Indicator implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Indicator{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", dimensions=" + dimensions +
+                ", unit='" + unit + '\'' +
+                ", unitName='" + unitName + '\'' +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

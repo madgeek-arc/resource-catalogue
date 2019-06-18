@@ -63,7 +63,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
         Event ret = super.add(event, auth);
-        logger.info("Adding Event " + event);
+        logger.debug("Adding Event " + event);
         return ret;
     }
 
@@ -72,7 +72,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         Event ret = super.update(event, auth);
-        logger.info("Updating Event " + event);
+        logger.debug("Updating Event " + event);
         return ret;
     }
 
