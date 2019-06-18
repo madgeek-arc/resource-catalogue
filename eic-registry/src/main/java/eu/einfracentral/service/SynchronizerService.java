@@ -16,6 +16,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @Service
 public class SynchronizerService {
@@ -26,19 +28,12 @@ public class SynchronizerService {
     private boolean active = false;
     private String host;
     private String filename;
+    private boolean retryKey;
 
-    private String readFile(String filename) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-
-            while (line != null) {
-                sb.append(line);
-                line = br.readLine();
-            }
-            return sb.toString();
-        }
-    }
+    private BlockingQueue<InfraService> serviceQueue;
+    private BlockingQueue<Measurement> measurementQueue;
+    private BlockingQueue<String> serviceActionQueue;
+    private BlockingQueue<String> measurementActionQueue;
 
     @Autowired
     public SynchronizerService(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename) {
@@ -51,6 +46,26 @@ public class SynchronizerService {
         if ("".equals(filename)) {
             logger.warn("'sync.token.filepath' value not set");
         }
+        this.serviceQueue = new LinkedBlockingQueue<>();
+        this.measurementQueue = new LinkedBlockingQueue<>();
+        this.serviceActionQueue = new LinkedBlockingQueue<>();
+        this.measurementActionQueue = new LinkedBlockingQueue<>();
+    }
+
+    public BlockingQueue<InfraService> getServiceQueue() {
+        return serviceQueue;
+    }
+
+    public BlockingQueue<Measurement> getMeasurementQueue() {
+        return measurementQueue;
+    }
+
+    public BlockingQueue<String> getServiceAction() {
+        return serviceActionQueue;
+    }
+
+    public BlockingQueue<String> getMeasurementAction() {
+        return measurementActionQueue;
     }
 
     private HttpHeaders createHeaders() {
@@ -67,6 +82,7 @@ public class SynchronizerService {
     }
 
     public void syncAdd(InfraService infraService) {
+        retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
             logger.info(String.format("Posting service with id: %s - Host: %s", infraService.getId(), host));
@@ -77,6 +93,7 @@ public class SynchronizerService {
                     logger.error(String.format("Adding service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 }
+                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -85,10 +102,19 @@ public class SynchronizerService {
             } catch (RuntimeException re) {
                 logger.error("syncAdd failed, Service id: " + infraService.getId(), re);
             }
+            if (retryKey) {
+                try {
+                    serviceQueue.add(infraService);
+                    serviceActionQueue.add("add");
+                } catch(IllegalStateException e){
+                    logger.info("No space is currently available in the Queue");
+                }
+            }
         }
     }
 
     public void syncUpdate(InfraService infraService) {
+        retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
             logger.info(String.format("Updating service with id: %s - Host: %s", infraService.getId(), host));
@@ -99,6 +125,7 @@ public class SynchronizerService {
                     logger.error(String.format("Updating service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 }
+                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -107,10 +134,19 @@ public class SynchronizerService {
             } catch (RuntimeException re) {
                 logger.error("syncUpdate failed, Service id: " + infraService.getId(), re);
             }
+            if (retryKey) {
+                try {
+                    serviceQueue.add(infraService);
+                    serviceActionQueue.add("update");
+                } catch(IllegalStateException e){
+                    logger.info("No space is currently available in the Queue");
+                }
+            }
         }
     }
 
     public void syncDelete(InfraService infraService) {
+        retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(createHeaders());
             logger.info(String.format("Deleting service with id: %s - Host: %s", infraService.getId(), host));
@@ -121,6 +157,7 @@ public class SynchronizerService {
                     logger.error(String.format("Deleting service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 }
+                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -129,10 +166,19 @@ public class SynchronizerService {
             } catch (RuntimeException re) {
                 logger.error("syncDelete failed, Service id: " + infraService.getId(), re);
             }
+            if (retryKey) {
+                try {
+                    serviceQueue.add(infraService);
+                    serviceActionQueue.add("delete");
+                } catch(IllegalStateException e){
+                    logger.info("No space is currently available in the Queue");
+                }
+            }
         }
     }
 
     public void syncAdd(Measurement measurement) {
+        retryKey = true;
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, createHeaders());
             logger.info(String.format("Posting measurement with id: %s - Host: %s", measurement.getId(), host));
@@ -143,6 +189,7 @@ public class SynchronizerService {
                     logger.error(String.format("Adding measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 }
+                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -151,10 +198,19 @@ public class SynchronizerService {
             } catch (RuntimeException re) {
                 logger.error("syncAdd failed, Measurement id: " + measurement.getId(), re);
             }
+            if (retryKey) {
+                try {
+                    measurementQueue.add(measurement);
+                    measurementActionQueue.add("add");
+                } catch(IllegalStateException e){
+                    logger.info("No space is currently available in the Queue");
+                }
+            }
         }
     }
 
     public void syncUpdate(Measurement measurement) {
+        retryKey = true;
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, createHeaders());
             logger.info(String.format("Updating measurement with id: %s - Host: %s", measurement.getId(), host));
@@ -165,6 +221,7 @@ public class SynchronizerService {
                     logger.error(String.format("Updating measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 }
+                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -173,10 +230,19 @@ public class SynchronizerService {
             } catch (RuntimeException re) {
                 logger.error("syncUpdate failed, Measurement id: " + measurement.getId(), re);
             }
+            if (retryKey) {
+                try {
+                    measurementQueue.add(measurement);
+                    measurementActionQueue.add("update");
+                } catch(IllegalStateException e){
+                    logger.info("No space is currently available in the Queue");
+                }
+            }
         }
     }
 
     public void syncDelete(Measurement measurement) {
+        retryKey = true;
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(createHeaders());
             logger.info(String.format("Deleting measurement with id: %s - Host: %s", measurement.getId(), host));
@@ -187,6 +253,7 @@ public class SynchronizerService {
                     logger.error(String.format("Deleting measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
                             measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 }
+                retryKey = false;
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: " + host, e);
             } catch (HttpServerErrorException e) {
@@ -195,6 +262,27 @@ public class SynchronizerService {
             } catch (RuntimeException re) {
                 logger.error("syncDelete failed, Measurement id: " + measurement.getId(), re);
             }
+            if (retryKey) {
+                try {
+                    measurementQueue.add(measurement);
+                    measurementActionQueue.add("delete");
+                } catch(IllegalStateException e){
+                    logger.info("No space is currently available in the Queue");
+                }
+            }
+        }
+    }
+
+    private String readFile(String filename) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                line = br.readLine();
+            }
+            return sb.toString();
         }
     }
 }
