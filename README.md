@@ -63,7 +63,7 @@ jdbc.url=jdbc:postgresql://${fqdn}:5432/db
 jdbc.username=<user>
 jdbc.password=<your-password>
 
-## Elastisearch Properties ##
+## Elasticsearch Properties ##
 elasticsearch.url=${fqdn}
 elasticsearch.port=9300
 elasticsearch.cluster=<clusterName>
@@ -90,6 +90,10 @@ oidc.id=
 eic.admins=test@email.com, test2@email.com
 einfracentral.debug=false
 
+## sync ##
+sync.host=
+sync.token.filepath=
+
 ## Mail Properties ##
 mail.smtp.auth=
 mail.smtp.host=
@@ -103,6 +107,7 @@ mail.smtp.ssl.enable=
 matomoHost=
 matomoToken=
 matomoSiteId=
+matomoAuthorizationHeader=
 ```
 
 - - -

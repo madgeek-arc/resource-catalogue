@@ -73,5 +73,13 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
      *
      * @return
      */
-    public List<Service> createFeaturedServices();
+    List<Service> createFeaturedServices();
+
+    /**
+     * Create service id.
+     *
+     * @param service
+     * @return
+     */
+    String createServiceId(Service service);
 }
