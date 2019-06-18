@@ -12,6 +12,7 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -88,7 +89,7 @@ public class ServiceController {
 
     @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerCanAddServices(#auth, #service)")
     @RequestMapping(path = "serviceWithMeasurements", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         Service service = null;
         List<Measurement> measurements = new ArrayList<>();
@@ -104,23 +105,29 @@ public class ServiceController {
             logger.error("IOException", e);
         }
         if (service == null) {
-            throw new RuntimeException("You failed");
+            throw new ServiceException("Cannot add a null service");
         }
-        Service s = this.infraService.get(service.getId());
-        try {
-            if (s != null) {
-                if (!s.equals(service)) {
-                    this.infraService.updateService(new InfraService(service), auth);
-                    logger.info("User " + auth.getName() + " updated Service%n" + ToStringBuilder.reflectionToString(s));
-                }
-            } else {
-                s = this.infraService.addService(new InfraService(service), auth);
-                logger.info("User " + auth.getName() + " added Service%n" + ToStringBuilder.reflectionToString(s));
+        Service s = null;
+        try { // check if service already exists
+            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
+                service.setId(infraService.createServiceId(service));
             }
-            this.measurementService.updateAll(s.getId(), measurements, auth);
-        } catch (ResourceNotFoundException e) {
-            logger.error("Service does not exist%n" + ToStringBuilder.reflectionToString(service));
+            s = this.infraService.get(service.getId());
+        } catch (ServiceException e) {
+            // continue with the creation of the service
         }
+
+        if (s == null) { // if existing service is null, create it, else update it
+            s = this.infraService.addService(new InfraService(service), auth);
+            logger.info("User " + auth.getName() + " added Service%n" + ToStringBuilder.reflectionToString(s));
+        } else {
+            if (!s.equals(service)) {
+                s = this.infraService.updateService(new InfraService(service), auth);
+                logger.info("User " + auth.getName() + " updated Service%n" + ToStringBuilder.reflectionToString(s));
+            }
+        }
+        this.measurementService.updateAll(s.getId(), measurements, auth);
+
         return new ResponseEntity<>(s, HttpStatus.OK);
     }
 
