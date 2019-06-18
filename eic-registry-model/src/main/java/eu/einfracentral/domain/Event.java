@@ -29,6 +29,18 @@ public class Event implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Event{" +
+                "id='" + id + '\'' +
+                ", instant=" + instant +
+                ", type='" + type + '\'' +
+                ", user='" + user + '\'' +
+                ", service='" + service + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

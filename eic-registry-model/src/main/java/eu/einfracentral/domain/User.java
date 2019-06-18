@@ -52,6 +52,16 @@ public class User implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

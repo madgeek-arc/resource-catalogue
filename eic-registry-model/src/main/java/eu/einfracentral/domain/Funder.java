@@ -36,6 +36,16 @@ public class Funder implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Funder{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", logo=" + logo +
+                ", services=" + services +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return this.id;
     }
