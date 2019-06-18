@@ -17,7 +17,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,11 +118,11 @@ public class ServiceController {
 
         if (s == null) { // if existing service is null, create it, else update it
             s = this.infraService.addService(new InfraService(service), auth);
-            logger.info("User " + auth.getName() + " added Service%n" + ToStringBuilder.reflectionToString(s));
+            logger.info("User " + auth.getName() + " added Service\n" + s.toString());
         } else {
             if (!s.equals(service)) {
                 s = this.infraService.updateService(new InfraService(service), auth);
-                logger.info("User " + auth.getName() + " updated Service%n" + ToStringBuilder.reflectionToString(s));
+                logger.info("User " + auth.getName() + " updated Service\n" + s.toString());
             }
         }
         this.measurementService.updateAll(s.getId(), measurements, auth);
