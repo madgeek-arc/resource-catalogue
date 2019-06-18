@@ -93,7 +93,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public void delete(T t) {
         del(t);
-        logger.info("Deleting Resource " + t);
     }
 
     @Override
