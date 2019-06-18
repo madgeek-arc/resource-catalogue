@@ -31,9 +31,11 @@ public class ScheduleService {
         BlockingQueue<String> measurementActionQueue = synchronizerService.getMeasurementAction();
         int syncTries = 0;
 
-        logger.info("retrySync started");
-        if(serviceQueue.isEmpty() && measurementQueue.isEmpty()){
-            logger.info("There are no Services or Measurements waiting to be Synchronized in the Queue!");
+        if(!serviceQueue.isEmpty()){
+            logger.warn(String.format("There are %s Services waiting to be Synchronized!", serviceQueue.size()));
+        }
+        if(!measurementQueue.isEmpty()){
+            logger.warn(String.format("There are %s Measurements waiting to be Synchronized!", measurementQueue.size()));
         }
 
         try {
@@ -41,8 +43,7 @@ public class ScheduleService {
                 if (!serviceQueue.isEmpty()){
                     InfraService infraService = serviceQueue.take();
                     String serviceAction = serviceActionQueue.take();
-                    logger.info("Head Service on serviceQueue: " +infraService.getId());
-                    logger.info("Head serviceAction on serviceActionQueue: " +serviceAction);
+                    logger.info(String.format("Attempting to perform '%s' operation for the service:%n%s", serviceAction, infraService));
                     switch (serviceAction){
                         case "add":
                             synchronizerService.syncAdd(infraService);
@@ -58,8 +59,7 @@ public class ScheduleService {
                 if (!measurementQueue.isEmpty()){
                     Measurement measurement = measurementQueue.take();
                     String measurementAction = measurementActionQueue.take();
-                    logger.info("Head Measurement on measurementQueue " +measurement);
-                    logger.info("Head measurementAction on measurementActionQueue " +measurementAction);
+                    logger.info(String.format("Attempting to perform '%s' operation for the measurement:%n%s", measurementAction, measurement));
                     switch (measurementAction){
                         case "add":
                             synchronizerService.syncAdd(measurement);
