@@ -35,6 +35,17 @@ public class InfraService extends Service {
         this.serviceMetadata = serviceMetadata;
     }
 
+    @Override
+    public String toString() {
+        return "InfraService{" +
+                "service=" + super.toString() +
+                ", serviceMetadata=" + serviceMetadata +
+                ", active=" + active +
+                ", status='" + status + '\'' +
+                ", latest=" + latest +
+                '}';
+    }
+
     public ServiceMetadata getServiceMetadata() {
         return serviceMetadata;
     }

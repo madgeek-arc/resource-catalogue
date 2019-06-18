@@ -2,7 +2,6 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Measurement;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +83,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to post Service with id %s to host %s%nMessage: %s",
                         infraService.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error(String.format("syncAdd failed, check if token has expired!%nService: %s", ToStringBuilder.reflectionToString(infraService)), re);
+                logger.error(String.format("syncAdd failed, check if token has expired!%nService: %s", infraService.toString()), re);
             }
         }
     }
@@ -106,7 +105,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to update Service with id %s to host %s%nMessage: %s",
                         infraService.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error(String.format("syncUpdate failed, check if token has expired!%nService: %s", ToStringBuilder.reflectionToString(infraService)), re);
+                logger.error(String.format("syncUpdate failed, check if token has expired!%nService: %s", infraService.toString()), re);
             }
         }
     }
@@ -128,7 +127,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to delete Service with id %s to host %s%nMessage: %s",
                         infraService.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error(String.format("syncDelete failed, check if token has expired!%nService: %s", ToStringBuilder.reflectionToString(infraService)), re);
+                logger.error(String.format("syncDelete failed, check if token has expired!%nService: %s", infraService.toString()), re);
             }
         }
     }
@@ -150,7 +149,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to post Measurement with id %s to host %s%nMessage: %s",
                         measurement.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error(String.format("syncAdd failed, check if token has expired!%nMeasurement: %s", ToStringBuilder.reflectionToString(measurement)), re);
+                logger.error(String.format("syncAdd failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
             }
         }
     }
@@ -172,7 +171,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to update Measurement with id %s to host %s%nMessage: %s",
                         measurement.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error(String.format("syncUpdate failed, check if token has expired!%nMeasurement: %s", ToStringBuilder.reflectionToString(measurement)), re);
+                logger.error(String.format("syncUpdate failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
             }
         }
     }
@@ -194,7 +193,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to delete Measurement with id %s to host %s%nMessage: %s",
                         measurement.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error(String.format("syncDelete failed, check if token has expired!%nMeasurement: %s", ToStringBuilder.reflectionToString(measurement)), re);
+                logger.error(String.format("syncDelete failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
             }
         }
     }

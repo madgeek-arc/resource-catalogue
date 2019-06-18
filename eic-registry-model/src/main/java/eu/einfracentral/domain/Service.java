@@ -373,6 +373,47 @@ public class Service implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Service{" +
+                "id='" + id + '\'' +
+                ", url=" + url +
+                ", name='" + name + '\'' +
+                ", tagline='" + tagline + '\'' +
+                ", description='" + description + '\'' +
+                ", options='" + options + '\'' +
+                ", targetUsers='" + targetUsers + '\'' +
+                ", userValue='" + userValue + '\'' +
+                ", userBase='" + userBase + '\'' +
+                ", symbol=" + symbol +
+                ", multimediaURL=" + multimediaURL +
+                ", providers=" + providers +
+                ", version='" + version + '\'' +
+                ", lastUpdate=" + lastUpdate +
+                ", changeLog='" + changeLog + '\'' +
+                ", validFor=" + validFor +
+                ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
+                ", trl='" + trl + '\'' +
+                ", category='" + category + '\'' +
+                ", subcategory='" + subcategory + '\'' +
+                ", places=" + places +
+                ", languages=" + languages +
+                ", tags=" + tags +
+                ", requiredServices=" + requiredServices +
+                ", relatedServices=" + relatedServices +
+                ", order=" + order +
+                ", requests=" + requests +
+                ", helpdesk=" + helpdesk +
+                ", userManual=" + userManual +
+                ", trainingInformation=" + trainingInformation +
+                ", feedback=" + feedback +
+                ", price=" + price +
+                ", serviceLevelAgreement=" + serviceLevelAgreement +
+                ", termsOfUse=" + termsOfUse +
+                ", funding='" + funding + '\'' +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Service)) return false;
