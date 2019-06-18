@@ -22,7 +22,7 @@ public class ScheduleService {
     }
 
 
-    @Scheduled(initialDelay = 0, fixedRate = 60000) //run every 5 min
+    @Scheduled(initialDelay = 0, fixedRate = 600000) //run every 10 min
     public void retrySync() {
 
         BlockingQueue<InfraService> serviceQueue = synchronizerService.getServiceQueue();
