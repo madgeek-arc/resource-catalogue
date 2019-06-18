@@ -110,7 +110,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         }
         measurementManager.delete(measurement);
         logger.info("User " + auth.getName() + " deleted Measurement with id " + measurement.getId());
-        return new ResponseEntity<>(measurement, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

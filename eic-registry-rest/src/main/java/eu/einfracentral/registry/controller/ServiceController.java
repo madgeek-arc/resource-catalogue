@@ -1,12 +1,18 @@
 package eu.einfracentral.registry.controller;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -23,6 +29,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,12 +41,15 @@ public class ServiceController {
     private static Logger logger = LogManager.getLogger(ServiceController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
+    private MeasurementService<Measurement, Authentication> measurementService;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
-                      ProviderService<Provider, Authentication> provider) {
+                      ProviderService<Provider, Authentication> provider,
+                      MeasurementService<Measurement, Authentication> measurementService) {
         this.infraService = service;
         this.providerService = provider;
+        this.measurementService = measurementService;
     }
 
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
@@ -74,6 +84,50 @@ public class ServiceController {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
         logger.info("User " + auth.getName() + " created a new Service " + service.getName() + " with id " + service.getId());
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
+    }
+
+    @PreAuthorize(" hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerCanAddServices(#auth, #service)")
+    @RequestMapping(path = "serviceWithMeasurements", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ObjectMapper mapper = new ObjectMapper();
+        Service service = null;
+        List<Measurement> measurements = new ArrayList<>();
+        try {
+            service = mapper.readValue(json.get("service").toString(), Service.class);
+            measurements = Arrays.stream(mapper.readValue(json.get("measurements").toString(), Measurement[].class)).collect(Collectors.toList());
+
+        } catch (JsonParseException e) {
+            logger.error("JsonParseException", e);
+        } catch (JsonMappingException e) {
+            logger.error("JsonMappingException", e);
+        } catch (IOException e) {
+            logger.error("IOException", e);
+        }
+        if (service == null) {
+            throw new ServiceException("Cannot add a null service");
+        }
+        Service s = null;
+        try { // check if service already exists
+            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
+                service.setId(infraService.createServiceId(service));
+            }
+            s = this.infraService.get(service.getId());
+        } catch (ServiceException e) {
+            // continue with the creation of the service
+        }
+
+        if (s == null) { // if existing service is null, create it, else update it
+            s = this.infraService.addService(new InfraService(service), auth);
+            logger.info("User " + auth.getName() + " added Service\n" + s.toString());
+        } else {
+            if (!s.equals(service)) {
+                s = this.infraService.updateService(new InfraService(service), auth);
+                logger.info("User " + auth.getName() + " updated Service\n" + s.toString());
+            }
+        }
+        this.measurementService.updateAll(s.getId(), measurements, auth);
+
+        return new ResponseEntity<>(s, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a version of revisions.")

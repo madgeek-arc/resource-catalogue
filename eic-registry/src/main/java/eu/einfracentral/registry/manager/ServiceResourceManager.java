@@ -419,6 +419,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return richServices;
     }
 
+    @Override
     public String createServiceId(Service service) {
         String provider = service.getProviders().get(0);
         return String.format("%s.%s", provider, StringUtils
@@ -572,11 +573,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return query.toString();
     }
 
-    public List<RichService> createRichVocabularies(List<InfraService> infraServices){
+    public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
         List<RichService> richServices = new ArrayList<>();
 
-        for (InfraService infraService : infraServices){
+        for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
             for (Vocabulary vocabulary : vocabularies) {
                 switch (vocabulary.getId()) {
@@ -635,12 +636,12 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return (richServices);
     }
 
-    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth){
+    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth) {
         Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
         Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
         Map<String, List<Float>> serviceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
-        for (RichService richService : richServices){
+        for (RichService richService : richServices) {
 
             // set user favourite and rate if auth != null
             if (auth != null) {

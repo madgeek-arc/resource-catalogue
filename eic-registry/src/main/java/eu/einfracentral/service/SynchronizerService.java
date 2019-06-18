@@ -100,7 +100,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to post Service with id %s to host %s%nMessage: %s",
                         infraService.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error("syncAdd failed, Service id: " + infraService.getId(), re);
+                logger.error(String.format("syncAdd failed, check if token has expired!%nService: %s", infraService.toString()), re);
             }
             if (retryKey) {
                 try {
@@ -132,7 +132,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to update Service with id %s to host %s%nMessage: %s",
                         infraService.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error("syncUpdate failed, Service id: " + infraService.getId(), re);
+                logger.error(String.format("syncUpdate failed, check if token has expired!%nService: %s", infraService.toString()), re);
             }
             if (retryKey) {
                 try {
@@ -164,7 +164,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to delete Service with id %s to host %s%nMessage: %s",
                         infraService.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error("syncDelete failed, Service id: " + infraService.getId(), re);
+                logger.error(String.format("syncDelete failed, check if token has expired!%nService: %s", infraService.toString()), re);
             }
             if (retryKey) {
                 try {
@@ -196,7 +196,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to post Measurement with id %s to host %s%nMessage: %s",
                         measurement.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error("syncAdd failed, Measurement id: " + measurement.getId(), re);
+                logger.error(String.format("syncAdd failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
             }
             if (retryKey) {
                 try {
@@ -228,7 +228,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to update Measurement with id %s to host %s%nMessage: %s",
                         measurement.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error("syncUpdate failed, Measurement id: " + measurement.getId(), re);
+                logger.error(String.format("syncUpdate failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
             }
             if (retryKey) {
                 try {
@@ -260,7 +260,7 @@ public class SynchronizerService {
                 logger.error(String.format("Failed to delete Measurement with id %s to host %s%nMessage: %s",
                         measurement.getId(), host, e.getResponseBodyAsString()));
             } catch (RuntimeException re) {
-                logger.error("syncDelete failed, Measurement id: " + measurement.getId(), re);
+                logger.error(String.format("syncDelete failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
             }
             if (retryKey) {
                 try {
