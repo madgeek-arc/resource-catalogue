@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_EVENTS;
+import static eu.einfracentral.config.CacheConfig.CACHE_SERVICE_EVENTS;
 
 @Component
 @SuppressWarnings("unchecked")
@@ -58,7 +59,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
@@ -68,7 +69,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         Event ret = super.update(event, auth);
@@ -77,7 +78,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -102,7 +103,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @CacheEvict(value = CACHE_EVENTS, allEntries = true)
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
@@ -171,7 +172,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    @Cacheable(value = CACHE_EVENTS)
+    @Cacheable(value = CACHE_SERVICE_EVENTS)
     public Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication) {
         Map<String, List<Float>> allServiceEvents = new HashMap<>();
         FacetFilter ff = new FacetFilter();
