@@ -92,6 +92,15 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public NewVocabulary update(NewVocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
+        if (vocabulary.getId().startsWith("category-") || vocabulary.getId().startsWith("subcategory-")) { // TODO: remove
+            String id = vocabulary.getName().toLowerCase();
+            id = id.replaceAll(" ", "_");
+            id = id.replaceAll("&", "and");
+            if (vocabulary.getParentId() != null) {
+                id = String.format("%s-%s", vocabulary.getParentId().toLowerCase(), id);
+            }
+            vocabulary.setId(id);
+        }
         String serialized = serialize(vocabulary);
         serialized = serialized.replaceAll("tns:entry", "entry");
         serialized = serialized.replaceAll("tns:key", "key");
