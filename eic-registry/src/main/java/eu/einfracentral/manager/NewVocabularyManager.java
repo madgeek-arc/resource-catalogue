@@ -70,7 +70,7 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
             if (NewVocabulary.Type.fromString(vocabulary.getType()) == NewVocabulary.Type.CATEGORY) {
                 id = String.format("%s-%s", vocabulary.getType().toLowerCase(), id);
             }
-            if (NewVocabulary.Type.fromString(vocabulary.getType()) == NewVocabulary.Type.CATEGORY) {
+            if (NewVocabulary.Type.fromString(vocabulary.getType()) == NewVocabulary.Type.SUBCATEGORY) {
                 id = String.format("%s-%s-%s", vocabulary.getType().toLowerCase(), vocabulary.getParentId(), id);
             }
             vocabulary.setId(id);
