@@ -67,11 +67,8 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
             String id = vocabulary.getName().toLowerCase();
             id = id.replaceAll(" ", "_");
             id = id.replaceAll("&", "and");
-            if (NewVocabulary.Type.fromString(vocabulary.getType()) == NewVocabulary.Type.CATEGORY) {
-                id = String.format("%s-%s", vocabulary.getType().toLowerCase(), id);
-            }
-            if (NewVocabulary.Type.fromString(vocabulary.getType()) == NewVocabulary.Type.SUBCATEGORY) {
-                id = String.format("%s-%s-%s", vocabulary.getType().toLowerCase(), vocabulary.getParentId(), id);
+            if (vocabulary.getParentId() != null) {
+                id = String.format("%s-%s", vocabulary.getParentId().toLowerCase(), id);
             }
             vocabulary.setId(id);
         }
