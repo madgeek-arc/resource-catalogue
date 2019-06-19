@@ -34,11 +34,13 @@ public final class EntryMapAdapter extends XmlAdapter<EntryMapAdapter.GenericMap
         return genericMap;
     }
 
+    @XmlType(name = "genericMap", namespace = "http://einfracentral.eu")
     public static class GenericMap {
         @XmlElement(name="entry")
         public List<GenericMapEntry> entries = new ArrayList<>();
     }
 
+    @XmlType(name = "genericMapEntry", namespace = "http://einfracentral.eu")
     public static class GenericMapEntry {
 
         @XmlElement

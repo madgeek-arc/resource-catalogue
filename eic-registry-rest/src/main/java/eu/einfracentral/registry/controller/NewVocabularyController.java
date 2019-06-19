@@ -33,10 +33,24 @@ public class NewVocabularyController extends ResourceController<NewVocabulary, A
     }
 
     @ApiOperation(value = "Adds a new Vocabulary")
-    @PostMapping
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @Override
     public ResponseEntity<NewVocabulary> add(@RequestBody NewVocabulary newVocabulary, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(newVocabularyService.add(newVocabulary, auth), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Convert vocabularies to new vocabularies")
+    @PostMapping(path = "/convert", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<NewVocabulary>> convert() {
+//        newVocabularyService.convertVocabularies();
+        return new ResponseEntity<>(newVocabularyService.convertVocabularies(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Delete a Vocabulary")
+    @DeleteMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @Override
+    public ResponseEntity<NewVocabulary> delete(@RequestBody NewVocabulary newVocabulary, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(newVocabularyService.del(newVocabulary), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns a list of EU countries.")

@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +35,13 @@ public final class ExtrasMapAdapter extends XmlAdapter<ExtrasMapAdapter.ExtrasMa
         return genericMap;
     }
 
+    @XmlType(name = "extrasMap", namespace = "http://einfracentral.eu")
     public static class ExtrasMap {
         @XmlElement(name="entry")
         public List<Extras> entries = new ArrayList<>();
     }
 
+    @XmlType(name = "extras", namespace = "http://einfracentral.eu")
     public static class Extras {
 
         @XmlElement
