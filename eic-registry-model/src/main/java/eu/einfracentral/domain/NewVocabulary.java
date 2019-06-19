@@ -1,8 +1,6 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,7 +26,22 @@ public class NewVocabulary implements Identifiable {
     private String type;
 
     @XmlJavaTypeAdapter(ExtrasMapAdapter.class)
+    @XmlElement
     private Map<String, String> extras = new HashMap<>();
+
+    public NewVocabulary() {
+
+    }
+
+    public NewVocabulary(String id, String name, String description, String parentId,
+                         String type, Map<String, String> extras) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.parentId = parentId;
+        this.type = type;
+        this.extras = extras;
+    }
 
     public enum Type {
         SUPERCATEGORY("Supercategory"),
