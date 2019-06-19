@@ -5,6 +5,7 @@ import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.NewVocabularyService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -36,7 +37,14 @@ public class NewVocabularyController extends ResourceController<NewVocabulary, A
     @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @Override
     public ResponseEntity<NewVocabulary> add(@RequestBody NewVocabulary newVocabulary, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(newVocabularyService.add(newVocabulary, auth), HttpStatus.OK);
+        return new ResponseEntity<>(newVocabularyService.add(newVocabulary, auth), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Updates a new Vocabulary")
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @Override
+    public ResponseEntity<NewVocabulary> update(@RequestBody NewVocabulary newVocabulary, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        return new ResponseEntity<>(newVocabularyService.update(newVocabulary, auth), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Convert vocabularies to new vocabularies")

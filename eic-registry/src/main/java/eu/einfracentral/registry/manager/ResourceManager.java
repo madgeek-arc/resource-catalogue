@@ -10,7 +10,6 @@ import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.VersionService;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,17 +69,11 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T add(T t, Authentication auth) {
         if (exists(t)) {
-            logger.error(String.format("%s already exists!%n%s", resourceType.getName(), ToStringBuilder.reflectionToString(t)));
+            logger.error(String.format("%s already exists!%n%s", resourceType.getName(), t));
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         String serialized = serialize(t);
         Resource created = new Resource();
-        if (resourceType.getName().equals("new_vocabulary")) {
-            serialized = serialized.replaceAll("tns:entry", "entry");
-            serialized = serialized.replaceAll("tns:key", "key");
-            serialized = serialized.replaceAll("tns:value", "value");
-
-        }
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);

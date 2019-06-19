@@ -4,18 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.NewVocabulary;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.VocabularyEntry;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.manager.ResourceManager;
 import eu.einfracentral.registry.service.NewVocabularyService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.New;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -24,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import static eu.einfracentral.config.CacheConfig.CACHE_VOCABULARIES;
 
 @Service
 public class NewVocabularyManager extends ResourceManager<NewVocabulary> implements NewVocabularyService {
@@ -55,6 +61,52 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     }
 
     @Override
+    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
+    public NewVocabulary add(NewVocabulary vocabulary, Authentication auth) {
+        if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
+            String id = vocabulary.getName().toLowerCase();
+            id = id.replaceAll(" ", "_");
+            id = id.replaceAll("&", "and");
+            if (NewVocabulary.Type.fromString(vocabulary.getType()) == NewVocabulary.Type.CATEGORY) {
+                id = String.format("%s-%s", vocabulary.getType().toLowerCase(), id);
+            }
+            if (NewVocabulary.Type.fromString(vocabulary.getType()) == NewVocabulary.Type.CATEGORY) {
+                id = String.format("%s-%s-%s", vocabulary.getType().toLowerCase(), vocabulary.getParentId(), id);
+            }
+            vocabulary.setId(id);
+        }
+        if (exists(vocabulary)) {
+            logger.error(String.format("%s already exists!%n%s", resourceType.getName(), vocabulary));
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+        }
+        String serialized = serialize(vocabulary);
+        Resource created = new Resource();
+        serialized = serialized.replaceAll("tns:entry", "entry");
+        serialized = serialized.replaceAll("tns:key", "key");
+        serialized = serialized.replaceAll("tns:value", "value");
+        created.setPayload(serialized);
+        created.setResourceType(resourceType);
+        resourceService.addResource(created);
+        logger.info("Adding Resource " + vocabulary);
+        return vocabulary;
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
+    public NewVocabulary update(NewVocabulary vocabulary, Authentication auth) {
+        Resource existing = whereID(vocabulary.getId(), true);
+        String serialized = serialize(vocabulary);
+        serialized = serialized.replaceAll("tns:entry", "entry");
+        serialized = serialized.replaceAll("tns:key", "key");
+        serialized = serialized.replaceAll("tns:value", "value");
+        existing.setPayload(serialized);
+        existing.setResourceType(resourceType);
+        resourceService.updateResource(existing);
+        logger.info("Updating Resource " + vocabulary);
+        return vocabulary;
+    }
+
+    @Override
     public Browsing<NewVocabulary> convertVocabularies() {
         List<NewVocabulary> newVocabularies = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
@@ -78,7 +130,7 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
                 Map<String, String> vocabularyExtras = entry.getValue().getExtras();
                 NewVocabulary newVocabulary;
                 if (NewVocabulary.Type.fromString(type) == NewVocabulary.Type.CATEGORY) {
-                    newVocabulary = new NewVocabulary(String.format("%s-%s",  type.toLowerCase(), entry.getValue().getId()), entry.getValue().getName(), null, null, type, vocabularyExtras);
+                    newVocabulary = new NewVocabulary(String.format("%s-%s", type.toLowerCase(), entry.getValue().getId()), entry.getValue().getName(), null, null, type, vocabularyExtras);
                 } else {
                     newVocabulary = new NewVocabulary(entry.getValue().getId(), entry.getValue().getName(), null, null, type, vocabularyExtras);
                 }
