@@ -41,7 +41,7 @@ public class NewVocabularyController extends ResourceController<NewVocabulary, A
     }
 
     @ApiOperation(value = "Updates a new Vocabulary")
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @Override
     public ResponseEntity<NewVocabulary> update(@RequestBody NewVocabulary newVocabulary, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         return new ResponseEntity<>(newVocabularyService.update(newVocabulary, auth), HttpStatus.OK);
