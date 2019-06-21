@@ -382,7 +382,7 @@
   <xs:complexType name="newVocabulary">
     <xs:sequence>
       <xs:element minOccurs="0" name="description" type="xs:string"/>
-      <xs:element minOccurs="0" name="extras" type="newVocabulariesExtrasMap"/>
+      <xs:element minOccurs="0" name="extras" type="vocabularyExtrasMap"/>
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="parentId" type="xs:string"/>
