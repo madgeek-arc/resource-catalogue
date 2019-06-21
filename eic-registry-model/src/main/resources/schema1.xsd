@@ -13,6 +13,8 @@
 
   <xs:element name="measurement" type="tns:measurement"/>
 
+  <xs:element name="newVocabulary" type="tns:newVocabulary"/>
+
   <xs:element name="provider" type="tns:provider"/>
 
   <xs:element name="rangeValue" type="tns:rangeValue"/>
