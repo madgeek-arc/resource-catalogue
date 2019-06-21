@@ -5,13 +5,13 @@
     <xs:sequence/>
   </xs:complexType>
 
-  <xs:complexType name="newVocabulariesExtrasMap">
+  <xs:complexType name="vocabularyExtrasMap">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" type="newVocabulariesExtras"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" type="vocabularyExtras"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="newVocabulariesExtras">
+  <xs:complexType name="vocabularyExtras">
     <xs:sequence>
       <xs:element minOccurs="0" name="key" type="xs:string"/>
       <xs:element minOccurs="0" name="value" type="xs:string"/>
