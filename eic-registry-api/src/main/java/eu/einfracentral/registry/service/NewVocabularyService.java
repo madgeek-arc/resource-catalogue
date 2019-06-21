@@ -4,6 +4,8 @@ import eu.einfracentral.domain.NewVocabulary;
 import eu.openminted.registry.core.domain.Browsing;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+
 public interface NewVocabularyService extends ResourceService<NewVocabulary, Authentication> {
 
     /**
@@ -12,7 +14,12 @@ public interface NewVocabularyService extends ResourceService<NewVocabulary, Aut
      */
     String[] getRegion(String name);
 
-
-    Browsing<NewVocabulary> convertVocabularies();
+    /**
+     * Get all vocabularies of a specific type.
+     *
+     * @param type
+     * @return
+     */
+    List<NewVocabulary> getByType(NewVocabulary.Type type);
 
 }

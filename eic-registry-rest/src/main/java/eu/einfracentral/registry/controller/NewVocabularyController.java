@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -48,10 +49,9 @@ public class NewVocabularyController extends ResourceController<NewVocabulary, A
     }
 
     @ApiOperation(value = "Convert vocabularies to new vocabularies")
-    @PostMapping(path = "/convert", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<NewVocabulary>> convert() {
-//        newVocabularyService.convertVocabularies();
-        return new ResponseEntity<>(newVocabularyService.convertVocabularies(), HttpStatus.OK);
+    @GetMapping(path = "/byType/{type}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<NewVocabulary>> getByType(@PathVariable(value = "type") NewVocabulary.Type type) {
+        return new ResponseEntity<>(newVocabularyService.getByType(type), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Delete a Vocabulary")
