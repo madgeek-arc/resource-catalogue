@@ -2,17 +2,13 @@ package eu.einfracentral.registry.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.NewVocabulary;
-import eu.einfracentral.domain.Vocabulary;
-import eu.einfracentral.domain.VocabularyEntry;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.NewVocabularyService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -21,10 +17,10 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -32,9 +28,6 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     private static final Logger logger = LogManager.getLogger(NewVocabularyManager.class);
 
     private Map<String, Region> regions = new HashMap<>();
-
-    @Autowired
-    VocabularyService vocabularyService;
 
     public NewVocabularyManager() {
         super(NewVocabulary.class);
@@ -69,6 +62,14 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
         ff.setQuantity(10000);
         ff.addFilter("type", type.getKey());
         return getAll(ff, null).getResults();
+    }
+
+    @Override
+    public Map<String, NewVocabulary> getVocabulariesMap(FacetFilter ff) {
+        return getAll(ff, null)
+                .getResults()
+                .stream()
+                .collect(Collectors.toMap(NewVocabulary::getId, v-> v));
     }
 
     @Override
