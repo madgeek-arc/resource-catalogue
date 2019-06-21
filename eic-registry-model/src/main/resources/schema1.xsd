@@ -61,20 +61,7 @@
       </xs:element>
       <xs:element name="entryId" type="xs:string"/>
       <xs:element minOccurs="0" name="entryName" type="xs:string"/>
-      <xs:element minOccurs="0" name="extras" type="tns:extrasMap"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="extrasMap">
-    <xs:sequence>
-      <xs:element form="unqualified" maxOccurs="unbounded" minOccurs="0" name="entry" type="tns:extras"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="extras">
-    <xs:sequence>
-      <xs:element form="unqualified" minOccurs="0" name="key" type="xs:string"/>
-      <xs:element form="unqualified" minOccurs="0" name="value" type="xs:string"/>
+      <xs:element minOccurs="0" name="extras" type="extrasMap"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -374,7 +361,7 @@
   <xs:complexType name="newVocabulary">
     <xs:sequence>
       <xs:element minOccurs="0" name="description" type="xs:string"/>
-      <xs:element minOccurs="0" name="extras" type="tns:extrasMap"/>
+      <xs:element minOccurs="0" name="extras" type="extrasMap"/>
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="parentId" type="xs:string"/>
