@@ -11,10 +11,12 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -61,7 +63,13 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     }
 
     @Override
-    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
+//    @Cacheable(value = CACHE_VOCABULARIES)
+    public Browsing<NewVocabulary> getAll(FacetFilter ff, Authentication auth) {
+        return super.getAll(ff, auth);
+    }
+
+    @Override
+//    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public NewVocabulary add(NewVocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
             String id = vocabulary.getName().toLowerCase();
@@ -74,7 +82,8 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
         }
         if (exists(vocabulary)) {
             logger.error(String.format("%s already exists!%n%s", resourceType.getName(), vocabulary));
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+            return vocabulary;
+//            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         String serialized = serialize(vocabulary);
         Resource created = new Resource();
@@ -89,7 +98,7 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     }
 
     @Override
-    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
+//    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public NewVocabulary update(NewVocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
         if (vocabulary.getId().startsWith("category-") || vocabulary.getId().startsWith("subcategory-")) { // TODO: remove
@@ -102,9 +111,8 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
             vocabulary.setId(id);
         }
         String serialized = serialize(vocabulary);
-        serialized = serialized.replaceAll("tns:entry", "entry");
-        serialized = serialized.replaceAll("tns:key", "key");
-        serialized = serialized.replaceAll("tns:value", "value");
+        serialized = serialized.replaceAll(":tns", "");
+        serialized = serialized.replaceAll("tns:", "");
         existing.setPayload(serialized);
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
