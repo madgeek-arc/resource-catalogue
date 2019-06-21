@@ -97,6 +97,20 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="extrasMapType">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="entries" nillable="true" type="tns:extrasType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="extrasType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="key" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
   <xs:complexType name="funder">
     <xs:sequence>
       <xs:element minOccurs="0" name="id" type="xs:string"/>
@@ -382,7 +396,7 @@
   <xs:complexType name="newVocabulary">
     <xs:sequence>
       <xs:element minOccurs="0" name="description" type="xs:string"/>
-      <xs:element minOccurs="0" name="extras" type="vocabularyExtrasMap"/>
+      <xs:element minOccurs="0" name="extras" type="tns:extrasMapType"/>
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="parentId" type="xs:string"/>
