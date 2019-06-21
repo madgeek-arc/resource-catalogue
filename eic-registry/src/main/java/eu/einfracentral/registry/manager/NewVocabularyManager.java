@@ -1,22 +1,18 @@
-package eu.einfracentral.manager;
+package eu.einfracentral.registry.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.NewVocabulary;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.VocabularyEntry;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.manager.ResourceManager;
 import eu.einfracentral.registry.service.NewVocabularyService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -30,8 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import static eu.einfracentral.config.CacheConfig.CACHE_VOCABULARIES;
 
 @Service
 public class NewVocabularyManager extends ResourceManager<NewVocabulary> implements NewVocabularyService {
@@ -63,7 +57,7 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     }
 
     @Override
-//    @Cacheable(value = CACHE_VOCABULARIES)
+//    @Cacheable(value = CACHE_VOCABULARIES) // TODO enable them when old vocabularies are removed
     public Browsing<NewVocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
     }
@@ -82,14 +76,10 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
         }
         if (exists(vocabulary)) {
             logger.error(String.format("%s already exists!%n%s", resourceType.getName(), vocabulary));
-            return vocabulary;
-//            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         String serialized = serialize(vocabulary);
         Resource created = new Resource();
-        serialized = serialized.replaceAll("tns:entry", "entry");
-        serialized = serialized.replaceAll("tns:key", "key");
-        serialized = serialized.replaceAll("tns:value", "value");
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);

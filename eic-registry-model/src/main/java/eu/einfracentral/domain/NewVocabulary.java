@@ -3,11 +3,10 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class NewVocabulary implements Identifiable {
 
     @XmlElement(required = true)
@@ -25,9 +24,8 @@ public class NewVocabulary implements Identifiable {
     @XmlElement(required = true)
     private String type;
 
-    @XmlJavaTypeAdapter(ExtrasMapAdapter.class)
-    @XmlElement
-    private Map<String, String> extras = new HashMap<>();
+    @XmlJavaTypeAdapter(ExtrasMapTypeAdapter.class)
+    private Map<String, String> extras;
 
     public NewVocabulary() {
 
