@@ -2,9 +2,11 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.NewVocabulary;
 import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Map;
 
 public interface NewVocabularyService extends ResourceService<NewVocabulary, Authentication> {
 
@@ -21,5 +23,13 @@ public interface NewVocabularyService extends ResourceService<NewVocabulary, Aut
      * @return
      */
     List<NewVocabulary> getByType(NewVocabulary.Type type);
+
+    /**
+     * Get vocabularies in a Map.
+     *
+     * @param ff
+     * @return
+     */
+    Map<String, NewVocabulary> getVocabulariesMap(FacetFilter ff);
 
 }
