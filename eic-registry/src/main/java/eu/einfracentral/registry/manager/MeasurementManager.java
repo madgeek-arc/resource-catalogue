@@ -24,16 +24,16 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     private static final Logger logger = LogManager.getLogger(MeasurementManager.class);
     private IndicatorManager indicatorManager;
-    private VocabularyManager vocabularyManager;
+    private NewVocabularyManager newVocabularyManager;
     private InfraServiceService<InfraService, InfraService> infraService;
     private SynchronizerService synchronizerService;
 
     @Autowired
-    public MeasurementManager(IndicatorManager indicatorManager, VocabularyManager vocabularyManager,
+    public MeasurementManager(IndicatorManager indicatorManager, NewVocabularyManager newVocabularyManager,
                               InfraServiceService<InfraService, InfraService> service,
                               SynchronizerService synchronizerService) {
         super(Measurement.class);
-        this.vocabularyManager = vocabularyManager;
+        this.newVocabularyManager = newVocabularyManager;
         this.infraService = service;
         this.indicatorManager = indicatorManager;
         this.synchronizerService = synchronizerService;
@@ -196,10 +196,11 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
         if (measurement.getLocations() != null) {
             List<String> verifiedLocations = new ArrayList<>();
-            Vocabulary placesVocabulary = vocabularyManager.get("places");
-            Map<String, VocabularyEntry> places = placesVocabulary.getEntries();
+            Map<String, NewVocabulary> placesVocabulary = newVocabularyManager.getByType(NewVocabulary.Type.PLACE)
+                    .stream()
+                    .collect(Collectors.toMap(NewVocabulary::getId, v -> v));
             for (String location : measurement.getLocations()) {
-                if (places.containsKey(location) && !verifiedLocations.contains(location)) {
+                if (placesVocabulary.get(location) != null && !verifiedLocations.contains(location)) {
                     verifiedLocations.add(location);
                 }
             }
