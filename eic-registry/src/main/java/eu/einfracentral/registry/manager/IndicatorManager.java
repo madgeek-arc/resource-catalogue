@@ -126,6 +126,8 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
             case BOOL:
                 if (indicator.getUnitName() != null) {
                     throw new ValidationException("unitName for 'boolean' unit must be null");
+                } else{
+                    indicator.setUnitName("");
                 }
                 break;
         }
