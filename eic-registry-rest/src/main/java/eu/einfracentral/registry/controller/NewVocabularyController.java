@@ -48,7 +48,13 @@ public class NewVocabularyController extends ResourceController<NewVocabulary, A
         return new ResponseEntity<>(newVocabularyService.update(newVocabulary, auth), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Convert vocabularies to new vocabularies")
+    @ApiOperation(value = "Get a Map of vocabulary types and their respective entries")
+    @GetMapping(path = "/byType", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Map<NewVocabulary.Type, List<NewVocabulary>>> getAllVocabulariesByType() {
+        return new ResponseEntity<>(newVocabularyService.getAllVocabulariesByType(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get vocabularies by type")
     @GetMapping(path = "/byType/{type}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<NewVocabulary>> getByType(@PathVariable(value = "type") NewVocabulary.Type type) {
         return new ResponseEntity<>(newVocabularyService.getByType(type), HttpStatus.OK);

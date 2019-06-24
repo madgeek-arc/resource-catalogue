@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.NewVocabulary;
+import eu.einfracentral.domain.Vocabulary;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,13 @@ public interface NewVocabularyService extends ResourceService<NewVocabulary, Aut
      * @return
      */
     String[] getRegion(String name);
+
+    /**
+     * Get all vocabularies by type in a Map.
+     *
+     * @return
+     */
+    Map<NewVocabulary.Type, List<NewVocabulary>> getAllVocabulariesByType();
 
     /**
      * Get all vocabularies of a specific type.

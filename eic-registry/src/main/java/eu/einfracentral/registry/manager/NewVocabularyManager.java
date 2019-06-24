@@ -56,6 +56,15 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     }
 
     @Override
+    public Map<NewVocabulary.Type, List<NewVocabulary>> getAllVocabulariesByType() {
+        Map<NewVocabulary.Type, List<NewVocabulary>> allVocabularies = new HashMap<>();
+        for (NewVocabulary.Type type : NewVocabulary.Type.values()) {
+            allVocabularies.put(type, getByType(type));
+        }
+        return allVocabularies;
+    }
+
+    @Override
 //    @Cacheable(value = CACHE_VOCABULARIES)
     public List<NewVocabulary> getByType(NewVocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
