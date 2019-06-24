@@ -65,6 +65,16 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     }
 
     @Override
+    public Map<String, NewVocabulary> getVocabulariesMap() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        return getAll(ff, null)
+                .getResults()
+                .stream()
+                .collect(Collectors.toMap(NewVocabulary::getId, v-> v));
+    }
+
+    @Override
     public Map<String, NewVocabulary> getVocabulariesMap(FacetFilter ff) {
         return getAll(ff, null)
                 .getResults()

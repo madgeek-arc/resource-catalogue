@@ -25,6 +25,13 @@ public interface NewVocabularyService extends ResourceService<NewVocabulary, Aut
     List<NewVocabulary> getByType(NewVocabulary.Type type);
 
     /**
+     * Get all vocabularies in a Map.
+     *
+     * @return
+     */
+    Map<String, NewVocabulary> getVocabulariesMap();
+
+    /**
      * Get vocabularies in a Map.
      *
      * @param ff

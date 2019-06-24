@@ -1,12 +1,11 @@
 package eu.einfracentral.utils;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.NewVocabulary;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Vocabulary;
-import eu.einfracentral.domain.VocabularyEntry;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.VocabularyManager;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.NewVocabularyService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.commons.collections.CollectionUtils;
@@ -29,95 +28,83 @@ public class ServiceValidators {
 
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private ProviderService<Provider, Authentication> providerService;
-    private VocabularyManager vocabularyManager;
+    private NewVocabularyService vocabularyService;
 
     @Autowired
     private ServiceValidators(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
-                              ProviderService<Provider, Authentication> providerService, VocabularyManager vocabularyManager) {
+                              ProviderService<Provider, Authentication> providerService,
+                              NewVocabularyService vocabularyService) {
         this.infraServiceService = infraServiceService;
         this.providerService = providerService;
-        this.vocabularyManager = vocabularyManager;
+        this.vocabularyService = vocabularyService;
     }
 
     public void validateVocabularies(InfraService service) {
         logger.debug("Validating vocabularies, Service id: " + service.getId());
+        Map<String, NewVocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
+
         //Validate Categories/Subcategories
-        if (service.getCategory() != null) {
-            Vocabulary categories = vocabularyManager.get("categories");
-            VocabularyEntry category = categories.getEntries().get(service.getCategory());
-            if (category == null)
-                throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
-            List<VocabularyEntry> subcategory = category.getChildren();
-            if (service.getSubcategory() == null) {
-                throw new ValidationException("Field 'subcategory' is mandatory.");
-            }
-            boolean flag = false;
-            for (VocabularyEntry aSubcategory : subcategory) {
-                if (aSubcategory.getId().equals(service.getSubcategory())) {
-                    flag = true;
-                    break;
-                }
-            }
-            if (!flag) {
-                throw new ValidationException(String.format("subcategory '%s' does not exist.", service.getSubcategory()));
-            }
-        } else throw new ValidationException("Field 'category' is mandatory.");
+        if (service.getCategory() == null)
+            throw new ValidationException("Field 'category' is mandatory.");
+        if (service.getSubcategory() == null)
+            throw new ValidationException("Field 'subcategory' is mandatory.");
+        if (!allVocabularies.containsKey(service.getCategory()))
+            throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
+        if (!allVocabularies.containsKey(service.getSubcategory()))
+            throw new ValidationException(String.format("subcategory '%s' does not exist.",
+                    service.getSubcategory()));
 
         //Validate Places
         if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
-            Map<String, VocabularyEntry> places = vocabularyManager.get("places").getEntries();
-            List<String> servicePlaces = service.getPlaces();
             List<String> notFoundPlaces = new ArrayList<>();
             List<String> foundPlaces = new ArrayList<>();
-            for (String place : servicePlaces) {
-                VocabularyEntry placeFound = places.get(place);
-                if (placeFound == null) {
-                    notFoundPlaces.add(place);
-                }
-                if (places.containsKey(place) && !foundPlaces.contains(place)) {
-                    foundPlaces.add(place);
+            for (String placeId : service.getPlaces()) {
+                if (allVocabularies.containsKey(placeId)) {
+                    if (!foundPlaces.contains(placeId)) {
+                        foundPlaces.add(placeId);
+                    }
+                } else {
+                    notFoundPlaces.add(placeId);
                 }
             }
             if (!notFoundPlaces.isEmpty()) {
-                throw new ValidationException(String.format("Places not found: %s", String.join(", ", notFoundPlaces)));
+                throw new ValidationException(String.format("Places not found: %s",
+                        String.join(", ", notFoundPlaces)));
             }
             service.setPlaces(foundPlaces);
         } else throw new ValidationException("Field 'places' is mandatory.");
 
         //Validate Languages
         if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
-            Map<String, VocabularyEntry> languages = vocabularyManager.get("languages").getEntries();
             List<String> serviceLanguages = service.getLanguages();
             List<String> notFoundLanguages = new ArrayList<>();
             List<String> foundLanguages = new ArrayList<>();
-            for (String language : serviceLanguages) {
-                VocabularyEntry languageFound = languages.get(language);
-                if (languageFound == null) {
-                    notFoundLanguages.add(language);
-                }
-                if (languages.containsKey(language) && !foundLanguages.contains(language)) {
-                    foundLanguages.add(language);
+            for (String languageId : serviceLanguages) {
+                if (allVocabularies.containsKey(languageId)) {
+                    if (!foundLanguages.contains(languageId)) {
+                        foundLanguages.add(languageId);
+                    }
+                } else {
+                    notFoundLanguages.add(languageId);
                 }
             }
             if (!notFoundLanguages.isEmpty()) {
-                throw new ValidationException(String.format("Languages not found: %s", String.join(", ", notFoundLanguages)));
+                throw new ValidationException(String.format("Languages not found: %s",
+                        String.join(", ", notFoundLanguages)));
             }
             service.setLanguages(foundLanguages);
         } else throw new ValidationException("Field 'languages' is mandatory.");
 
         //Validate LifeCycleStatus
         if (service.getLifeCycleStatus() != null) {
-            Vocabulary lifecyclestatus = vocabularyManager.get("lifecyclestatus");
-            VocabularyEntry lfc = lifecyclestatus.getEntries().get(service.getLifeCycleStatus());
-            if (lfc == null)
-                throw new ValidationException(String.format("LifeCycleStatus '%s' does not exist.", service.getLifeCycleStatus()));
+            if (!allVocabularies.containsKey(service.getLifeCycleStatus()))
+                throw new ValidationException(String.format("LifeCycleStatus '%s' does not exist.",
+                        service.getLifeCycleStatus()));
         } else throw new ValidationException("Field 'lifeCycleStatus' is mandatory.");
 
         //Validate TRL
         if (service.getTrl() != null) {
-            Vocabulary trl = vocabularyManager.get("trl");
-            VocabularyEntry trlEntry = trl.getEntries().get(service.getTrl());
-            if (trlEntry == null)
+            if (!allVocabularies.containsKey(service.getTrl()))
                 throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
         } else throw new ValidationException("Field 'trl' is mandatory.");
     }
@@ -131,7 +118,8 @@ public class ServiceValidators {
                 (service.getProviders().stream().filter(Objects::nonNull).mapToInt(p -> 1).sum() == 0)) {
             throw new ValidationException("field 'providers' is obligatory");
         }
-        if (service.getProviders().stream().filter(Objects::nonNull).anyMatch(x -> providerService.getResource(x) == null)) {
+        if (service.getProviders().stream().filter(Objects::nonNull)
+                .anyMatch(x -> providerService.getResource(x) == null)) {
             throw new ValidationException("Provider does not exist");
         }
         for (String provider : providers) {
@@ -149,7 +137,8 @@ public class ServiceValidators {
         List<String> existingRelatedServices = new ArrayList<>();
         if (relatedServices != null) {
             for (String serviceRel : relatedServices) {
-                if (infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceRel)) && !existingRelatedServices.contains(serviceRel)) {
+                if (infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceRel))
+                        && !existingRelatedServices.contains(serviceRel)) {
                     existingRelatedServices.add(serviceRel);
                 }
             }
@@ -160,7 +149,8 @@ public class ServiceValidators {
         List<String> existingRequiredServices = new ArrayList<>();
         if (requiredServices != null) {
             for (String serviceReq : requiredServices) {
-                if (infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceReq)) && !existingRequiredServices.contains(serviceReq)) {
+                if (infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceReq))
+                        && !existingRequiredServices.contains(serviceReq)) {
                     existingRequiredServices.add(serviceReq);
                 }
             }

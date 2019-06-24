@@ -6,8 +6,8 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.NewVocabularyService;
 import eu.einfracentral.registry.service.ServiceInterface;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetLabelService;
@@ -46,7 +46,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private VersionService versionService;
 
     @Autowired
-    private VocabularyService vocabularyManager;
+    private NewVocabularyService vocabularyService;
 
     @Autowired
     private EventService eventService;
@@ -572,75 +572,62 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return query.toString();
     }
 
-    public List<RichService> createRichVocabularies(List<InfraService> infraServices){
-        List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
+    public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
+        Map<String, NewVocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
         List<RichService> richServices = new ArrayList<>();
 
-        for (InfraService infraService : infraServices){
+        for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
-            for (Vocabulary vocabulary : vocabularies) {
-                switch (vocabulary.getId()) {
-                    case "categories":
-                        if (infraService.getCategory() != null) {
-                            richService.setCategoryName(vocabulary.getEntries().get(infraService.getCategory()).getName());
-                        }
 
-                        if (infraService.getSubcategory() != null) {
-                            List<VocabularyEntry> subcategories = vocabulary.getEntries().get(infraService.getCategory()).getChildren();
-                            for (VocabularyEntry entry : subcategories) {
-                                if (entry.getId().equals(infraService.getSubcategory())) {
-                                    richService.setSubCategoryName(entry.getName());
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-
-                    case "languages":
-                        if (infraService.getLanguages() != null) {
-                            richService.setLanguageNames(infraService.getLanguages()
-                                    .stream()
-                                    .map(l -> vocabulary.getEntries().get(l).getName())
-                                    .collect(Collectors.toList())
-                            );
-                        }
-                        break;
-
-                    case "places":
-                        if (infraService.getPlaces() != null) {
-                            richService.setPlaceNames(infraService.getPlaces()
-                                    .stream()
-                                    .map(p -> vocabulary.getEntries().get(p).getName())
-                                    .collect(Collectors.toList())
-                            );
-                        }
-                        break;
-
-                    case "trl":
-                        if (infraService.getTrl() != null) {
-                            richService.setTrlName(vocabulary.getEntries().get(infraService.getTrl()).getName());
-                        }
-                        break;
-
-                    case "lifecyclestatus":
-                        if (infraService.getLifeCycleStatus() != null) {
-                            richService.setLifeCycleStatusName(vocabulary.getEntries().get(infraService.getLifeCycleStatus()).getName());
-                        }
-                        break;
-                    default:
-                }
+            // Category Name
+            if (infraService.getCategory() != null) {
+                richService.setCategoryName(allVocabularies.get(infraService.getCategory()).getName());
             }
+
+            // Subcategory Name
+            if (infraService.getSubcategory() != null) {
+                richService.setSubCategoryName(allVocabularies.get(infraService.getSubcategory()).getName());
+            }
+
+            // Language Names
+            if (infraService.getLanguages() != null) {
+                richService.setLanguageNames(infraService.getLanguages()
+                        .stream()
+                        .map(l -> allVocabularies.get(l).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // Place Names
+            if (infraService.getPlaces() != null) {
+                richService.setPlaceNames(infraService.getPlaces()
+                        .stream()
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // TRL Names
+            if (infraService.getTrl() != null) {
+                richService.setTrlName(allVocabularies.get(infraService.getTrl()).getName());
+            }
+
+            // LCS Names
+            if (infraService.getLifeCycleStatus() != null) {
+                richService.setLifeCycleStatusName(allVocabularies.get(infraService.getLifeCycleStatus()).getName());
+            }
+
             richServices.add(richService);
         }
         return (richServices);
     }
 
-    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth){
+    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth) {
         Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
         Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
         Map<String, List<Float>> serviceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
-        for (RichService richService : richServices){
+        for (RichService richService : richServices) {
 
             // set user favourite and rate if auth != null
             if (auth != null) {

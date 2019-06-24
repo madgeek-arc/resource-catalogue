@@ -1,11 +1,13 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.config.ServiceConfig;
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.NewVocabularyService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
@@ -28,7 +30,7 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { ServiceConfig.class })
+@ContextConfiguration(classes = {ServiceConfig.class})
 //@ContextConfiguration(classes = { TestConfig.class })
 //@ContextConfiguration(classes = { MockDatabaseConfiguration.class })
 @ActiveProfiles("test")
@@ -44,7 +46,7 @@ public class ServiceProviderRegistrationIT {
     InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    VocabularyService vocabularyService;
+    NewVocabularyService vocabularyService;
 
     @Autowired
     SecurityService securityService;
@@ -126,22 +128,15 @@ public class ServiceProviderRegistrationIT {
 
     public Service createService(String serviceName, Provider provider) throws MalformedURLException {
         Service service = new Service();
-        VocabularyEntry vocabularyEntry;
 
         service.setName(serviceName);
         service.setProviders(Collections.singletonList(provider.getId()));
-        service.setTrl(vocabularyService.get("trl").getEntries().get("trl-7").getId());
-        service.setLifeCycleStatus(vocabularyService.get("lifecyclestatus").getEntries().get("beta").getId());
-
-        vocabularyEntry = vocabularyService.get("places").getEntries().get("WW");
-        service.setPlaces(Collections.singletonList(vocabularyEntry.getId()));
-
-        vocabularyEntry = vocabularyService.get("languages").getEntries().get("english");
-        service.setLanguages(Collections.singletonList(vocabularyEntry.getId()));
-
-        vocabularyEntry = vocabularyService.get("categories").getEntries().get("other");
-        service.setCategory(vocabularyEntry.getId());
-        service.setSubcategory(vocabularyEntry.getChildren().get(0).getId());
+        service.setTrl(vocabularyService.get("trl-7").getId());
+        service.setLifeCycleStatus(vocabularyService.get("beta").getId());
+        service.setPlaces(Collections.singletonList(vocabularyService.get("WW").getId()));
+        service.setLanguages(Collections.singletonList(vocabularyService.get("english").getId()));
+        service.setCategory(vocabularyService.get("other-other").getId());
+        service.setSubcategory(vocabularyService.get("other-other-other").getId());
 
         service.setUrl(new URL("http://test.t"));
         service.setSymbol(new URL("http://test.t"));
