@@ -48,7 +48,7 @@ public class NewVocabulary implements Identifiable {
         LANGUAGE("Language"),
         PLACE("Place"),
         TRL("Technology readiness level"),
-        LCS("Life-cycle status");
+        PHASE("Phase");
 
         private final String type;
 
