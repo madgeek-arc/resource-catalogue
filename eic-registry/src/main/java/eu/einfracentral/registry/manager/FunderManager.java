@@ -47,7 +47,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
     public Funder add(Funder funder, Authentication auth) {
         validateFunderServices(funder);
         super.add(funder, auth);
-        logger.info("Adding Funder " + funder);
+        logger.debug("Adding Funder " + funder);
         return funder;
     }
 

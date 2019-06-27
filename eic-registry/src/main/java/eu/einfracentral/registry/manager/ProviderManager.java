@@ -88,7 +88,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ret = super.add(provider, null);
-        logger.info("Adding Provider " + provider);
+        logger.debug("Adding Provider " + provider);
 
         // update provider roles
         eicAuthoritiesMapper.updateAuthorities();
@@ -109,7 +109,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.info("Updating Provider " + provider);
+        logger.debug("Updating Provider " + provider);
 
         // update provider roles
         eicAuthoritiesMapper.updateAuthorities();
@@ -194,7 +194,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             }
         });
         super.delete(provider);
-        logger.info("Deleting Provider " + provider);
+        logger.debug("Deleting Provider " + provider);
 
         // update provider roles
         eicAuthoritiesMapper.updateAuthorities();
