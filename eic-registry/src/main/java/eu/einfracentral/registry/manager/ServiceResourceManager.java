@@ -419,6 +419,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return richServices;
     }
 
+    @Override
     public String createServiceId(Service service) {
         String provider = service.getProviders().get(0);
         return String.format("%s.%s", provider, StringUtils

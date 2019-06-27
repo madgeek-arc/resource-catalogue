@@ -69,8 +69,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T add(T t, Authentication auth) {
         if (exists(t)) {
-            logger.error(String.format("%s already exists!%n%s", resourceType.getName(), t));
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), t.getId()), HttpStatus.CONFLICT);
         }
         String serialized = serialize(t);
         Resource created = new Resource();
@@ -94,7 +93,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public void delete(T t) {
         del(t);
-        logger.info("Deleting Resource " + t);
     }
 
     @Override

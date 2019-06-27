@@ -30,6 +30,16 @@ public class ServiceMetadata {
         this.modifiedAt = serviceMetadata.getModifiedAt();
     }
 
+    @Override
+    public String toString() {
+        return "ServiceMetadata{" +
+                "registeredBy='" + registeredBy + '\'' +
+                ", registeredAt='" + registeredAt + '\'' +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                ", modifiedAt='" + modifiedAt + '\'' +
+                '}';
+    }
+
     public String getRegisteredBy() {
         return registeredBy;
     }
