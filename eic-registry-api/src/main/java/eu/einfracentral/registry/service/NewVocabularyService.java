@@ -47,4 +47,15 @@ public interface NewVocabularyService extends ResourceService<NewVocabulary, Aut
      */
     Map<String, NewVocabulary> getVocabulariesMap(FacetFilter ff);
 
+    /**
+     * Adds all new vocs.
+     *
+     */
+    void addAll(List<NewVocabulary> newVocabularies, Authentication auth);
+
+    /**
+     * Deletes subcategories.
+     *
+     */
+    void deleteAll(Authentication auth);
 }

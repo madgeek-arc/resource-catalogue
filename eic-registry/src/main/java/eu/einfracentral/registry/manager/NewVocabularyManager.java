@@ -92,6 +92,25 @@ public class NewVocabularyManager extends ResourceManager<NewVocabulary> impleme
     }
 
     @Override
+    public void addAll(List<NewVocabulary> newVocabularies, Authentication auth) {
+        for (NewVocabulary newVocabulary : newVocabularies){
+            logger.info("Adding subcategory " +newVocabulary.getId());
+            add(newVocabulary, auth);
+        }
+    }
+
+    @Override
+    public void deleteAll(Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<NewVocabulary> allVocs = getByType(NewVocabulary.Type.SCIENTIFIC_SUBDOMAIN);
+        for (NewVocabulary vocabulary : allVocs) {
+            logger.info("Deleting Scientific Subdomain " +vocabulary.getName());
+            delete(vocabulary);
+        }
+    }
+
+    @Override
 //    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public NewVocabulary add(NewVocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
