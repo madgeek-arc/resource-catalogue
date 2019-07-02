@@ -41,6 +41,18 @@ public class NewVocabularyController extends ResourceController<NewVocabulary, A
         return new ResponseEntity<>(newVocabularyService.add(newVocabulary, auth), HttpStatus.CREATED);
     }
 
+    @ApiOperation(value = "Adds all new Vocabularies")
+    @RequestMapping(path = "/addAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public void addAll(@RequestBody List<NewVocabulary> newVocabularies, @ApiIgnore Authentication auth) {
+        newVocabularyService.addAll(newVocabularies, auth);
+    }
+
+    @ApiOperation(value = "Delete All Vocs")
+    @RequestMapping(path = "/deleteAll", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public void deleteAll(@ApiIgnore Authentication auth) {
+        newVocabularyService.deleteAll(auth);
+    }
+
     @ApiOperation(value = "Updates a new Vocabulary")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @Override

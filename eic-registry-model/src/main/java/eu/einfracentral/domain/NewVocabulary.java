@@ -48,7 +48,14 @@ public class NewVocabulary implements Identifiable {
         LANGUAGE("Language"),
         PLACE("Place"),
         TRL("Technology readiness level"),
-        PHASE("Phase");
+        PHASE("Phase"),
+        SCIENTIFIC_DOMAIN("Scientific domain"),
+        SCIENTIFIC_SUBDOMAIN("Scientific subdomain"),
+        TARGET_USERS("Target users"),
+        ACCESS_TYPE("Access type"),
+        ACCESS_MODE("Access mode"),
+        FUNDED_BY("Funded by"),
+        ORDER_TYPE("Order type");
 
         private final String type;
 
