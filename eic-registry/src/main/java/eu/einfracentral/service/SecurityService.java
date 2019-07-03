@@ -89,7 +89,12 @@ public class SecurityService {
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
+        InfraService service;
+        try {
+            service = infraServiceService.get(serviceId);
+        } catch (RuntimeException e) {
+            return false;
+        }
         if (service.getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
         }
@@ -136,5 +141,20 @@ public class SecurityService {
             }
         }
         return false;
+    }
+
+    public boolean serviceIsActive(String serviceId) {
+        InfraService service = infraServiceService.get(serviceId);
+        return service.isActive();
+    }
+
+    public boolean serviceIsActive(String serviceId, String version) {
+        // FIXME: serviceId is equal to 'rich' and version holds the service ID
+        //  when searching for a Rich Service without providing a version
+        if ("rich".equals(serviceId)) {
+            return serviceIsActive(version);
+        }
+        InfraService service = infraServiceService.get(serviceId, version);
+        return service.isActive();
     }
 }
