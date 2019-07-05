@@ -2,11 +2,11 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,14 +73,21 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public InfraService updateService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
-        InfraService existingService = get(infraService.getId());
+        InfraService existingService;
+
+        try { // try to find a service with the same id and version
+            existingService = get(infraService.getId(), infraService.getVersion());
+        } catch (ServiceException e) {
+            // if a service with version = infraService.getVersion() does not exist, get the latest service
+            existingService = get(infraService.getId());
+        }
 
         // update existing service serviceMetadata
         ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
         infraService.setServiceMetadata(serviceMetadata);
+        infraService.setActive(existingService.isActive());
 
         if (infraService.getVersion().equals(existingService.getVersion())) {
-            infraService.setActive(existingService.isActive());
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
