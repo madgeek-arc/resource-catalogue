@@ -13,6 +13,7 @@ import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -74,6 +75,8 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.userIsServiceProviderAdmin(#authentication, #serviceId)")
     public List<Measurement> updateAll(String serviceId, List<Measurement> allMeasurements, Authentication auth) {
         List<Measurement> updatedMeasurements = new ArrayList<>();
         List<Measurement> existingMeasurements = getAll(serviceId, auth).getResults();

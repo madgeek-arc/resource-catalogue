@@ -92,7 +92,8 @@ public class ServiceController {
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')") // FIXME: add 'and @securityService.providerCanAddServices(#auth, #service)'
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
+    // @securityService.providerCanAddServices(#auth, #service) is checked when adding/updating service or measurements
     @RequestMapping(path = "serviceWithMeasurements", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
