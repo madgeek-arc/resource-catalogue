@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -27,17 +28,15 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private ServiceValidators serviceValidators;
     private ProviderManager providerManager;
     private Random randomNumberGenerator;
-//    private SynchronizerService synchronizerService;
 
 
     @Autowired
     public InfraServiceManager(ServiceValidators serviceValidators, ProviderManager providerManager,
-                               Random randomNumberGenerator/*, SynchronizerService synchronizerService*/) {
+                               Random randomNumberGenerator) {
         super(InfraService.class);
         this.serviceValidators = serviceValidators;
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
-//        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -46,6 +45,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
     public InfraService addService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
@@ -70,6 +71,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
     public InfraService updateService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
@@ -113,6 +116,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
     public void delete(InfraService infraService) {
         super.delete(infraService);
         logger.info("Deleting Service " + infraService);
