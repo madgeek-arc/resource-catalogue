@@ -30,7 +30,7 @@ public class RichService {
 
 
     public RichService() {
-
+        // No arg constructor
     }
 
     public RichService(Service service, ServiceMetadata serviceMetadata) {
