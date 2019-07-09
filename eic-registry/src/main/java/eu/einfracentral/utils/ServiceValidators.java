@@ -1,11 +1,11 @@
 package eu.einfracentral.utils;
 
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.NewVocabulary;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.NewVocabularyService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.commons.collections.CollectionUtils;
@@ -28,12 +28,12 @@ public class ServiceValidators {
 
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private ProviderService<Provider, Authentication> providerService;
-    private NewVocabularyService vocabularyService;
+    private VocabularyService vocabularyService;
 
     @Autowired
     private ServiceValidators(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                               ProviderService<Provider, Authentication> providerService,
-                              NewVocabularyService vocabularyService) {
+                              VocabularyService vocabularyService) {
         this.infraServiceService = infraServiceService;
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;
@@ -41,7 +41,7 @@ public class ServiceValidators {
 
     public void validateVocabularies(InfraService service) {
         logger.debug("Validating vocabularies, Service id: " + service.getId());
-        Map<String, NewVocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
+        Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         // Validate Supercategories/Categories/Subcategories
         if (service.getSupercategory() == null)

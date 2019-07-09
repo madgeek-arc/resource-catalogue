@@ -6,7 +6,7 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.NewVocabularyService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -46,7 +46,7 @@ public class ServiceProviderRegistrationIT {
     InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    NewVocabularyService vocabularyService;
+    VocabularyService vocabularyService;
 
     @Autowired
     SecurityService securityService;

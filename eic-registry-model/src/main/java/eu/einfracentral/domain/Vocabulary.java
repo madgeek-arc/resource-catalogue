@@ -2,10 +2,11 @@ package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Arrays;
 import java.util.Map;
 
-@XmlRootElement(namespace = "http://einfracentral.eu")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType
+@XmlRootElement
 public class Vocabulary implements Identifiable {
 
     @XmlElement(required = true)
@@ -14,30 +15,73 @@ public class Vocabulary implements Identifiable {
     @XmlElement(required = true)
     private String name;
 
-    @XmlJavaTypeAdapter(EntryMapAdapter.class)
-    private Map<String, VocabularyEntry> entries;  // = new HashMap<>();
+    @XmlElement
+    private String description;
 
-    public enum Types {
-        CATEGORIES("categories"),
-        LANGUAGES("languages"),
-        PLACES("places"),
-        TRL("trl"),
-        LIFE_CYCLE_STATUS("lifecyclestatus");
+    @XmlElement
+    private String parentId;
+
+    @XmlElement(required = true)
+    private String type;
+
+    @XmlJavaTypeAdapter(ExtrasMapTypeAdapter.class)
+    private Map<String, String> extras;
+
+    public Vocabulary() {
+
+    }
+
+    public Vocabulary(String id, String name, String description, String parentId,
+                      String type, Map<String, String> extras) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.parentId = parentId;
+        this.type = type;
+        this.extras = extras;
+    }
+
+    public enum Type {
+        SUPERCATEGORY("Supercategory"),
+        CATEGORY("Category"),
+        SUBCATEGORY("Subcategory"),
+        LANGUAGE("Language"),
+        PLACE("Place"),
+        TRL("Technology readiness level"),
+        PHASE("Phase"),
+        SCIENTIFIC_DOMAIN("Scientific domain"),
+        SCIENTIFIC_SUBDOMAIN("Scientific subdomain"),
+        TARGET_USERS("Target users"),
+        ACCESS_TYPE("Access type"),
+        ACCESS_MODE("Access mode"),
+        FUNDED_BY("Funded by"),
+        ORDER_TYPE("Order type");
 
         private final String type;
 
-        Types(final String type) {
+        Type(final String type) {
             this.type = type;
         }
 
         public String getKey() {
             return type;
         }
+
+        /**
+         * @return the Enum representation for the given string.
+         * @throws IllegalArgumentException if unknown string.
+         */
+        public static Type fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(Type.values())
+                    .filter(v -> v.type.equals(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
     }
 
     @Override
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Override
@@ -53,11 +97,35 @@ public class Vocabulary implements Identifiable {
         this.name = name;
     }
 
-    public Map<String, VocabularyEntry> getEntries() {
-        return entries;
+    public String getDescription() {
+        return description;
     }
 
-    public void setEntries(Map<String, VocabularyEntry> entries) {
-        this.entries = entries;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type.getKey();
+    }
+
+    public Map<String, String> getExtras() {
+        return extras;
+    }
+
+    public void setExtras(Map<String, String> extras) {
+        this.extras = extras;
     }
 }

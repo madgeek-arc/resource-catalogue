@@ -1,15 +1,59 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Vocabulary;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
+
+import java.util.List;
+import java.util.Map;
 
 public interface VocabularyService extends ResourceService<Vocabulary, Authentication> {
 
     /**
-     *
      * @param name
      * @return
      */
     String[] getRegion(String name);
 
+    /**
+     * Get all vocabularies by type in a Map.
+     *
+     * @return
+     */
+    Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType();
+
+    /**
+     * Get all vocabularies of a specific type.
+     *
+     * @param type
+     * @return
+     */
+    List<Vocabulary> getByType(Vocabulary.Type type);
+
+    /**
+     * Get all vocabularies in a Map.
+     *
+     * @return
+     */
+    Map<String, Vocabulary> getVocabulariesMap();
+
+    /**
+     * Get vocabularies in a Map.
+     *
+     * @param ff
+     * @return
+     */
+    Map<String, Vocabulary> getVocabulariesMap(FacetFilter ff);
+
+    /**
+     * Adds all new vocs.
+     *
+     */
+    void addAll(List<Vocabulary> newVocabularies, Authentication auth);
+
+    /**
+     * Deletes subcategories.
+     *
+     */
+    void deleteAll(Authentication auth);
 }

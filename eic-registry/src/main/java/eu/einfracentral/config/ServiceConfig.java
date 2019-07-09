@@ -52,8 +52,8 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
         return JAXBContext.newInstance(Event.class, Funder.class, Provider.class,
-                Service.class, User.class, Vocabulary.class, InfraService.class, VocabularyEntry.class,
-                Indicator.class, Measurement.class, RangeValue.class, NewVocabulary.class);
+                Service.class, User.class, InfraService.class, Indicator.class,
+                Measurement.class, RangeValue.class, Vocabulary.class);
     }
 
     @Bean
