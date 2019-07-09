@@ -107,7 +107,6 @@ public class ServiceProviderRegistrationIT {
         provider.setId(id);
         provider.setName("Test");
         provider.setWebsite(new URL("http://test.t"));
-        provider.setAdditionalInfo("nothing");
 
         return providerService.add(provider, securityService.getAdminAccess());
     }
@@ -115,11 +114,6 @@ public class ServiceProviderRegistrationIT {
     private Provider updateProvider(String id) throws MalformedURLException, ResourceNotFoundException {
         // get provider
         Provider provider = providerService.get(id);
-
-        // change some fields
-        provider.setCatalogueOfResources(new URL("http://test.t"));
-        provider.setPublicDescOfResources(new URL("http://test.t"));
-        provider.setContactInformation("no info");
 
         // update provider
         return providerService.update(provider, securityService.getAdminAccess());
@@ -132,16 +126,15 @@ public class ServiceProviderRegistrationIT {
         service.setName(serviceName);
         service.setProviders(Collections.singletonList(provider.getId()));
         service.setTrl(vocabularyService.get("trl-7").getId());
-        service.setLifeCycleStatus(vocabularyService.get("beta").getId());
+        service.setPhase(vocabularyService.get("beta").getId());
         service.setPlaces(Collections.singletonList(vocabularyService.get("WW").getId()));
         service.setLanguages(Collections.singletonList(vocabularyService.get("english").getId()));
         service.setCategory(vocabularyService.get("other-other").getId());
-        service.setSubcategory(vocabularyService.get("other-other-other").getId());
 
         service.setUrl(new URL("http://test.t"));
-        service.setSymbol(new URL("http://test.t"));
+        service.setLogo(new URL("http://test.t"));
         service.setOrder(new URL("http://test.t"));
-        service.setServiceLevelAgreement(new URL("http://test.t"));
+        service.setSla(new URL("http://test.t"));
 
         service.setDescription("test service");
         service.setVersion("v1.0");

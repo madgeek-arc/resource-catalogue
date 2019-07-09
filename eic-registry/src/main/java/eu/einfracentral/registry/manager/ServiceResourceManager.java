@@ -432,12 +432,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.setTagline(TextUtils.prettifyText(infraService.getTagline(), specialCharacters));
         infraService.setDescription(TextUtils.prettifyText(infraService.getDescription(), specialCharacters));
-        infraService.setUserBase(TextUtils.prettifyText(infraService.getUserBase(), specialCharacters));
         infraService.setUserValue(TextUtils.prettifyText(infraService.getUserValue(), specialCharacters));
-        infraService.setTargetUsers(TextUtils.prettifyText(infraService.getTargetUsers(), specialCharacters));
-        infraService.setFunding(TextUtils.prettifyText(infraService.getFunding(), specialCharacters));
         infraService.setChangeLog(TextUtils.prettifyText(infraService.getChangeLog(), specialCharacters));
-        infraService.setOptions(TextUtils.prettifyText(infraService.getOptions(), specialCharacters));
         return infraService;
     }
 
@@ -580,6 +576,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
 
+            // Supercategory Name
+            if (infraService.getSupercategory() != null) {
+                richService.setSuperCategoryName(allVocabularies.get(infraService.getSupercategory()).getName());
+            }
+
             // Category Name
             if (infraService.getCategory() != null) {
                 richService.setCategoryName(allVocabularies.get(infraService.getCategory()).getName());
@@ -587,7 +588,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
             // Subcategory Name
             if (infraService.getSubcategory() != null) {
-                richService.setSubCategoryName(allVocabularies.get(infraService.getSubcategory()).getName());
+                richService.setSubCategoryNames(infraService.getSubcategory()
+                        .stream()
+                        .map(l -> allVocabularies.get(l).getName())
+                        .collect(Collectors.toList())
+                );
             }
 
             // Language Names
@@ -608,14 +613,73 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 );
             }
 
-            // TRL Names
+            // TRL Name
             if (infraService.getTrl() != null) {
                 richService.setTrlName(allVocabularies.get(infraService.getTrl()).getName());
             }
 
-            // LCS Names
-            if (infraService.getLifeCycleStatus() != null) {
-                richService.setLifeCycleStatusName(allVocabularies.get(infraService.getLifeCycleStatus()).getName());
+            // Phase Name
+            if (infraService.getPhase() != null) {
+                richService.setPhaseName(allVocabularies.get(infraService.getPhase()).getName());
+            }
+
+            // ScientificDomain Names
+            if (infraService.getScientificDomain() != null) {
+                richService.setScientificDomainNames(infraService.getScientificDomain()
+                        .stream()
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // ScientificSubdomain Names
+            if (infraService.getScientificSubdomain() != null) {
+                richService.setScientificSubDomainNames(infraService.getScientificSubdomain()
+                        .stream()
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // TargetUsers Names
+            if (infraService.getTargetUsers() != null) {
+                richService.setTargetUsersNames(infraService.getTargetUsers()
+                        .stream()
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // AccessType Names
+            if (infraService.getAccessType() != null) {
+                richService.setAccessTypeNames(infraService.getAccessType()
+                        .stream()
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // AccessMode Names
+            if (infraService.getAccessMode() != null) {
+                richService.setAccessModeNames(infraService.getAccessMode()
+                        .stream()
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // FundedBy Names
+            if (infraService.getFundedBy() != null) {
+                richService.setFundedByNames(infraService.getFundedBy()
+                        .stream()
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // OrderType Name
+            if (infraService.getOrderType() != null) {
+                richService.setOrderTypeName(allVocabularies.get(infraService.getOrderType()).getName());
             }
 
             richServices.add(richService);

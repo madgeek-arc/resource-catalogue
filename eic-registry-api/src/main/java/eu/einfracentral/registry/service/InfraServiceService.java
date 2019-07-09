@@ -82,4 +82,11 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
      * @return
      */
     String createServiceId(Service service);
+//
+//    /**
+//     * Migrates Service's fields for Catris.
+//     *
+//     */
+//    void migrateCatrisServices(List<InfraService> infraServices);
+
 }

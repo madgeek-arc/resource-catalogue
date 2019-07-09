@@ -343,4 +343,15 @@ public class ServiceController {
         }
         return facetFilter;
     }
+
+
+//    @ApiOperation(value = "Migrates Service's fields for Catris")
+//    @RequestMapping(path = "catris",method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+//    public void migrateCatrisServices() {
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(10000);
+//        List<InfraService> infraServices = infraService.getAll(ff, null).getResults();
+//        infraService.migrateCatrisServices(infraServices);
+//    }
+
 }
