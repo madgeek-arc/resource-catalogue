@@ -6,7 +6,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.NewVocabularyService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.SynchronizerService;
@@ -46,7 +46,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private VersionService versionService;
 
     @Autowired
-    private NewVocabularyService vocabularyService;
+    private VocabularyService vocabularyService;
 
     @Autowired
     private EventService eventService;
@@ -570,7 +570,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
-        Map<String, NewVocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
+        Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
         List<RichService> richServices = new ArrayList<>();
 
         for (InfraService infraService : infraServices) {

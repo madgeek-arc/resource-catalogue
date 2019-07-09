@@ -5,6 +5,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -25,16 +26,16 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     private static final Logger logger = LogManager.getLogger(MeasurementManager.class);
     private IndicatorManager indicatorManager;
-    private NewVocabularyManager newVocabularyManager;
+    private VocabularyService vocabularyService;
     private InfraServiceService<InfraService, InfraService> infraService;
     private SynchronizerService synchronizerService;
 
     @Autowired
-    public MeasurementManager(IndicatorManager indicatorManager, NewVocabularyManager newVocabularyManager,
+    public MeasurementManager(IndicatorManager indicatorManager, VocabularyService vocabularyService,
                               InfraServiceService<InfraService, InfraService> service,
                               SynchronizerService synchronizerService) {
         super(Measurement.class);
-        this.newVocabularyManager = newVocabularyManager;
+        this.vocabularyService = vocabularyService;
         this.infraService = service;
         this.indicatorManager = indicatorManager;
         this.synchronizerService = synchronizerService;
@@ -203,9 +204,9 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
         if (measurement.getLocations() != null) {
             List<String> verifiedLocations = new ArrayList<>();
-            Map<String, NewVocabulary> placesVocabulary = newVocabularyManager.getByType(NewVocabulary.Type.PLACE)
+            Map<String, Vocabulary> placesVocabulary = vocabularyService.getByType(Vocabulary.Type.PLACE)
                     .stream()
-                    .collect(Collectors.toMap(NewVocabulary::getId, v -> v));
+                    .collect(Collectors.toMap(Vocabulary::getId, v -> v));
             for (String location : measurement.getLocations()) {
                 if (placesVocabulary.get(location) != null && !verifiedLocations.contains(location)) {
                     verifiedLocations.add(location);

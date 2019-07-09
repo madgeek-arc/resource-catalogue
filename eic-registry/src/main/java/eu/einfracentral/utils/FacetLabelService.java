@@ -1,8 +1,8 @@
 package eu.einfracentral.utils;
 
-import eu.einfracentral.domain.NewVocabulary;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.registry.service.NewVocabularyService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -23,10 +23,10 @@ public class FacetLabelService {
 
     private static final Logger logger = LogManager.getLogger(FacetLabelService.class);
     private ProviderService<Provider, Authentication> providerService;
-    private NewVocabularyService vocabularyService;
+    private VocabularyService vocabularyService;
 
     @Autowired
-    FacetLabelService(ProviderService<Provider, Authentication> providerService, NewVocabularyService vocabularyService) {
+    FacetLabelService(ProviderService<Provider, Authentication> providerService, VocabularyService vocabularyService) {
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;
     }
@@ -42,7 +42,7 @@ public class FacetLabelService {
         Map<String, String> providerNames = providerService.getAll(ff, null)
                 .getResults()
                 .stream().collect(Collectors.toMap(Provider::getId, Provider::getName));
-        Map<String, NewVocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
+        Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         for (Facet facet : facets) {
             for (Value value : facet.getValues()) {

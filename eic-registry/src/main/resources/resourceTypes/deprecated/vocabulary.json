@@ -20,18 +20,17 @@
     },
     {
       "defaultValue": null,
-      "label": "Vocabulary Type",
-      "multivalued": false,
-      "name": "type",
-      "path": "//*[local-name()='type']/text()",
+      "multivalued": true,
+      "name": "entry_keys",
+      "path": "//*[local-name()='entries']/*[local-name()='entry']/*[local-name()='key']/text()",
       "primaryKey": false,
       "type": "java.lang.String"
     },
     {
       "defaultValue": null,
       "multivalued": true,
-      "name": "parent_id",
-      "path": "//*[local-name()='parentId']/text()",
+      "name": "entries_children",
+      "path": "//*[local-name()='entries']/*[local-name()='entry']/*[local-name()='value']/*[local-name()='children']/*[local-name()='child']/*[local-name()='entryId']/text()",
       "primaryKey": false,
       "type": "java.lang.String"
     }
@@ -40,5 +39,5 @@
   "name": "vocabulary",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }
