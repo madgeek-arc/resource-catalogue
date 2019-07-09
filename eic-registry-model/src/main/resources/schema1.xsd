@@ -489,33 +489,30 @@
   </xs:complexType>
 
   <xs:complexType name="richService">
-    <xs:complexContent>
-      <xs:extension base="tns:service">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="accessModeNames" nillable="true" type="xs:string"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="accessTypeNames" nillable="true" type="xs:string"/>
-          <xs:element minOccurs="0" name="categoryName" type="xs:string"/>
-          <xs:element name="favourites" type="xs:int"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="fundedByNames" nillable="true" type="xs:string"/>
-          <xs:element name="hasRate" type="xs:float"/>
-          <xs:element name="isFavourite" type="xs:boolean"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="languageNames" nillable="true" type="xs:string"/>
-          <xs:element minOccurs="0" name="orderTypeName" type="xs:string"/>
-          <xs:element minOccurs="0" name="phaseName" type="xs:string"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="placeNames" nillable="true" type="xs:string"/>
-          <xs:element name="ratings" type="xs:int"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomainNames" nillable="true" type="xs:string"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubDomainNames" nillable="true" type="xs:string"/>
-          <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="subCategoryNames" nillable="true" type="xs:string"/>
-          <xs:element minOccurs="0" name="superCategoryName" type="xs:string"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUsersNames" nillable="true" type="xs:string"/>
-          <xs:element minOccurs="0" name="trlName" type="xs:string"/>
-          <xs:element name="userRate" type="xs:float"/>
-          <xs:element name="views" type="xs:int"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessModeNames" nillable="true" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessTypeNames" nillable="true" type="xs:string"/>
+      <xs:element minOccurs="0" name="categoryName" type="xs:string"/>
+      <xs:element name="favourites" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="fundedByNames" nillable="true" type="xs:string"/>
+      <xs:element name="hasRate" type="xs:float"/>
+      <xs:element name="isFavourite" type="xs:boolean"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="languageNames" nillable="true" type="xs:string"/>
+      <xs:element minOccurs="0" name="orderTypeName" type="xs:string"/>
+      <xs:element minOccurs="0" name="phaseName" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="placeNames" nillable="true" type="xs:string"/>
+      <xs:element name="ratings" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomainNames" nillable="true" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubDomainNames" nillable="true" type="xs:string"/>
+      <xs:element minOccurs="0" ref="tns:service"/>
+      <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="subCategoryNames" nillable="true" type="xs:string"/>
+      <xs:element minOccurs="0" name="superCategoryName" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUsersNames" nillable="true" type="xs:string"/>
+      <xs:element minOccurs="0" name="trlName" type="xs:string"/>
+      <xs:element name="userRate" type="xs:float"/>
+      <xs:element name="views" type="xs:int"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="serviceHistory">

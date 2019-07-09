@@ -23,6 +23,7 @@ public class InfraService extends Service {
 
 
     public InfraService() {
+        // No arg constructor
     }
 
     public InfraService(Service service) {
