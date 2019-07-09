@@ -61,7 +61,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     private String webappHome;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         logger.info("Register local");
         auth.authenticationProvider(openIdConnectAuthenticationProvider());
     }
@@ -104,7 +104,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public void registerGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    public void registerGlobal(AuthenticationManagerBuilder auth) {
         logger.info("Register Global");
         auth.authenticationProvider(openIdConnectAuthenticationProvider());
     }

@@ -360,7 +360,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Paging<Resource> resources;
         if (serviceVersion == null || "".equals(serviceVersion) || "latest".equals(serviceVersion)) {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND latest = true", serviceId),
                             resourceType.getName(), 1, 0, "modifiedAt", "DESC");
         } else {
             resources = searchService
