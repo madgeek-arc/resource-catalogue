@@ -86,7 +86,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         if (funderId.matches("all")) {
             List<String> serviceListIds = new ArrayList<>();
             for (RichService richService : richServiceList) {
-                serviceListIds.add(richService.getId());
+                serviceListIds.add(richService.getService().getId());
             }
             servicesMap = new HashMap<>();
             for (Funder funder : funderList) {
@@ -106,7 +106,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
             Funder funder = get(funderId);
             List<RichService> funderServices = new ArrayList<>();
             for (RichService richService : richServiceList) {
-                if (funder.getServices().contains(richService.getId())) {
+                if (funder.getServices().contains(richService.getService().getId())) {
                     funderServices.add(richService);
                 }
             }
@@ -125,8 +125,8 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         funderStats.put("Places", createMap("PlaceNames", services));
 
         Map<String, Double> providerMap = new HashMap<>();
-        for (RichService service : services) {
-            for (String provider : service.getProviders()) {
+        for (RichService richService : services) {
+            for (String provider : richService.getService().getProviders()) {
                 String providerName = providerService.get(provider, securityService.getAdminAccess()).getName();
                 if (providerMap.containsKey(providerName)) {
                     providerMap.put(providerName, (providerMap.get(providerName) + 1));
