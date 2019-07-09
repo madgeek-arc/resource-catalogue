@@ -5,6 +5,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
@@ -66,17 +67,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         List<User> users;
         User authUser = new User(auth);
         Provider ret;
-        if (provider.getId() == null) {
-            provider.setId(provider.getName());
-        }
-        provider.setId(StringUtils
-                .stripAccents(provider.getId())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replaceAll(" ", "_"));
-        if ("".equals(provider.getId())) {
-            throw new ServiceException("Provider id not valid. Special characters are ignored.");
-        }
-
+        validateProvider(provider);
         users = provider.getUsers();
         if (users == null) {
             users = new ArrayList<>();
@@ -102,6 +93,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider update(Provider provider, Authentication auth) {
+        validateProvider(provider);
         Resource existing = whereID(provider.getId(), true);
         Provider ex = deserialize(existing);
         provider.setActive(ex.getActive());
@@ -378,6 +370,67 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
                 verifyProvider(provider.getId(), Provider.States.PENDING_2, false, authentication);
             }
+        }
+    }
+
+    public void validateProvider(Provider provider){
+        // Validate Provider's ID
+        if (provider.getId() == null) {
+            provider.setId(provider.getName());
+        }
+        provider.setId(StringUtils
+                .stripAccents(provider.getId())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replaceAll(" ", "_"));
+        if ("".equals(provider.getId())) {
+            throw new ServiceException("Provider id not valid. Special characters are ignored.");
+        }
+
+        // Validate Provider's Name
+        if (provider.getName() == null || provider.getName().equals("")) {
+            throw new ValidationException("field 'name' is obligatory");
+        }
+        if (provider.getName().length() > 80) {
+            throw new ValidationException("max length for 'name' is 80 chars");
+        }
+
+        // Validate Provider's Website
+        if (provider.getWebsite() == null || provider.getWebsite().toString().equals("")) {
+            throw new ValidationException("field 'website' is obligatory");
+        }
+
+        // Validate Provider's Description
+        if (provider.getDescription() == null || provider.getDescription().equals("")) {
+            throw new ValidationException("field 'description' is obligatory");
+        }
+        if (provider.getDescription().length() > 1000) {
+            throw new ValidationException("max length for 'description' is 1000 chars");
+        }
+
+        // Validate Provider's Logo
+        if (provider.getLogo() == null || provider.getLogo().toString().equals("")) {
+            throw new ValidationException("field 'logo' is obligatory");
+        }
+
+        // Validate Provider's Contact Name
+        if (provider.getContactName() == null || provider.getContactName().equals("")) {
+            throw new ValidationException("field 'contactName' is obligatory");
+        }
+        if (provider.getContactName().length() > 20) {
+            throw new ValidationException("max length for 'contactName' is 20 chars");
+        }
+
+        // Validate Provider's Contact Email
+        if (provider.getContactEmail() == null || provider.getContactEmail().equals("")) {
+            throw new ValidationException("field 'contactEmail' is obligatory");
+        }
+
+        // Validate Provider's Contact Tel
+        if (provider.getContactTel() == null || provider.getContactTel().equals("")) {
+            throw new ValidationException("field 'contactTel' is obligatory");
+        }
+        if (provider.getContactTel().length() > 20) {
+            throw new ValidationException("max length for 'contactTel' is 20 chars");
         }
     }
 

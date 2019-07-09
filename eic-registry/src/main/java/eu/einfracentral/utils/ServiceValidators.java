@@ -43,18 +43,25 @@ public class ServiceValidators {
         logger.debug("Validating vocabularies, Service id: " + service.getId());
         Map<String, NewVocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
-        //Validate Categories/Subcategories
+        // Validate Supercategories/Categories/Subcategories
+        if (service.getSupercategory() == null)
+            throw new ValidationException("Field 'supercategory' is mandatory.");
+        if (!allVocabularies.containsKey(service.getSupercategory()))
+            throw new ValidationException(String.format("supercategory '%s' does not exist.", service.getSupercategory()));
+
         if (service.getCategory() == null)
             throw new ValidationException("Field 'category' is mandatory.");
-        if (service.getSubcategory() == null)
-            throw new ValidationException("Field 'subcategory' is mandatory.");
         if (!allVocabularies.containsKey(service.getCategory()))
             throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
-        if (!allVocabularies.containsKey(service.getSubcategory()))
-            throw new ValidationException(String.format("subcategory '%s' does not exist.",
-                    service.getSubcategory()));
 
-        //Validate Places
+        if (service.getSubcategory() == null)
+            throw new ValidationException("Field 'subcategory' is mandatory.");
+        for (String subcategory : service.getSubcategory()){
+            if (!allVocabularies.containsKey(subcategory))
+                throw new ValidationException(String.format("subcategory '%s' does not exist.", subcategory));
+        }
+
+        // Validate Places
         if (service.getPlaces() != null && !service.getPlaces().isEmpty()) {
             List<String> notFoundPlaces = new ArrayList<>();
             List<String> foundPlaces = new ArrayList<>();
@@ -74,7 +81,7 @@ public class ServiceValidators {
             service.setPlaces(foundPlaces);
         } else throw new ValidationException("Field 'places' is mandatory.");
 
-        //Validate Languages
+        // Validate Languages
         if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
             List<String> serviceLanguages = service.getLanguages();
             List<String> notFoundLanguages = new ArrayList<>();
@@ -95,21 +102,68 @@ public class ServiceValidators {
             service.setLanguages(foundLanguages);
         } else throw new ValidationException("Field 'languages' is mandatory.");
 
-        //Validate LifeCycleStatus
-        if (service.getLifeCycleStatus() != null) {
-            if (!allVocabularies.containsKey(service.getLifeCycleStatus()))
-                throw new ValidationException(String.format("LifeCycleStatus '%s' does not exist.",
-                        service.getLifeCycleStatus()));
-        } else throw new ValidationException("Field 'lifeCycleStatus' is mandatory.");
+        // Validate Phase
+        if (service.getPhase() != null) {
+            if (!allVocabularies.containsKey(service.getPhase()))
+                throw new ValidationException(String.format("Phase '%s' does not exist.",
+                        service.getPhase()));
+        } else throw new ValidationException("Field 'phase' is mandatory.");
 
-        //Validate TRL
+        // Validate TRL
         if (service.getTrl() != null) {
             if (!allVocabularies.containsKey(service.getTrl()))
                 throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
         } else throw new ValidationException("Field 'trl' is mandatory.");
+
+        // Validate Scientific Domain/Subdomain
+        if (service.getScientificDomain() == null)
+            throw new ValidationException("Field 'scientificDomain' is mandatory.");
+        for (String scientificDomain : service.getScientificDomain()){
+            if (!allVocabularies.containsKey(scientificDomain))
+                throw new ValidationException(String.format("scientificDomain '%s' does not exist.", scientificDomain));
+        }
+        if (service.getScientificSubdomain() == null)
+            throw new ValidationException("Field 'scientificSubdomain' is mandatory.");
+        for (String scientificSubomain : service.getScientificSubdomain()){
+            if (!allVocabularies.containsKey(scientificSubomain))
+                throw new ValidationException(String.format("scientificSubdomain '%s' does not exist.", scientificSubomain));
+        }
+
+        // Validate Target Users
+        if (service.getTargetUsers() == null)
+            throw new ValidationException("Field 'targetUsers' is mandatory.");
+        for (String targetUserNew : service.getTargetUsers()){
+            if (!allVocabularies.containsKey(targetUserNew))
+                throw new ValidationException(String.format("targetUser '%s' does not exist.", targetUserNew));
+        }
+
+        // Validate Access Type
+        for (String accessType : service.getAccessType()){
+            if (!allVocabularies.containsKey(accessType))
+                throw new ValidationException(String.format("accessType '%s' does not exist.", accessType));
+        }
+
+        // Validate Access Mode
+        for (String accessMode : service.getAccessMode()){
+            if (!allVocabularies.containsKey(accessMode))
+                throw new ValidationException(String.format("accessMode '%s' does not exist.", accessMode));
+        }
+
+        // Validate Funded By
+        for (String fundedBy : service.getFundedBy()){
+            if (!allVocabularies.containsKey(fundedBy))
+                throw new ValidationException(String.format("fundedBy '%s' does not exist.", fundedBy));
+        }
+
+        // Validate Order Type
+        if (service.getOrderType() == null)
+            throw new ValidationException("Field 'orderType' is mandatory.");
+        if (!allVocabularies.containsKey(service.getOrderType()))
+            throw new ValidationException(String.format("orderType '%s' does not exist.", service.getOrderType()));
+
     }
 
-    //validates the correctness of Providers.
+    // Validate the correctness of Providers.
     public void validateProviders(InfraService service) {
         logger.debug("Validating Providers, Service id: " + service.getId());
         List<String> providers = service.getProviders();
@@ -130,7 +184,7 @@ public class ServiceValidators {
         service.setProviders(validProviders);
     }
 
-    //validates the correctness of Related and Required Services.
+    // Validate the correctness of Related and Required Services.
     public void validateServices(InfraService service) {
         logger.debug("Validating Required/Related Services, Service id: " + service.getId());
         List<String> relatedServices = service.getRelatedServices();
@@ -158,97 +212,87 @@ public class ServiceValidators {
         }
     }
 
-    //validates the correctness of Service Name.
+    // Validate the correctness of Service Name.
     public void validateName(InfraService service) {
         if (service.getName() == null || service.getName().equals("")) {
             throw new ValidationException("field 'name' is obligatory");
         }
-        //TODO: Core should check the max length
-        if (service.getName().length() > 160) {
-            throw new ValidationException("max length for 'name' is 160 chars");
+        if (service.getName().length() > 80) {
+            throw new ValidationException("max length for 'name' is 240 chars");
         }
     }
 
-    //validates the correctness of Service URL.
+    // Validate the correctness of Service URL.
     public void validateURL(InfraService service) {
         if (service.getUrl() == null || service.getUrl().toString().equals("")) {
             throw new ValidationException("field 'url' is mandatory");
         }
     }
 
-    //validates the correctness of Service Description.
+    // Validate the correctness of Service Description.
     public void validateDescription(InfraService service) {
         if (service.getDescription() == null || service.getDescription().equals("")) {
             throw new ValidationException("field 'description' is mandatory");
         }
-        //TODO: Core should check the max length
-        if (service.getDescription().length() > 3000) {
-            throw new ValidationException("max length for 'description' is 3000 chars");
+        if (service.getDescription().length() > 1000) {
+            throw new ValidationException("max length for 'description' is 1000 chars");
         }
     }
 
-    //validates the correctness of Service Symbol.
-    public void validateSymbol(InfraService service) {
-        if (service.getSymbol() == null || service.getSymbol().toString().equals("")) {
-            throw new ValidationException("field 'symbol' is mandatory");
+    // Validate the correctness of Service Logo.
+    public void validateLogo(InfraService service) {
+        if (service.getLogo() == null || service.getLogo().toString().equals("")) {
+            throw new ValidationException("field 'logo' is mandatory");
         }
     }
 
-    //validates the correctness of Service Version.
-    public void validateVersion(InfraService service) {
-        if (service.getVersion() == null || service.getVersion().equals("")) {
-            throw new ValidationException("field 'version' is mandatory");
-        }
-        //TODO: Core should check the max length
-        if (service.getVersion().length() > 20) {
-            throw new ValidationException("max length for 'version' is 20 chars");
-        }
-    }
-
-    //validates the correctness of Service Last Update (Revision Date).
-    public void validateLastUpdate(InfraService service) {
-        if (service.getLastUpdate() == null || service.getLastUpdate().toString().equals("")) {
-            throw new ValidationException("field 'Revision Date' (lastUpdate) is mandatory");
-        }
-    }
-
-    //validates the correctness of URL for requesting the service from the service providers.
-    public void validateOrder(InfraService service) {
-        if (service.getOrder() == null || service.getOrder().toString().equals("")) {
-            throw new ValidationException("field 'order' is mandatory");
-        }
-    }
-
-    //validates the correctness of Service SLA.
-    public void validateSLA(InfraService service) {
-        if (service.getServiceLevelAgreement() == null || service.getServiceLevelAgreement().toString().equals("")) {
-            throw new ValidationException("field 'serviceLevelAgreement' is mandatory");
-        }
-    }
-
-    //validates the max length of various variables.
-    //FIXME: Core should check the max length
+    // Validate the max length of various variables (x3).
     public void validateMaxLength(InfraService service) {
-        if (service.getTagline() != null && service.getTagline().length() > 300) {
-            throw new ValidationException("max length for 'tagline' is 300 chars");
+        if (service.getTagline() != null && service.getTagline().length() > 100) {
+            throw new ValidationException("max length for 'tagline' is 100 chars");
         }
-        if (service.getOptions() != null && service.getOptions().length() > 3000) {
-            throw new ValidationException("max length for 'options' is 3000 chars");
+        if (service.getUserValue() != null && service.getUserValue().length() > 1000) {
+            throw new ValidationException("max length for 'userValue' is 1000 chars");
         }
-        if (service.getTargetUsers() != null && service.getTargetUsers().length() > 3000) {
-            throw new ValidationException("max length for 'targetUsers' is 3000 chars");
+        for (String userBase : service.getUserBase()){
+            if (userBase != null && userBase.length() > 100) {
+                throw new ValidationException("max length for 'userBase' is 100 chars");
+            }
         }
-        if (service.getUserValue() != null && service.getUserValue().length() > 3000) {
-            throw new ValidationException("max length for 'userValue' is 3000 chars");
+        for (String userCase : service.getUseCases()){
+            if (userCase != null && userCase.length() > 100) {
+                throw new ValidationException("max length for 'userCase' is 100 chars");
+            }
         }
-        if (service.getUserBase() != null && service.getUserBase().length() > 3000) {
-            throw new ValidationException("max length for 'userBase' is 3000 chars");
+        for (String tag : service.getTags()){
+            if (tag != null && tag.length() > 20) {
+                throw new ValidationException("max length for 'tag' is 20 chars");
+            }
         }
-        if (service.getChangeLog() != null && service.getChangeLog().length() > 3000) {
-            throw new ValidationException("max length for 'changeLog' is 3000 chars");
+        if (service.getVersion().length() > 10) {
+            throw new ValidationException("max length for 'version' is 10 chars");
         }
-        if (service.getFunding() != null && service.getFunding().length() > 1500) {
-            throw new ValidationException("max length for 'funding' is 1500 chars");
+        if (service.getChangeLog().length() > 1000) {
+            throw new ValidationException("max length for 'changeLog' is 1000 chars");
+        }
+        for (String certification : service.getCertifications()){
+            if (certification != null && certification.length() > 100) {
+                throw new ValidationException("max length for 'certification' is 100 chars");
+            }
+        }
+        for (String standard : service.getStandards()){
+            if (standard != null && standard.length() > 100) {
+                throw new ValidationException("max length for 'standard' is 100 chars");
+            }
+        }
+        if (service.getOwnerName() != null && service.getOwnerName().length() > 20) {
+            throw new ValidationException("max length for 'ownerName' is 20 chars");
+        }
+        if (service.getSupportName() != null && service.getSupportName().length() > 20) {
+            throw new ValidationException("max length for 'supportName' is 20 chars");
+        }
+        if (service.getSecurityName() != null && service.getSecurityName().length() > 20) {
+            throw new ValidationException("max length for 'securityName' is 20 chars");
         }
     }
 }

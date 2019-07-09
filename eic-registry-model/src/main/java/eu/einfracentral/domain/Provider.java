@@ -14,36 +14,68 @@ import java.util.List;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {
 
+
+    // Provider Basic Information
+    /**
+     * Identifier of the service provider.
+     */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 1, example = "(required)", required = true)
     private String id;
 
+    /**
+     * Name of the service provider.
+     */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 2, example = "(required)", required = true)
     private String name;
 
+    /**
+     * Webpage with information about the service provider.
+     */
     @XmlElement(required = true)
+    @ApiModelProperty(position = 3, example = "(required)", required = true)
     private URL website;
 
-    @XmlElement
-    private URL catalogueOfResources;
+    /**
+     * The description of the service provider.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 4, example = "(required)", required = true)
+    private String description;
 
-    @XmlElement
-    private URL publicDescOfResources;
-
-    @XmlElement
+    /**
+     * Link to the logo/visual identity of the service provider.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 5, example = "(required)", required = true)
     private URL logo;
 
+
+    // Provider Contact Information
+    /**
+     * Name of the main contact person of the service provider.
+     */
     @XmlElement(required = true)
-    private String additionalInfo;
+    @ApiModelProperty(position = 6, example = "(required)", required = true)
+    private String contactName;
 
-    @XmlElement
-    private String contactInformation;
+    /**
+     * Email of the main contact person of the service provider.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 7, example = "(required)", required = true)
+    private String contactEmail;
 
-    @XmlElementWrapper(name = "users")
-    @XmlElement(name = "user")
-    @ApiModelProperty(required = true)
-//    @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
-    private List<User> users;
+    /**
+     * Telephone of the main contact person of the service provider.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 8, example = "(required)", required = true)
+    private String contactTel;
 
+
+    // Extra needed fields
     @XmlElement
     @ApiModelProperty(hidden = true)
     private Boolean active;
@@ -52,21 +84,27 @@ public class Provider implements Identifiable {
     @ApiModelProperty(hidden = true)
     private String status;
 
+    @XmlElementWrapper(name = "users")
+    @XmlElement(name = "user")
+    @ApiModelProperty(required = true)
+//    @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
+    private List<User> users;
+
 
     public Provider() {
     }
 
     public Provider(Provider provider) {
-        this.id = provider.getId();
-        this.name = provider.getName();
-        this.contactInformation = provider.getContactInformation();
-        this.website = provider.getWebsite();
-        this.catalogueOfResources = provider.getCatalogueOfResources();
-        this.publicDescOfResources = provider.getPublicDescOfResources();
-        this.additionalInfo = provider.getAdditionalInfo();
-        this.users = provider.getUsers();
-        this.active = provider.getActive();
-        this.status = provider.getStatus();
+        this.id = provider.id;
+        this.name = provider.name;
+        this.website = provider.website;
+        this.description = provider.description;
+        this.logo = provider.logo;
+        this.contactName = provider.contactName;
+        this.contactEmail = provider.contactEmail;
+        this.contactTel = provider.contactTel;
+        this.active = provider.active;
+        this.status = provider.status;
     }
 
     public enum States {
@@ -105,14 +143,14 @@ public class Provider implements Identifiable {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", website=" + website +
-                ", catalogueOfResources=" + catalogueOfResources +
-                ", publicDescOfResources=" + publicDescOfResources +
+                ", description='" + description + '\'' +
                 ", logo=" + logo +
-                ", additionalInfo='" + additionalInfo + '\'' +
-                ", contactInformation='" + contactInformation + '\'' +
-                ", users=" + users +
+                ", contactName='" + contactName + '\'' +
+                ", contactEmail='" + contactEmail + '\'' +
+                ", contactTel='" + contactTel + '\'' +
                 ", active=" + active +
                 ", status='" + status + '\'' +
+                ", users=" + users +
                 '}';
     }
 
@@ -134,24 +172,6 @@ public class Provider implements Identifiable {
         this.name = name;
     }
 
-    public String getContactInformation() {
-        return contactInformation;
-    }
-
-    public void setContactInformation(String contactInformation) {
-        this.contactInformation = contactInformation;
-    }
-
-    @ApiModelProperty(hidden = true)
-    public List<User> getUsers() {
-        return users;
-    }
-
-    @ApiModelProperty(hidden = true)
-    public void setUsers(List<User> users) {
-        this.users = users;
-    }
-
     public URL getWebsite() {
         return website;
     }
@@ -160,20 +180,12 @@ public class Provider implements Identifiable {
         this.website = website;
     }
 
-    public URL getCatalogueOfResources() {
-        return catalogueOfResources;
+    public String getDescription() {
+        return description;
     }
 
-    public void setCatalogueOfResources(URL catalogueOfResources) {
-        this.catalogueOfResources = catalogueOfResources;
-    }
-
-    public URL getPublicDescOfResources() {
-        return publicDescOfResources;
-    }
-
-    public void setPublicDescOfResources(URL publicDescOfResources) {
-        this.publicDescOfResources = publicDescOfResources;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public URL getLogo() {
@@ -184,12 +196,28 @@ public class Provider implements Identifiable {
         this.logo = logo;
     }
 
-    public String getAdditionalInfo() {
-        return additionalInfo;
+    public String getContactName() {
+        return contactName;
     }
 
-    public void setAdditionalInfo(String additionalInfo) {
-        this.additionalInfo = additionalInfo;
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactTel() {
+        return contactTel;
+    }
+
+    public void setContactTel(String contactTel) {
+        this.contactTel = contactTel;
     }
 
     public Boolean getActive() {
@@ -206,5 +234,13 @@ public class Provider implements Identifiable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 }

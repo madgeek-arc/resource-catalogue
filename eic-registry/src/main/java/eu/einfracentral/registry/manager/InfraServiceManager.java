@@ -2,7 +2,6 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -12,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -179,11 +177,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         serviceValidators.validateName(service);
         serviceValidators.validateURL(service);
         serviceValidators.validateDescription(service);
-        serviceValidators.validateSymbol(service);
-        serviceValidators.validateVersion(service);
-        serviceValidators.validateLastUpdate(service);
-        serviceValidators.validateOrder(service);
-        serviceValidators.validateSLA(service);
+        serviceValidators.validateLogo(service);
         serviceValidators.validateMaxLength(service);
         serviceValidators.validateProviders(service);
         return true;
@@ -214,4 +208,37 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ret.setModifiedAt(ret.getRegisteredAt());
         return ret;
     }
+
+//    public void migrateCatrisServices(List<InfraService> infraServices) {
+//        for (InfraService infraService : infraServices) {
+//
+//            //TODO: WHAT TO DO WITH OLD SERVICE OPTIONS
+//
+//            // Migrates old lcs to new phase
+//            infraService.setPhase(infraService.getLifeCycleStatus());
+//
+//            // Migrates old targetUsers to new targetUsers
+//            List<String> targetUsers = Collections.singletonList(infraService.getTargetUsers());
+//            infraService.setTargetUsersNew(targetUsers);
+//
+//            // Migrates old termsOfUse to new termsOfUse
+//            try {
+//                URL url = new URL(infraService.getTermsOfUse().get(0));
+//                infraService.setTermsOfUseNew(url);
+//            } catch (MalformedURLException e) {
+//                e.printStackTrace();
+//            }
+//
+//            // Migrates old funding to new fundedBy
+//            List<String> funding = Collections.singletonList(infraService.getFunding());
+//            infraService.setFundedBy(funding);
+//
+//            // Migrates old subcategories to new subcategories
+//
+//            // Updates Service
+//            super.update(infraService, null);
+//        }
+//
+//    }
+
 }
