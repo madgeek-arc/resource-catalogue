@@ -699,11 +699,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
                 List<Event> userEvents;
                 try {
-                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richService.getId(), auth);
+                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richService.getService().getId(), auth);
                     if (!userEvents.isEmpty()) {
                         richService.setFavourite(userEvents.get(0).getValue().equals("1"));
                     }
-                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richService.getId(), auth);
+                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richService.getService().getId(), auth);
                     if (!userEvents.isEmpty()) {
                         richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
                     }
@@ -715,21 +715,21 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 }
             }
 
-            if (serviceRatings.containsKey(richService.getId())) {
-                int ratings = serviceRatings.get(richService.getId()).size();
-                float rating = serviceRatings.get(richService.getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
+            if (serviceRatings.containsKey(richService.getService().getId())) {
+                int ratings = serviceRatings.get(richService.getService().getId()).size();
+                float rating = serviceRatings.get(richService.getService().getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
                 richService.setRatings(ratings);
                 richService.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
 
             }
 
-            if (serviceFavourites.containsKey(richService.getId())) {
-                int favourites = serviceFavourites.get(richService.getId()).stream().mapToInt(Float::intValue).sum();
+            if (serviceFavourites.containsKey(richService.getService().getId())) {
+                int favourites = serviceFavourites.get(richService.getService().getId()).stream().mapToInt(Float::intValue).sum();
                 richService.setFavourites(favourites);
             }
 
             // set visits
-            Integer views = serviceVisits.get(richService.getId());
+            Integer views = serviceVisits.get(richService.getService().getId());
             if (views != null) {
                 richService.setViews(views);
             } else {
