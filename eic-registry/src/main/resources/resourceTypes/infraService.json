@@ -9,39 +9,9 @@
     },
     {
       "multivalued": false,
-      "name": "url",
-      "path": "//*[local-name()='url']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "name",
+      "label": "Service Name",
       "path": "//*[local-name()='name']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "service_version",
-      "path": "//*[local-name()='version']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "tagline",
-      "path": "//*[local-name()='tagline']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "options",
-      "path": "//*[local-name()='options']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "trl",
-      "label": "TRL",
-      "path": "//*[local-name()='trl']/text()",
       "type": "java.lang.String"
     },
     {
@@ -52,10 +22,17 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "lifeCycleStatus",
-      "label": "Lifecycle Status",
-      "path": "//*[local-name()='lifeCycleStatus']/text()",
+      "multivalued": true,
+      "name": "scientific_domains",
+      "label": "Scientific Domain",
+      "path": "//*[local-name()='scientificDomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "label": "Scientific Subdomain",
+      "path": "//*[local-name()='scientificSubdomain']/text()",
       "type": "java.lang.String"
     },
     {
@@ -66,41 +43,80 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "subcategory",
+      "multivalued": true,
+      "name": "subcategories",
       "label": "Subcategory",
       "path": "//*[local-name()='subcategory']/text()",
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
-      "name": "place",
-      "path": "//*[local-name()='place']/text()",
+      "multivalued": false,
+      "name": "supercategory",
+      "label": "Superategory",
+      "path": "//*[local-name()='supercategory']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "language",
+      "name": "target_users",
+      "label": "Target User",
+      "path": "//*[local-name()='targetUser']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "languages",
       "label": "Language",
       "path": "//*[local-name()='language']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "tag",
-      "path": "//*[local-name()='tag']/text()",
+      "name": "places",
+      "label": "Place",
+      "path": "//*[local-name()='place']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "relatedService",
-      "path": "//*[local-name()='relatedService']/text()",
+      "name": "access_types",
+      "label": "Access Type",
+      "path": "//*[local-name()='accessType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "access_modes",
+      "label": "Access Mode",
+      "path": "//*[local-name()='accessMode']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funders",
+      "label": "Funders",
+      "path": "//*[local-name()='funder']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "funding",
-      "path": "//*[local-name()='funding']/text()",
+      "name": "phase",
+      "label": "Phase",
+      "path": "//*[local-name()='phase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "trl",
+      "label": "TRL",
+      "path": "//*[local-name()='trl']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "orderType",
+      "label": "Order Type",
+      "path": "//*[local-name()='orderType']/text()",
       "type": "java.lang.String"
     },
     {

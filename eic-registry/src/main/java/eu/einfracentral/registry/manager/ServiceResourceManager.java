@@ -587,8 +587,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // Subcategory Name
-            if (infraService.getSubcategory() != null) {
-                richService.setSubCategoryNames(infraService.getSubcategory()
+            if (infraService.getSubcategories() != null) {
+                richService.setSubCategoryNames(infraService.getSubcategories()
                         .stream()
                         .map(l -> allVocabularies.get(l).getName())
                         .collect(Collectors.toList())
@@ -624,8 +624,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // ScientificDomain Names
-            if (infraService.getScientificDomain() != null) {
-                richService.setScientificDomainNames(infraService.getScientificDomain()
+            if (infraService.getScientificDomains() != null) {
+                richService.setScientificDomainNames(infraService.getScientificDomains()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -633,8 +633,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // ScientificSubdomain Names
-            if (infraService.getScientificSubdomain() != null) {
-                richService.setScientificSubDomainNames(infraService.getScientificSubdomain()
+            if (infraService.getScientificSubdomains() != null) {
+                richService.setScientificSubDomainNames(infraService.getScientificSubdomains()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -651,8 +651,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // AccessType Names
-            if (infraService.getAccessType() != null) {
-                richService.setAccessTypeNames(infraService.getAccessType()
+            if (infraService.getAccessTypes() != null) {
+                richService.setAccessTypeNames(infraService.getAccessTypes()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -660,8 +660,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // AccessMode Names
-            if (infraService.getAccessMode() != null) {
-                richService.setAccessModeNames(infraService.getAccessMode()
+            if (infraService.getAccessModes() != null) {
+                richService.setAccessModeNames(infraService.getAccessModes()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -669,8 +669,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // FundedBy Names
-            if (infraService.getFundedBy() != null) {
-                richService.setFundedByNames(infraService.getFundedBy()
+            if (infraService.getFunders() != null) {
+                richService.setFundedByNames(infraService.getFunders()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
