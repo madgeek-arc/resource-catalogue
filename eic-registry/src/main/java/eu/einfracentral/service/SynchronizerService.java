@@ -189,7 +189,7 @@ public class SynchronizerService {
                 URI uri = new URI(host + "/measurement");
                 ResponseEntity re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, Measurement.class);
                 if (re.getStatusCode() != HttpStatus.CREATED) {
-                    logger.error(String.format("Adding measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
+                    logger.error(String.format("Posting measurement with id '%s' to host '%s' returned code '%d'%nResponse body:%n%s",
                             measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
                 } else {
                     retryKey = false;

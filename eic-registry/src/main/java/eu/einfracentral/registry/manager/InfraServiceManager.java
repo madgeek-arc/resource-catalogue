@@ -46,7 +46,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
-            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
+            "@securityService.providerCanAddServices(#authentication, #infraService)")
     public InfraService addService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
@@ -72,7 +72,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
-            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
+            "@securityService.providerCanAddServices(#authentication, #infraService)")
     public InfraService updateService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);

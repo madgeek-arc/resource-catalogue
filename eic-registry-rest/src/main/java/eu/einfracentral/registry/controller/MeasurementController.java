@@ -4,6 +4,7 @@ import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -52,7 +53,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @ApiOperation(value = "Returns the latest Measurements for the specific service.")
     @RequestMapping(path = "latest/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Measurement>> getLatestServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
+        throw new ServiceException("I am an error message");
+//        return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
 
     @Override
