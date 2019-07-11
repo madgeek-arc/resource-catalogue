@@ -20,35 +20,35 @@ public class Provider implements Identifiable {
      * Identifier of the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, example = "(required)", required = true)
+    @ApiModelProperty(position = 1, example = "String (required)", required = true)
     private String id;
 
     /**
      * Name of the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "(required)", required = true)
+    @ApiModelProperty(position = 2, example = "String (required)", required = true)
     private String name;
 
     /**
      * Webpage with information about the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "(required)", required = true)
+    @ApiModelProperty(position = 3, example = "URL (required)", required = true)
     private URL website;
 
     /**
      * The description of the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "(required)", required = true)
+    @ApiModelProperty(position = 4, example = "String (required)", required = true)
     private String description;
 
     /**
      * Link to the logo/visual identity of the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "(required)", required = true)
+    @ApiModelProperty(position = 5, example = "URL (required)", required = true)
     private URL logo;
 
 
@@ -57,21 +57,21 @@ public class Provider implements Identifiable {
      * Name of the main contact person of the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "(required)", required = true)
+    @ApiModelProperty(position = 6, example = "String (required)", required = true)
     private String contactName;
 
     /**
      * Email of the main contact person of the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 7, example = "(required)", required = true)
+    @ApiModelProperty(position = 7, example = "String (required)", required = true)
     private String contactEmail;
 
     /**
      * Telephone of the main contact person of the service provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, example = "(required)", required = true)
+    @ApiModelProperty(position = 8, example = "String (required)", required = true)
     private String contactTel;
 
 
@@ -84,10 +84,9 @@ public class Provider implements Identifiable {
     @ApiModelProperty(hidden = true)
     private String status;
 
-    @XmlElementWrapper(name = "users")
+    @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
     @ApiModelProperty(required = true)
-//    @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
     private List<User> users;
 
 

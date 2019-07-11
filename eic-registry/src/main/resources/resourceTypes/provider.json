@@ -22,7 +22,13 @@
     {
       "multivalued": true,
       "name": "users",
-      "path": "//*[local-name()='users']/text()",
+      "path": "//*[local-name()='user']/*[local-name()='email']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "contact_name",
+      "path": "//*[local-name()='contactName']/text()",
       "type": "java.lang.String"
     },
     {

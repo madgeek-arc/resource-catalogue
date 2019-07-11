@@ -107,20 +107,24 @@
 
   <xs:complexType name="service">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessMode" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The mode a user can access the service.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element minOccurs="0" name="accessModes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="accessMode" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="accessPolicy" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Webpage to the information about the access policies that apply.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessType" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The way a user can access the service.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element minOccurs="0" name="accessTypes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="accessType" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element name="category" type="xs:string">
         <xs:annotation>
@@ -144,10 +148,12 @@
           <xs:documentation><![CDATA[A high-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables to access.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="fundedBy" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Sources of funding for the development and/or operation of the service.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element minOccurs="0" name="funders">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="funder" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="helpdesk" type="xs:anyURI">
         <xs:annotation>
@@ -191,10 +197,12 @@
           <xs:documentation><![CDATA[Webpage with monitoring information about this service.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" type="xs:anyURI">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Link to video, screenshots or slides showing details of the service.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element minOccurs="0" name="multimediaUrls">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimediaUrl" type="xs:anyURI"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element name="name" type="xs:string">
         <xs:annotation>
@@ -276,15 +284,19 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element maxOccurs="unbounded" name="scientificDomain" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The branch of science, scientific discipline that is related to the service.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element name="scientificDomains">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
-      <xs:element maxOccurs="unbounded" name="scientificSubdomain" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The subbranch of science, scientific subdicipline that is related to the service.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element name="scientificSubdomains">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubdomain" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="securityContact" type="xs:string">
         <xs:annotation>
@@ -308,10 +320,12 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element maxOccurs="unbounded" name="subcategory" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[A named group of services that offer access to the same type of resource or capabilities, within the defined service category.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element name="subcategories">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="subcategory" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element name="supercategory" type="xs:string">
         <xs:annotation>
@@ -340,10 +354,10 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="targetUsersNew">
+      <xs:element name="targetUsers">
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUserNew" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUser" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -367,15 +381,19 @@
           <xs:documentation><![CDATA[Webpage with information about the service usually hosted and maintained by the service provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="useCases" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[List of use cases supported by this service/resource.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element minOccurs="0" name="useCases">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="useCase" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="userBase" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[List of customers, communities, users, etc using the service.]]></xs:documentation>
-        </xs:annotation>
+      <xs:element minOccurs="0" name="userBases">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="userBase" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="userValue" type="xs:string">
         <xs:annotation>
