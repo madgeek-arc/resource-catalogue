@@ -53,8 +53,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @ApiOperation(value = "Returns the latest Measurements for the specific service.")
     @RequestMapping(path = "latest/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Measurement>> getLatestServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        throw new ServiceException("I am an error message");
-//        return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
+        return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
 
     @Override
