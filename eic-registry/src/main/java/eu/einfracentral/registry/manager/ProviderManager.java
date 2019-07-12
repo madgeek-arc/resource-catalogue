@@ -384,6 +384,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
      * @param providers
      * @param authentication
      */
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void verifyNewProviders(List<String> providers, Authentication authentication) {
         for (String serviceProvider : providers) {
             Provider provider = get(serviceProvider);
