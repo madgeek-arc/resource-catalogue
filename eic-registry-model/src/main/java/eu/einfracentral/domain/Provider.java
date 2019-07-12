@@ -86,7 +86,7 @@ public class Provider implements Identifiable {
 
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(position = 8, required = true)
     private List<User> users;
 
 
