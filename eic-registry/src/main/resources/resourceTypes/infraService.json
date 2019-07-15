@@ -15,6 +15,12 @@
       "type": "java.lang.String"
     },
     {
+      "multivalued": false,
+      "name": "service_version",
+      "path": "//*[local-name()='version']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": true,
       "name": "providers",
       "label": "Provider",
