@@ -76,6 +76,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             users.add(authUser);
             provider.setUsers(users);
         }
+        provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ret = super.add(provider, null);
@@ -119,6 +120,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Cacheable(value = CACHE_PROVIDERS)
     public Provider get(String id) {
         Provider provider = super.get(id);
+        if (provider == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("Could not find provider with id: %s", id));
+        }
         return provider;
     }
 
@@ -130,7 +135,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             provider.setUsers(null);
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
-        } else if (securityService.hasRole(auth, "ROLE_PROVIDER") && securityService.userIsProviderAdmin(auth, provider)) {
+        } else if (securityService.hasRole(auth, "ROLE_PROVIDER")
+                && securityService.userIsProviderAdmin(auth, provider)) {
             return provider;
         }
         provider.setUsers(null);
@@ -364,6 +370,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
     }
 
+    /**
+     * This method is used to update a list of new providers with status 'Provider.States.ST_SUBMISSION'
+     * to status 'Provider.States.PENDING_2'
+     * @param providers
+     * @param authentication
+     */
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void verifyNewProviders(List<String> providers, Authentication authentication) {
         for (String serviceProvider : providers) {
             Provider provider = get(serviceProvider);

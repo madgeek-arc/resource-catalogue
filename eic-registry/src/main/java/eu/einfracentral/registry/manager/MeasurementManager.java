@@ -77,7 +77,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
-            "@securityService.userIsServiceProviderAdmin(#authentication, #serviceId)")
+            "@securityService.userIsServiceProviderAdmin(#auth, #serviceId)")
     public List<Measurement> updateAll(String serviceId, List<Measurement> allMeasurements, Authentication auth) {
         List<Measurement> updatedMeasurements = new ArrayList<>();
         List<Measurement> existingMeasurements = getAll(serviceId, auth).getResults();
