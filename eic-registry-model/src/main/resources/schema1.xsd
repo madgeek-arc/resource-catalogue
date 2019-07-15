@@ -482,7 +482,7 @@
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
-      <xs:element minOccurs="0" name="users">
+      <xs:element name="users">
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:user"/>
