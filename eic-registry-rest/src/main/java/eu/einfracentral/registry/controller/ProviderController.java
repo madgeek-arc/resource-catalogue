@@ -72,7 +72,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @Override
     @ApiOperation(value = "Creates a new Provider.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ResponseEntity<Provider> ret = super.add(provider, auth);
         logger.info("User " + auth.getName() + " added the Provider " + provider.getName() + " with id " + provider.getId());

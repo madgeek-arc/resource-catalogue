@@ -3,6 +3,8 @@ package eu.einfracentral.service;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.User;
+import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -11,6 +13,7 @@ import eu.openminted.registry.core.service.ServiceException;
 import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -60,7 +63,7 @@ public class SecurityService {
         Provider registeredProvider = providerManager.get(providerId);
         User user = new User(auth);
         if (registeredProvider == null) {
-            throw new ServiceException("Provider with id '" + providerId + "' does not exist.");
+            throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
         }
         return registeredProvider.getUsers()
                 .parallelStream()
@@ -107,18 +110,23 @@ public class SecurityService {
     }
 
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
-        List<String> providerNames = service.getProviders();
-        for (String providerName : providerNames) {
-            Provider provider = providerManager.get(providerName);
+        List<String> providerIds = service.getProviders();
+        for (String providerId : providerIds) {
+            Provider provider = providerManager.get(providerId);
+            if ((provider.getActive() == null || provider.getStatus() == null)) {
+                throw new ServiceException("Provider active or status field is null");
+            }
             if (provider.getActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
-                return userIsProviderAdmin(auth, provider);
+                if (userIsProviderAdmin(auth, provider)) {
+                    return true;
+                }
             } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
                 FacetFilter ff = new FacetFilter();
                 ff.addFilter("providers", provider.getId());
                 if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                     return true;
                 }
-                throw new ServiceException("You have already created a Service Template.");
+                throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
             }
         }
         return false;
@@ -126,18 +134,24 @@ public class SecurityService {
 
     public boolean providerIsActive(String providerId) {
         Provider provider = providerManager.get(providerId);
-        if (!provider.getActive()) {
-            throw new ServiceException(String.format("Provider with id '%s' is not active yet.", provider.getName()));
+        if (provider != null && provider.getActive() != null) {
+            if (!provider.getActive()) {
+                throw new ServiceException(String.format("Provider '%s' is not active.", provider.getName()));
+            }
+            return true;
+        } else {
+            throw new ResourceNotFoundException(String.format("Provider with id '%s' does not exist.", providerId));
         }
-        return provider.getActive();
     }
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         for (String providerId : service.getProviders()) {
             Provider provider = providerManager.get(providerId);
-            if (provider.getActive()) {
-                return userIsProviderAdmin(auth, provider);
+            if (provider != null && provider.getActive() != null && provider.getActive()) {
+                if (userIsProviderAdmin(auth, providerId)) {
+                    return true;
+                }
             }
         }
         return false;

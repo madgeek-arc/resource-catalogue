@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -69,7 +70,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService get(String id, String version) {
         Resource resource = getResource(id, version);
         if (resource == null) {
-            throw new ServiceException(String.format("Could not find service with id: %s", id));
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s", id));
         }
         return deserialize(resource);
     }
@@ -119,7 +120,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         if (existing == null) {
-            throw new ServiceException(
+            throw new ResourceNotFoundException(
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
                             infraService.getId(), infraService.getVersion()));
         }
@@ -183,7 +184,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 {
                     try {
                         return getRichService(id, "latest", auth);
-                    } catch (ServiceException e) {
+                    } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
 

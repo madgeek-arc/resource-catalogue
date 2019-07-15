@@ -119,7 +119,7 @@ public class ServiceController {
                 service.setId(infraService.createServiceId(service));
             }
             s = this.infraService.get(service.getId());
-        } catch (ServiceException e) {
+        } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service
         }
 
