@@ -7,8 +7,8 @@ public class RichService {
 
     private Service service;
     private ServiceMetadata serviceMetadata;
-    private String superCategoryName;
-    private String categoryName;
+    private List<String> superCategoryNames;
+    private List<String> categoryNames;
     private List<String> subCategoryNames;
     private List<String> languageNames;
     private List<String> placeNames;
@@ -60,12 +60,12 @@ public class RichService {
     }
 
     // Getters/Setters for VocabularyNames
-    public String getCategoryName() {
-        return categoryName;
+    public List<String> getCategoryNames() {
+        return categoryNames;
     }
 
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
+    public void setCategoryNames(List<String> categoryNames) {
+        this.categoryNames = categoryNames;
     }
 
     public List<String> getSubCategoryNames() {
@@ -100,12 +100,12 @@ public class RichService {
         this.placeNames = placeNames;
     }
 
-    public String getSuperCategoryName() {
-        return superCategoryName;
+    public List<String> getSuperCategoryNames() {
+        return superCategoryNames;
     }
 
-    public void setSuperCategoryName(String superCategoryName) {
-        this.superCategoryName = superCategoryName;
+    public void setSuperCategoryNames(List<String> superCategoryNames) {
+        this.superCategoryNames = superCategoryNames;
     }
 
     public String getPhaseName() {

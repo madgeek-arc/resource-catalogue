@@ -500,7 +500,7 @@
     <xs:sequence>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="accessModeNames" nillable="true" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="accessTypeNames" nillable="true" type="xs:string"/>
-      <xs:element minOccurs="0" name="categoryName" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="categoryNames" nillable="true" type="xs:string"/>
       <xs:element name="favourites" type="xs:int"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="fundedByNames" nillable="true" type="xs:string"/>
       <xs:element name="hasRate" type="xs:float"/>
@@ -515,7 +515,7 @@
       <xs:element minOccurs="0" ref="tns:service"/>
       <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="subCategoryNames" nillable="true" type="xs:string"/>
-      <xs:element minOccurs="0" name="superCategoryName" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="superCategoryNames" nillable="true" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUsersNames" nillable="true" type="xs:string"/>
       <xs:element minOccurs="0" name="trlName" type="xs:string"/>
       <xs:element name="userRate" type="xs:float"/>
