@@ -578,14 +578,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             RichService richService = new RichService(infraService);
 
             // Supercategory Name
-            if (infraService.getSupercategory() != null) {
-                richService.setSuperCategoryName(allVocabularies.get(infraService.getSupercategory()).getName());
-            }
+            // TODO: create and display a list of Supercategory names based on the saved subcategories
 
             // Category Name
-            if (infraService.getCategory() != null) {
-                richService.setCategoryName(allVocabularies.get(infraService.getCategory()).getName());
-            }
+            // TODO: create and display a list of Category names based on the saved subcategories
 
             // Subcategory Name
             if (infraService.getSubcategories() != null) {

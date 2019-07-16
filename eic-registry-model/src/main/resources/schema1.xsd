@@ -126,11 +126,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="category" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[A named group of services that offer access to the same type of resource or capabilities.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element minOccurs="0" name="certifications">
         <xs:complexType>
           <xs:sequence>
@@ -327,11 +322,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="supercategory" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[A named group for a predefined list of categories.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element minOccurs="0" name="supportContact" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[E-mail contact of the person to request technical/operational support.]]></xs:documentation>
@@ -388,7 +378,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="userBases">
+      <xs:element minOccurs="0" name="userBaseList">
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="userBase" type="xs:string"/>

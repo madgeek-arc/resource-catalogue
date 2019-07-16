@@ -19,7 +19,7 @@ public class Service implements Identifiable {
     /**
      * Global unique and persistent identifier of the service.
      */
-    @XmlElement(required = false)
+    @XmlElement
     @ApiModelProperty(position = 1, example = "(required on PUT only)")
     private String id;
 
@@ -68,17 +68,17 @@ public class Service implements Identifiable {
     /**
      * List of customers, communities, users, etc using the service.
      */
-    @XmlElementWrapper(name = "userBases")
+    @XmlElementWrapper(name = "userBaseList")
     @XmlElement(name = "userBase")
-    @ApiModelProperty(position = 8, example = "List<String> (optional)")
-    private List<String> userBases;
+    @ApiModelProperty(position = 8, dataType = "List", example = "String[] (optional)")
+    private List<String> userBaseList;
 
     /**
      * List of use cases supported by this service/resource.
      */
     @XmlElementWrapper(name = "useCases")
     @XmlElement(name = "useCase")
-    @ApiModelProperty(position = 9, example = "List<String> (optional)")
+    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (optional)")
     private List<String> useCases;
 
     /**
@@ -86,7 +86,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "multimediaUrls")
     @XmlElement(name = "multimediaUrl")
-    @ApiModelProperty(position = 10, example = "(optional)")
+    @ApiModelProperty(position = 10, dataType = "List", example = "(optional)")
     private List<URL> multimediaUrls;
 
     /**
@@ -94,7 +94,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "options")
     @XmlElement(name = "option")
-    @ApiModelProperty(position = 11, example = "List<String> (optional)")
+    @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
     private List<String> options;
 
     /**
@@ -102,7 +102,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
-    @ApiModelProperty(position = 12, dataType = "List", example = "List<String> (optional)")
+    @ApiModelProperty(position = 12, dataType = "List", example = "String[] (optional)")
     private List<String> requiredServices;
 
     /**
@@ -110,7 +110,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
-    @ApiModelProperty(position = 13, dataType = "List", example = "List<String> (optional)")
+    @ApiModelProperty(position = 13, dataType = "List", example = "String[] (optional)")
     private List<String> relatedServices;
 
 
@@ -120,7 +120,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "providers", required = true)
     @XmlElement(name = "provider")
-    @ApiModelProperty(position = 14, dataType = "List", example = "List<String> (required)", required = true)
+    @ApiModelProperty(position = 14, dataType = "List", example = "String[] (required)", required = true)
     private List<String> providers;
 
     /**
@@ -128,7 +128,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains", required = true)
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 15, example = "List<String> (required)", required = true)
+    @ApiModelProperty(position = 15, dataType = "List", example = "String[] (required)", required = true)
     private List<String> scientificDomains;
 
     /**
@@ -136,37 +136,39 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificSubdomains", required = true)
     @XmlElement(name = "scientificSubdomain")
-    @ApiModelProperty(position = 16, example = "List<String> (required)", required = true)
+    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (required)", required = true)
     private List<String> scientificSubdomains;
 
-    /**
-     * A named group of services that offer access to the same type of resource or capabilities.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 17, example = "String (required)", required = true)
-    private String category;
+//    /**
+//     * A named group for a predefined list of categories.
+//     */
+//    @XmlElementWrapper(name = "supercategories", required = true)
+//    @XmlElement(name = "supercategory")
+//    @ApiModelProperty(position = 17, dataType = "List", example = "String (required)", required = true)
+//    private List<String> supercategories;
+//
+//    /**
+//     * A named group of services that offer access to the same type of resource or capabilities.
+//     */
+//    @XmlElementWrapper(name = "categories", required = true)
+//    @XmlElement(name = "category")
+//    @ApiModelProperty(position = 18, dataType = "List", example = "String[] (required)", required = true)
+//    private List<String> categories;
 
     /**
      * A named group of services that offer access to the same type of resource or capabilities, within the defined service category.
      */
     @XmlElementWrapper(name = "subcategories", required = true)
     @XmlElement(name = "subcategory")
-    @ApiModelProperty(position = 18, example = "List<String> (required)", required = true)
+    @ApiModelProperty(position = 19, dataType = "List", example = "String[] (required)", required = true)
     private List<String> subcategories;
-
-    /**
-     * A named group for a predefined list of categories.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 19, example = "String (required)", required = true)
-    private String supercategory;
 
     /**
      * Type of users/customers that commissions a service provider to deliver a service.
      */
     @XmlElementWrapper(name = "targetUsers", required = true)
     @XmlElement(name = "targetUser")
-    @ApiModelProperty(position = 20, dataType = "List", example = "List<String> (required)", required = true)
+    @ApiModelProperty(position = 20, dataType = "List", example = "String[] (required)", required = true)
     private List<String> targetUsers;
 
     /**
@@ -174,7 +176,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "languages", required = true)
     @XmlElement(name = "language")
-    @ApiModelProperty(position = 21, dataType = "List", example = "List<String> (required)", required = true)
+    @ApiModelProperty(position = 21, dataType = "List", example = "String[] (required)", required = true)
     private List<String> languages;
 
     /**
@@ -182,7 +184,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "places", required = true)
     @XmlElement(name = "place")
-    @ApiModelProperty(position = 22, dataType = "List", example = "List<String> (required)", required = true)
+    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (required)", required = true)
     private List<String> places;
 
     /**
@@ -190,7 +192,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "accessTypes")
     @XmlElement(name = "accessType")
-    @ApiModelProperty(position = 23, example = "List<String> (optional)")
+    @ApiModelProperty(position = 23, dataType = "List", example = "String[] (optional)")
     private List<String> accessTypes;
 
     /**
@@ -198,7 +200,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "accessModes")
     @XmlElement(name = "accessMode")
-    @ApiModelProperty(position = 24, example = "List<String> (optional)")
+    @ApiModelProperty(position = 24, dataType = "List", example = "String[] (optional)")
     private List<String> accessModes;
 
     /**
@@ -206,7 +208,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "funders")
     @XmlElement(name = "funder")
-    @ApiModelProperty(position = 25, example = "List<String> (optional)")
+    @ApiModelProperty(position = 25, dataType = "List", example = "String[] (optional)")
     private List<String> funders;
 
     /**
@@ -214,7 +216,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 26, dataType = "List", example = "List<String> (optional)")
+    @ApiModelProperty(position = 26, dataType = "List", example = "String[] (optional)")
     private List<String> tags;
 
 
@@ -259,7 +261,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
-    @ApiModelProperty(position = 32, dataType = "List", example = "List<String> (optional)")
+    @ApiModelProperty(position = 32, dataType = "List", example = "String[] (optional)")
     private List<String> certifications;
 
     /**
@@ -267,7 +269,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "standards")
     @XmlElement(name = "standard")
-    @ApiModelProperty(position = 33, dataType = "List", example = "List<String> (optional)")
+    @ApiModelProperty(position = 33, dataType = "List", example = "String[] (optional)")
     private List<String> standards;
 
 
@@ -422,7 +424,7 @@ public class Service implements Identifiable {
         this.logo = service.logo;
         this.tagline = service.tagline;
         this.userValue = service.userValue;
-        this.userBases = service.userBases;
+        this.userBaseList = service.userBaseList;
         this.useCases = service.useCases;
         this.multimediaUrls = service.multimediaUrls;
         this.options = service.options;
@@ -430,9 +432,9 @@ public class Service implements Identifiable {
         this.relatedServices = service.relatedServices;
         this.providers = service.providers;
         this.targetUsers = service.targetUsers;
-        this.category = service.category;
+//        this.supercategories = service.supercategories;
+//        this.categories = service.categories;
         this.subcategories = service.subcategories;
-        this.supercategory = service.supercategory;
         this.scientificDomains = service.scientificDomains;
         this.scientificSubdomains = service.scientificSubdomains;
         this.languages = service.languages;
@@ -479,7 +481,7 @@ public class Service implements Identifiable {
                 ", logo=" + logo +
                 ", tagline='" + tagline + '\'' +
                 ", userValue='" + userValue + '\'' +
-                ", userBase=" + userBases +
+                ", userBase=" + userBaseList +
                 ", useCases=" + useCases +
                 ", multimedia=" + multimediaUrls +
                 ", options=" + options +
@@ -488,9 +490,9 @@ public class Service implements Identifiable {
                 ", providers=" + providers +
                 ", scientificDomain=" + scientificDomains +
                 ", scientificSubdomain=" + scientificSubdomains +
-                ", category='" + category + '\'' +
+//                ", supercategories='" + supercategories + '\'' +
+//                ", categories='" + categories + '\'' +
                 ", subcategory=" + subcategories +
-                ", supercategory='" + supercategory + '\'' +
                 ", targetUsers=" + targetUsers +
                 ", languages=" + languages +
                 ", places=" + places +
@@ -539,7 +541,7 @@ public class Service implements Identifiable {
                 Objects.equals(logo, service.logo) &&
                 Objects.equals(tagline, service.tagline) &&
                 Objects.equals(userValue, service.userValue) &&
-                stringListsAreEqual(userBases, service.userBases) &&
+                stringListsAreEqual(userBaseList, service.userBaseList) &&
                 stringListsAreEqual(useCases, service.useCases) &&
                 Objects.equals(multimediaUrls, service.multimediaUrls) &&
                 Objects.equals(options, service.options) &&
@@ -548,9 +550,9 @@ public class Service implements Identifiable {
                 stringListsAreEqual(providers, service.providers) &&
                 stringListsAreEqual(scientificDomains, service.scientificDomains) &&
                 stringListsAreEqual(scientificSubdomains, service.scientificSubdomains) &&
-                Objects.equals(category, service.category) &&
+//                stringListsAreEqual(supercategories, service.supercategories) &&
+//                stringListsAreEqual(categories, service.categories) &&
                 stringListsAreEqual(subcategories, service.subcategories) &&
-                Objects.equals(supercategory, service.supercategory) &&
                 stringListsAreEqual(targetUsers, service.targetUsers) &&
                 stringListsAreEqual(languages, service.languages) &&
                 stringListsAreEqual(places, service.places) &&
@@ -607,7 +609,13 @@ public class Service implements Identifiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, url, description, logo, tagline, userValue, userBases, useCases, multimediaUrls, options, requiredServices, relatedServices, providers, scientificDomains, scientificSubdomains, category, subcategories, supercategory, targetUsers, languages, places, accessTypes, accessModes, funders, tags, phase, trl, version, lastUpdate, changeLog, certifications, standards, orderType, order, sla, termsOfUse, privacyPolicy, accessPolicy, paymentModel, pricing, manual, training, helpdesk, monitoring, maintenance, ownerName, ownerContact, supportName, supportContact, securityName, securityContact);
+        return Objects.hash(id, name, url, description, logo, tagline, userValue, userBaseList, useCases,
+                multimediaUrls, options, requiredServices, relatedServices, providers, scientificDomains,
+                scientificSubdomains, /*supercategories, categories,*/ subcategories, targetUsers, languages,
+                places, accessTypes, accessModes, funders, tags, phase, trl, version, lastUpdate, changeLog,
+                certifications, standards, orderType, order, sla, termsOfUse, privacyPolicy, accessPolicy,
+                paymentModel, pricing, manual, training, helpdesk, monitoring, maintenance, ownerName, ownerContact,
+                supportName, supportContact, securityName, securityContact);
     }
 
     @Override
@@ -668,12 +676,12 @@ public class Service implements Identifiable {
         this.userValue = userValue;
     }
 
-    public List<String> getUserBases() {
-        return userBases;
+    public List<String> getUserBaseList() {
+        return userBaseList;
     }
 
-    public void setUserBases(List<String> userBase) {
-        this.userBases = userBases;
+    public void setUserBaseList(List<String> userBase) {
+        this.userBaseList = userBaseList;
     }
 
     public List<String> getUseCases() {
@@ -740,13 +748,21 @@ public class Service implements Identifiable {
         this.scientificSubdomains = scientificSubdomains;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
+//    public List<String> getSupercategories() {
+//        return supercategories;
+//    }
+//
+//    public void setSupercategories(List<String> supercategories) {
+//        this.supercategories = supercategories;
+//    }
+//
+//    public List<String> getCategories() {
+//        return categories;
+//    }
+//
+//    public void setCategories(List<String> categories) {
+//        this.categories = categories;
+//    }
 
     public List<String> getSubcategories() {
         return subcategories;
@@ -754,14 +770,6 @@ public class Service implements Identifiable {
 
     public void setSubcategories(List<String> subcategories) {
         this.subcategories = subcategories;
-    }
-
-    public String getSupercategory() {
-        return supercategory;
-    }
-
-    public void setSupercategory(String supercategory) {
-        this.supercategory = supercategory;
     }
 
     public List<String> getTargetUsers() {
