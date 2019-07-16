@@ -129,7 +129,7 @@ public class ServiceProviderRegistrationIT {
         service.setPhase(vocabularyService.get("beta").getId());
         service.setPlaces(Collections.singletonList(vocabularyService.get("WW").getId()));
         service.setLanguages(Collections.singletonList(vocabularyService.get("english").getId()));
-        service.setCategory(vocabularyService.get("other-other").getId());
+//        service.setCategory(vocabularyService.get("other-other").getId());
 
         service.setUrl(new URL("http://test.t"));
         service.setLogo(new URL("http://test.t"));
