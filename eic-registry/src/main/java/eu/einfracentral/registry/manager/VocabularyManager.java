@@ -96,9 +96,9 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    public void addAll(List<Vocabulary> newVocabularies, Authentication auth) {
-        for (Vocabulary vocabulary : newVocabularies) {
-            logger.info("Adding subcategory " + vocabulary.getId());
+    public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
+        for (Vocabulary vocabulary : vocabularies) {
+            logger.info("Adding Vocabulary " + vocabulary.getId());
             add(vocabulary, auth);
         }
     }
@@ -107,9 +107,9 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<Vocabulary> allVocs = getByType(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN);
+        List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
-            logger.info("Deleting Scientific Subdomain " + vocabulary.getName());
+            logger.info("Deleting Vocabulary " + vocabulary.getName());
             delete(vocabulary);
         }
     }
@@ -143,15 +143,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
     public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
-        if (vocabulary.getId().startsWith("category-") || vocabulary.getId().startsWith("subcategory-")) { // TODO: remove
-            String id = vocabulary.getName().toLowerCase();
-            id = id.replaceAll(" ", "_");
-            id = id.replaceAll("&", "and");
-            if (vocabulary.getParentId() != null) {
-                id = String.format("%s-%s", vocabulary.getParentId().toLowerCase(), id);
-            }
-            vocabulary.setId(id);
-        }
         String serialized = serialize(vocabulary);
         serialized = serialized.replaceAll(":tns", "");
         serialized = serialized.replaceAll("tns:", "");

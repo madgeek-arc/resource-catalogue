@@ -55,7 +55,7 @@ public class ServiceValidators {
             throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
 
         if (service.getSubcategories() == null)
-            throw new ValidationException("Field 'subcategory' is mandatory.");
+            throw new ValidationException("Field 'subcategories' is mandatory.");
         for (String subcategory : service.getSubcategories()){
             if (!allVocabularies.containsKey(subcategory))
                 throw new ValidationException(String.format("subcategory '%s' does not exist.", subcategory));
@@ -115,15 +115,15 @@ public class ServiceValidators {
                 throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
         } else throw new ValidationException("Field 'trl' is mandatory.");
 
-        // Validate Scientific Domain/Subdomain
+        // Validate Scientific Domains/Subdomains
         if (service.getScientificDomains() == null)
-            throw new ValidationException("Field 'scientificDomain' is mandatory.");
+            throw new ValidationException("Field 'scientificDomains' is mandatory.");
         for (String scientificDomain : service.getScientificDomains()){
             if (!allVocabularies.containsKey(scientificDomain))
                 throw new ValidationException(String.format("scientificDomain '%s' does not exist.", scientificDomain));
         }
         if (service.getScientificSubdomains() == null)
-            throw new ValidationException("Field 'scientificSubdomain' is mandatory.");
+            throw new ValidationException("Field 'scientificSubdomains' is mandatory.");
         for (String scientificSubomain : service.getScientificSubdomains()){
             if (!allVocabularies.containsKey(scientificSubomain))
                 throw new ValidationException(String.format("scientificSubdomain '%s' does not exist.", scientificSubomain));
@@ -137,22 +137,22 @@ public class ServiceValidators {
                 throw new ValidationException(String.format("targetUser '%s' does not exist.", targetUserNew));
         }
 
-        // Validate Access Type
+        // Validate Access Types
         for (String accessType : service.getAccessTypes()){
             if (!allVocabularies.containsKey(accessType))
                 throw new ValidationException(String.format("accessType '%s' does not exist.", accessType));
         }
 
-        // Validate Access Mode
+        // Validate Access Modes
         for (String accessMode : service.getAccessModes()){
             if (!allVocabularies.containsKey(accessMode))
                 throw new ValidationException(String.format("accessMode '%s' does not exist.", accessMode));
         }
 
-        // Validate Funded By
-        for (String fundedBy : service.getFunders()){
-            if (!allVocabularies.containsKey(fundedBy))
-                throw new ValidationException(String.format("fundedBy '%s' does not exist.", fundedBy));
+        // Validate Funders
+        for (String funder : service.getFunders()){
+            if (!allVocabularies.containsKey(funder))
+                throw new ValidationException(String.format("funder '%s' does not exist.", funder));
         }
 
         // Validate Order Type
@@ -246,52 +246,52 @@ public class ServiceValidators {
         }
     }
 
-    // Validate the max length of various variables (x3).
+    // Validate the max length of various variables (x10).
     public void validateMaxLength(InfraService service) {
-        if (service.getTagline() != null && service.getTagline().length() > 100) {
+        if (service.getTagline() != null && service.getTagline().length() > 1000) {
             throw new ValidationException("max length for 'tagline' is 100 chars");
         }
-        if (service.getUserValue() != null && service.getUserValue().length() > 1000) {
+        if (service.getUserValue() != null && service.getUserValue().length() > 10000) {
             throw new ValidationException("max length for 'userValue' is 1000 chars");
         }
-        for (String userBase : service.getUserBases()){
-            if (userBase != null && userBase.length() > 100) {
-                throw new ValidationException("max length for 'userBase' is 100 chars");
-            }
-        }
+//        for (String userBase : service.getUserBases()){
+//            if (userBase != null && userBase.length() > 100) {
+//                throw new ValidationException("max length for 'userBase' is 100 chars");
+//            }
+//        }
         for (String userCase : service.getUseCases()){
-            if (userCase != null && userCase.length() > 100) {
+            if (userCase != null && userCase.length() > 1000) {
                 throw new ValidationException("max length for 'userCase' is 100 chars");
             }
         }
         for (String tag : service.getTags()){
-            if (tag != null && tag.length() > 20) {
+            if (tag != null && tag.length() > 2000) {
                 throw new ValidationException("max length for 'tag' is 20 chars");
             }
         }
-        if (service.getVersion().length() > 10) {
+        if (service.getVersion().length() > 100) {
             throw new ValidationException("max length for 'version' is 10 chars");
         }
-        if (service.getChangeLog().length() > 1000) {
+        if (service.getChangeLog().length() > 10000) {
             throw new ValidationException("max length for 'changeLog' is 1000 chars");
         }
         for (String certification : service.getCertifications()){
-            if (certification != null && certification.length() > 100) {
+            if (certification != null && certification.length() > 1000) {
                 throw new ValidationException("max length for 'certification' is 100 chars");
             }
         }
         for (String standard : service.getStandards()){
-            if (standard != null && standard.length() > 100) {
+            if (standard != null && standard.length() > 1000) {
                 throw new ValidationException("max length for 'standard' is 100 chars");
             }
         }
-        if (service.getOwnerName() != null && service.getOwnerName().length() > 20) {
+        if (service.getOwnerName() != null && service.getOwnerName().length() > 200) {
             throw new ValidationException("max length for 'ownerName' is 20 chars");
         }
-        if (service.getSupportName() != null && service.getSupportName().length() > 20) {
+        if (service.getSupportName() != null && service.getSupportName().length() > 200) {
             throw new ValidationException("max length for 'supportName' is 20 chars");
         }
-        if (service.getSecurityName() != null && service.getSecurityName().length() > 20) {
+        if (service.getSecurityName() != null && service.getSecurityName().length() > 200) {
             throw new ValidationException("max length for 'securityName' is 20 chars");
         }
     }
