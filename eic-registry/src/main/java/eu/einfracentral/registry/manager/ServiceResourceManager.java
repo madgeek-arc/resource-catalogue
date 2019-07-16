@@ -577,11 +577,22 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
 
-            // Supercategory Name
-            // TODO: create and display a list of Supercategory names based on the saved subcategories
-
-            // Category Name
-            // TODO: create and display a list of Category names based on the saved subcategories
+            // Supercategory & Category Names
+            List<String> supercategories = new ArrayList<>();
+            List<String> categories = new ArrayList<>();
+            for (String subcategory : infraService.getSubcategories()){
+                String[] parts = subcategory.split("-");
+                String supercategoryPart = parts[1]; //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-microscopy
+                String categoryPart = parts[2];
+                Vocabulary supercategoryVoc = vocabularyService.get("supercategory-"+supercategoryPart);
+                Vocabulary categoryVoc = vocabularyService.get("category-"+supercategoryPart+"-"+categoryPart);
+                String supercategoryName = supercategoryVoc.getName();
+                String categoryName = categoryVoc.getName();
+                supercategories.add(supercategoryName);
+                categories.add(categoryName);
+            }
+            richService.setSuperCategoryNames(supercategories);
+            richService.setCategoryNames(categories);
 
             // Subcategory Name
             if (infraService.getSubcategories() != null) {
