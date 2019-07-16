@@ -49,12 +49,7 @@ public class ServiceValidators {
         if (!allVocabularies.containsKey(service.getSupercategory()))
             throw new ValidationException(String.format("supercategory '%s' does not exist.", service.getSupercategory()));
 
-        if (service.getCategory() == null)
-            throw new ValidationException("Field 'category' is mandatory.");
-        if (!allVocabularies.containsKey(service.getCategory()))
-            throw new ValidationException(String.format("category '%s' does not exist.", service.getCategory()));
-
-        if (service.getSubcategories() == null)
+        if (service.getSubcategories() == null || service.getSubcategories().isEmpty())
             throw new ValidationException("Field 'subcategories' is mandatory.");
         for (String subcategory : service.getSubcategories()){
             if (!allVocabularies.containsKey(subcategory))
@@ -83,10 +78,9 @@ public class ServiceValidators {
 
         // Validate Languages
         if (service.getLanguages() != null && !service.getLanguages().isEmpty()) {
-            List<String> serviceLanguages = service.getLanguages();
             List<String> notFoundLanguages = new ArrayList<>();
             List<String> foundLanguages = new ArrayList<>();
-            for (String languageId : serviceLanguages) {
+            for (String languageId : service.getLanguages()) {
                 if (allVocabularies.containsKey(languageId)) {
                     if (!foundLanguages.contains(languageId)) {
                         foundLanguages.add(languageId);
@@ -116,13 +110,13 @@ public class ServiceValidators {
         } else throw new ValidationException("Field 'trl' is mandatory.");
 
         // Validate Scientific Domains/Subdomains
-        if (service.getScientificDomains() == null)
+        if (service.getScientificDomains() == null || service.getScientificDomains().isEmpty())
             throw new ValidationException("Field 'scientificDomains' is mandatory.");
         for (String scientificDomain : service.getScientificDomains()){
             if (!allVocabularies.containsKey(scientificDomain))
                 throw new ValidationException(String.format("scientificDomain '%s' does not exist.", scientificDomain));
         }
-        if (service.getScientificSubdomains() == null)
+        if (service.getScientificSubdomains() == null || service.getScientificSubdomains().isEmpty())
             throw new ValidationException("Field 'scientificSubdomains' is mandatory.");
         for (String scientificSubomain : service.getScientificSubdomains()){
             if (!allVocabularies.containsKey(scientificSubomain))
@@ -130,7 +124,7 @@ public class ServiceValidators {
         }
 
         // Validate Target Users
-        if (service.getTargetUsers() == null)
+        if (service.getTargetUsers() == null || service.getTargetUsers().isEmpty())
             throw new ValidationException("Field 'targetUsers' is mandatory.");
         for (String targetUserNew : service.getTargetUsers()){
             if (!allVocabularies.containsKey(targetUserNew))
@@ -138,21 +132,27 @@ public class ServiceValidators {
         }
 
         // Validate Access Types
-        for (String accessType : service.getAccessTypes()){
-            if (!allVocabularies.containsKey(accessType))
-                throw new ValidationException(String.format("accessType '%s' does not exist.", accessType));
+        if (service.getAccessTypes() != null) {
+            for (String accessType : service.getAccessTypes()){
+                if (!allVocabularies.containsKey(accessType))
+                    throw new ValidationException(String.format("accessType '%s' does not exist.", accessType));
+            }
         }
 
         // Validate Access Modes
-        for (String accessMode : service.getAccessModes()){
-            if (!allVocabularies.containsKey(accessMode))
-                throw new ValidationException(String.format("accessMode '%s' does not exist.", accessMode));
+        if (service.getAccessModes() != null) {
+            for (String accessMode : service.getAccessModes()){
+                if (!allVocabularies.containsKey(accessMode))
+                    throw new ValidationException(String.format("accessMode '%s' does not exist.", accessMode));
+            }
         }
 
         // Validate Funders
-        for (String funder : service.getFunders()){
-            if (!allVocabularies.containsKey(funder))
-                throw new ValidationException(String.format("funder '%s' does not exist.", funder));
+        if (service.getFunders() != null) {
+            for (String funder : service.getFunders()){
+                if (!allVocabularies.containsKey(funder))
+                    throw new ValidationException(String.format("funder '%s' does not exist.", funder));
+            }
         }
 
         // Validate Order Type
@@ -254,11 +254,11 @@ public class ServiceValidators {
         if (service.getUserValue() != null && service.getUserValue().length() > 10000) {
             throw new ValidationException("max length for 'userValue' is 1000 chars");
         }
-//        for (String userBase : service.getUserBases()){
-//            if (userBase != null && userBase.length() > 100) {
-//                throw new ValidationException("max length for 'userBase' is 100 chars");
-//            }
-//        }
+        for (String userBase : service.getUserBaseList()){ // TODO: check if it works as intended
+            if (userBase != null && userBase.length() > 100) {
+                throw new ValidationException("max length for 'userBase' is 100 chars");
+            }
+        }
         for (String userCase : service.getUseCases()){
             if (userCase != null && userCase.length() > 1000) {
                 throw new ValidationException("max length for 'userCase' is 100 chars");
