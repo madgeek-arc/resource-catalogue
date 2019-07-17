@@ -72,14 +72,21 @@ elasticsearch.cluster=<clusterName>
 jms.host=tcp://${fqdn}:61616
 jms.prefix=<local>
 
-## eic Properties ##
-webapp.home=http://localhost:8080/eic-registry/openid_connect_login
-webapp.front=http://localhost:3000
+## eic Login Properties ##
+webapp.homepage=http://localhost:3000
+webapp.oidc.login.redirectUris=http://localhost:8080/eic-registry/openid_connect_login
 
-## AAI Properties ##
+## Openid Connect Properties ##
 oidc.issuer=
-oidc.secret=
-oidc.id=
+oidc.authorization=
+oidc.token=
+oidc.userinfo=
+oidc.revocation=
+oidc.jwk=
+
+oidc.clientId=
+oidc.clientSecret=
+oidc.scopes=openid, profile, email
 
 
 #########################
