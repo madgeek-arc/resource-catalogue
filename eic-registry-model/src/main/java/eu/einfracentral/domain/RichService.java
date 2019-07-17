@@ -60,6 +60,14 @@ public class RichService {
     }
 
     // Getters/Setters for VocabularyNames
+    public List<String> getSuperCategoryNames() {
+        return superCategoryNames;
+    }
+
+    public void setSuperCategoryNames(List<String> superCategoryNames) {
+        this.superCategoryNames = superCategoryNames;
+    }
+
     public List<String> getCategoryNames() {
         return categoryNames;
     }
@@ -84,14 +92,6 @@ public class RichService {
         this.languageNames = languageNames;
     }
 
-    public String getTrlName() {
-        return trlName;
-    }
-
-    public void setTrlName(String trlName) {
-        this.trlName = trlName;
-    }
-
     public List<String> getPlaceNames() {
         return placeNames;
     }
@@ -100,12 +100,12 @@ public class RichService {
         this.placeNames = placeNames;
     }
 
-    public List<String> getSuperCategoryNames() {
-        return superCategoryNames;
+    public String getTrlName() {
+        return trlName;
     }
 
-    public void setSuperCategoryNames(List<String> superCategoryNames) {
-        this.superCategoryNames = superCategoryNames;
+    public void setTrlName(String trlName) {
+        this.trlName = trlName;
     }
 
     public String getPhaseName() {
@@ -171,7 +171,6 @@ public class RichService {
     public void setOrderTypeName(String orderTypeName) {
         this.orderTypeName = orderTypeName;
     }
-
 
     // Getters/Setters for Statistics
     public int getViews() {
