@@ -43,21 +43,7 @@ public class ServiceValidators {
         logger.debug("Validating vocabularies, Service id: " + service.getId());
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
-//        // Validate Supercategories/Categories/Subcategories
-//        if (Objects.requireNonNull(service.getSupercategories()).isEmpty())
-//            throw new ValidationException("Field 'supercategories' is mandatory.");
-//        for (String supercategory : service.getSubcategories()){
-//            if (!allVocabularies.containsKey(supercategory))
-//                throw new ValidationException(String.format("supercategory '%s' does not exist.", supercategory));
-//        }
-//
-//        if (Objects.requireNonNull(service.getCategories()).isEmpty())
-//            throw new ValidationException("Field 'categories' is mandatory.");
-//        for (String category : service.getCategories()){
-//            if (!allVocabularies.containsKey(category))
-//                throw new ValidationException(String.format("category '%s' does not exist.", category));
-//        }
-
+        // Validate Subcategories
         if (service.getSubcategories() == null || service.getSubcategories().isEmpty())
             throw new ValidationException("Field 'subcategories' is mandatory.");
         for (String subcategory : service.getSubcategories()){
