@@ -42,24 +42,10 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "category",
-      "label": "Category",
-      "path": "//*[local-name()='category']/text()",
-      "type": "java.lang.String"
-    },
-    {
       "multivalued": true,
       "name": "subcategories",
       "label": "Subcategory",
       "path": "//*[local-name()='subcategory']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "supercategory",
-      "label": "Superategory",
-      "path": "//*[local-name()='supercategory']/text()",
       "type": "java.lang.String"
     },
     {

@@ -139,22 +139,6 @@ public class Service implements Identifiable {
     @ApiModelProperty(position = 16, dataType = "List", example = "String[] (required)", required = true)
     private List<String> scientificSubdomains;
 
-//    /**
-//     * A named group for a predefined list of categories.
-//     */
-//    @XmlElementWrapper(name = "supercategories", required = true)
-//    @XmlElement(name = "supercategory")
-//    @ApiModelProperty(position = 17, dataType = "List", example = "String (required)", required = true)
-//    private List<String> supercategories;
-//
-//    /**
-//     * A named group of services that offer access to the same type of resource or capabilities.
-//     */
-//    @XmlElementWrapper(name = "categories", required = true)
-//    @XmlElement(name = "category")
-//    @ApiModelProperty(position = 18, dataType = "List", example = "String[] (required)", required = true)
-//    private List<String> categories;
-
     /**
      * A named group of services that offer access to the same type of resource or capabilities, within the defined service category.
      */
@@ -490,8 +474,6 @@ public class Service implements Identifiable {
                 ", providers=" + providers +
                 ", scientificDomain=" + scientificDomains +
                 ", scientificSubdomain=" + scientificSubdomains +
-//                ", supercategories='" + supercategories + '\'' +
-//                ", categories='" + categories + '\'' +
                 ", subcategory=" + subcategories +
                 ", targetUsers=" + targetUsers +
                 ", languages=" + languages +
