@@ -5,6 +5,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,8 +44,19 @@ public class UserEventsController {
         Map<String, String> favouriteServices = new HashMap<>();
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), auth);
         List<RichService> services = new ArrayList<>();
+
+        // Check if the serviceId exists and add it on the list, so to avoid errors
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<String> serviceIds = new ArrayList<>();
+        for (InfraService infraService : infraServiceService.getAll(ff, auth).getResults()){
+            serviceIds.add(infraService.getId());
+        }
+
         for (Event userEvent : userEvents) {
-            favouriteServices.putIfAbsent(userEvent.getService(), userEvent.getValue());
+            if (serviceIds.contains(userEvent.getService())){
+                favouriteServices.putIfAbsent(userEvent.getService(), userEvent.getValue());
+            }
         }
         for (Map.Entry<String, String> favouriteService : favouriteServices.entrySet()) {
             if ("1".equals(favouriteService.getValue())) { // "1" is true
