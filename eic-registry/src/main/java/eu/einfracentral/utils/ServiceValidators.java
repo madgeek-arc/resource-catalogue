@@ -254,11 +254,11 @@ public class ServiceValidators {
         if (service.getUserValue() != null && service.getUserValue().length() > 10000) {
             throw new ValidationException("max length for 'userValue' is 1000 chars");
         }
-        for (String userBase : service.getUserBaseList()){ // TODO: check if it works as intended
-            if (userBase != null && userBase.length() > 100) {
-                throw new ValidationException("max length for 'userBase' is 100 chars");
-            }
-        }
+//        for (String userBase : service.getUserBaseList()){ // TODO: check if it works as intended
+//            if (userBase != null && userBase.length() > 100) {
+//                throw new ValidationException("max length for 'userBase' is 100 chars");
+//            }
+//        }
         for (String userCase : service.getUseCases()){
             if (userCase != null && userCase.length() > 1000) {
                 throw new ValidationException("max length for 'userCase' is 100 chars");
