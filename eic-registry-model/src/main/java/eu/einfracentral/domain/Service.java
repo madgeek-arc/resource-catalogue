@@ -95,7 +95,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "options")
     @XmlElement(name = "option")
     @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
-    private List<String> options;
+    private List<ServiceOption> options;
 
     /**
      * List of other services required with this service.
@@ -479,24 +479,24 @@ public class Service implements Identifiable {
                 ", logo=" + logo +
                 ", tagline='" + tagline + '\'' +
                 ", userValue='" + userValue + '\'' +
-                ", userBase=" + userBaseList +
+                ", userBaseList=" + userBaseList +
                 ", useCases=" + useCases +
-                ", multimedia=" + multimediaUrls +
+                ", multimediaUrls=" + multimediaUrls +
                 ", options=" + options +
                 ", requiredServices=" + requiredServices +
                 ", relatedServices=" + relatedServices +
                 ", providers=" + providers +
-                ", scientificDomain=" + scientificDomains +
-                ", scientificSubdomain=" + scientificSubdomains +
+                ", scientificDomains=" + scientificDomains +
+                ", scientificSubdomains=" + scientificSubdomains +
                 ", category='" + category + '\'' +
-                ", subcategory=" + subcategories +
+                ", subcategories=" + subcategories +
                 ", supercategory='" + supercategory + '\'' +
                 ", targetUsers=" + targetUsers +
                 ", languages=" + languages +
                 ", places=" + places +
-                ", accessType=" + accessTypes +
-                ", accessMode=" + accessModes +
-                ", fundedBy=" + funders +
+                ", accessTypes=" + accessTypes +
+                ", accessModes=" + accessModes +
+                ", funders=" + funders +
                 ", tags=" + tags +
                 ", phase='" + phase + '\'' +
                 ", trl='" + trl + '\'' +
@@ -678,7 +678,7 @@ public class Service implements Identifiable {
         return userBaseList;
     }
 
-    public void setUserBaseList(List<String> userBase) {
+    public void setUserBaseList(List<String> userBaseList) {
         this.userBaseList = userBaseList;
     }
 
@@ -698,11 +698,11 @@ public class Service implements Identifiable {
         this.multimediaUrls = multimediaUrls;
     }
 
-    public List<String> getOptions() {
+    public List<ServiceOption> getOptions() {
         return options;
     }
 
-    public void setOptions(List<String> options) {
+    public void setOptions(List<ServiceOption> options) {
         this.options= options;
     }
 
