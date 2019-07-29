@@ -762,7 +762,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             String domain = subdomain.getParentId(); //scientific_domain-natural_sciences
             innerDomainMap.put(vocabularyService.get(domain).getId(), vocabularyService.get(domain).getName());
         }
-        outterMap.put(innerDomainMap, innerSubdomainMap);
+
+        for (Map.Entry entry : innerDomainMap.entrySet()){
+            outterMap.put(entry, innerSubdomainMap.entrySet());
+        }
+
         domainTree.put("Scientific Domains", outterMap);
 
         return domainTree;
