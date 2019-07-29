@@ -38,7 +38,6 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         return new ResponseEntity<>(service.get(id), HttpStatus.OK);
     }
 
-    @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.add(t, auth), HttpStatus.CREATED);
