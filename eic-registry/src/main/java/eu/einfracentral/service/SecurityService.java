@@ -65,8 +65,12 @@ public class SecurityService {
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
         }
+        if (registeredProvider.getUsers() == null) {
+            return false;
+        }
         return registeredProvider.getUsers()
                 .parallelStream()
+                .filter(Objects::nonNull)
                 .anyMatch(u -> {
                     if (u.getId() != null) {
                         if (u.getEmail() != null) {
