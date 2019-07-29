@@ -60,13 +60,14 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @Override
     @ApiOperation(value = "Creates a new Indicator.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
         ResponseEntity<Indicator> ret = super.add(indicator, auth);
         logger.info("User " + auth.getName() + " created a new Indicator " + indicator.getName() + " with id " + indicator.getId());
         return ret;
     }
 
+    @ApiIgnore
     @Override
     @ApiOperation(value = "Updates the Indicator assigned the given id with the given Indicator, keeping a version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -78,6 +79,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
 
+    @ApiIgnore
     @ApiOperation(value = "Deletes the Indicator with the given id.")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")

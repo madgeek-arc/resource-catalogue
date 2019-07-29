@@ -69,6 +69,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @Override
     @ApiOperation(value = "Creates a new Provider.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -130,6 +131,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get a list of Providers in which the given user is admin.")
     @RequestMapping(path = "getServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
@@ -140,6 +142,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get a list of Providers in which you are admin.")
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
@@ -150,6 +153,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Get the pending services of the given Provider.")
     @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {

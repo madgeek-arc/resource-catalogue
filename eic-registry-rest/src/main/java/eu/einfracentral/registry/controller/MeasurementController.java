@@ -56,6 +56,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
 
+    @ApiIgnore
     @Override
     @ApiOperation(value = "Filter a list of Measurements based on a set of filters or get a list of all Measurements in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
@@ -92,6 +93,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ret;
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Updates existing Measurements of a specific Service, or/and adds new ones.")
     @RequestMapping(path = "updateAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
@@ -101,6 +103,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ret;
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Deletes the Measurement with the given id.")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
