@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@ApiIgnore
 @RestController
 @RequestMapping("userEvents")
 public class UserEventsController {
@@ -37,7 +36,12 @@ public class UserEventsController {
         this.infraServiceService = infraServiceService;
     }
 
-    @ApiOperation("Retrieve all the favourite Services of the authenticated user.")
+    /**
+     * Retrieve all the favourite Services of the authenticated user.
+     *
+     * @param auth
+     * @return
+     */
     @RequestMapping(path = "favourites", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> favourites(Authentication auth) {
 
@@ -66,8 +70,12 @@ public class UserEventsController {
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
 
-
-    @ApiOperation("Retrieve all the rated Services of the authenticated user.")
+    /**
+     * Retrieve all the rated Services of the authenticated user.
+     *
+     * @param auth
+     * @return
+     */
     @RequestMapping(path = "ratings", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> ratings(Authentication auth) {
 
