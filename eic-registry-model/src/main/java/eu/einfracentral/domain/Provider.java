@@ -100,6 +100,23 @@ public class Provider implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Provider{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", website=" + website +
+                ", catalogueOfResources=" + catalogueOfResources +
+                ", publicDescOfResources=" + publicDescOfResources +
+                ", logo=" + logo +
+                ", additionalInfo='" + additionalInfo + '\'' +
+                ", contactInformation='" + contactInformation + '\'' +
+                ", users=" + users +
+                ", active=" + active +
+                ", status='" + status + '\'' +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

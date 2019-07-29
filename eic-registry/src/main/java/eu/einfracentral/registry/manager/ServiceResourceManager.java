@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -69,7 +70,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService get(String id, String version) {
         Resource resource = getResource(id, version);
         if (resource == null) {
-            throw new ServiceException(String.format("Could not find service with id: %s", id));
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s", id));
         }
         return deserialize(resource);
     }
@@ -119,7 +120,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService update(InfraService infraService, Authentication auth) {
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         if (existing == null) {
-            throw new ServiceException(
+            throw new ResourceNotFoundException(
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
                             infraService.getId(), infraService.getVersion()));
         }
@@ -183,7 +184,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 {
                     try {
                         return getRichService(id, "latest", auth);
-                    } catch (ServiceException e) {
+                    } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
 
@@ -360,7 +361,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Paging<Resource> resources;
         if (serviceVersion == null || "".equals(serviceVersion) || "latest".equals(serviceVersion)) {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND latest = true", serviceId),
                             resourceType.getName(), 1, 0, "modifiedAt", "DESC");
         } else {
             resources = searchService
@@ -419,6 +420,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return richServices;
     }
 
+    @Override
     public String createServiceId(Service service) {
         String provider = service.getProviders().get(0);
         return String.format("%s.%s", provider, StringUtils
@@ -572,11 +574,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return query.toString();
     }
 
-    public List<RichService> createRichVocabularies(List<InfraService> infraServices){
+    public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
         List<Vocabulary> vocabularies = vocabularyManager.getAll(new FacetFilter(), null).getResults();
         List<RichService> richServices = new ArrayList<>();
 
-        for (InfraService infraService : infraServices){
+        for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
             for (Vocabulary vocabulary : vocabularies) {
                 switch (vocabulary.getId()) {
@@ -635,12 +637,12 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return (richServices);
     }
 
-    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth){
+    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth) {
         Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
         Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
         Map<String, List<Float>> serviceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
-        for (RichService richService : richServices){
+        for (RichService richService : richServices) {
 
             // set user favourite and rate if auth != null
             if (auth != null) {

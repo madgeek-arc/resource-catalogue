@@ -58,6 +58,20 @@ public class Measurement implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Measurement{" +
+                "id='" + id + '\'' +
+                ", indicatorId='" + indicatorId + '\'' +
+                ", serviceId='" + serviceId + '\'' +
+                ", time=" + time +
+                ", locations=" + locations +
+                ", valueIsRange=" + valueIsRange +
+                ", value='" + value + '\'' +
+                ", rangeValue=" + rangeValue +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

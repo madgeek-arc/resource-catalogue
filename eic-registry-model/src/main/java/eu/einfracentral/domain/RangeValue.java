@@ -26,6 +26,14 @@ public class RangeValue {
         this.toValue = rangeValue.getToValue();
     }
 
+    @Override
+    public String toString() {
+        return "RangeValue{" +
+                "fromValue='" + fromValue + '\'' +
+                ", toValue='" + toValue + '\'' +
+                '}';
+    }
+
     public String getFromValue() {
         return fromValue;
     }

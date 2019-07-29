@@ -63,7 +63,7 @@ jdbc.url=jdbc:postgresql://${fqdn}:5432/db
 jdbc.username=<user>
 jdbc.password=<your-password>
 
-## Elastisearch Properties ##
+## Elasticsearch Properties ##
 elasticsearch.url=${fqdn}
 elasticsearch.port=9300
 elasticsearch.cluster=<clusterName>
@@ -72,14 +72,21 @@ elasticsearch.cluster=<clusterName>
 jms.host=tcp://${fqdn}:61616
 jms.prefix=<local>
 
-## eic Properties ##
-webapp.home=http://localhost:8080/eic-registry/openid_connect_login
-webapp.front=http://localhost:3000
+## eic Login Properties ##
+webapp.homepage=http://localhost:3000
+webapp.oidc.login.redirectUris=http://localhost:8080/eic-registry/openid_connect_login
 
-## AAI Properties ##
+## Openid Connect Properties ##
 oidc.issuer=
-oidc.secret=
-oidc.id=
+oidc.authorization=
+oidc.token=
+oidc.userinfo=
+oidc.revocation=
+oidc.jwk=
+
+oidc.clientId=
+oidc.clientSecret=
+oidc.scopes=openid, profile, email
 
 
 #########################
@@ -89,6 +96,10 @@ oidc.id=
 ## eic Properties ##
 eic.admins=test@email.com, test2@email.com
 einfracentral.debug=false
+
+## sync ##
+sync.host=
+sync.token.filepath=
 
 ## Mail Properties ##
 mail.smtp.auth=
@@ -103,6 +114,7 @@ mail.smtp.ssl.enable=
 matomoHost=
 matomoToken=
 matomoSiteId=
+matomoAuthorizationHeader=
 ```
 
 - - -

@@ -47,21 +47,45 @@ import java.util.stream.Collectors;
 public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final Logger logger = LogManager.getLogger(SessionSecurityConfig.class);
+
     @Autowired
     EICAuthoritiesMapper eicAuthoritiesMapper;
-    @Value("${webapp.front}")
-    private String webappFrontUrl;
+
     @Value("${oidc.issuer}")
     private String oidcIssuer;
-    @Value("${oidc.secret}")
-    private String oidcSecret;
-    @Value("${oidc.id}")
-    private String oidcId;
-    @Value("${webapp.home}")
-    private String webappHome;
+
+    @Value("${oidc.authorization}")
+    private String oidcAuthorizationEndpoint;
+
+    @Value("${oidc.token}")
+    private String oidcTokenEndpoint;
+
+    @Value("${oidc.userinfo}")
+    private String oidcUserinfoEndpoint;
+
+    @Value("${oidc.revocation}")
+    private String oidcRevocationEndpoint;
+
+    @Value("${oidc.jwk}")
+    private String oidcJwkUri;
+
+    @Value("${oidc.clientId}")
+    private String oidcClientId;
+
+    @Value("${oidc.clientSecret}")
+    private String oidcClientSecret;
+
+    @Value("#{'${oidc.scopes}'.split(',')}")
+    private List<String> scopes;
+
+    @Value("#{'${webapp.oidc.login.redirectUris}'.split(',')}")
+    private List<String> redirectUris;
+
+    @Value("${webapp.homepage}")
+    private String webappFrontUrl;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         logger.info("Register local");
         auth.authenticationProvider(openIdConnectAuthenticationProvider());
     }
@@ -104,7 +128,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public void registerGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    public void registerGlobal(AuthenticationManagerBuilder auth) {
         logger.info("Register Global");
         auth.authenticationProvider(openIdConnectAuthenticationProvider());
     }
@@ -137,11 +161,11 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     ServerConfiguration aaiServerConfiguration() {
         ServerConfiguration serverConfiguration = new ServerConfiguration();
         serverConfiguration.setIssuer(oidcIssuer);
-        serverConfiguration.setAuthorizationEndpointUri(oidcIssuer + "authorize");
-        serverConfiguration.setTokenEndpointUri(oidcIssuer + "token");
-        serverConfiguration.setUserInfoUri(oidcIssuer + "userinfo");
-        serverConfiguration.setJwksUri(oidcIssuer + "jwk");
-        serverConfiguration.setRevocationEndpointUri(oidcIssuer + "revoke");
+        serverConfiguration.setAuthorizationEndpointUri(oidcAuthorizationEndpoint);
+        serverConfiguration.setTokenEndpointUri(oidcTokenEndpoint);
+        serverConfiguration.setUserInfoUri(oidcUserinfoEndpoint);
+        serverConfiguration.setRevocationEndpointUri(oidcRevocationEndpoint);
+        serverConfiguration.setJwksUri(oidcJwkUri);
         return serverConfiguration;
     }
 
@@ -157,11 +181,11 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     RegisteredClient platformClient() {
         RegisteredClient ret = new RegisteredClient();
-        ret.setClientId(oidcId);
-        ret.setClientSecret(oidcSecret);
-        ret.setScope(Sets.newHashSet("openid", "profile", "email", "refeds_edu"));
+        ret.setClientId(oidcClientId);
+        ret.setClientSecret(oidcClientSecret);
+        ret.setScope(Sets.newHashSet(scopes));
         ret.setTokenEndpointAuthMethod(ClientDetailsEntity.AuthMethod.SECRET_BASIC);
-        ret.setRedirectUris(Sets.newHashSet(webappHome));
+        ret.setRedirectUris(Sets.newHashSet(redirectUris));
         return ret;
     }
 
