@@ -279,13 +279,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="scientificDomains">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
       <xs:element name="scientificSubdomains">
         <xs:complexType>
           <xs:sequence>

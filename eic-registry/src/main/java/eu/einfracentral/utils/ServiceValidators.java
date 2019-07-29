@@ -104,13 +104,7 @@ public class ServiceValidators {
                 throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
         } else throw new ValidationException("Field 'trl' is mandatory.");
 
-        // Validate Scientific Domains/Subdomains
-        if (service.getScientificDomains() == null || service.getScientificDomains().isEmpty())
-            throw new ValidationException("Field 'scientificDomains' is mandatory.");
-        for (String scientificDomain : service.getScientificDomains()){
-            if (!allVocabularies.containsKey(scientificDomain))
-                throw new ValidationException(String.format("scientificDomain '%s' does not exist.", scientificDomain));
-        }
+        // Validate Scientific Subdomains
         if (service.getScientificSubdomains() == null || service.getScientificSubdomains().isEmpty())
             throw new ValidationException("Field 'scientificSubdomains' is mandatory.");
         for (String scientificSubomain : service.getScientificSubdomains()){
@@ -249,7 +243,7 @@ public class ServiceValidators {
         if (service.getUserValue() != null && service.getUserValue().length() > 10000) {
             throw new ValidationException("max length for 'userValue' is 1000 chars");
         }
-        for (String userBase : service.getUserBaseList()){ // TODO: check if it works as intended
+        for (String userBase : service.getUserBaseList()){
             if (userBase != null && userBase.length() > 100) {
                 throw new ValidationException("max length for 'userBase' is 100 chars");
             }
