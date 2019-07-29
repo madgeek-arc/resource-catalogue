@@ -46,8 +46,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         this.infraServiceService = infraServiceService;
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Deletes the Provider with the given id.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Deletes the Provider with the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
@@ -69,9 +69,9 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-    @ApiIgnore
     @Override
-    @ApiOperation(value = "Creates a new Provider.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Creates a new Provider.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
@@ -124,15 +124,15 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providerManager.getServices(id), HttpStatus.OK);
     }
 
-    @ApiIgnore // TODO enable in a future release
-    @ApiOperation(value = "Get a featured InfraService offered by a Provider.")
+//    @ApiIgnore // TODO enable in a future release
+//    @ApiOperation(value = "Get a featured InfraService offered by a Provider.")
     @RequestMapping(path = "featured/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Get a list of Providers in which the given user is admin.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Get a list of Providers in which the given user is admin.")
     @RequestMapping(path = "getServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
         List<Provider> providers = providerManager.getServiceProviders(email, auth);
@@ -142,8 +142,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Get a list of Providers in which you are admin.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Get a list of Providers in which you are admin.")
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
         List<Provider> providers = providerManager.getMyServiceProviders(auth);
@@ -153,24 +153,24 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Get the pending services of the given Provider.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Get the pending services of the given Provider.")
     @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         List<Service> ret = providerManager.getInactiveServices(id).stream().map(Service::new).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Get all inactive Providers.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Get all inactive Providers.")
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
         List<Provider> ret = providerManager.getInactive();
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Accept/Reject a Provider.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Accept/Reject a Provider.")
     @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
@@ -180,8 +180,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return ret;
     }
 
-    @ApiIgnore
-    @ApiOperation(value = "Publish all Provider services.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Publish all Provider services.")
     @RequestMapping(path = "publishServices", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
