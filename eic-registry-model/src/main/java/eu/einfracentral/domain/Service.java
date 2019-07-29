@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -369,6 +370,113 @@ public class Service implements Identifiable {
 //        this.serviceability = service.getServiceability();
 //        this.performanceIndicatorName = service.getPerformanceIndicatorName();
 //        this.performanceIndicatorValue = service.getPerformanceIndicatorValue();
+    }
+
+    @Override
+    public String toString() {
+        return "Service{" +
+                "id='" + id + '\'' +
+                ", url=" + url +
+                ", name='" + name + '\'' +
+                ", tagline='" + tagline + '\'' +
+                ", description='" + description + '\'' +
+                ", options='" + options + '\'' +
+                ", targetUsers='" + targetUsers + '\'' +
+                ", userValue='" + userValue + '\'' +
+                ", userBase='" + userBase + '\'' +
+                ", symbol=" + symbol +
+                ", multimediaURL=" + multimediaURL +
+                ", providers=" + providers +
+                ", version='" + version + '\'' +
+                ", lastUpdate=" + lastUpdate +
+                ", changeLog='" + changeLog + '\'' +
+                ", validFor=" + validFor +
+                ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
+                ", trl='" + trl + '\'' +
+                ", category='" + category + '\'' +
+                ", subcategory='" + subcategory + '\'' +
+                ", places=" + places +
+                ", languages=" + languages +
+                ", tags=" + tags +
+                ", requiredServices=" + requiredServices +
+                ", relatedServices=" + relatedServices +
+                ", order=" + order +
+                ", requests=" + requests +
+                ", helpdesk=" + helpdesk +
+                ", userManual=" + userManual +
+                ", trainingInformation=" + trainingInformation +
+                ", feedback=" + feedback +
+                ", price=" + price +
+                ", serviceLevelAgreement=" + serviceLevelAgreement +
+                ", termsOfUse=" + termsOfUse +
+                ", funding='" + funding + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Service)) return false;
+        Service service = (Service) o;
+        return Objects.equals(id, service.id) &&
+                Objects.equals(url, service.url) &&
+                Objects.equals(name, service.name) &&
+                Objects.equals(tagline, service.tagline) &&
+                Objects.equals(description, service.description) &&
+                Objects.equals(options, service.options) &&
+                Objects.equals(targetUsers, service.targetUsers) &&
+                Objects.equals(userValue, service.userValue) &&
+                Objects.equals(userBase, service.userBase) &&
+                Objects.equals(symbol, service.symbol) &&
+                Objects.equals(multimediaURL, service.multimediaURL) &&
+                Objects.equals(providers, service.providers) &&
+                Objects.equals(version, service.version) &&
+                Objects.equals(lastUpdate, service.lastUpdate) &&
+                Objects.equals(changeLog, service.changeLog) &&
+                Objects.equals(validFor, service.validFor) &&
+                Objects.equals(lifeCycleStatus, service.lifeCycleStatus) &&
+                Objects.equals(trl, service.trl) &&
+                Objects.equals(category, service.category) &&
+                Objects.equals(subcategory, service.subcategory) &&
+                Objects.equals(places, service.places) &&
+                Objects.equals(languages, service.languages) &&
+                Objects.equals(tags, service.tags) &&
+                stringListsAreEqual(requiredServices, service.requiredServices) &&
+                stringListsAreEqual(relatedServices, service.relatedServices) &&
+                Objects.equals(order, service.order) &&
+                Objects.equals(requests, service.requests) &&
+                Objects.equals(helpdesk, service.helpdesk) &&
+                Objects.equals(userManual, service.userManual) &&
+                Objects.equals(trainingInformation, service.trainingInformation) &&
+                Objects.equals(feedback, service.feedback) &&
+                Objects.equals(price, service.price) &&
+                Objects.equals(serviceLevelAgreement, service.serviceLevelAgreement) &&
+                stringListsAreEqual(termsOfUse, service.termsOfUse) &&
+                Objects.equals(funding, service.funding);
+    }
+
+    private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
+        if (stringListIsEmpty(list1) && stringListIsEmpty(list2)) {
+            return true;
+        }
+        return Objects.equals(list1, list2);
+    }
+
+    /**
+     * Method checking if a {@link List<String>} object is null or is empty or it contains only one entry
+     * with an empty String ("")
+     * @param list
+     * @return
+     */
+    private boolean stringListIsEmpty(List<String> list) {
+        if (list == null || list.isEmpty()) {
+            return true;
+        } else return list.size() == 1 && "".equals(list.get(0));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, url, name, tagline, description, options, targetUsers, userValue, userBase, symbol, multimediaURL, providers, version, lastUpdate, changeLog, validFor, lifeCycleStatus, trl, category, subcategory, places, languages, tags, requiredServices, relatedServices, order, requests, helpdesk, userManual, trainingInformation, feedback, price, serviceLevelAgreement, termsOfUse, funding);
     }
 
     @Override

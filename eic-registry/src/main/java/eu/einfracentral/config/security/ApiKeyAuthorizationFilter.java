@@ -2,7 +2,6 @@ package eu.einfracentral.config.security;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-import eu.openminted.registry.core.exception.ServerError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -14,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -60,10 +60,10 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(req, res);
         } catch (Exception e) {
-            log.error("JWT Error", e);
+            log.error("JWT is not valid or it has expired", e);
             res.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
             ObjectMapper mapper = new ObjectMapper();
-            res.getWriter().append(mapper.writeValueAsString(new ServerError(((HttpServletRequest) req).getRequestURI(), e)));
+            res.getWriter().append(mapper.writeValueAsString(new UnauthorizedUserException(((HttpServletRequest) req).getRequestURI(), e)));
         }
 
     }

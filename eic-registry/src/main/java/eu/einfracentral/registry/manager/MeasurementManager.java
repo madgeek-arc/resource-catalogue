@@ -13,6 +13,7 @@ import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +53,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         existsIdentical(measurement);
         validate(measurement);
         super.add(measurement, auth);
-        logger.info("Adding Measurement " + measurement);
+        logger.debug("Adding Measurement " + measurement);
         synchronizerService.syncAdd(measurement);
         return measurement;
     }
@@ -68,15 +69,21 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("You cannot change the Indicator of the measurement");
         }
         super.update(measurement, auth);
-        logger.info("Updating Measurement " + measurement);
+        logger.debug("Updating Measurement " + measurement);
         synchronizerService.syncUpdate(measurement);
         return measurement;
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.userIsServiceProviderAdmin(#auth, #serviceId)")
     public List<Measurement> updateAll(String serviceId, List<Measurement> allMeasurements, Authentication auth) {
         List<Measurement> updatedMeasurements = new ArrayList<>();
         List<Measurement> existingMeasurements = getAll(serviceId, auth).getResults();
+
+        // set Service ID to every measurement
+        allMeasurements.forEach(measurement -> measurement.setServiceId(serviceId));
+
         for (Measurement existingMeasurement : existingMeasurements) {
             for (int i = 0; i < allMeasurements.size(); i++) {
                 if (existingMeasurement.getId().equals(allMeasurements.get(i).getId())) {
@@ -161,7 +168,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public void delete(Measurement measurement) {
         super.delete(measurement);
-        logger.info("Deleting Measurement " + measurement);
+        logger.debug("Deleting Measurement " + measurement);
         synchronizerService.syncDelete(measurement);
     }
 

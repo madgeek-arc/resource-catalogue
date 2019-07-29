@@ -2,15 +2,16 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -27,17 +28,15 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private ServiceValidators serviceValidators;
     private ProviderManager providerManager;
     private Random randomNumberGenerator;
-//    private SynchronizerService synchronizerService;
 
 
     @Autowired
     public InfraServiceManager(ServiceValidators serviceValidators, ProviderManager providerManager,
-                               Random randomNumberGenerator/*, SynchronizerService synchronizerService*/) {
+                               Random randomNumberGenerator) {
         super(InfraService.class);
         this.serviceValidators = serviceValidators;
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
-//        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -46,6 +45,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.providerCanAddServices(#authentication, #infraService)")
     public InfraService addService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
@@ -70,17 +71,26 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.providerCanAddServices(#authentication, #infraService)")
     public InfraService updateService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
-        InfraService existingService = get(infraService.getId());
+        InfraService existingService;
+
+        try { // try to find a service with the same id and version
+            existingService = get(infraService.getId(), infraService.getVersion());
+        } catch (ServiceException e) {
+            // if a service with version = infraService.getVersion() does not exist, get the latest service
+            existingService = get(infraService.getId());
+        }
 
         // update existing service serviceMetadata
         ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
         infraService.setServiceMetadata(serviceMetadata);
+        infraService.setActive(existingService.isActive());
 
         if (infraService.getVersion().equals(existingService.getVersion())) {
-            infraService.setActive(existingService.isActive());
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
@@ -106,6 +116,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
     public void delete(InfraService infraService) {
         super.delete(infraService);
         logger.info("Deleting Service " + infraService);

@@ -8,9 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -72,7 +70,7 @@ public class AnalyticsService {
                 }
                 return results;
             } catch (Exception e) {
-                logger.error("Cannot find visits for the specific Service.", e);
+                logger.error(String.format("Cannot retrieve visits for all Services%nMatomo response: %s%n", json), e);
             }
         }
         return new HashMap<>();
@@ -90,7 +88,7 @@ public class AnalyticsService {
             Map<String, Integer> sortedResults = new TreeMap<>(results);
             return sortedResults;
         } catch (Exception e) {
-            logger.debug("Cannot find visits for the specific Service.", e);
+            logger.debug(String.format("Cannot find visits for the label '%s'%n", label), e);
         }
         return new HashMap<>();
     }
@@ -109,12 +107,17 @@ public class AnalyticsService {
     }
 
     private String getMatomoResponse(String url) {
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class, headers);
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            logger.error(String.format("Could not get analytics from matomo%nResponse Code: %s%nResponse Body: %s",
-                    responseEntity.getStatusCode().toString(), responseEntity.getBody()));
-            throw new RuntimeException(responseEntity.getBody());
+        try {
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                logger.error(String.format("Could not retrieve analytics from matomo%nResponse Code: %s%nResponse Body: %s",
+                        responseEntity.getStatusCode().toString(), responseEntity.getBody()));
+            }
+            return responseEntity.getBody();
+        } catch (RuntimeException e) {
+            logger.error("Could not retrieve analytics from matomo", e);
         }
-        return responseEntity.getBody();
+        return "";
     }
 }
