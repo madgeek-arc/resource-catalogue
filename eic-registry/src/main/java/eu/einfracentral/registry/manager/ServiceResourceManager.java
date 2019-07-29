@@ -15,6 +15,7 @@ import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.*;
+import org.apache.commons.collections.MultiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -632,13 +633,15 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // ScientificDomain Names
-            if (infraService.getScientificDomains() != null) {
-                richService.setScientificDomainNames(infraService.getScientificDomains()
-                        .stream()
-                        .map(p -> allVocabularies.get(p).getName())
-                        .collect(Collectors.toList())
-                );
+            List<String> scientificDomains = new ArrayList<>();
+            for (String scientificSubdomain : infraService.getScientificSubdomains()){
+                String[] parts = scientificSubdomain.split("-");
+                String scientificDomainPart = parts[1]; //scientific_subdomain-natural_sciences-information_sciences
+                Vocabulary scientificDomainVoc = vocabularyService.get("scientific_domain-"+scientificDomainPart);
+                String scientificDomainName = scientificDomainVoc.getName();
+                scientificDomains.add(scientificDomainName);
             }
+            richService.setScientificDomainNames(scientificDomains);
 
             // ScientificSubdomain Names
             if (infraService.getScientificSubdomains() != null) {
@@ -745,6 +748,24 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
         }
         return richServices;
+    }
+
+    public Map<String, Map<Map<String, String>, Map<String, String>>> createDomainTree(){
+        List<Vocabulary> subdomainsList = vocabularyService.getByType(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN);
+        Map<String, Map<Map<String, String>, Map<String, String>>> domainTree = new HashMap<>();
+        MultiMap outterMap = new org.apache.commons.collections.map.MultiValueMap();
+        Map<String, String> innerSubdomainMap = new HashMap<>();
+        Map<String, String> innerDomainMap = new HashMap<>();
+
+        for (Vocabulary subdomain : subdomainsList){
+            innerSubdomainMap.put(subdomain.getId(), subdomain.getName()); //scientific_subdomain-natural_sciences-mathematics
+            String domain = subdomain.getParentId(); //scientific_domain-natural_sciences
+            innerDomainMap.put(vocabularyService.get(domain).getId(), vocabularyService.get(domain).getName());
+        }
+        outterMap.put(innerDomainMap, innerSubdomainMap);
+        domainTree.put("Scientific Domains", outterMap);
+
+        return domainTree;
     }
 
 }

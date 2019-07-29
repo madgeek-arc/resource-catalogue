@@ -93,4 +93,10 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
      * @return
      */
     boolean exists(SearchService.KeyValue... ids);
+
+    /**
+     * Creates the Domain Tree structure
+     * @return
+     */
+    Map<String, Map<Map<String, String>, Map<String, String>>> createDomainTree();
 }

@@ -361,4 +361,10 @@ public class ServiceController {
 //        infraService.migrateCatrisServices(infraServices);
 //    }
 
+    @ApiOperation(value = "Get the Domain Tree structure.")
+    @RequestMapping(path = "domainTree", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public Map<String, Map<Map<String, String>, Map<String, String>>> createDomainTree() {
+        return infraService.createDomainTree();
+    }
+
 }
