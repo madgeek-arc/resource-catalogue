@@ -69,6 +69,7 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.providerVisitation(id, by), HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Returns the time series of the specified Event type.")
     @RequestMapping(path = "events", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<?> events(@RequestParam Event.UserActionType type, @RequestParam Date from, @RequestParam Date to, @RequestParam StatisticsService.Interval by) {
