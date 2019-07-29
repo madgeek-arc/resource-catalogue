@@ -4,7 +4,6 @@ import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -37,9 +36,9 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         this.measurementManager = service;
     }
 
+    @Override
     @ApiOperation(value = "Returns the Measurement with the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @Override
     public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
@@ -57,7 +56,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     @Override
-    @ApiOperation(value = "Filter a list of Measurements based on a set of filters or get a list of all Measurements in the eInfraCentral Catalogue.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Filter a list of Measurements based on a set of filters or get a list of all Measurements in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -92,7 +92,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ret;
     }
 
-    @ApiOperation(value = "Updates existing Measurements of a specific Service, or/and adds new ones.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Updates existing Measurements of a specific Service, or/and adds new ones.")
     @RequestMapping(path = "updateAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
@@ -101,7 +102,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ret;
     }
 
-    @ApiOperation(value = "Deletes the Measurement with the given id.")
+//    @ApiIgnore
+//    @ApiOperation(value = "Deletes the Measurement with the given id.")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Measurement> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
