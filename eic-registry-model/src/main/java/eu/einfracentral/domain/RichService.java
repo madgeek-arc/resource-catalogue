@@ -1,26 +1,25 @@
 package eu.einfracentral.domain;
 
 
+import eu.einfracentral.dto.Category;
+import eu.einfracentral.dto.ScientificDomain;
 import java.util.List;
 
 public class RichService {
 
     private Service service;
-    private ServiceMetadata serviceMetadata;
-    private List<String> superCategoryNames;
-    private List<String> categoryNames;
-    private List<String> subCategoryNames;
+    private ServiceMetadata serviceMetadata; //TODO: Do we need it?
+
     private List<String> languageNames;
     private List<String> placeNames;
     private String trlName;
     private String phaseName;
-    private List<String> scientificDomainNames;
-    private List<String> scientificSubDomainNames;
     private List<String> targetUsersNames;
     private List<String> accessTypeNames;
     private List<String> accessModeNames;
     private List<String> fundedByNames;
     private String orderTypeName;
+
     private int views;
     private int ratings;
     private float userRate;
@@ -28,6 +27,8 @@ public class RichService {
     private int favourites;
     private boolean isFavourite;
 
+    private List<Category> categories;
+    private List<ScientificDomain> domains;
 
     public RichService() {
         // No arg constructor
@@ -60,30 +61,6 @@ public class RichService {
     }
 
     // Getters/Setters for VocabularyNames
-    public List<String> getSuperCategoryNames() {
-        return superCategoryNames;
-    }
-
-    public void setSuperCategoryNames(List<String> superCategoryNames) {
-        this.superCategoryNames = superCategoryNames;
-    }
-
-    public List<String> getCategoryNames() {
-        return categoryNames;
-    }
-
-    public void setCategoryNames(List<String> categoryNames) {
-        this.categoryNames = categoryNames;
-    }
-
-    public List<String> getSubCategoryNames() {
-        return subCategoryNames;
-    }
-
-    public void setSubCategoryNames(List<String> subCategoryNames) {
-        this.subCategoryNames = subCategoryNames;
-    }
-
     public List<String> getLanguageNames() {
         return languageNames;
     }
@@ -114,22 +91,6 @@ public class RichService {
 
     public void setPhaseName(String phaseName) {
         this.phaseName = phaseName;
-    }
-
-    public List<String> getScientificDomainNames() {
-        return scientificDomainNames;
-    }
-
-    public void setScientificDomainNames(List<String> scientificDomainNames) {
-        this.scientificDomainNames = scientificDomainNames;
-    }
-
-    public List<String> getScientificSubDomainNames() {
-        return scientificSubDomainNames;
-    }
-
-    public void setScientificSubDomainNames(List<String> scientificSubDomainNames) {
-        this.scientificSubDomainNames = scientificSubDomainNames;
     }
 
     public List<String> getTargetUsersNames() {
@@ -221,4 +182,19 @@ public class RichService {
         this.userRate = userRate;
     }
 
+    public List<ScientificDomain> getDomains() {
+        return domains;
+    }
+
+    public void setDomains(List<ScientificDomain> domains) {
+        this.domains = domains;
+    }
+
+    public List<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
+    }
 }

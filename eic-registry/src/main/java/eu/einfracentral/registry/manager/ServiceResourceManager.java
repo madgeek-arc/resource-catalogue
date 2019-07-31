@@ -1,21 +1,22 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.Category;
+import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.registry.service.ServiceInterface;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.*;
-import org.apache.commons.collections.MultiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -600,32 +601,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
 
-            // Supercategory & Category Names
-            List<String> supercategories = new ArrayList<>();
-            List<String> categories = new ArrayList<>();
-            for (String subcategory : infraService.getSubcategories()){
-                String[] parts = subcategory.split("-");
-                String supercategoryPart = parts[1]; //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-microscopy
-                String categoryPart = parts[2];
-                Vocabulary supercategoryVoc = vocabularyService.get("supercategory-"+supercategoryPart);
-                Vocabulary categoryVoc = vocabularyService.get("category-"+supercategoryPart+"-"+categoryPart);
-                String supercategoryName = supercategoryVoc.getName();
-                String categoryName = categoryVoc.getName();
-                supercategories.add(supercategoryName);
-                categories.add(categoryName);
-            }
-            richService.setSuperCategoryNames(supercategories);
-            richService.setCategoryNames(categories);
-
-            // Subcategory Name
-            if (infraService.getSubcategories() != null) {
-                richService.setSubCategoryNames(infraService.getSubcategories()
-                        .stream()
-                        .map(l -> allVocabularies.get(l).getName())
-                        .collect(Collectors.toList())
-                );
-            }
-
             // Language Names
             if (infraService.getLanguages() != null) {
                 richService.setLanguageNames(infraService.getLanguages()
@@ -652,26 +627,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             // Phase Name
             if (infraService.getPhase() != null) {
                 richService.setPhaseName(allVocabularies.get(infraService.getPhase()).getName());
-            }
-
-            // ScientificDomain Names
-            List<String> scientificDomains = new ArrayList<>();
-            for (String scientificSubdomain : infraService.getScientificSubdomains()){
-                String[] parts = scientificSubdomain.split("-");
-                String scientificDomainPart = parts[1]; //scientific_subdomain-natural_sciences-information_sciences
-                Vocabulary scientificDomainVoc = vocabularyService.get("scientific_domain-"+scientificDomainPart);
-                String scientificDomainName = scientificDomainVoc.getName();
-                scientificDomains.add(scientificDomainName);
-            }
-            richService.setScientificDomainNames(scientificDomains);
-
-            // ScientificSubdomain Names
-            if (infraService.getScientificSubdomains() != null) {
-                richService.setScientificSubDomainNames(infraService.getScientificSubdomains()
-                        .stream()
-                        .map(p -> allVocabularies.get(p).getName())
-                        .collect(Collectors.toList())
-                );
             }
 
             // TargetUsers Names
@@ -714,6 +669,32 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             if (infraService.getOrderType() != null) {
                 richService.setOrderTypeName(allVocabularies.get(infraService.getOrderType()).getName());
             }
+
+            // Domain Tree
+            List<ScientificDomain> domains = new ArrayList<>();
+            for (String subdomain : infraService.getScientificSubdomains()) {
+                ScientificDomain domain = new ScientificDomain();
+                String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics
+                String domainId = "scientific_domain-" + parts[1];
+                domain.setDomain(vocabularyService.get(domainId));
+                domain.setSubdomain(vocabularyService.get(subdomain));
+                domains.add(domain);
+            }
+            richService.setDomains(domains);
+
+            // Category Tree
+            List<Category> categories = new ArrayList<>();
+            for (String subcategory : infraService.getSubcategories()) {
+                Category category = new Category();
+                String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
+                String supercategoryId = "supercategory-" +parts[1];
+                String categoryId = "category-" +parts[1] +"-" +parts[2] ;
+                category.setSuperCategory(vocabularyService.get(supercategoryId));
+                category.setCategory(vocabularyService.get(categoryId));
+                category.setSubCategory(vocabularyService.get(subcategory));
+                categories.add(category);
+            }
+            richService.setCategories(categories);
 
             richServices.add(richService);
         }
@@ -770,28 +751,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
         }
         return richServices;
-    }
-
-    public Map<String, Map<Map<String, String>, Map<String, String>>> createDomainTree(){
-        List<Vocabulary> subdomainsList = vocabularyService.getByType(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN);
-        Map<String, Map<Map<String, String>, Map<String, String>>> domainTree = new HashMap<>();
-        MultiMap outterMap = new org.apache.commons.collections.map.MultiValueMap();
-        Map<String, String> innerSubdomainMap = new HashMap<>();
-        Map<String, String> innerDomainMap = new HashMap<>();
-
-        for (Vocabulary subdomain : subdomainsList){
-            innerSubdomainMap.put(subdomain.getId(), subdomain.getName()); //scientific_subdomain-natural_sciences-mathematics
-            String domain = subdomain.getParentId(); //scientific_domain-natural_sciences
-            innerDomainMap.put(vocabularyService.get(domain).getId(), vocabularyService.get(domain).getName());
-        }
-
-        for (Map.Entry entry : innerDomainMap.entrySet()){
-            outterMap.put(entry, innerSubdomainMap.entrySet());
-        }
-
-        domainTree.put("Scientific Domains", outterMap);
-
-        return domainTree;
     }
 
 }
