@@ -2,9 +2,15 @@ package eu.einfracentral.dto;
 
 import eu.einfracentral.domain.Vocabulary;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class ScientificDomain {
-    Vocabulary domain;
-    Vocabulary subdomain;
+
+    private Vocabulary domain;
+    private Vocabulary subdomain;
 
     public ScientificDomain() {
     }

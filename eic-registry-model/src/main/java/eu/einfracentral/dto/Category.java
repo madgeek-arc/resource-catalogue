@@ -2,41 +2,47 @@ package eu.einfracentral.dto;
 
 import eu.einfracentral.domain.Vocabulary;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Category {
-    Vocabulary superCategory;
-    Vocabulary category;
-    Vocabulary subCategory;
+
+    private Vocabulary superCategoryVocab;
+    private Vocabulary categoryVocab;
+    private Vocabulary subCategoryVocab;
 
     public Category() {
     }
 
-    public Category(Vocabulary superCategory, Vocabulary category, Vocabulary subCategory) {
-        this.superCategory = superCategory;
-        this.category = category;
-        this.subCategory = subCategory;
+    public Category(Vocabulary superCategoryVocab, Vocabulary category, Vocabulary subCategoryVocab) {
+        this.superCategoryVocab = superCategoryVocab;
+        this.categoryVocab = category;
+        this.subCategoryVocab = subCategoryVocab;
     }
 
-    public Vocabulary getSuperCategory() {
-        return superCategory;
+    public Vocabulary getSuperCategoryVocab() {
+        return superCategoryVocab;
     }
 
-    public void setSuperCategory(Vocabulary superCategory) {
-        this.superCategory = superCategory;
+    public void setSuperCategoryVocab(Vocabulary superCategoryVocab) {
+        this.superCategoryVocab = superCategoryVocab;
     }
 
-    public Vocabulary getCategory() {
-        return category;
+    public Vocabulary getCategoryVocab() {
+        return categoryVocab;
     }
 
-    public void setCategory(Vocabulary category) {
-        this.category = category;
+    public void setCategoryVocab(Vocabulary categoryVocab) {
+        this.categoryVocab = categoryVocab;
     }
 
-    public Vocabulary getSubCategory() {
-        return subCategory;
+    public Vocabulary getSubCategoryVocab() {
+        return subCategoryVocab;
     }
 
-    public void setSubCategory(Vocabulary subCategory) {
-        this.subCategory = subCategory;
+    public void setSubCategoryVocab(Vocabulary subCategoryVocab) {
+        this.subCategoryVocab = subCategoryVocab;
     }
 }
