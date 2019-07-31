@@ -84,6 +84,28 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
         filter.setBrowseBy(getBrowseBy());
+        List<String> browseBy = getBrowseBy();
+        java.util.Collections.sort(browseBy);
+        List<String> orderedBrowseBy = new ArrayList<>();
+
+        //TODO: Ask Stefania for the order, when committed inform JB
+        //TODO: Do we need to return Supercategories, Categories and Domains as facets?
+        //Order Service's facets as we like (+removed Service Name - no9)
+        orderedBrowseBy.add(browseBy.get(11));   //no13 - Subcategories
+        orderedBrowseBy.add(browseBy.get(8));    // no9 - Providers
+        orderedBrowseBy.add(browseBy.get(10));   //no12 - Scientific Subdomains
+        orderedBrowseBy.add(browseBy.get(6));    // no7 - Phase
+        orderedBrowseBy.add(browseBy.get(13));   //no16 - TRL
+        orderedBrowseBy.add(browseBy.get(7));    // no8 - Places
+        orderedBrowseBy.add(browseBy.get(3));    // no4 - Languages
+        orderedBrowseBy.add(browseBy.get(1));    // no1 - Access Types
+        orderedBrowseBy.add(browseBy.get(0));    // no0 - Access Modes
+        orderedBrowseBy.add(browseBy.get(5));    // no6 - Order Type
+        orderedBrowseBy.add(browseBy.get(12));   //no15 - Target Users
+        orderedBrowseBy.add(browseBy.get(2));    // no3 - Funders
+        orderedBrowseBy.add(browseBy.get(9));   //no10 - Resource Type
+
+        filter.setBrowseBy(orderedBrowseBy);
         filter.setResourceType(getResourceType());
         return getMatchingServices(filter);
     }
