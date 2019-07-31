@@ -494,7 +494,6 @@
       <xs:element maxOccurs="unbounded" minOccurs="0" name="accessModeNames" nillable="true" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="accessTypeNames" nillable="true" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="categories" nillable="true" type="category"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="categoryNames" nillable="true" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="domains" nillable="true" type="scientificDomain"/>
       <xs:element name="favourites" type="xs:int"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="fundedByNames" nillable="true" type="xs:string"/>
@@ -505,12 +504,8 @@
       <xs:element minOccurs="0" name="phaseName" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="placeNames" nillable="true" type="xs:string"/>
       <xs:element name="ratings" type="xs:int"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomainNames" nillable="true" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubDomainNames" nillable="true" type="xs:string"/>
       <xs:element minOccurs="0" ref="tns:service"/>
       <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="subCategoryNames" nillable="true" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="superCategoryNames" nillable="true" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUsersNames" nillable="true" type="xs:string"/>
       <xs:element minOccurs="0" name="trlName" type="xs:string"/>
       <xs:element name="userRate" type="xs:float"/>
