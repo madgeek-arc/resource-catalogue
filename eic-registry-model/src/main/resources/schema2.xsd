@@ -9,9 +9,9 @@
 
   <xs:complexType name="category">
     <xs:sequence>
-      <xs:element minOccurs="0" name="category" type="ns1:vocabulary"/>
-      <xs:element minOccurs="0" name="subCategory" type="ns1:vocabulary"/>
-      <xs:element minOccurs="0" name="superCategory" type="ns1:vocabulary"/>
+      <xs:element minOccurs="0" name="categoryVocab" type="ns1:vocabulary"/>
+      <xs:element minOccurs="0" name="subCategoryVocab" type="ns1:vocabulary"/>
+      <xs:element minOccurs="0" name="superCategoryVocab" type="ns1:vocabulary"/>
     </xs:sequence>
   </xs:complexType>
 

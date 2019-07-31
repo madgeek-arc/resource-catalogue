@@ -3,6 +3,8 @@
 
   <xs:import schemaLocation="schema2.xsd"/>
 
+  <xs:element name="category" type="category"/>
+
   <xs:element name="event" type="tns:event"/>
 
   <xs:element name="funder" type="tns:funder"/>
@@ -16,6 +18,8 @@
   <xs:element name="provider" type="tns:provider"/>
 
   <xs:element name="rangeValue" type="tns:rangeValue"/>
+
+  <xs:element name="scientificDomain" type="scientificDomain"/>
 
   <xs:element name="service" type="tns:service"/>
 
@@ -513,6 +517,7 @@
     </xs:sequence>
   </xs:complexType>
 
+
   <xs:complexType name="vocabulary">
     <xs:sequence>
       <xs:element minOccurs="0" name="description" type="xs:string"/>
@@ -523,6 +528,7 @@
       <xs:element name="type" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
+
 
   <xs:complexType name="serviceHistory">
     <xs:complexContent>
