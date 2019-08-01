@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.Category;
+import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -88,24 +90,21 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         List<String> orderedBrowseBy = new ArrayList<>();
 
         //TODO: Ask Stefania for the order, when committed inform JB
-        //TODO: It doesn't work as intended - fix
+        //TODO: Do we need to return Supercategories, Categories and Domains as facets?
         //Order Service's facets as we like (+removed Service Name - no9)
-        orderedBrowseBy.add(browseBy.get(14));   //no14 - Supercategory
-        orderedBrowseBy.add(browseBy.get(2));    // no2 - Category
-        orderedBrowseBy.add(browseBy.get(13));   //no13 - Subcategories
-        orderedBrowseBy.add(browseBy.get(9));    // no9 - Providers
-        orderedBrowseBy.add(browseBy.get(11));   //no11 - Scientific Domains
-        orderedBrowseBy.add(browseBy.get(12));   //no12 - Scientific Subdomains
-        orderedBrowseBy.add(browseBy.get(7));    // no7 - Phase
-        orderedBrowseBy.add(browseBy.get(16));   //no16 - TRL
-        orderedBrowseBy.add(browseBy.get(8));    // no8 - Places
-        orderedBrowseBy.add(browseBy.get(4));    // no4 - Languages
+        orderedBrowseBy.add(browseBy.get(11));   //no13 - Subcategories
+        orderedBrowseBy.add(browseBy.get(8));    // no9 - Providers
+        orderedBrowseBy.add(browseBy.get(10));   //no12 - Scientific Subdomains
+        orderedBrowseBy.add(browseBy.get(6));    // no7 - Phase
+        orderedBrowseBy.add(browseBy.get(13));   //no16 - TRL
+        orderedBrowseBy.add(browseBy.get(7));    // no8 - Places
+        orderedBrowseBy.add(browseBy.get(3));    // no4 - Languages
         orderedBrowseBy.add(browseBy.get(1));    // no1 - Access Types
         orderedBrowseBy.add(browseBy.get(0));    // no0 - Access Modes
-        orderedBrowseBy.add(browseBy.get(6));    // no6 - Order Type
-        orderedBrowseBy.add(browseBy.get(15));   //no15 - Target Users
-        orderedBrowseBy.add(browseBy.get(3));    // no3 - Funders
-        orderedBrowseBy.add(browseBy.get(10));   //no10 - Resource Type
+        orderedBrowseBy.add(browseBy.get(5));    // no6 - Order Type
+        orderedBrowseBy.add(browseBy.get(12));   //no15 - Target Users
+        orderedBrowseBy.add(browseBy.get(2));    // no3 - Funders
+        orderedBrowseBy.add(browseBy.get(9));   //no10 - Resource Type
 
         filter.setBrowseBy(orderedBrowseBy);
         filter.setResourceType(getResourceType());
@@ -602,24 +601,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
 
-            if (infraService.getSupercategory() != null) {
-                richService.setSuperCategoryName(allVocabularies.get(infraService.getSupercategory()).getName());
-            }
-
-            // Category Name
-            if (infraService.getCategory() != null) {
-                richService.setCategoryName(allVocabularies.get(infraService.getCategory()).getName());
-            }
-
-            // Subcategory Name
-            if (infraService.getSubcategories() != null) {
-                richService.setSubCategoryNames(infraService.getSubcategories()
-                        .stream()
-                        .map(l -> allVocabularies.get(l).getName())
-                        .collect(Collectors.toList())
-                );
-            }
-
             // Language Names
             if (infraService.getLanguages() != null) {
                 richService.setLanguageNames(infraService.getLanguages()
@@ -646,24 +627,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             // Phase Name
             if (infraService.getPhase() != null) {
                 richService.setPhaseName(allVocabularies.get(infraService.getPhase()).getName());
-            }
-
-            // ScientificDomain Names
-            if (infraService.getScientificDomains() != null) {
-                richService.setScientificDomainNames(infraService.getScientificDomains()
-                        .stream()
-                        .map(p -> allVocabularies.get(p).getName())
-                        .collect(Collectors.toList())
-                );
-            }
-
-            // ScientificSubdomain Names
-            if (infraService.getScientificSubdomains() != null) {
-                richService.setScientificSubDomainNames(infraService.getScientificSubdomains()
-                        .stream()
-                        .map(p -> allVocabularies.get(p).getName())
-                        .collect(Collectors.toList())
-                );
             }
 
             // TargetUsers Names
@@ -706,6 +669,32 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             if (infraService.getOrderType() != null) {
                 richService.setOrderTypeName(allVocabularies.get(infraService.getOrderType()).getName());
             }
+
+            // Domain Tree
+            List<ScientificDomain> domains = new ArrayList<>();
+            for (String subdomain : infraService.getScientificSubdomains()) {
+                ScientificDomain domain = new ScientificDomain();
+                String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics
+                String domainId = "scientific_domain-" + parts[1];
+                domain.setDomain(vocabularyService.get(domainId));
+                domain.setSubdomain(vocabularyService.get(subdomain));
+                domains.add(domain);
+            }
+            richService.setDomains(domains);
+
+            // Category Tree
+            List<Category> categories = new ArrayList<>();
+            for (String subcategory : infraService.getSubcategories()) {
+                Category category = new Category();
+                String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
+                String supercategoryId = "supercategory-" +parts[1];
+                String categoryId = "category-" +parts[1] +"-" +parts[2] ;
+                category.setSuperCategory(vocabularyService.get(supercategoryId));
+                category.setCategory(vocabularyService.get(categoryId));
+                category.setSubCategory(vocabularyService.get(subcategory));
+                categories.add(category);
+            }
+            richService.setCategories(categories);
 
             richServices.add(richService);
         }

@@ -1,26 +1,29 @@
 package eu.einfracentral.domain;
 
 
+import eu.einfracentral.dto.Category;
+import eu.einfracentral.dto.ScientificDomain;
+
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.List;
 
+@XmlTransient
 public class RichService {
 
     private Service service;
     private ServiceMetadata serviceMetadata;
-    private String superCategoryName;
-    private String categoryName;
-    private List<String> subCategoryNames;
+
     private List<String> languageNames;
     private List<String> placeNames;
     private String trlName;
     private String phaseName;
-    private List<String> scientificDomainNames;
-    private List<String> scientificSubDomainNames;
+
     private List<String> targetUsersNames;
     private List<String> accessTypeNames;
     private List<String> accessModeNames;
     private List<String> fundedByNames;
     private String orderTypeName;
+
     private int views;
     private int ratings;
     private float userRate;
@@ -28,6 +31,8 @@ public class RichService {
     private int favourites;
     private boolean isFavourite;
 
+    private List<Category> categories;
+    private List<ScientificDomain> domains;
 
     public RichService() {
         // No arg constructor
@@ -39,7 +44,7 @@ public class RichService {
     }
 
     public RichService(InfraService service) {
-        this.service = service;
+        this.service = new Service(service); // copy constructor is needed to 'hide' infraService fields
         this.serviceMetadata = service.getServiceMetadata();
     }
 
@@ -58,38 +63,15 @@ public class RichService {
     public void setServiceMetadata(ServiceMetadata serviceMetadata) {
         this.serviceMetadata = serviceMetadata;
     }
+      
 
     // Getters/Setters for VocabularyNames
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
-    public List<String> getSubCategoryNames() {
-        return subCategoryNames;
-    }
-
-    public void setSubCategoryNames(List<String> subCategoryNames) {
-        this.subCategoryNames = subCategoryNames;
-    }
-
     public List<String> getLanguageNames() {
         return languageNames;
     }
 
     public void setLanguageNames(List<String> languageNames) {
         this.languageNames = languageNames;
-    }
-
-    public String getTrlName() {
-        return trlName;
-    }
-
-    public void setTrlName(String trlName) {
-        this.trlName = trlName;
     }
 
     public List<String> getPlaceNames() {
@@ -100,12 +82,12 @@ public class RichService {
         this.placeNames = placeNames;
     }
 
-    public String getSuperCategoryName() {
-        return superCategoryName;
+    public String getTrlName() {
+        return trlName;
     }
 
-    public void setSuperCategoryName(String superCategoryName) {
-        this.superCategoryName = superCategoryName;
+    public void setTrlName(String trlName) {
+        this.trlName = trlName;
     }
 
     public String getPhaseName() {
@@ -114,22 +96,6 @@ public class RichService {
 
     public void setPhaseName(String phaseName) {
         this.phaseName = phaseName;
-    }
-
-    public List<String> getScientificDomainNames() {
-        return scientificDomainNames;
-    }
-
-    public void setScientificDomainNames(List<String> scientificDomainNames) {
-        this.scientificDomainNames = scientificDomainNames;
-    }
-
-    public List<String> getScientificSubDomainNames() {
-        return scientificSubDomainNames;
-    }
-
-    public void setScientificSubDomainNames(List<String> scientificSubDomainNames) {
-        this.scientificSubDomainNames = scientificSubDomainNames;
     }
 
     public List<String> getTargetUsersNames() {
@@ -172,7 +138,7 @@ public class RichService {
         this.orderTypeName = orderTypeName;
     }
 
-
+      
     // Getters/Setters for Statistics
     public int getViews() {
         return views;
@@ -222,4 +188,19 @@ public class RichService {
         this.userRate = userRate;
     }
 
+    public List<ScientificDomain> getDomains() {
+        return domains;
+    }
+
+    public void setDomains(List<ScientificDomain> domains) {
+        this.domains = domains;
+    }
+
+    public List<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
+    }
 }

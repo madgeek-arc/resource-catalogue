@@ -43,12 +43,7 @@ public class ServiceValidators {
         logger.debug("Validating vocabularies, Service id: " + service.getId());
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
-        // Validate Supercategories/Categories/Subcategories
-        if (service.getSupercategory() == null)
-            throw new ValidationException("Field 'supercategory' is mandatory.");
-        if (!allVocabularies.containsKey(service.getSupercategory()))
-            throw new ValidationException(String.format("supercategory '%s' does not exist.", service.getSupercategory()));
-
+        // Validate Subcategories
         if (service.getSubcategories() == null || service.getSubcategories().isEmpty())
             throw new ValidationException("Field 'subcategories' is mandatory.");
         for (String subcategory : service.getSubcategories()){
@@ -109,13 +104,7 @@ public class ServiceValidators {
                 throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
         } else throw new ValidationException("Field 'trl' is mandatory.");
 
-        // Validate Scientific Domains/Subdomains
-        if (service.getScientificDomains() == null || service.getScientificDomains().isEmpty())
-            throw new ValidationException("Field 'scientificDomains' is mandatory.");
-        for (String scientificDomain : service.getScientificDomains()){
-            if (!allVocabularies.containsKey(scientificDomain))
-                throw new ValidationException(String.format("scientificDomain '%s' does not exist.", scientificDomain));
-        }
+        // Validate Scientific Subdomains
         if (service.getScientificSubdomains() == null || service.getScientificSubdomains().isEmpty())
             throw new ValidationException("Field 'scientificSubdomains' is mandatory.");
         for (String scientificSubomain : service.getScientificSubdomains()){
