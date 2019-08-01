@@ -17,6 +17,7 @@ public class RichService {
     private List<String> placeNames;
     private String trlName;
     private String phaseName;
+
     private List<String> targetUsersNames;
     private List<String> accessTypeNames;
     private List<String> accessModeNames;
@@ -61,7 +62,7 @@ public class RichService {
 
     public void setServiceMetadata(ServiceMetadata serviceMetadata) {
         this.serviceMetadata = serviceMetadata;
-    }
+      
 
     // Getters/Setters for VocabularyNames
     public List<String> getLanguageNames() {
@@ -136,6 +137,7 @@ public class RichService {
         this.orderTypeName = orderTypeName;
     }
 
+      
     // Getters/Setters for Statistics
     public int getViews() {
         return views;

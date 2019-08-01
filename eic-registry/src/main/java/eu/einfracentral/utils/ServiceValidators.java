@@ -243,35 +243,60 @@ public class ServiceValidators {
         if (service.getUserValue() != null && service.getUserValue().length() > 10000) {
             throw new ValidationException("max length for 'userValue' is 1000 chars");
         }
-        for (String userBase : service.getUserBaseList()){
-            if (userBase != null && userBase.length() > 100) {
-                throw new ValidationException("max length for 'userBase' is 100 chars");
+        if (service.getUserBaseList() != null){
+            for (String userBase : service.getUserBaseList()){
+                if (userBase != null && userBase.length() > 100) {
+                    throw new ValidationException("max length for 'userBase' is 100 chars");
+                }
+                if (userBase == null || userBase.equals("")){
+                    throw new ValidationException("One or more items of the userBase list is null or empty");
+                }
             }
         }
-        for (String userCase : service.getUseCases()){
-            if (userCase != null && userCase.length() > 1000) {
-                throw new ValidationException("max length for 'userCase' is 100 chars");
+        if (service.getUseCases() != null){
+            for (String userCase : service.getUseCases()){
+                if (userCase != null && userCase.length() > 1000) {
+                    throw new ValidationException("max length for 'userCase' is 100 chars");
+                }
+                if (userCase == null || userCase.equals("")){
+                    throw new ValidationException("One or more items of the useCases list is null or empty");
+                }
             }
         }
-        for (String tag : service.getTags()){
-            if (tag != null && tag.length() > 2000) {
-                throw new ValidationException("max length for 'tag' is 20 chars");
+        if (service.getTags() != null){
+            for (String tag : service.getTags()){
+                if (tag != null && tag.length() > 2000) {
+                    throw new ValidationException("max length for 'tag' is 20 chars");
+                }
+                if (tag == null || tag.equals("")){
+                    throw new ValidationException("One or more items of the tags list is null or empty");
+                }
             }
         }
-        if (service.getVersion().length() > 100) {
+        if (service.getVersion() != null && service.getVersion().length() > 100) {
             throw new ValidationException("max length for 'version' is 10 chars");
         }
-        if (service.getChangeLog().length() > 10000) {
+        if (service.getChangeLog() != null && service.getChangeLog().length() > 10000) {
             throw new ValidationException("max length for 'changeLog' is 1000 chars");
         }
-        for (String certification : service.getCertifications()){
-            if (certification != null && certification.length() > 1000) {
-                throw new ValidationException("max length for 'certification' is 100 chars");
+        if (service.getCertifications() != null){
+            for (String certification : service.getCertifications()){
+                if (certification != null && certification.length() > 1000) {
+                    throw new ValidationException("max length for 'certification' is 100 chars");
+                }
+                if (certification == null || certification.equals("")){
+                    throw new ValidationException("One or more items of the certifications list is null or empty");
+                }
             }
         }
-        for (String standard : service.getStandards()){
-            if (standard != null && standard.length() > 1000) {
-                throw new ValidationException("max length for 'standard' is 100 chars");
+        if (service.getStandards() != null){
+            for (String standard : service.getStandards()){
+                if (standard != null && standard.length() > 1000) {
+                    throw new ValidationException("max length for 'standard' is 100 chars");
+                }
+                if (standard == null || standard.equals("")){
+                    throw new ValidationException("One or more items of the standards list is null or empty");
+                }
             }
         }
         if (service.getOwnerName() != null && service.getOwnerName().length() > 200) {

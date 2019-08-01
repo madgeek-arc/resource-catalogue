@@ -95,7 +95,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "options")
     @XmlElement(name = "option")
     @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
-    private List<String> options;
+    private List<ServiceOption> options;
 
     /**
      * List of other services required with this service.
@@ -128,7 +128,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificSubdomains", required = true)
     @XmlElement(name = "scientificSubdomain")
-    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 15, dataType = "List", example = "String[] (required)", required = true)
     private List<String> scientificSubdomains;
 
     /**
@@ -225,6 +225,8 @@ public class Service implements Identifiable {
     @ApiModelProperty(position = 27, example = "XMLGregorianCalendar (optional)")
     private XMLGregorianCalendar lastUpdate;
 
+  
+    // Service Classification Information
     /**
      * Summary of the service features updated from the previous version.
      */
@@ -248,7 +250,7 @@ public class Service implements Identifiable {
     @ApiModelProperty(position = 30, dataType = "List", example = "String[] (optional)")
     private List<String> standards;
 
-
+  
     // Service Contractual Information
     /**
      * Described id the service can be accessed with an ordering process.
@@ -292,6 +294,8 @@ public class Service implements Identifiable {
     @ApiModelProperty(position = 36, example = "URL (optional)")
     private URL accessPolicy;
 
+  
+    // Service Maturity Information
     /**
      * Webpage with the supported payment models and restrictions that apply to each of them.
      */
@@ -343,7 +347,7 @@ public class Service implements Identifiable {
     @ApiModelProperty(position = 43, example = "URL (optional)")
     private URL maintenance;
 
-
+  
     // Service Contact Information
     /**
      * Name of the person who has accountability for the whole service from a management point of view.
@@ -666,11 +670,11 @@ public class Service implements Identifiable {
         this.multimediaUrls = multimediaUrls;
     }
 
-    public List<String> getOptions() {
+    public List<ServiceOption> getOptions() {
         return options;
     }
 
-    public void setOptions(List<String> options) {
+    public void setOptions(List<ServiceOption> options) {
         this.options= options;
     }
 

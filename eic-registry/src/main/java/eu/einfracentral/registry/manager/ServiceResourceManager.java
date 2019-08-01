@@ -9,8 +9,8 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetLabelService;
@@ -82,9 +82,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return get(id, "latest");
     }
 
+
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
-        filter.setBrowseBy(getBrowseBy());
         List<String> browseBy = getBrowseBy();
         java.util.Collections.sort(browseBy);
         List<String> orderedBrowseBy = new ArrayList<>();
