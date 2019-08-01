@@ -86,7 +86,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "multimediaUrls")
     @XmlElement(name = "multimediaUrl")
-    @ApiModelProperty(position = 10, dataType = "List", example = "(optional)")
+    @ApiModelProperty(position = 10, dataType = "List", example = "URL[] (optional)")
     private List<URL> multimediaUrls;
 
     /**
