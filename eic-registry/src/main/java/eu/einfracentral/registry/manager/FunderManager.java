@@ -117,10 +117,11 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
     }
 
     private Map<String, Map<String, Double>> createFunderStats(Map<String, Map<String, Double>> funderStats, List<RichService> services) {
-        funderStats.put("Categories", createMap("CategoryName", services));
-        funderStats.put("Subcategories", createMap("SubCategoryName", services));
+        funderStats.put("Supercategories", createMap("SuperCategoryNames", services));
+        funderStats.put("Categories", createMap("CategoryNames", services));
+        funderStats.put("Subcategories", createMap("SubCategoryNames", services));
         funderStats.put("TRL", createMap("TrlName", services));
-        funderStats.put("Lifecycle Status", createMap("LifeCycleStatusName", services));
+        funderStats.put("Phase", createMap("PhaseName", services));
         funderStats.put("Languages", createMap("LanguageNames", services));
         funderStats.put("Places", createMap("PlaceNames", services));
 
