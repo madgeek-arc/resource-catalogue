@@ -489,42 +489,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="richService">
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessModeNames" nillable="true" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessTypeNames" nillable="true" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="categories" nillable="true" type="xs:anyType"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="domains" nillable="true" type="xs:anyType"/>
-      <xs:element name="favourites" type="xs:int"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="fundedByNames" nillable="true" type="xs:string"/>
-      <xs:element name="hasRate" type="xs:float"/>
-      <xs:element name="isFavourite" type="xs:boolean"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="languageNames" nillable="true" type="xs:string"/>
-      <xs:element minOccurs="0" name="orderTypeName" type="xs:string"/>
-      <xs:element minOccurs="0" name="phaseName" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="placeNames" nillable="true" type="xs:string"/>
-      <xs:element name="ratings" type="xs:int"/>
-      <xs:element minOccurs="0" ref="tns:service"/>
-      <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUsersNames" nillable="true" type="xs:string"/>
-      <xs:element minOccurs="0" name="trlName" type="xs:string"/>
-      <xs:element name="userRate" type="xs:float"/>
-      <xs:element name="views" type="xs:int"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="serviceHistory">
-    <xs:complexContent>
-      <xs:extension base="tns:serviceMetadata">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="coreVersionId" type="xs:string"/>
-          <xs:element minOccurs="0" name="version" type="xs:string"/>
-          <xs:element name="versionChange" type="xs:boolean"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
   <xs:complexType name="serviceOption">
     <xs:sequence>
       <xs:element name="description" type="xs:string">

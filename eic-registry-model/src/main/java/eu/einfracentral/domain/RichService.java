@@ -3,12 +3,15 @@ package eu.einfracentral.domain;
 
 import eu.einfracentral.dto.Category;
 import eu.einfracentral.dto.ScientificDomain;
+
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.List;
 
+@XmlTransient
 public class RichService {
 
     private Service service;
-    private ServiceMetadata serviceMetadata; //TODO: Do we need it?
+    private ServiceMetadata serviceMetadata;
 
     private List<String> languageNames;
     private List<String> placeNames;
@@ -40,7 +43,7 @@ public class RichService {
     }
 
     public RichService(InfraService service) {
-        this.service = service;
+        this.service = new Service(service); // copy constructor is needed to 'hide' infraService fields
         this.serviceMetadata = service.getServiceMetadata();
     }
 
