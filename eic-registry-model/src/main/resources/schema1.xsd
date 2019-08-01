@@ -3,8 +3,6 @@
 
   <xs:import schemaLocation="schema2.xsd"/>
 
-  <xs:element name="category" type="category"/>
-
   <xs:element name="event" type="tns:event"/>
 
   <xs:element name="funder" type="tns:funder"/>
@@ -18,8 +16,6 @@
   <xs:element name="provider" type="tns:provider"/>
 
   <xs:element name="rangeValue" type="tns:rangeValue"/>
-
-  <xs:element name="scientificDomain" type="scientificDomain"/>
 
   <xs:element name="service" type="tns:service"/>
 
@@ -497,8 +493,8 @@
     <xs:sequence>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="accessModeNames" nillable="true" type="xs:string"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="accessTypeNames" nillable="true" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="categories" nillable="true" type="category"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="domains" nillable="true" type="scientificDomain"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="categories" nillable="true" type="xs:anyType"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="domains" nillable="true" type="xs:anyType"/>
       <xs:element name="favourites" type="xs:int"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="fundedByNames" nillable="true" type="xs:string"/>
       <xs:element name="hasRate" type="xs:float"/>
@@ -516,19 +512,6 @@
       <xs:element name="views" type="xs:int"/>
     </xs:sequence>
   </xs:complexType>
-
-
-  <xs:complexType name="vocabulary">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="description" type="xs:string"/>
-      <xs:element minOccurs="0" name="extras" type="tns:extrasMapType"/>
-      <xs:element name="id" type="xs:string"/>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="parentId" type="xs:string"/>
-      <xs:element name="type" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
 
   <xs:complexType name="serviceHistory">
     <xs:complexContent>
@@ -569,6 +552,17 @@
           <xs:documentation><![CDATA[Webpage with information about the service option.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="vocabulary">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="description" type="xs:string"/>
+      <xs:element minOccurs="0" name="extras" type="tns:extrasMapType"/>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="parentId" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>
