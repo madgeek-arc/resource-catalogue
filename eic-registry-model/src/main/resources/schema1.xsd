@@ -138,24 +138,10 @@
           <xs:documentation><![CDATA[Summary of the service features updated from the previous version.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="accessTypes">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="accessType" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="category" type="xs:string">
+      <xs:element name="description" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A high-level description in fairly non-technical terms of what the service does, functionality it provides and resources it enables to access.]]></xs:documentation>
         </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="funders">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="funder" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="funders">
         <xs:complexType>
@@ -221,7 +207,7 @@
       <xs:element minOccurs="0" name="options">
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="option" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="option" type="tns:serviceOption"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -289,7 +275,7 @@
       <xs:element minOccurs="0" name="requiredServices">
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="standard" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="requiredService" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -530,36 +516,6 @@
       <xs:element minOccurs="0" name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="surname" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="serviceOption">
-    <xs:sequence>
-      <xs:element name="description" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The description of the service option.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="id" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Identifier of the service option.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="logo" type="xs:anyURI">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Link to the logo/visual identity of the service provider.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="name" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Name of the service option.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="url" type="xs:anyURI">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Webpage with information about the service option.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
     </xs:sequence>
   </xs:complexType>
 
