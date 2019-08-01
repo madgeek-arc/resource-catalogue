@@ -2,11 +2,9 @@ package eu.einfracentral.dto;
 
 import eu.einfracentral.domain.Vocabulary;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 
-@XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlTransient
 public class Category {
 
     private Vocabulary superCategoryVocab;
@@ -22,27 +20,27 @@ public class Category {
         this.subCategoryVocab = subCategoryVocab;
     }
 
-    public Vocabulary getSuperCategoryVocab() {
+    public Vocabulary getSuperCategory() {
         return superCategoryVocab;
     }
 
-    public void setSuperCategoryVocab(Vocabulary superCategoryVocab) {
-        this.superCategoryVocab = superCategoryVocab;
+    public void setSuperCategory(Vocabulary superCategory) {
+        this.superCategoryVocab = superCategory;
     }
 
-    public Vocabulary getCategoryVocab() {
+    public Vocabulary getCategory() {
         return categoryVocab;
     }
 
-    public void setCategoryVocab(Vocabulary categoryVocab) {
-        this.categoryVocab = categoryVocab;
+    public void setCategory(Vocabulary category) {
+        this.categoryVocab = category;
     }
 
-    public Vocabulary getSubCategoryVocab() {
+    public Vocabulary getSubCategory() {
         return subCategoryVocab;
     }
 
-    public void setSubCategoryVocab(Vocabulary subCategoryVocab) {
-        this.subCategoryVocab = subCategoryVocab;
+    public void setSubCategory(Vocabulary subCategory) {
+        this.subCategoryVocab = subCategory;
     }
 }

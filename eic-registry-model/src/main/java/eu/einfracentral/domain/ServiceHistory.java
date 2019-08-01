@@ -1,5 +1,8 @@
 package eu.einfracentral.domain;
 
+import javax.xml.bind.annotation.XmlTransient;
+
+@XmlTransient
 public class ServiceHistory extends ServiceMetadata {
 
     private String version;
