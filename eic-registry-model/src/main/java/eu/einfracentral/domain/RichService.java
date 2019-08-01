@@ -62,6 +62,7 @@ public class RichService {
 
     public void setServiceMetadata(ServiceMetadata serviceMetadata) {
         this.serviceMetadata = serviceMetadata;
+    }
       
 
     // Getters/Setters for VocabularyNames
