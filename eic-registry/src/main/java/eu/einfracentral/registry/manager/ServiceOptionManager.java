@@ -2,14 +2,14 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.ServiceOption;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.ServiceOptionService;
+import eu.einfracentral.registry.service.ResourceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ServiceOptionManager extends ResourceManager<ServiceOption> implements ServiceOptionService<ServiceOption, Authentication> {
+public class ServiceOptionManager extends ResourceManager<ServiceOption> implements ResourceService<ServiceOption, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
 
@@ -23,23 +23,19 @@ public class ServiceOptionManager extends ResourceManager<ServiceOption> impleme
     }
 
     @Override
-    public ServiceOption add(ServiceOption serviceOption, Authentication auth){
+    public ServiceOption add(ServiceOption serviceOption, Authentication auth) {
         validate(serviceOption);
         super.add(serviceOption, auth);
-        logger.info("Adding ServiceOption " +serviceOption);
+        logger.info("Adding ServiceOption " + serviceOption);
         return serviceOption;
     }
 
     @Override
-    public ServiceOption update(ServiceOption serviceOption, Authentication auth){
+    public ServiceOption update(ServiceOption serviceOption, Authentication auth) {
         validate(serviceOption);
         super.update(serviceOption, auth);
-        logger.info("Updating ServiceOption " +serviceOption);
+        logger.info("Updating ServiceOption " + serviceOption);
         return serviceOption;
-    }
-
-    public ServiceOption get(String id, Authentication auth) {
-        return null;
     }
 
     @Override

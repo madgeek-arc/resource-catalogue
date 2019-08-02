@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.ServiceOption;
-import eu.einfracentral.registry.service.ServiceOptionService;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,53 +19,47 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("serviceOption")
 @Api(value = "Get information about a ServiceOption.")
-public class ServiceOptionController extends ResourceController<ServiceOption, Authentication> {
+public class ServiceOptionController {
 
     private static final Logger logger = LogManager.getLogger(IndicatorController.class);
-    private ServiceOptionService<ServiceOption, Authentication> serviceOptionManager;
+    private ResourceService<ServiceOption, Authentication> service;
 
     @Autowired
-    ServiceOptionController(ServiceOptionService<ServiceOption, Authentication> service) {
-        super(service);
-        this.serviceOptionManager = service;
+    ServiceOptionController(ResourceService<ServiceOption, Authentication> service) {
+        this.service = service;
     }
 
     @ApiOperation(value = "Returns the ServiceOption with the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @Override
-    public ResponseEntity<ServiceOption> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return super.get(id, auth);
+    public ResponseEntity<ServiceOption> get(@PathVariable("id") String id) {
+        return new ResponseEntity<>(service.get(id), HttpStatus.OK);
     }
 
-    @Override
     @ApiOperation(value = "Creates a new ServiceOption.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<ServiceOption> add(@RequestBody ServiceOption serviceOption, @ApiIgnore Authentication auth) {
-        ResponseEntity<ServiceOption> ret = super.add(serviceOption, auth);
         logger.info("User " + auth.getName() + " created a new ServiceOption with id " + serviceOption.getId());
-        return ret;
+        return new ResponseEntity<>(service.add(serviceOption, auth), HttpStatus.CREATED);
     }
 
-    @Override
     @ApiOperation(value = "Updates the ServiceOption assigned the given id with the given ServiceOption, keeping version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<ServiceOption> update(@RequestBody ServiceOption serviceOption, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ResponseEntity<ServiceOption> ret = super.update(serviceOption, auth);
         logger.info("User " + auth.getName() + " updated ServiceOption with id " + serviceOption.getId());
-        return ret;
+        return new ResponseEntity<>(service.update(serviceOption, auth), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes the ServiceOption with the given id.")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<ServiceOption> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceOption serviceOption = serviceOptionManager.get(id);
+        ServiceOption serviceOption = service.get(id);
         if (serviceOption == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        serviceOptionManager.delete(serviceOption);
+        service.delete(serviceOption);
         logger.info("User " + auth.getName() + " deleted ServiceOption with id " + serviceOption.getId());
         return new ResponseEntity<>(serviceOption, HttpStatus.OK);
     }
