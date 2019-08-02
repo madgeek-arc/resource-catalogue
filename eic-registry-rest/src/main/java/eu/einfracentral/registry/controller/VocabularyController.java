@@ -17,8 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("vocabulary")
@@ -109,5 +108,33 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     public ResponseEntity<Paging<Vocabulary>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         Paging<Vocabulary> vocabularies = super.getAll(allRequestParams, auth).getBody();
         return new ResponseEntity<>(vocabularies, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Returns a tree structure of Categories")
+    @RequestMapping(path = "categoriesTree", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public @ResponseBody ResponseEntity<Map<Vocabulary, List<Map<Vocabulary, List<Vocabulary>>>>> getCategoriesTree() {
+        Map<String, List<Vocabulary>> vocabularies = vocabularyService.getBy("parent_id");
+        Map<Vocabulary, List<Map<Vocabulary, List<Vocabulary>>>> categoriesTree = new HashMap<>();
+        for (Vocabulary supercategory : vocabularyService.getByType(Vocabulary.Type.SUPERCATEGORY)) {
+            categoriesTree.put(supercategory, new ArrayList<>());
+            for (Vocabulary category : vocabularies.get(supercategory.getId())) {
+                Map<Vocabulary, List<Vocabulary>> categories = new HashMap<>();
+                categories.put(category, new ArrayList<>());
+                for (Vocabulary subcategory : vocabularies.get(category.getId())) {
+                    categories.get(category).add(subcategory);
+                }
+                categoriesTree.get(supercategory).add(categories);
+            }
+        }
+        return new ResponseEntity<>(categoriesTree, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Returns a tree structure of Scientific Domains")
+    @RequestMapping(path = "scientificDomainsTree", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<Vocabulary>> getScientificDomainTree(@RequestParam Vocabulary.Type type) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("vocabulary_id", type.getKey());
+        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 }
