@@ -16,6 +16,14 @@ public interface VocabularyService extends ResourceService<Vocabulary, Authentic
     String[] getRegion(String name);
 
     /**
+     * Get parent vocabulary.
+     *
+     * @param id
+     * @return
+     */
+    Vocabulary getParent(String id);
+
+    /**
      * Get all vocabularies by type in a Map.
      *
      * @return
