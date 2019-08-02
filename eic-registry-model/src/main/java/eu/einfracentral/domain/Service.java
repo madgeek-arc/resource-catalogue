@@ -94,7 +94,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "options")
     @XmlElement(name = "option")
-    @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 11, dataType = "List", example = "ServiceOptions[] (optional)")
     private List<ServiceOption> options;
 
     /**
