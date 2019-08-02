@@ -7,15 +7,14 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Value;
+import org.apache.commons.collections.list.TreeList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,7 +35,8 @@ public class FacetLabelService {
                 .collect(Collectors.joining(newDelimiter));
     }
 
-    public void createLabels(List<Facet> facets) {
+    public List<Facet> createLabels(List<Facet> facets) {
+        List<Facet> enrichedFacets = new TreeList();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         Map<String, String> providerNames = providerService.getAll(ff, null)
@@ -44,8 +44,24 @@ public class FacetLabelService {
                 .stream().collect(Collectors.toMap(Provider::getId, Provider::getName));
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
+        Facet superCategories;
+        Facet categories;
+        Facet scientificDomains;
+
         for (Facet facet : facets) {
+            if (facet.getField().equals("subcategories")) {
+                categories = createCategoriesFacet(facet);
+                superCategories = createSupercategoriesFacet(categories);
+
+                enrichedFacets.add(superCategories);
+                enrichedFacets.add(categories);
+            }
+            if (facet.getField().equals("scientific_subdomains")) {
+                scientificDomains = createScientificDomainsFacet(facet);
+                enrichedFacets.add(scientificDomains);
+            }
             for (Value value : facet.getValues()) {
+
                 switch (facet.getField()) {
                     case "providers":
                         value.setLabel(providerNames.get(value.getValue()));
@@ -60,5 +76,85 @@ public class FacetLabelService {
                 }
             }
         }
+        enrichedFacets.addAll(facets);
+        return enrichedFacets;
+    }
+
+    Facet createCategoriesFacet(Facet subcategories) {
+        List<Value> categoriesValues = new ArrayList<>();
+
+        Map<String, Vocabulary> categoriesMap = new TreeMap<>();
+
+        for (Value value : subcategories.getValues()) {
+            Vocabulary parent = vocabularyService.getParent(value.getValue());
+            if (parent != null) {
+                categoriesMap.putIfAbsent(parent.getId(), parent);
+            }
+        }
+
+        for (Vocabulary category : categoriesMap.values()) {
+            Value value = new Value();
+            value.setValue(category.getId());
+            value.setLabel(category.getName());
+            categoriesValues.add(value);
+        }
+
+        Facet categories = new Facet();
+        categories.setField("categories");
+        categories.setLabel("Categories");
+        categories.setValues(categoriesValues);
+        return categories;
+    }
+
+    Facet createSupercategoriesFacet(Facet categories) {
+        List<Value> superCategoriesValues = new ArrayList<>();
+
+        Map<String, Vocabulary> categoriesMap = new TreeMap<>();
+
+        for (Value value : categories.getValues()) {
+            Vocabulary parent = vocabularyService.getParent(value.getValue());
+            if (parent != null) {
+                categoriesMap.putIfAbsent(parent.getId(), parent);
+            }
+        }
+
+        for (Vocabulary category : categoriesMap.values()) {
+            Value value = new Value();
+            value.setValue(category.getId());
+            value.setLabel(category.getName());
+            superCategoriesValues.add(value);
+        }
+
+        Facet superCategories = new Facet();
+        superCategories.setField("supercategories");
+        superCategories.setLabel("Supercategories");
+        superCategories.setValues(superCategoriesValues);
+        return superCategories;
+    }
+
+    Facet createScientificDomainsFacet(Facet scientificSubdomains) {
+        List<Value> scientificDomainsValues = new ArrayList<>();
+
+        Map<String, Vocabulary> categoriesMap = new TreeMap<>();
+
+        for (Value value : scientificSubdomains.getValues()) {
+            Vocabulary parent = vocabularyService.getParent(value.getValue());
+            if (parent != null) {
+                categoriesMap.putIfAbsent(parent.getId(), parent);
+            }
+        }
+
+        for (Vocabulary category : categoriesMap.values()) {
+            Value value = new Value();
+            value.setValue(category.getId());
+            value.setLabel(category.getName());
+            scientificDomainsValues.add(value);
+        }
+
+        Facet scientificDomains = new Facet();
+        scientificDomains.setField("scientific_domains");
+        scientificDomains.setLabel("Scientific Domains");
+        scientificDomains.setValues(scientificDomainsValues);
+        return scientificDomains;
     }
 }

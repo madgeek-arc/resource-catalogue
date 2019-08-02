@@ -475,7 +475,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             services = getResults(ff);
         }
 
-        facetLabelService.createLabels(services.getFacets());
+        services.setFacets(facetLabelService.createLabels(services.getFacets()));
         return services;
     }
 
