@@ -54,6 +54,11 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    public Vocabulary getParent(String id) {
+        return get(get(id).getParentId());
+    }
+
+    @Override
     @Cacheable(value = CACHE_VOCABULARIES)
     public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
