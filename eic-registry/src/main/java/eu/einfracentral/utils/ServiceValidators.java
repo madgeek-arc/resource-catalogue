@@ -1,6 +1,7 @@
 package eu.einfracentral.utils;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceOption;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.exception.ValidationException;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -232,6 +232,36 @@ public class ServiceValidators {
     public void validateLogo(InfraService service) {
         if (service.getLogo() == null || service.getLogo().toString().equals("")) {
             throw new ValidationException("field 'logo' is mandatory");
+        }
+    }
+
+    // Validate the correctness of Service Options.
+    public void validateOptions(InfraService service) {
+        if (service.getOptions() != null){
+            for (ServiceOption option : service.getOptions()){
+
+                // Validate the Option's fields requirement
+                if (option.getId() == null || option.getId().equals("")){
+                    throw new ValidationException("field 'id' is mandatory");
+                }
+                if (option.getName() == null || option.getName().equals("")){
+                    throw new ValidationException("field 'name' is mandatory");
+                }
+                if (option.getDescription() == null || option.getDescription().equals("")){
+                    throw new ValidationException("field 'description' is mandatory");
+                }
+                if (option.getUrl() == null || option.getUrl().toString().equals("")){
+                    throw new ValidationException("field 'url' is mandatory");
+                }
+
+                // Validate max length of Option's fields
+                if (option.getName().length() > 80){
+                    throw new ValidationException("max length for 'name' is 80 chars");
+                }
+                if (option.getDescription().length() > 1000){
+                    throw new ValidationException("max length for 'description' is 1000 chars");
+                }
+            }
         }
     }
 
