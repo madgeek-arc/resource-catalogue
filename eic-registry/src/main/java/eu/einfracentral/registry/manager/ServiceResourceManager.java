@@ -91,20 +91,20 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         //TODO: Ask Stefania for the order, when committed inform JB
         //TODO: Do we need to return Supercategories, Categories and Domains as facets?
-        //Order Service's facets as we like (+removed Service Name - no9)
-        orderedBrowseBy.add(browseBy.get(11));   //no13 - Subcategories
-        orderedBrowseBy.add(browseBy.get(8));    // no9 - Providers
-        orderedBrowseBy.add(browseBy.get(10));   //no12 - Scientific Subdomains
-        orderedBrowseBy.add(browseBy.get(6));    // no7 - Phase
-        orderedBrowseBy.add(browseBy.get(13));   //no16 - TRL
-        orderedBrowseBy.add(browseBy.get(7));    // no8 - Places
-        orderedBrowseBy.add(browseBy.get(3));    // no4 - Languages
+        //Order Service's facets as we like (+removed Service Name - no4)
+        orderedBrowseBy.add(browseBy.get(11));   //no11 - Subcategories
+        orderedBrowseBy.add(browseBy.get(8));    // no8 - Providers
+        orderedBrowseBy.add(browseBy.get(10));   //no10 - Scientific Subdomains
+        orderedBrowseBy.add(browseBy.get(6));    // no6 - Phase
+        orderedBrowseBy.add(browseBy.get(13));   //no13 - TRL
+        orderedBrowseBy.add(browseBy.get(7));    // no7 - Places
+        orderedBrowseBy.add(browseBy.get(3));    // no3 - Languages
         orderedBrowseBy.add(browseBy.get(1));    // no1 - Access Types
         orderedBrowseBy.add(browseBy.get(0));    // no0 - Access Modes
-        orderedBrowseBy.add(browseBy.get(5));    // no6 - Order Type
-        orderedBrowseBy.add(browseBy.get(12));   //no15 - Target Users
-        orderedBrowseBy.add(browseBy.get(2));    // no3 - Funders
-        orderedBrowseBy.add(browseBy.get(9));   //no10 - Resource Type
+        orderedBrowseBy.add(browseBy.get(5));    // no5 - Order Type
+        orderedBrowseBy.add(browseBy.get(12));   //no12 - Target Users
+        orderedBrowseBy.add(browseBy.get(2));    // no2 - Funders
+        orderedBrowseBy.add(browseBy.get(9));    // no9 - Resource Type
 
         filter.setBrowseBy(orderedBrowseBy);
         filter.setResourceType(getResourceType());
