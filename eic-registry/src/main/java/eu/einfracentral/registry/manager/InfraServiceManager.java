@@ -193,6 +193,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         serviceValidators.validateLogo(service);
         serviceValidators.validateMaxLength(service);
         serviceValidators.validateProviders(service);
+        serviceValidators.validateOptions(service);
         return true;
     }
 
