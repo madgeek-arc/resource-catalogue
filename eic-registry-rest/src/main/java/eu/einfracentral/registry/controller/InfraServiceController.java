@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -21,8 +22,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("infraService")
@@ -119,7 +121,7 @@ public class InfraServiceController {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<InfraService>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
-        FacetFilter ff = createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         return ResponseEntity.ok(infraService.getAll(ff, authentication));
     }
 
@@ -146,40 +148,6 @@ public class InfraServiceController {
             logger.info("User " + auth.getName() + " set InfraService " + service.getName() + " with id: " + service.getId() + " to inactive");
         }
         return ResponseEntity.ok(infraService.update(service, auth));
-    }
-
-    private FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
-        logger.debug("Request params: " + allRequestParams);
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");
-        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from").get(0)) : 0);
-        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity").get(0)) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order").get(0) : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField").get(0) : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            facetFilter.setOrderBy(sort);
-        }
-        if (!allRequestParams.isEmpty()) {
-            Set<Map.Entry<String, List<Object>>> filterSet = allRequestParams.entrySet();
-            for (Map.Entry<String, List<Object>> entry : filterSet) {
-                // split values separated by comma to entries and replace existing <key,value> pair with the new one
-                allRequestParams.replace(entry.getKey(), new LinkedList<>(
-                        entry.getValue()
-                                .stream()
-                                .flatMap(e -> Arrays.stream(e.toString().split(",")))
-                                .distinct()
-                                .collect(Collectors.toList()))
-                );
-            }
-            Map<String, Object> multiFilter = new HashMap<>();
-            multiFilter.put("multi-filter", allRequestParams);
-            facetFilter.setFilter(multiFilter);
-        }
-        return facetFilter;
     }
 
 }
