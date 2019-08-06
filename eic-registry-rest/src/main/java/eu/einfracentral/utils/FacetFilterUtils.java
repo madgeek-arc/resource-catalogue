@@ -37,28 +37,29 @@ public class FacetFilterUtils {
         return allFilters;
     }
 
-//    private String createQuery(Map<String, List<String>> filters, String keyword) {
-//        String searchField = "searchableArea";
-//        return createQuery(filters, keyword, searchField);
-//    }
-
     // Creates a Query consisted of all given filters and keywords
     public static String createQuery(Map<String, List<String>> filters, String keyword) {
-        List<String> searchFields = filters.remove("searchFields"); // TODO
+        List<String> searchFields = filters.remove("searchFields");
+        if (searchFields == null || searchFields.isEmpty()) {
+            searchFields = Collections.singletonList("searchableArea");
+        }
+        final List<String> fields = searchFields;
         StringBuilder query = new StringBuilder();
 
         if (keyword != null && !keyword.replaceAll(" ", "").equals("")) {
             String keywordQuery;
             List<String> searchKeywords = Arrays.asList(keyword.split(" "));
+            List<String> allSearchKeywords = new ArrayList<>();
             // filter search keywords, trim whitespace and create search statements
-            searchKeywords = searchKeywords
-                    .stream()
-                    .map(k -> k.replaceAll(" ", ""))
-                    .filter(k -> !k.equals(""))
-                    .map(k -> String.format("%s=%s", searchFields.get(0), k))
-//                    .map(k -> String.format("searchableArea=%s", k))
-                    .collect(Collectors.toList());
-            keywordQuery = String.join(" OR ", searchKeywords);
+            for (String f : fields) {
+                allSearchKeywords.addAll(searchKeywords
+                        .stream()
+                        .map(k -> k.replaceAll(" ", ""))
+                        .filter(k -> !k.equals(""))
+                        .map(k -> String.format("%s=%s", f, k))
+                        .collect(Collectors.toList()));
+            }
+            keywordQuery = String.join(" OR ", allSearchKeywords);
             query.append(String.format("( %s )", keywordQuery));
 
             if (!filters.isEmpty()) {
