@@ -8,6 +8,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -165,7 +166,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
-        FacetFilter ff = createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
@@ -184,7 +185,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "/rich/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-        FacetFilter ff = createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<RichService> services = infraService.getRichServices(ff, auth);
@@ -283,7 +284,7 @@ public class ServiceController {
     })
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Service>> getInactiveServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        FacetFilter ff = createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", "false");
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
 //        Paging<InfraService> infraServices = infraService.getInactiveServices();
@@ -321,41 +322,6 @@ public class ServiceController {
         Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
         return ResponseEntity.ok(services);
     }
-
-    private FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
-        logger.debug("Request params: " + allRequestParams);
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");
-        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from").get(0)) : 0);
-        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity").get(0)) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order").get(0) : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField").get(0) : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            facetFilter.setOrderBy(sort);
-        }
-        if (!allRequestParams.isEmpty()) {
-            Set<Map.Entry<String, List<Object>>> filterSet = allRequestParams.entrySet();
-            for (Map.Entry<String, List<Object>> entry : filterSet) {
-                // split values separated by comma to entries and replace existing <key,value> pair with the new one
-                allRequestParams.replace(entry.getKey(), new LinkedList<>(
-                        entry.getValue()
-                                .stream()
-                                .flatMap(e -> Arrays.stream(e.toString().split(",")))
-                                .distinct()
-                                .collect(Collectors.toList()))
-                );
-            }
-            Map<String, Object> multiFilter = new HashMap<>();
-            multiFilter.put("multi-filter", allRequestParams);
-            facetFilter.setFilter(multiFilter);
-        }
-        return facetFilter;
-    }
-
 
 //    @ApiOperation(value = "Migrates Service's fields for Catris")
 //    @RequestMapping(path = "catris",method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
