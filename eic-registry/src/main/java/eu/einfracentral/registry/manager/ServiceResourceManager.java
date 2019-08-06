@@ -9,10 +9,11 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.registry.service.ServiceInterface;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
@@ -24,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
@@ -107,7 +107,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         orderedBrowseBy.add(browseBy.get(9));   //no10 - Resource Type
 
         filter.setBrowseBy(orderedBrowseBy);
-        filter.setResourceType(getResourceType());
+
+//        filter.setResourceType(getResourceType());
+//        getMatchingServices(filter).getFacets();
         return getMatchingServices(filter);
     }
 
@@ -489,10 +491,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         String searchKeyword = ff.getKeyword();
 
         // retrieve filters from FacetFilter object
-        Map<String, List<String>> allFilters = getFacetFilterFilters(ff);
+        Map<String, List<String>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
 
         // create a query based on the filters and the search keywords
-        String searchQuery = createQuery(allFilters, searchKeyword);
+        String searchQuery = FacetFilterUtils.createQuery(allFilters, searchKeyword);
 
         ff.setFilter(null);
         ff.setKeyword(searchQuery);
@@ -506,7 +508,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
             someFilters.remove(filter.getKey());
 
-            searchQuery = createQuery(someFilters, searchKeyword);
+            searchQuery = FacetFilterUtils.createQuery(someFilters, searchKeyword);
             ffWithoutFacetCategory.setKeyword(searchQuery);
             List<Facet> facetsCategory = cqlQuery(ffWithoutFacetCategory).getFacets();
 
@@ -529,69 +531,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     private List<Facet> getServiceFacets(FacetFilter ff) {
         return cqlQuery(ff).getFacets();
-    }
-
-    // Gets all given filters
-    private Map<String, List<String>> getFacetFilterFilters(FacetFilter ff) {
-        Map<String, Object> filters = ff.getFilter();
-        Map<String, List<String>> allFilters = new HashMap<>();
-
-        // check if a MultiValueMap filter exists inside the filter
-        if (filters.get("multi-filter") != null) {
-            MultiValueMap<String, String> multiFilter = (MultiValueMap<String, String>) filters.remove("multi-filter");
-
-            for (Map.Entry<String, List<String>> entry : multiFilter.entrySet()) {
-                // fill the variable with the multiple filters
-                allFilters.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        // fill the variable with the rest of the filters
-        for (Map.Entry<String, Object> ffEntry : filters.entrySet()) {
-            allFilters.put(ffEntry.getKey(), Collections.singletonList(ffEntry.getValue().toString()));
-        }
-
-        return allFilters;
-    }
-
-    // Creates a Query consisted of all given filters and keywords
-    private String createQuery(Map<String, List<String>> filters, String keyword) {
-        StringBuilder query = new StringBuilder();
-
-        if (keyword != null && !keyword.replaceAll(" ", "").equals("")) {
-            String keywordQuery;
-            List<String> searchKeywords = Arrays.asList(keyword.split(" "));
-            // filter search keywords, trim whitespace and create search statements
-            searchKeywords = searchKeywords
-                    .stream()
-                    .map(k -> k.replaceAll(" ", ""))
-                    .filter(k -> !k.equals(""))
-                    .map(k -> String.format("searchableArea=%s", k))
-                    .collect(Collectors.toList());
-            keywordQuery = String.join(" OR ", searchKeywords);
-            query.append(String.format("( %s )", keywordQuery));
-
-            if (!filters.isEmpty()) {
-                query.append(" AND ");
-            }
-        }
-
-        for (Iterator iter = filters.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry<String, List<String>> filter = (Map.Entry<String, List<String>>) iter.next();
-            List<String> entries = new ArrayList<>();
-            filter.getValue().forEach(e -> entries.add(String.format("%s=%s", filter.getKey(), e)));
-            if (entries.size() > 1) {
-                query.append(String.format("( %s )", String.join(" OR ", entries)));
-            } else { // this is important to skip adding parentheses when we have zero or only 1 filter
-                query.append(String.join("", entries));
-            }
-
-            if (iter.hasNext()) {
-                query.append(" AND ");
-            }
-        }
-
-        return query.toString();
     }
 
     public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
@@ -687,8 +626,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             for (String subcategory : infraService.getSubcategories()) {
                 Category category = new Category();
                 String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
-                String supercategoryId = "supercategory-" +parts[1];
-                String categoryId = "category-" +parts[1] +"-" +parts[2] ;
+                String supercategoryId = "supercategory-" + parts[1];
+                String categoryId = "category-" + parts[1] + "-" + parts[2];
                 category.setSuperCategory(vocabularyService.get(supercategoryId));
                 category.setCategory(vocabularyService.get(categoryId));
                 category.setSubCategory(vocabularyService.get(subcategory));
