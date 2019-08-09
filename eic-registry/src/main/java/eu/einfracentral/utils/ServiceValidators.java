@@ -207,7 +207,7 @@ public class ServiceValidators {
             throw new ValidationException("field 'name' is obligatory");
         }
         if (service.getName().length() > 80) {
-            throw new ValidationException("max length for 'name' is 240 chars");
+            throw new ValidationException("max length for 'name' is 80 chars");
         }
     }
 
@@ -265,12 +265,24 @@ public class ServiceValidators {
         }
     }
 
+    // Validate the correctness of Service Version.
+    public void validateVersion (InfraService service){
+        if (service.getVersion() != null) {
+            if (service.getVersion().equals("")){
+                throw new ValidationException("field 'version' cannot be an empty String");
+            }
+            if (service.getVersion().length() > 10){
+                throw new ValidationException("max length for 'version' is 10 chars");
+            }
+        }
+    }
+
     // Validate the max length of various variables (x10).
     public void validateMaxLength(InfraService service) {
-        if (service.getTagline() != null && service.getTagline().length() > 1000) {
+        if (service.getTagline() != null && service.getTagline().length() > 100) {
             throw new ValidationException("max length for 'tagline' is 100 chars");
         }
-        if (service.getUserValue() != null && service.getUserValue().length() > 10000) {
+        if (service.getUserValue() != null && service.getUserValue().length() > 1000) {
             throw new ValidationException("max length for 'userValue' is 1000 chars");
         }
         if (service.getUserBaseList() != null){
@@ -285,7 +297,7 @@ public class ServiceValidators {
         }
         if (service.getUseCases() != null){
             for (String userCase : service.getUseCases()){
-                if (userCase != null && userCase.length() > 1000) {
+                if (userCase != null && userCase.length() > 100) {
                     throw new ValidationException("max length for 'userCase' is 100 chars");
                 }
                 if (userCase == null || userCase.equals("")){
@@ -295,7 +307,7 @@ public class ServiceValidators {
         }
         if (service.getTags() != null){
             for (String tag : service.getTags()){
-                if (tag != null && tag.length() > 2000) {
+                if (tag != null && tag.length() > 20) {
                     throw new ValidationException("max length for 'tag' is 20 chars");
                 }
                 if (tag == null || tag.equals("")){
@@ -303,15 +315,12 @@ public class ServiceValidators {
                 }
             }
         }
-        if (service.getVersion() != null && service.getVersion().length() > 100) {
-            throw new ValidationException("max length for 'version' is 10 chars");
-        }
-        if (service.getChangeLog() != null && service.getChangeLog().length() > 10000) {
+        if (service.getChangeLog() != null && service.getChangeLog().length() > 1000) {
             throw new ValidationException("max length for 'changeLog' is 1000 chars");
         }
         if (service.getCertifications() != null){
             for (String certification : service.getCertifications()){
-                if (certification != null && certification.length() > 1000) {
+                if (certification != null && certification.length() > 100) {
                     throw new ValidationException("max length for 'certification' is 100 chars");
                 }
                 if (certification == null || certification.equals("")){
@@ -321,7 +330,7 @@ public class ServiceValidators {
         }
         if (service.getStandards() != null){
             for (String standard : service.getStandards()){
-                if (standard != null && standard.length() > 1000) {
+                if (standard != null && standard.length() > 100) {
                     throw new ValidationException("max length for 'standard' is 100 chars");
                 }
                 if (standard == null || standard.equals("")){
@@ -329,13 +338,13 @@ public class ServiceValidators {
                 }
             }
         }
-        if (service.getOwnerName() != null && service.getOwnerName().length() > 200) {
+        if (service.getOwnerName() != null && service.getOwnerName().length() > 20) {
             throw new ValidationException("max length for 'ownerName' is 20 chars");
         }
-        if (service.getSupportName() != null && service.getSupportName().length() > 200) {
+        if (service.getSupportName() != null && service.getSupportName().length() > 20) {
             throw new ValidationException("max length for 'supportName' is 20 chars");
         }
-        if (service.getSecurityName() != null && service.getSecurityName().length() > 200) {
+        if (service.getSecurityName() != null && service.getSecurityName().length() > 20) {
             throw new ValidationException("max length for 'securityName' is 20 chars");
         }
     }

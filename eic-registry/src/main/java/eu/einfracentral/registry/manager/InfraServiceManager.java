@@ -7,6 +7,7 @@ import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.service.ServiceException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,19 +78,21 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         validate(infraService);
         InfraService existingService;
 
-        try { // try to find a service with the same id and version
-            existingService = get(infraService.getId(), infraService.getVersion());
-        } catch (ServiceException e) {
-            // if a service with version = infraService.getVersion() does not exist, get the latest service
-            existingService = get(infraService.getId());
-        }
+        existingService = get(infraService.getId());
 
         // update existing service serviceMetadata
         ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
         infraService.setServiceMetadata(serviceMetadata);
         infraService.setActive(existingService.isActive());
 
-        if (infraService.getVersion().equals(existingService.getVersion())) {
+        boolean nullToVersion = false;
+        if((infraService.getVersion() == null && existingService.getVersion() != null) ||
+           (existingService.getVersion() == null && infraService.getVersion() != null)){
+            nullToVersion = true;
+        }
+
+        if (!nullToVersion &&
+           ((infraService.getVersion() == null && existingService.getVersion() == null) || (infraService.getVersion().equals(existingService.getVersion())))) {
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
@@ -99,16 +102,17 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         } else {
             // create new service and AFTERWARDS update the previous one (in case the new service cannot be created)
 //                infraService.setStatus(); // TODO: enable this when services support the Status field
-            // set new service as latest
-            infraService.setLatest(true);
-            ret = super.add(infraService, authentication);
-            logger.info("Updating Service " + infraService + " with version changes (super.add)");
 
             // set previous service not latest
             existingService.setLatest(false);
             super.update(existingService, authentication);
             logger.info("Updating Service " + infraService + " with version changes (super.update)");
             logger.info("Service Version: " + infraService.getVersion());
+
+            // set new service as latest
+            infraService.setLatest(true);
+            ret = super.add(infraService, authentication);
+            logger.info("Updating Service " + infraService + " with version changes (super.add)");
         }
 
         return ret;
@@ -194,6 +198,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         serviceValidators.validateMaxLength(service);
         serviceValidators.validateProviders(service);
         serviceValidators.validateOptions(service);
+        serviceValidators.validateVersion(service);
         return true;
     }
 
