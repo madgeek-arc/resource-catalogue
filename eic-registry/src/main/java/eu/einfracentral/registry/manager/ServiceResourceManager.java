@@ -72,7 +72,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public InfraService get(String id, String version) {
         Resource resource = getResource(id, version);
         if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find service with id: %s", id));
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s and version: %s", id, version));
         }
         return deserialize(resource);
     }
@@ -371,7 +371,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     private boolean exists(InfraService infraService) {
-        return getResource(infraService.getId(), infraService.getVersion()) != null;
+        if (infraService.getVersion() != null){
+            return getResource(infraService.getId(), infraService.getVersion()) != null;
+        }
+        return getResource(infraService.getId(), null) != null;
     }
 
     public Resource getResourceById(String resourceId) {
