@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
@@ -78,21 +79,20 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         validate(infraService);
         InfraService existingService;
 
-        existingService = get(infraService.getId());
+        try { // try to find a service with the same id and version
+            existingService = get(infraService.getId(), infraService.getVersion());
+        } catch (ResourceNotFoundException e) {
+            // if a service with version = infraService.getVersion() does not exist, get the latest service
+            existingService = get(infraService.getId());
+        }
 
         // update existing service serviceMetadata
         ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
         infraService.setServiceMetadata(serviceMetadata);
         infraService.setActive(existingService.isActive());
 
-        boolean nullToVersion = false;
-        if((infraService.getVersion() == null && existingService.getVersion() != null) ||
-           (existingService.getVersion() == null && infraService.getVersion() != null)){
-            nullToVersion = true;
-        }
-
-        if (!nullToVersion &&
-           ((infraService.getVersion() == null && existingService.getVersion() == null) || (infraService.getVersion().equals(existingService.getVersion())))) {
+        if ((infraService.getVersion() == null && existingService.getVersion() == null)
+                || infraService.getVersion() != null && infraService.getVersion().equals(existingService.getVersion())) {
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
@@ -106,8 +106,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             // set previous service not latest
             existingService.setLatest(false);
             super.update(existingService, authentication);
-            logger.info("Updating Service " + infraService + " with version changes (super.update)");
-            logger.info("Service Version: " + infraService.getVersion());
+            logger.info("Updating Service " + existingService + " with version changes (super.update)");
+            logger.info("Service Version: " + existingService.getVersion());
 
             // set new service as latest
             infraService.setLatest(true);

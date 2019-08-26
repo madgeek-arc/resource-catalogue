@@ -129,7 +129,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
 
-        // add spaces after ',' if they don't already exist and remove spaces before
         prettifyServiceTextFields(infraService, ",");
 
         String serialized;
@@ -152,7 +151,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
         synchronizerService.syncUpdate(infraService);
 
-        // add spaces after ',' if they don't already exist and remove spaces before
         prettifyServiceTextFields(infraService, ",");
 
         existing.setPayload(serialize(infraService));
@@ -388,7 +386,18 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     public Resource getResource(String serviceId, String serviceVersion) {
         Paging<Resource> resources;
-        if (serviceVersion == null || "".equals(serviceVersion) || "latest".equals(serviceVersion)) {
+        if (serviceVersion == null || "".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
+                            resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
+            // return the latest modified resource that does not contain a version attribute
+            for (Resource resource : resources.getResults()) {
+                if (!resource.getPayload().contains("<tns:version>")) {
+                    return resource;
+                }
+            }
+            return null;
+        } else if ("latest".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\" AND latest = true", serviceId),
                             resourceType.getName(), 1, 0, "modifiedAt", "DESC");
@@ -459,6 +468,13 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 .toLowerCase());
     }
 
+    /**
+     * Adds spaces after ',' if they don't already exist and removes spaces before
+     *
+     * @param infraService
+     * @param specialCharacters
+     * @return
+     */
     private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.setTagline(TextUtils.prettifyText(infraService.getTagline(), specialCharacters));
         infraService.setDescription(TextUtils.prettifyText(infraService.getDescription(), specialCharacters));
