@@ -27,9 +27,9 @@ public class ServiceValidators {
 
     private static final Logger logger = LogManager.getLogger(ServiceValidators.class);
 
-    private static final int NAME_LENGTH_SMALL = 20;
     private static final int NAME_LENGTH = 80;
     private static final int FIELD_LENGTH = 100;
+    private static final int FIELD_LENGTH_SMALL = 20;
     private static final int TEXT_LENGTH = 1000;
 
     private InfraServiceService<InfraService, InfraService> infraServiceService;
@@ -274,8 +274,8 @@ public class ServiceValidators {
     // Validate the correctness of Service Version.
     public void validateVersion(InfraService service) {
         if (service.getVersion() != null) {
-            if (service.getVersion().length() > NAME_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'version' is " + NAME_LENGTH_SMALL + " chars");
+            if (service.getVersion().length() > FIELD_LENGTH_SMALL) {
+                throw new ValidationException("max length for 'version' is " + FIELD_LENGTH_SMALL + " chars");
             }
         }
     }
@@ -319,8 +319,8 @@ public class ServiceValidators {
                 service.setTags(null);
             }
             for (String tag : service.getTags()) {
-                if (tag != null && tag.length() > NAME_LENGTH_SMALL) {
-                    throw new ValidationException("max length for 'tag' is " + NAME_LENGTH_SMALL + " chars");
+                if (tag != null && tag.length() > FIELD_LENGTH_SMALL) {
+                    throw new ValidationException("max length for 'tag' is " + FIELD_LENGTH_SMALL + " chars");
                 }
                 if (tag == null || tag.equals("")) {
                     throw new ValidationException("One or more items of the tags list is null or empty");
@@ -356,14 +356,14 @@ public class ServiceValidators {
                 }
             }
         }
-        if (service.getOwnerName() != null && service.getOwnerName().length() > NAME_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'ownerName' is " + NAME_LENGTH_SMALL + " chars");
+        if (service.getOwnerName() != null && service.getOwnerName().length() > NAME_LENGTH) {
+            throw new ValidationException("max length for 'ownerName' is " + NAME_LENGTH + " chars");
         }
-        if (service.getSupportName() != null && service.getSupportName().length() > NAME_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'supportName' is " + NAME_LENGTH_SMALL + " chars");
+        if (service.getSupportName() != null && service.getSupportName().length() > NAME_LENGTH) {
+            throw new ValidationException("max length for 'supportName' is " + NAME_LENGTH + " chars");
         }
-        if (service.getSecurityName() != null && service.getSecurityName().length() > NAME_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'securityName' is " + NAME_LENGTH_SMALL + " chars");
+        if (service.getSecurityName() != null && service.getSecurityName().length() > NAME_LENGTH) {
+            throw new ValidationException("max length for 'securityName' is " + NAME_LENGTH + " chars");
         }
     }
 }
