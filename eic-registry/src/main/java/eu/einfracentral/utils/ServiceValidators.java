@@ -307,7 +307,7 @@ public class ServiceValidators {
             }
             for (String userCase : service.getUseCases()) {
                 if (userCase != null && userCase.length() > FIELD_LENGTH) {
-                    throw new ValidationException("max length for 'userCase' is " + FIELD_LENGTH + " chars");
+                    throw new ValidationException("max length for 'useCase' is " + FIELD_LENGTH + " chars");
                 }
                 if (userCase == null || userCase.equals("")) {
                     throw new ValidationException("One or more items of the useCases list is null or empty");
