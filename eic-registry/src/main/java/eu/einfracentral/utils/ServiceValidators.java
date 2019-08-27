@@ -129,7 +129,7 @@ public class ServiceValidators {
         // Validate Access Types
         if (service.getAccessTypes() != null) {
             if (service.getAccessTypes().size() == 1 && "".equals(service.getAccessTypes().get(0))) {
-                service.setAccessTypes(null);
+                service.getAccessTypes().remove(0);
             }
             for (String accessType : service.getAccessTypes()) {
                 if (!allVocabularies.containsKey(accessType))
@@ -140,7 +140,7 @@ public class ServiceValidators {
         // Validate Access Modes
         if (service.getAccessModes() != null) {
             if (service.getAccessModes().size() == 1 && "".equals(service.getAccessModes().get(0))) {
-                service.setAccessModes(null);
+                service.getAccessModes().remove(0);
             }
             for (String accessMode : service.getAccessModes()) {
                 if (!allVocabularies.containsKey(accessMode))
@@ -151,7 +151,7 @@ public class ServiceValidators {
         // Validate Funders
         if (service.getFunders() != null) {
             if (service.getFunders().size() == 1 && "".equals(service.getFunders().get(0))) {
-                service.setFunders(null);
+                service.getFunders().remove(0);
             }
             for (String funder : service.getFunders()) {
                 if (!allVocabularies.containsKey(funder))
@@ -299,7 +299,7 @@ public class ServiceValidators {
         }
         if (service.getUserBaseList() != null) {
             if (service.getUserBaseList().size() == 1 && "".equals(service.getUserBaseList().get(0))) {
-                service.setUserBaseList(null);
+                service.getUserBaseList().remove(0);
             }
             for (String userBase : service.getUserBaseList()) {
                 if (userBase != null && userBase.length() > FIELD_LENGTH) {
@@ -312,7 +312,7 @@ public class ServiceValidators {
         }
         if (service.getUseCases() != null) {
             if (service.getUseCases().size() == 1 && "".equals(service.getUseCases().get(0))) {
-                service.setUseCases(null);
+                service.getUseCases().remove(0);
             }
             for (String userCase : service.getUseCases()) {
                 if (userCase != null && userCase.length() > FIELD_LENGTH) {
@@ -325,7 +325,7 @@ public class ServiceValidators {
         }
         if (service.getTags() != null) {
             if (service.getTags().size() == 1 && "".equals(service.getTags().get(0))) {
-                service.setTags(null);
+                service.getTags().remove(0);
             }
             for (String tag : service.getTags()) {
                 if (tag != null && tag.length() > FIELD_LENGTH_SMALL) {
@@ -341,7 +341,7 @@ public class ServiceValidators {
         }
         if (service.getCertifications() != null) {
             if (service.getCertifications().size() == 1 && "".equals(service.getCertifications().get(0))) {
-                service.setCertifications(null);
+                service.getCertifications().remove(0);
             }
             for (String certification : service.getCertifications()) {
                 if (certification != null && certification.length() > FIELD_LENGTH) {
@@ -354,7 +354,7 @@ public class ServiceValidators {
         }
         if (service.getStandards() != null) {
             if (service.getStandards().size() == 1 && "".equals(service.getStandards().get(0))) {
-                service.setStandards(null);
+                service.getStandards().remove(0);
             }
             for (String standard : service.getStandards()) {
                 if (standard != null && standard.length() > FIELD_LENGTH) {
