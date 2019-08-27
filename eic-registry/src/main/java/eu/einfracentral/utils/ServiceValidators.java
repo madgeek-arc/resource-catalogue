@@ -128,6 +128,9 @@ public class ServiceValidators {
 
         // Validate Access Types
         if (service.getAccessTypes() != null) {
+            if (service.getAccessTypes().size() == 1 && "".equals(service.getAccessTypes().get(0))) {
+                service.setAccessTypes(null);
+            }
             for (String accessType : service.getAccessTypes()) {
                 if (!allVocabularies.containsKey(accessType))
                     throw new ValidationException(String.format("accessType '%s' does not exist.", accessType));
@@ -136,6 +139,9 @@ public class ServiceValidators {
 
         // Validate Access Modes
         if (service.getAccessModes() != null) {
+            if (service.getAccessModes().size() == 1 && "".equals(service.getAccessModes().get(0))) {
+                service.setAccessModes(null);
+            }
             for (String accessMode : service.getAccessModes()) {
                 if (!allVocabularies.containsKey(accessMode))
                     throw new ValidationException(String.format("accessMode '%s' does not exist.", accessMode));
@@ -144,6 +150,9 @@ public class ServiceValidators {
 
         // Validate Funders
         if (service.getFunders() != null) {
+            if (service.getFunders().size() == 1 && "".equals(service.getFunders().get(0))) {
+                service.setFunders(null);
+            }
             for (String funder : service.getFunders()) {
                 if (!allVocabularies.containsKey(funder))
                     throw new ValidationException(String.format("funder '%s' does not exist.", funder));
