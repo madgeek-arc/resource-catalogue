@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.EmailMessage;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import org.apache.logging.log4j.LogManager;
@@ -33,8 +34,7 @@ public class ContactController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROVIDER', 'ROLE_USER')")
     @PostMapping("service/{ids}/support")
-    public void sendRequest(@PathVariable("ids") List<String> ids, @RequestParam String email,
-                            @RequestBody String message) {
+    public void sendRequest(@PathVariable("ids") List<String> ids, @RequestBody EmailMessage message) {
         for (String id : ids) {
             List<String> emailsTo;
             InfraService service = infraServiceService.get(id);
@@ -46,8 +46,8 @@ public class ContactController {
                         .map(providerId -> providerService.get(providerId).getContactEmail())
                         .collect(Collectors.toList());
             }
-
-            logger.info(String.format("%nSending e-mail to '%s'%nFrom %s:%nMessage Body:%n%s", String.join(",", emailsTo), email, message));
+            // TODO: complete this method
+            logger.info(String.format("%nSending e-mail to '%s'%nFrom %s <%s>:%nSubject: %s%nMessage Body:%n%s", String.join(",", emailsTo), message.getSenderName(), message.getSenderEmail(), message.getSubject(), message.getMessage()));
         }
     }
 }
