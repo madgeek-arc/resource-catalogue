@@ -129,6 +129,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
 
+        if ("".equals(infraService.getVersion())) {
+            infraService.setVersion(null);
+        }
         prettifyServiceTextFields(infraService, ",");
 
         String serialized;
@@ -151,6 +154,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
         synchronizerService.syncUpdate(infraService);
 
+        if ("".equals(infraService.getVersion())) {
+            infraService.setVersion(null);
+        }
         prettifyServiceTextFields(infraService, ",");
 
         existing.setPayload(serialize(infraService));
