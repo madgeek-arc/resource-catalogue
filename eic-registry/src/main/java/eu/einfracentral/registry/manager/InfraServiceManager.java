@@ -7,14 +7,13 @@ import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.service.ServiceException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -78,6 +77,11 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         InfraService ret;
         validate(infraService);
         InfraService existingService;
+
+        // if service version is empty set it null
+        if ("".equals(infraService.getVersion())) {
+            infraService.setVersion(null);
+        }
 
         try { // try to find a service with the same id and version
             existingService = get(infraService.getId(), infraService.getVersion());

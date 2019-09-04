@@ -3,6 +3,7 @@ package eu.einfracentral.utils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.*;
@@ -10,20 +11,24 @@ import java.util.stream.Collectors;
 
 public class FacetFilterUtils {
 
+    public static final String MULTI_FILTER = "multi-filter";
+    public static final String SEARCH_FIELDS = "searchFields";
+    public static final String SEARCHABLE_AREA = "searchableArea";
+
     private static final Logger logger = LogManager.getLogger(FacetFilterUtils.class);
 
     private FacetFilterUtils() {}
 
     // Gets all given filters
-    public static Map<String, List<String>> getFacetFilterFilters(FacetFilter ff) {
-        Map<String, Object> filters = ff.getFilter();
-        Map<String, List<String>> allFilters = new HashMap<>();
+    public static Map<String, List<Object>> getFacetFilterFilters(FacetFilter ff) {
+        Map<String, Object> filters = new HashMap<>(ff.getFilter());
+        Map<String, List<Object>> allFilters = new HashMap<>();
 
         // check if a MultiValueMap filter exists inside the filter
-        if (filters.get("multi-filter") != null) {
-            MultiValueMap<String, String> multiFilter = (MultiValueMap<String, String>) filters.remove("multi-filter");
+        if (filters.get(MULTI_FILTER) != null) {
+            MultiValueMap<String, Object> multiFilter = (MultiValueMap<String, Object>) filters.remove(MULTI_FILTER);
 
-            for (Map.Entry<String, List<String>> entry : multiFilter.entrySet()) {
+            for (Map.Entry<String, List<Object>> entry : multiFilter.entrySet()) {
                 // fill the variable with the multiple filters
                 allFilters.put(entry.getKey(), entry.getValue());
             }
@@ -38,12 +43,12 @@ public class FacetFilterUtils {
     }
 
     // Creates a Query consisted of all given filters and keywords
-    public static String createQuery(Map<String, List<String>> filters, String keyword) {
-        List<String> searchFields = filters.remove("searchFields");
+    public static String createQuery(Map<String, List<Object>> filters, String keyword) {
+        List<Object> searchFields = filters.remove(FacetFilterUtils.SEARCH_FIELDS);
         if (searchFields == null || searchFields.isEmpty()) {
-            searchFields = Collections.singletonList("searchableArea");
+            searchFields = Collections.singletonList(FacetFilterUtils.SEARCHABLE_AREA);
         }
-        final List<String> fields = searchFields;
+        final List<Object> fields = searchFields;
         StringBuilder query = new StringBuilder();
 
         if (keyword != null && !keyword.replaceAll(" ", "").equals("")) {
@@ -51,7 +56,7 @@ public class FacetFilterUtils {
             List<String> searchKeywords = Arrays.asList(keyword.split(" "));
             List<String> allSearchKeywords = new ArrayList<>();
             // filter search keywords, trim whitespace and create search statements
-            for (String f : fields) {
+            for (Object f : fields) {
                 allSearchKeywords.addAll(searchKeywords
                         .stream()
                         .map(k -> k.replaceAll(" ", ""))
@@ -68,7 +73,7 @@ public class FacetFilterUtils {
         }
 
         for (Iterator iter = filters.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry<String, List<String>> filter = (Map.Entry<String, List<String>>) iter.next();
+            Map.Entry<String, List<Object>> filter = (Map.Entry<String, List<Object>>) iter.next();
             List<String> entries = new ArrayList<>();
             filter.getValue().forEach(e -> entries.add(String.format("%s=%s", filter.getKey(), e)));
             if (entries.size() > 1) {
@@ -83,6 +88,11 @@ public class FacetFilterUtils {
         }
 
         return query.toString();
+    }
+
+    public static FacetFilter createMultiFacetFilter(Map<String, List<Object>> allRequestParams) {
+        MultiValueMap<String, Object> requestParams = new LinkedMultiValueMap<>(allRequestParams);
+        return createMultiFacetFilter(requestParams);
     }
 
     public static FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
@@ -113,7 +123,7 @@ public class FacetFilterUtils {
                 );
             }
             Map<String, Object> multiFilter = new HashMap<>();
-            multiFilter.put("multi-filter", allRequestParams);
+            multiFilter.put(MULTI_FILTER, allRequestParams);
             facetFilter.setFilter(multiFilter);
         }
         return facetFilter;

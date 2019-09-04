@@ -12,11 +12,13 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ServiceInterface;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
+import eu.einfracentral.service.SearchServiceEIC;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -26,10 +28,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -62,6 +65,41 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Autowired
     private AnalyticsService analyticsService;
+
+    @Autowired
+    private SearchServiceEIC searchServiceEIC;
+
+    private List<String> browseBy;
+    private Map<String, String> labels;
+
+    @PostConstruct
+    void initLabels() {
+        resourceType = resourceTypeService.getResourceType(getResourceType());
+        Set<String> browseSet = new HashSet<>();
+        Map<String, Set<String>> sets = new HashMap<>();
+        labels = new HashMap<>();
+        labels.put("resourceType", "Resource Type");
+        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
+            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
+            labels.put(f.getName(), f.getLabel());
+            if (f.getLabel() != null) {
+                sets.get(f.getResourceType().getName()).add(f.getName());
+            }
+        }
+        boolean flag = true;
+        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
+            if (flag) {
+                browseSet.addAll(entry.getValue());
+                flag = false;
+            } else {
+                browseSet.retainAll(entry.getValue());
+            }
+        }
+        browseBy = new ArrayList<>();
+        browseBy.addAll(browseSet);
+        browseBy.add("resourceType");
+        logger.info("Generated generic service for " + getResourceType() + "[" + getClass().getSimpleName() + "]");
+    }
 
     @Override
     public String getResourceType() {
@@ -124,14 +162,15 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         if (infraService.getId() == null) {
             infraService.setId(createServiceId(infraService));
         }
+        // if service version is empty set it null
+        if ("".equals(infraService.getVersion())) {
+            infraService.setVersion(null);
+        }
         synchronizerService.syncAdd(infraService);
         if (exists(infraService)) {
             throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
 
-        if ("".equals(infraService.getVersion())) {
-            infraService.setVersion(null);
-        }
         prettifyServiceTextFields(infraService, ",");
 
         String serialized;
@@ -146,6 +185,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
+        // if service version is empty set it null
+        if ("".equals(infraService.getVersion())) {
+            infraService.setVersion(null);
+        }
         Resource existing = getResource(infraService.getId(), infraService.getVersion());
         if (existing == null) {
             throw new ResourceNotFoundException(
@@ -154,9 +197,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
         synchronizerService.syncUpdate(infraService);
 
-        if ("".equals(infraService.getVersion())) {
-            infraService.setVersion(null);
-        }
         prettifyServiceTextFields(infraService, ",");
 
         existing.setPayload(serialize(infraService));
@@ -302,38 +342,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
-    @Deprecated
-    @Override
-    public Map<String, Service> getAllVersionsHistory(String serviceId) {
-        Map<String, Service> history = new TreeMap<>();
-
-        // get all resources with the specified Service id
-        List<Resource> resources = getResourcesWithServiceId(serviceId);
-
-        // for each resource (InfraService), get its versions
-        if (resources != null) {
-            for (Resource resource : resources) {
-                List<Version> versions = versionService.getVersionsByResource(resource.getId());
-                for (Version version : versions) {
-                    Resource tempResource = version.getResource();
-                    tempResource.setPayload(version.getPayload());
-                    InfraService service = deserialize(tempResource);
-                    if (service != null) {
-                        try {
-                            SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-                            Date date = new Date(Long.parseLong(service.getServiceMetadata().getModifiedAt()));
-                            history.put(sf.format(date), service);
-                        } catch (NullPointerException e) {
-                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
-                        }
-                    }
-                }
-            }
-        }
-
-        return history;
-    }
-
     @Override
     public Service getVersionHistory(String serviceId, String versionId) {
         List<Resource> resources = getResourcesWithServiceId(serviceId);
@@ -360,7 +368,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         }
     }
 
-    public String serialize(InfraService infraService) {
+    private String serialize(InfraService infraService) {
         String serialized;
         serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
         return serialized;
@@ -375,7 +383,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     private boolean exists(InfraService infraService) {
-        if (infraService.getVersion() != null){
+        if (infraService.getVersion() != null) {
             return getResource(infraService.getId(), infraService.getVersion()) != null;
         }
         return getResource(infraService.getId(), null) != null;
@@ -492,20 +500,21 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
         Browsing<InfraService> services;
 
-        if (ff.getFilter() != null && ff.getFilter().get("multi-filter") != null) {
-            services = getServicesWithCorrectFacets(ff);
-        } else {
-            // Return all services if user enters blank keyword on search
-            if (StringUtils.isBlank(ff.getKeyword())) {
-                ff.setKeyword("");
-            }
-            services = getResults(ff);
-        }
+//        if (ff.getFilter() != null && ff.getFilter().get(FacetFilterUtils.MULTI_FILTER) != null) {
+//            services = getServicesWithCorrectFacets(ff);
+//        } else {
+//            // Return all services if user enters blank keyword on search
+//            if (StringUtils.isBlank(ff.getKeyword())) {
+//                ff.setKeyword("");
+//            }
+        services = getResults(ff);
+//        }
 
         services.setFacets(facetLabelService.createLabels(services.getFacets()));
         return services;
     }
 
+    @Deprecated
     // Gets all Services abiding by the specific FacetFilter (filters & keywords)
     private Browsing<InfraService> getServicesWithCorrectFacets(FacetFilter ff) {
         List<Facet> serviceFacets;
@@ -516,7 +525,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         String searchKeyword = ff.getKeyword();
 
         // retrieve filters from FacetFilter object
-        Map<String, List<String>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
+        Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
 
         // create a query based on the filters and the search keywords
         String searchQuery = FacetFilterUtils.createQuery(allFilters, searchKeyword);
@@ -528,8 +537,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Browsing<InfraService> services = cqlQuery(ff);
         serviceFacets = services.getFacets();
 
-        for (Map.Entry<String, List<String>> filter : allFilters.entrySet()) {
-            Map<String, List<String>> someFilters = new HashMap<>(allFilters);
+        for (Map.Entry<String, List<Object>> filter : allFilters.entrySet()) {
+            Map<String, List<Object>> someFilters = new HashMap<>(allFilters);
 
             someFilters.remove(filter.getKey());
 
@@ -554,6 +563,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     }
 
+    @Deprecated
     private List<Facet> getServiceFacets(FacetFilter ff) {
         return cqlQuery(ff).getFacets();
     }
@@ -717,4 +727,55 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return richServices;
     }
 
+    @Override
+    protected Browsing<InfraService> getResults(FacetFilter filter) {
+        Browsing<InfraService> browsing;
+        filter.setResourceType(getResourceType());
+        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+
+        browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
+        return browsing;
+    }
+
+    private List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
+        ff.setQuantity(0);
+
+        Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
+
+        for (Map.Entry<String, List<Object>> filter : allFilters.entrySet()) {
+            Map<String, List<Object>> someFilters = new HashMap<>(allFilters);
+
+            if ("latest".equals(filter.getKey()) || "active".equals(filter.getKey())) {
+                continue;
+            }
+            someFilters.remove(filter.getKey());
+
+            FacetFilter facetFilter = FacetFilterUtils.createMultiFacetFilter(someFilters);
+            facetFilter.setResourceType(getResourceType());
+            facetFilter.setBrowseBy(ff.getBrowseBy());
+            List<Facet> facetsCategory = convertToBrowsingEIC(searchServiceEIC.search(facetFilter)).getFacets();
+
+            for (Facet facet : serviceFacets) {
+                if (facet.getField().equals(filter.getKey())) {
+                    for (Facet facetCategory : facetsCategory) {
+                        if (facetCategory.getField().equals(filter.getKey())) {
+                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        return serviceFacets;
+    }
+
+    private Browsing<InfraService> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
+        List<InfraService> results = paging.getResults()
+                .parallelStream()
+                .map(res -> parserPool.deserialize(res, typeParameterClass))
+                .collect(Collectors.toList());
+        return new Browsing<>(paging, results, labels);
+    }
 }
