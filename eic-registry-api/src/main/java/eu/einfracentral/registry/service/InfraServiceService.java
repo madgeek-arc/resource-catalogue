@@ -30,14 +30,6 @@ public interface InfraServiceService<T, R extends Service> extends ServiceInterf
     Paging<ServiceHistory> getHistory(String id);
 
     /**
-     * Get the History of all versions of the InfraService with the specified id.
-     *
-     * @param id
-     * @return
-     */
-    Map<String, Service> getAllVersionsHistory(String id);
-
-    /**
      * Get the History of a specific resource version of the InfraService with the specified id.
      *
      * @param serviceId

@@ -245,19 +245,6 @@ public class ServiceController {
         return ResponseEntity.ok(history);
     }
 
-    @Deprecated
-//    @ApiIgnore
-//    @ApiOperation(value = "Get all modifications of a specific Service in chronological order, providing the Service id.")
-    @RequestMapping(path = {"allVersionHistory/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Map<String, Service>> getAllVersionsHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Map<String, Service> allVersionHistory = infraService.getAllVersionsHistory(id);
-        Map<String, Service> versions = new TreeMap<>();
-        for (Map.Entry<String, Service> version : allVersionHistory.entrySet()) {
-            versions.put(version.getKey(), new Service(version.getValue()));
-        }
-        return ResponseEntity.ok(versions);
-    }
-
 //    @ApiIgnore
 //    @ApiOperation(value = "Get all modifications of a specific Service, providing the Service id and the resource Version id.")
     @RequestMapping(path = {"history/{serviceId}/{versionId}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
