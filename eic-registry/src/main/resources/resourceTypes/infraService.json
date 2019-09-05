@@ -146,6 +146,48 @@
       "name": "latest",
       "path": "//*[local-name()='latest']/text()",
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "description",
+      "path": "//*[local-name()='description']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "tagline",
+      "path": "//*[local-name()='tagline']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "user_value",
+      "path": "//*[local-name()='userValue']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "user_base",
+      "path": "//*[local-name()='userBase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "use_cases",
+      "path": "//*[local-name()='useCase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "tags",
+      "path": "//*[local-name()='tag']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "owner_name",
+      "path": "//*[local-name()='ownerName']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
