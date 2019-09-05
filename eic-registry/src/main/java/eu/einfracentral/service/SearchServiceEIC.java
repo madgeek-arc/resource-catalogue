@@ -31,7 +31,6 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
 
     @Override
     public BoolQueryBuilder createQueryBuilder(FacetFilter filter) {
-        logger.info("My LOG from searchService");
         BoolQueryBuilder qBuilder = new BoolQueryBuilder();
 
         // retrieve filters from FacetFilter object
