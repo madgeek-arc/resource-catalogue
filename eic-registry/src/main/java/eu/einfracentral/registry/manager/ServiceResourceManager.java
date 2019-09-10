@@ -146,7 +146,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         filter.setBrowseBy(orderedBrowseBy);
 
-//        filter.setResourceType(getResourceType());
+        filter.setResourceType(getResourceType());
 //        getMatchingServices(filter).getFacets();
         return getMatchingServices(filter);
     }
@@ -742,23 +742,27 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
 
-        for (Map.Entry<String, List<Object>> filter : allFilters.entrySet()) {
-            Map<String, List<Object>> someFilters = new HashMap<>(allFilters);
+        List<String> reverseOrderedKeys = new LinkedList<>(allFilters.keySet());
+        Collections.reverse(reverseOrderedKeys);
 
-            if ("latest".equals(filter.getKey()) || "active".equals(filter.getKey())) {
+        for (String filterKey : reverseOrderedKeys) {
+            Map<String, List<Object>> someFilters = new LinkedHashMap<>(allFilters);
+
+            // if last filter is "latest" or "active" continue to next iteration
+            if ("latest".equals(filterKey) || "active".equals(filterKey)) {
                 continue;
             }
-            someFilters.remove(filter.getKey());
+            someFilters.remove(filterKey);
 
             FacetFilter facetFilter = FacetFilterUtils.createMultiFacetFilter(someFilters);
             facetFilter.setResourceType(getResourceType());
-            facetFilter.setBrowseBy(ff.getBrowseBy());
+            facetFilter.setBrowseBy(Collections.singletonList(filterKey));
             List<Facet> facetsCategory = convertToBrowsingEIC(searchServiceEIC.search(facetFilter)).getFacets();
 
             for (Facet facet : serviceFacets) {
-                if (facet.getField().equals(filter.getKey())) {
+                if (facet.getField().equals(filterKey)) {
                     for (Facet facetCategory : facetsCategory) {
-                        if (facetCategory.getField().equals(filter.getKey())) {
+                        if (facetCategory.getField().equals(facet.getField())) {
                             serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
                             break;
                         }
@@ -766,6 +770,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                     break;
                 }
             }
+            break;
         }
 
         return serviceFacets;

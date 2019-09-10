@@ -21,8 +21,8 @@ public class FacetFilterUtils {
 
     // Gets all given filters
     public static Map<String, List<Object>> getFacetFilterFilters(FacetFilter ff) {
-        Map<String, Object> filters = new HashMap<>(ff.getFilter());
-        Map<String, List<Object>> allFilters = new HashMap<>();
+        Map<String, Object> filters = new LinkedHashMap<>(ff.getFilter());
+        Map<String, List<Object>> allFilters = new LinkedHashMap<>();
 
         // check if a MultiValueMap filter exists inside the filter
         if (filters.get(MULTI_FILTER) != null) {
@@ -122,7 +122,7 @@ public class FacetFilterUtils {
                                 .collect(Collectors.toList()))
                 );
             }
-            Map<String, Object> multiFilter = new HashMap<>();
+            Map<String, Object> multiFilter = new LinkedHashMap<>();
             multiFilter.put(MULTI_FILTER, allRequestParams);
             facetFilter.setFilter(multiFilter);
         }
