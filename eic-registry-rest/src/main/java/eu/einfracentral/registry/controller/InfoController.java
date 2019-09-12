@@ -10,7 +10,6 @@ import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 //@ApiIgnore
 @RestController
@@ -40,7 +38,7 @@ public class InfoController {
         this.providerService = provider;
     }
 
-//    @ApiOperation(value = "Get Info about #SPs, #Services etc.")
+    //    @ApiOperation(value = "Get Info about #SPs, #Services etc.")
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@ApiIgnore Authentication authentication) {
         Map<Object, Object> servicesInfo = new HashMap<>();
@@ -50,6 +48,7 @@ public class InfoController {
         servicesInfo.put("providers", providerService.getAll(ff, authentication).getTotal());
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
+        servicesInfo.put("serviceEntries", infraServices.getTotal());
 
         int aggregatedServiceCount = infraServices.getResults()
                 .stream()
