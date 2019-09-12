@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.Category;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -192,12 +193,35 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
+    @RequestMapping(path = "/rich/by/supercategory", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<RichService>> getRichSuperCategory(@RequestParam String supercategory, @ApiIgnore Authentication auth) {
+
+        List<RichService> results = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("active", "true");
+        ff.addFilter("latest", "true");
+        ff.setQuantity(1000);
+        Paging<RichService> services = infraService.getRichServices(ff, auth);
+        for (RichService service : services.getResults()){
+            for (Category category : service.getCategories()){
+                if (category.getSuperCategory().getId().equals(supercategory) && !results.contains(service)){
+                    results.add(service);
+                }
+            }
+        }
+        services.setTotal(results.size());
+        services.setTo(results.size()-1);
+
+        return ResponseEntity.ok(new Paging<>(services.getTotal(), services.getFrom(), services.getTo(), results, services.getFacets()));
+    }
+
+
     @ApiOperation(value = "Get a list of Services based on a set of ids.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
     })
     @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> getSomeServices(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(
                 infraService.getByIds(auth, ids) // FIXME: create method that returns Services instead of RichServices
                         .stream().map(RichService::getService).collect(Collectors.toList()));
