@@ -112,17 +112,8 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     }
 
     @ApiOperation(value = "Returns a tree structure of Categories")
-    @RequestMapping(path = "vocabularyTree", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<VocabularyTree> getVocabularyTree(@RequestParam("type") Vocabulary.Type type) {
+    @RequestMapping(path = "vocabularyTree/{type}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns a tree structure of Scientific Domains")
-    @RequestMapping(path = "scientificDomainsTree", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Vocabulary>> getScientificDomainTree(@RequestParam Vocabulary.Type type) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("vocabulary_id", type.getKey());
-        return new ResponseEntity<>(vocabularyService.getAll(ff, null), HttpStatus.OK);
     }
 }
