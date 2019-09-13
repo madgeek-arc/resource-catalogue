@@ -198,10 +198,8 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-
-    @ApiIgnore
-    @RequestMapping(path = "/childsFromParent", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public List<String> getChildsFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
+    @RequestMapping(path = "/childrenFromParent", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
 
         List<String> childIds = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
