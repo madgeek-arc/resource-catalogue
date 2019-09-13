@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.Category;
+import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -44,14 +46,17 @@ public class ServiceController {
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
     private MeasurementService<Measurement, Authentication> measurementService;
+    private VocabularyService vocabularyService;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<Provider, Authentication> provider,
-                      MeasurementService<Measurement, Authentication> measurementService) {
+                      MeasurementService<Measurement, Authentication> measurementService,
+                      VocabularyService vocabularyService) {
         this.infraService = service;
         this.providerService = provider;
         this.measurementService = measurementService;
+        this.vocabularyService = vocabularyService;
     }
 
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
@@ -193,26 +198,44 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-    @RequestMapping(path = "/rich/by/supercategory", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<RichService>> getRichSuperCategory(@RequestParam String supercategory, @ApiIgnore Authentication auth) {
 
-        List<RichService> results = new ArrayList<>();
+    @ApiIgnore
+    @RequestMapping(path = "/childsFromParent", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public List<String> getChildsFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
+
+        List<String> childIds = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         ff.setQuantity(1000);
-        Paging<RichService> services = infraService.getRichServices(ff, auth);
-        for (RichService service : services.getResults()){
-            for (Category category : service.getCategories()){
-                if (category.getSuperCategory().getId().equals(supercategory) && !results.contains(service)){
-                    results.add(service);
-                }
+        List<RichService> services = infraService.getRichServices(ff, auth).getResults();
+        for (RichService service : services){
+            switch (type){
+                case "SUPERCATEGORY":
+                    for (Category category : service.getCategories()){
+                        if (category.getSuperCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())){
+                            childIds.add(category.getSubCategory().getId());
+                        }
+                    }
+                    break;
+                case "CATEGORY":
+                    for (Category category : service.getCategories()){
+                        if (category.getCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())){
+                            childIds.add(category.getSubCategory().getId());
+                        }
+                    }
+                    break;
+                case "SCIENTIFIC_DOMAIN":
+                    for (ScientificDomain domain : service.getDomains()){
+                        if (domain.getDomain().getId().equals(parent) && !childIds.contains(domain.getSubdomain().getId())){
+                            childIds.add(domain.getSubdomain().getId());
+                        }
+                    }
+                    break;
             }
         }
-        services.setTotal(results.size());
-        services.setTo(results.size()-1);
 
-        return ResponseEntity.ok(new Paging<>(services.getTotal(), services.getFrom(), services.getTo(), results, services.getFacets()));
+        return childIds;
     }
 
 
