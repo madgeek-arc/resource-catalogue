@@ -3,13 +3,13 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,21 +38,31 @@ public class InfoController {
         this.providerService = provider;
     }
 
-//    @ApiOperation(value = "Get Info about #SPs, #Services etc.")
+    //    @ApiOperation(value = "Get Info about #SPs, #Services etc.")
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@ApiIgnore Authentication authentication) {
         Map<Object, Object> servicesInfo = new HashMap<>();
         FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
         ff.addFilter("active", "true");
-        servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
+        servicesInfo.put("providers", providerService.getAll(ff, authentication).getTotal());
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
-        servicesInfo.put("services", (long) infraServices.getTotal());
+        servicesInfo.put("serviceEntries", infraServices.getTotal());
+
+        int aggregatedServiceCount = infraServices.getResults()
+                .stream()
+                .map(Service::getAggregatedServices)
+                .map(value -> value == null ? 1 : value)
+                .mapToInt(Integer::intValue)
+                .sum();
+        servicesInfo.put("services", aggregatedServiceCount);
+
         for (Facet f : infraServices.getFacets()) {
             if (f.getField().equals("resourceType")) {
                 continue;
             }
-            servicesInfo.putIfAbsent(f.getField(), (long) f.getValues().size());
+            servicesInfo.putIfAbsent(f.getField(), f.getValues().size());
         }
         return ResponseEntity.ok(servicesInfo);
     }
