@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.dto.VocabularyTree;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Browsing;
@@ -19,6 +20,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +119,45 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             logger.info("Deleting Vocabulary " + vocabulary.getName());
             delete(vocabulary);
         }
+    }
+
+    @Override
+    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: replace with recursive method
+        VocabularyTree root = new VocabularyTree();
+        root.setVocabulary(null);
+        Map<String, List<Vocabulary>> vocabularies = getBy("parent_id");
+        List<VocabularyTree> superTreeList = new ArrayList<>();
+        List<Vocabulary> superVocabularies = getByType(type);
+        if (superVocabularies != null) {
+            for (Vocabulary superVocabulary : superVocabularies) {
+                VocabularyTree superTree = new VocabularyTree();
+                superTree.setVocabulary(superVocabulary);
+                List<VocabularyTree> treeList = new ArrayList<>();
+                List<Vocabulary> vocs = vocabularies.get(superVocabulary.getId());
+                if (vocs != null) {
+                    for (Vocabulary voc : vocs) {
+                        VocabularyTree tree = new VocabularyTree();
+                        tree.setVocabulary(voc);
+                        List<VocabularyTree> subTreeList = new ArrayList<>();
+                        List<Vocabulary> subVocabularies = vocabularies.get(voc.getId());
+                        if (subVocabularies != null) {
+                            for (Vocabulary subVocabulary : subVocabularies) {
+                                VocabularyTree subTree = new VocabularyTree();
+                                subTree.setVocabulary(subVocabulary);
+//                    subTree.setChildren(null);
+                                subTreeList.add(subTree);
+                            }
+                        }
+                        tree.setChildren(subTreeList);
+                        treeList.add(tree);
+                    }
+                }
+                superTree.setChildren(treeList);
+                superTreeList.add(superTree);
+            }
+        }
+        root.setChildren(superTreeList);
+        return root;
     }
 
     @Override

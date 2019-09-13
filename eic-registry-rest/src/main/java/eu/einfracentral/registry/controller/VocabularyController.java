@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.dto.VocabularyTree;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -111,22 +112,9 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     }
 
     @ApiOperation(value = "Returns a tree structure of Categories")
-    @RequestMapping(path = "categoriesTree", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public @ResponseBody ResponseEntity<Map<Vocabulary, List<Map<Vocabulary, List<Vocabulary>>>>> getCategoriesTree() {
-        Map<String, List<Vocabulary>> vocabularies = vocabularyService.getBy("parent_id");
-        Map<Vocabulary, List<Map<Vocabulary, List<Vocabulary>>>> categoriesTree = new HashMap<>();
-        for (Vocabulary supercategory : vocabularyService.getByType(Vocabulary.Type.SUPERCATEGORY)) {
-            categoriesTree.put(supercategory, new ArrayList<>());
-            for (Vocabulary category : vocabularies.get(supercategory.getId())) {
-                Map<Vocabulary, List<Vocabulary>> categories = new HashMap<>();
-                categories.put(category, new ArrayList<>());
-                for (Vocabulary subcategory : vocabularies.get(category.getId())) {
-                    categories.get(category).add(subcategory);
-                }
-                categoriesTree.get(supercategory).add(categories);
-            }
-        }
-        return new ResponseEntity<>(categoriesTree, HttpStatus.OK);
+    @RequestMapping(path = "vocabularyTree", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<VocabularyTree> getVocabularyTree(@RequestParam("type") Vocabulary.Type type) {
+        return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns a tree structure of Scientific Domains")
