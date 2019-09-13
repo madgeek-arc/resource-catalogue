@@ -277,42 +277,12 @@ public class Service implements Identifiable {
     @ApiModelProperty(position = 34, example = "'Service Funding Sources' (optional)")
     private String funding;
 
-    //Level Targets and Performance Information
-//    /**
-//     * Availability, i.e., the fraction of a time period that an item is in a condition to perform its intended function upon demand (“available” indicates that an item is in this condition); availability is often expressed as a probability.
-//     */
-//    @JsonIgnore
-//    @XmlElement
-//    private String availability;
-//
-//    /**
-//     * Reliability, i.e., the probability that an item will function without failure under stated conditions for a speciﬁed amount of time. “Stated conditions” indicates perquisite conditions external to the item being considered. For example, a stated condition for a supercomputer might be that power and cooling must be available - thus a failure of the power or cooling systems would not be considered a failure of the supercomputer.
-//     */
-//    @JsonIgnore
-//    @XmlElement
-//    private String reliability;
-//
-//    /**
-//     * Serviceability, i.e., the probability that an item will be retained in, or restored to, a condition to per-form its intended function within a speciﬁed period of time Durability, i.e., the ability of a physical product to remain functional, without requiring excessive maintenance or repair, when faced with the challenges of normal operation over its design lifetime.
-//     */
-//    @JsonIgnore
-//    @XmlElement
-//    private String serviceability;
-//
-//    /**
-//     * Other Service Level Target or Performance Infdicator
-//     */
-//    @JsonIgnore
-//    @XmlElement
-//    private String performanceIndicatorName;
-//
-//    /**
-//     * Indicator Value Measurement of Other Indicator
-//     */
-//    @JsonIgnore
-//    @XmlElement
-//    private String performanceIndicatorValue;
-
+    /**
+     * Number of aggregated services.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 35, example = "'Service Funding Sources' (optional)")
+    private Integer aggregatedServices = 1;
 
 
     public Service() {
@@ -365,11 +335,7 @@ public class Service implements Identifiable {
         this.serviceLevelAgreement = service.getServiceLevelAgreement();
         this.termsOfUse = service.getTermsOfUse();
         this.funding = service.getFunding();
-//        this.availability = service.getAvailability();
-//        this.reliability = service.getReliability();
-//        this.serviceability = service.getServiceability();
-//        this.performanceIndicatorName = service.getPerformanceIndicatorName();
-//        this.performanceIndicatorValue = service.getPerformanceIndicatorValue();
+        this.aggregatedServices = service.getAggregatedServices();
     }
 
     @Override
@@ -409,7 +375,8 @@ public class Service implements Identifiable {
                 ", price=" + price +
                 ", serviceLevelAgreement=" + serviceLevelAgreement +
                 ", termsOfUse=" + termsOfUse +
-                ", funding='" + funding + '\'' +
+                ", funding='" + funding +
+                ", aggregated_services='" + aggregatedServices + '\'' +
                 '}';
     }
 
@@ -452,7 +419,8 @@ public class Service implements Identifiable {
                 Objects.equals(price, service.price) &&
                 Objects.equals(serviceLevelAgreement, service.serviceLevelAgreement) &&
                 stringListsAreEqual(termsOfUse, service.termsOfUse) &&
-                Objects.equals(funding, service.funding);
+                Objects.equals(funding, service.funding) &&
+                Objects.equals(aggregatedServices, service.aggregatedServices);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -476,7 +444,7 @@ public class Service implements Identifiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, url, name, tagline, description, options, targetUsers, userValue, userBase, symbol, multimediaURL, providers, version, lastUpdate, changeLog, validFor, lifeCycleStatus, trl, category, subcategory, places, languages, tags, requiredServices, relatedServices, order, requests, helpdesk, userManual, trainingInformation, feedback, price, serviceLevelAgreement, termsOfUse, funding);
+        return Objects.hash(id, url, name, tagline, description, options, targetUsers, userValue, userBase, symbol, multimediaURL, providers, version, lastUpdate, changeLog, validFor, lifeCycleStatus, trl, category, subcategory, places, languages, tags, requiredServices, relatedServices, order, requests, helpdesk, userManual, trainingInformation, feedback, price, serviceLevelAgreement, termsOfUse, funding, aggregatedServices);
     }
 
     @Override
@@ -763,44 +731,11 @@ public class Service implements Identifiable {
         this.funding = funding;
     }
 
-//    public String getAvailability() {
-//        return availability;
-//    }
-//
-//    public void setAvailability(String availability) {
-//        this.availability = availability;
-//    }
-//
-//    public String getReliability() {
-//        return reliability;
-//    }
-//
-//    public void setReliability(String reliability) {
-//        this.reliability = reliability;
-//    }
-//
-//    public String getServiceability() {
-//        return serviceability;
-//    }
-//
-//    public void setServiceability(String serviceability) {
-//        this.serviceability = serviceability;
-//    }
-//
-//    public String getPerformanceIndicatorName() {
-//        return performanceIndicatorName;
-//    }
-//
-//    public void setPerformanceIndicatorName(String performanceIndicatorName) {
-//        this.performanceIndicatorName = performanceIndicatorName;
-//    }
-//
-//    public String getPerformanceIndicatorValue() {
-//        return performanceIndicatorValue;
-//    }
-//
-//    public void setPerformanceIndicatorValue(String performanceIndicatorValue) {
-//        this.performanceIndicatorValue = performanceIndicatorValue;
-//    }
+    public Integer getAggregatedServices() {
+        return aggregatedServices;
+    }
 
+    public void setAggregatedServices(Integer aggregatedServices) {
+        this.aggregatedServices = aggregatedServices;
+    }
 }
