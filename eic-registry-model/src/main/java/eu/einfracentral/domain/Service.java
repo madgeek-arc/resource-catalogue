@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -280,9 +281,37 @@ public class Service implements Identifiable {
     /**
      * Number of aggregated services.
      */
-    @XmlElement
-    @ApiModelProperty(position = 35, example = "'Service Funding Sources' (optional)")
+    @XmlElement(required = false, defaultValue = "1")
+    @ApiModelProperty(position = 35, example = "(default = 1)")
     private Integer aggregatedServices = 1;
+
+    /**
+     * Number of publications.
+     */
+    @XmlElement(required = false, defaultValue = "0")
+    @ApiModelProperty(position = 36, example = "(default = 0)")
+    private Integer publications = 0;
+
+    /**
+     * Number of Data(sets).
+     */
+    @XmlElement(required = false, defaultValue = "0")
+    @ApiModelProperty(position = 37, example = "(default = 0)")
+    private Integer datasets = 0;
+
+    /**
+     * Number of Software/Applications.
+     */
+    @XmlElement(required = false, defaultValue = "0")
+    @ApiModelProperty(position = 38, example = "(default = 0)")
+    private Integer softwareApplications = 0;
+
+    /**
+     * Number of other products.
+     */
+    @XmlElement(required = false, defaultValue = "0")
+    @ApiModelProperty(position = 39, example = "(default = 0)")
+    private Integer otherProducts = 0;
 
 
     public Service() {
@@ -336,6 +365,10 @@ public class Service implements Identifiable {
         this.termsOfUse = service.getTermsOfUse();
         this.funding = service.getFunding();
         this.aggregatedServices = service.getAggregatedServices();
+        this.publications = service.getPublications();
+        this.datasets = service.getDatasets();
+        this.softwareApplications = service.getSoftwareApplications();
+        this.otherProducts = service.getOtherProducts();
     }
 
     @Override
@@ -376,7 +409,11 @@ public class Service implements Identifiable {
                 ", serviceLevelAgreement=" + serviceLevelAgreement +
                 ", termsOfUse=" + termsOfUse +
                 ", funding='" + funding +
-                ", aggregated_services='" + aggregatedServices + '\'' +
+                ", aggregated_services='" + aggregatedServices +
+                ", publications='" + publications +
+                ", datasets='" + datasets +
+                ", softwareApplications='" + softwareApplications +
+                ", otherProducts='" + otherProducts + '\'' +
                 '}';
     }
 
@@ -420,7 +457,11 @@ public class Service implements Identifiable {
                 Objects.equals(serviceLevelAgreement, service.serviceLevelAgreement) &&
                 stringListsAreEqual(termsOfUse, service.termsOfUse) &&
                 Objects.equals(funding, service.funding) &&
-                Objects.equals(aggregatedServices, service.aggregatedServices);
+                Objects.equals(aggregatedServices, service.aggregatedServices) &&
+                Objects.equals(publications, service.publications) &&
+                Objects.equals(datasets, service.datasets) &&
+                Objects.equals(softwareApplications, service.softwareApplications) &&
+                Objects.equals(otherProducts, service.otherProducts);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -444,7 +485,11 @@ public class Service implements Identifiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, url, name, tagline, description, options, targetUsers, userValue, userBase, symbol, multimediaURL, providers, version, lastUpdate, changeLog, validFor, lifeCycleStatus, trl, category, subcategory, places, languages, tags, requiredServices, relatedServices, order, requests, helpdesk, userManual, trainingInformation, feedback, price, serviceLevelAgreement, termsOfUse, funding, aggregatedServices);
+        return Objects.hash(id, url, name, tagline, description, options, targetUsers, userValue, userBase, symbol,
+                multimediaURL, providers, version, lastUpdate, changeLog, validFor, lifeCycleStatus, trl, category,
+                subcategory, places, languages, tags, requiredServices, relatedServices, order, requests, helpdesk,
+                userManual, trainingInformation, feedback, price, serviceLevelAgreement, termsOfUse, funding,
+                aggregatedServices, publications, datasets, softwareApplications, otherProducts);
     }
 
     @Override
@@ -737,5 +782,37 @@ public class Service implements Identifiable {
 
     public void setAggregatedServices(Integer aggregatedServices) {
         this.aggregatedServices = aggregatedServices;
+    }
+
+    public Integer getPublications() {
+        return publications;
+    }
+
+    public void setPublications(Integer publications) {
+        this.publications = publications;
+    }
+
+    public Integer getDatasets() {
+        return datasets;
+    }
+
+    public void setDatasets(Integer datasets) {
+        this.datasets = datasets;
+    }
+
+    public Integer getSoftwareApplications() {
+        return softwareApplications;
+    }
+
+    public void setSoftwareApplications(Integer softwareApplications) {
+        this.softwareApplications = softwareApplications;
+    }
+
+    public Integer getOtherProducts() {
+        return otherProducts;
+    }
+
+    public void setOtherProducts(Integer otherProducts) {
+        this.otherProducts = otherProducts;
     }
 }
