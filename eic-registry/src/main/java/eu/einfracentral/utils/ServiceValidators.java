@@ -261,4 +261,36 @@ public class ServiceValidators {
             throw new ValidationException("max length for 'funding' is 1500 chars");
         }
     }
+
+    public void validateExtraFields(InfraService service) {
+        if (service.getAggregatedServices() == null) {
+            service.setAggregatedServices(1);
+        } else if (service.getAggregatedServices() < 1) {
+            throw new ValidationException("Aggregated services cannot be less than 1");
+        }
+
+        if (service.getPublications() == null) {
+            service.setPublications(0);
+        } else if (service.getPublications() < 0) {
+            throw new ValidationException("Publications number cannot be negative");
+        }
+
+        if (service.getDatasets() == null) {
+            service.setDatasets(0);
+        } else if (service.getDatasets() < 0) {
+            throw new ValidationException("Data(sets) number cannot be negative");
+        }
+
+        if (service.getSoftwareApplications() == null) {
+            service.setSoftwareApplications(0);
+        } else if (service.getSoftwareApplications() < 0) {
+            throw new ValidationException("Software/Applications number cannot be negative");
+        }
+
+        if (service.getOtherProducts() == null) {
+            service.setOtherProducts(0);
+        } else if (service.getOtherProducts() < 0) {
+            throw new ValidationException("Other products number cannot be negative");
+        }
+    }
 }

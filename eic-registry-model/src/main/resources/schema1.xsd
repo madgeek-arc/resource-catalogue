@@ -116,6 +116,11 @@
 
   <xs:complexType name="service">
     <xs:sequence>
+      <xs:element default="1" minOccurs="0" name="aggregatedServices" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Number of aggregated services.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="category" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A named group of services that offer access to the same type of resource that is of interest to a customer/user.]]></xs:documentation>
@@ -124,6 +129,11 @@
       <xs:element minOccurs="0" name="changeLog" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A log of the service features added in the last and previous versions.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element default="0" minOccurs="0" name="datasets" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Number of Data(sets).]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="description" type="xs:string">
@@ -188,6 +198,11 @@
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the webpage to request the service from the service provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element default="0" minOccurs="0" name="otherProducts" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Number of other products.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="places">
         <xs:complexType>
           <xs:sequence>
@@ -206,6 +221,11 @@
             <xs:element maxOccurs="unbounded" minOccurs="0" name="provider" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
+      </xs:element>
+      <xs:element default="0" minOccurs="0" name="publications" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Number of publications.]]></xs:documentation>
+        </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="relatedServices">
         <xs:complexType>
@@ -229,6 +249,11 @@
       <xs:element name="serviceLevelAgreement" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[The Uniform Resource Locator (web address) to the information about the levels of performance that a service provider is expected to achieve.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element default="0" minOccurs="0" name="softwareApplications" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Number of Software/Applications.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="subcategory" type="xs:string">
