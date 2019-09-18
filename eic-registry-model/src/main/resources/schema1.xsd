@@ -15,6 +15,8 @@
 
   <xs:element name="provider" type="tns:provider"/>
 
+  <xs:element name="providerRequest" type="tns:providerRequest"/>
+
   <xs:element name="rangeValue" type="tns:rangeValue"/>
 
   <xs:element name="service" type="tns:service"/>
@@ -516,6 +518,15 @@
       <xs:element minOccurs="0" name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="surname" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="providerRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="date" type="xs:anySimpleType"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="message" type="xs:anyType"/>
+      <xs:element minOccurs="0" name="providerId" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
