@@ -1,14 +1,18 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ProviderRequestService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -61,6 +65,15 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         if (providerRequest.getProviderId() == null || providerRequest.getProviderId().equals("")) {
             throw new ValidationException("ProviderRequest's providerId cannot be 'null' or 'empty'");
         }
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<String> providerIds = new ArrayList<>();
+        for (Provider provider : providerManager.getAll(ff, null).getResults()){
+            providerIds.add(provider.getId());
+        }
+        if (!providerIds.contains(providerRequest.getProviderId())){
+            throw new ValidationException("Provider with id " +providerRequest.getProviderId()+ " does not exist.");
+        }
 
         // Validates ProviderRequest's date
         if (providerRequest.getDate() != null && "".equals(providerRequest.getDate().toString())) {
@@ -69,7 +82,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
         // Validates ProviderRequest's message
         if (providerRequest.getMessage() == null) {
-            throw new ValidationException("ProviderRequest's message cannot be 'null'");
+            throw new ValidationException("ProviderRequest's message cannot be null");
         }
 
         return null;
