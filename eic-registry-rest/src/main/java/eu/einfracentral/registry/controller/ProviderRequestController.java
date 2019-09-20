@@ -2,7 +2,6 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.registry.service.ProviderRequestService;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
