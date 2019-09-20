@@ -6,12 +6,6 @@
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
-    },
-    {
-      "multivalued": false,
-      "name": "provider",
-      "path": "//*[local-name()='providerId']/text()",
-      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
