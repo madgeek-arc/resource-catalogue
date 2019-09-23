@@ -1,7 +1,14 @@
 # eInfraCentral Catalogue #
 ###### What is this project about?
 
-- - -
+eInfraCentral platform, developed in the context of [eInfracentral EU project](http://einfracentral.eu/) is open sourced SW used for building and synchronizing electronic service catalogues from research infrastructures. It can be used by any research organization and research Infrastructure to publish, maintain a catalogue of services and offer added value functionality on top of service offerings.
+
+eInfracentral technology has been used for building the eInfraCentral catalogue (https://www.einfracentral.eu), the Catalogue of the European Open Science Cloud Portal (https://catalogue.eosc-portal.eu),  the catalogue of services of OpenAire infrastructure (http://catalogue.openaire.eu) and the catalogue of services of Research Infrastructres (http://www.catris.eu). 
+
+*Detailed specifications are available also at the developer section of the portal https://www.einfracentral.eu/developers*
+
+The eInfraCentral software is distributed under the [GPL 3.0](https://opensource.org/licenses/GPL-3.0) license.
+
 
 ## Local deployment:
 
