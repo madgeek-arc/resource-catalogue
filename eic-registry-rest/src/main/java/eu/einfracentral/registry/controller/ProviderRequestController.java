@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -84,6 +85,14 @@ public class ProviderRequestController extends ResourceController<ProviderReques
         logger.info("User " + auth.getName() + " deleted request with id " + providerRequest.getId() +
                        " for the Provider with id " + providerRequest.getProviderId());
         return new ResponseEntity<>(providerRequest, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Returns a list with all the requests made on a specific Provider.")
+    @RequestMapping(path = "allProviderRequests", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public List<ProviderRequest> getAllProviderRequests(@RequestParam String providerId, @ApiIgnore Authentication auth) {
+        return providerRequestService.getAllProviderRequests(providerId, auth);
+
     }
 
 }

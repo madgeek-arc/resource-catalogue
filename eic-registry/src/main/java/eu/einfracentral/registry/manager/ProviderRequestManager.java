@@ -59,6 +59,23 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         super.delete(providerRequest);
     }
 
+    public List<ProviderRequest> getAllProviderRequests (String providerId, Authentication auth){
+        List<ProviderRequest> ret = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<ProviderRequest> providerRequests = getAll(ff, auth).getResults();
+        for (ProviderRequest providerRequest : providerRequests){
+            if (providerRequest.getProviderId().equals(providerId)){
+                ret.add(providerRequest);
+            }
+        }
+        if (ret.isEmpty()){
+            throw new ValidationException("Provider with id " +providerId+ " does not exist.");
+        }
+
+        return ret;
+    }
+
     public ProviderRequest validate(ProviderRequest providerRequest) {
 
         // Validates ProviderRequest's providerId
