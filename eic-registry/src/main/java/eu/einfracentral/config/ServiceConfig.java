@@ -48,6 +48,8 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     @Value("${jms.prefix}")
     private String jmsPrefix;
 
+    @Value("${session.expiration.hours:4}")
+    private int sessionExpirationHours;
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
@@ -80,7 +82,9 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
     @Bean
     public SessionRepository sessionRepository() {
-        return new MapSessionRepository();
+        MapSessionRepository sessionRepository = new MapSessionRepository();
+//        sessionRepository.setDefaultMaxInactiveInterval(sessionExpirationHours * 60);
+        return sessionRepository;
     }
 
     @Bean
