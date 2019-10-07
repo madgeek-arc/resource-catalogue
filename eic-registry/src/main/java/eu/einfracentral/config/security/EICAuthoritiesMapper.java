@@ -85,7 +85,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                                 .stream()
                                 .filter(Objects::nonNull)
                                 .map(u -> {
-                                    if (u.getId() != null) {
+                                    if (u.getId() != null && !"".equals(u.getId())) {
                                         return u.getId();
                                     }
                                     return u.getEmail();
