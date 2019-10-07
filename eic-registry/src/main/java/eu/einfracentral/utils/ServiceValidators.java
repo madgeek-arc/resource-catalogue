@@ -17,10 +17,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 public class ServiceValidators {
@@ -254,6 +251,9 @@ public class ServiceValidators {
     public void validateOptions(InfraService service) {
         if (service.getOptions() != null) {
             for (ServiceOption option : service.getOptions()) {
+
+                // Create Option's id
+                option.setId(UUID.randomUUID().toString());
 
                 // Validate the Option's fields requirement
                 if (option.getId() == null || option.getId().equals("")) {
