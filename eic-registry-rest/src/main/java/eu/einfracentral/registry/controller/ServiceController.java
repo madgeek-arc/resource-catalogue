@@ -142,7 +142,7 @@ public class ServiceController {
         }
         this.measurementService.updateAll(s.getId(), measurements, auth);
 
-        return new ResponseEntity<>(s, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a version of revisions.")
