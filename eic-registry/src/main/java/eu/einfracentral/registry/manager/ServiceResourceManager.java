@@ -98,6 +98,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         browseBy = new ArrayList<>();
         browseBy.addAll(browseSet);
         browseBy.add("resourceType");
+        java.util.Collections.sort(browseBy);
         logger.info("Generated generic service for " + getResourceType() + "[" + getClass().getSimpleName() + "]");
     }
 
@@ -123,12 +124,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
-        List<String> browseBy = getBrowseBy();
-        java.util.Collections.sort(browseBy);
         List<String> orderedBrowseBy = new ArrayList<>();
 
-        //TODO: Ask Stefania for the order, when committed inform JB
-        //TODO: Do we need to return Supercategories, Categories and Domains as facets?
         //Order Service's facets as we like (+removed Service Name - no4)
         orderedBrowseBy.add(browseBy.get(11));   //no11 - Subcategories
         orderedBrowseBy.add(browseBy.get(8));    // no8 - Providers
@@ -147,7 +144,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         filter.setBrowseBy(orderedBrowseBy);
 
         filter.setResourceType(getResourceType());
-//        getMatchingServices(filter).getFacets();
         return getMatchingServices(filter);
     }
 
