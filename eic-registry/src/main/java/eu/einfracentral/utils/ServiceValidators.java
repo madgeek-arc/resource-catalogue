@@ -1,9 +1,6 @@
 package eu.einfracentral.utils;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ServiceOption;
-import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -99,13 +96,13 @@ public class ServiceValidators {
             if (!allVocabularies.containsKey(service.getPhase()))
                 throw new ValidationException(String.format("Phase '%s' does not exist.",
                         service.getPhase()));
-        } else throw new ValidationException("Field 'phase' is mandatory.");
+        }
 
         // Validate TRL
         if (service.getTrl() != null) {
             if (!allVocabularies.containsKey(service.getTrl()))
                 throw new ValidationException(String.format("TRL '%s' does not exist.", service.getTrl()));
-        } else throw new ValidationException("Field 'trl' is mandatory.");
+        }
 
         // Validate Scientific Subdomains
         if (service.getScientificSubdomains() == null || service.getScientificSubdomains().isEmpty())
@@ -289,6 +286,76 @@ public class ServiceValidators {
         }
     }
 
+    // Validate the correctness of Service Contacts.
+    public void validateContacts(InfraService service){
+        if (service.getContacts() == null || service.getContacts().isEmpty())
+            throw new ValidationException("Field 'contacts' is mandatory. You need to provide at least 1 contact.");
+        for (ServiceContact contact : service.getContacts()) {
+
+            // Validate the Contact's fields requirement
+            if (contact.getFirstName() == null || contact.getFirstName().equals("")) {
+                throw new ValidationException("field 'firstName' is mandatory");
+            }
+            if (contact.getLastName() == null || contact.getLastName().equals("")) {
+                throw new ValidationException("field 'lastName' is mandatory");
+            }
+            if (contact.getEmail() == null || contact.getEmail().equals("")) {
+                throw new ValidationException("field 'email' is mandatory");
+            }
+            if (contact.getTel() == null || contact.getTel().equals("")) {
+                throw new ValidationException("field 'tel' is mandatory");
+            }
+
+            // Validate max length of Contact's fields
+            if (contact.getFirstName().length() > FIELD_LENGTH_SMALL) {
+                throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
+            }
+            if (contact.getLastName().length() > FIELD_LENGTH_SMALL) {
+                throw new ValidationException("max length for 'lastName' is " + FIELD_LENGTH_SMALL + " chars");
+            }
+            if (contact.getTel().length() > FIELD_LENGTH_SMALL) {
+                throw new ValidationException("max length for 'tel' is " + FIELD_LENGTH_SMALL + " chars");
+            }
+            if (contact.getPosition().length() > FIELD_LENGTH_SMALL) {
+                throw new ValidationException("max length for 'position' is " + FIELD_LENGTH_SMALL + " chars");
+            }
+        }
+    }
+
+    // Validate the correctness of Service Aggregator Information
+    public void validateExtraFields(InfraService service) {
+        if (service.getAggregatedServices() == null) {
+            service.setAggregatedServices(1);
+        } else if (service.getAggregatedServices() < 1) {
+            throw new ValidationException("Aggregated services cannot be less than 1");
+        }
+        if (service.getPublications() == null) {
+            service.setPublications(0);
+        } else if (service.getPublications() < 0) {
+            throw new ValidationException("Publications number cannot be negative");
+        }
+        if (service.getDatasets() == null) {
+            service.setDatasets(0);
+        } else if (service.getDatasets() < 0) {
+            throw new ValidationException("Data(sets) number cannot be negative");
+        }
+        if (service.getSoftware() == null) {
+            service.setSoftware(0);
+        } else if (service.getSoftware() < 0) {
+            throw new ValidationException("Software number cannot be negative");
+        }
+        if (service.getApplications() == null) {
+            service.setApplications(0);
+        } else if (service.getApplications() < 0) {
+            throw new ValidationException("Applications number cannot be negative");
+        }
+        if (service.getOtherProducts() == null) {
+            service.setOtherProducts(0);
+        } else if (service.getOtherProducts() < 0) {
+            throw new ValidationException("Other products number cannot be negative");
+        }
+    }
+
     // Validate the max length of various variables (x10).
     public void validateMaxLength(InfraService service) {
         if (service.getTagline() != null && service.getTagline().length() > FIELD_LENGTH) {
@@ -365,14 +432,18 @@ public class ServiceValidators {
                 }
             }
         }
-        if (service.getOwnerName() != null && service.getOwnerName().length() > NAME_LENGTH) {
-            throw new ValidationException("max length for 'ownerName' is " + NAME_LENGTH + " chars");
-        }
-        if (service.getSupportName() != null && service.getSupportName().length() > NAME_LENGTH) {
-            throw new ValidationException("max length for 'supportName' is " + NAME_LENGTH + " chars");
-        }
-        if (service.getSecurityName() != null && service.getSecurityName().length() > NAME_LENGTH) {
-            throw new ValidationException("max length for 'securityName' is " + NAME_LENGTH + " chars");
+        if (service.getRelatedPlatforms() != null) {
+            if (service.getRelatedPlatforms().size() == 1 && "".equals(service.getRelatedPlatforms().get(0))) {
+                service.getRelatedPlatforms().remove(0);
+            }
+            for (String relatedPlatform : service.getRelatedPlatforms()) {
+                if (relatedPlatform != null && relatedPlatform.length() > FIELD_LENGTH_SMALL) {
+                    throw new ValidationException("max length for 'relatedPlatform' is " + FIELD_LENGTH_SMALL + " chars");
+                }
+                if (relatedPlatform == null || relatedPlatform.equals("")) {
+                    throw new ValidationException("One or more items of the relatedPlatforms list is null or empty");
+                }
+            }
         }
     }
 }
