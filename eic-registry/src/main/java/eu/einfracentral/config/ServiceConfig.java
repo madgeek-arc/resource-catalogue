@@ -5,10 +5,7 @@ import freemarker.template.TemplateExceptionHandler;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.session.MapSessionRepository;
@@ -26,14 +23,13 @@ import java.util.Objects;
 import java.util.Random;
 
 @Configuration
-@ComponentScan({
+@ComponentScan(value = {
         "eu.openminted.registry.core",
-        "eu.openminted.registry.core.service",
-        "eu.einfracentral.config",
         "eu.einfracentral.manager",
         "eu.einfracentral.registry.manager",
         "eu.einfracentral.utils",
         "eu.einfracentral.service"})
+@Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
 @EnableAsync
