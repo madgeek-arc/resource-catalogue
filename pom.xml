@@ -36,7 +36,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <logging.version>2.6.2</logging.version>
+        <logging.version>2.12.1</logging.version>
         <jackson.version.core>[2.9.9,)</jackson.version.core>
         <junit-toolbox.version>2.2</junit-toolbox.version>
         <registry-core.version>2.1.4-SNAPSHOT</registry-core.version>
@@ -107,6 +107,21 @@
                 <artifactId>log4j-api</artifactId>
                 <version>${logging.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${logging.version}</version>
+            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.apache.logging.log4j</groupId>-->
+<!--                <artifactId>log4j-api</artifactId>-->
+<!--                <version>${logging.version}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
