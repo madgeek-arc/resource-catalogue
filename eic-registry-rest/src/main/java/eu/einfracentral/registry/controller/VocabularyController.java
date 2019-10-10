@@ -116,4 +116,10 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
+
+    @ApiOperation(value = "Returns a map structure of vocabularies")
+    @RequestMapping(path = "vocabularyMap", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
+        return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
+    }
 }

@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_VOCABULARIES;
+import static eu.einfracentral.config.CacheConfig.CACHE_VOCABULARY_TREE;
 
 @Service
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
@@ -108,7 +109,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            logger.info("Adding Vocabulary " + vocabulary.getId());
+            logger.info(String.format("Adding Vocabulary %s", vocabulary.getId()));
             add(vocabulary, auth);
         }
     }
@@ -119,13 +120,13 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.setQuantity(10000);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
-            logger.info("Deleting Vocabulary " + vocabulary.getName());
+            logger.info(String.format("Deleting Vocabulary %s", vocabulary.getName()));
             delete(vocabulary);
         }
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARIES)
+    @Cacheable(value = CACHE_VOCABULARY_TREE)
     public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: replace with recursive method
         VocabularyTree root = new VocabularyTree();
         root.setVocabulary(null);
