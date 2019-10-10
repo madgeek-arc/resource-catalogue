@@ -32,7 +32,7 @@ public class CacheConfig {
         cacheManager.setCaches(Arrays.asList(
 
                 new ConcurrentMapCache(CACHE_VISITS,
-                        CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(500).build().asMap(), false),
+                        CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(2000).build().asMap(), false),
                 new ConcurrentMapCache(CACHE_FEATURED,
                         CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).maximumSize(50).build().asMap(), false),
                 new ConcurrentMapCache(CACHE_PROVIDERS),
