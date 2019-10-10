@@ -216,7 +216,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         try {
             serviceField = Service.class.getDeclaredField(field);
         } catch (NoSuchFieldException e) {
-            logger.warn("Attempt to find field '" + field + "' in Service failed. Trying in InfraService...");
+            logger.warn(String.format("Attempt to find field '%s' in Service failed. Trying in InfraService...", field));
             serviceField = InfraService.class.getDeclaredField(field);
         }
         serviceField.setAccessible(true);
@@ -342,7 +342,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     public Service getVersionHistory(String serviceId, String versionId) {
         List<Resource> resources = getResourcesWithServiceId(serviceId);
         Service service = new Service();
-        List<Version> versions = new ArrayList<>();
+        List<Version> versions;
         List<Version> allVersions = new ArrayList<>();
 
         if (resources != null) {
@@ -429,14 +429,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return resources.getTotal() == 0 ? null : resources.getResults();
     }
 
-    @Deprecated
-    protected Map<String, List<Resource>> groupBy(String field) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceType.getName());
-        ff.setQuantity(1000);
-        return searchService.searchByCategory(ff, field);
-    }
-
     @Override
     public RichService getRichService(String id, String version, Authentication auth) {
         InfraService infraService;
@@ -459,10 +451,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Override
     public List<RichService> createRichServices(List<InfraService> infraServices, Authentication auth) {
-        // FIXME: when the list of services contains only 1 entry, 'analyticsService.getAllServiceVisits()' may
-        //  slow down the method
-        List<RichService> richServices = createRichVocabularies(infraServices);
 
+        List<RichService> richServices = createRichVocabularies(infraServices);
         createRichStatistics(richServices, auth);
 
         return richServices;
@@ -474,7 +464,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return String.format("%s.%s", provider, StringUtils
                 .stripAccents(service.getName())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replaceAll(" ", "_")
+                .replace(" ", "_")
                 .toLowerCase());
     }
 
@@ -496,72 +486,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
         Browsing<InfraService> services;
 
-//        if (ff.getFilter() != null && ff.getFilter().get(FacetFilterUtils.MULTI_FILTER) != null) {
-//            services = getServicesWithCorrectFacets(ff);
-//        } else {
-//            // Return all services if user enters blank keyword on search
-//            if (StringUtils.isBlank(ff.getKeyword())) {
-//                ff.setKeyword("");
-//            }
         services = getResults(ff);
-//        }
 
         services.setFacets(facetLabelService.createLabels(services.getFacets()));
         return services;
-    }
-
-    @Deprecated
-    // Gets all Services abiding by the specific FacetFilter (filters & keywords)
-    private Browsing<InfraService> getServicesWithCorrectFacets(FacetFilter ff) {
-        List<Facet> serviceFacets;
-
-        FacetFilter ffWithoutFacetCategory = new FacetFilter(ff.getBrowseBy());
-        ffWithoutFacetCategory.setQuantity(0);
-        ffWithoutFacetCategory.setFilter(null);
-        String searchKeyword = ff.getKeyword();
-
-        // retrieve filters from FacetFilter object
-        Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
-
-        // create a query based on the filters and the search keywords
-        String searchQuery = FacetFilterUtils.createQuery(allFilters, searchKeyword);
-
-        ff.setFilter(null);
-        ff.setKeyword(searchQuery);
-        logger.debug(String.format("Searching services using keyword: %s", ff.getKeyword()));
-
-        Browsing<InfraService> services = cqlQuery(ff);
-        serviceFacets = services.getFacets();
-
-        for (Map.Entry<String, List<Object>> filter : allFilters.entrySet()) {
-            Map<String, List<Object>> someFilters = new HashMap<>(allFilters);
-
-            someFilters.remove(filter.getKey());
-
-            searchQuery = FacetFilterUtils.createQuery(someFilters, searchKeyword);
-            ffWithoutFacetCategory.setKeyword(searchQuery);
-            List<Facet> facetsCategory = cqlQuery(ffWithoutFacetCategory).getFacets();
-
-            for (Facet facet : serviceFacets) {
-                if (facet.getField().equals(filter.getKey())) {
-                    for (Facet facetCategory : facetsCategory) {
-                        if (facetCategory.getField().equals(filter.getKey())) {
-                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        services.setFacets(serviceFacets);
-        return services;
-
-    }
-
-    @Deprecated
-    private List<Facet> getServiceFacets(FacetFilter ff) {
-        return cqlQuery(ff).getFacets();
     }
 
     public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
