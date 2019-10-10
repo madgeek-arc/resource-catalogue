@@ -67,6 +67,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    @Cacheable(value = CACHE_VOCABULARIES)
     public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
         for (Vocabulary.Type type : Vocabulary.Type.values()) {
@@ -85,6 +86,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    @Cacheable(value = CACHE_VOCABULARIES)
     public Map<String, Vocabulary> getVocabulariesMap() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -95,6 +97,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    @Cacheable(value = CACHE_VOCABULARIES)
     public Map<String, Vocabulary> getVocabulariesMap(FacetFilter ff) {
         return getAll(ff, null)
                 .getResults()
@@ -122,6 +125,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    @Cacheable(value = CACHE_VOCABULARIES)
     public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: replace with recursive method
         VocabularyTree root = new VocabularyTree();
         root.setVocabulary(null);

@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -54,8 +56,40 @@ public class AnalyticsService {
         serviceVisits = String.format(serviceVisitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
     }
 
+    /**
+     * Scheduler that refreshes CACHE_VISITS every 5 minutes.
+     *
+     * @return
+     */
+    @Scheduled(fixedDelay = (5 * 60 * 1000))
+    @CachePut(value = CACHE_VISITS)
+    public Map<String, Integer> updateVisitsScheduler() {
+        return getServiceVisits();
+    }
+
     @Cacheable(value = CACHE_VISITS)
     public Map<String, Integer> getAllServiceVisits() {
+        return getServiceVisits();
+    }
+
+    public Map<String, Integer> getVisitsForLabel(String label, StatisticsService.Interval by) {
+        try {
+            Map<String, Integer> results = StreamSupport.stream(
+                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label, by).fields(), Spliterator.NONNULL), false).collect(
+                    Collectors.toMap(
+                            Map.Entry::getKey,
+                            dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
+                    )
+            );
+            Map<String, Integer> sortedResults = new TreeMap<>(results);
+            return sortedResults;
+        } catch (Exception e) {
+            logger.debug(String.format("Cannot find visits for the label '%s'%n", label), e);
+        }
+        return new HashMap<>();
+    }
+
+    private Map<String, Integer> getServiceVisits() {
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         JsonNode json = parse(getMatomoResponse(String.format(serviceVisits, date)));
         if (json != null) {
@@ -72,23 +106,6 @@ public class AnalyticsService {
             } catch (Exception e) {
                 logger.error(String.format("Cannot retrieve visits for all Services%nMatomo response: %s%n", json), e);
             }
-        }
-        return new HashMap<>();
-    }
-
-    public Map<String, Integer> getVisitsForLabel(String label, StatisticsService.Interval by) {
-        try {
-            Map<String, Integer> results = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label, by).fields(), Spliterator.NONNULL), false).collect(
-                    Collectors.toMap(
-                            Map.Entry::getKey,
-                            dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
-                    )
-            );
-            Map<String, Integer> sortedResults = new TreeMap<>(results);
-            return sortedResults;
-        } catch (Exception e) {
-            logger.debug(String.format("Cannot find visits for the label '%s'%n", label), e);
         }
         return new HashMap<>();
     }
