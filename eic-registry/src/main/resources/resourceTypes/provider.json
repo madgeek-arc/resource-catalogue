@@ -15,20 +15,87 @@
     },
     {
       "multivalued": false,
-      "name": "website",
-      "path": "//*[local-name()='website']/text()",
+      "name": "acronym",
+      "path": "//*[local-name()='acronym']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "types",
+      "label": "Type",
+      "path": "//*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "domains",
+      "label": "Domain",
+      "path": "//*[local-name()='domain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "categories",
+      "label": "Category",
+      "path": "//*[local-name()='category']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "esfriDomains",
+      "label": "Esfri Domain",
+      "path": "//*[local-name()='esfriDomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "tags",
+      "path": "//*[local-name()='tag']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "lifeCycleStatus",
+      "path": "//*[local-name()='lifeCycleStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "legalStatus",
+      "path": "//*[local-name()='legalStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "esfri",
+      "path": "//*[local-name()='esfri']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "networks",
+      "label": "Network",
+      "path": "//*[local-name()='network']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "areasOfActivity",
+      "label": "Area of Activity",
+      "path": "//*[local-name()='areaOfActivity']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "societalGrandChallenges",
+      "label": "Societal Grand Challenge",
+      "path": "//*[local-name()='societalGrandChallenge']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "users",
       "path": "//*[local-name()='user']/*[local-name()='email']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "contact_name",
-      "path": "//*[local-name()='contactName']/text()",
       "type": "java.lang.String"
     },
     {

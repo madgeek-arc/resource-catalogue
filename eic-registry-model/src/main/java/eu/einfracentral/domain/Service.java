@@ -1,7 +1,6 @@
 package eu.einfracentral.domain;
 
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.Contact;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -96,7 +95,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "options")
     @XmlElement(name = "option")
-    @ApiModelProperty(position = 11, dataType = "List", example = "ServiceOptions[] (optional)")
+    @ApiModelProperty(position = 11)
     private List<ServiceOption> options;
 
     /**
@@ -354,8 +353,8 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "contacts", required = true)
     @XmlElement(name = "contact")
-    @ApiModelProperty(position = 44, dataType = "List", example = "ServiceContact[] (required)", required = true)
-    private List<ServiceContact> contacts;
+    @ApiModelProperty(position = 44, required = true)
+    private List<Contact> contacts;
 
 
     // Service Other Information
@@ -999,11 +998,11 @@ public class Service implements Identifiable {
         this.maintenance = maintenance;
     }
 
-    public List<ServiceContact> getContacts() {
+    public List<Contact> getContacts() {
         return contacts;
     }
 
-    public void setContacts(List<ServiceContact> contacts) {
+    public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
 

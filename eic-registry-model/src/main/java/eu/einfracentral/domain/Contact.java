@@ -5,11 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.List;
+
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class ServiceContact {
+public class Contact {
 
 
     // Contact Basic Information
@@ -17,46 +17,57 @@ public class ServiceContact {
      * First Name of the service/resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, example = "(required)", required = true)
+    @ApiModelProperty(position = 1, example = "String (required)", required = true)
     private String firstName;
 
     /**
      * Last Name of the service/resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "(required)", required = true)
+    @ApiModelProperty(position = 2, example = "String (required)", required = true)
     private String lastName;
 
     /**
      * Email of the service/resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "(required)", required = true)
+    @ApiModelProperty(position = 3, example = "String (required)", required = true)
     private String email;
 
     /**
      * Telephone of the service/resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "(required)", required = true)
+    @ApiModelProperty(position = 4, example = "String (required)", required = true)
     private String tel;
 
     /**
      * Position of the service/resource's main contact person/manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 5, example = "(optional)")
+    @ApiModelProperty(position = 5, example = "String (optional)")
     private String position;
 
-    public ServiceContact() {
+    public Contact() {
     }
 
-    public ServiceContact(String firstName, String lastName, String email, String tel, String position) {
+    public Contact(String firstName, String lastName, String email, String tel, String position) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.tel = tel;
         this.position = position;
+    }
+
+    @Override
+    public String toString() {
+        return "Contact{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", tel='" + tel + '\'' +
+                ", position='" + position + '\'' +
+                '}';
     }
 
     public String getFirstName() {
