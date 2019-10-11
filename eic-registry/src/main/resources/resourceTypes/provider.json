@@ -3,14 +3,14 @@
     {
       "multivalued": false,
       "name": "provider_id",
-      "path": "//*[local-name()='id']/text()",
+      "path": "//*[local-name()='provider']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
     {
       "multivalued": false,
       "name": "name",
-      "path": "//*[local-name()='name']/text()",
+      "path": "//*[local-name()='provider']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
@@ -116,5 +116,5 @@
   "name": "provider",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris_new_classification/eic-registry-model/src/main/resources/schema1.xsd"
 }
