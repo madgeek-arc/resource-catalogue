@@ -80,6 +80,18 @@ public class Vocabulary implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Vocabulary{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", parentId='" + parentId + '\'' +
+                ", type='" + type + '\'' +
+                ", extras=" + extras.toString() +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return this.id;
     }
