@@ -84,7 +84,7 @@ public class AnalyticsService {
             Map<String, Integer> sortedResults = new TreeMap<>(results);
             return sortedResults;
         } catch (Exception e) {
-            logger.debug(String.format("Cannot find visits for the label '%s'%n", label), e);
+            logger.warn(String.format("Cannot find visits for the label '%s'%n", label), e);
         }
         return new HashMap<>();
     }

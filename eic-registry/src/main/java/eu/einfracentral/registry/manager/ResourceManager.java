@@ -9,11 +9,10 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import java.net.UnknownHostException;
@@ -25,10 +24,7 @@ import java.util.stream.Stream;
 
 public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T, Authentication> {
 
-    final static private Logger logger = LogManager.getLogger(ResourceManager.class);
-
-    @Autowired
-    private VersionService versionService;
+    private static final Logger logger = LogManager.getLogger(ResourceManager.class);
 
     public ResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
@@ -55,17 +51,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return null;
     }
 
-//    public boolean exists(SearchService.KeyValue... ids) {
-//        Resource resource;
-//        try {
-//            resource = this.searchService.searchId(getResourceType(), ids);
-//            return resource != null;
-//        } catch (UnknownHostException e) {
-//            logger.error(e);
-//            throw new ServiceException(e);
-//        }
-//    }
-
     @Override
     public T add(T t, Authentication auth) {
         if (exists(t)) {
@@ -76,7 +61,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);
-        logger.info("Adding Resource " + t);
+        logger.debug(String.format("Adding Resource %s", t));
         return t;
     }
 
@@ -86,7 +71,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         existing.setPayload(serialize(t));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.info("Updating Resource " + t);
+        logger.debug(String.format("Updating Resource %s", t));
         return t;
     }
 
@@ -98,7 +83,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T del(T t) {
         resourceService.deleteResource(whereID(t.getId(), true).getId());
-        logger.info("Deleting Resource " + t);
+        logger.debug(String.format("Deleting Resource %s", t));
         return t;
     }
 
@@ -107,7 +92,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 entry -> entry.getValue()
                         .stream()
-                        .map(resource -> deserialize(whereCoreID(resource.getId())))
+                        .map(resource -> deserialize(where("id", resource.getId(), true)))
                         .collect(Collectors.toList())));
     }
 
@@ -122,6 +107,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<T> delAll() {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(10000);
@@ -131,57 +117,12 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T validate(T t) {
-        logger.info("Validating Resource " + t);
+        logger.debug(String.format("Validating Resource %s", t));
         return t;
     }
 
-    @Deprecated
-    @Override
-    public List<T> versions(String id, String version) {
-        return multiWhereID(id).stream().flatMap(
-                resource -> versionService.getVersionsByResource(resource.getId())
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .map(
-                                versionObject -> deserialize(versionObject.getResource())
-                        )
-        ).collect(Collectors.toList());
-    }
-
-    @Deprecated
-    protected List<Resource> multiWhereID(String id) {
-        return multiWhere(String.format("%s_id", resourceType.getName()), id);
-    }
-
-    @Deprecated
-    protected List<Resource> multiWhere(String field, String value) {
-        List<Resource> ret;
-        try {
-            FacetFilter ff = new FacetFilter();
-            ff.setResourceType(resourceType.getName());
-            ff.addFilter(field, value);
-            ret = searchService.search(ff).getResults();
-        } catch (UnknownHostException e) {
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return ret;
-    }
-
-    @Deprecated
-    protected List<Resource> whereIDin(String... ids) {
-        return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
-    }
-
-    protected Map<String, List<Resource>> groupBy(String field) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceType.getName());
-        ff.setQuantity(1000);
-        return searchService.searchByCategory(ff, field);
-    }
-
-    @Deprecated
-    protected Resource whereCoreID(String id) {
-        return where("id", id, true);
+    public ParserService.ParserServiceTypes getCoreFormat() {
+        return ParserService.ParserServiceTypes.XML;
     }
 
     protected boolean exists(T t) {
@@ -196,24 +137,23 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return ret;
     }
 
-    public ParserService.ParserServiceTypes getCoreFormat() {
-        return ParserService.ParserServiceTypes.XML;
-    }
-
     protected T deserialize(Resource resource) {
         return parserPool.deserialize(resource, typeParameterClass);
     }
 
+    protected Map<String, List<Resource>> groupBy(String field) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(resourceType.getName());
+        ff.setQuantity(1000);
+        return searchService.searchByCategory(ff, field);
+    }
+
+    protected List<Resource> whereIDin(String... ids) {
+        return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
+    }
+
     protected Resource whereID(String id, boolean throwOnNull) {
-        Resource ret = null;
-        try {
-            ret = where(String.format("%s_id", resourceType.getName()), id, throwOnNull);
-        } catch (ResourceException e) {
-            if (throwOnNull) {
-                throw e;
-            }
-        }
-        return ret;
+        return where(String.format("%s_id", resourceType.getName()), id, throwOnNull);
     }
 
     protected Resource where(String field, String value, boolean throwOnNull) {
