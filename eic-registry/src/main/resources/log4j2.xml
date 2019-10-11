@@ -6,7 +6,7 @@
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%C{1.}}{bright,blue}: %msg%n%throwable"/>
+            <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%C}{bright,blue}: %msg%n%throwable"/>
         </Console>
         <RollingFile name="RollingFile" fileName="${baseDir}/eic.log"
                      filePattern="${baseDir}/$${date:yyyy-MM}/eic-%d{yyyy-MM-dd_HH:mm:ss}.log.gz">
