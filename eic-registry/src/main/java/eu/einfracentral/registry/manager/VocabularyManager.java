@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_VOCABULARIES;
-import static eu.einfracentral.config.CacheConfig.CACHE_VOCABULARY_TREE;
+import static eu.einfracentral.config.CacheConfig.*;
 
 @Service
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
@@ -87,7 +87,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARIES)
+    @Cacheable(value = CACHE_VOCABULARY_MAP)
     public Map<String, Vocabulary> getVocabulariesMap() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -98,7 +98,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARIES)
+    @Cacheable(value = CACHE_VOCABULARY_MAP)
     public Map<String, Vocabulary> getVocabulariesMap(FacetFilter ff) {
         return getAll(ff, null)
                 .getResults()
@@ -107,20 +107,24 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            logger.info(String.format("Adding Vocabulary %s", vocabulary.getId()));
+            logger.debug(String.format("Adding Vocabulary %s", vocabulary.toString()));
             add(vocabulary, auth);
         }
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
-            logger.info(String.format("Deleting Vocabulary %s", vocabulary.getName()));
+            logger.debug(String.format("Deleting Vocabulary %s", vocabulary.getName()));
             delete(vocabulary);
         }
     }
@@ -166,12 +170,12 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
             String id = vocabulary.getName().toLowerCase();
-            id = id.replaceAll(" ", "_");
-            id = id.replaceAll("&", "and");
+            id = id.replace(" ", "_");
+            id = id.replace("&", "and");
             if (vocabulary.getParentId() != null) {
                 id = String.format("%s-%s", vocabulary.getParentId().toLowerCase(), id);
             }
@@ -186,21 +190,21 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);
-        logger.info("Adding Resource " + vocabulary);
+        logger.debug(String.format("Adding Resource %s", vocabulary));
         return vocabulary;
     }
 
     @Override
-    @CacheEvict(value = CACHE_VOCABULARIES, allEntries = true)
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
         String serialized = serialize(vocabulary);
-        serialized = serialized.replaceAll(":tns", "");
-        serialized = serialized.replaceAll("tns:", "");
+        serialized = serialized.replace(":tns", "");
+        serialized = serialized.replace("tns:", "");
         existing.setPayload(serialized);
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.info("Updating Resource " + vocabulary);
+        logger.debug(String.format("Updating Resource %s", vocabulary));
         return vocabulary;
     }
 

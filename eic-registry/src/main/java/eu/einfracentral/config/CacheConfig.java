@@ -20,6 +20,7 @@ public class CacheConfig {
 
     public static final String CACHE_PROVIDERS = "providers";
     public static final String CACHE_VOCABULARIES = "vocabularies";
+    public static final String CACHE_VOCABULARY_MAP = "vocabulary_map";
     public static final String CACHE_VOCABULARY_TREE = "vocabulary_tree";
     public static final String CACHE_FEATURED = "featuredServices";
     public static final String CACHE_EVENTS = "events";
@@ -40,6 +41,7 @@ public class CacheConfig {
                 new ConcurrentMapCache(CACHE_EVENTS),
                 new ConcurrentMapCache(CACHE_SERVICE_EVENTS),
                 new ConcurrentMapCache(CACHE_VOCABULARIES),
+                new ConcurrentMapCache(CACHE_VOCABULARY_MAP),
                 new ConcurrentMapCache(CACHE_VOCABULARY_TREE),
 
                 // NEEDED FOR registry-core
