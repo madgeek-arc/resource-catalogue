@@ -273,6 +273,39 @@ public class ServiceValidators {
                 if (option.getDescription().length() > TEXT_LENGTH) {
                     throw new ValidationException("max length for 'description' is " + TEXT_LENGTH + " chars");
                 }
+
+                // Validate Option's Contacts
+                // Validate the Contact's fields requirement
+                if (option.getContacts() == null || option.getContacts().isEmpty())
+                    throw new ValidationException("Field 'contacts' is mandatory. You need to provide at least 1 contact.");
+                for (Contact contact : option.getContacts()){
+                    if (contact.getFirstName() == null || contact.getFirstName().equals("")) {
+                        throw new ValidationException("field 'firstName' is mandatory");
+                    }
+                    if (contact.getLastName() == null || contact.getLastName().equals("")) {
+                        throw new ValidationException("field 'lastName' is mandatory");
+                    }
+                    if (contact.getEmail() == null || contact.getEmail().equals("")) {
+                        throw new ValidationException("field 'email' is mandatory");
+                    }
+                    if (contact.getTel() == null || contact.getTel().equals("")) {
+                        throw new ValidationException("field 'tel' is mandatory");
+                    }
+
+                    // Validate max length of Contact's fields
+                    if (contact.getFirstName().length() > FIELD_LENGTH_SMALL) {
+                        throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
+                    }
+                    if (contact.getLastName().length() > FIELD_LENGTH_SMALL) {
+                        throw new ValidationException("max length for 'lastName' is " + FIELD_LENGTH_SMALL + " chars");
+                    }
+                    if (contact.getTel().length() > FIELD_LENGTH_SMALL) {
+                        throw new ValidationException("max length for 'tel' is " + FIELD_LENGTH_SMALL + " chars");
+                    }
+                    if (contact.getPosition().length() > FIELD_LENGTH_SMALL) {
+                        throw new ValidationException("max length for 'position' is " + FIELD_LENGTH_SMALL + " chars");
+                    }
+                }
             }
         }
     }
@@ -290,7 +323,7 @@ public class ServiceValidators {
     public void validateContacts(InfraService service){
         if (service.getContacts() == null || service.getContacts().isEmpty())
             throw new ValidationException("Field 'contacts' is mandatory. You need to provide at least 1 contact.");
-        for (ServiceContact contact : service.getContacts()) {
+        for (Contact contact : service.getContacts()) {
 
             // Validate the Contact's fields requirement
             if (contact.getFirstName() == null || contact.getFirstName().equals("")) {

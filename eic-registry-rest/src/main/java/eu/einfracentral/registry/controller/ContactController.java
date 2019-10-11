@@ -38,12 +38,12 @@ public class ContactController {
         for (String id : ids) {
             List<String> emailsTo;
             InfraService service = infraServiceService.get(id);
-            if (service.getSupportContact() != null && !service.getSupportContact().equals("")) {
-                emailsTo = Collections.singletonList(service.getSupportContact());
+            if (service.getContacts().get(0).getEmail() != null && !service.getContacts().get(0).getEmail().equals("")) {
+                emailsTo = Collections.singletonList(service.getContacts().get(0).getEmail());
             } else {
                 emailsTo = service.getProviders()
                         .stream()
-                        .map(providerId -> providerService.get(providerId).getContactEmail())
+                        .map(providerId -> providerService.get(providerId).getContacts().get(0).getEmail())
                         .collect(Collectors.toList());
             }
             // TODO: complete this method
