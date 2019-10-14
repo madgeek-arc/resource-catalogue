@@ -66,6 +66,18 @@ public class ProviderLocation {
         this.region = region;
     }
 
+    @Override
+    public String toString() {
+        return "ProviderLocation{" +
+                "name='" + name + '\'' +
+                ", street='" + street + '\'' +
+                ", number='" + number + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", city='" + city + '\'' +
+                ", region='" + region + '\'' +
+                '}';
+    }
+
     public String getName() {
         return name;
     }

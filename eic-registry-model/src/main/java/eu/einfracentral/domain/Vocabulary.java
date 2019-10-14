@@ -1,6 +1,8 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Arrays;
 import java.util.Map;
@@ -28,7 +30,6 @@ public class Vocabulary implements Identifiable {
     private Map<String, String> extras;
 
     public Vocabulary() {
-
     }
 
     public Vocabulary(String id, String name, String description, String parentId,
@@ -87,6 +88,18 @@ public class Vocabulary implements Identifiable {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Vocabulary{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", parentId='" + parentId + '\'' +
+                ", type='" + type + '\'' +
+                ", extras=" + extras +
+                '}';
     }
 
     @Override

@@ -71,8 +71,20 @@ public class ServiceOption implements Identifiable {
     private List<String> attributes;
 
 
-    public ServiceOption(){
+    public ServiceOption() {
+    }
 
+    @Override
+    public String toString() {
+        return "ServiceOption{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", url=" + url +
+                ", description='" + description + '\'' +
+                ", logo=" + logo +
+                ", contacts=" + contacts +
+                ", attributes=" + attributes +
+                '}';
     }
 
     @Override
