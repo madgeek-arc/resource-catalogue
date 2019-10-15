@@ -15,6 +15,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -49,6 +50,10 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     @Override
     public Collection<? extends GrantedAuthority> mapAuthorities(JWT idToken, UserInfo userInfo) {
         Set<GrantedAuthority> out = new HashSet<>();
+        if (idToken == null || userInfo == null) {
+            throw new UnauthorizedUserException("token is not valid or it has expired");
+        }
+
         SimpleGrantedAuthority authority;
         out.add(new SimpleGrantedAuthority("ROLE_USER"));
         if (userRolesMap.get(userInfo.getSub()) != null) {
@@ -99,7 +104,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             logger.warn("There are no Provider entries in DB");
         }
 
-        userRolesMap.putAll(Arrays.stream(admins.replaceAll(" ", "").split(","))
+        userRolesMap.putAll(Arrays.stream(admins.replace(" ", "").split(","))
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))

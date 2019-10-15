@@ -23,6 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.text.ParseException;
 
 public class ApiKeyAuthorizationFilter extends GenericFilterBean {
 
@@ -50,6 +51,9 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
         String jwt = resolveToken(request);
         PendingOIDCAuthenticationToken token;
         try {
+            if (jwt == null) {
+                throw new NullPointerException("jwt is null");
+            }
             JWT idToken = JWTParser.parse(jwt);
             String issuer = idToken.getJWTClaimsSet().getIssuer();
             String subject = idToken.getJWTClaimsSet().getSubject();
@@ -59,15 +63,15 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
             Authentication auth = this.authenticationProvider.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(req, res);
-        } catch (Exception e) {
-            log.error("JWT is not valid or it has expired", e);
+        } catch (RuntimeException | ParseException e) {
+            log.error(e);
             res.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
             ObjectMapper mapper = new ObjectMapper();
-            res.getWriter().append(mapper.writeValueAsString(new UnauthorizedUserException(((HttpServletRequest) req).getRequestURI(), e)));
+            UnauthorizedUserException exception = new UnauthorizedUserException(e.getMessage(), e);
+            res.getWriter().append(mapper.writeValueAsString(exception));
         }
 
     }
-
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
