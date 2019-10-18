@@ -28,7 +28,7 @@ import java.util.UUID;
 @Order(1)
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final Logger logger = LogManager.getLogger(ResponseEntityExceptionHandler.class);
+    private static final Logger logger = LogManager.getLogger(RestResponseEntityExceptionHandler.class);
 
     @ExceptionHandler(value = {IllegalStateException.class, IllegalArgumentException.class})
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
