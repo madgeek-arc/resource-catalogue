@@ -26,12 +26,7 @@
     </scm>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>4.12</junit.version>
-        <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>2.8</maven-dependency-plugin.version>
-        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
-        <maven-war-plugin.version>2.4</maven-war-plugin.version>
+        <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
     </properties>
 
     <dependencies>
@@ -68,17 +63,9 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.logging.log4j</groupId>-->
-<!--            <artifactId>log4j-api</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -110,6 +97,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
         </dependency>
         <dependency>
@@ -119,10 +110,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -155,11 +142,10 @@
             <artifactId>openid-connect-common</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session</artifactId>
-            <version>1.3.3.RELEASE</version>
+            <version>1.3.5.RELEASE</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
