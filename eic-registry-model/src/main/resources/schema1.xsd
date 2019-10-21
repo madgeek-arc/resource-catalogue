@@ -3,6 +3,8 @@
 
   <xs:import schemaLocation="schema2.xsd"/>
 
+  <xs:element name="emailMessage" type="tns:emailMessage"/>
+
   <xs:element name="event" type="tns:event"/>
 
   <xs:element name="funder" type="tns:funder"/>
@@ -15,6 +17,8 @@
 
   <xs:element name="provider" type="tns:provider"/>
 
+  <xs:element name="providerRequest" type="tns:providerRequest"/>
+
   <xs:element name="rangeValue" type="tns:rangeValue"/>
 
   <xs:element name="service" type="tns:service"/>
@@ -26,6 +30,16 @@
   <xs:element name="user" type="tns:user"/>
 
   <xs:element name="vocabulary" type="tns:vocabulary"/>
+
+  <xs:complexType name="emailMessage">
+    <xs:sequence>
+      <xs:element default="null" minOccurs="0" name="message" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="recipientEmail" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="senderEmail" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="senderName" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="subject" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <xs:complexType name="event">
     <xs:sequence>
@@ -570,6 +584,15 @@
       <xs:element minOccurs="0" name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="surname" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="providerRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="date" type="xs:anySimpleType"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="message" type="tns:emailMessage"/>
+      <xs:element minOccurs="0" name="providerId" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
