@@ -86,7 +86,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         funderService.delete(funder);
-        logger.info("User '{}' deleted Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId()));
+        logger.info("User '{}' deleted Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId());
         return new ResponseEntity<>(funder, HttpStatus.OK);
     }
 
