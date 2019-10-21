@@ -13,8 +13,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,7 +57,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         }
         logger.info("Deleting provider: " + provider.getName());
         providerManager.delete(provider);
-        logger.info("User " + auth.getName() + " deleted the Provider " + provider.getName() + " with id " + provider.getId());
+        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -76,7 +76,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ResponseEntity<Provider> ret = super.add(provider, auth);
-        logger.info("User " + auth.getName() + " added the Provider " + provider.getName() + " with id " + provider.getId());
+        logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
         return ret;
     }
 
@@ -86,7 +86,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Provider> ret = super.update(provider, auth);
-        logger.info("User " + auth.getName() + " updated the Provider " + provider.getName() + " with id " + provider.getId());
+        logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
         return ret;
     }
 
@@ -176,7 +176,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                    @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
         ResponseEntity<Provider> ret = new ResponseEntity<>(providerManager.verifyProvider(id, status, active, auth), HttpStatus.OK);
-        logger.info("User " + auth.getName() + " updated Provider " + providerManager.get(id).getName() + " {status: " +status+ "} {active: " +active+ "}");
+        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth.getName(), providerManager.get(id).getName(), status, active);
         return ret;
     }
 
@@ -199,7 +199,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             sm.setModifiedBy("system");
             sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             infraServiceService.update(service, auth);
-            logger.info("User " + auth.getName() + " published(updated) all Services " + services + " of the Provider " + providerManager.get(id).getName());
+            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'", auth.getName(), providerManager.get(id).getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

@@ -72,7 +72,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
         ResponseEntity<Indicator> ret = super.add(indicator, auth);
-        logger.info("User " + auth.getName() + " created a new Indicator " + indicator.getName() + " with id " + indicator.getId());
+        logger.info("User '{}' created a new Indicator with name '{}' and id '{}'", auth.getName(), indicator.getName(), indicator.getId());
         return ret;
     }
 
@@ -83,7 +83,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Indicator> ret = super.update(indicator, auth);
-        logger.info("User " + auth.getName() + " updated the Indicator " + indicator.getName() + " with id " + indicator.getId());
+        logger.info("User '{}' updated the Indicator with name '{}' and id '{}'", auth.getName(), indicator.getName(), indicator.getId());
         return ret;
     }
 
@@ -97,7 +97,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         indicatorService.delete(indicator);
-        logger.info("User " + auth.getName() + " deleted the Indicator " + indicator.getName() + " with id " + indicator.getId());
+        logger.info("User '{}' deleted the Indicator with name '{}' and id '{}'", auth.getName(), indicator.getName(), indicator.getId());
         return new ResponseEntity<>(indicator, HttpStatus.OK);
     }
 

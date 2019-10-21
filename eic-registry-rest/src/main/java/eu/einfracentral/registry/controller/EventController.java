@@ -70,7 +70,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         for (Event event : events) {
             if (event.getValue() == null) {
                 toDelete.add(event);
-                logger.info("Null event to be deleted: " + event);
+                logger.info("Attempting delete of null event: {}", event);
             }
         }
         int size = toDelete.size();
@@ -87,9 +87,9 @@ public class EventController extends ResourceController<Event, Authentication> {
     public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
         if (value) {
-            logger.info("User " + authentication.getName() + " set Service with id " + id + " as FAVORITE");
+            logger.info("User '{}' set Service with id '{}' as FAVORITE", authentication.getName(), id);
         } else {
-            logger.info("User " + authentication.getName() + " set Service with id " + id + " as UNFAVORITE");
+            logger.info("User '{}' set Service with id '{}' as UNFAVORITE", authentication.getName(), id);
         }
         return ret;
     }
@@ -136,7 +136,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PROVIDER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setRating(id, rating, authentication), HttpStatus.OK);
-        logger.info("User " + authentication.getName() + " rated Service with id " + id + " with " + rating);
+        logger.info("User '{}' rated Service with id '{}', rating value: {}", authentication.getName(), id, rating);
         return ret;
     }
 

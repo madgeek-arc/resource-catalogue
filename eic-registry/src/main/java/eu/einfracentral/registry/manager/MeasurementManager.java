@@ -169,7 +169,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public void delete(Measurement measurement) {
         super.delete(measurement);
-        logger.debug("Deleting Measurement " + measurement);
+        logger.debug("Deleting Measurement: {}", measurement);
         synchronizerService.syncDelete(measurement);
     }
 
