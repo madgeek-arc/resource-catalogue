@@ -216,7 +216,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         try {
             serviceField = Service.class.getDeclaredField(field);
         } catch (NoSuchFieldException e) {
-            logger.warn(String.format("Attempt to find field '%s' in Service failed. Trying in InfraService...", field));
+            logger.warn("Attempt to find field '{}' in Service failed. Trying in InfraService...", field);
             serviceField = InfraService.class.getDeclaredField(field);
         }
         serviceField.setAccessible(true);
@@ -316,7 +316,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                         try {
                             historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
-                            logger.warn(String.format("InfraService with id '%s' does not have ServiceMetadata", service.getId()));
+                            logger.warn("InfraService with id '{}' does not have ServiceMetadata", service.getId());
                         }
                     }
                 }

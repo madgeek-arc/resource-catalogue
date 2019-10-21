@@ -37,35 +37,35 @@ public class ResourceController<T extends Identifiable, U extends Authentication
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.add(t, auth), HttpStatus.CREATED);
-        logger.debug(String.format("User %s created a new Resource with id %s", auth.getName(), t.getId()));
+        logger.debug("User {} created a new Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> update(@RequestBody T t, @ApiIgnore U auth) throws ResourceNotFoundException {
         ResponseEntity<T> ret = new ResponseEntity<>(service.update(t, auth), HttpStatus.OK);
-        logger.debug(String.format("User %s updated Resource with id %s", auth.getName(), t.getId()));
+        logger.debug("User {} updated Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> validate(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.validate(t), HttpStatus.OK);
-        logger.debug(String.format("User %s validated Resource with id %s", auth.getName(), t.getId()));
+        logger.debug("User {} validated Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.del(t), HttpStatus.OK);
-        logger.debug(String.format("User %s deleted Resource with id %s", auth.getName(), t.getId()));
+        logger.debug("User {} deleted Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<T>> delAll(@ApiIgnore U auth) {
         ResponseEntity<List<T>> ret = new ResponseEntity<>(service.delAll(), HttpStatus.OK);
-        logger.debug(String.format("User %s deleted a list of resources %s", auth.getName(), ret));
+        logger.debug("User {} deleted a list of resources {}", auth.getName(), ret);
         return ret;
     }
 
