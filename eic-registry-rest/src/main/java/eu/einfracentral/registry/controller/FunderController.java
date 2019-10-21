@@ -61,7 +61,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> add(@RequestBody Funder funder, @ApiIgnore Authentication auth) {
         ResponseEntity<Funder> ret = new ResponseEntity<>(funderService.add(funder, auth), HttpStatus.OK);
-        logger.info("User " + auth.getName() + " created a new Funder " + funder.getName() + " with id " + funder.getId());
+        logger.info("User '{}' created a new Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId());
         return ret;
     }
 
@@ -72,7 +72,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> update(@RequestBody Funder funder, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Funder> ret = super.update(funder, auth);
-        logger.info("User " + auth.getName() + " updated Funder " + funder.getName() + " with id " + funder.getId());
+        logger.info("User {} updated Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId());
         return ret;
     }
 
@@ -86,7 +86,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         funderService.delete(funder);
-        logger.info("User " + auth.getName() + " deleted Funder " + funder.getName() + " with id " + funder.getId());
+        logger.info("User '{}' deleted Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId()));
         return new ResponseEntity<>(funder, HttpStatus.OK);
     }
 

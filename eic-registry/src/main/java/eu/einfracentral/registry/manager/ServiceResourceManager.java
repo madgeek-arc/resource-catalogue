@@ -99,7 +99,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         browseBy.addAll(browseSet);
         browseBy.add("resourceType");
         java.util.Collections.sort(browseBy);
-        logger.info("Generated generic service for " + getResourceType() + "[" + getClass().getSimpleName() + "]");
+        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
     }
 
     @Override

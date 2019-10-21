@@ -129,7 +129,7 @@ public class SynchronizerService {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
                 logger.error("Failed to update Service with id {} to host {}\nMessage: {}",
                         infraService.getId(), host, e.getResponseBodyAsString());
@@ -228,7 +228,7 @@ public class SynchronizerService {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
                 logger.error("Failed to update Measurement with id {} to host {}\nMessage: {}",
                         measurement.getId(), host, e.getResponseBodyAsString());
@@ -261,7 +261,7 @@ public class SynchronizerService {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
                 logger.error("Failed to delete Measurement with id {} to host {}\nMessage: {}",
                         measurement.getId(), host, e.getResponseBodyAsString());

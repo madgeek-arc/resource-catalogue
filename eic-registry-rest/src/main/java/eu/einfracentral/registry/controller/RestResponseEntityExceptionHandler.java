@@ -86,7 +86,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleRuntimeException(RuntimeException ex, WebRequest request) {
         String errorId = UUID.randomUUID().toString();
         String response = String.format("Please send the following error code to the system administrators. Error Code: '%s'", errorId);
-        logger.error("Error Code: " + errorId, errorId, ex);
+        logger.error("Error Code: {}", errorId, ex);
         return handleExceptionInternal(ex, response,
                 new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }

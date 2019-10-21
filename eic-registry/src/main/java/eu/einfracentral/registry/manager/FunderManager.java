@@ -47,7 +47,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
     public Funder add(Funder funder, Authentication auth) {
         validateFunderServices(funder);
         super.add(funder, auth);
-        logger.debug("Adding Funder " + funder);
+        logger.debug("Adding Funder: {}", funder);
         return funder;
     }
 
@@ -169,9 +169,9 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
                     }
                 }
             } catch (NoSuchMethodException e) {
-                logger.error("ERROR: could not find method " + methodName, e);
+                logger.error("ERROR: could not find method: {}", methodName, e);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.error("ERROR: " + methodName, e);
+                logger.error("ERROR: {}", methodName, e);
             }
         }
 
