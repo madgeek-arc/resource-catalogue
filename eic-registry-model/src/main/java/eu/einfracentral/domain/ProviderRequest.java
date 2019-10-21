@@ -29,6 +29,16 @@ public class ProviderRequest implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "ProviderRequest{" +
+                "id='" + id + '\'' +
+                ", message=" + message +
+                ", date=" + date +
+                ", providerId='" + providerId + '\'' +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

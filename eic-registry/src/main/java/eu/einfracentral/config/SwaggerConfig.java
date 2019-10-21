@@ -71,7 +71,7 @@ public class SwaggerConfig {
                         new ApiKey("apiKey", "Authorization", "header"))
                 )
                 .select()
-                .apis(isLocalhost ? RequestHandlerSelectors.basePackage("eu") :
+                .apis(isLocalhost ? RequestHandlerSelectors.basePackage("eu.einfracentral") :
                         RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                 .paths(PathSelectors.any())
                 .build();
