@@ -84,7 +84,7 @@ public class AnalyticsService {
             Map<String, Integer> sortedResults = new TreeMap<>(results);
             return sortedResults;
         } catch (Exception e) {
-            logger.warn(String.format("Cannot find visits for the label '%s'%n", label), e);
+            logger.warn("Cannot find visits for the label '{}'\n", label, e);
         }
         return new HashMap<>();
     }
@@ -104,7 +104,7 @@ public class AnalyticsService {
                 }
                 return results;
             } catch (Exception e) {
-                logger.error(String.format("Cannot retrieve visits for all Services%nMatomo response: %s%n", json), e);
+                logger.error("Cannot retrieve visits for all Services\nMatomo response: {}\n", json, e);
             }
         }
         return new HashMap<>();
@@ -128,8 +128,8 @@ public class AnalyticsService {
             HttpEntity<String> request = new HttpEntity<>(headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
             if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                logger.error(String.format("Could not retrieve analytics from matomo%nResponse Code: %s%nResponse Body: %s",
-                        responseEntity.getStatusCode().toString(), responseEntity.getBody()));
+                logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
+                        responseEntity.getStatusCode().toString(), responseEntity.getBody());
             }
             return responseEntity.getBody();
         } catch (RuntimeException e) {

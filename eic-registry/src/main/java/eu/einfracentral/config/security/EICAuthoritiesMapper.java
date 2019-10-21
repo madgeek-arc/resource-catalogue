@@ -5,8 +5,8 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.client.OIDCAuthoritiesMapper;
 import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             authority = userRolesMap.get(userInfo.getEmail());
         }
         if (authority != null) {
-            logger.info(String.format("User %s with email %s mapped as %s", userInfo.getSub(), userInfo.getEmail(), authority.getAuthority()));
+            logger.info("User {} with email {} mapped as {}", userInfo.getSub(), userInfo.getEmail(), authority.getAuthority());
             out.add(authority);
         }
         return out;

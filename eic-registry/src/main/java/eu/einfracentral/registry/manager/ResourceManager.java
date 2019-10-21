@@ -61,7 +61,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);
-        logger.debug(String.format("Adding Resource %s", t));
+        logger.debug("Adding Resource {}", t);
         return t;
     }
 
@@ -71,7 +71,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         existing.setPayload(serialize(t));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug(String.format("Updating Resource %s", t));
+        logger.debug("Updating Resource {}", t);
         return t;
     }
 
@@ -83,7 +83,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T del(T t) {
         resourceService.deleteResource(whereID(t.getId(), true).getId());
-        logger.debug(String.format("Deleting Resource %s", t));
+        logger.debug("Deleting Resource {}", t);
         return t;
     }
 
@@ -117,7 +117,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T validate(T t) {
-        logger.debug(String.format("Validating Resource %s", t));
+        logger.debug("Validating Resource {}", t);
         return t;
     }
 

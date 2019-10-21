@@ -18,7 +18,7 @@ public class LoggingController {
     @PostMapping("root")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity setRootLogLevel(@RequestParam Level standardLevel) {
-        logger.info(String.format("Changing Root Level Logging to '%s'", standardLevel));
+        logger.info("Changing Root Level Logging to '{}'", standardLevel);
         Configurator.setRootLevel(standardLevel);
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -26,7 +26,7 @@ public class LoggingController {
     @PostMapping("package/{path}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity setPackageLogLevel(@PathVariable("path") String path, @RequestParam Level standardLevel) {
-        logger.info(String.format("Changing '%s' Logger Level to '%s'", path, standardLevel));
+        logger.info("Changing '{}' Logger Level to '{}'", path, standardLevel);
         Configurator.setLevel(path, standardLevel);
         return new ResponseEntity(HttpStatus.OK);
     }

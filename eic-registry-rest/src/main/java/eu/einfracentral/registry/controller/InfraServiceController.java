@@ -63,7 +63,7 @@ public class InfraServiceController {
         ff.setQuantity(10000);
         List<InfraService> services = infraService.getAll(ff, null).getResults();
         for (InfraService service : services) {
-            logger.info(String.format("Deleting service with name: %s", service.getName()));
+            logger.info("Deleting service with name: {}", service.getName());
             infraService.delete(service);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

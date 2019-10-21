@@ -110,7 +110,7 @@ public class RegistrationMailService {
             if (!debug) {
                 mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
             }
-            logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", "registration@einfracentral.eu", regTeamSubject, regTeamMail));
+            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", "registration@einfracentral.eu", regTeamSubject, regTeamMail);
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");
             for (User user : provider.getUsers()) {
@@ -125,7 +125,7 @@ public class RegistrationMailService {
                 if (!debug) {
                     mailService.sendMail(user.getEmail(), providerSubject, providerMail);
                 }
-                logger.info(String.format("Recipient: %s%nTitle: %s%nMail body: %n%s", user.getEmail(), providerSubject, providerMail));
+                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), providerSubject, providerMail);
             }
 
             out.close();

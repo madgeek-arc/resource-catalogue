@@ -62,8 +62,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> add(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) {
         ResponseEntity<ProviderRequest> ret = new ResponseEntity<>(providerRequestService.add(providerRequest, auth), HttpStatus.OK);
-        logger.info("User " + auth.getName() + " created a new request with id " + providerRequest.getId() +
-                       " for the Provider with id " + providerRequest.getProviderId());
+        logger.info("User {} created a new request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return ret;
     }
 
@@ -72,8 +71,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> update(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<ProviderRequest> ret = super.update(providerRequest, auth);
-        logger.info("User " + auth.getName() + " updated request with id " + providerRequest.getId() +
-                       " for the Provider with id " + providerRequest.getProviderId());
+        logger.info("User {} updated request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return ret;
     }
 
@@ -82,8 +80,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     public ResponseEntity<ProviderRequest> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderRequest providerRequest = providerRequestService.get(id);
         providerRequestService.delete(providerRequest);
-        logger.info("User " + auth.getName() + " deleted request with id " + providerRequest.getId() +
-                       " for the Provider with id " + providerRequest.getProviderId());
+        logger.info("User {} deleted request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return new ResponseEntity<>(providerRequest, HttpStatus.OK);
     }
 

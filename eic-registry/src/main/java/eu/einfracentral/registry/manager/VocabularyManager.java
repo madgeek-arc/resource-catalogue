@@ -111,7 +111,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            logger.debug(String.format("Adding Vocabulary %s", vocabulary.toString()));
+            logger.debug("Adding Vocabulary {}", vocabulary.toString());
             add(vocabulary, auth);
         }
     }
@@ -124,7 +124,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.setQuantity(10000);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
-            logger.debug(String.format("Deleting Vocabulary %s", vocabulary.getName()));
+            logger.debug("Deleting Vocabulary {}", vocabulary.getName());
             delete(vocabulary);
         }
     }
@@ -182,7 +182,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             vocabulary.setId(id);
         }
         if (exists(vocabulary)) {
-            logger.error(String.format("%s already exists!%n%s", resourceType.getName(), vocabulary));
+            logger.error("{} already exists!\n{}", resourceType.getName(), vocabulary);
             throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
         }
         String serialized = serialize(vocabulary);
@@ -190,7 +190,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);
-        logger.debug(String.format("Adding Resource %s", vocabulary));
+        logger.debug("Adding Resource {}", vocabulary);
         return vocabulary;
     }
 
@@ -204,7 +204,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         existing.setPayload(serialized);
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug(String.format("Updating Resource %s", vocabulary));
+        logger.debug("Updating Resource {}", vocabulary);
         return vocabulary;
     }
 

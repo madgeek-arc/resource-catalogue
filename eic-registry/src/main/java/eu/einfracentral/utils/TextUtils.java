@@ -55,11 +55,11 @@ public class TextUtils {
      */
     public static String formatArithmeticPrecision(String value, int precision) {
         if (!value.matches("^(?:(0?\\.)|([1-9]\\d*))\\.?\\d*$")) {
-            logger.error(String.format("Error: '%s' is not a valid numeric value", value));
+            logger.error("Error: '{}' is not a valid numeric value", value);
             throw new NumberFormatException("Not a valid numeric value...");
         }
         if (precision < 0) {
-            logger.error(String.format("Error: precision cannot be a negative value : %d", precision));
+            logger.error("Error: precision cannot be a negative value : {}", precision);
             throw new NumberFormatException("Arithmetic precision cannot be a negative value");
         }
         String[] parts = value.split("\\.");

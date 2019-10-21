@@ -41,7 +41,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         validate(providerRequest);
         providerRequest.setId(UUID.randomUUID().toString());
         super.add(providerRequest, auth);
-        logger.debug(String.format("Adding ProviderRequest %s", providerRequest));
+        logger.debug("Adding ProviderRequest {}", providerRequest);
         return providerRequest;
     }
 
@@ -49,13 +49,13 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     public ProviderRequest update(ProviderRequest providerRequest, Authentication auth) {
         validate(providerRequest);
         super.update(providerRequest, auth);
-        logger.info(String.format("Updating ProviderRequest %s", providerRequest));
+        logger.info("Updating ProviderRequest {}", providerRequest);
         return providerRequest;
     }
 
     @Override
     public void delete(ProviderRequest providerRequest) {
-        logger.info(String.format("Deleting ProviderRequest %s", providerRequest));
+        logger.info("Deleting ProviderRequest {}", providerRequest);
         super.delete(providerRequest);
     }
 

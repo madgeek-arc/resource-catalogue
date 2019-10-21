@@ -47,7 +47,7 @@ public class ContactController {
                         .collect(Collectors.toList());
             }
             // TODO: complete this method
-            logger.info(String.format("%nSending e-mail to '%s'%nFrom %s <%s>:%nSubject: %s%nMessage Body:%n%s", String.join(",", emailsTo), message.getSenderName(), message.getSenderEmail(), message.getSubject(), message.getMessage()));
+            logger.info("\nSending e-mail to '{}'\nFrom {} <{}>:\nSubject: {}\nMessage Body:\n{}", String.join(",", emailsTo), message.getSenderName(), message.getSenderEmail(), message.getSubject(), message.getMessage());
         }
     }
 }
