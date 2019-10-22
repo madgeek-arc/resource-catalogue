@@ -3,7 +3,7 @@
     {
       "multivalued": false,
       "name": "infra_service_id",
-      "path": "//*[local-name()='infraService']/*[local-name()='id']/text()",
+      "path": "//*[local-name()='service']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
@@ -11,177 +11,177 @@
       "multivalued": false,
       "name": "name",
       "label": "Service Name",
-      "path": "//*[local-name()='infraService']/*[local-name()='name']/text()",
+      "path": "//*[local-name()='service']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "service_version",
-      "path": "//*[local-name()='version']/text()",
+      "path": "//*[local-name()='service']/*[local-name()='version']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "providers",
       "label": "Provider",
-      "path": "//*[local-name()='provider']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='provider']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "scientific_subdomains",
       "label": "Scientific Subdomain",
-      "path": "//*[local-name()='scientificSubdomain']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='scientificSubdomain']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "subcategories",
       "label": "Subcategory",
-      "path": "//*[local-name()='subcategory']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='subcategory']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "target_users",
       "label": "Target User",
-      "path": "//*[local-name()='targetUser']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='targetUser']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "languages",
       "label": "Language",
-      "path": "//*[local-name()='language']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='language']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "places",
       "label": "Place",
-      "path": "//*[local-name()='place']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='place']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "access_types",
       "label": "Access Type",
-      "path": "//*[local-name()='accessType']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='accessType']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "access_modes",
       "label": "Access Mode",
-      "path": "//*[local-name()='accessMode']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='accessMode']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "funders",
       "label": "Funders",
-      "path": "//*[local-name()='funder']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='funder']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "phase",
       "label": "Phase",
-      "path": "//*[local-name()='phase']/text()",
+      "path": "//*[local-name()='service']/*[local-name()='phase']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "trl",
       "label": "TRL",
-      "path": "//*[local-name()='trl']/text()",
+      "path": "//*[local-name()='service']/*[local-name()='trl']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "orderType",
       "label": "Order Type",
-      "path": "//*[local-name()='orderType']/text()",
+      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "description",
+      "path": "//*[local-name()='service']/*[local-name()='description']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "tagline",
+      "path": "//*[local-name()='service']/*[local-name()='tagline']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "user_value",
+      "path": "//*[local-name()='service']/*[local-name()='userValue']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "user_base",
+      "path": "//*[local-name()='service']//*[local-name()='userBase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "use_cases",
+      "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "tags",
+      "path": "//*[local-name()='service']//*[local-name()='tag']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "registeredBy",
-      "path": "//*[local-name()='registeredBy']/text()",
+      "path": "//*[local-name()='serviceMetadata']/*[local-name()='registeredBy']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "modifiedBy",
-      "path": "//*[local-name()='modifiedBy']/text()",
+      "path": "//*[local-name()='serviceMetadata']/*[local-name()='modifiedBy']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "registeredAt",
-      "path": "//*[local-name()='registeredAt']/text()",
+      "path": "//*[local-name()='serviceMetadata']/*[local-name()='registeredAt']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "modifiedAt",
-      "path": "//*[local-name()='modifiedAt']/text()",
+      "path": "//*[local-name()='serviceMetadata']/*[local-name()='modifiedAt']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "active",
       "defaultValue": false,
-      "path": "//*[local-name()='active']/text()",
+      "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
       "type": "java.lang.Boolean"
     },
     {
       "multivalued": false,
       "name": "status",
-      "path": "//*[local-name()='status']/text()",
+      "path": "//*[local-name()='infraService']/*[local-name()='status']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "latest",
-      "path": "//*[local-name()='latest']/text()",
+      "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
       "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
-      "name": "description",
-      "path": "//*[local-name()='infraService']/*[local-name()='description']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "tagline",
-      "path": "//*[local-name()='tagline']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "user_value",
-      "path": "//*[local-name()='userValue']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "user_base",
-      "path": "//*[local-name()='userBase']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "use_cases",
-      "path": "//*[local-name()='useCase']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "tags",
-      "path": "//*[local-name()='tag']/text()",
-      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",

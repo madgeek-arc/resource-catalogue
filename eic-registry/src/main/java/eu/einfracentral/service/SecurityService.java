@@ -102,10 +102,10 @@ public class SecurityService {
         } catch (RuntimeException e) {
             return false;
         }
-        if (service.getProviders().isEmpty()) {
+        if (service.getService().getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
         }
-        Optional<List<String>> providers = Optional.of(service.getProviders());
+        Optional<List<String>> providers = Optional.of(service.getService().getProviders());
         return providers
                 .get()
                 .stream()
@@ -114,7 +114,7 @@ public class SecurityService {
     }
 
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
-        List<String> providerIds = service.getProviders();
+        List<String> providerIds = service.getService().getProviders();
         for (String providerId : providerIds) {
             Provider provider = providerManager.get(providerId);
             if ((provider.getActive() == null || provider.getStatus() == null)) {
@@ -150,7 +150,7 @@ public class SecurityService {
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
-        for (String providerId : service.getProviders()) {
+        for (String providerId : service.getService().getProviders()) {
             Provider provider = providerManager.get(providerId);
             if (provider != null && provider.getActive() != null && provider.getActive()) {
                 if (userIsProviderAdmin(auth, providerId)) {

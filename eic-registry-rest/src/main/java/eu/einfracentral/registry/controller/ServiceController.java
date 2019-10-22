@@ -10,7 +10,6 @@ import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -46,25 +45,21 @@ public class ServiceController {
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
     private MeasurementService<Measurement, Authentication> measurementService;
-    private VocabularyService vocabularyService;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<Provider, Authentication> provider,
-                      MeasurementService<Measurement, Authentication> measurementService,
-                      VocabularyService vocabularyService) {
+                      MeasurementService<Measurement, Authentication> measurementService) {
         this.infraService = service;
         this.providerService = provider;
         this.measurementService = measurementService;
-        this.vocabularyService = vocabularyService;
     }
 
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Service ret = new Service(infraService.get(id));
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+        return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the specified version of a Service, providing the Service id and version.")
@@ -78,10 +73,10 @@ public class ServiceController {
         if ("rich".equals(id)) { // wrong controller (id = rich, version = serviceId)
             return getRichService(version, "latest", auth);
         }
-        return new ResponseEntity<>(new Service(infraService.get(id, version)), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.get(id, version).getService(), HttpStatus.OK);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Get the specified version of a RichService providing the Service id and version.")
     @RequestMapping(path = "rich/{id}/{version}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth, #id)")
@@ -95,11 +90,11 @@ public class ServiceController {
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
-        logger.info(String.format("User %s created a new Service %s with id %s", auth.getName(), service.getName(), service.getId()));
-        return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
+        logger.info("User '{}' created a new Service with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
+        return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     // @securityService.providerCanAddServices(#auth, #service) is checked when adding/updating service or measurements
     @RequestMapping(path = "serviceWithMeasurements", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -126,18 +121,18 @@ public class ServiceController {
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
                 service.setId(infraService.createServiceId(service));
             }
-            s = this.infraService.get(service.getId());
+            s = this.infraService.get(service.getId()).getService();
         } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service
         }
 
         if (s == null) { // if existing service is null, create it, else update it
-            s = this.infraService.addService(new InfraService(service), auth);
-            logger.info("User '{}' added Service:\n{}", auth.getName(), s.toString());
+            s = this.infraService.addService(new InfraService(service), auth).getService();
+            logger.info("User '{}' added Service:\n{}", auth.getName(), s);
         } else {
             if (!s.equals(service)) {
-                s = this.infraService.updateService(new InfraService(service), auth);
-                logger.info("User '{}' updated Service:\n{}", auth.getName(), s.toString());
+                s = this.infraService.updateService(new InfraService(service), auth).getService();
+                logger.info("User '{}' updated Service:\n{}", auth.getName(), s);
             }
         }
         this.measurementService.updateAll(s.getId(), measurements, auth);
@@ -151,7 +146,7 @@ public class ServiceController {
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret = this.infraService.updateService(new InfraService(service), auth);
         logger.info("User '{}' updated Service with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
-        return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
+        return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Validates the Service without actually changing the repository.")
@@ -176,11 +171,11 @@ public class ServiceController {
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
-        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
+        List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -207,25 +202,25 @@ public class ServiceController {
         ff.addFilter("latest", "true");
         ff.setQuantity(1000);
         List<RichService> services = infraService.getRichServices(ff, auth).getResults();
-        for (RichService service : services){
-            switch (type){
+        for (RichService service : services) {
+            switch (type) {
                 case "SUPERCATEGORY":
-                    for (Category category : service.getCategories()){
-                        if (category.getSuperCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())){
+                    for (Category category : service.getCategories()) {
+                        if (category.getSuperCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())) {
                             childIds.add(category.getSubCategory().getId());
                         }
                     }
                     break;
                 case "CATEGORY":
-                    for (Category category : service.getCategories()){
-                        if (category.getCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())){
+                    for (Category category : service.getCategories()) {
+                        if (category.getCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())) {
                             childIds.add(category.getSubCategory().getId());
                         }
                     }
                     break;
                 case "SCIENTIFIC_DOMAIN":
-                    for (ScientificDomain domain : service.getDomains()){
-                        if (domain.getDomain().getId().equals(parent) && !childIds.contains(domain.getSubdomain().getId())){
+                    for (ScientificDomain domain : service.getDomains()) {
+                        if (domain.getDomain().getId().equals(parent) && !childIds.contains(domain.getSubdomain().getId())) {
                             childIds.add(domain.getSubdomain().getId());
                         }
                     }
@@ -248,7 +243,7 @@ public class ServiceController {
                         .stream().map(RichService::getService).collect(Collectors.toList()));
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Get a list of RichServices based on a set of ids.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
@@ -274,7 +269,7 @@ public class ServiceController {
                     .stream()
                     .filter(s -> s.isActive() != null ? s.isActive() : false)
                     .filter(InfraService::isLatest)
-                    .map(Service::new).collect(Collectors.toList());
+                    .map(InfraService::getService).collect(Collectors.toList());
             if (!items.isEmpty()) {
                 serviceResults.put(services.getKey(), items);
             }
@@ -282,7 +277,7 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Get all modification details of a specific Service, providing the Service id.")
     @RequestMapping(path = {"history/{id}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
@@ -290,7 +285,7 @@ public class ServiceController {
         return ResponseEntity.ok(history);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Get all modifications of a specific Service, providing the Service id and the resource Version id.")
     @RequestMapping(path = {"history/{serviceId}/{versionId}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getVersionHistory(@PathVariable String serviceId, @PathVariable String versionId, @ApiIgnore Authentication auth) {
@@ -298,14 +293,14 @@ public class ServiceController {
         return ResponseEntity.ok(service);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Get all featured Services.")
     @RequestMapping(path = "featured/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
         return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -320,14 +315,14 @@ public class ServiceController {
         ff.addFilter("active", "false");
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
 //        Paging<InfraService> infraServices = infraService.getInactiveServices();
-        List<Service> services = infraServices.getResults().stream().map(Service::new).collect(Collectors.toList());
+        List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
         if (services.isEmpty()) {
             throw new ResourceNotFoundException();
         }
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Providing the Service id and version, set the Service to active or inactive.")
     @RequestMapping(path = "publish/{id}/{version}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
@@ -335,11 +330,11 @@ public class ServiceController {
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = infraService.get(id, version);
         service.setActive(active);
-        logger.info("User '{}' set Service with name '{}' and id '{}' as active", auth.getName(), service.getName(), service.getId());
+        logger.info("User '{}' set Service with name '{}' and id '{}' as active", auth.getName(), service.getService().getName(), service.getService().getId());
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
-//    @ApiIgnore
+    //    @ApiIgnore
 //    @ApiOperation(value = "Get all pending Service Templates.")
     @RequestMapping(path = "pending/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -348,20 +343,11 @@ public class ServiceController {
         List<Service> serviceTemplates = new ArrayList<>();
         for (Provider provider : pendingProviders) {
             if (Provider.States.fromString(provider.getStatus()) == Provider.States.PENDING_2) {
-                serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()));
+                serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
             }
         }
         Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
         return ResponseEntity.ok(services);
     }
-
-//    @ApiOperation(value = "Migrates Service's fields for Catris")
-//    @RequestMapping(path = "catris",method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    public void migrateCatrisServices() {
-//        FacetFilter ff = new FacetFilter();
-//        ff.setQuantity(10000);
-//        List<InfraService> infraServices = infraService.getAll(ff, null).getResults();
-//        infraService.migrateCatrisServices(infraServices);
-//    }
 
 }

@@ -54,7 +54,7 @@ public class UserEventsController {
         ff.setQuantity(10000);
         List<String> serviceIds = new ArrayList<>();
         for (InfraService infraService : infraServiceService.getAll(ff, auth).getResults()){
-            serviceIds.add(infraService.getId());
+            serviceIds.add(infraService.getService().getId());
         }
 
         for (Event userEvent : userEvents) {
