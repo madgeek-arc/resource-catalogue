@@ -77,19 +77,11 @@ public class Provider implements Identifiable {
     private List<String> types;
 
     /**
-     * A named group of providers that offer access to the same type of resource or capabilities.
-     */
-    @XmlElementWrapper(name = "domains", required = true)
-    @XmlElement(name = "domain")
-    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (required)", required = true)
-    private List<String> domains;
-
-    /**
      * A named group of providers that offer access to the same type of resource or capabilities, within the defined category.
      */
     @XmlElementWrapper(name = "categories", required = true)
     @XmlElement(name = "category")
-    @ApiModelProperty(position = 10, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (required)", required = true)
     private List<String> categories;
 
     /**
@@ -97,7 +89,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "esfriDomains")
     @XmlElement(name = "esfriDomain")
-    @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
     private List<String> esfriDomains;
 
     /**
@@ -105,7 +97,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 12, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
     private List<String> tags;
 
 
@@ -114,7 +106,7 @@ public class Provider implements Identifiable {
      * Current status of the RI life-cycle.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, example = "String (required)", required = true)
+    @ApiModelProperty(position = 12, example = "String (required)", required = true)
     private String lifeCycleStatus;
 
 
@@ -123,14 +115,14 @@ public class Provider implements Identifiable {
      * Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, required = true)
+    @ApiModelProperty(position = 13, required = true)
     private ProviderLocation location;
 
     /**
      * Country which provides the coordination. In the case of distributed/virtual Providers the country of the coordinating office (headquarters) should be selected.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 15, example = "String (required)", required = true)
+    @ApiModelProperty(position = 14, example = "String (required)", required = true)
     private String coordinatingCountry;
 
     /**
@@ -138,7 +130,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 15, dataType = "List", example = "String[] (optional)")
     private List<String> participatingCountries;
 
 
@@ -148,7 +140,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "contacts", required = true)
     @XmlElement(name = "contact")
-    @ApiModelProperty(position = 17, required = true)
+    @ApiModelProperty(position = 16, required = true)
     private List<Contact> contacts;
 
 
@@ -157,21 +149,21 @@ public class Provider implements Identifiable {
      * Name of the organisation/institution legally hosting (housing) the RI or its coordinating centre. A distinction is made between: (1) RIs that are self-standing and have a defined and distinct legal entity, (2) RI that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.). If (1) - name of the RI, If (2) - name of the hosting organisation.
      */
     @XmlElement
-    @ApiModelProperty(position = 18, example = "String (optional)")
+    @ApiModelProperty(position = 17, example = "String (optional)")
     private String hostingLegalEntity;
 
     /**
      * For independent legal entities (1) - legal status of the Provider. For embedded Providers (2) - legal status of the hosting legal entity.
      */
     @XmlElement
-    @ApiModelProperty(position = 19, example = "String (optional)")
+    @ApiModelProperty(position = 18, example = "String (optional)")
     private String legalStatus;
 
     /**
      * If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.
      */
     @XmlElement
-    @ApiModelProperty(position = 20, example = "String (optional)")
+    @ApiModelProperty(position = 19, example = "String (optional)")
     private String esfri;
 
     /**
@@ -179,7 +171,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
-    @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
     private List<String> networks;
 
     /**
@@ -187,7 +179,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "areasOfActivity")
     @XmlElement(name = "areaOfActivity")
-    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
     private List<String> areasOfActivity;
 
     /**
@@ -195,14 +187,14 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "societalGrandChallenges")
     @XmlElement(name = "societalGrandChallenge")
-    @ApiModelProperty(position = 23, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
     private List<String> societalGrandChallenges;
 
     /**
      * Is the RI featured on the national roadmap for research infrastructures
      */
     @XmlElement
-    @ApiModelProperty(position = 24, example = "String (optional)")
+    @ApiModelProperty(position = 23, example = "String (optional)")
     private boolean nationalRoadmap;
 
 
@@ -217,7 +209,7 @@ public class Provider implements Identifiable {
 
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 25, required = true)
+    @ApiModelProperty(position = 24, required = true)
     private List<User> users;
 
 
@@ -265,7 +257,6 @@ public class Provider implements Identifiable {
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
                 ", types=" + types +
-                ", domains=" + domains +
                 ", categories=" + categories +
                 ", esfriDomains=" + esfriDomains +
                 ", tags=" + tags +
@@ -351,14 +342,6 @@ public class Provider implements Identifiable {
 
     public void setTypes(List<String> types) {
         this.types = types;
-    }
-
-    public List<String> getDomains() {
-        return domains;
-    }
-
-    public void setDomains(List<String> domains) {
-        this.domains = domains;
     }
 
     public List<String> getCategories() {
