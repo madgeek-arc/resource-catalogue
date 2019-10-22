@@ -154,8 +154,8 @@
                 <configuration>
                     <jsonLibrary>jackson2</jsonLibrary>
                     <classPatterns>
-                        <pattern>eu.einfracentral.domain.*</pattern>
-                        <pattern>eu.einfracentral.dto.*</pattern>
+                        <pattern>eu.einfracentral.domain.**</pattern>
+                        <pattern>eu.einfracentral.dto.**</pattern>
                     </classPatterns>
                     <outputFile>target/eic-model.ts</outputFile>
                     <outputKind>module</outputKind>
