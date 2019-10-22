@@ -55,7 +55,6 @@ public class Vocabulary implements Identifiable {
         TARGET_USERS("Target users"),
         ACCESS_TYPE("Access type"),
         ACCESS_MODE("Access mode"),
-        FUNDED_BY("Funded by"),
         ORDER_TYPE("Order type"),
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_CATEGORY("Provider category"),
