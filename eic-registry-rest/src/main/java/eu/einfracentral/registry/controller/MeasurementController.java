@@ -76,7 +76,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) {
         ResponseEntity<Measurement> ret = super.add(measurement, auth);
-        logger.info("User " + auth.getName() + " created a new Measurement with id " + measurement.getId());
+        logger.info("User '{}' created a new Measurement with id '{}'", auth.getName(), measurement.getId());
         logger.info("Indicator id: " + measurement.getIndicatorId() + " and Service id: " + measurement.getServiceId());
         return ret;
     }
@@ -87,8 +87,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Measurement> ret = super.update(measurement, auth);
-        logger.info("User " + auth.getName() + " updated Measurement with id " + measurement.getId());
-        logger.info("Indicator id: " + measurement.getIndicatorId() + " and Service id: " + measurement.getServiceId());
+        logger.info("User '{}' updated Measurement with id '{}':\n -Indicator id: {}\n -Service id: {}",
+                auth.getName(), measurement.getId(), measurement.getIndicatorId(), measurement.getServiceId());
         return ret;
     }
 
@@ -98,7 +98,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
         List<Measurement> ret = measurementManager.updateAll(serviceId, allMeasurements, auth);
-        logger.info("User " + auth.getName() + " updated a list of Measurements " + ret);
+        logger.info("User '{}' updated a list of Measurements {}", auth.getName(), ret);
         return ret;
     }
 
@@ -112,7 +112,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         measurementManager.delete(measurement);
-        logger.info("User " + auth.getName() + " deleted Measurement with id " + measurement.getId());
+        logger.info("User '{}' deleted Measurement with id '{}'", auth.getName(), measurement.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

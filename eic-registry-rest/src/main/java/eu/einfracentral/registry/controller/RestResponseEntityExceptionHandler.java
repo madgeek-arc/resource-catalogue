@@ -28,7 +28,7 @@ import java.util.UUID;
 @Order(1)
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final Logger logger = LogManager.getLogger(ResponseEntityExceptionHandler.class);
+    private static final Logger logger = LogManager.getLogger(RestResponseEntityExceptionHandler.class);
 
     @ExceptionHandler(value = {IllegalStateException.class, IllegalArgumentException.class})
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
@@ -86,7 +86,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleRuntimeException(RuntimeException ex, WebRequest request) {
         String errorId = UUID.randomUUID().toString();
         String response = String.format("Please send the following error code to the system administrators. Error Code: '%s'", errorId);
-        logger.error("Error Code: " + errorId, errorId, ex);
+        logger.error("Error Code: {}", errorId, ex);
         return handleExceptionInternal(ex, response,
                 new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }

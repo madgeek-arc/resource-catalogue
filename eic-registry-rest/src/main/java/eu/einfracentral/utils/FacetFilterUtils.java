@@ -96,7 +96,7 @@ public class FacetFilterUtils {
     }
 
     public static FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
-        logger.debug("Request params: " + allRequestParams);
+        logger.debug("Request params: {}", allRequestParams);
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");
         facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from").get(0)) : 0);

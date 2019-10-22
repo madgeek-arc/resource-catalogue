@@ -6,13 +6,16 @@
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level %highlight{%c{1}} - %msg%n"/>
+            <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%C}{bright,blue}: %msg%n%throwable"/>
         </Console>
         <RollingFile name="RollingFile" fileName="${baseDir}/eic.log"
-                     filePattern="${baseDir}/$${date:yyyy-MM}/eic-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout pattern="%d %p %c{1.} [%t] %m%n" />
-            <CronTriggeringPolicy schedule="0 0 0 1 * ?"/>
-            <SizeBasedTriggeringPolicy size="100 MB"/>
+                     filePattern="${baseDir}/$${date:yyyy-MM}/eic-%d{yyyy-MM-dd_HH:mm:ss}.log.gz">
+            <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%C}{bright,blue}: %msg%n%throwable" />
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <CronTriggeringPolicy schedule="0 0 0 1 * ?"/>
+                <SizeBasedTriggeringPolicy size="20 MB" />
+            </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${baseDir}" maxDepth="2">
                     <IfFileName glob="*/eic-*.log.gz" />
@@ -21,10 +24,13 @@
             </DefaultRolloverStrategy>
         </RollingFile>
         <RollingFile name="SyncRollingFile" fileName="${syncBaseDir}/sync.log"
-                     filePattern="${syncBaseDir}/$${date:yyyy-MM}/sync-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout pattern="%d %p %c{1.} [%t] %m%n" />
-            <CronTriggeringPolicy schedule="0 0 0 1 * ?"/>
-            <SizeBasedTriggeringPolicy size="100 MB"/>
+                     filePattern="${syncBaseDir}/$${date:yyyy-MM}/sync-%d{yyyy-MM-dd_HH:mm:ss}.log.gz">
+            <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%C}{bright,blue}: %msg%n%throwable" />
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <CronTriggeringPolicy schedule="0 0 0 1 * ?"/>
+                <SizeBasedTriggeringPolicy size="20 MB" />
+            </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${syncBaseDir}" maxDepth="2">
                     <IfFileName glob="*/sync-*.log.gz" />
@@ -38,6 +44,12 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Root>
+        <Logger name="springfox.documentation" level="warn">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.springframework" level="warn">
+            <AppenderRef ref="Console"/>
+        </Logger>
         <Logger name="eu.einfracentral.service.SynchronizerService" level="info">
             <AppenderRef ref="SyncRollingFile"/>
         </Logger>

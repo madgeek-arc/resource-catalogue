@@ -53,7 +53,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         if (!events.isEmpty()) {
             for (Event event : events) {
                 this.delete(event);
-                logger.info(String.format("Deleting Event:%n-id: %s%n-Service: %s%n-Type: %s", event.getId(), event.getService(), event.getType()));
+                logger.info("Deleting Event:\n-id: {}\n-Service: {}\n-Type: {}", event.getId(), event.getService(), event.getType());
             }
         }
     }
@@ -64,7 +64,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
         Event ret = super.add(event, auth);
-        logger.debug("Adding Event " + event);
+        logger.debug("Adding Event: {}", event);
         return ret;
     }
 
@@ -73,7 +73,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         Event ret = super.update(event, auth);
-        logger.debug("Updating Event " + event);
+        logger.debug("Updating Event: {}", event);
         return ret;
     }
 
@@ -89,7 +89,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
             event = events.get(0);
             delete(event);
-            logger.debug("Deleting previous FAVORITE Event " + event + " because it happened more than once in the same day.");
+            logger.debug("Deleting previous FAVORITE Event '{}' because it happened more than once in the same day.", event);
         } else {
             event = new Event();
             event.setService(serviceId);
@@ -97,7 +97,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setType(Event.UserActionType.FAVOURITE.getKey());
             event.setValue(favouriteValue);
             event = add(event, null);
-            logger.debug("Adding a new FAVORITE Event " + event);
+            logger.debug("Adding a new FAVORITE Event: {}", event);
         }
         return event;
     }
@@ -117,7 +117,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event = events.get(0);
             event.setValue(value);
             event = update(event, null);
-            logger.debug("Updating RATING Event " + event);
+            logger.debug("Updating RATING Event: {}", event);
         } else {
             event = new Event();
             event.setService(serviceId);
@@ -125,7 +125,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setType(Event.UserActionType.RATING.getKey());
             event.setValue(value);
             event = add(event, null);
-            logger.debug("Adding a new RATING Event " + event);
+            logger.debug("Adding a new RATING Event: {}", event);
         }
         return event;
     }

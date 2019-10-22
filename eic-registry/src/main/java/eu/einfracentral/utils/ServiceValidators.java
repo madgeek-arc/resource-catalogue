@@ -40,7 +40,7 @@ public class ServiceValidators {
     }
 
     public void validateVocabularies(InfraService service) {
-        logger.debug("Validating vocabularies, Service id: " + service.getId());
+        logger.debug("Validating vocabularies, Service id: {}", service.getId());
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         // Validate Subcategories
@@ -163,7 +163,7 @@ public class ServiceValidators {
 
     // Validate the correctness of Providers.
     public void validateProviders(InfraService service) {
-        logger.debug("Validating Providers, Service id: " + service.getId());
+        logger.debug("Validating Providers, Service id: {}", service.getId());
         List<String> providers = service.getProviders();
         List<String> validProviders = new ArrayList<>();
         if ((providers == null) || CollectionUtils.isEmpty(service.getProviders()) ||
@@ -184,7 +184,7 @@ public class ServiceValidators {
 
     // Validate the correctness of Related and Required Services.
     public void validateServices(InfraService service) {
-        logger.debug("Validating Required/Related Services, Service id: " + service.getId());
+        logger.debug("Validating Required/Related Services, Service id: {}", service.getId());
         List<String> relatedServices = service.getRelatedServices();
         List<String> existingRelatedServices = new ArrayList<>();
         if (relatedServices != null) {

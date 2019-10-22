@@ -54,7 +54,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         existsIdentical(measurement);
         validate(measurement);
         super.add(measurement, auth);
-        logger.debug("Adding Measurement " + measurement);
+        logger.debug("Adding Measurement {}", measurement);
         synchronizerService.syncAdd(measurement);
         return measurement;
     }
@@ -70,7 +70,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             throw new ValidationException("You cannot change the Indicator of the measurement");
         }
         super.update(measurement, auth);
-        logger.debug("Updating Measurement " + measurement);
+        logger.debug("Updating Measurement {}", measurement);
         synchronizerService.syncUpdate(measurement);
         return measurement;
     }
@@ -169,7 +169,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public void delete(Measurement measurement) {
         super.delete(measurement);
-        logger.debug("Deleting Measurement " + measurement);
+        logger.debug("Deleting Measurement: {}", measurement);
         synchronizerService.syncDelete(measurement);
     }
 

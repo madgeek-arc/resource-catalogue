@@ -11,8 +11,8 @@ import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -130,7 +130,7 @@ public class StatisticsManager implements StatisticsService {
                                         subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
                                 ).sum();
                             }
-//                            logger.warn(String.format("Favs: %s - Unfavs: %s", totalDocCounts[1], totalDocCounts[0]));
+//                            logger.warn("Favs: {} - Unfavs: {}", totalDocCounts[1], totalDocCounts[0]);
                             return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
                         }
                 )

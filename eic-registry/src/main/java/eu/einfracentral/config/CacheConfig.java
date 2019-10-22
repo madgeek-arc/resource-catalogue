@@ -20,6 +20,8 @@ public class CacheConfig {
 
     public static final String CACHE_PROVIDERS = "providers";
     public static final String CACHE_VOCABULARIES = "vocabularies";
+    public static final String CACHE_VOCABULARY_MAP = "vocabulary_map";
+    public static final String CACHE_VOCABULARY_TREE = "vocabulary_tree";
     public static final String CACHE_FEATURED = "featuredServices";
     public static final String CACHE_EVENTS = "events";
     public static final String CACHE_SERVICE_EVENTS = "service_events";
@@ -32,13 +34,15 @@ public class CacheConfig {
         cacheManager.setCaches(Arrays.asList(
 
                 new ConcurrentMapCache(CACHE_VISITS,
-                        CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(500).build().asMap(), false),
+                        CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(2000).build().asMap(), false),
                 new ConcurrentMapCache(CACHE_FEATURED,
                         CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).maximumSize(50).build().asMap(), false),
                 new ConcurrentMapCache(CACHE_PROVIDERS),
                 new ConcurrentMapCache(CACHE_EVENTS),
                 new ConcurrentMapCache(CACHE_SERVICE_EVENTS),
                 new ConcurrentMapCache(CACHE_VOCABULARIES),
+                new ConcurrentMapCache(CACHE_VOCABULARY_MAP),
+                new ConcurrentMapCache(CACHE_VOCABULARY_TREE),
 
                 // NEEDED FOR registry-core
                 new ConcurrentMapCache("resourceTypes"),

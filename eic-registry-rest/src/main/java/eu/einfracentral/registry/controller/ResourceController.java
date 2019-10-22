@@ -1,12 +1,10 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Identifiable;
-import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.exception.ServerError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -16,11 +14,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 //the below line contains the only produces needed for spring to work in the entire project; all others are there until springfox fix their bugs
 @RequestMapping(consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -41,35 +37,35 @@ public class ResourceController<T extends Identifiable, U extends Authentication
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.add(t, auth), HttpStatus.CREATED);
-        logger.debug("User " + auth.getName() + " created a new Resource with id " + t.getId());
+        logger.debug("User {} created a new Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> update(@RequestBody T t, @ApiIgnore U auth) throws ResourceNotFoundException {
         ResponseEntity<T> ret = new ResponseEntity<>(service.update(t, auth), HttpStatus.OK);
-        logger.debug("User " + auth.getName() + " updated Resource with id " + t.getId());
+        logger.debug("User {} updated Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> validate(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.validate(t), HttpStatus.OK);
-        logger.debug("User " + auth.getName() + " validated Resource with id " + t.getId());
+        logger.debug("User {} validated Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.del(t), HttpStatus.OK);
-        logger.debug("User " + auth.getName() + " deleted Resource with id " + t.getId());
+        logger.debug("User {} deleted Resource with id {}", auth.getName(), t.getId());
         return ret;
     }
 
     @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<T>> delAll(@ApiIgnore U auth) {
         ResponseEntity<List<T>> ret = new ResponseEntity<>(service.delAll(), HttpStatus.OK);
-        logger.debug("User " + auth.getName() + " deleted a list of resources " + ret);
+        logger.debug("User {} deleted a list of resources {}", auth.getName(), ret);
         return ret;
     }
 
@@ -102,14 +98,9 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
 
-    @ExceptionHandler(ResourceException.class)
-    @ResponseBody
-    public ResponseEntity<ServerError> handleResourceException(HttpServletRequest req, ResourceException e) {
-        return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), e), e.getStatus());
-    }
-
-    @RequestMapping(path = {"versions/{id}", "versions/{id}/{version}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<T>> versions(@PathVariable String id, @PathVariable Optional<String> version, @ApiIgnore U auth) {
-        return new ResponseEntity<>(service.versions(id, version.orElse(null)), HttpStatus.OK);
-    }
+//    @ExceptionHandler(ResourceException.class)
+//    @ResponseBody
+//    public ResponseEntity<ServerError> handleResourceException(HttpServletRequest req, ResourceException e) {
+//        return new ResponseEntity<>(new ServerError(req.getRequestURL().toString(), e), e.getStatus());
+//    }
 }

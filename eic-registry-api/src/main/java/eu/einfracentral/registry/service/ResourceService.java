@@ -48,13 +48,6 @@ ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
 
     /**
      * @param id
-     * @param version
-     * @return
-     */
-    List<T> versions(String id, String version);
-
-    /**
-     * @param id
      * @return
      */
     Resource getResource(String id);
