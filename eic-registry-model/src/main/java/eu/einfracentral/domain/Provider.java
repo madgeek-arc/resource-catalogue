@@ -17,62 +17,193 @@ public class Provider implements Identifiable {
 
     // Provider Basic Information
     /**
-     * Identifier of the service provider.
+     * Unique identifier of the provider.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
     private String id;
 
     /**
-     * Name of the service provider.
+     * Full Name of the organisation providing/offering the service/resource.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
     private String name;
 
     /**
-     * Webpage with information about the service provider.
+     * Acronym or abbreviation of the provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    private String acronym;
+
+    /**
+     * Webpage with information about the provider.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 4, example = "URL (required)", required = true)
     private URL website;
 
     /**
-     * The description of the service provider.
+     * The description of the provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "String (required)", required = true)
+    @ApiModelProperty(position = 5, example = "String (required)", required = true)
     private String description;
 
     /**
-     * Link to the logo/visual identity of the service provider.
+     * Link to the logo/visual identity of the provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 6, example = "URL (required)", required = true)
     private URL logo;
+
+    /**
+     * Link to video, slideshow, photos, screenshots with details of the provider.
+     */
+    @XmlElementWrapper(name = "multimedia")
+//    @XmlElement(name = "multimedia")
+    @ApiModelProperty(position = 7, dataType = "List", example = "URL[] (optional)")
+    private List<URL> multimedia;
+
+
+    // Provider Classification Information
+    /**
+     * Defines if the Provider is single-sited, distributed, mobile, virtual, etc.
+     */
+    @XmlElementWrapper(name = "types", required = true)
+    @XmlElement(name = "type")
+    @ApiModelProperty(position = 8, dataType = "List", example = "String[] (required)", required = true)
+    private List<String> types;
+
+    /**
+     * A named group of providers that offer access to the same type of resource or capabilities.
+     */
+    @XmlElementWrapper(name = "domains", required = true)
+    @XmlElement(name = "domain")
+    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (required)", required = true)
+    private List<String> domains;
+
+    /**
+     * A named group of providers that offer access to the same type of resource or capabilities, within the defined category.
+     */
+    @XmlElementWrapper(name = "categories", required = true)
+    @XmlElement(name = "category")
+    @ApiModelProperty(position = 10, dataType = "List", example = "String[] (required)", required = true)
+    private List<String> categories;
+
+    /**
+     * ESFRI domain classification.
+     */
+    @XmlElementWrapper(name = "esfriDomains")
+    @XmlElement(name = "esfriDomain")
+    @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
+    private List<String> esfriDomains;
+
+    /**
+     * Keywords associated to the Provider to simplify search by relevant keywords.
+     */
+    @XmlElementWrapper(name = "tags")
+    @XmlElement(name = "tag")
+    @ApiModelProperty(position = 12, dataType = "List", example = "String[] (optional)")
+    private List<String> tags;
+
+
+    // Provider Maturity Information
+    /**
+     * Current status of the RI life-cycle.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 13, example = "String (required)", required = true)
+    private String lifeCycleStatus;
+
+
+    // Provider Location Information
+    /**
+     * Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 14, required = true)
+    private ProviderLocation location;
+
+    /**
+     * Country which provides the coordination. In the case of distributed/virtual Providers the country of the coordinating office (headquarters) should be selected.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 15, example = "String (required)", required = true)
+    private String coordinatingCountry;
+
+    /**
+     * Providers that are funded by several countries should list here all supporting countries (including the Coordinating country).
+     */
+    @XmlElementWrapper(name = "participatingCountries")
+    @XmlElement(name = "participatingCountry")
+    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (optional)")
+    private List<String> participatingCountries;
 
 
     // Provider Contact Information
     /**
-     * Name of the main contact person of the service provider.
+     * List of provider's contact persons info.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "String (required)", required = true)
-    private String contactName;
+    @XmlElementWrapper(name = "contacts", required = true)
+    @XmlElement(name = "contact")
+    @ApiModelProperty(position = 17, required = true)
+    private List<Contact> contacts;
+
+
+    // Provider Other Information
+    /**
+     * Name of the organisation/institution legally hosting (housing) the RI or its coordinating centre. A distinction is made between: (1) RIs that are self-standing and have a defined and distinct legal entity, (2) RI that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.). If (1) - name of the RI, If (2) - name of the hosting organisation.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 18, example = "String (optional)")
+    private String hostingLegalEntity;
 
     /**
-     * Email of the main contact person of the service provider.
+     * For independent legal entities (1) - legal status of the Provider. For embedded Providers (2) - legal status of the hosting legal entity.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 7, example = "String (required)", required = true)
-    private String contactEmail;
+    @XmlElement
+    @ApiModelProperty(position = 19, example = "String (optional)")
+    private String legalStatus;
 
     /**
-     * Telephone of the main contact person of the service provider.
+     * If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 8, example = "String (required)", required = true)
-    private String contactTel;
+    @XmlElement
+    @ApiModelProperty(position = 20, example = "String (optional)")
+    private String esfri;
+
+    /**
+     * Select the networks the RIs is part of.
+     */
+    @XmlElementWrapper(name = "networks")
+    @XmlElement(name = "network")
+    @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
+    private List<String> networks;
+
+    /**
+     * Basic research, Applied research or Technological development.
+     */
+    @XmlElementWrapper(name = "areasOfActivity")
+    @XmlElement(name = "areaOfActivity")
+    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
+    private List<String> areasOfActivity;
+
+    /**
+     * RI’s participation in the grand societal challenges as defined by the European Commission (Horizon 2020)
+     */
+    @XmlElementWrapper(name = "societalGrandChallenges")
+    @XmlElement(name = "societalGrandChallenge")
+    @ApiModelProperty(position = 23, dataType = "List", example = "String[] (optional)")
+    private List<String> societalGrandChallenges;
+
+    /**
+     * Is the RI featured on the national roadmap for research infrastructures
+     */
+    @XmlElement
+    @ApiModelProperty(position = 24, example = "String (optional)")
+    private boolean nationalRoadmap;
 
 
     // Extra needed fields
@@ -86,24 +217,11 @@ public class Provider implements Identifiable {
 
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 8, required = true)
+    @ApiModelProperty(position = 25, required = true)
     private List<User> users;
 
 
     public Provider() {
-    }
-
-    public Provider(Provider provider) {
-        this.id = provider.id;
-        this.name = provider.name;
-        this.website = provider.website;
-        this.description = provider.description;
-        this.logo = provider.logo;
-        this.contactName = provider.contactName;
-        this.contactEmail = provider.contactEmail;
-        this.contactTel = provider.contactTel;
-        this.active = provider.active;
-        this.status = provider.status;
     }
 
     public enum States {
@@ -141,12 +259,28 @@ public class Provider implements Identifiable {
         return "Provider{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", acronym='" + acronym + '\'' +
                 ", website=" + website +
                 ", description='" + description + '\'' +
                 ", logo=" + logo +
-                ", contactName='" + contactName + '\'' +
-                ", contactEmail='" + contactEmail + '\'' +
-                ", contactTel='" + contactTel + '\'' +
+                ", multimedia=" + multimedia +
+                ", types=" + types +
+                ", domains=" + domains +
+                ", categories=" + categories +
+                ", esfriDomains=" + esfriDomains +
+                ", tags=" + tags +
+                ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
+                ", location=" + location +
+                ", coordinatingCountry='" + coordinatingCountry + '\'' +
+                ", participatingCountries=" + participatingCountries +
+                ", contacts=" + contacts +
+                ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
+                ", legalStatus='" + legalStatus + '\'' +
+                ", esfri='" + esfri + '\'' +
+                ", networks=" + networks +
+                ", areasOfActivity=" + areasOfActivity +
+                ", societalGrandChallenges=" + societalGrandChallenges +
+                ", nationalRoadmap=" + nationalRoadmap +
                 ", active=" + active +
                 ", status='" + status + '\'' +
                 ", users=" + users +
@@ -169,6 +303,14 @@ public class Provider implements Identifiable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAcronym() {
+        return acronym;
+    }
+
+    public void setAcronym(String acronym) {
+        this.acronym = acronym;
     }
 
     public URL getWebsite() {
@@ -195,28 +337,148 @@ public class Provider implements Identifiable {
         this.logo = logo;
     }
 
-    public String getContactName() {
-        return contactName;
+    public List<URL> getMultimedia() {
+        return multimedia;
     }
 
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
+    public void setMultimedia(List<URL> multimedia) {
+        this.multimedia = multimedia;
     }
 
-    public String getContactEmail() {
-        return contactEmail;
+    public List<String> getTypes() {
+        return types;
     }
 
-    public void setContactEmail(String contactEmail) {
-        this.contactEmail = contactEmail;
+    public void setTypes(List<String> types) {
+        this.types = types;
     }
 
-    public String getContactTel() {
-        return contactTel;
+    public List<String> getDomains() {
+        return domains;
     }
 
-    public void setContactTel(String contactTel) {
-        this.contactTel = contactTel;
+    public void setDomains(List<String> domains) {
+        this.domains = domains;
+    }
+
+    public List<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
+
+    public List<String> getEsfriDomains() {
+        return esfriDomains;
+    }
+
+    public void setEsfriDomains(List<String> esfriDomains) {
+        this.esfriDomains = esfriDomains;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public String getLifeCycleStatus() {
+        return lifeCycleStatus;
+    }
+
+    public void setLifeCycleStatus(String lifeCycleStatus) {
+        this.lifeCycleStatus = lifeCycleStatus;
+    }
+
+    public ProviderLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(ProviderLocation location) {
+        this.location = location;
+    }
+
+    public String getCoordinatingCountry() {
+        return coordinatingCountry;
+    }
+
+    public void setCoordinatingCountry(String coordinatingCountry) {
+        this.coordinatingCountry = coordinatingCountry;
+    }
+
+    public List<String> getParticipatingCountries() {
+        return participatingCountries;
+    }
+
+    public void setParticipatingCountries(List<String> participatingCountries) {
+        this.participatingCountries = participatingCountries;
+    }
+
+    public List<Contact> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
+
+    public String getHostingLegalEntity() {
+        return hostingLegalEntity;
+    }
+
+    public void setHostingLegalEntity(String hostingLegalEntity) {
+        this.hostingLegalEntity = hostingLegalEntity;
+    }
+
+    public String getLegalStatus() {
+        return legalStatus;
+    }
+
+    public void setLegalStatus(String legalStatus) {
+        this.legalStatus = legalStatus;
+    }
+
+    public String getEsfri() {
+        return esfri;
+    }
+
+    public void setEsfri(String esfri) {
+        this.esfri = esfri;
+    }
+
+    public List<String> getNetworks() {
+        return networks;
+    }
+
+    public void setNetworks(List<String> networks) {
+        this.networks = networks;
+    }
+
+    public List<String> getAreasOfActivity() {
+        return areasOfActivity;
+    }
+
+    public void setAreasOfActivity(List<String> areasOfActivity) {
+        this.areasOfActivity = areasOfActivity;
+    }
+
+    public List<String> getSocietalGrandChallenges() {
+        return societalGrandChallenges;
+    }
+
+    public void setSocietalGrandChallenges(List<String> societalGrandChallenges) {
+        this.societalGrandChallenges = societalGrandChallenges;
+    }
+
+    public boolean isNationalRoadmap() {
+        return nationalRoadmap;
+    }
+
+    public void setNationalRoadmap(boolean nationalRoadmap) {
+        this.nationalRoadmap = nationalRoadmap;
     }
 
     public Boolean getActive() {

@@ -15,33 +15,37 @@ public class Funder implements Identifiable {
     private String id;
 
     @XmlElement
-    private String name;
+    private String fundingOrganisation;
 
     @XmlElement
-    private URL logo;
+    private String organisationLocalLanguage;
 
-    @XmlElementWrapper(name = "services")
-    @XmlElement(name = "service")
-    private List<String> services;
+    @XmlElement
+    private String acronym;
+
+    @XmlElement
+    private String country;
 
 
     public Funder() {
     }
 
-    public Funder(String id, String name, URL logo, List<String> services) {
+    public Funder(String id, String fundingOrganisation, String organisationLocalLanguage, String acronym, String country) {
         this.id = id;
-        this.name = name;
-        this.logo = logo;
-        this.services = services;
+        this.fundingOrganisation = fundingOrganisation;
+        this.organisationLocalLanguage = organisationLocalLanguage;
+        this.acronym = acronym;
+        this.country = country;
     }
 
     @Override
     public String toString() {
         return "Funder{" +
                 "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", logo=" + logo +
-                ", services=" + services +
+                ", fundingOrganisation='" + fundingOrganisation + '\'' +
+                ", organisationLocalLanguage='" + organisationLocalLanguage + '\'' +
+                ", acronym='" + acronym + '\'' +
+                ", country='" + country + '\'' +
                 '}';
     }
 
@@ -55,27 +59,35 @@ public class Funder implements Identifiable {
         this.id = s;
     }
 
-    public String getName() {
-        return name;
+    public String getFundingOrganisation() {
+        return fundingOrganisation;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFundingOrganisation(String fundingOrganisation) {
+        this.fundingOrganisation = fundingOrganisation;
     }
 
-    public URL getLogo() {
-        return logo;
+    public String getOrganisationLocalLanguage() {
+        return organisationLocalLanguage;
     }
 
-    public void setLogo(URL logo) {
-        this.logo = logo;
+    public void setOrganisationLocalLanguage(String organisationLocalLanguage) {
+        this.organisationLocalLanguage = organisationLocalLanguage;
     }
 
-    public List<String> getServices() {
-        return services;
+    public String getAcronym() {
+        return acronym;
     }
 
-    public void setServices(List<String> services) {
-        this.services = services;
+    public void setAcronym(String acronym) {
+        this.acronym = acronym;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }

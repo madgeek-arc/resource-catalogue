@@ -3,16 +3,15 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.Funder;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.Map;
 
 public interface FunderService extends ResourceService<Funder, Authentication> {
 
     /**
-     * Returns various stats about the specific Funder
+     * Adds all new funders.
      *
-     * @param funderId
-     * @param auth
-     * @return
      */
-    Map<String, Map<String, Double>> getFunderStats(String funderId, Authentication auth);
+    void addAll(List<Funder> funders, Authentication auth);
+
 }

@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -61,8 +62,15 @@ public class FunderController extends ResourceController<Funder, Authentication>
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> add(@RequestBody Funder funder, @ApiIgnore Authentication auth) {
         ResponseEntity<Funder> ret = new ResponseEntity<>(funderService.add(funder, auth), HttpStatus.OK);
-        logger.info("User '{}' created a new Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId());
+        logger.info("User '{}' created a new Funder with name '{}' and id '{}'", auth.getName(), funder.getFundingOrganisation(), funder.getId());
         return ret;
+    }
+
+    @ApiOperation(value = "Adds all Funders")
+    @RequestMapping(path = "/addAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addAll(@RequestBody List<Funder> funders, @ApiIgnore Authentication auth) {
+        funderService.addAll(funders, auth);
     }
 
     @Override
@@ -72,7 +80,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> update(@RequestBody Funder funder, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Funder> ret = super.update(funder, auth);
-        logger.info("User {} updated Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId());
+        logger.info("User {} updated Funder with name '{}' and id '{}'", auth.getName(), funder.getFundingOrganisation(), funder.getId());
         return ret;
     }
 
@@ -86,14 +94,8 @@ public class FunderController extends ResourceController<Funder, Authentication>
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         funderService.delete(funder);
-        logger.info("User '{}' deleted Funder with name '{}' and id '{}'", auth.getName(), funder.getName(), funder.getId());
+        logger.info("User '{}' deleted Funder with name '{}' and id '{}'", auth.getName(), funder.getFundingOrganisation(), funder.getId());
         return new ResponseEntity<>(funder, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Returns various stats about all or a specific Funder.")
-    @RequestMapping(path = "funderStats/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public Map<String, Map<String, Double>> getFunderStats(@PathVariable("id") String funderId, @ApiIgnore Authentication auth) {
-        return funderService.getFunderStats(funderId, auth);
     }
 
 }
