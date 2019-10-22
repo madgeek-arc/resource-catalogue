@@ -1,16 +1,12 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.net.URL;
-import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Funder implements Identifiable {
-
     @XmlElement
     private String id;
 
