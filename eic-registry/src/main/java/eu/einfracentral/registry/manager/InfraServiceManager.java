@@ -203,6 +203,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         serviceValidators.validateProviders(service);
         serviceValidators.validateOptions(service);
         serviceValidators.validateVersion(service);
+        serviceValidators.validateContacts(service);
         return true;
     }
 

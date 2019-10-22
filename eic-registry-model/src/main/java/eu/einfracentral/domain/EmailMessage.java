@@ -30,6 +30,17 @@ public class EmailMessage {
         this.message = message;
     }
 
+    @Override
+    public String toString() {
+        return "EmailMessage{" +
+                "recipientEmail='" + recipientEmail + '\'' +
+                ", senderEmail='" + senderEmail + '\'' +
+                ", senderName='" + senderName + '\'' +
+                ", subject='" + subject + '\'' +
+                ", message='" + message + '\'' +
+                '}';
+    }
+
     public String getRecipientEmail() {
         return recipientEmail;
     }

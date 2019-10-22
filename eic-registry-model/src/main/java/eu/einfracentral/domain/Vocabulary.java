@@ -1,6 +1,8 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Arrays;
 import java.util.Map;
@@ -28,7 +30,6 @@ public class Vocabulary implements Identifiable {
     private Map<String, String> extras;
 
     public Vocabulary() {
-
     }
 
     public Vocabulary(String id, String name, String description, String parentId,
@@ -55,7 +56,17 @@ public class Vocabulary implements Identifiable {
         ACCESS_TYPE("Access type"),
         ACCESS_MODE("Access mode"),
         FUNDED_BY("Funded by"),
-        ORDER_TYPE("Order type");
+        ORDER_TYPE("Order type"),
+        PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
+        PROVIDER_CATEGORY("Provider category"),
+        PROVIDER_DOMAIN("Provider domain"),
+        PROVIDER_ESFRI("Provider esfri"),
+        PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
+        PROVIDER_LEGAL_STATUS("Provider legal status"),
+        PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
+        PROVIDER_NETWORKS("Provider networks"),
+        PROVIDER_SOCIETAL_GRAND_CHALLENGES("Provider societal grand challenges"),
+        PROVIDER_TYPE("Provider type");
 
         private final String type;
 
@@ -87,7 +98,7 @@ public class Vocabulary implements Identifiable {
                 ", description='" + description + '\'' +
                 ", parentId='" + parentId + '\'' +
                 ", type='" + type + '\'' +
-                ", extras=" + extras.toString() +
+                ", extras=" + extras +
                 '}';
     }
 
