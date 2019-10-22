@@ -5,6 +5,8 @@
 
   <xs:element name="contact" type="tns:contact"/>
 
+  <xs:element name="emailMessage" type="tns:emailMessage"/>
+
   <xs:element name="event" type="tns:event"/>
 
   <xs:element name="funder" type="tns:funder"/>
@@ -18,6 +20,8 @@
   <xs:element name="provider" type="tns:provider"/>
 
   <xs:element name="providerLocation" type="tns:providerLocation"/>
+
+  <xs:element name="providerRequest" type="tns:providerRequest"/>
 
   <xs:element name="rangeValue" type="tns:rangeValue"/>
 
@@ -43,26 +47,31 @@
           <xs:documentation><![CDATA[First Name of the service/resource's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="isMainContact" type="xs:boolean">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Position of the service/resource's main contact person/manager.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element name="lastName" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Last Name of the service/resource's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="phone" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Phone of the provider's main contact person/ provider manager.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element minOccurs="0" name="position" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Position of the provider's main contact person/ provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Position of the service/resource's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="tel" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Telephone of the service/resource's main contact person/manager.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="emailMessage">
+    <xs:sequence>
+      <xs:element default="null" minOccurs="0" name="message" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="recipientEmail" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="senderEmail" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="senderName" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="subject" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -143,7 +152,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="accessModes">
         <xs:annotation>
-          <xs:documentation><![CDATA[The mode a user can access the service.]]></xs:documentation>
+          <xs:documentation><![CDATA[The mode a user can access the service/resource (Excellence Driven, Market driven, etc).]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -158,7 +167,7 @@
       </xs:element>
       <xs:element minOccurs="0" name="accessTypes">
         <xs:annotation>
-          <xs:documentation><![CDATA[The way a user can access the service.]]></xs:documentation>
+          <xs:documentation><![CDATA[The way a user can access the service/resource (Remote, Physical, Virtual, etc.).]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -183,7 +192,7 @@
       </xs:element>
       <xs:element minOccurs="0" name="certifications">
         <xs:annotation>
-          <xs:documentation><![CDATA[List of certifications obtained for the service from independent third parties.]]></xs:documentation>
+          <xs:documentation><![CDATA[List of certifications obtained for the service (including the certification body).]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -197,6 +206,9 @@
         </xs:annotation>
       </xs:element>
       <xs:element name="contacts">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of service's contact persons info.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:contact"/>
@@ -240,7 +252,7 @@
       </xs:element>
       <xs:element name="languages">
         <xs:annotation>
-          <xs:documentation><![CDATA[Languages of the user interface of the service.]]></xs:documentation>
+          <xs:documentation><![CDATA[Languages of the user interface of the service or the resource.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -270,7 +282,7 @@
       </xs:element>
       <xs:element minOccurs="0" name="multimediaUrls">
         <xs:annotation>
-          <xs:documentation><![CDATA[Link to video, screenshots or slides showing details of the service.]]></xs:documentation>
+          <xs:documentation><![CDATA[Link to video, screenshots or slides showing details of the service/resource.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -285,7 +297,7 @@
       </xs:element>
       <xs:element minOccurs="0" name="options">
         <xs:annotation>
-          <xs:documentation><![CDATA[High-level description of the various options or forms in which the service can be instantiated.]]></xs:documentation>
+          <xs:documentation><![CDATA[High-level description of the various options or forms in which the service/resource can be instantiated.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -320,7 +332,7 @@
       </xs:element>
       <xs:element name="places">
         <xs:annotation>
-          <xs:documentation><![CDATA[Countries where the service is offered.]]></xs:documentation>
+          <xs:documentation><![CDATA[Countries where the service/resource is offered.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -340,7 +352,7 @@
       </xs:element>
       <xs:element name="providers">
         <xs:annotation>
-          <xs:documentation><![CDATA[The organisation that manages and delivers the service.]]></xs:documentation>
+          <xs:documentation><![CDATA[The organisation that manages and delivers the service/resource.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -354,6 +366,9 @@
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="relatedPlatforms">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of service's related platforms.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="relatedPlatform" type="xs:string"/>
@@ -382,7 +397,7 @@
       </xs:element>
       <xs:element name="scientificSubdomains">
         <xs:annotation>
-          <xs:documentation><![CDATA[The subbranch of science, scientific subdicipline that is related to the service.]]></xs:documentation>
+          <xs:documentation><![CDATA[The subbranch of science, scientific subdicipline that is related to the service/resource.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -412,7 +427,7 @@
       </xs:element>
       <xs:element name="subcategories">
         <xs:annotation>
-          <xs:documentation><![CDATA[A named group of services that offer access to the same type of resource or capabilities, within the defined service category.]]></xs:documentation>
+          <xs:documentation><![CDATA[A named group of services/resources that offer access to the same type of resource or capabilities, within the defined service category.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -427,7 +442,7 @@
       </xs:element>
       <xs:element minOccurs="0" name="tags">
         <xs:annotation>
-          <xs:documentation><![CDATA[Comma-separated list of keywords associated to the service to simplify search by relevant keywords.]]></xs:documentation>
+          <xs:documentation><![CDATA[Keywords associated to the service/resource to simplify search by relevant keywords.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -437,7 +452,7 @@
       </xs:element>
       <xs:element name="targetUsers">
         <xs:annotation>
-          <xs:documentation><![CDATA[Type of users/customers that commissions a service provider to deliver a service.]]></xs:documentation>
+          <xs:documentation><![CDATA[Type of users/customers that commissions a service/resource provider to deliver a service.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -477,7 +492,7 @@
       </xs:element>
       <xs:element minOccurs="0" name="userBaseList">
         <xs:annotation>
-          <xs:documentation><![CDATA[List of customers, communities, users, etc using the service.]]></xs:documentation>
+          <xs:documentation><![CDATA[List of customers, communities, users, etc. using the service.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -515,6 +530,9 @@
   <xs:complexType name="serviceOption">
     <xs:sequence>
       <xs:element minOccurs="0" name="attributes">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of option's attributes.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="attribute" type="xs:string"/>
@@ -522,6 +540,9 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="contacts">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of option's contact persons info.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:contact"/>
@@ -584,56 +605,76 @@
 
   <xs:complexType name="provider">
     <xs:sequence>
-      <xs:element minOccurs="0" name="acronym" type="xs:string">
+      <xs:element name="acronym" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Acronym or abbreviation of the provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="active" type="xs:boolean"/>
-      <xs:element minOccurs="0" name="affiliations">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="affiliation" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
       <xs:element minOccurs="0" name="areasOfActivity">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Basic research, Applied research or Technological development.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="areaOfActivity" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="certifications">
+      <xs:element name="categories">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of providers that offer access to the same type of resource or capabilities, within the defined category.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="certification" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="category" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="contacts">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of provider's contact persons info.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:contact"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="coordinatingCountry" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Country which provides the coordination. In the case of distributed/virtual Providers the country of the coordinating office (headquarters) should be selected.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="description" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The description of the provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="domains">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of providers that offer access to the same type of resource or capabilities.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="domain" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="esfri" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element minOccurs="0" name="esfriDomains">
+        <xs:annotation>
+          <xs:documentation><![CDATA[ESFRI domain classification.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="esfriDomain" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="esfriParticipation" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.]]></xs:documentation>
-        </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="hostingLegalEntity" type="xs:string">
         <xs:annotation>
@@ -645,19 +686,14 @@
           <xs:documentation><![CDATA[Unique identifier of the provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="legalForm" type="xs:string">
+      <xs:element minOccurs="0" name="legalStatus" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[The legal from is usually noted in the registration act/statute of teh organisation. For independent legal entities (1) - legal form of the provider. For embedded providers (2) - legal form of the hosting legal entity.]]></xs:documentation>
+          <xs:documentation><![CDATA[For independent legal entities (1) - legal status of the Provider. For embedded Providers (2) - legal status of the hosting legal entity.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="legalName" type="xs:string">
+      <xs:element name="lifeCycleStatus" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Full Legal Name of the organisation providing/offering the service/resource and acting as main contact point. The Legal Name must correspond to the official legal name in the statute or the registration act/decree establishing the organisation.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="lifeCycleStatus" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Current status of the provider life-cycle.]]></xs:documentation>
+          <xs:documentation><![CDATA[Current status of the RI life-cycle.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="location" type="tns:providerLocation">
@@ -680,33 +716,40 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Full Name of the organisation providing/offering the service/resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="nationalRoadmap" type="xs:boolean">
         <xs:annotation>
           <xs:documentation><![CDATA[Is the RI featured on the national roadmap for research infrastructures]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="0" name="networks">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Select the networks the RIs is part of.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="network" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element minOccurs="0" name="participatingCountries">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Providers that are funded by several countries should list here all supporting countries (including the Coordinating country).]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="participatingCountry" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="scientificDomains">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="scientificSubdomains">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubdomain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
       <xs:element minOccurs="0" name="societalGrandChallenges">
+        <xs:annotation>
+          <xs:documentation><![CDATA[RI’s participation in the grand societal challenges as defined by the European Commission (Horizon 2020)]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="societalGrandChallenge" type="xs:string"/>
@@ -715,6 +758,9 @@
       </xs:element>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
       <xs:element minOccurs="0" name="tags">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Keywords associated to the Provider to simplify search by relevant keywords.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="tag" type="xs:string"/>
@@ -722,6 +768,9 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="types">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Defines if the Provider is single-sited, distributed, mobile, virtual, etc.]]></xs:documentation>
+        </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="type" type="xs:string"/>
@@ -750,9 +799,14 @@
           <xs:documentation><![CDATA[Provider's location city.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="country" type="xs:string">
+      <xs:element name="name" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location country.]]></xs:documentation>
+          <xs:documentation><![CDATA[Provider's location name.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="number" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's location street number.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="postalCode" type="xs:string">
@@ -760,14 +814,14 @@
           <xs:documentation><![CDATA[Provider's location postal code.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="region" type="xs:string">
+      <xs:element name="region" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Provider's location region.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="streetNameNumber" type="xs:string">
+      <xs:element name="street" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location name.]]></xs:documentation>
+          <xs:documentation><![CDATA[Provider's location street.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
