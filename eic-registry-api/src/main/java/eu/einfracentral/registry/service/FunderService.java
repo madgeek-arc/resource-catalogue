@@ -14,4 +14,17 @@ public interface FunderService extends ResourceService<Funder, Authentication> {
      */
     void addAll(List<Funder> funders, Authentication auth);
 
+    /**
+     * Get all funders in a Map.
+     *
+     * @return
+     */
+    Map<String, Funder> getFundersMap();
+
+    /**
+     * Deletes all Funders.
+     *
+     */
+    void deleteAll(Authentication auth);
+
 }

@@ -1,23 +1,16 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Funder;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.RichService;
 import eu.einfracentral.registry.service.FunderService;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class FunderManager extends ResourceManager<Funder> implements FunderService {
@@ -34,18 +27,45 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Funder add(Funder funder, Authentication auth) {
-        funder.setId(UUID.randomUUID().toString());
+        funder.setId(funder.getAcronym().toLowerCase());
         super.add(funder, auth);
         logger.debug("Adding Funder: {}", funder);
         return funder;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addAll(List<Funder> funders, Authentication auth) {
         for (Funder funder : funders){
-            funder.setId(UUID.randomUUID().toString());
+            funder.setId(funder.getAcronym().toLowerCase());
             logger.debug(String.format("Adding Funder %s", funder.getFundingOrganisation()));
             super.add(funder, auth);
         }
     }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void deleteAll(Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<Funder> allFunders = getAll(ff, auth).getResults();
+        for (Funder funder : allFunders) {
+            logger.debug("Deleting Funder {}", funder.getFundingOrganisation());
+            delete(funder);
+        }
+    }
+
+    @Override
+    public Map<String, Funder> getFundersMap() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        Map<String, Funder> fundersMap;
+        fundersMap = getAll(ff, null)
+                .getResults()
+                .stream()
+                .collect(Collectors.toMap(Funder::getId, v -> v));
+        return fundersMap;
+    }
+
 }
