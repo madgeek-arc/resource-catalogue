@@ -651,16 +651,6 @@
           <xs:documentation><![CDATA[The description of the provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="domains">
-        <xs:annotation>
-          <xs:documentation><![CDATA[A named group of providers that offer access to the same type of resource or capabilities.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="domain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
       <xs:element minOccurs="0" name="esfri" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.]]></xs:documentation>
