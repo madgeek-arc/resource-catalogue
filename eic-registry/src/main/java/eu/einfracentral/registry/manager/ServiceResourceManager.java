@@ -155,12 +155,12 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
-        if (infraService.getId() == null) {
-            infraService.setId(createServiceId(infraService));
+        if (infraService.getService().getId() == null) {
+            infraService.getService().setId(createServiceId(infraService.getService()));
         }
         // if service version is empty set it null
-        if ("".equals(infraService.getVersion())) {
-            infraService.setVersion(null);
+        if ("".equals(infraService.getService().getVersion())) {
+            infraService.getService().setVersion(null);
         }
         synchronizerService.syncAdd(infraService);
         if (exists(infraService)) {
@@ -182,14 +182,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         // if service version is empty set it null
-        if ("".equals(infraService.getVersion())) {
-            infraService.setVersion(null);
+        if ("".equals(infraService.getService().getVersion())) {
+            infraService.getService().setVersion(null);
         }
-        Resource existing = getResource(infraService.getId(), infraService.getVersion());
+        Resource existing = getResource(infraService.getService().getId(), infraService.getService().getVersion());
         if (existing == null) {
             throw new ResourceNotFoundException(
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
-                            infraService.getId(), infraService.getVersion()));
+                            infraService.getService().getId(), infraService.getService().getVersion()));
         }
         synchronizerService.syncUpdate(infraService);
 
@@ -203,11 +203,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public void delete(InfraService infraService) {
-        if (infraService == null || infraService.getId() == null) {
+        if (infraService == null || infraService.getService().getId() == null) {
             throw new ServiceException("You cannot delete a null service or service with null id field");
         }
         synchronizerService.syncDelete(infraService);
-        resourceService.deleteResource(getResource(infraService.getId(), infraService.getVersion()).getId());
+        resourceService.deleteResource(getResource(infraService.getService().getId(), infraService.getService().getVersion()).getId());
     }
 
     @Override
@@ -316,7 +316,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                         try {
                             historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
-                            logger.warn("InfraService with id '{}' does not have ServiceMetadata", service.getId());
+                            logger.warn("InfraService with id '{}' does not have ServiceMetadata", service.getService().getId());
                         }
                     }
                 }
@@ -354,7 +354,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 if (version.getId().matches(versionId)) {
                     Resource tempResource = version.getResource();
                     tempResource.setPayload(version.getPayload());
-                    service = deserialize(tempResource);
+                    service = Objects.requireNonNull(deserialize(tempResource)).getService();
                     break;
                 }
             }
@@ -379,10 +379,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     }
 
     private boolean exists(InfraService infraService) {
-        if (infraService.getVersion() != null) {
-            return getResource(infraService.getId(), infraService.getVersion()) != null;
+        if (infraService.getService().getVersion() != null) {
+            return getResource(infraService.getService().getId(), infraService.getService().getVersion()) != null;
         }
-        return getResource(infraService.getId(), null) != null;
+        return getResource(infraService.getService().getId(), null) != null;
     }
 
     public Resource getResourceById(String resourceId) {
@@ -476,10 +476,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
      * @return
      */
     private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
-        infraService.setTagline(TextUtils.prettifyText(infraService.getTagline(), specialCharacters));
-        infraService.setDescription(TextUtils.prettifyText(infraService.getDescription(), specialCharacters));
-        infraService.setUserValue(TextUtils.prettifyText(infraService.getUserValue(), specialCharacters));
-        infraService.setChangeLog(TextUtils.prettifyText(infraService.getChangeLog(), specialCharacters));
+        infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
+        infraService.getService().setDescription(TextUtils.prettifyText(infraService.getService().getDescription(), specialCharacters));
+        infraService.getService().setUserValue(TextUtils.prettifyText(infraService.getService().getUserValue(), specialCharacters));
+        infraService.getService().setChangeLog(TextUtils.prettifyText(infraService.getService().getChangeLog(), specialCharacters));
         return infraService;
     }
 
@@ -501,8 +501,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             RichService richService = new RichService(infraService);
 
             // Language Names
-            if (infraService.getLanguages() != null) {
-                richService.setLanguageNames(infraService.getLanguages()
+            if (infraService.getService().getLanguages() != null) {
+                richService.setLanguageNames(infraService.getService().getLanguages()
                         .stream()
                         .map(l -> allVocabularies.get(l).getName())
                         .collect(Collectors.toList())
@@ -510,8 +510,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // Place Names
-            if (infraService.getPlaces() != null) {
-                richService.setPlaceNames(infraService.getPlaces()
+            if (infraService.getService().getPlaces() != null) {
+                richService.setPlaceNames(infraService.getService().getPlaces()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -519,18 +519,18 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // TRL Name
-            if (infraService.getTrl() != null) {
-                richService.setTrlName(allVocabularies.get(infraService.getTrl()).getName());
+            if (infraService.getService().getTrl() != null) {
+                richService.setTrlName(allVocabularies.get(infraService.getService().getTrl()).getName());
             }
 
             // Phase Name
-            if (infraService.getPhase() != null) {
-                richService.setPhaseName(allVocabularies.get(infraService.getPhase()).getName());
+            if (infraService.getService().getPhase() != null) {
+                richService.setPhaseName(allVocabularies.get(infraService.getService().getPhase()).getName());
             }
 
             // TargetUsers Names
-            if (infraService.getTargetUsers() != null) {
-                richService.setTargetUsersNames(infraService.getTargetUsers()
+            if (infraService.getService().getTargetUsers() != null) {
+                richService.setTargetUsersNames(infraService.getService().getTargetUsers()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -538,8 +538,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // AccessType Names
-            if (infraService.getAccessTypes() != null) {
-                richService.setAccessTypeNames(infraService.getAccessTypes()
+            if (infraService.getService().getAccessTypes() != null) {
+                richService.setAccessTypeNames(infraService.getService().getAccessTypes()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -547,8 +547,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // AccessMode Names
-            if (infraService.getAccessModes() != null) {
-                richService.setAccessModeNames(infraService.getAccessModes()
+            if (infraService.getService().getAccessModes() != null) {
+                richService.setAccessModeNames(infraService.getService().getAccessModes()
                         .stream()
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
@@ -556,8 +556,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // Funders Names
-            if (infraService.getFunders() != null) {
-                richService.setFundedByNames(infraService.getFunders()
+            if (infraService.getService().getFunders() != null) {
+                richService.setFundedByNames(infraService.getService().getFunders()
                         .stream()
                         .map(p -> allFunders.get(p).getFundingOrganisation())
                         .collect(Collectors.toList())
@@ -565,13 +565,13 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             }
 
             // OrderType Name
-            if (infraService.getOrderType() != null) {
-                richService.setOrderTypeName(allVocabularies.get(infraService.getOrderType()).getName());
+            if (infraService.getService().getOrderType() != null) {
+                richService.setOrderTypeName(allVocabularies.get(infraService.getService().getOrderType()).getName());
             }
 
             // Domain Tree
             List<ScientificDomain> domains = new ArrayList<>();
-            for (String subdomain : infraService.getScientificSubdomains()) {
+            for (String subdomain : infraService.getService().getScientificSubdomains()) {
                 ScientificDomain domain = new ScientificDomain();
                 String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics
                 String domainId = "scientific_domain-" + parts[1];
@@ -583,7 +583,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
             // Category Tree
             List<Category> categories = new ArrayList<>();
-            for (String subcategory : infraService.getSubcategories()) {
+            for (String subcategory : infraService.getService().getSubcategories()) {
                 Category category = new Category();
                 String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
                 String supercategoryId = "supercategory-" + parts[1];

@@ -40,13 +40,13 @@ public class ServiceHistory extends ServiceMetadata {
 
     public ServiceHistory(InfraService service, boolean versionChange) {
         super(service.getServiceMetadata());
-        this.version = service.getVersion();
+        this.version = service.getService().getVersion();
         this.versionChange = versionChange;
     }
 
     public ServiceHistory(InfraService service, String coreVersionId, boolean versionChange) {
         super(service.getServiceMetadata());
-        this.version = service.getVersion();
+        this.version = service.getService().getVersion();
         this.coreVersionId = coreVersionId;
         this.versionChange = versionChange;
     }

@@ -6,8 +6,10 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-// FIXME: change to composition instead of inheritance.
-public class InfraService extends Service {
+public class InfraService {
+
+    @XmlElement(required = true)
+    private Service service;
 
     @XmlElement(name = "serviceMetadata")
     private ServiceMetadata serviceMetadata;
@@ -27,24 +29,32 @@ public class InfraService extends Service {
     }
 
     public InfraService(Service service) {
-        super(service);
+        this.service = service;
         this.setServiceMetadata(null);
     }
 
     public InfraService(Service service, ServiceMetadata serviceMetadata) {
-        super(service);
+        this.service = service;
         this.serviceMetadata = serviceMetadata;
     }
 
     @Override
     public String toString() {
         return "InfraService{" +
-                "service=" + super.toString() +
+                "service=" + service +
                 ", serviceMetadata=" + serviceMetadata +
                 ", active=" + active +
                 ", status='" + status + '\'' +
                 ", latest=" + latest +
                 '}';
+    }
+
+    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
     }
 
     public ServiceMetadata getServiceMetadata() {

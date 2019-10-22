@@ -42,7 +42,7 @@ public class ServiceValidators {
         this.funderService = funderService;
     }
 
-    public void validateVocabularies(InfraService service) {
+    public void validateVocabularies(Service service) {
         logger.debug("Validating vocabularies, Service id: {}", service.getId());
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
         Map<String, Funder> allFunders = funderService.getFundersMap();
@@ -166,7 +166,7 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Providers.
-    public void validateProviders(InfraService service) {
+    public void validateProviders(Service service) {
         logger.debug("Validating Providers, Service id: {}", service.getId());
         List<String> providers = service.getProviders();
         List<String> validProviders = new ArrayList<>();
@@ -187,7 +187,7 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Related and Required Services.
-    public void validateServices(InfraService service) {
+    public void validateServices(Service service) {
         logger.debug("Validating Required/Related Services, Service id: {}", service.getId());
         List<String> relatedServices = service.getRelatedServices();
         List<String> existingRelatedServices = new ArrayList<>();
@@ -215,7 +215,7 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Service Name.
-    public void validateName(InfraService service) {
+    public void validateName(Service service) {
         if (service.getName() == null || service.getName().equals("")) {
             throw new ValidationException("field 'name' is obligatory");
         }
@@ -225,14 +225,14 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Service URL.
-    public void validateURL(InfraService service) {
+    public void validateURL(Service service) {
         if (service.getUrl() == null || service.getUrl().toString().equals("")) {
             throw new ValidationException("field 'url' is mandatory");
         }
     }
 
     // Validate the correctness of Service Description.
-    public void validateDescription(InfraService service) {
+    public void validateDescription(Service service) {
         if (service.getDescription() == null || service.getDescription().equals("")) {
             throw new ValidationException("field 'description' is mandatory");
         }
@@ -242,14 +242,14 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Service Logo.
-    public void validateLogo(InfraService service) {
+    public void validateLogo(Service service) {
         if (service.getLogo() == null || service.getLogo().toString().equals("")) {
             throw new ValidationException("field 'logo' is mandatory");
         }
     }
 
     // Validate the correctness of Service Options.
-    public void validateOptions(InfraService service) {
+    public void validateOptions(Service service) {
         if (service.getOptions() != null) {
             for (ServiceOption option : service.getOptions()) {
 
@@ -315,7 +315,7 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Service Version.
-    public void validateVersion(InfraService service) {
+    public void validateVersion(Service service) {
         if (service.getVersion() != null) {
             if (service.getVersion().length() > FIELD_LENGTH_SMALL) {
                 throw new ValidationException("max length for 'version' is " + FIELD_LENGTH_SMALL + " chars");
@@ -324,7 +324,7 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Service Contacts.
-    public void validateContacts(InfraService service){
+    public void validateContacts(Service service){
         if (service.getContacts() == null || service.getContacts().isEmpty())
             throw new ValidationException("Field 'contacts' is mandatory. You need to provide at least 1 contact.");
         for (Contact contact : service.getContacts()) {
@@ -360,7 +360,7 @@ public class ServiceValidators {
     }
 
     // Validate the correctness of Service Aggregator Information
-    public void validateExtraFields(InfraService service) {
+    public void validateExtraFields(Service service) {
         if (service.getAggregatedServices() == null) {
             service.setAggregatedServices(1);
         } else if (service.getAggregatedServices() < 1) {
@@ -394,7 +394,7 @@ public class ServiceValidators {
     }
 
     // Validate the max length of various variables (x10).
-    public void validateMaxLength(InfraService service) {
+    public void validateMaxLength(Service service) {
         if (service.getTagline() != null && service.getTagline().length() > FIELD_LENGTH) {
             throw new ValidationException("max length for 'tagline' is " + FIELD_LENGTH + " chars");
         }
