@@ -447,14 +447,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                 throw new ValidationException(String.format("type '%s' does not exist.", type));
         }
 
-        // Validate Provider's Domain
-        if (provider.getDomains() == null || provider.getDomains().isEmpty())
-            throw new ValidationException("Field 'domains' is mandatory.");
-        for (String domain : provider.getDomains()) {
-            if (!allVocabularies.containsKey(domain))
-                throw new ValidationException(String.format("domain '%s' does not exist.", domain));
-        }
-
         // Validate Provider's Category
         if (provider.getCategories() == null || provider.getCategories().isEmpty())
             throw new ValidationException("Field 'categories' is mandatory.");
