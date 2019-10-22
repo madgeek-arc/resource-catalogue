@@ -6,8 +6,8 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
@@ -96,7 +96,7 @@ public class ServiceProviderRegistrationIT {
             logger.error("ERROR", e);
         } finally {
             provider = providerService.get(providerId, securityService.getAdminAccess());
-            logger.info(String.format("Deleting provider with id: %s", provider.getId()));
+            logger.info("Deleting provider with id: {}", provider.getId());
             providerService.delete(provider);
         }
 
