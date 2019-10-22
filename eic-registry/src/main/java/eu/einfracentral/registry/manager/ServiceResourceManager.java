@@ -7,10 +7,7 @@ import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ServiceInterface;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.SearchServiceEIC;
 import eu.einfracentral.service.SynchronizerService;
@@ -53,6 +50,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Autowired
     private VocabularyService vocabularyService;
+
+    @Autowired
+    private FunderService funderService;
 
     @Autowired
     private EventService eventService;
@@ -494,6 +494,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
+        Map<String, Funder> allFunders = funderService.getFundersMap();
         List<RichService> richServices = new ArrayList<>();
 
         for (InfraService infraService : infraServices) {
@@ -554,11 +555,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 );
             }
 
-            // FundedBy Names
+            // Funders Names
             if (infraService.getFunders() != null) {
                 richService.setFundedByNames(infraService.getFunders()
                         .stream()
-                        .map(p -> allVocabularies.get(p).getName())
+                        .map(p -> allFunders.get(p).getFundingOrganisation())
                         .collect(Collectors.toList())
                 );
             }

@@ -2,6 +2,7 @@ package eu.einfracentral.utils;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.FunderService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -29,19 +30,22 @@ public class ServiceValidators {
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private ProviderService<Provider, Authentication> providerService;
     private VocabularyService vocabularyService;
+    private FunderService funderService;
 
     @Autowired
     private ServiceValidators(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                               ProviderService<Provider, Authentication> providerService,
-                              VocabularyService vocabularyService) {
+                              VocabularyService vocabularyService, FunderService funderService) {
         this.infraServiceService = infraServiceService;
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;
+        this.funderService = funderService;
     }
 
     public void validateVocabularies(InfraService service) {
         logger.debug("Validating vocabularies, Service id: {}", service.getId());
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
+        Map<String, Funder> allFunders = funderService.getFundersMap();
 
         // Validate Subcategories
         if (service.getSubcategories() == null || service.getSubcategories().isEmpty())
@@ -148,7 +152,7 @@ public class ServiceValidators {
                 service.getFunders().remove(0);
             }
             for (String funder : service.getFunders()) {
-                if (!allVocabularies.containsKey(funder))
+                if (!allFunders.containsKey(funder))
                     throw new ValidationException(String.format("funder '%s' does not exist.", funder));
             }
         }
