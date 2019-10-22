@@ -4,4 +4,56 @@
   <xs:complexType abstract="true" name="xmlAdapter">
     <xs:sequence/>
   </xs:complexType>
+
+  <xs:simpleType name="userActionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FAVOURITE"/>
+      <xs:enumeration value="RATING"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="unitType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PCT"/>
+      <xs:enumeration value="NUM"/>
+      <xs:enumeration value="BOOL"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dimensionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TIME"/>
+      <xs:enumeration value="LOCATIONS"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="states">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PENDING_1"/>
+      <xs:enumeration value="ST_SUBMISSION"/>
+      <xs:enumeration value="PENDING_2"/>
+      <xs:enumeration value="REJECTED_ST"/>
+      <xs:enumeration value="APPROVED"/>
+      <xs:enumeration value="REJECTED"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SUPERCATEGORY"/>
+      <xs:enumeration value="CATEGORY"/>
+      <xs:enumeration value="SUBCATEGORY"/>
+      <xs:enumeration value="LANGUAGE"/>
+      <xs:enumeration value="PLACE"/>
+      <xs:enumeration value="TRL"/>
+      <xs:enumeration value="PHASE"/>
+      <xs:enumeration value="SCIENTIFIC_DOMAIN"/>
+      <xs:enumeration value="SCIENTIFIC_SUBDOMAIN"/>
+      <xs:enumeration value="TARGET_USERS"/>
+      <xs:enumeration value="ACCESS_TYPE"/>
+      <xs:enumeration value="ACCESS_MODE"/>
+      <xs:enumeration value="FUNDED_BY"/>
+      <xs:enumeration value="ORDER_TYPE"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>

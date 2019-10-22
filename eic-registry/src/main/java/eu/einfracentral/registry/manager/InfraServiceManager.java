@@ -63,7 +63,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
 
         ret = super.add(infraService, authentication);
-        logger.info("Adding Service " + infraService);
+        logger.info("Adding Service: {}", infraService);
 
         providerManager.verifyNewProviders(infraService.getProviders(), authentication);
 
@@ -100,8 +100,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
-            logger.info("Updating Service " + infraService + " with no version changes");
-            logger.info("Service Version: " + infraService.getVersion());
+            logger.info("Updating Service without version change: {}", infraService);
+            logger.info("Service Version: {}", infraService.getVersion());
 
         } else {
             // create new service and AFTERWARDS update the previous one (in case the new service cannot be created)
@@ -110,13 +110,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             // set previous service not latest
             existingService.setLatest(false);
             super.update(existingService, authentication);
-            logger.info("Updating Service " + existingService + " with version changes (super.update)");
-            logger.info("Service Version: " + existingService.getVersion());
+            logger.info("Updating Service with version change (super.update): {}", existingService);
+            logger.info("Service Version: {}", existingService.getVersion());
 
             // set new service as latest
             infraService.setLatest(true);
             ret = super.add(infraService, authentication);
-            logger.info("Updating Service " + infraService + " with version changes (super.add)");
+            logger.info("Updating Service with version change (super.add): {}", infraService);
         }
 
         return ret;
@@ -127,7 +127,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
     public void delete(InfraService infraService) {
         super.delete(infraService);
-        logger.info("Deleting Service " + infraService);
+        logger.info("Deleting Service: {}", infraService);
     }
 
     @Override
@@ -178,7 +178,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 infraService.setServiceMetadata(serviceMetadata);
 
                 super.update(infraService, null);
-                logger.info("Updating Service " + infraService + " through merging");
+                logger.info("Updating Service through merging: {}", infraService);
                 ret.add(infraService);
 
             } catch (Exception e) {
@@ -192,7 +192,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public boolean validate(InfraService service) {
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
-        logger.debug("Validating Service with id: " + service.getId());
+        logger.debug("Validating Service with id: {}", service.getId());
         serviceValidators.validateServices(service);
         serviceValidators.validateVocabularies(service);
         serviceValidators.validateName(service);

@@ -32,10 +32,10 @@ public class ScheduleService {
         int syncTries = 0;
 
         if(!serviceQueue.isEmpty()){
-            logger.warn(String.format("There are %s Services waiting to be Synchronized!", serviceQueue.size()));
+            logger.warn("There are {} Services waiting to be Synchronized!", serviceQueue.size());
         }
         if(!measurementQueue.isEmpty()){
-            logger.warn(String.format("There are %s Measurements waiting to be Synchronized!", measurementQueue.size()));
+            logger.warn("There are {} Measurements waiting to be Synchronized!", measurementQueue.size());
         }
 
         try {
@@ -43,7 +43,7 @@ public class ScheduleService {
                 if (!serviceQueue.isEmpty()){
                     InfraService infraService = serviceQueue.take();
                     String serviceAction = serviceActionQueue.take();
-                    logger.info(String.format("Attempting to perform '%s' operation for the service:%n%s", serviceAction, infraService));
+                    logger.info("Attempting to perform '{}' operation for the service:\n{}", serviceAction, infraService);
                     switch (serviceAction){
                         case "add":
                             synchronizerService.syncAdd(infraService);
@@ -59,7 +59,7 @@ public class ScheduleService {
                 if (!measurementQueue.isEmpty()){
                     Measurement measurement = measurementQueue.take();
                     String measurementAction = measurementActionQueue.take();
-                    logger.info(String.format("Attempting to perform '%s' operation for the measurement:%n%s", measurementAction, measurement));
+                    logger.info("Attempting to perform '{}' operation for the measurement:\n{}", measurementAction, measurement);
                     switch (measurementAction){
                         case "add":
                             synchronizerService.syncAdd(measurement);

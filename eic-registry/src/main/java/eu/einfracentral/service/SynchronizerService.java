@@ -75,7 +75,7 @@ public class SynchronizerService {
             token = readFile(filename);
             headers.add("Authorization", "Bearer " + token);
         } catch (IOException e) {
-            logger.error(String.format("Could not read file '%s' containing the synchronization token", filename), e);
+            logger.error("Could not read file '{}' containing the synchronization token", filename, e);
         }
 
         return headers;
@@ -85,23 +85,23 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
-            logger.info(String.format("Posting service with id: %s - Host: %s", infraService.getId(), host));
+            logger.info("Posting service with id: {} - Host: {}", infraService.getId(), host);
             try {
                 URI uri = new URI(host + "/infraService");
                 ResponseEntity re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, InfraService.class);
                 if (re.getStatusCode() != HttpStatus.CREATED) {
-                    logger.error(String.format("Adding service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
-                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                    logger.error("Adding service with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error(String.format("Failed to post Service with id %s to host %s%nMessage: %s",
-                        infraService.getId(), host, e.getResponseBodyAsString()));
+                logger.error("Failed to post Service with id {} to host {}\nMessage: {}",
+                        infraService.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
-                logger.error(String.format("syncAdd failed, check if token has expired!%nService: %s", infraService.toString()), re);
+                logger.error("syncAdd failed, check if token has expired!\nService: {}", infraService.toString(), re);
             }
             if (retryKey) {
                 try {
@@ -118,23 +118,23 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
-            logger.info(String.format("Updating service with id: %s - Host: %s", infraService.getId(), host));
+            logger.info("Updating service with id: {} - Host: {}", infraService.getId(), host);
             try {
                 URI uri = new URI(host + "/infraService");
                 ResponseEntity re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.PUT, request, InfraService.class);
                 if (re.getStatusCode() != HttpStatus.OK) {
-                    logger.error(String.format("Updating service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
-                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                    logger.error("Updating service with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error(String.format("Failed to update Service with id %s to host %s%nMessage: %s",
-                        infraService.getId(), host, e.getResponseBodyAsString()));
+                logger.error("Failed to update Service with id {} to host {}\nMessage: {}",
+                        infraService.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
-                logger.error(String.format("syncUpdate failed, check if token has expired!%nService: %s", infraService.toString()), re);
+                logger.error("syncUpdate failed, check if token has expired!\nService: {}", infraService.toString(), re);
             }
             if (retryKey) {
                 try {
@@ -151,23 +151,23 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(createHeaders());
-            logger.info(String.format("Deleting service with id: %s - Host: %s", infraService.getId(), host));
+            logger.info("Deleting service with id: {} - Host: {}", infraService.getId(), host);
             try {
                 URI uri = new URI(String.format("%s/infraService/%s/%s", host, infraService.getId(), infraService.getVersion()));
                 ResponseEntity re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
                 if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
-                    logger.error(String.format("Deleting service with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
-                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                    logger.error("Deleting service with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error(String.format("Failed to delete Service with id %s to host %s%nMessage: %s",
-                        infraService.getId(), host, e.getResponseBodyAsString()));
+                logger.error("Failed to delete Service with id {} to host {}\nMessage: {}",
+                        infraService.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
-                logger.error(String.format("syncDelete failed, check if token has expired!%nService: %s", infraService.toString()), re);
+                logger.error("syncDelete failed, check if token has expired!\nService: {}", infraService.toString(), re);
             }
             if (retryKey) {
                 try {
@@ -184,23 +184,23 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, createHeaders());
-            logger.info(String.format("Posting measurement with id: %s - Host: %s", measurement.getId(), host));
+            logger.info("Posting measurement with id: {} - Host: {}", measurement.getId(), host);
             try {
                 URI uri = new URI(host + "/measurement");
                 ResponseEntity re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, Measurement.class);
                 if (re.getStatusCode() != HttpStatus.CREATED) {
-                    logger.error(String.format("Posting measurement with id '%s' to host '%s' returned code '%d'%nResponse body:%n%s",
-                            measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                    logger.error("Posting measurement with id '{}' to host '{}' returned code '{}'\nResponse body:\n{}",
+                            measurement.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error(String.format("Failed to post Measurement with id %s to host %s%nMessage: %s",
-                        measurement.getId(), host, e.getResponseBodyAsString()));
+                logger.error("Failed to post Measurement with id {} to host {}\nMessage: {}",
+                        measurement.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
-                logger.error(String.format("syncAdd failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
+                logger.error("syncAdd failed, check if token has expired!\nMeasurement: {}", measurement.toString(), re);
             }
             if (retryKey) {
                 try {
@@ -217,23 +217,23 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(measurement, createHeaders());
-            logger.info(String.format("Updating measurement with id: %s - Host: %s", measurement.getId(), host));
+            logger.info("Updating measurement with id: {} - Host: {}", measurement.getId(), host);
             try {
                 URI uri = new URI(host + "/measurement");
                 ResponseEntity re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.PUT, request, Measurement.class);
                 if (re.getStatusCode() != HttpStatus.OK) {
-                    logger.error(String.format("Updating measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
-                            measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                    logger.error("Updating measurement with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                            measurement.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error(String.format("Failed to update Measurement with id %s to host %s%nMessage: %s",
-                        measurement.getId(), host, e.getResponseBodyAsString()));
+                logger.error("Failed to update Measurement with id {} to host {}\nMessage: {}",
+                        measurement.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
-                logger.error(String.format("syncUpdate failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
+                logger.error("syncUpdate failed, check if token has expired!\nMeasurement: {}", measurement.toString(), re);
             }
             if (retryKey) {
                 try {
@@ -250,23 +250,23 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<Measurement> request = new HttpEntity<>(createHeaders());
-            logger.info(String.format("Deleting measurement with id: %s - Host: %s", measurement.getId(), host));
+            logger.info("Deleting measurement with id: {} - Host: {}", measurement.getId(), host);
             try {
                 URI uri = new URI(String.format("%s/measurement/%s", host, measurement.getId()));
                 ResponseEntity re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
                 if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
-                    logger.error(String.format("Deleting measurement with id '%s' from host '%s' returned code '%d'%nResponse body:%n%s",
-                            measurement.getId(), host, re.getStatusCodeValue(), re.getBody()));
+                    logger.error("Deleting measurement with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                            measurement.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
             } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: " + host, e);
+                logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error(String.format("Failed to delete Measurement with id %s to host %s%nMessage: %s",
-                        measurement.getId(), host, e.getResponseBodyAsString()));
+                logger.error("Failed to delete Measurement with id {} to host {}\nMessage: {}",
+                        measurement.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
-                logger.error(String.format("syncDelete failed, check if token has expired!%nMeasurement: %s", measurement.toString()), re);
+                logger.error("syncDelete failed, check if token has expired!\nMeasurement: {}", measurement.toString(), re);
             }
             if (retryKey) {
                 try {

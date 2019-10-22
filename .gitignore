@@ -8,6 +8,10 @@ target/
 # Log file
 *.log
 
+# Log folders
+**/logs
+**/syncLogs
+
 # BlueJ files
 *.ctxt
 

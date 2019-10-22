@@ -7,12 +7,12 @@ public class MvcInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class[]{ ServiceConfig.class, SecurityRootConfig.class }; //
+        return new Class[]{ ServiceConfig.class, SecurityRootConfig.class };
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{ WebMvcConfigurer.class, SwaggerConfig.class, SecurityRootConfig.class };
+        return new Class[]{ WebMvcConfigurer.class, SwaggerConfig.class };
     }
 
     @Override

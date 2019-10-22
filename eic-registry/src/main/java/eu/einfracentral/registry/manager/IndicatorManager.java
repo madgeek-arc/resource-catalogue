@@ -38,7 +38,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
     public Indicator add(Indicator indicator, Authentication auth) {
         validate(indicator);
         super.add(indicator, auth);
-        logger.info("Adding Indicator " + indicator);
+        logger.info("Adding Indicator: {}", indicator);
         return indicator;
     }
 
@@ -46,7 +46,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
     public Indicator update(Indicator indicator, Authentication auth) {
         validate(indicator);
         super.update(indicator, auth);
-        logger.info("Updating Indicator " + indicator);
+        logger.info("Updating Indicator: {}", indicator);
         return indicator;
     }
 
@@ -63,7 +63,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
         if (measurements.getTotal() > 0) {
             throw new ValidationException("You can't delete the specific Indicator, as it's related to one or more Measurements");
         }
-        logger.info("Deleting Indicator " + indicator);
+        logger.info("Deleting Indicator: {}", indicator);
         super.delete(indicator);
     }
 

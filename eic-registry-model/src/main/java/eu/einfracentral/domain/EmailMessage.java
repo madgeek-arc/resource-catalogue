@@ -1,14 +1,22 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-@XmlTransient
+@XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class EmailMessage {
 
+    @XmlElement(defaultValue = "null")
     private String recipientEmail;
+    @XmlElement(defaultValue = "null")
     private String senderEmail;
+    @XmlElement(defaultValue = "null")
     private String senderName;
+    @XmlElement(defaultValue = "null")
     private String subject;
+    @XmlElement(defaultValue = "null")
     private String message;
 
     public EmailMessage() {

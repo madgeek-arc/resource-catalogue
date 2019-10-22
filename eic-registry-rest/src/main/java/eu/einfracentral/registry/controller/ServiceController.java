@@ -95,7 +95,7 @@ public class ServiceController {
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
-        logger.info("User " + auth.getName() + " created a new Service " + service.getName() + " with id " + service.getId());
+        logger.info(String.format("User %s created a new Service %s with id %s", auth.getName(), service.getName(), service.getId()));
         return new ResponseEntity<>(new Service(ret), HttpStatus.CREATED);
     }
 
@@ -133,11 +133,11 @@ public class ServiceController {
 
         if (s == null) { // if existing service is null, create it, else update it
             s = this.infraService.addService(new InfraService(service), auth);
-            logger.info("User " + auth.getName() + " added Service\n" + s.toString());
+            logger.info("User '{}' added Service:\n{}", auth.getName(), s.toString());
         } else {
             if (!s.equals(service)) {
                 s = this.infraService.updateService(new InfraService(service), auth);
-                logger.info("User " + auth.getName() + " updated Service\n" + s.toString());
+                logger.info("User '{}' updated Service:\n{}", auth.getName(), s.toString());
             }
         }
         this.measurementService.updateAll(s.getId(), measurements, auth);
@@ -150,7 +150,7 @@ public class ServiceController {
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret = this.infraService.updateService(new InfraService(service), auth);
-        logger.info("User " + auth.getName() + " updated Service " + service.getName() + " with id " + service.getId());
+        logger.info("User '{}' updated Service with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
         return new ResponseEntity<>(new Service(ret), HttpStatus.OK);
     }
 
@@ -158,7 +158,7 @@ public class ServiceController {
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Service service, @ApiIgnore Authentication auth) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(new InfraService(service)));
-        logger.info("User " + auth.getName() + " validated Service " + service.getName() + " with id " + service.getId());
+        logger.info("User '{}' validated Service with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
         return ret;
     }
 
@@ -335,7 +335,7 @@ public class ServiceController {
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = infraService.get(id, version);
         service.setActive(active);
-        logger.info("User " + auth.getName() + " set Service " + service.getName() + " with id " + service.getId() + " to active");
+        logger.info("User '{}' set Service with name '{}' and id '{}' as active", auth.getName(), service.getName(), service.getId());
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 

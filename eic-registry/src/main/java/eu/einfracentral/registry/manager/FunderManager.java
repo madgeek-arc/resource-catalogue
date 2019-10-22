@@ -37,7 +37,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
     public Funder add(Funder funder, Authentication auth) {
         funder.setId(UUID.randomUUID().toString());
         super.add(funder, auth);
-        logger.debug(String.format("Adding Funder %s", funder.getFundingOrganisation()));
+        logger.debug("Adding Funder: {}", funder);
         return funder;
     }
 

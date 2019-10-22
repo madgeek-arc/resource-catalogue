@@ -84,18 +84,18 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${webapp.homepage}")
     private String webappFrontUrl;
 
-    @Override
+    /*@Override
     protected void configure(AuthenticationManagerBuilder auth) {
         logger.info("Register local");
         auth.authenticationProvider(openIdConnectAuthenticationProvider());
-    }
+    }*/
 
-    @Override
+    /*@Override
     @Bean
     public AuthenticationManager authenticationManagerBean()
             throws Exception {
         return super.authenticationManagerBean();
-    }
+    }*/
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
