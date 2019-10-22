@@ -52,7 +52,6 @@
       <xs:enumeration value="TARGET_USERS"/>
       <xs:enumeration value="ACCESS_TYPE"/>
       <xs:enumeration value="ACCESS_MODE"/>
-      <xs:enumeration value="FUNDED_BY"/>
       <xs:enumeration value="ORDER_TYPE"/>
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
       <xs:enumeration value="PROVIDER_CATEGORY"/>
