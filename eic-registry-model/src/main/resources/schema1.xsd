@@ -711,7 +711,7 @@
           <xs:documentation><![CDATA[Full Name of the organisation providing/offering the service/resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="nationalRoadmap" type="xs:boolean">
+      <xs:element minOccurs="0" name="nationalRoadmap" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Is the RI featured on the national roadmap for research infrastructures]]></xs:documentation>
         </xs:annotation>
