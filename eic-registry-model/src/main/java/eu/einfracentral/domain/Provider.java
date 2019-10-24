@@ -194,8 +194,8 @@ public class Provider implements Identifiable {
      * Is the RI featured on the national roadmap for research infrastructures
      */
     @XmlElement
-    @ApiModelProperty(position = 23, example = "String (optional)")
-    private boolean nationalRoadmap;
+    @ApiModelProperty(position = 23, example = "Yes or No (optional)")
+    private String nationalRoadmap;
 
 
     // Extra needed fields
@@ -456,11 +456,11 @@ public class Provider implements Identifiable {
         this.societalGrandChallenges = societalGrandChallenges;
     }
 
-    public boolean isNationalRoadmap() {
+    public String getNationalRoadmap() {
         return nationalRoadmap;
     }
 
-    public void setNationalRoadmap(boolean nationalRoadmap) {
+    public void setNationalRoadmap(String nationalRoadmap) {
         this.nationalRoadmap = nationalRoadmap;
     }
 
