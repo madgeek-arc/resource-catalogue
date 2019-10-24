@@ -390,17 +390,18 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     public void validateProvider(Provider provider){
-        logger.debug("Validating vocabularies, Provider id: " + provider.getId());
+        logger.debug("Validating vocabularies, Provider id: {}", provider.getId());
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         // Validate Provider's ID
-        if (provider.getId() == null) {
+        if (provider.getId() == null || "".equals(provider.getId())) {
             provider.setId(provider.getName());
         }
         provider.setId(StringUtils
                 .stripAccents(provider.getId())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replaceAll(" ", "_"));
+                .replace(" ", "_")
+                .toLowerCase());
         if ("".equals(provider.getId())) {
             throw new ServiceException("Provider id not valid. Special characters are ignored.");
         }
@@ -586,36 +587,49 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // Validate Provider's Hosting Legal Entity
-        if (provider.getHostingLegalEntity().length() > NAME_LENGTH) {
+        if (provider.getHostingLegalEntity() != null && provider.getHostingLegalEntity().length() > NAME_LENGTH) {
             throw new ValidationException("max length for 'hostingLegalEntity' is " + NAME_LENGTH + " chars");
         }
 
         // Validate Provider's Legal Status
-        if (!allVocabularies.containsKey(provider.getLegalStatus())){
+        if (provider.getLegalStatus() != null && !allVocabularies.containsKey(provider.getLegalStatus())){
             throw new ValidationException(String.format("legalStatus '%s' does not exist.", provider.getLegalStatus()));
         }
 
         // Validate Provider's ESFRI
-        if (!allVocabularies.containsKey(provider.getEsfri())){
+        if (provider.getEsfri() != null && !allVocabularies.containsKey(provider.getEsfri())){
             throw new ValidationException(String.format("ESFRI '%s' does not exist.", provider.getEsfri()));
         }
 
         // Validate Provider's Networks
-        for (String network : provider.getNetworks()) {
-            if (!allVocabularies.containsKey(network))
-                throw new ValidationException(String.format("network '%s' does not exist.", network));
+        if (provider.getNetworks() != null) {
+            for (String network : provider.getNetworks()) {
+                if (!allVocabularies.containsKey(network))
+                    throw new ValidationException(String.format("network '%s' does not exist.", network));
+            }
         }
 
         // Validate Provider's Areas of Activity
-        for (String area : provider.getAreasOfActivity()) {
-            if (!allVocabularies.containsKey(area))
-                throw new ValidationException(String.format("areaOfActivity '%s' does not exist.", area));
+        if (provider.getAreasOfActivity() != null) {
+            for (String area : provider.getAreasOfActivity()) {
+                if (!allVocabularies.containsKey(area))
+                    throw new ValidationException(String.format("areaOfActivity '%s' does not exist.", area));
+            }
         }
 
         // Validate Provider's Societal Grand Challenges
-        for (String challenge : provider.getSocietalGrandChallenges()) {
-            if (!allVocabularies.containsKey(challenge))
-                throw new ValidationException(String.format("societalGrandChallenge '%s' does not exist.", challenge));
+        if (provider.getSocietalGrandChallenges() != null) {
+            for (String challenge : provider.getSocietalGrandChallenges()) {
+                if (!allVocabularies.containsKey(challenge))
+                    throw new ValidationException(String.format("societalGrandChallenge '%s' does not exist.", challenge));
+            }
+        }
+
+        // Validate Provider's National Roadmap
+        if (provider.getNationalRoadmap() != null) {
+            if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
+                throw new ValidationException("nationalRoadmap's value should be Yes or No");
+            }
         }
 
     }
