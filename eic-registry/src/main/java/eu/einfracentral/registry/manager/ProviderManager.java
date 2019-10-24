@@ -394,7 +394,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         // Validate Provider's ID
-        if (provider.getId() == null) {
+        if (provider.getId() == null || "".equals(provider.getId())) {
             provider.setId(provider.getName());
         }
         provider.setId(StringUtils
