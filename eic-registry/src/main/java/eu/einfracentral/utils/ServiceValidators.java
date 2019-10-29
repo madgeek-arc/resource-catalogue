@@ -329,31 +329,26 @@ public class ServiceValidators {
             throw new ValidationException("Field 'contacts' is mandatory. You need to provide at least 1 contact.");
         for (Contact contact : service.getContacts()) {
 
-            // Validate the Contact's fields requirement
+            // Validate the Contact's fields requirement and max length
             if (contact.getFirstName() == null || contact.getFirstName().equals("")) {
                 throw new ValidationException("field 'firstName' is mandatory");
+            } else if (contact.getFirstName().length() > FIELD_LENGTH_SMALL) {
+                throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
             }
             if (contact.getLastName() == null || contact.getLastName().equals("")) {
                 throw new ValidationException("field 'lastName' is mandatory");
+            } else if (contact.getLastName().length() > FIELD_LENGTH_SMALL) {
+                throw new ValidationException("max length for 'lastName' is " + FIELD_LENGTH_SMALL + " chars");
             }
             if (contact.getEmail() == null || contact.getEmail().equals("")) {
                 throw new ValidationException("field 'email' is mandatory");
             }
             if (contact.getTel() == null || contact.getTel().equals("")) {
                 throw new ValidationException("field 'tel' is mandatory");
-            }
-
-            // Validate max length of Contact's fields
-            if (contact.getFirstName().length() > FIELD_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-            }
-            if (contact.getLastName().length() > FIELD_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'lastName' is " + FIELD_LENGTH_SMALL + " chars");
-            }
-            if (contact.getTel().length() > FIELD_LENGTH_SMALL) {
+            } else if (contact.getTel().length() > FIELD_LENGTH_SMALL) {
                 throw new ValidationException("max length for 'tel' is " + FIELD_LENGTH_SMALL + " chars");
             }
-            if (contact.getPosition().length() > FIELD_LENGTH_SMALL) {
+            if (contact.getPosition() != null && contact.getPosition().length() > FIELD_LENGTH_SMALL) {
                 throw new ValidationException("max length for 'position' is " + FIELD_LENGTH_SMALL + " chars");
             }
         }

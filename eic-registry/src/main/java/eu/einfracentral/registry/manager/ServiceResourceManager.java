@@ -227,10 +227,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         final Field f = serviceField;
         final String undef = "undefined";
-        return services.getResults().stream()/*.map(Service::new)*/.collect(Collectors.groupingBy(service -> {
+        return services.getResults().stream().collect(Collectors.groupingBy(service -> {
             try {
-                return f.get(service) != null ? f.get(service).toString() : undef;
-            } catch (IllegalAccessException e) {
+                return f.get(service.getService()) != null ? f.get(service.getService()).toString() : undef;
+            } catch (IllegalAccessException | IllegalArgumentException e) {
                 logger.warn("Warning", e);
                 try {
                     return f.get(service) != null ? f.get(service).toString() : undef;
