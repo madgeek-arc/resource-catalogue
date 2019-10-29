@@ -157,7 +157,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
 //    @ApiOperation(value = "Get the pending services of the given Provider.")
     @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        List<Service> ret = providerManager.getInactiveServices(id).stream().map(Service::new).collect(Collectors.toList());
+        List<Service> ret = providerManager.getInactiveServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 

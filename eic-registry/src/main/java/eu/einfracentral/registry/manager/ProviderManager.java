@@ -187,7 +187,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
-                if (s.getProviders().size() == 1) {
+                if (s.getService().getProviders().size() == 1) {
                     infraServiceService.delete(s);
                 }
             } catch (ResourceNotFoundException e) {
@@ -298,7 +298,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.addFilter("providers", providerId);
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
-        return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
+        return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
     @Override
@@ -308,7 +308,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
-        return infraServiceService.getAll(ff, null).getResults().stream().map(Service::new).collect(Collectors.toList());
+        return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
     //Gets random Services to be featured at the Carousel
@@ -351,9 +351,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             service.setActive(true);
             try {
                 infraServiceService.update(service, null);
-                logger.info("Setting Service with name '{}' as active", service.getName());
+                logger.info("Setting Service with name '{}' as active", service.getService().getName());
             } catch (ResourceNotFoundException e) {
-                logger.error("Could not update service with name '{}", service.getName());
+                logger.error("Could not update service with name '{}", service.getService().getName());
             }
         }
     }
@@ -366,9 +366,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             service.setActive(false);
             try {
                 infraServiceService.update(service, null);
-                logger.info("Setting Service with name '{}' as inactive", service.getName());
+                logger.info("Setting Service with name '{}' as inactive", service.getService().getName());
             } catch (ResourceNotFoundException e) {
-                logger.error("Could not update service with name '{}'", service.getName());
+                logger.error("Could not update service with name '{}'", service.getService().getName());
             }
         }
     }

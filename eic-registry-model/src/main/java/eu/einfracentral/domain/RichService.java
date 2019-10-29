@@ -44,7 +44,7 @@ public class RichService {
     }
 
     public RichService(InfraService service) {
-        this.service = new Service(service); // copy constructor is needed to 'hide' infraService fields
+        this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
         this.serviceMetadata = service.getServiceMetadata();
     }
 

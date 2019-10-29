@@ -52,7 +52,7 @@ public class InfraServiceController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         infraService.delete(service);
-        logger.info("User '{}' deleted InfraService '{}' with id: '{}'", authentication.getName(), service.getName(), service.getId());
+        logger.info("User '{}' deleted InfraService '{}' with id: '{}'", authentication.getName(), service.getService().getName(), service.getService().getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -63,7 +63,7 @@ public class InfraServiceController {
         ff.setQuantity(10000);
         List<InfraService> services = infraService.getAll(ff, null).getResults();
         for (InfraService service : services) {
-            logger.info("Deleting service with name: {}", service.getName());
+            logger.info("Deleting service with name: {}", service.getService().getName());
             infraService.delete(service);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -92,8 +92,8 @@ public class InfraServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication.getName(), service.getName(), service.getId(), service.getVersion());
-        logger.info(" Service Providers: {}", service.getProviders());
+        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication.getName(), service.getService().getName(), service.getService().getId(), service.getService().getVersion());
+        logger.info(" Service Providers: {}", service.getService().getProviders());
         return ret;
     }
 
@@ -101,14 +101,14 @@ public class InfraServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated InfraService '{}' with id: {}", authentication.getName(), service.getName(), service.getId());
+        logger.info("User '{}' updated InfraService '{}' with id: {}", authentication.getName(), service.getService().getName(), service.getService().getId());
         return ret;
     }
 
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(service));
-        logger.info("Validating InfraService: {}", service.getName());
+        logger.info("Validating InfraService: {}", service.getService().getName());
         return ret;
     }
 
@@ -143,9 +143,9 @@ public class InfraServiceController {
         sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
         service.setServiceMetadata(sm);
         if (active) {
-            logger.info("User '{}' set InfraService '{}' with id: {} as active", auth.getName(), service.getName(), service.getId());
+            logger.info("User '{}' set InfraService '{}' with id: {} as active", auth.getName(), service.getService().getName(), service.getService().getId());
         } else {
-            logger.info("User '{}' set InfraService '{}' with id: {} as inactive", auth.getName(), service.getName(), service.getId());
+            logger.info("User '{}' set InfraService '{}' with id: {} as inactive", auth.getName(), service.getService().getName(), service.getService().getId());
         }
         return ResponseEntity.ok(infraService.update(service, auth));
     }

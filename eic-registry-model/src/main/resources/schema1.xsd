@@ -136,16 +136,13 @@
   </xs:complexType>
 
   <xs:complexType name="infraService">
-    <xs:complexContent>
-      <xs:extension base="tns:service">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="active" type="xs:boolean"/>
-          <xs:element name="latest" type="xs:boolean"/>
-          <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="active" type="xs:boolean"/>
+      <xs:element name="latest" type="xs:boolean"/>
+      <xs:element ref="tns:service"/>
+      <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
+      <xs:element minOccurs="0" name="status" type="xs:string"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="service">
@@ -518,15 +515,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="serviceMetadata">
-    <xs:sequence>
-      <xs:element default="null" minOccurs="0" name="modifiedAt" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="serviceOption">
     <xs:sequence>
       <xs:element minOccurs="0" name="attributes">
@@ -574,6 +562,15 @@
           <xs:documentation><![CDATA[Webpage with information about the service option.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="serviceMetadata">
+    <xs:sequence>
+      <xs:element default="null" minOccurs="0" name="modifiedAt" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
