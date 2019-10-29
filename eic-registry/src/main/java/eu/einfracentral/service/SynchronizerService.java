@@ -85,13 +85,13 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
-            logger.info("Posting service with id: {} - Host: {}", infraService.getId(), host);
+            logger.info("Posting service with id: {} - Host: {}", infraService.getService().getId(), host);
             try {
                 URI uri = new URI(host + "/infraService");
                 ResponseEntity re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, InfraService.class);
                 if (re.getStatusCode() != HttpStatus.CREATED) {
                     logger.error("Adding service with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
-                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody());
+                            infraService.getService().getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
@@ -99,7 +99,7 @@ public class SynchronizerService {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
                 logger.error("Failed to post Service with id {} to host {}\nMessage: {}",
-                        infraService.getId(), host, e.getResponseBodyAsString());
+                        infraService.getService().getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncAdd failed, check if token has expired!\nService: {}", infraService.toString(), re);
             }
@@ -118,13 +118,13 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(infraService, createHeaders());
-            logger.info("Updating service with id: {} - Host: {}", infraService.getId(), host);
+            logger.info("Updating service with id: {} - Host: {}", infraService.getService().getId(), host);
             try {
                 URI uri = new URI(host + "/infraService");
                 ResponseEntity re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.PUT, request, InfraService.class);
                 if (re.getStatusCode() != HttpStatus.OK) {
                     logger.error("Updating service with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
-                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody());
+                            infraService.getService().getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
@@ -132,7 +132,7 @@ public class SynchronizerService {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
                 logger.error("Failed to update Service with id {} to host {}\nMessage: {}",
-                        infraService.getId(), host, e.getResponseBodyAsString());
+                        infraService.getService().getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncUpdate failed, check if token has expired!\nService: {}", infraService.toString(), re);
             }
@@ -151,13 +151,13 @@ public class SynchronizerService {
         retryKey = true;
         if (active) {
             HttpEntity<InfraService> request = new HttpEntity<>(createHeaders());
-            logger.info("Deleting service with id: {} - Host: {}", infraService.getId(), host);
+            logger.info("Deleting service with id: {} - Host: {}", infraService.getService().getId(), host);
             try {
-                URI uri = new URI(String.format("%s/infraService/%s/%s", host, infraService.getId(), infraService.getVersion()));
+                URI uri = new URI(String.format("%s/infraService/%s/%s", host, infraService.getService().getId(), infraService.getService().getVersion()));
                 ResponseEntity re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.DELETE, request, Void.class);
                 if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
                     logger.error("Deleting service with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
-                            infraService.getId(), host, re.getStatusCodeValue(), re.getBody());
+                            infraService.getService().getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
                 }
@@ -165,7 +165,7 @@ public class SynchronizerService {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
                 logger.error("Failed to delete Service with id {} to host {}\nMessage: {}",
-                        infraService.getId(), host, e.getResponseBodyAsString());
+                        infraService.getService().getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncDelete failed, check if token has expired!\nService: {}", infraService.toString(), re);
             }

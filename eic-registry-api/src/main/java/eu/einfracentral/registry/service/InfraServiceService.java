@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface InfraServiceService<T, R extends Service> extends ServiceInterface<T, R, Authentication> {
+public interface InfraServiceService<T, R> extends ServiceInterface<T, R, Authentication> {
 
     /**
      * Get the service resource.

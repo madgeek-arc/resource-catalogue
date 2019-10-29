@@ -50,10 +50,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     public InfraService addService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
-        infraService.setActive(providerManager.get(infraService.getProviders().get(0)).getActive());
-        if ((infraService.getId() == null) || ("".equals(infraService.getId()))) {
-            String id = createServiceId(infraService);
-            infraService.setId(id);
+        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).getActive());
+        if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
+            String id = createServiceId(infraService.getService());
+            infraService.getService().setId(id);
         }
         infraService.setLatest(true);
 
@@ -65,7 +65,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ret = super.add(infraService, authentication);
         logger.info("Adding Service: {}", infraService);
 
-        providerManager.verifyNewProviders(infraService.getProviders(), authentication);
+        providerManager.verifyNewProviders(infraService.getService().getProviders(), authentication);
 
         return ret;
     }
@@ -79,15 +79,15 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         InfraService existingService;
 
         // if service version is empty set it null
-        if ("".equals(infraService.getVersion())) {
-            infraService.setVersion(null);
+        if ("".equals(infraService.getService().getVersion())) {
+            infraService.getService().setVersion(null);
         }
 
         try { // try to find a service with the same id and version
-            existingService = get(infraService.getId(), infraService.getVersion());
+            existingService = get(infraService.getService().getId(), infraService.getService().getVersion());
         } catch (ResourceNotFoundException e) {
             // if a service with version = infraService.getVersion() does not exist, get the latest service
-            existingService = get(infraService.getId());
+            existingService = get(infraService.getService().getId());
         }
 
         // update existing service serviceMetadata
@@ -95,13 +95,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         infraService.setServiceMetadata(serviceMetadata);
         infraService.setActive(existingService.isActive());
 
-        if ((infraService.getVersion() == null && existingService.getVersion() == null)
-                || infraService.getVersion() != null && infraService.getVersion().equals(existingService.getVersion())) {
+        if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
+                || infraService.getService().getVersion() != null && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, authentication);
             logger.info("Updating Service without version change: {}", infraService);
-            logger.info("Service Version: {}", infraService.getVersion());
+            logger.info("Service Version: {}", infraService.getService().getVersion());
 
         } else {
             // create new service and AFTERWARDS update the previous one (in case the new service cannot be created)
@@ -111,7 +111,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             existingService.setLatest(false);
             super.update(existingService, authentication);
             logger.info("Updating Service with version change (super.update): {}", existingService);
-            logger.info("Service Version: {}", existingService.getVersion());
+            logger.info("Service Version: {}", existingService.getService().getVersion());
 
             // set new service as latest
             infraService.setLatest(true);
@@ -171,7 +171,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //                migrate(infraService); // use this to make custom changes
                 ObjectUtils.merge(infraService, service); // use this to make bulk changes FIXME: this method does not work as expected
                 validate(infraService);
-                InfraService existingService = get(infraService.getId());
+                InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
                 ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), "eInfraCentral");
@@ -189,7 +189,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    public boolean validate(InfraService service) {
+    public boolean validate(InfraService infraService) {
+        Service service = infraService.getService();
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
         logger.debug("Validating Service with id: {}", service.getId());
@@ -233,37 +234,5 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         ret.setModifiedAt(ret.getRegisteredAt());
         return ret;
     }
-
-//    public void migrateCatrisServices(List<InfraService> infraServices) {
-//        for (InfraService infraService : infraServices) {
-//
-//            //TODO: WHAT TO DO WITH OLD SERVICE OPTIONS
-//
-//            // Migrates old lcs to new phase
-//            infraService.setPhase(infraService.getLifeCycleStatus());
-//
-//            // Migrates old targetUsers to new targetUsers
-//            List<String> targetUsers = Collections.singletonList(infraService.getTargetUsers());
-//            infraService.setTargetUsersNew(targetUsers);
-//
-//            // Migrates old termsOfUse to new termsOfUse
-//            try {
-//                URL url = new URL(infraService.getTermsOfUse().get(0));
-//                infraService.setTermsOfUseNew(url);
-//            } catch (MalformedURLException e) {
-//                e.printStackTrace();
-//            }
-//
-//            // Migrates old funding to new fundedBy
-//            List<String> funding = Collections.singletonList(infraService.getFunding());
-//            infraService.setFundedBy(funding);
-//
-//            // Migrates old subcategories to new subcategories
-//
-//            // Updates Service
-//            super.update(infraService, null);
-//        }
-//
-//    }
 
 }
