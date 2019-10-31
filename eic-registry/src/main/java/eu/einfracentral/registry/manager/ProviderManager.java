@@ -39,7 +39,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private VocabularyService vocabularyService;
 
     private static final int NAME_LENGTH = 80;
-    private static final int FIELD_LENGTH = 100;
     private static final int FIELD_LENGTH_SMALL = 20;
     private static final int TEXT_LENGTH = 1000;
 
@@ -457,11 +456,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // Validate Provider's ESFRI Domain
-        if (provider.getEsfriDomains() == null || provider.getEsfriDomains().isEmpty())
-            throw new ValidationException("Field 'esfriDomains' is mandatory.");
-        for (String esfriDomain : provider.getEsfriDomains()) {
-            if (!allVocabularies.containsKey(esfriDomain))
-                throw new ValidationException(String.format("esfriDomain '%s' does not exist.", esfriDomain));
+        if (provider.getEsfriDomains() != null){
+            for (String esfriDomain : provider.getEsfriDomains()) {
+                if (!allVocabularies.containsKey(esfriDomain))
+                    throw new ValidationException(String.format("esfriDomain '%s' does not exist.", esfriDomain));
+            }
         }
 
         // Validate Provider's Tags
@@ -581,8 +580,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             if (contact.getTel().length() > FIELD_LENGTH_SMALL) {
                 throw new ValidationException("max length for 'tel' is " + FIELD_LENGTH_SMALL + " chars");
             }
-            if (contact.getPosition().length() > FIELD_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'position' is " + FIELD_LENGTH_SMALL + " chars");
+            if (contact.getPosition() != null){
+                if (contact.getPosition().length() > FIELD_LENGTH_SMALL) {
+                    throw new ValidationException("max length for 'position' is " + FIELD_LENGTH_SMALL + " chars");
+                }
             }
         }
 

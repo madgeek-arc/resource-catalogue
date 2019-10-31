@@ -281,7 +281,7 @@ public class ServiceValidators {
                 // Validate Option's Contacts
                 // Validate the Contact's fields requirement
                 if (option.getContacts() == null || option.getContacts().isEmpty())
-                    throw new ValidationException("Field 'contacts' is mandatory. You need to provide at least 1 contact.");
+                    throw new ValidationException("Field 'contacts' inside 'options' is mandatory. You need to provide at least 1 contact.");
                 for (Contact contact : option.getContacts()){
                     if (contact.getFirstName() == null || contact.getFirstName().equals("")) {
                         throw new ValidationException("field 'firstName' is mandatory");
