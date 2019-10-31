@@ -40,13 +40,7 @@ public class FieldValidator {
                 throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
             }
 
-            if (String.class.equals(clazz) && validationAnnotation.maxLength() > 0) {
-                String val = (String) fieldValue;
-                if (val.length() > validationAnnotation.maxLength()) {
-                    throw new ValidationException(String.format("Max length for field '%s' is %s characters.",
-                            field.getName(), validationAnnotation.maxLength()));
-                }
-            }
+            validateMaxLength(field, fieldValue, validationAnnotation);
         }
     }
 
@@ -62,13 +56,23 @@ public class FieldValidator {
         return false;
     }
 
-    public static boolean validateMaxLength(Object o, Class clazz, FieldValidation annotation) {
-        if (o != null) {
-            return true;
-//            if (annotation.) {
-//            }
-        } else
-            return true;
+    public static void validateMaxLength(Field field, Object o, FieldValidation annotation) {
+        if (annotation.maxLength() > 0 && o != null) {
+            Class clazz = o.getClass();
+            if (String.class.equals(clazz) || URL.class.equals(clazz)) {
+                String val = (String) o;
+                if (val.length() > annotation.maxLength()) {
+                    throw new ValidationException(String.format("Max length for field '%s' is %s characters.",
+                            field.getName(), annotation.maxLength()));
+                }
+            }
+            // if given object is a collection, apply 'validateMaxLength' to all entries
+            else if (Collection.class.isAssignableFrom(clazz) && !((Collection) o).isEmpty()) {
+                for (Object entry : ((Collection) o)) {
+                    validateMaxLength(field, entry, annotation);
+                }
+            }
+        }
     }
 
     private FieldValidator() {}
