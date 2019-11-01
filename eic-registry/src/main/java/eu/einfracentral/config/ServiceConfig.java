@@ -28,6 +28,7 @@ import java.util.Random;
         "eu.einfracentral.manager",
         "eu.einfracentral.registry.manager",
         "eu.einfracentral.utils",
+        "eu.einfracentral.validator",
         "eu.einfracentral.service"})
 @Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})

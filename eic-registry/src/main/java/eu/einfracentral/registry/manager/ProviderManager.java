@@ -21,6 +21,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import eu.einfracentral.validator.FieldValidator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,6 +39,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private EICAuthoritiesMapper eicAuthoritiesMapper;
     private VocabularyService vocabularyService;
 
+    private FieldValidator fieldValidator;
+
     private static final int NAME_LENGTH = 80;
     private static final int FIELD_LENGTH = 100;
     private static final int FIELD_LENGTH_SMALL = 20;
@@ -48,7 +51,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy RegistrationMailService registrationMailService, /*JmsTemplate jmsTopicTemplate*/
                            @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
-                           VocabularyService vocabularyService) {
+                           VocabularyService vocabularyService,
+                           @Lazy FieldValidator fieldValidator) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -56,6 +60,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         this.registrationMailService = registrationMailService;
         this.eicAuthoritiesMapper = eicAuthoritiesMapper;
         this.vocabularyService = vocabularyService;
+        this.fieldValidator = fieldValidator;
     }
 
 
@@ -389,8 +394,15 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
     }
 
-    public void validateProvider(Provider provider){
+    public void validateProvider(Provider provider){ //TODO
         logger.debug("Validating vocabularies, Provider id: {}", provider.getId());
+
+        try {
+            fieldValidator.validateFields(provider);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
+
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         // Validate Provider's ID
