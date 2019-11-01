@@ -1,19 +1,19 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.config.security.EICAuthoritiesMapper;
-import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ServiceException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
-import eu.einfracentral.validator.FieldValidator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
@@ -37,21 +39,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     private Random randomNumberGenerator;
     private RegistrationMailService registrationMailService;
     private EICAuthoritiesMapper eicAuthoritiesMapper;
-    private VocabularyService vocabularyService;
 
     private FieldValidator fieldValidator;
-
-    private static final int NAME_LENGTH = 80;
-    private static final int FIELD_LENGTH = 100;
-    private static final int FIELD_LENGTH_SMALL = 20;
-    private static final int TEXT_LENGTH = 1000;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy RegistrationMailService registrationMailService, /*JmsTemplate jmsTopicTemplate*/
                            @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
-                           VocabularyService vocabularyService,
                            @Lazy FieldValidator fieldValidator) {
         super(Provider.class);
         this.infraServiceService = infraServiceService;
@@ -59,7 +54,6 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         this.randomNumberGenerator = randomNumberGenerator;
         this.registrationMailService = registrationMailService;
         this.eicAuthoritiesMapper = eicAuthoritiesMapper;
-        this.vocabularyService = vocabularyService;
         this.fieldValidator = fieldValidator;
     }
 
@@ -381,6 +375,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     /**
      * This method is used to update a list of new providers with status 'Provider.States.ST_SUBMISSION'
      * to status 'Provider.States.PENDING_2'
+     *
      * @param providers
      * @param authentication
      */
@@ -394,256 +389,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
     }
 
-    public void validateProvider(Provider provider){ //TODO
-        logger.debug("Validating vocabularies, Provider id: {}", provider.getId());
-
+    public void validateProvider(Provider provider) {
+        logger.debug("Validating Provider with id: {}", provider.getId());
         try {
             fieldValidator.validateFields(provider);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
-
-        Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
-
-        // Validate Provider's ID
-        if (provider.getId() == null || "".equals(provider.getId())) {
-            provider.setId(provider.getName());
-        }
-        provider.setId(StringUtils
-                .stripAccents(provider.getId())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
-        if ("".equals(provider.getId())) {
-            throw new ServiceException("Provider id not valid. Special characters are ignored.");
-        }
-
-        // Validate Provider's Name
-        if (provider.getName() == null || provider.getName().equals("")) {
-            throw new ValidationException("field 'name' is obligatory");
-        }
-        if (provider.getName().length() > NAME_LENGTH) {
-            throw new ValidationException("max length for 'name' is 80 chars");
-        }
-
-        // Validate Provider's Acronym
-        if (provider.getAcronym() == null || provider.getAcronym().equals("")) {
-            throw new ValidationException("field 'acronym' is obligatory");
-        }
-        if (provider.getAcronym().length() > FIELD_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'name' is 20 chars");
-        }
-
-        // Validate Provider's Website
-        if (provider.getWebsite() == null || provider.getWebsite().toString().equals("")) {
-            throw new ValidationException("field 'website' is obligatory");
-        }
-
-        // Validate Provider's Description
-        if (provider.getDescription() == null || provider.getDescription().equals("")) {
-            throw new ValidationException("field 'description' is obligatory");
-        }
-        if (provider.getDescription().length() > TEXT_LENGTH) {
-            throw new ValidationException("max length for 'description' is 1000 chars");
-        }
-
-        // Validate Provider's Logo
-        if (provider.getLogo() == null || provider.getLogo().toString().equals("")) {
-            throw new ValidationException("field 'logo' is obligatory");
-        }
-
-        // Validate Provider's Type
-        if (provider.getTypes() == null || provider.getTypes().isEmpty())
-            throw new ValidationException("Field 'types' is mandatory.");
-        for (String type : provider.getTypes()) {
-            if (!allVocabularies.containsKey(type))
-                throw new ValidationException(String.format("type '%s' does not exist.", type));
-        }
-
-        // Validate Provider's Category
-        if (provider.getCategories() == null || provider.getCategories().isEmpty())
-            throw new ValidationException("Field 'categories' is mandatory.");
-        for (String category : provider.getCategories()) {
-            if (!allVocabularies.containsKey(category))
-                throw new ValidationException(String.format("category '%s' does not exist.", category));
-        }
-
-        // Validate Provider's ESFRI Domain
-        if (provider.getEsfriDomains() == null || provider.getEsfriDomains().isEmpty())
-            throw new ValidationException("Field 'esfriDomains' is mandatory.");
-        for (String esfriDomain : provider.getEsfriDomains()) {
-            if (!allVocabularies.containsKey(esfriDomain))
-                throw new ValidationException(String.format("esfriDomain '%s' does not exist.", esfriDomain));
-        }
-
-        // Validate Provider's Tags
-        if (provider.getTags() != null) {
-            if (provider.getTags().size() == 1 && "".equals(provider.getTags().get(0))) {
-                provider.getTags().remove(0);
-            }
-            for (String tag : provider.getTags()) {
-                if (tag != null && tag.length() > FIELD_LENGTH_SMALL) {
-                    throw new ValidationException("max length for 'tag' is " + FIELD_LENGTH_SMALL + " chars");
-                }
-                if (tag == null || tag.equals("")) {
-                    throw new ValidationException("One or more items of the tags list is null or empty");
-                }
-            }
-        }
-
-        // Validate Provider's Life Cycle Status
-        if (provider.getLifeCycleStatus() == null || provider.getLifeCycleStatus().isEmpty())
-            throw new ValidationException("Field 'lifeCycleStatus' is mandatory.");
-        if (!allVocabularies.containsKey(provider.getLifeCycleStatus()))
-            throw new ValidationException(String.format("lifeCycleStatus '%s' does not exist.", provider.getLifeCycleStatus()));
-
-        // Validate Provider's Location
-        if (provider.getLocation() == null){
-            throw new ValidationException("Field 'location' is mandatory.");
-        }
-        if (provider.getLocation().getName() == null || provider.getLocation().getName().equals("")) {
-            throw new ValidationException("field 'name' is mandatory");
-        }
-        if (provider.getLocation().getName().length() > FIELD_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-        }
-        if (provider.getLocation().getStreet() == null || provider.getLocation().getStreet().equals("")) {
-            throw new ValidationException("field 'street' is mandatory");
-        }
-        if (provider.getLocation().getStreet().length() > FIELD_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-        }
-        if (provider.getLocation().getNumber() == null || provider.getLocation().getNumber().equals("")) {
-            throw new ValidationException("field 'number' is mandatory");
-        }
-        if (provider.getLocation().getNumber().length() > FIELD_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-        }
-        if (provider.getLocation().getPostalCode() == null || provider.getLocation().getPostalCode().equals("")) {
-            throw new ValidationException("field 'postalCode' is mandatory");
-        }
-        if (provider.getLocation().getPostalCode().length() > FIELD_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-        }
-        if (provider.getLocation().getCity() == null || provider.getLocation().getCity().equals("")) {
-            throw new ValidationException("field 'city' is mandatory");
-        }
-        if (provider.getLocation().getCity().length() > FIELD_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-        }
-        if (provider.getLocation().getRegion() == null || provider.getLocation().getRegion().equals("")) {
-            throw new ValidationException("field 'region' is mandatory");
-        }
-        if (provider.getLocation().getRegion().length() > FIELD_LENGTH_SMALL) {
-            throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-        }
-
-        // Validate Coordinating Country
-        if (provider.getCoordinatingCountry() != null && !provider.getCoordinatingCountry().equals("")) {
-            if (!allVocabularies.containsKey(provider.getCoordinatingCountry()))
-                throw new ValidationException(String.format("coordinatingCountry '%s' does not exist.", provider.getCoordinatingCountry()));
-        } else throw new ValidationException("Field 'coordinatingCountry' is mandatory.");
-
-        // Validate Participating Countries
-        if (provider.getParticipatingCountries() != null && !provider.getParticipatingCountries().isEmpty()) {
-            List<String> notFoundCountries = new ArrayList<>();
-            List<String> foundCountries = new ArrayList<>();
-            for (String countryId : provider.getParticipatingCountries()) {
-                if (allVocabularies.containsKey(countryId)) {
-                    if (!foundCountries.contains(countryId)) {
-                        foundCountries.add(countryId);
-                    }
-                } else {
-                    notFoundCountries.add(countryId);
-                }
-            }
-            if (!notFoundCountries.isEmpty()) {
-                throw new ValidationException(String.format("Countries not found: %s",
-                        String.join(", ", notFoundCountries)));
-            }
-            provider.setParticipatingCountries(foundCountries);
-        }
-
-        // Validate Provider's Contacts
-        if (provider.getContacts() == null || provider.getContacts().isEmpty())
-            throw new ValidationException("Field 'contacts' is mandatory. You need to provide at least 1 contact.");
-        for (Contact contact : provider.getContacts()) {
-
-        // Validate the Contact's fields requirement
-            if (contact.getFirstName() == null || contact.getFirstName().equals("")) {
-                throw new ValidationException("field 'firstName' is mandatory");
-            }
-            if (contact.getLastName() == null || contact.getLastName().equals("")) {
-                throw new ValidationException("field 'lastName' is mandatory");
-            }
-            if (contact.getEmail() == null || contact.getEmail().equals("")) {
-                throw new ValidationException("field 'email' is mandatory");
-            }
-            if (contact.getTel() == null || contact.getTel().equals("")) {
-                 throw new ValidationException("field 'tel' is mandatory");
-            }
-
-            // Validate max length of Contact's fields
-            if (contact.getFirstName().length() > FIELD_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'firstName' is " + FIELD_LENGTH_SMALL + " chars");
-            }
-            if (contact.getLastName().length() > FIELD_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'lastName' is " + FIELD_LENGTH_SMALL + " chars");
-            }
-            if (contact.getTel().length() > FIELD_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'tel' is " + FIELD_LENGTH_SMALL + " chars");
-            }
-            if (contact.getPosition().length() > FIELD_LENGTH_SMALL) {
-                throw new ValidationException("max length for 'position' is " + FIELD_LENGTH_SMALL + " chars");
-            }
-        }
-
-        // Validate Provider's Hosting Legal Entity
-        if (provider.getHostingLegalEntity() != null && provider.getHostingLegalEntity().length() > NAME_LENGTH) {
-            throw new ValidationException("max length for 'hostingLegalEntity' is " + NAME_LENGTH + " chars");
-        }
-
-        // Validate Provider's Legal Status
-        if (provider.getLegalStatus() != null && !allVocabularies.containsKey(provider.getLegalStatus())){
-            throw new ValidationException(String.format("legalStatus '%s' does not exist.", provider.getLegalStatus()));
-        }
-
-        // Validate Provider's ESFRI
-        if (provider.getEsfri() != null && !allVocabularies.containsKey(provider.getEsfri())){
-            throw new ValidationException(String.format("ESFRI '%s' does not exist.", provider.getEsfri()));
-        }
-
-        // Validate Provider's Networks
-        if (provider.getNetworks() != null) {
-            for (String network : provider.getNetworks()) {
-                if (!allVocabularies.containsKey(network))
-                    throw new ValidationException(String.format("network '%s' does not exist.", network));
-            }
-        }
-
-        // Validate Provider's Areas of Activity
-        if (provider.getAreasOfActivity() != null) {
-            for (String area : provider.getAreasOfActivity()) {
-                if (!allVocabularies.containsKey(area))
-                    throw new ValidationException(String.format("areaOfActivity '%s' does not exist.", area));
-            }
-        }
-
-        // Validate Provider's Societal Grand Challenges
-        if (provider.getSocietalGrandChallenges() != null) {
-            for (String challenge : provider.getSocietalGrandChallenges()) {
-                if (!allVocabularies.containsKey(challenge))
-                    throw new ValidationException(String.format("societalGrandChallenge '%s' does not exist.", challenge));
-            }
-        }
-
-        // Validate Provider's National Roadmap
-        if (provider.getNationalRoadmap() != null) {
-            if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
-                throw new ValidationException("nationalRoadmap's value should be Yes or No");
-            }
-        }
-
     }
 
 }
