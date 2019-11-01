@@ -89,6 +89,10 @@ public class FieldValidator {
                 validateIds(field, fieldValue, validationAnnotation);
             } else if (fieldValue != null && fieldValue.getClass().getCanonicalName().startsWith("eu.einfracentral.")) {
                 validateFields(fieldValue);
+            } else if (fieldValue != null && Collection.class.isAssignableFrom(fieldValue.getClass())) {
+                for (Object entry : ((Collection) fieldValue)) {
+                    validateFields(entry);
+                }
             }
         }
     }
