@@ -4,6 +4,7 @@ import eu.einfracentral.domain.Indicator;
 import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.IndicatorService;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
@@ -21,11 +22,13 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
     private static final Logger logger = LogManager.getLogger(IndicatorManager.class);
     private MeasurementManager measurementManager;
+    private FieldValidator fieldValidator;
 
     @Autowired
-    public IndicatorManager(@Lazy MeasurementManager measurementManager) {
+    public IndicatorManager(@Lazy MeasurementManager measurementManager, @Lazy FieldValidator fieldValidator) {
         super(Indicator.class);
         this.measurementManager = measurementManager;
+        this.fieldValidator = fieldValidator;
     }
 
     @Override
@@ -36,7 +39,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
     @Override
     public Indicator add(Indicator indicator, Authentication auth) {
-        validate(indicator);
+        validateIndicator(indicator);
         super.add(indicator, auth);
         logger.info("Adding Indicator: {}", indicator);
         return indicator;
@@ -44,7 +47,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
     @Override
     public Indicator update(Indicator indicator, Authentication auth) {
-        validate(indicator);
+        validateIndicator(indicator);
         super.update(indicator, auth);
         logger.info("Updating Indicator: {}", indicator);
         return indicator;
@@ -67,28 +70,13 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
         super.delete(indicator);
     }
 
+    public void validateIndicator(Indicator indicator) {
+        logger.debug("Validating Indicator with id: {}", indicator.getId());
 
-    @Override
-    public Indicator validate(Indicator indicator) {
-
-        // Validates Indicator's ID
-        if (indicator.getId() == null || indicator.getId().equals("")) {
-            throw new ValidationException("Indicator's id cannot be 'null' or 'empty'");
-        }
-
-        // Validates Indicator's name
-        if (indicator.getName() == null || indicator.getName().equals("")) {
-            throw new ValidationException("Indicator's name cannot be 'null' or 'empty'");
-        }
-
-        // Validates Indicator's description
-        if (indicator.getDescription() == null || indicator.getDescription().equals("")) {
-            throw new ValidationException("Indicator's description cannot be 'null' or 'empty'");
-        }
-
-        // Validates Indicator's dimensions
-        if (indicator.getDimensions() == null || indicator.getDimensions().isEmpty()) {
-            throw new ValidationException("Indicator's dimensions cannot be 'null' or 'empty'");
+        try {
+            fieldValidator.validateFields(indicator);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
         }
 
         List<String> validatedDimensions = new ArrayList<>();
@@ -103,11 +91,6 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
             }
         }
         indicator.setDimensions(validatedDimensions);
-
-        // Validates Indicator's unit
-        if (indicator.getUnit() == null) {
-            throw new ValidationException("Indicator's unit cannot be 'null' or 'empty'");
-        }
 
         // Validates Indicator's unitName
         switch (Indicator.UnitType.fromString(indicator.getUnit())) {
@@ -134,8 +117,6 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
         // throws exception if value does not exist
         Indicator.UnitType.fromString(indicator.getUnit());
-
-        return indicator;
     }
 
     boolean hasTime(Indicator indicator) {
