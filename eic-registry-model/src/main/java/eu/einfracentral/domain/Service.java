@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -10,6 +12,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
+
+import static eu.einfracentral.utils.ValidationLengths.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -22,6 +26,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @FieldValidation
     private String id;
 
     /**
@@ -29,6 +34,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
+    @FieldValidation(maxLength = NAME_LENGTH)
     private String name;
 
     /**
@@ -36,6 +42,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "URL (required)", required = true)
+    @FieldValidation
     private URL url;
 
     /**
@@ -43,6 +50,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, example = "String (required)", required = true)
+    @FieldValidation(maxLength = TEXT_LENGTH)
     private String description;
 
     /**
@@ -50,6 +58,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, example = "URL (required)", required = true)
+    @FieldValidation
     private URL logo;
 
     /**
@@ -58,6 +67,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "multimediaUrls")
     @XmlElement(name = "multimediaUrl")
     @ApiModelProperty(position = 6, dataType = "List", example = "URL[] (optional)")
+    @FieldValidation(nullable = true)
     private List<URL> multimediaUrls;
 
     /**
@@ -65,6 +75,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 7, example = "String (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
     private String tagline;
 
     /**
@@ -72,6 +83,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 8, example = "String (optional)")
+    @FieldValidation(nullable = true, maxLength = TEXT_LENGTH)
     private String userValue;
 
     /**
@@ -80,6 +92,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "userBaseList")
     @XmlElement(name = "userBase")
     @ApiModelProperty(position = 9, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
     private List<String> userBaseList;
 
     /**
@@ -88,6 +101,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "useCases")
     @XmlElement(name = "useCase")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
     private List<String> useCases;
 
     /**
@@ -96,6 +110,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "options")
     @XmlElement(name = "option")
     @ApiModelProperty(position = 11)
+    @FieldValidation(nullable = true)
     private List<ServiceOption> options;
 
     /**
@@ -103,6 +118,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 12, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL endpoint;
 
 
@@ -113,6 +129,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "providers", required = true)
     @XmlElement(name = "provider")
     @ApiModelProperty(position = 13, dataType = "List", example = "String[] (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Provider.class)
     private List<String> providers;
 
     /**
@@ -121,6 +138,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "scientificSubdomains", required = true)
     @XmlElement(name = "scientificSubdomain")
     @ApiModelProperty(position = 14, dataType = "List", example = "String[] (required)", required = true)
+    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
     private List<String> scientificSubdomains;
 
     /**
@@ -129,6 +147,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "subcategories", required = true)
     @XmlElement(name = "subcategory")
     @ApiModelProperty(position = 15, dataType = "List", example = "String[] (required)", required = true)
+    @VocabularyValidation(type = Vocabulary.Type.SUBCATEGORY)
     private List<String> subcategories;
 
     /**
@@ -137,6 +156,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "targetUsers", required = true)
     @XmlElement(name = "targetUser")
     @ApiModelProperty(position = 16, dataType = "List", example = "String[] (required)", required = true)
+    @VocabularyValidation(type = Vocabulary.Type.TARGET_USERS)
     private List<String> targetUsers;
 
     /**
@@ -145,6 +165,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "languages", required = true)
     @XmlElement(name = "language")
     @ApiModelProperty(position = 17, dataType = "List", example = "String[] (required)", required = true)
+    @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
     private List<String> languages;
 
     /**
@@ -153,6 +174,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "places", required = true)
     @XmlElement(name = "place")
     @ApiModelProperty(position = 18, dataType = "List", example = "String[] (required)", required = true)
+    @VocabularyValidation(type = Vocabulary.Type.PLACE)
     private List<String> places;
 
     /**
@@ -161,6 +183,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "accessTypes")
     @XmlElement(name = "accessType")
     @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
+    @VocabularyValidation(type = Vocabulary.Type.ACCESS_TYPE)
     private List<String> accessTypes;
 
     /**
@@ -169,6 +192,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "accessModes")
     @XmlElement(name = "accessMode")
     @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
+    @VocabularyValidation(type = Vocabulary.Type.ACCESS_MODE)
     private List<String> accessModes;
 
     /**
@@ -177,6 +201,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "funders")
     @XmlElement(name = "funder")
     @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Funder.class)
     private List<String> funders;
 
     /**
@@ -185,6 +210,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
     @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
     private List<String> tags;
 
 
@@ -194,6 +220,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 23, example = "String (optional)")
+    @VocabularyValidation(type = Vocabulary.Type.PHASE)
     private String phase;
 
     /**
@@ -201,6 +228,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 24, example = "String (optional)")
+    @VocabularyValidation(type = Vocabulary.Type.TRL)
     private String trl;
 
     /**
@@ -208,6 +236,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 25, example = "String (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
     private String version;
 
     /**
@@ -215,6 +244,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 26, example = "XMLGregorianCalendar (optional)")
+    @FieldValidation(nullable = true)
     private XMLGregorianCalendar lastUpdate;
 
   
@@ -224,6 +254,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 27, example = "String (optional)")
+    @FieldValidation(nullable = true, maxLength = TEXT_LENGTH)
     private String changeLog;
 
     /**
@@ -232,6 +263,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
     @ApiModelProperty(position = 28, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
     private List<String> certifications;
 
     /**
@@ -240,6 +272,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "standards")
     @XmlElement(name = "standard")
     @ApiModelProperty(position = 29, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
     private List<String> standards;
 
   
@@ -249,6 +282,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 30, example = "String (required)", required = true)
+    @VocabularyValidation(type = Vocabulary.Type.ORDER_TYPE)
     private String orderType;
 
     /**
@@ -256,6 +290,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 31, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL order;
 
     /**
@@ -263,6 +298,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 32, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL sla;
 
     /**
@@ -270,6 +306,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 33, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL termsOfUse;
 
     /**
@@ -277,6 +314,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 34, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL privacyPolicy;
 
     /**
@@ -284,6 +322,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 35, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL accessPolicy;
 
   
@@ -293,6 +332,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 36, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL paymentModel;
 
     /**
@@ -300,6 +340,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 37, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL pricing;
 
 
@@ -309,6 +350,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 38, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL userManual;
 
     /**
@@ -316,6 +358,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 39, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL adminManual;
 
     /**
@@ -323,6 +366,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 40, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL training;
 
     /**
@@ -330,6 +374,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 41, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL helpdesk;
 
     /**
@@ -337,6 +382,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 42, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL monitoring;
 
     /**
@@ -344,6 +390,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 43, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL maintenance;
 
   
@@ -354,6 +401,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "contacts", required = true)
     @XmlElement(name = "contact")
     @ApiModelProperty(position = 44, required = true)
+    @FieldValidation
     private List<Contact> contacts;
 
 
@@ -364,6 +412,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
     @ApiModelProperty(position = 45, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
     private List<String> requiredServices;
 
     /**
@@ -372,6 +421,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
     @ApiModelProperty(position = 46, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
     private List<String> relatedServices;
 
     /**
@@ -380,6 +430,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "relatedPlatforms")
     @XmlElement(name = "relatedPlatform")
     @ApiModelProperty(position = 47, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
     private List<String> relatedPlatforms;
 
 

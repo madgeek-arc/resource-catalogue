@@ -42,6 +42,7 @@ public class ServiceValidators {
         this.funderService = funderService;
     }
 
+    @Deprecated
     public void validateVocabularies(Service service) {
         logger.debug("Validating vocabularies, Service id: {}", service.getId());
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
@@ -165,6 +166,7 @@ public class ServiceValidators {
 
     }
 
+    @Deprecated
     // Validate the correctness of Providers.
     public void validateProviders(Service service) {
         logger.debug("Validating Providers, Service id: {}", service.getId());
@@ -186,6 +188,7 @@ public class ServiceValidators {
         service.setProviders(validProviders);
     }
 
+    @Deprecated
     // Validate the correctness of Related and Required Services.
     public void validateServices(Service service) {
         logger.debug("Validating Required/Related Services, Service id: {}", service.getId());
@@ -214,6 +217,7 @@ public class ServiceValidators {
         }
     }
 
+    @Deprecated
     // Validate the correctness of Service Name.
     public void validateName(Service service) {
         if (service.getName() == null || service.getName().equals("")) {
@@ -224,6 +228,7 @@ public class ServiceValidators {
         }
     }
 
+    @Deprecated
     // Validate the correctness of Service URL.
     public void validateURL(Service service) {
         if (service.getUrl() == null || service.getUrl().toString().equals("")) {
@@ -231,6 +236,7 @@ public class ServiceValidators {
         }
     }
 
+    @Deprecated
     // Validate the correctness of Service Description.
     public void validateDescription(Service service) {
         if (service.getDescription() == null || service.getDescription().equals("")) {
@@ -241,6 +247,7 @@ public class ServiceValidators {
         }
     }
 
+    @Deprecated
     // Validate the correctness of Service Logo.
     public void validateLogo(Service service) {
         if (service.getLogo() == null || service.getLogo().toString().equals("")) {
@@ -314,6 +321,7 @@ public class ServiceValidators {
         }
     }
 
+    @Deprecated
     // Validate the correctness of Service Version.
     public void validateVersion(Service service) {
         if (service.getVersion() != null) {
@@ -388,6 +396,7 @@ public class ServiceValidators {
         }
     }
 
+    @Deprecated
     // Validate the max length of various variables (x10).
     public void validateMaxLength(Service service) {
         if (service.getTagline() != null && service.getTagline().length() > FIELD_LENGTH) {
