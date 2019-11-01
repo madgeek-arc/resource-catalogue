@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
 
 @Service
@@ -43,6 +42,9 @@ public class FieldValidator {
     }
 
     public void validateFields(Object o) throws IllegalAccessException {
+        if (o == null) {
+            throw new ValidationException("Attempt to validate null object..");
+        }
 
         // get declared fields of class
         Field[] declaredFields = o.getClass().getDeclaredFields();
@@ -54,6 +56,10 @@ public class FieldValidator {
     }
 
     public void validateField(Field field, Object o) throws IllegalAccessException {
+        if (o == null) {
+            throw new ValidationException("Attempt to validate null object..");
+        }
+
         // check if FieldValidation annotation exists
         Annotation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
         Annotation annotation = field.getAnnotation(FieldValidation.class);
@@ -78,7 +84,12 @@ public class FieldValidator {
             }
 
             validateMaxLength(field, fieldValue, validationAnnotation);
-            validateIds(field, fieldValue, validationAnnotation);
+
+            if (validationAnnotation.containsId()) {
+                validateIds(field, fieldValue, validationAnnotation);
+            } else if (fieldValue != null && fieldValue.getClass().getCanonicalName().startsWith("eu.einfracentral.")) {
+                validateFields(fieldValue);
+            }
         }
     }
 

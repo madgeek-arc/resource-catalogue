@@ -132,7 +132,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 13, required = true)
-    @VocabularyValidation(type = Vocabulary.Type.PLACE)
+    @FieldValidation
     private ProviderLocation location;
 
     /**
