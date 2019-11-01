@@ -104,6 +104,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "esfriDomain")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_DOMAIN)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private List<String> esfriDomains;
 
     /**
@@ -132,7 +133,6 @@ public class Provider implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 13, required = true)
-    @VocabularyValidation(type = Vocabulary.Type.PLACE)
     private ProviderLocation location;
 
     /**
@@ -150,6 +150,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "participatingCountry")
     @ApiModelProperty(position = 15, dataType = "List", example = "String[] (optional)")
     @VocabularyValidation(type = Vocabulary.Type.PLACE)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private List<String> participatingCountries;
 
 
@@ -179,6 +180,7 @@ public class Provider implements Identifiable {
     @XmlElement
     @ApiModelProperty(position = 18, example = "String (optional)")
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private String legalStatus;
 
     /**
@@ -187,6 +189,7 @@ public class Provider implements Identifiable {
     @XmlElement
     @ApiModelProperty(position = 19, example = "String (optional)")
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private String esfri;
 
     /**
@@ -196,6 +199,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "network")
     @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORKS)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private List<String> networks;
 
     /**
@@ -205,6 +209,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "areaOfActivity")
     @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AREA_OF_ACTIVITY)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private List<String> areasOfActivity;
 
     /**
@@ -214,6 +219,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "societalGrandChallenge")
     @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SOCIETAL_GRAND_CHALLENGES)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private List<String> societalGrandChallenges;
 
     /**
