@@ -1,5 +1,7 @@
 package eu.einfracentral.annotation;
 
+import eu.einfracentral.domain.Vocabulary;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -7,13 +9,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FieldValidation {
+@FieldValidation(containsId = true, idClass = Vocabulary.class)
+public @interface VocabularyValidation {
 
-    boolean nullable() default false;
-
-    int maxLength() default 0;
-
-    boolean containsId() default false;
-
-    Class idClass() default Object.class;
+    Vocabulary.Type type();
 }
