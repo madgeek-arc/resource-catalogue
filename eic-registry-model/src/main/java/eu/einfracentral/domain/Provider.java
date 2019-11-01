@@ -103,6 +103,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "esfriDomains")
     @XmlElement(name = "esfriDomain")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_DOMAIN)
     private List<String> esfriDomains;
 
@@ -149,6 +150,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
     @ApiModelProperty(position = 15, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PLACE)
     private List<String> participatingCountries;
 
@@ -178,6 +180,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 18, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
     private String legalStatus;
 
@@ -186,6 +189,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 19, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI)
     private String esfri;
 
@@ -195,6 +199,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
     @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORKS)
     private List<String> networks;
 
@@ -204,6 +209,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "areasOfActivity")
     @XmlElement(name = "areaOfActivity")
     @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AREA_OF_ACTIVITY)
     private List<String> areasOfActivity;
 
@@ -213,6 +219,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "societalGrandChallenges")
     @XmlElement(name = "societalGrandChallenge")
     @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SOCIETAL_GRAND_CHALLENGES)
     private List<String> societalGrandChallenges;
 
