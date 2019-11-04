@@ -67,11 +67,11 @@
 
   <xs:complexType name="emailMessage">
     <xs:sequence>
-      <xs:element default="null" minOccurs="0" name="message" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="recipientEmail" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="senderEmail" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="senderName" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="subject" type="xs:string"/>
+      <xs:element minOccurs="0" name="message" type="xs:string"/>
+      <xs:element minOccurs="0" name="recipientEmail" type="xs:string"/>
+      <xs:element minOccurs="0" name="senderEmail" type="xs:string"/>
+      <xs:element minOccurs="0" name="senderName" type="xs:string"/>
+      <xs:element minOccurs="0" name="subject" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
