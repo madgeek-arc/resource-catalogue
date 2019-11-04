@@ -5,6 +5,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
@@ -14,6 +15,8 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ServiceException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +69,20 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider add(Provider provider, Authentication auth) {
+
+        // Create Provider ID // TODO move elsewhere
+        if (provider.getId() == null || "".equals(provider.getId())) {
+            provider.setId(provider.getName()); // TODO: or maybe use acronym instead ??
+        }
+        provider.setId(StringUtils
+                .stripAccents(provider.getId())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase());
+        if ("".equals(provider.getId())) {
+            throw new ServiceException("Provider id not valid. Special characters are ignored.");
+        }
+
         List<User> users;
         User authUser = new User(auth);
         Provider ret;
@@ -391,6 +408,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     public void validateProvider(Provider provider) {
         logger.debug("Validating Provider with id: {}", provider.getId());
+
+        // Validate Provider's National Roadmap
+        if (provider.getNationalRoadmap() != null && !"".equals(provider.getNationalRoadmap())) {
+            if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
+                throw new ValidationException("nationalRoadmap's value should be Yes or No");
+            }
+        }
+
         try {
             fieldValidator.validateFields(provider);
         } catch (IllegalAccessException e) {
