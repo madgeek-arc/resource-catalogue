@@ -151,9 +151,9 @@ public class ServiceController {
 
     @ApiOperation(value = "Validates the Service without actually changing the repository.")
     @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody Service service, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Boolean> validate(@RequestBody Service service) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(new InfraService(service)));
-        logger.info("User '{}' validated Service with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
+        logger.info("Validated Service with name '{}' and id '{}'", service.getName(), service.getId());
         return ret;
     }
 
