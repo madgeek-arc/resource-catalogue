@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 @Service
 public class FieldValidator {
@@ -78,6 +80,14 @@ public class FieldValidator {
             Class clazz = null;
             if (fieldValue != null) {
                 clazz = field.get(o).getClass();
+
+                if (Collection.class.isAssignableFrom(fieldValue.getClass())) {
+                    removeNullOrEmptyEntries((Collection) fieldValue);
+                } else if ((String.class.isAssignableFrom(fieldValue.getClass())
+                        || URL.class.isAssignableFrom(fieldValue.getClass()))
+                        && "".equals(fieldValue)) {
+                    fieldValue = null;
+                }
             }
 
             if (!validationAnnotation.nullable() && isNullOrEmpty(fieldValue, clazz)) {
@@ -174,6 +184,24 @@ public class FieldValidator {
                     throw new ValidationException(
                             String.format("%s with ID '%s' does not exist. Found in field '%s'",
                                     annotation.idClass().getSimpleName(), o.toString(), field.getName()));
+                }
+            }
+        }
+    }
+
+    private void removeNullOrEmptyEntries(Collection collection) {
+        if (collection != null) {
+            for (Iterator i = collection.iterator(); i.hasNext();) {
+                Object entry = i.next();
+                // if elements are of type String or URL
+                if (entry != null) {
+                    if ((String.class.isAssignableFrom(entry.getClass())
+                            || URL.class.isAssignableFrom(entry.getClass()))
+                            && "".equals(entry.toString())) {
+                        i.remove(); // remove empty string entries ("")
+                    }
+                } else {
+                    i.remove(); // remove null entries
                 }
             }
         }
