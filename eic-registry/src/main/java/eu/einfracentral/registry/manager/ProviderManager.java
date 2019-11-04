@@ -456,7 +456,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // Validate Provider's ESFRI Domain
-        if (provider.getEsfriDomains() != null){
+        if (provider.getEsfriDomains() != null) {
+            if (provider.getEsfriDomains().size() == 1 && "".equals(provider.getEsfriDomains().get(0))) {
+                provider.getEsfriDomains().remove(0);
+            }
             for (String esfriDomain : provider.getEsfriDomains()) {
                 if (!allVocabularies.containsKey(esfriDomain))
                     throw new ValidationException(String.format("esfriDomain '%s' does not exist.", esfriDomain));
@@ -485,7 +488,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
             throw new ValidationException(String.format("lifeCycleStatus '%s' does not exist.", provider.getLifeCycleStatus()));
 
         // Validate Provider's Location
-        if (provider.getLocation() == null){
+        if (provider.getLocation() == null) {
             throw new ValidationException("Field 'location' is mandatory.");
         }
         if (provider.getLocation().getName() == null || provider.getLocation().getName().equals("")) {
@@ -532,7 +535,10 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         } else throw new ValidationException("Field 'coordinatingCountry' is mandatory.");
 
         // Validate Participating Countries
-        if (provider.getParticipatingCountries() != null && !provider.getParticipatingCountries().isEmpty()) {
+        if (provider.getParticipatingCountries() != null) {
+            if (provider.getParticipatingCountries().size() == 1 && "".equals(provider.getParticipatingCountries().get(0))) {
+                provider.getParticipatingCountries().remove(0);
+            }
             List<String> notFoundCountries = new ArrayList<>();
             List<String> foundCountries = new ArrayList<>();
             for (String countryId : provider.getParticipatingCountries()) {
@@ -593,17 +599,24 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // Validate Provider's Legal Status
-        if (provider.getLegalStatus() != null && !allVocabularies.containsKey(provider.getLegalStatus())){
+        if (provider.getLegalStatus() != null
+                && !"".equals(provider.getLegalStatus())
+                && !allVocabularies.containsKey(provider.getLegalStatus())){
             throw new ValidationException(String.format("legalStatus '%s' does not exist.", provider.getLegalStatus()));
         }
 
         // Validate Provider's ESFRI
-        if (provider.getEsfri() != null && !allVocabularies.containsKey(provider.getEsfri())){
+        if (provider.getEsfri() != null
+                && "".equals(provider.getEsfri())
+                && !allVocabularies.containsKey(provider.getEsfri())){
             throw new ValidationException(String.format("ESFRI '%s' does not exist.", provider.getEsfri()));
         }
 
         // Validate Provider's Networks
         if (provider.getNetworks() != null) {
+            if (provider.getNetworks().size() == 1 && "".equals(provider.getNetworks().get(0))) {
+                provider.getNetworks().remove(0);
+            }
             for (String network : provider.getNetworks()) {
                 if (!allVocabularies.containsKey(network))
                     throw new ValidationException(String.format("network '%s' does not exist.", network));
@@ -612,6 +625,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
         // Validate Provider's Areas of Activity
         if (provider.getAreasOfActivity() != null) {
+            if (provider.getAreasOfActivity().size() == 1 && "".equals(provider.getAreasOfActivity().get(0))) {
+                provider.getAreasOfActivity().remove(0);
+            }
             for (String area : provider.getAreasOfActivity()) {
                 if (!allVocabularies.containsKey(area))
                     throw new ValidationException(String.format("areaOfActivity '%s' does not exist.", area));
@@ -620,6 +636,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
         // Validate Provider's Societal Grand Challenges
         if (provider.getSocietalGrandChallenges() != null) {
+            if (provider.getSocietalGrandChallenges().size() == 1 && "".equals(provider.getSocietalGrandChallenges().get(0))) {
+                provider.getSocietalGrandChallenges().remove(0);
+            }
             for (String challenge : provider.getSocietalGrandChallenges()) {
                 if (!allVocabularies.containsKey(challenge))
                     throw new ValidationException(String.format("societalGrandChallenge '%s' does not exist.", challenge));
