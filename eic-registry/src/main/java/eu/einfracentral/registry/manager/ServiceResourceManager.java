@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.Category;
+import eu.einfracentral.dto.ProviderInfo;
 import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
@@ -50,6 +51,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
     @Autowired
     private VocabularyService vocabularyService;
+
+    @Autowired
+    private ProviderService providerService;
 
     @Autowired
     private FunderService funderService;
@@ -454,7 +458,23 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
         List<RichService> richServices = createRichVocabularies(infraServices);
         createRichStatistics(richServices, auth);
+        createProviderInfo(richServices, auth);
 
+        return richServices;
+    }
+
+    private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth){
+        for (RichService richService : richServices){
+            List<ProviderInfo> providerInfoList = new ArrayList<>();
+            for (String provider : richService.getService().getProviders()){
+                ProviderInfo providerInfo = new ProviderInfo();
+                providerInfo.setProviderId(providerService.get(provider, auth).getId());
+                providerInfo.setProviderName(providerService.get(provider, auth).getName());
+                providerInfo.setProviderAcronym(providerService.get(provider, auth).getAcronym());
+                providerInfoList.add(providerInfo);
+            }
+            richService.setProviderInfo(providerInfoList);
+        }
         return richServices;
     }
 
@@ -492,7 +512,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return services;
     }
 
-    public List<RichService> createRichVocabularies(List<InfraService> infraServices) {
+    private List<RichService> createRichVocabularies(List<InfraService> infraServices) {
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
         Map<String, Funder> allFunders = funderService.getFundersMap();
         List<RichService> richServices = new ArrayList<>();
@@ -600,7 +620,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return (richServices);
     }
 
-    public List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth) {
+    private List<RichService> createRichStatistics(List<RichService> richServices, Authentication auth) {
         Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
         Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
         Map<String, List<Float>> serviceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
