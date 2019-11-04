@@ -2,6 +2,7 @@ package eu.einfracentral.domain;
 
 
 import eu.einfracentral.dto.Category;
+import eu.einfracentral.dto.ProviderInfo;
 import eu.einfracentral.dto.ScientificDomain;
 
 import javax.xml.bind.annotation.XmlTransient;
@@ -17,7 +18,6 @@ public class RichService {
     private List<String> placeNames;
     private String trlName;
     private String phaseName;
-
     private List<String> targetUsersNames;
     private List<String> accessTypeNames;
     private List<String> accessModeNames;
@@ -33,6 +33,7 @@ public class RichService {
 
     private List<Category> categories;
     private List<ScientificDomain> domains;
+    private List<ProviderInfo> providerInfo;
 
     public RichService() {
         // No arg constructor
@@ -202,5 +203,14 @@ public class RichService {
 
     public void setCategories(List<Category> categories) {
         this.categories = categories;
+    }
+
+    // Getter/Setter for ProviderInfo
+    public List<ProviderInfo> getProviderInfo() {
+        return providerInfo;
+    }
+
+    public void setProviderInfo(List<ProviderInfo> providerInfo) {
+        this.providerInfo = providerInfo;
     }
 }
