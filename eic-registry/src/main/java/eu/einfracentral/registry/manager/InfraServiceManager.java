@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
@@ -20,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
@@ -200,24 +202,22 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         //just check if validateVocabularies did anything or not
         logger.debug("Validating Service with id: {}", service.getId());
 
+        if (service.getOptions() != null) {
+            for (ServiceOption option : service.getOptions()) {
+
+                // Create Option's id
+                option.setId(UUID.randomUUID().toString());
+            }
+        }
+
         try {
             fieldValidator.validateFields(infraService);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
 
-        serviceValidators.validateServices(service);
-        serviceValidators.validateVocabularies(service);
-        serviceValidators.validateName(service);
-        serviceValidators.validateURL(service);
-        serviceValidators.validateDescription(service);
-        serviceValidators.validateLogo(service);
-        serviceValidators.validateMaxLength(service);
-        serviceValidators.validateProviders(service);
-        serviceValidators.validateOptions(service);
-        serviceValidators.validateVersion(service);
-        serviceValidators.validateContacts(service);
         serviceValidators.validateExtraFields(service);
+
         return true;
     }
 

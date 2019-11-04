@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -8,6 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
+
+import static eu.einfracentral.utils.ValidationLengths.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -20,6 +23,7 @@ public class ServiceOption implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "(required on PUT only)", required = true)
+    @FieldValidation
     private String id;
 
     /**
@@ -27,6 +31,7 @@ public class ServiceOption implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
+    @FieldValidation(maxLength = NAME_LENGTH)
     private String name;
 
     /**
@@ -34,6 +39,7 @@ public class ServiceOption implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "URL (required)", required = true)
+    @FieldValidation
     private URL url;
 
     /**
@@ -41,6 +47,7 @@ public class ServiceOption implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, example = "String (required)", required = true)
+    @FieldValidation(maxLength = TEXT_LENGTH)
     private String description;
 
     /**
@@ -48,6 +55,7 @@ public class ServiceOption implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 5, example = "URL (optional)")
+    @FieldValidation(nullable = true)
     private URL logo;
 
 
@@ -58,6 +66,7 @@ public class ServiceOption implements Identifiable {
     @XmlElementWrapper(name = "contacts", required = true)
     @XmlElement(name = "contact")
     @ApiModelProperty(position = 6, required = true)
+    @FieldValidation
     private List<Contact> contacts;
 
 
@@ -68,6 +77,7 @@ public class ServiceOption implements Identifiable {
     @XmlElementWrapper(name = "attributes")
     @XmlElement(name = "attribute")
     @ApiModelProperty(position = 7, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true)
     private List<String> attributes;
 
 
