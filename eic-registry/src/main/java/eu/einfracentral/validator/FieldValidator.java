@@ -4,6 +4,7 @@ import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.IndicatorManager;
 import eu.einfracentral.registry.manager.ProviderManager;
@@ -157,7 +158,8 @@ public class FieldValidator {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Funder",
                                         field.getName()));
-                    } else if (InfraService.class.equals(annotation.idClass())
+                    } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
+                            || InfraService.class.equals(annotation.idClass()))
                             && infraServiceService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
@@ -168,7 +170,7 @@ public class FieldValidator {
                                 String.format("Field '%s' should contain the ID of an existing Service",
                                         field.getName()));
                     }
-                } catch (ResourceException e) {
+                } catch (ResourceException | ResourceNotFoundException e) {
                     throw new ValidationException(
                             String.format("%s with ID '%s' does not exist. Found in field '%s'",
                                     annotation.idClass().getSimpleName(), o.toString(), field.getName()));
