@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -38,8 +39,8 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     @Override
     public ProviderRequest add(ProviderRequest providerRequest, Authentication auth) {
-        validate(providerRequest);
         providerRequest.setId(UUID.randomUUID().toString());
+        validate(providerRequest);
         super.add(providerRequest, auth);
         logger.debug("Adding ProviderRequest {}", providerRequest);
         return providerRequest;
@@ -79,9 +80,6 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     public ProviderRequest validate(ProviderRequest providerRequest) {
 
         // Validates ProviderRequest's providerId
-        if (providerRequest.getProviderId() == null || providerRequest.getProviderId().equals("")) {
-            throw new ValidationException("ProviderRequest's providerId cannot be 'null' or 'empty'");
-        }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         List<String> providerIds = new ArrayList<>();
@@ -93,13 +91,28 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         }
 
         // Validates ProviderRequest's date
-        if (providerRequest.getDate() != null && "".equals(providerRequest.getDate().toString())) {
-            throw new ValidationException("Measurement's time cannot be empty");
+        if (providerRequest.getDate() == null || "".equals(providerRequest.getDate().toString())) {
+            throw new ValidationException("ProviderRequest's date cannot be empty");
         }
 
         // Validates ProviderRequest's message
         if (providerRequest.getMessage() == null) {
             throw new ValidationException("ProviderRequest's message cannot be null");
+        }
+        if (providerRequest.getMessage().getMessage() == null || "".equals(providerRequest.getMessage().getMessage())){
+            throw new ValidationException("EmailMessage's message cannot be null or empty");
+        }
+        if (providerRequest.getMessage().getSenderEmail() == null || "".equals(providerRequest.getMessage().getSenderEmail())){
+            throw new ValidationException("EmailMessage's senderEmail cannot be null or empty");
+        }
+        if (providerRequest.getMessage().getSenderName() == null || "".equals(providerRequest.getMessage().getSenderName())){
+            throw new ValidationException("EmailMessage's senderName cannot be null or empty");
+        }
+        if (providerRequest.getMessage().getSubject() == null || "".equals(providerRequest.getMessage().getSubject())){
+            throw new ValidationException("EmailMessage's subject cannot be null or empty");
+        }
+        if (providerRequest.getMessage().getRecipientEmail() == null || "".equals(providerRequest.getMessage().getRecipientEmail())){
+            throw new ValidationException("EmailMessage's recipientEmail cannot be null or empty");
         }
 
         return null;
