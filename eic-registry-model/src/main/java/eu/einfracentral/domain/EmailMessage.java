@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -8,15 +10,24 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class EmailMessage {
 
-    @XmlElement(defaultValue = "null")
+    @XmlElement
+    @FieldValidation
     private String recipientEmail;
-    @XmlElement(defaultValue = "null")
+
+    @XmlElement
+    @FieldValidation
     private String senderEmail;
-    @XmlElement(defaultValue = "null")
+
+    @XmlElement
+    @FieldValidation
     private String senderName;
-    @XmlElement(defaultValue = "null")
+
+    @XmlElement
+    @FieldValidation()
     private String subject;
-    @XmlElement(defaultValue = "null")
+
+    @XmlElement
+    @FieldValidation
     private String message;
 
     public EmailMessage() {
