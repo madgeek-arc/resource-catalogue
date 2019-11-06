@@ -70,34 +70,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public Provider add(Provider provider, Authentication auth) {
 
-        // Create Provider ID // TODO move elsewhere
-        if (provider.getId() == null || "".equals(provider.getId())) {
-            provider.setId(provider.getName()); // TODO: or maybe use acronym instead ??
-        }
-        provider.setId(StringUtils
-                .stripAccents(provider.getId())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
-        if ("".equals(provider.getId())) {
-            throw new ServiceException("Provider id not valid. Special characters are ignored.");
-        }
-
-        List<User> users;
-        User authUser = new User(auth);
-        Provider ret;
+        createProviderId(provider);
+        addAuthenticatedUser(provider, auth);
         validateProvider(provider);
-        users = provider.getUsers();
-        if (users == null) {
-            users = new ArrayList<>();
-        }
-        if (users.stream().noneMatch(u -> u.getEmail().equals(authUser.getEmail()))) {
-            users.add(authUser);
-            provider.setUsers(users);
-        }
+
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
+        Provider ret;
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
 
@@ -423,4 +403,30 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
     }
 
+    private void createProviderId(Provider provider) {
+        if (provider.getId() == null || "".equals(provider.getId())) {
+            provider.setId(provider.getAcronym());
+        }
+        provider.setId(StringUtils
+                .stripAccents(provider.getId())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase());
+        if ("".equals(provider.getId())) {
+            throw new ServiceException("Provider id not valid. Special characters are ignored.");
+        }
+    }
+
+    private void addAuthenticatedUser(Provider provider, Authentication auth) {
+        List<User> users;
+        User authUser = new User(auth);
+        users = provider.getUsers();
+        if (users == null) {
+            users = new ArrayList<>();
+        }
+        if (users.stream().noneMatch(u -> u.getEmail().equals(authUser.getEmail()))) {
+            users.add(authUser);
+            provider.setUsers(users);
+        }
+    }
 }

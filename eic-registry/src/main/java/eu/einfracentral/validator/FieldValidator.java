@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -193,7 +192,7 @@ public class FieldValidator {
 
     private void removeNullOrEmptyEntries(Collection collection) {
         if (collection != null) {
-            for (Iterator i = collection.iterator(); i.hasNext();) {
+            for (Iterator i = collection.iterator(); i.hasNext(); ) {
                 Object entry = i.next();
                 // if elements are of type String or URL
                 if (entry != null) {
