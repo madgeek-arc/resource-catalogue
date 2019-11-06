@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.TextUtils;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -18,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,16 +31,18 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     private VocabularyService vocabularyService;
     private InfraServiceService<InfraService, InfraService> infraService;
     private SynchronizerService synchronizerService;
+    private FieldValidator fieldValidator;
 
     @Autowired
     public MeasurementManager(IndicatorManager indicatorManager, VocabularyService vocabularyService,
                               InfraServiceService<InfraService, InfraService> service,
-                              SynchronizerService synchronizerService) {
+                              SynchronizerService synchronizerService, FieldValidator fieldValidator) {
         super(Measurement.class);
         this.vocabularyService = vocabularyService;
         this.infraService = service;
         this.indicatorManager = indicatorManager;
         this.synchronizerService = synchronizerService;
+        this.fieldValidator = fieldValidator;
     }
 
     @Override
@@ -52,7 +56,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             measurement.setId(UUID.randomUUID().toString());
         }
         existsIdentical(measurement);
-        validate(measurement);
+        validateMeasurement(measurement);
         super.add(measurement, auth);
         logger.debug("Adding Measurement {}", measurement);
         synchronizerService.syncAdd(measurement);
@@ -61,7 +65,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Override
     public Measurement update(Measurement measurement, Authentication auth) {
-        validate(measurement);
+        validateMeasurement(measurement);
         Measurement previous = get(measurement.getId());
         if (!previous.getServiceId().equals(measurement.getServiceId())) {
             throw new ValidationException("You cannot change the Service id of the measurement");
@@ -173,21 +177,20 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         synchronizerService.syncDelete(measurement);
     }
 
-    @Override
-    public Measurement validate(Measurement measurement) {
+    public void validateMeasurement(Measurement measurement) {
+        logger.debug("Validating Measurement with id: {}", measurement.getId());
+        try {
+            fieldValidator.validateFields(measurement);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
 
         Indicator indicator = indicatorManager.get(measurement.getIndicatorId());
 
         // validate measurement fields
         validateMeasurementStructure(measurement);
 
-        // validate measurement values // TODO: move methods below to a function
-
-        // Validates Indicator's ID
-        if (indicator == null) {
-            throw new ValidationException("Indicator with id: " + measurement.getIndicatorId() + " does not exist");
-        }
-
+        // validate measurement values
         // Validates Service existence
         if (infraService.get(measurement.getServiceId()) == null) {
             throw new ValidationException("Service with id: " + measurement.getServiceId() + " does not exist");
@@ -217,11 +220,6 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             }
 
             measurement.setLocations(verifiedLocations);
-        }
-
-        // Validates Measurement's time
-        if (measurement.getTime() != null && "".equals(measurement.getTime().toString())) {
-            throw new ValidationException("Measurement's time cannot be empty");
         }
 
         // Validate Measurement's value
@@ -255,7 +253,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
                     if (Float.parseFloat(measurement.getRangeValue().getFromValue()) >= Float.parseFloat(measurement.getRangeValue().getToValue())) {
                         throw new ValidationException("toValue can't be less than or equal to fromValue.");
                     }
-                } catch (ValidationException e) {
+                } catch (NumberFormatException e) {
                     logger.error(e);
                     throw new ValidationException("Value provided is not a number");
                 }
@@ -309,8 +307,6 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             default:
                 // should never enter this
         }
-
-        return measurement;
     }
 
     // Validates if Measurement's index complies with Indicator's structure
@@ -329,26 +325,30 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     // Assures that no other Measurement with the same fields (IndicatorId, ServiceId, Locations, Time) exists.
     public boolean existsIdentical(Measurement measurement) {
-        Paging<Measurement> existingMeasurements = getAll(measurement.getIndicatorId(), measurement.getServiceId(), null);
-        for (Measurement entry : existingMeasurements.getResults()) {
-            if (entry.getLocations() == null && measurement.getLocations() == null) {
-                if (entry.getTime().equals(measurement.getTime())) {
-                    throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
-                            " for the specific timestamp already exists!");
-                }
-            } else if (entry.getTime() == null && measurement.getTime() == null) {
-                if (entry.getLocations().equals(measurement.getLocations())) {
-                    throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
-                            " for the specific location-s already exists!");
-                }
-            } else if (entry.getTime() != null && entry.getLocations() != null && measurement.getLocations() != null && measurement.getTime() != null) {
-                if (entry.getTime().equals(measurement.getTime()) && entry.getLocations().equals(measurement.getLocations())) {
-                    throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
-                            " for the specific timestamp and location-s already exists!");
+        try {
+            Paging<Measurement> existingMeasurements = getAll(measurement.getIndicatorId(), measurement.getServiceId(), null);
+            for (Measurement entry : existingMeasurements.getResults()) {
+                if (entry.getLocations() == null && measurement.getLocations() == null) {
+                    if (entry.getTime().equals(measurement.getTime())) {
+                        throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
+                                " for the specific timestamp already exists!");
+                    }
+                } else if (entry.getTime() == null && measurement.getTime() == null) {
+                    if (entry.getLocations().equals(measurement.getLocations())) {
+                        throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
+                                " for the specific location-s already exists!");
+                    }
+                } else if (entry.getTime() != null && entry.getLocations() != null && measurement.getLocations() != null && measurement.getTime() != null) {
+                    if (entry.getTime().equals(measurement.getTime()) && entry.getLocations().equals(measurement.getLocations())) {
+                        throw new ValidationException("Measurement with IndicatorId " + measurement.getIndicatorId() + " and ServiceId " + measurement.getServiceId() +
+                                " for the specific timestamp and location-s already exists!");
+                    }
                 }
             }
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
-        return true;
     }
 
     private Paging<Measurement> pagingResourceToMeasurement(Paging<Resource> measurementResources) {

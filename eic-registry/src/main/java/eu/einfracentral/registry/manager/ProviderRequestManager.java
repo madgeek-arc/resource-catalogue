@@ -1,9 +1,9 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ProviderRequestService;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,12 +19,12 @@ import java.util.UUID;
 public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<ProviderRequest, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequest.class);
-    private ProviderManager providerManager;
+    private FieldValidator fieldValidator;
 
     @Autowired
-    public ProviderRequestManager(ProviderManager providerManager) {
+    public ProviderRequestManager(FieldValidator fieldValidator) {
         super(ProviderRequest.class);
-        this.providerManager = providerManager;
+        this.fieldValidator = fieldValidator;
     }
 
     @Override
@@ -32,14 +32,10 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         return "provider_request";
     }
 
-    public ProviderRequest get(String id, Authentication auth) {
-        return null;
-    }
-
     @Override
     public ProviderRequest add(ProviderRequest providerRequest, Authentication auth) {
-        validate(providerRequest);
         providerRequest.setId(UUID.randomUUID().toString());
+        validate(providerRequest);
         super.add(providerRequest, auth);
         logger.debug("Adding ProviderRequest {}", providerRequest);
         return providerRequest;
@@ -59,6 +55,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         super.delete(providerRequest);
     }
 
+    @Override
     public List<ProviderRequest> getAllProviderRequests (String providerId, Authentication auth){
         List<ProviderRequest> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
@@ -78,28 +75,10 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     public ProviderRequest validate(ProviderRequest providerRequest) {
 
-        // Validates ProviderRequest's providerId
-        if (providerRequest.getProviderId() == null || providerRequest.getProviderId().equals("")) {
-            throw new ValidationException("ProviderRequest's providerId cannot be 'null' or 'empty'");
-        }
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        List<String> providerIds = new ArrayList<>();
-        for (Provider provider : providerManager.getAll(ff, null).getResults()){
-            providerIds.add(provider.getId());
-        }
-        if (!providerIds.contains(providerRequest.getProviderId())){
-            throw new ValidationException("Provider with id " +providerRequest.getProviderId()+ " does not exist.");
-        }
-
-        // Validates ProviderRequest's date
-        if (providerRequest.getDate() != null && "".equals(providerRequest.getDate().toString())) {
-            throw new ValidationException("Measurement's time cannot be empty");
-        }
-
-        // Validates ProviderRequest's message
-        if (providerRequest.getMessage() == null) {
-            throw new ValidationException("ProviderRequest's message cannot be null");
+        try {
+            fieldValidator.validateFields(providerRequest);
+        } catch (IllegalAccessException e) {
+            logger.error("Validation error:", e);
         }
 
         return null;

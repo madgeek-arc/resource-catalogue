@@ -1,22 +1,27 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
@@ -28,15 +33,17 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private ServiceValidators serviceValidators;
     private ProviderManager providerManager;
     private Random randomNumberGenerator;
+    private FieldValidator fieldValidator;
 
 
     @Autowired
     public InfraServiceManager(ServiceValidators serviceValidators, ProviderManager providerManager,
-                               Random randomNumberGenerator) {
+                               Random randomNumberGenerator, @Lazy FieldValidator fieldValidator) {
         super(InfraService.class);
         this.serviceValidators = serviceValidators;
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
+        this.fieldValidator = fieldValidator;
     }
 
     @Override
@@ -194,18 +201,23 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
         logger.debug("Validating Service with id: {}", service.getId());
-        serviceValidators.validateServices(service);
-        serviceValidators.validateVocabularies(service);
-        serviceValidators.validateName(service);
-        serviceValidators.validateURL(service);
-        serviceValidators.validateDescription(service);
-        serviceValidators.validateLogo(service);
-        serviceValidators.validateMaxLength(service);
-        serviceValidators.validateProviders(service);
-        serviceValidators.validateOptions(service);
-        serviceValidators.validateVersion(service);
-        serviceValidators.validateContacts(service);
+
+        if (service.getOptions() != null) {
+            for (ServiceOption option : service.getOptions()) {
+
+                // Create Option's id
+                option.setId(UUID.randomUUID().toString());
+            }
+        }
+
+        try {
+            fieldValidator.validateFields(infraService);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
+
         serviceValidators.validateExtraFields(service);
+
         return true;
     }
 

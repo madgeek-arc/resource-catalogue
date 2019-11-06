@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -9,6 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 public class InfraService {
 
     @XmlElement(required = true)
+    @FieldValidation
     private Service service;
 
     @XmlElement(name = "serviceMetadata")
