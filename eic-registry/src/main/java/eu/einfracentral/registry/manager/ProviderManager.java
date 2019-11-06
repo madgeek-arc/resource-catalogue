@@ -409,17 +409,17 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     public void validateProvider(Provider provider) {
         logger.debug("Validating Provider with id: {}", provider.getId());
 
-        // Validate Provider's National Roadmap
-        if (provider.getNationalRoadmap() != null && !"".equals(provider.getNationalRoadmap())) {
-            if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
-                throw new ValidationException("nationalRoadmap's value should be Yes or No");
-            }
-        }
-
         try {
             fieldValidator.validateFields(provider);
         } catch (IllegalAccessException e) {
             logger.error("", e);
+        }
+
+        // Validate Provider's National Roadmap
+        if (provider.getNationalRoadmap() != null) {
+            if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
+                throw new ValidationException("nationalRoadmap's value should be Yes or No");
+            }
         }
     }
 
