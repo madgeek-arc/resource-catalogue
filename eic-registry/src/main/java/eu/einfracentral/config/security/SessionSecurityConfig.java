@@ -218,7 +218,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
             Gson gson = new Gson();
             JsonElement jsonRoles = new JsonParser().parse(gson.toJson(roles));
             info.add("roles", jsonRoles);
-            int expireSec = 3600;
+            int expireSec = 8 * 3600;
             info.add("expireSec", new JsonParser().parse(gson.toJson(expireSec)));
 
             Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
