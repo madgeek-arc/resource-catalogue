@@ -87,7 +87,8 @@ public class FieldValidator {
                 } else if ((String.class.isAssignableFrom(fieldValue.getClass())
                         || URL.class.isAssignableFrom(fieldValue.getClass()))
                         && "".equals(fieldValue)) {
-                    field.set(o, null);
+                    fieldValue = null;
+                    field.set(o, fieldValue);
                 }
             }
 
