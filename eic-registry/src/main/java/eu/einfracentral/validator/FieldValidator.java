@@ -83,10 +83,11 @@ public class FieldValidator {
 
                 if (Collection.class.isAssignableFrom(fieldValue.getClass())) {
                     removeNullOrEmptyEntries((Collection) fieldValue);
+                    field.set(o, fieldValue);
                 } else if ((String.class.isAssignableFrom(fieldValue.getClass())
                         || URL.class.isAssignableFrom(fieldValue.getClass()))
                         && "".equals(fieldValue)) {
-                    fieldValue = null;
+                    field.set(o, null);
                 }
             }
 
