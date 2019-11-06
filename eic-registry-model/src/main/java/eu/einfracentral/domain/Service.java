@@ -220,6 +220,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 23, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PHASE)
     private String phase;
 
@@ -228,6 +229,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 24, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TRL)
     private String trl;
 

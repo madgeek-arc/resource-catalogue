@@ -24,7 +24,7 @@ public class ProviderRequest implements Identifiable {
     private XMLGregorianCalendar date;
 
     @XmlElement
-    @FieldValidation
+    @FieldValidation(containsId = true, idClass = Provider.class)
     private String providerId;
 
     public ProviderRequest() {
