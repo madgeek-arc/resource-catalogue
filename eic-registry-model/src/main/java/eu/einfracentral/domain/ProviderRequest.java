@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -10,12 +12,19 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class ProviderRequest implements Identifiable {
 
     @XmlElement
+    @FieldValidation
     private String id;
+
     @XmlElement
+    @FieldValidation
     private EmailMessage message;
+
     @XmlElement
+    @FieldValidation
     private XMLGregorianCalendar date;
+
     @XmlElement
+    @FieldValidation(containsId = true, idClass = Provider.class)
     private String providerId;
 
     public ProviderRequest() {

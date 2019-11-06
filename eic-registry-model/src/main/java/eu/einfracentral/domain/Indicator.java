@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -14,27 +15,33 @@ import java.util.stream.Collectors;
 public class Indicator implements Identifiable {
     @ApiModelProperty(position = 1, example = "Indicator's ID")
     @XmlElement(required = true)
+    @FieldValidation
     private String id;
 
     @ApiModelProperty(position = 2, example = "Indicator's name")
     @XmlElement(required = true)
+    @FieldValidation
     private String name;
 
     @ApiModelProperty(position = 3, example = "Indicator's short description")
     @XmlElement(required = true)
+    @FieldValidation
     private String description;
 
     @ApiModelProperty(position = 4, example = "['time', 'locations'] (at least one)")
     @XmlElementWrapper(name = "dimensions")
     @XmlElement(name = "dimension", required = true)
+    @FieldValidation
     private List<String> dimensions;
 
     @ApiModelProperty(position = 5, example = "'percentage', 'numeric' or 'boolean'")
     @XmlElement(required = true)
+    @FieldValidation
     private String unit;
 
     @ApiModelProperty(position = 6, example= "'days', 'km', etc")
     @XmlElement(required = true)
+    @FieldValidation
     private String unitName;
 
     public Indicator() {

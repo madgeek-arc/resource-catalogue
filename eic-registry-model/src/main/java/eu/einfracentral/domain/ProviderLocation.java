@@ -1,10 +1,13 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+
+import static eu.einfracentral.utils.ValidationLengths.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -17,6 +20,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
+    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
     private String name;
 
     /**
@@ -24,6 +28,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
+    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
     private String street;
 
     /**
@@ -31,6 +36,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
     private String number;
 
     /**
@@ -38,6 +44,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, example = "String (required)", required = true)
+    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
     private String postalCode;
 
     /**
@@ -45,6 +52,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, example = "String (required)", required = true)
+    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
     private String city;
 
     /**
@@ -52,6 +60,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 6, example = "String (required)", required = true)
+    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
     private String region;
 
     public ProviderLocation() {
