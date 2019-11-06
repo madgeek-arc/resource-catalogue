@@ -1,12 +1,10 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.ObjectUtils;
-import eu.einfracentral.utils.ServiceValidators;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -30,17 +28,15 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
-    private ServiceValidators serviceValidators;
     private ProviderManager providerManager;
     private Random randomNumberGenerator;
     private FieldValidator fieldValidator;
 
 
     @Autowired
-    public InfraServiceManager(ServiceValidators serviceValidators, ProviderManager providerManager,
-                               Random randomNumberGenerator, @Lazy FieldValidator fieldValidator) {
+    public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
+                               @Lazy FieldValidator fieldValidator) {
         super(InfraService.class);
-        this.serviceValidators = serviceValidators;
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
         this.fieldValidator = fieldValidator;
@@ -216,9 +212,43 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             logger.error("", e);
         }
 
-        serviceValidators.validateExtraFields(service);
+        validateExtraFields(service);
 
         return true;
+    }
+
+    // Validate the correctness of Service Aggregator Information
+    private void validateExtraFields(Service service) {
+        if (service.getAggregatedServices() == null) {
+            service.setAggregatedServices(1);
+        } else if (service.getAggregatedServices() < 1) {
+            throw new ValidationException("Aggregated services cannot be less than 1");
+        }
+        if (service.getPublications() == null) {
+            service.setPublications(0);
+        } else if (service.getPublications() < 0) {
+            throw new ValidationException("Publications number cannot be negative");
+        }
+        if (service.getDatasets() == null) {
+            service.setDatasets(0);
+        } else if (service.getDatasets() < 0) {
+            throw new ValidationException("Data(sets) number cannot be negative");
+        }
+        if (service.getSoftware() == null) {
+            service.setSoftware(0);
+        } else if (service.getSoftware() < 0) {
+            throw new ValidationException("Software number cannot be negative");
+        }
+        if (service.getApplications() == null) {
+            service.setApplications(0);
+        } else if (service.getApplications() < 0) {
+            throw new ValidationException("Applications number cannot be negative");
+        }
+        if (service.getOtherProducts() == null) {
+            service.setOtherProducts(0);
+        } else if (service.getOtherProducts() < 0) {
+            throw new ValidationException("Other products number cannot be negative");
+        }
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
