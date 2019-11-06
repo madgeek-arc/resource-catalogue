@@ -647,7 +647,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
         // Validate Provider's National Roadmap
         if (provider.getNationalRoadmap() != null) {
-            if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
+            if ("".equals(provider.getNationalRoadmap())) {
+                provider.setNationalRoadmap(null);
+            } else if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
                 throw new ValidationException("nationalRoadmap's value should be Yes or No");
             }
         }
