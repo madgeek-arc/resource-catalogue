@@ -48,7 +48,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           @Lazy RegistrationMailService registrationMailService, /*JmsTemplate jmsTopicTemplate*/
+                           @Lazy RegistrationMailService registrationMailService,
                            @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
                            @Lazy FieldValidator fieldValidator) {
         super(Provider.class);
