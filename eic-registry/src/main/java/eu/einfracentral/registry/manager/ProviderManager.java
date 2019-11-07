@@ -82,7 +82,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         logger.debug("Adding Provider: {}", provider);
 
         // update provider roles
-        eicAuthoritiesMapper.updateAuthorities();
+        try {
+            eicAuthoritiesMapper.updateAuthorities();
+        } catch (RuntimeException e) {
+            logger.error("Could not update authorities map", e);
+        }
 
         // send messages to queue
         registrationMailService.sendProviderMails(provider);
@@ -104,7 +108,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         logger.debug("Updating Provider: {}", provider);
 
         // update provider roles
-        eicAuthoritiesMapper.updateAuthorities();
+        try {
+            eicAuthoritiesMapper.updateAuthorities();
+        } catch (RuntimeException e) {
+            logger.error("Could not update authorities map", e);
+        }
 
         return provider;
     }
@@ -194,7 +202,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         logger.debug("Deleting Provider: {}", provider);
 
         // update provider roles
-        eicAuthoritiesMapper.updateAuthorities();
+        try {
+            eicAuthoritiesMapper.updateAuthorities();
+        } catch (RuntimeException e) {
+            logger.error("Could not update authorities map", e);
+        }
     }
 
     @Override
