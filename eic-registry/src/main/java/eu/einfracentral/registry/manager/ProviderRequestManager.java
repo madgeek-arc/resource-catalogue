@@ -18,7 +18,7 @@ import java.util.UUID;
 @Component
 public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<ProviderRequest, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(ProviderRequest.class);
+    private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
     private FieldValidator fieldValidator;
 
     @Autowired
