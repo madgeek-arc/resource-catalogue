@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -69,6 +70,7 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
             ObjectMapper mapper = new ObjectMapper();
             UnauthorizedUserException exception = new UnauthorizedUserException(e.getMessage(), e);
             res.getWriter().append(mapper.writeValueAsString(exception));
+            ((HttpServletResponse) res).setStatus(401);
         }
 
     }
