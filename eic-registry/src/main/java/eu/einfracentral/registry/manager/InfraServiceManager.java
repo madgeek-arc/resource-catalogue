@@ -51,13 +51,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
             "@securityService.providerCanAddServices(#authentication, #infraService)")
     public InfraService addService(InfraService infraService, Authentication authentication) {
-        InfraService ret;
-        validate(infraService);
-        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).getActive());
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
             String id = createServiceId(infraService.getService());
             infraService.getService().setId(id);
         }
+        validate(infraService);
+        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).getActive());
+
         infraService.setLatest(true);
 
         if (infraService.getServiceMetadata() == null) {
@@ -65,6 +65,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             infraService.setServiceMetadata(serviceMetadata);
         }
 
+        InfraService ret;
         ret = super.add(infraService, authentication);
         logger.info("Adding Service: {}", infraService);
 

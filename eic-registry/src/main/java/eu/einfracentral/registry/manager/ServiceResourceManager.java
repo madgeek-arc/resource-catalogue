@@ -507,8 +507,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         Browsing<InfraService> services;
 
         services = getResults(ff);
-
-        services.setFacets(facetLabelService.createLabels(services.getFacets()));
+        if (!services.getResults().isEmpty() && !services.getFacets().isEmpty()) {
+            services.setFacets(facetLabelService.createLabels(services.getFacets()));
+        }
         return services;
     }
 

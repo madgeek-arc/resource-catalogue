@@ -183,6 +183,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "accessTypes")
     @XmlElement(name = "accessType")
     @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ACCESS_TYPE)
     private List<String> accessTypes;
 
@@ -192,6 +193,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "accessModes")
     @XmlElement(name = "accessMode")
     @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ACCESS_MODE)
     private List<String> accessModes;
 
