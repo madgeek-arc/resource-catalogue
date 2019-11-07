@@ -3,9 +3,10 @@
 verbose="--write-out \%\{http\_code\} --silent --output /dev/null"
 UPLOADED=""
 FAILED=""
+token=""
 function post_resourceType {
     data=`cat $1`
-    response=$(curl -X POST --write-out %{http_code} --silent --output /dev/null --data "$data" --header "Content-Type:application/json" http://$2:8080/eic-registry/resourceType/)
+    response=$(curl -X POST --write-out %\{http_code\} --silent --output /dev/null --data "$data" --header "Content-Type:application/json" --header "Authorization: Bearer $token" http://$2:8080/eic-registry/resourceType/)
     if ((${response} >= 200 && ${response} < 300 )); then
         colors="\e[32m"
         UPLOADED="$1\n$UPLOADED"
@@ -15,6 +16,8 @@ function post_resourceType {
     fi
     echo -e "[${colors}${response}\e[0m] Resource posted --> $1"
 }
+
+read -p 'Authorization token: ' token
 
 for resource in *.json; do
     post_resourceType ${resource} $1
