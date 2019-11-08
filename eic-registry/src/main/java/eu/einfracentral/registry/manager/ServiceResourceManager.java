@@ -719,7 +719,11 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             break;
         }
 
-        return serviceFacets;
+        return removeEmptyFacets(serviceFacets);
+    }
+
+    private List<Facet> removeEmptyFacets(List<Facet> facetList) {
+        return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).collect(toList());
     }
 
     private Browsing<InfraService> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
