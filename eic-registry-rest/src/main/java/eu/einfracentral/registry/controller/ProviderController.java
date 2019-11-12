@@ -47,7 +47,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         this.infraServiceService = infraServiceService;
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Deletes the Provider with the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
@@ -71,7 +70,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     }
 
     @Override
-//    @ApiIgnore
 //    @ApiOperation(value = "Creates a new Provider.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
@@ -125,14 +123,12 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providerManager.getServices(id), HttpStatus.OK);
     }
 
-//    @ApiIgnore // TODO enable in a future release
-//    @ApiOperation(value = "Get a featured InfraService offered by a Provider.")
+//    @ApiOperation(value = "Get a featured InfraService offered by a Provider.") // TODO enable in a future release
     @RequestMapping(path = "featured/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Get a list of Providers in which the given user is admin.")
     @RequestMapping(path = "getServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
@@ -143,7 +139,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Get a list of Providers in which you are admin.")
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
@@ -154,7 +149,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Get the pending services of the given Provider.")
     @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
@@ -162,7 +156,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Get all inactive Providers.")
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
@@ -170,7 +163,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Accept/Reject a Provider.")
     @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -181,7 +173,6 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Publish all Provider services.")
     @RequestMapping(path = "publishServices", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")

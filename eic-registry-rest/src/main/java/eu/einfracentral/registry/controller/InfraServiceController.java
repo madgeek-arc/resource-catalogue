@@ -28,7 +28,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("infraService")
-//@ApiIgnore
 @Api(value = "Get Information about a Service")
 public class InfraServiceController {
 

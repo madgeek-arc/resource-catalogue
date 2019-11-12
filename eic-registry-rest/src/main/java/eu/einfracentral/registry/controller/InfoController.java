@@ -22,7 +22,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.HashMap;
 import java.util.Map;
 
-//@ApiIgnore
 @RestController
 @RequestMapping("info")
 @Api(value = "Get General Information")
