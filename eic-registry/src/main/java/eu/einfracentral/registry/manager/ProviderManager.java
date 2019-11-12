@@ -422,8 +422,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         provider.setId(StringUtils
                 .stripAccents(provider.getId())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
+                .replace(" ", "_"));
         if ("".equals(provider.getId())) {
             throw new ServiceException("Provider id not valid. Special characters are ignored.");
         }
