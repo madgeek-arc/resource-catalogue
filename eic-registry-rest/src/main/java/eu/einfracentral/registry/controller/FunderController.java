@@ -65,21 +65,11 @@ public class FunderController extends ResourceController<Funder, Authentication>
         return ret;
     }
 
-    @ApiOperation(value = "Adds all Funders")
+    // Adds all Funders
     @RequestMapping(path = "/addAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addAll(@RequestBody List<Funder> funders, @ApiIgnore Authentication auth) {
         funderService.addAll(funders, auth);
-    }
-
-    @Override
-//    @ApiOperation(value = "Updates the Funder assigned the given id with the given Funder, keeping a version of revisions.")
-    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Funder> update(@RequestBody Funder funder, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ResponseEntity<Funder> ret = super.update(funder, auth);
-        logger.info("User {} updated Funder with name '{}' and id '{}'", auth.getName(), funder.getFundingOrganisation(), funder.getId());
-        return ret;
     }
 
 //    @ApiOperation(value = "Deletes the Funder with the given id.")
