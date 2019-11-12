@@ -1,9 +1,9 @@
 package eu.einfracentral.utils;
 
-import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Value;

@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import static eu.einfracentral.utils.ValidationLengths.*;
+import static eu.einfracentral.utils.ValidationLengths.FIELD_LENGTH_SMALL;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")

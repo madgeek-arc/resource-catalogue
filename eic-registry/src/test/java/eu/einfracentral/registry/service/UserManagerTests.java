@@ -1,10 +1,12 @@
 package eu.einfracentral.registry.service;
 
+import org.junit.Test;
+
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.*;
-import org.junit.Test;
 
 public class UserManagerTests {
     private static final HashMap<String, String> users = new HashMap<>();
