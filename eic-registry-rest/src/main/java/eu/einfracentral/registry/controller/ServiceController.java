@@ -95,7 +95,7 @@ public class ServiceController {
     }
 
     //    @ApiIgnore
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
+    @PreAuthorize("isAuthenticated()")
     // @securityService.providerCanAddServices(#auth, #service) is checked when adding/updating service or measurements
     @RequestMapping(path = "serviceWithMeasurements", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
