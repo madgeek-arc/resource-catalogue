@@ -56,7 +56,6 @@ public class FunderController extends ResourceController<Funder, Authentication>
     }
 
     @Override
-//    @ApiIgnore
 //    @ApiOperation(value = "Creates a new Funder.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -74,7 +73,6 @@ public class FunderController extends ResourceController<Funder, Authentication>
     }
 
     @Override
-//    @ApiIgnore
 //    @ApiOperation(value = "Updates the Funder assigned the given id with the given Funder, keeping a version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -84,7 +82,6 @@ public class FunderController extends ResourceController<Funder, Authentication>
         return ret;
     }
 
-//    @ApiIgnore
 //    @ApiOperation(value = "Deletes the Funder with the given id.")
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")

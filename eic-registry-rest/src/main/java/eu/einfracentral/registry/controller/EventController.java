@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-//@ApiIgnore
 @RestController
 @RequestMapping("event")
 public class EventController extends ResourceController<Event, Authentication> {
@@ -36,7 +35,6 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     private final Logger logger = LogManager.getLogger(EventController.class);
 
-//    @ApiIgnore
 //    @ApiOperation("Retrieve all events.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -50,7 +48,6 @@ public class EventController extends ResourceController<Event, Authentication> {
         return super.getAll(allRequestParams, authentication);
     }
 
-//    @ApiIgnore
 //    @ApiOperation("Retrieve the event with a specific ID.")
     @RequestMapping(path = "event/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @Override
@@ -58,7 +55,6 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>(eventService.get(id), HttpStatus.OK);
     }
 
-//    @ApiIgnore
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @RequestMapping(path = "deleteNull/{type}/", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String> deleteNullEvents(@PathVariable String type) {
@@ -109,7 +105,6 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>("0", HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation("Retrieve all the favourited events.")
     @RequestMapping(path = "favourites/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getFavourites() {
@@ -155,7 +150,6 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>("null", HttpStatus.OK);
     }
 
-//    @ApiIgnore
 //    @ApiOperation("Retrieve all rating events.")
     @RequestMapping(path = "ratings/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getRatings() {
