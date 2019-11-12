@@ -4,6 +4,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceMetadata;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -175,9 +176,9 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                    @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
-        ResponseEntity<Provider> ret = new ResponseEntity<>(providerManager.verifyProvider(id, status, active, auth), HttpStatus.OK);
-        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth.getName(), providerManager.get(id).getName(), status, active);
-        return ret;
+        Provider provider = providerManager.verifyProvider(id, status, active, auth);
+        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth.getName(), provider.getName(), status, active);
+        return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
 //    @ApiIgnore
@@ -186,7 +187,10 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-//        List<InfraService> services = providerManager.getInactiveServices(id);
+        Provider provider = providerManager.get(id);
+        if (provider == null) {
+            throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
+        }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("providers", id);
@@ -199,7 +203,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             sm.setModifiedBy("system");
             sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             infraServiceService.update(service, auth);
-            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'", auth.getName(), providerManager.get(id).getName());
+            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'", auth.getName(), provider.getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
