@@ -143,7 +143,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")
-                && securityService.userIsProviderAdmin(auth, provider)) {
+                && securityService.userIsProviderAdmin(auth, provider.getId())) {
             return provider;
         }
         provider.setUsers(null);
@@ -284,7 +284,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         ff.setQuantity(10000);
         return super.getAll(ff, null).getResults()
                 .stream().map(p -> {
-                    if (securityService.userIsProviderAdmin(auth, p)) {
+                    if (securityService.userIsProviderAdmin(auth, p.getId())) {
                         return p;
                     } else return null;
                 })

@@ -55,10 +55,6 @@ public class SecurityService {
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
-    public boolean userIsProviderAdmin(Authentication auth, Provider provider) {
-        return userIsProviderAdmin(auth, provider.getId());
-    }
-
     public boolean userIsProviderAdmin(Authentication auth, String providerId) {
         Provider registeredProvider = providerManager.get(providerId);
         User user = new User(auth);
@@ -117,25 +113,28 @@ public class SecurityService {
         List<String> providerIds = service.getService().getProviders();
         for (String providerId : providerIds) {
             Provider provider = providerManager.get(providerId);
-            if ((provider.getActive() == null || provider.getStatus() == null)) {
-                throw new ServiceException("Provider active or status field is null");
-            }
-            if (provider.getActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
-                if (userIsProviderAdmin(auth, provider)) {
-                    return true;
+            if (userIsProviderAdmin(auth, provider.getId())) {
+                if ((provider.getActive() == null || provider.getStatus() == null)) {
+                    throw new ServiceException("Provider active or status field is null");
                 }
-            } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
-                FacetFilter ff = new FacetFilter();
-                ff.addFilter("providers", provider.getId());
-                if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
-                    return true;
+                if (provider.getActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
+                    if (userIsProviderAdmin(auth, provider.getId())) {
+                        return true;
+                    }
+                } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                    FacetFilter ff = new FacetFilter();
+                    ff.addFilter("providers", provider.getId());
+                    if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                        return true;
+                    }
+                    throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
                 }
-                throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
             }
         }
         return false;
     }
 
+    @Deprecated
     public boolean providerIsActive(String providerId) {
         Provider provider = providerManager.get(providerId);
         if (provider != null && provider.getActive() != null) {
@@ -148,6 +147,7 @@ public class SecurityService {
         }
     }
 
+    @Deprecated
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         for (String providerId : service.getService().getProviders()) {
@@ -161,11 +161,13 @@ public class SecurityService {
         return false;
     }
 
+    @Deprecated
     public boolean serviceIsActive(String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         return service.isActive();
     }
 
+    @Deprecated
     public boolean serviceIsActive(String serviceId, String version) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version

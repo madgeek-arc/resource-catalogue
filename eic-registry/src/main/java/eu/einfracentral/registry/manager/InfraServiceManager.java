@@ -48,8 +48,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
-            "@securityService.providerCanAddServices(#authentication, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#authentication, #infraService)")
     public InfraService addService(InfraService infraService, Authentication authentication) {
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
             String id = createServiceId(infraService.getService());
