@@ -7,7 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import java.util.concurrent.*;
+
+import java.util.concurrent.BlockingQueue;
 
 
 @Component

@@ -3,7 +3,6 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.dto.VocabularyTree;
 import eu.einfracentral.registry.service.VocabularyService;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
@@ -19,7 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("vocabulary")

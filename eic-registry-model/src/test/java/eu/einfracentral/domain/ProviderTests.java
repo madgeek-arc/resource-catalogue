@@ -1,8 +1,11 @@
 package eu.einfracentral.domain;
 
-import java.io.*;
-import javax.xml.bind.*;
 import org.junit.Test;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 public class ProviderTests {
     @Test

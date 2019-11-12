@@ -1,8 +1,8 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.EmailMessage;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.EmailMessage;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import org.apache.logging.log4j.LogManager;

@@ -10,7 +10,8 @@ import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
 
-import static eu.einfracentral.utils.ValidationLengths.*;
+import static eu.einfracentral.utils.ValidationLengths.NAME_LENGTH;
+import static eu.einfracentral.utils.ValidationLengths.TEXT_LENGTH;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")

@@ -1,9 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.config.ServiceConfig;
-import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -13,10 +11,8 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.client.ElasticsearchClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
