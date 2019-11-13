@@ -32,7 +32,7 @@ public class ContactController {
         this.providerService = providerService;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROVIDER', 'ROLE_USER')")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("service/{ids}/support")
     public void sendRequest(@PathVariable("ids") List<String> ids, @RequestBody EmailMessage message) {
         for (String id : ids) {

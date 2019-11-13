@@ -49,7 +49,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
 
 //    @ApiOperation(value = "Deletes the Provider with the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id);
         if (provider == null) {
@@ -82,7 +82,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @Override
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.userIsProviderAdmin(#auth,#provider.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Provider> ret = super.update(provider, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
@@ -169,7 +169,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                    @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.verifyProvider(id, status, active, auth);
-        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth.getName(), provider.getName(), status, active);
+        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getName(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
