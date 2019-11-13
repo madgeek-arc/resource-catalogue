@@ -74,7 +74,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+    @PreAuthorize("hasRole('ROLE_ADMIN') or " +
             "@securityService.providerCanAddServices(#authentication, #infraService)")
     public InfraService updateService(InfraService infraService, Authentication authentication) {
         InfraService ret;
@@ -126,7 +126,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
+    @PreAuthorize("hasRole('ROLE_ADMIN') or " +
             "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
     public void delete(InfraService infraService) {
         super.delete(infraService);
