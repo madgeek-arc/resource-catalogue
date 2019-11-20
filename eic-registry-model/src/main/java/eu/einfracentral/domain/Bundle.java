@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public abstract class Bundle<T> {
+public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @XmlTransient
     @FieldValidation
@@ -28,11 +28,21 @@ public abstract class Bundle<T> {
     public Bundle () {
     }
 
-    T getPayload() {
+    public T getPayload() {
         return payload;
     }
 
-    void setPayload(T payload) {
+    @Override
+    public String getId() {
+        return payload.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        this.payload.setId(id);
+    }
+
+    public void setPayload(T payload) {
         this.payload = payload;
     }
 
