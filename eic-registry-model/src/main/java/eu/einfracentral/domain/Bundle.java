@@ -20,7 +20,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private ServiceMetadata metadata;
 
     @XmlElement
-    private Boolean active;
+    private boolean active;
 
     @XmlElement
     private String status;
@@ -54,11 +54,11 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.metadata = metadata;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {  // FIXME: make it primitive
         return active;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
