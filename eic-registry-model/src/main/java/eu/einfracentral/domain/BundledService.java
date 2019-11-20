@@ -8,8 +8,10 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class BundledService extends Bundle<Service> {
 
-    public BundledService() {
+    public BundledService() { }
 
+    public BundledService(Service service) {
+        this.setService(service);
     }
 
     @XmlElement(name = "service")
