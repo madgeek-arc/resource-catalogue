@@ -43,7 +43,7 @@
 
   <xs:complexType abstract="true" name="bundle">
     <xs:sequence>
-      <xs:element minOccurs="0" name="active" type="xs:boolean"/>
+      <xs:element name="active" type="xs:boolean"/>
       <xs:element minOccurs="0" name="metadata" type="tns:serviceMetadata"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
     </xs:sequence>
@@ -822,13 +822,14 @@
   </xs:complexType>
 
   <xs:complexType name="infraService">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="active" type="xs:boolean"/>
-      <xs:element name="latest" type="xs:boolean"/>
-      <xs:element ref="tns:service"/>
-      <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
-    </xs:sequence>
+    <xs:complexContent>
+      <xs:extension base="tns:bundle">
+        <xs:sequence>
+          <xs:element name="latest" type="xs:boolean"/>
+          <xs:element minOccurs="0" ref="tns:service"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="measurement">

@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Bundle;
-import eu.einfracentral.domain.Identifiable;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -36,14 +33,10 @@ public abstract class BundleManager<T extends Bundle, R extends Identifiable, U 
 
     @Override
     public String getResourceType() {
-        try {
-            if (typeParameterClass.getField("payload").getClass().isAssignableFrom(Provider.class)) {
-                return "provider_bundle";
-            } else if (typeParameterClass.getField("payload").getClass().isAssignableFrom(Service.class)) {
-                return "service_bundle";
-            }
-        } catch (NoSuchFieldException e) {
-            logger.error("Did not find field 'payload' in class");
+        if (typeParameterClass.isAssignableFrom(BundledProvider.class)) {
+            return "bundled_provider";
+        } else if (typeParameterClass.isAssignableFrom(BundledService.class)) {
+            return "bundled_service";
         }
         return null;
     }
