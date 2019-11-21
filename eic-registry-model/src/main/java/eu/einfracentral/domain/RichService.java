@@ -12,7 +12,7 @@ import java.util.List;
 public class RichService {
 
     private Service service;
-    private ServiceMetadata serviceMetadata;
+    private Metadata metadata;
 
     private List<String> languageNames;
     private List<String> placeNames;
@@ -39,14 +39,14 @@ public class RichService {
         // No arg constructor
     }
 
-    public RichService(Service service, ServiceMetadata serviceMetadata) {
+    public RichService(Service service, Metadata metadata) {
         this.service = service;
-        this.serviceMetadata = serviceMetadata;
+        this.metadata = metadata;
     }
 
     public RichService(InfraService service) {
         this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
-        this.serviceMetadata = service.getServiceMetadata();
+        this.metadata = service.getMetadata();
     }
 
     public Service getService() {
@@ -57,14 +57,14 @@ public class RichService {
         this.service = service;
     }
 
-    public ServiceMetadata getServiceMetadata() {
-        return serviceMetadata;
+    public Metadata getMetadata() {
+        return metadata;
     }
 
-    public void setServiceMetadata(ServiceMetadata serviceMetadata) {
-        this.serviceMetadata = serviceMetadata;
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
     }
-      
+
 
     // Getters/Setters for VocabularyNames
     public List<String> getLanguageNames() {
@@ -139,7 +139,7 @@ public class RichService {
         this.orderTypeName = orderTypeName;
     }
 
-      
+
     // Getters/Setters for Statistics
     public int getViews() {
         return views;

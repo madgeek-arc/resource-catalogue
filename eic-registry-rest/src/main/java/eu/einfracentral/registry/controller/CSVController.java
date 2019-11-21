@@ -28,7 +28,7 @@ import java.util.List;
 @RequestMapping("exportToCSV")
 public class CSVController {
 
-    private static Logger logger = LogManager.getLogger(ServiceController.class);
+    private static Logger logger = LogManager.getLogger(CSVController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
     private ProviderService<Provider, Authentication> providerService;
 
@@ -38,7 +38,7 @@ public class CSVController {
         this.providerService = provider;
     }
 
-//    @ApiOperation(value = "Downloads a csv file with Service entries")
+    // Downloads a csv file with Service entries
     @RequestMapping(path = "services", method = RequestMethod.GET, produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
@@ -47,11 +47,11 @@ public class CSVController {
         ff.addFilter("latest", "true");
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
         String csvData = listToCSV(infraServices.getResults());
-        response.setHeader("Content-disposition","attachment; filename=" + "services.csv");
+        response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
         return ResponseEntity.ok(csvData);
     }
 
-//    @ApiOperation(value = "Downloads a csv file with Provider entries")
+    // Downloads a csv file with Provider entries
     @RequestMapping(path = "providers", method = RequestMethod.GET, produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> providersToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
@@ -59,7 +59,7 @@ public class CSVController {
         ff.setQuantity(10000);
         Paging<Provider> providers = providerService.getAll(ff, auth);
         String csvData = listToCSV(providers.getResults());
-        response.setHeader("Content-disposition","attachment; filename=" + "providers.csv");
+        response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
         return ResponseEntity.ok(csvData);
     }
 

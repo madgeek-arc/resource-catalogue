@@ -76,8 +76,8 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
         return ret;
     }
 
+    // Updates the Indicator assigned the given id with the given Indicator, keeping a version of revisions.
     @Override
-//    @ApiOperation(value = "Updates the Indicator assigned the given id with the given Indicator, keeping a version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -86,7 +86,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
         return ret;
     }
 
-//    @ApiOperation(value = "Deletes the Indicator with the given id.")
+    // Deletes the Indicator with the given id.
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -99,8 +99,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
         return new ResponseEntity<>(indicator, HttpStatus.OK);
     }
 
-    // returns a list of unused indicator IDs
-//    @ApiOperation(value = "Shows unused indicators.")
+    // Returns a list of unused indicator IDs.
     @RequestMapping(path = {"unused"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<String>> unused(@ApiIgnore Authentication auth) {

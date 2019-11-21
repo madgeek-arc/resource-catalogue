@@ -300,14 +300,14 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 if (!versions.isEmpty()) {
                     tempResource.setPayload(versions.get(0).getPayload());
                     service = deserialize(tempResource);
-                    if (service != null && service.getServiceMetadata() != null) {
-                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
+                    if (service != null && service.getMetadata() != null) {
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
                     }
                     versions.remove(0);
                 } else {
                     service = deserialize(tempResource);
-                    if (service != null && service.getServiceMetadata() != null) {
-                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, true));
+                    if (service != null && service.getMetadata() != null) {
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, true));
                     }
                 }
 
@@ -318,15 +318,15 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                     service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
+                            historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
-                            logger.warn("InfraService with id '{}' does not have ServiceMetadata", service.getService().getId());
+                            logger.warn("InfraService with id '{}' does not have Metadata", service.getService().getId());
                         }
                     }
                 }
                 service = deserialize(resource);
-                if (service != null && service.getServiceMetadata() != null) {
-                    historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, false));
+                if (service != null && service.getMetadata() != null) {
+                    historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, false));
                 }
             }
         }
@@ -463,10 +463,10 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return richServices;
     }
 
-    private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth){
-        for (RichService richService : richServices){
+    private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth) {
+        for (RichService richService : richServices) {
             List<ProviderInfo> providerInfoList = new ArrayList<>();
-            for (String provider : richService.getService().getProviders()){
+            for (String provider : richService.getService().getProviders()) {
                 ProviderInfo providerInfo = new ProviderInfo();
                 providerInfo.setProviderId(providerService.get(provider, auth).getId());
                 providerInfo.setProviderName(providerService.get(provider, auth).getName());

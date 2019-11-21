@@ -40,7 +40,7 @@ public class Indicator implements Identifiable {
     @FieldValidation
     private String unit;
 
-    @ApiModelProperty(position = 6, example= "'days', 'km', etc")
+    @ApiModelProperty(position = 6, example = "'days', 'km', etc")
     @XmlElement(required = true)
     @FieldValidation
     private String unitName;
@@ -83,9 +83,9 @@ public class Indicator implements Identifiable {
                     .filter(v -> v.unitType.equals(s))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Unknown value: " + s + " ; Valid options: "
-                                    + Arrays.stream(values())
-                                    .map(UnitType::getKey)
-                                    .collect(Collectors.joining(", "))));
+                            + Arrays.stream(values())
+                            .map(UnitType::getKey)
+                            .collect(Collectors.joining(", "))));
         }
 
     }

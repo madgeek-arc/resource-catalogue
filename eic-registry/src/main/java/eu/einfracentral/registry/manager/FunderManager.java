@@ -38,9 +38,9 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addAll(List<Funder> funders, Authentication auth) {
-        for (Funder funder : funders){
+        for (Funder funder : funders) {
             funder.setId(funder.getAcronym().toLowerCase());
-            logger.debug(String.format("Adding Funder %s", funder.getFundingOrganisation()));
+            logger.debug("Adding Funder: {}", funder.getFundingOrganisation());
             super.add(funder, auth);
         }
     }
@@ -52,7 +52,7 @@ public class FunderManager extends ResourceManager<Funder> implements FunderServ
         ff.setQuantity(10000);
         List<Funder> allFunders = getAll(ff, auth).getResults();
         for (Funder funder : allFunders) {
-            logger.debug("Deleting Funder {}", funder.getFundingOrganisation());
+            logger.debug("Deleting Funder: {}", funder.getFundingOrganisation());
             delete(funder);
         }
     }

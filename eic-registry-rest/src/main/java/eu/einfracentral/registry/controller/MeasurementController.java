@@ -55,8 +55,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
 
+    // Filter a list of Measurements based on a set of filters or get a list of all Measurements in the eInfraCentral Catalogue.
     @Override
-//    @ApiOperation(value = "Filter a list of Measurements based on a set of filters or get a list of all Measurements in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -75,8 +75,8 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) {
         ResponseEntity<Measurement> ret = super.add(measurement, auth);
-        logger.info("User '{}' created a new Measurement with id '{}'", auth.getName(), measurement.getId());
-        logger.info("Indicator id: " + measurement.getIndicatorId() + " and Service id: " + measurement.getServiceId());
+        logger.info("User '{}' created a new Measurement with id '{}'\n -Indicator id: {}\n -Service id: {}",
+                auth.getName(), measurement.getId(), measurement.getIndicatorId(), measurement.getServiceId());
         return ret;
     }
 
@@ -91,7 +91,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ret;
     }
 
-//    @ApiOperation(value = "Updates existing Measurements of a specific Service, or/and adds new ones.")
+    // Updates existing Measurements of a specific Service, or/and adds new ones.
     @RequestMapping(path = "updateAll", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
@@ -100,7 +100,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ret;
     }
 
-//    @ApiOperation(value = "Deletes the Measurement with the given id.")
+    // Deletes the Measurement with the given id.
     @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Measurement> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {

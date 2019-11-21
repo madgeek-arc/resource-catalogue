@@ -14,7 +14,8 @@ public class RangeValue {
     @XmlElement
     private String toValue;
 
-    public RangeValue() {}
+    public RangeValue() {
+    }
 
     public RangeValue(String fromValue, String toValue) {
         this.fromValue = fromValue;

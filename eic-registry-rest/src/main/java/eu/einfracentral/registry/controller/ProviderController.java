@@ -1,9 +1,9 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.ServiceMetadata;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -47,7 +47,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         this.infraServiceService = infraServiceService;
     }
 
-//    @ApiOperation(value = "Deletes the Provider with the given id.")
+    // Deletes the Provider with the given id.
     @RequestMapping(path = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
@@ -69,8 +69,8 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
+    // Creates a new Provider.
     @Override
-//    @ApiOperation(value = "Creates a new Provider.")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
@@ -123,13 +123,13 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providerManager.getServices(id), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get a featured InfraService offered by a Provider.") // TODO enable in a future release
+    // Get a featured InfraService offered by a Provider. // TODO enable in a future release
     @RequestMapping(path = "featured/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get a list of Providers in which the given user is admin.")
+    // Get a list of Providers in which the given user is admin.
     @RequestMapping(path = "getServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
         List<Provider> providers = providerManager.getServiceProviders(email, auth);
@@ -139,7 +139,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get a list of Providers in which you are admin.")
+    // Get a list of Providers in which you are admin.
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
         List<Provider> providers = providerManager.getMyServiceProviders(auth);
@@ -149,21 +149,21 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get the pending services of the given Provider.")
+    // Get the pending services of the given Provider.
     @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         List<Service> ret = providerManager.getInactiveServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get all inactive Providers.")
+    // Get all inactive Providers.
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
         List<Provider> ret = providerManager.getInactive();
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Accept/Reject a Provider.")
+    // Accept/Reject a Provider.
     @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
@@ -173,7 +173,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Publish all Provider services.")
+    // Publish all Provider services.
     @RequestMapping(path = "publishServices", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
@@ -190,11 +190,12 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             service.setActive(active);
 //            service.setStatus(status.getKey());
             service.setLatest(active);
-            ServiceMetadata sm = service.getServiceMetadata();
-            sm.setModifiedBy("system");
-            sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            Metadata metadata = service.getMetadata();
+            metadata.setModifiedBy("system");
+            metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             infraServiceService.update(service, auth);
-            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'", auth.getName(), provider.getName());
+            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'",
+                    auth.getName(), provider.getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

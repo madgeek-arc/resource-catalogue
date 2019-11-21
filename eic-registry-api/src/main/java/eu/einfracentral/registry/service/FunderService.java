@@ -10,7 +10,6 @@ public interface FunderService extends ResourceService<Funder, Authentication> {
 
     /**
      * Adds all new funders.
-     *
      */
     void addAll(List<Funder> funders, Authentication auth);
 
@@ -23,7 +22,6 @@ public interface FunderService extends ResourceService<Funder, Authentication> {
 
     /**
      * Deletes all Funders.
-     *
      */
     void deleteAll(Authentication auth);
 

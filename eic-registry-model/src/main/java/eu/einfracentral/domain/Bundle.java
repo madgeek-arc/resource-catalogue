@@ -17,7 +17,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @XmlElement(name = "metadata")
     @FieldValidation
-    private ServiceMetadata metadata;
+    private Metadata metadata;
 
     @XmlElement
     private boolean active;
@@ -25,7 +25,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @XmlElement
     private String status;
 
-    public Bundle () {
+    public Bundle() {
     }
 
     public T getPayload() {
@@ -46,14 +46,15 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.payload = payload;
     }
 
-    public ServiceMetadata getMetadata() {
+    public Metadata getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(ServiceMetadata metadata) {
+    public void setMetadata(Metadata metadata) {
         this.metadata = metadata;
     }
 
+    // FIXME: change to primitive
     public Boolean isActive() {  // FIXME: make it primitive
         return active;
     }

@@ -6,7 +6,8 @@ import org.springframework.security.core.Authentication;
 
 public class AuthenticationInfo {
 
-    private AuthenticationInfo() {}
+    private AuthenticationInfo() {
+    }
 
     public static String getSub(Authentication auth) {
         return getOIDC(auth).getSub();

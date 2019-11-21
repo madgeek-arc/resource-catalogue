@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 public class BundledProvider extends Bundle<Provider> {
 
     public BundledProvider() {
-
+        // no arg constructor
     }
 
     @XmlElement(name = "provider")

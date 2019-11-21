@@ -251,8 +251,6 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private XMLGregorianCalendar lastUpdate;
 
-  
-    // Service Classification Information
     /**
      * Summary of the service/resource features updated from the previous version.
      */
@@ -279,7 +277,7 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
     private List<String> standards;
 
-  
+
     // Service Contractual Information
     /**
      * Described id the service/resource can be accessed with an ordering process.
@@ -329,8 +327,6 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private URL accessPolicy;
 
-  
-    // Service Maturity Information
     /**
      * Webpage with the supported payment models and restrictions that apply to each of them.
      */
@@ -397,7 +393,7 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private URL maintenance;
 
-  
+
     // Service Contact Information
     /**
      * List of service's contact persons info.
@@ -671,6 +667,7 @@ public class Service implements Identifiable {
     /**
      * Method checking if a {@link List<String>} object is null or is empty or it contains only one entry
      * with an empty String ("")
+     *
      * @param list
      * @return
      */
@@ -778,7 +775,7 @@ public class Service implements Identifiable {
     }
 
     public void setOptions(List<ServiceOption> options) {
-        this.options= options;
+        this.options = options;
     }
 
     public URL getEndpoint() {

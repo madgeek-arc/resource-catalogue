@@ -15,6 +15,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Deletes the provider and all the corresponding services.
      * (Does not delete services that have other providers as well)
+     *
      * @param provider
      */
     @Override

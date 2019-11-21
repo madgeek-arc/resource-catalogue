@@ -34,7 +34,9 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         this.vocabularyService = vocabularyService;
     }
 
-    /** Open methods **/
+    /**
+     * Open methods
+     **/
 
     @ApiOperation(value = "Returns a list of EU countries.")
     @RequestMapping(path = "countries/EU", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -92,7 +94,9 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     }
 
 
-    /** Secured methods **/
+    /**
+     * Secured methods
+     **/
 
     @ApiOperation(value = "Adds a new Vocabulary")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})

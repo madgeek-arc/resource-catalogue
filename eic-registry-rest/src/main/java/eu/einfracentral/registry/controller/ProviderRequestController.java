@@ -25,7 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("request")
 @Api(value = "Get information about a provider request.")
-public class ProviderRequestController extends ResourceController<ProviderRequest, Authentication>{
+public class ProviderRequestController extends ResourceController<ProviderRequest, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestController.class);
     private ProviderRequestService<ProviderRequest, Authentication> providerRequestService;
