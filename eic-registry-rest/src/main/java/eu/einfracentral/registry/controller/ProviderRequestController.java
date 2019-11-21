@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.EmailMessage;
 import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.registry.service.ProviderRequestService;
 import eu.openminted.registry.core.domain.Paging;
@@ -62,7 +63,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> add(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) {
         ResponseEntity<ProviderRequest> ret = new ResponseEntity<>(providerRequestService.add(providerRequest, auth), HttpStatus.OK);
-        logger.info("User {} created a new request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
+//        logger.info("User {} created a new request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return ret;
     }
 
@@ -71,7 +72,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> update(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<ProviderRequest> ret = super.update(providerRequest, auth);
-        logger.info("User {} updated request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
+//        logger.info("User {} updated request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return ret;
     }
 
@@ -80,7 +81,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     public ResponseEntity<ProviderRequest> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderRequest providerRequest = providerRequestService.get(id);
         providerRequestService.delete(providerRequest);
-        logger.info("User {} deleted request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
+//        logger.info("User {} deleted request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return new ResponseEntity<>(providerRequest, HttpStatus.OK);
     }
 
@@ -90,6 +91,12 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     public List<ProviderRequest> getAllProviderRequests(@RequestParam String providerId, @ApiIgnore Authentication auth) {
         return providerRequestService.getAllProviderRequests(providerId, auth);
 
+    }
+
+    @ApiOperation(value = "Send mails to all providers and creates the Provider Requests.")
+    @RequestMapping(path = "sendMailsToProviders", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public void sendMailsToProviders (@RequestParam List<String> serviceIds, @RequestBody EmailMessage message){
+        providerRequestService.sendMailsToProviders(serviceIds, message);
     }
 
 }
