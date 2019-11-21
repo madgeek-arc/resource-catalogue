@@ -41,7 +41,7 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
             searchFields = Collections.singletonList(FacetFilterUtils.SEARCHABLE_AREA);
         }
 
-        if (!filter.getKeyword().equals("")) {
+        if (filter.getKeyword() != null && !filter.getKeyword().equals("")) {
             // create regexp disMaxQuery
             DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
             for (Object field : searchFields) {

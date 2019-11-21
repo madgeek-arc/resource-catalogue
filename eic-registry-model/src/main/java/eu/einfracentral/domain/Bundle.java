@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -11,6 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
+    @ApiModelProperty(hidden = true)
     @XmlTransient
     @FieldValidation
     private T payload;
@@ -28,10 +30,6 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     public Bundle() {
     }
 
-    public T getPayload() {
-        return payload;
-    }
-
     @Override
     public String getId() {
         return payload.getId();
@@ -40,6 +38,10 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @Override
     public void setId(String id) {
         this.payload.setId(id);
+    }
+
+    public T getPayload() {
+        return payload;
     }
 
     public void setPayload(T payload) {
