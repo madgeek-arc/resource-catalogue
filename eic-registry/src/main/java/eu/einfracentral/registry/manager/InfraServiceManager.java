@@ -64,9 +64,9 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             infraService.setMetadata(metadata);
         }
 
+        logger.info("Adding Service: {}", infraService);
         InfraService ret;
         ret = super.add(infraService, authentication);
-        logger.info("Adding Service: {}", infraService);
 
         providerManager.verifyNewProviders(infraService.getService().getProviders(), authentication);
 
