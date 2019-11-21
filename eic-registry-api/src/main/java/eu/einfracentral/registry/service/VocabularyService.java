@@ -56,13 +56,11 @@ public interface VocabularyService extends ResourceService<Vocabulary, Authentic
 
     /**
      * Adds all new vocs.
-     *
      */
     void addAll(List<Vocabulary> newVocabularies, Authentication auth);
 
     /**
      * Deletes all vocs.
-     *
      */
     void deleteAll(Authentication auth);
 

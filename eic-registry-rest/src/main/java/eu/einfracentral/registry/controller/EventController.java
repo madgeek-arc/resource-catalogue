@@ -35,7 +35,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     private final Logger logger = LogManager.getLogger(EventController.class);
 
-//    @ApiOperation("Retrieve all events.")
+    // Retrieve all events.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -48,7 +48,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         return super.getAll(allRequestParams, authentication);
     }
 
-//    @ApiOperation("Retrieve the event with a specific ID.")
+    // Retrieve the event with a specific ID.
     @RequestMapping(path = "event/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @Override
     public ResponseEntity<Event> get(@PathVariable String id, @ApiIgnore Authentication authentication) {
@@ -77,7 +77,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
 
     // FAVORITES -------->
-//    @ApiOperation("Set a Service as favorite for a user.")
+    // Set a Service as favorite for a user.
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
@@ -90,7 +90,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         return ret;
     }
 
-//    @ApiOperation("Check if a Service is favourited by the authenticated user.")
+    // Check if a Service is favourited by the authenticated user.
     @RequestMapping(path = "favourite/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String> getFavourite(@PathVariable String id, @ApiIgnore Authentication authentication) {
         List<Event> events;
@@ -105,19 +105,19 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>("0", HttpStatus.OK);
     }
 
-//    @ApiOperation("Retrieve all the favourited events.")
+    // Retrieve all the favourited events.
     @RequestMapping(path = "favourites/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getFavourites() {
         return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.FAVOURITE.getKey()), HttpStatus.OK);
     }
 
-//    @ApiOperation("Retrieve all the favourited events of the authenticated user.")
+    // Retrieve all the favourited events of the authenticated user.
     @RequestMapping(path = "favourites", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getUserFavourites(Authentication authentication) {
         return new ResponseEntity<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication), HttpStatus.OK);
     }
 
-//    @ApiOperation("Retrieve all the favourited events of a infraService with the specified ID.")
+    // Retrieve all the favourited events of a infraService with the specified ID.
     @RequestMapping(path = "favourites/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getServiceFavourites(@PathVariable String id) {
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), id), HttpStatus.OK);
@@ -126,7 +126,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
 
     // RATINGS ---------->
-//    @ApiOperation("Set a rating to a Service from the authenticated user.")
+    // Set a rating to a Service from the authenticated user.
     @RequestMapping(path = "rating/service/{id}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {
@@ -135,7 +135,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         return ret;
     }
 
-//    @ApiOperation("Get the rating of the authenticated user.")
+    // Get the rating of the authenticated user.
     @RequestMapping(path = "rating/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String> getRating(@PathVariable String id, @ApiIgnore Authentication authentication) {
         List<Event> events;
@@ -150,13 +150,13 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>("null", HttpStatus.OK);
     }
 
-//    @ApiOperation("Retrieve all rating events.")
+    // Retrieve all rating events.
     @RequestMapping(path = "ratings/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getRatings() {
         return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.RATING.getKey()), HttpStatus.OK);
     }
 
-//    @ApiOperation("Retrieve all the rating events of the authenticated user.")
+    // Retrieve all the rating events of the authenticated user.
     @RequestMapping(path = "ratings", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getUserRating(Authentication authentication) {
         try {
@@ -167,7 +167,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-//    @ApiOperation("Retrieve all the rating events of a infraService with the specified ID.")
+    // Retrieve all the rating events of a infraService with the specified ID.
     @RequestMapping(path = "ratings/service/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Event>> getServiceRatings(@PathVariable String id) {
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), id), HttpStatus.OK);

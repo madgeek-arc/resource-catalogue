@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.ServiceMetadata;
+import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -137,10 +137,10 @@ public class InfraServiceController {
         InfraService service = infraService.get(id, version);
         service.setActive(active);
         service.setLatest(latest);
-        ServiceMetadata sm = service.getServiceMetadata();
-        sm.setModifiedBy("system");
-        sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        service.setServiceMetadata(sm);
+        Metadata metadata = service.getMetadata();
+        metadata.setModifiedBy("system");
+        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+        service.setMetadata(metadata);
         if (active) {
             logger.info("User '{}' set InfraService '{}' with id: {} as active", auth.getName(), service.getService().getName(), service.getService().getId());
         } else {

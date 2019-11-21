@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class ServiceMetadata {
+public class Metadata {
 
     @XmlElement(defaultValue = "null")
     private String registeredBy;
@@ -20,19 +20,19 @@ public class ServiceMetadata {
     @XmlElement(defaultValue = "null")
     private String modifiedAt;
 
-    public ServiceMetadata() {
+    public Metadata() {
     }
 
-    public ServiceMetadata(ServiceMetadata serviceMetadata) {
-        this.registeredBy = serviceMetadata.getRegisteredBy();
-        this.modifiedBy = serviceMetadata.getModifiedBy();
-        this.registeredAt = serviceMetadata.getRegisteredAt();
-        this.modifiedAt = serviceMetadata.getModifiedAt();
+    public Metadata(Metadata metadata) {
+        this.registeredBy = metadata.getRegisteredBy();
+        this.modifiedBy = metadata.getModifiedBy();
+        this.registeredAt = metadata.getRegisteredAt();
+        this.modifiedAt = metadata.getModifiedAt();
     }
 
     @Override
     public String toString() {
-        return "ServiceMetadata{" +
+        return "Metadata{" +
                 "registeredBy='" + registeredBy + '\'' +
                 ", registeredAt='" + registeredAt + '\'' +
                 ", modifiedBy='" + modifiedBy + '\'' +

@@ -143,25 +143,25 @@
     {
       "multivalued": false,
       "name": "registeredBy",
-      "path": "//*[local-name()='serviceMetadata']/*[local-name()='registeredBy']/text()",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "modifiedBy",
-      "path": "//*[local-name()='serviceMetadata']/*[local-name()='modifiedBy']/text()",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedBy']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "registeredAt",
-      "path": "//*[local-name()='serviceMetadata']/*[local-name()='registeredAt']/text()",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredAt']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "modifiedAt",
-      "path": "//*[local-name()='serviceMetadata']/*[local-name()='modifiedAt']/text()",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedAt']/text()",
       "type": "java.lang.String"
     },
     {

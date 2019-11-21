@@ -1,7 +1,6 @@
 package eu.einfracentral.controllers;
 
 import eu.einfracentral.domain.BundledService;
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.service.TransformerCRUDService;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +39,8 @@ public class BundledServiceController {
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         BundledService ret = this.bundleService.add(new BundledService(service), auth);
-        logger.info("User '{}' created a new Service with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
+        logger.info("User '{}' created a new Service with name '{}' and id '{}'",
+                auth.getName(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 }

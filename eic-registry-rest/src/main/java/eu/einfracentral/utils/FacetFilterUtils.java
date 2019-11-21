@@ -17,7 +17,8 @@ public class FacetFilterUtils {
 
     private static final Logger logger = LogManager.getLogger(FacetFilterUtils.class);
 
-    private FacetFilterUtils() {}
+    private FacetFilterUtils() {
+    }
 
     // Gets all given filters
     public static Map<String, List<Object>> getFacetFilterFilters(FacetFilter ff) {

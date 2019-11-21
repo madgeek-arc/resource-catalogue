@@ -7,5 +7,6 @@ public class ValidationLengths {
     public static final int FIELD_LENGTH_SMALL = 20;
     public static final int TEXT_LENGTH = 1000;
 
-    private ValidationLengths() {}
+    private ValidationLengths() {
+    }
 }

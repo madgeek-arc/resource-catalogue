@@ -18,7 +18,7 @@ public class ScheduleService {
     private SynchronizerService synchronizerService;
 
     @Autowired
-    public ScheduleService(SynchronizerService synchronizerService){
+    public ScheduleService(SynchronizerService synchronizerService) {
         this.synchronizerService = synchronizerService;
     }
 
@@ -32,20 +32,20 @@ public class ScheduleService {
         BlockingQueue<String> measurementActionQueue = synchronizerService.getMeasurementAction();
         int syncTries = 0;
 
-        if(!serviceQueue.isEmpty()){
+        if (!serviceQueue.isEmpty()) {
             logger.warn("There are {} Services waiting to be Synchronized!", serviceQueue.size());
         }
-        if(!measurementQueue.isEmpty()){
+        if (!measurementQueue.isEmpty()) {
             logger.warn("There are {} Measurements waiting to be Synchronized!", measurementQueue.size());
         }
 
         try {
-            while ((!serviceQueue.isEmpty() || !measurementQueue.isEmpty()) && syncTries<1) {
-                if (!serviceQueue.isEmpty()){
+            while ((!serviceQueue.isEmpty() || !measurementQueue.isEmpty()) && syncTries < 1) {
+                if (!serviceQueue.isEmpty()) {
                     InfraService infraService = serviceQueue.take();
                     String serviceAction = serviceActionQueue.take();
                     logger.info("Attempting to perform '{}' operation for the service:\n{}", serviceAction, infraService);
-                    switch (serviceAction){
+                    switch (serviceAction) {
                         case "add":
                             synchronizerService.syncAdd(infraService);
                             break;
@@ -55,13 +55,15 @@ public class ScheduleService {
                         case "delete":
                             synchronizerService.syncDelete(infraService);
                             break;
+                        default:
+                            logger.warn("Unsupported Service action: {}", serviceAction);
                     }
                 }
-                if (!measurementQueue.isEmpty()){
+                if (!measurementQueue.isEmpty()) {
                     Measurement measurement = measurementQueue.take();
                     String measurementAction = measurementActionQueue.take();
                     logger.info("Attempting to perform '{}' operation for the measurement:\n{}", measurementAction, measurement);
-                    switch (measurementAction){
+                    switch (measurementAction) {
                         case "add":
                             synchronizerService.syncAdd(measurement);
                             break;
@@ -71,6 +73,8 @@ public class ScheduleService {
                         case "delete":
                             synchronizerService.syncDelete(measurement);
                             break;
+                        default:
+                            logger.warn("Unsupported Measurement action: {}", measurementAction);
                     }
                 }
                 syncTries++;

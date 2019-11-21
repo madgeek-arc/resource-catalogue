@@ -60,6 +60,7 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
 
     /**
      * Gets all Services with extra fields like views and ratings
+     *
      * @param ff
      * @return
      */
@@ -67,6 +68,7 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
 
     /**
      * Gets the specific Service with extra fields like views and ratings
+     *
      * @param id
      * @param auth
      * @return
@@ -75,12 +77,14 @@ public interface ServiceInterface<T, R, U extends Authentication> extends Transf
 
     /**
      * Creates a RichService for the specific Service
+     *
      * @return
      */
     RichService createRichService(InfraService infraService, U auth);
 
     /**
      * Creates RichServices for a list of given Services
+     *
      * @return
      */
     List<RichService> createRichServices(List<InfraService> infraServiceList, Authentication auth);

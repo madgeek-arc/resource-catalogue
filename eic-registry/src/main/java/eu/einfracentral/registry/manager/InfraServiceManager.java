@@ -59,9 +59,9 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
         infraService.setLatest(true);
 
-        if (infraService.getServiceMetadata() == null) {
-            ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
-            infraService.setServiceMetadata(serviceMetadata);
+        if (infraService.getMetadata() == null) {
+            Metadata metadata = createServiceMetadata(new User(authentication).getFullName());
+            infraService.setMetadata(metadata);
         }
 
         InfraService ret;
@@ -94,8 +94,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
 
         // update existing service serviceMetadata
-        ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
-        infraService.setServiceMetadata(serviceMetadata);
+        Metadata metadata = updateServiceMetadata(existingService.getMetadata(), new User(authentication).getFullName());
+        infraService.setMetadata(metadata);
         infraService.setActive(existingService.isActive());
 
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
@@ -177,8 +177,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
-                ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), "eInfraCentral");
-                infraService.setServiceMetadata(serviceMetadata);
+                Metadata metadata = updateServiceMetadata(existingService.getMetadata(), "eInfraCentral");
+                infraService.setMetadata(metadata);
 
                 super.update(infraService, null);
                 logger.info("Updating Service through merging: {}", infraService);
@@ -256,10 +256,10 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //        return service;
 //    }
 
-    private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
-        ServiceMetadata ret;
-        if (serviceMetadata != null) {
-            ret = new ServiceMetadata(serviceMetadata);
+    private Metadata updateServiceMetadata(Metadata metadata, String modifiedBy) {
+        Metadata ret;
+        if (metadata != null) {
+            ret = new Metadata(metadata);
             ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             ret.setModifiedBy(modifiedBy);
         } else {
@@ -268,8 +268,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         return ret;
     }
 
-    private ServiceMetadata createServiceMetadata(String registeredBy) {
-        ServiceMetadata ret = new ServiceMetadata();
+    private Metadata createServiceMetadata(String registeredBy) {
+        Metadata ret = new Metadata();
         ret.setRegisteredBy(registeredBy);
         ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
         ret.setModifiedBy(registeredBy);

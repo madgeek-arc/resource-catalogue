@@ -1,8 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.BundledService;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -11,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;

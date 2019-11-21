@@ -21,16 +21,16 @@ public class InfraService extends Bundle<Service> {
         this.setMetadata(null);
     }
 
-    public InfraService(Service service, ServiceMetadata serviceMetadata) {
+    public InfraService(Service service, Metadata metadata) {
         this.setService(service);
-        this.setMetadata(serviceMetadata);
+        this.setMetadata(metadata);
     }
 
     @Override
     public String toString() {
         return "InfraService{" +
                 "service=" + getService() +
-                ", serviceMetadata=" + getMetadata() +
+                ", metadata=" + getMetadata() +
                 ", active=" + isActive() +
                 ", status='" + getStatus() + '\'' +
                 ", latest=" + latest +
@@ -44,16 +44,6 @@ public class InfraService extends Bundle<Service> {
 
     public void setService(Service service) {
         this.setPayload(service);
-    }
-
-    // FIXME: remove ServiceMetadata getter/setter
-    @XmlElement(name = "serviceMetadata")
-    public ServiceMetadata getServiceMetadata() {
-        return getMetadata();
-    }
-
-    public void setServiceMetadata(ServiceMetadata serviceMetadata) {
-        this.setMetadata(serviceMetadata);
     }
 
     public boolean isLatest() {

@@ -36,7 +36,7 @@ public class InfoController {
         this.providerService = provider;
     }
 
-//    @ApiOperation(value = "Get Info about #SPs, #Services etc.")
+    // Get Info about #SPs, #Services etc.
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@ApiIgnore Authentication authentication) {
         Map<Object, Object> servicesInfo = new HashMap<>();

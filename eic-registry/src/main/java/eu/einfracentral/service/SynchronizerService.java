@@ -107,7 +107,7 @@ public class SynchronizerService {
                 try {
                     serviceQueue.add(infraService);
                     serviceActionQueue.add("add");
-                } catch(IllegalStateException e){
+                } catch (IllegalStateException e) {
                     logger.info("No space is currently available in the Queue");
                 }
             }
@@ -140,7 +140,7 @@ public class SynchronizerService {
                 try {
                     serviceQueue.add(infraService);
                     serviceActionQueue.add("update");
-                } catch(IllegalStateException e){
+                } catch (IllegalStateException e) {
                     logger.info("No space is currently available in the Queue");
                 }
             }
@@ -173,7 +173,7 @@ public class SynchronizerService {
                 try {
                     serviceQueue.add(infraService);
                     serviceActionQueue.add("delete");
-                } catch(IllegalStateException e){
+                } catch (IllegalStateException e) {
                     logger.info("No space is currently available in the Queue");
                 }
             }
@@ -206,7 +206,7 @@ public class SynchronizerService {
                 try {
                     measurementQueue.add(measurement);
                     measurementActionQueue.add("add");
-                } catch(IllegalStateException e){
+                } catch (IllegalStateException e) {
                     logger.info("No space is currently available in the Queue");
                 }
             }
@@ -239,7 +239,7 @@ public class SynchronizerService {
                 try {
                     measurementQueue.add(measurement);
                     measurementActionQueue.add("update");
-                } catch(IllegalStateException e){
+                } catch (IllegalStateException e) {
                     logger.info("No space is currently available in the Queue");
                 }
             }
@@ -272,7 +272,7 @@ public class SynchronizerService {
                 try {
                     measurementQueue.add(measurement);
                     measurementActionQueue.add("delete");
-                } catch(IllegalStateException e){
+                } catch (IllegalStateException e) {
                     logger.info("No space is currently available in the Queue");
                 }
             }
