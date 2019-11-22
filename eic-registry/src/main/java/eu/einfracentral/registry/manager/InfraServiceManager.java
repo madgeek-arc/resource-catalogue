@@ -207,7 +207,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
 
         try {
-            fieldValidator.validateFields(infraService);
+            fieldValidator.validateFields(infraService.getService());
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
