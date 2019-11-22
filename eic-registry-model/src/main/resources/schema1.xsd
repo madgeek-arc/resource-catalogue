@@ -613,14 +613,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="pendingService">
-    <xs:complexContent>
-      <xs:extension base="tns:infraService">
-        <xs:sequence/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
   <xs:complexType name="provider">
     <xs:sequence>
       <xs:element name="acronym" type="xs:string">
