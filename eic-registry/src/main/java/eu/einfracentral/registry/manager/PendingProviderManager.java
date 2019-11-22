@@ -1,21 +1,21 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-@Service("pendingServiceManager")
-public class PendingServiceManager extends ResourceManager<InfraService> implements ResourceService<InfraService, Authentication> {
+@Service("pendingProviderManager")
+public class PendingProviderManager extends ResourceManager<ProviderBundle> implements ResourceService<ProviderBundle, Authentication> {
 
     @Autowired
-    public PendingServiceManager() {
-        super(InfraService.class);
+    public PendingProviderManager() {
+        super(ProviderBundle.class);
     }
 
     @Override
     public String getResourceType() {
-        return "pending_service";
+        return "pending_provider";
     }
 }
