@@ -56,8 +56,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.metadata = metadata;
     }
 
-    // FIXME: change to primitive
-    public Boolean isActive() {  // FIXME: make it primitive
+    public boolean isActive() {  // FIXME: make it primitive
         return active;
     }
 

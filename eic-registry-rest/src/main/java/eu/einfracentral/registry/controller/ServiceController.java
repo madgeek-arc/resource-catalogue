@@ -263,7 +263,7 @@ public class ServiceController {
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
             List<Service> items = services.getValue()
                     .stream()
-                    .filter(s -> s.isActive() != null ? s.isActive() : false)
+                    .filter(InfraService::isActive)
                     .filter(InfraService::isLatest)
                     .map(InfraService::getService).collect(Collectors.toList());
             if (!items.isEmpty()) {
