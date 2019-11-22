@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "provider_id",
+      "name": "pending_provider_id",
       "path": "//*[local-name()='provider']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
