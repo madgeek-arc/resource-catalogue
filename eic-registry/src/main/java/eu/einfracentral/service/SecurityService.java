@@ -115,8 +115,8 @@ public class SecurityService {
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
-                if ((provider.isActive() == null || provider.getStatus() == null)) {
-                    throw new ServiceException("Provider active or status field is null");
+                if (provider.getStatus() == null) {
+                    throw new ServiceException("Provider status field is null");
                 }
                 if (provider.isActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
                     if (userIsProviderAdmin(auth, provider.getId())) {
@@ -138,7 +138,7 @@ public class SecurityService {
     @Deprecated
     public boolean providerIsActive(String providerId) {
         ProviderBundle provider = providerManager.get(providerId);
-        if (provider != null && provider.isActive() != null) {
+        if (provider != null) {
             if (!provider.isActive()) {
                 throw new ServiceException(String.format("Provider '%s' is not active.", provider.getProvider().getName()));
             }
@@ -153,7 +153,7 @@ public class SecurityService {
         InfraService service = infraServiceService.get(serviceId);
         for (String providerId : service.getService().getProviders()) {
             ProviderBundle provider = providerManager.get(providerId);
-            if (provider != null && provider.isActive() != null && provider.isActive()) {
+            if (provider != null && provider.isActive()) {
                 if (userIsProviderAdmin(auth, providerId)) {
                     return true;
                 }

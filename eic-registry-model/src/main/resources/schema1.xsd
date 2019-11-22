@@ -5,10 +5,6 @@
 
   <xs:element name="bundle" type="tns:bundle"/>
 
-  <xs:element name="bundledProvider" type="tns:bundledProvider"/>
-
-  <xs:element name="bundledService" type="tns:bundledService"/>
-
   <xs:element name="contact" type="tns:contact"/>
 
   <xs:element name="emailMessage" type="tns:emailMessage"/>
@@ -60,193 +56,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="bundledProvider">
-    <xs:complexContent>
-      <xs:extension base="tns:bundle">
-        <xs:sequence>
-          <xs:element minOccurs="0" ref="tns:provider"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="provider">
-    <xs:sequence>
-      <xs:element name="acronym" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Acronym or abbreviation of the provider.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="areasOfActivity">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Basic research, Applied research or Technological development.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="areaOfActivity" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="categories">
-        <xs:annotation>
-          <xs:documentation><![CDATA[A named group of providers that offer access to the same type of resource or capabilities, within the defined category.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="category" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="contacts">
-        <xs:annotation>
-          <xs:documentation><![CDATA[List of provider's contact persons info.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:contact"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="coordinatingCountry" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Country which provides the coordination. In the case of distributed/virtual Providers the country of the coordinating office (headquarters) should be selected.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="description" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The description of the provider.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="esfri" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="esfriDomains">
-        <xs:annotation>
-          <xs:documentation><![CDATA[ESFRI domain classification.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="esfriDomain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="hostingLegalEntity" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Name of the organisation/institution legally hosting (housing) the RI or its coordinating centre. A distinction is made between: (1) RIs that are self-standing and have a defined and distinct legal entity, (2) RI that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.). If (1) - name of the RI, If (2) - name of the hosting organisation.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="id" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Unique identifier of the provider.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="legalStatus" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[For independent legal entities (1) - legal status of the Provider. For embedded Providers (2) - legal status of the hosting legal entity.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="lifeCycleStatus" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Current status of the RI life-cycle.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="location" type="tns:providerLocation">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="logo" type="xs:anyURI">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Link to the logo/visual identity of the provider.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="multimedia">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Link to video, slideshow, photos, screenshots with details of the provider.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" nillable="true" type="xs:anyURI"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="name" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Full Name of the organisation providing/offering the service/resource.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="nationalRoadmap" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Is the RI featured on the national roadmap for research infrastructures]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="networks">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Select the networks the RIs is part of.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="network" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="participatingCountries">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Providers that are funded by several countries should list here all supporting countries (including the Coordinating country).]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="participatingCountry" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="societalGrandChallenges">
-        <xs:annotation>
-          <xs:documentation><![CDATA[RI’s participation in the grand societal challenges as defined by the European Commission (Horizon 2020)]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="societalGrandChallenge" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="tags">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Keywords associated to the Provider to simplify search by relevant keywords.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="tag" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="types">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Defines if the Provider is single-sited, distributed, mobile, virtual, etc.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="type" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="users">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:user"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="website" type="xs:anyURI">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Webpage with information about the provider.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="contact">
     <xs:sequence>
       <xs:element name="email" type="xs:string">
@@ -277,54 +86,81 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="providerLocation">
+  <xs:complexType name="emailMessage">
     <xs:sequence>
-      <xs:element name="city" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location city.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="name" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location name.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="number" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location street number.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="postalCode" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location postal code.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="region" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location region.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="street" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Provider's location street.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
+      <xs:element minOccurs="0" name="message" type="xs:string"/>
+      <xs:element minOccurs="0" name="recipientEmail" type="xs:string"/>
+      <xs:element minOccurs="0" name="senderEmail" type="xs:string"/>
+      <xs:element minOccurs="0" name="senderName" type="xs:string"/>
+      <xs:element minOccurs="0" name="subject" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="user">
+  <xs:complexType name="event">
     <xs:sequence>
-      <xs:element minOccurs="0" name="email" type="xs:string"/>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="instant" type="xs:long"/>
+      <xs:element name="service" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
+      <xs:element name="user" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="extrasMapType">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" nillable="true" type="tns:extrasType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="extrasType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="key" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="extrasMapTypeAdapter">
+    <xs:complexContent>
+      <xs:extension base="xmlAdapter">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="funder">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="acronym" type="xs:string"/>
+      <xs:element minOccurs="0" name="country" type="xs:string"/>
+      <xs:element minOccurs="0" name="fundingOrganisation" type="xs:string"/>
       <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="name" type="xs:string"/>
-      <xs:element minOccurs="0" name="surname" type="xs:string"/>
+      <xs:element minOccurs="0" name="organisationLocalLanguage" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="bundledService">
+  <xs:complexType name="indicator">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string"/>
+      <xs:element minOccurs="0" name="dimensions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="dimension" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="unit" type="xs:string"/>
+      <xs:element name="unitName" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="infraService">
     <xs:complexContent>
       <xs:extension base="tns:bundle">
         <xs:sequence>
+          <xs:element name="latest" type="xs:boolean"/>
           <xs:element minOccurs="0" ref="tns:service"/>
         </xs:sequence>
       </xs:extension>
@@ -751,87 +587,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="emailMessage">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="message" type="xs:string"/>
-      <xs:element minOccurs="0" name="recipientEmail" type="xs:string"/>
-      <xs:element minOccurs="0" name="senderEmail" type="xs:string"/>
-      <xs:element minOccurs="0" name="senderName" type="xs:string"/>
-      <xs:element minOccurs="0" name="subject" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="event">
-    <xs:sequence>
-      <xs:element name="id" type="xs:string"/>
-      <xs:element name="instant" type="xs:long"/>
-      <xs:element name="service" type="xs:string"/>
-      <xs:element name="type" type="xs:string"/>
-      <xs:element name="user" type="xs:string"/>
-      <xs:element minOccurs="0" name="value" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="extrasMapType">
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" nillable="true" type="tns:extrasType"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="extrasType">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="key" type="xs:string"/>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-
-  <xs:complexType name="extrasMapTypeAdapter">
-    <xs:complexContent>
-      <xs:extension base="xmlAdapter">
-        <xs:sequence/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="funder">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="acronym" type="xs:string"/>
-      <xs:element minOccurs="0" name="country" type="xs:string"/>
-      <xs:element minOccurs="0" name="fundingOrganisation" type="xs:string"/>
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="organisationLocalLanguage" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="indicator">
-    <xs:sequence>
-      <xs:element name="description" type="xs:string"/>
-      <xs:element minOccurs="0" name="dimensions">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" name="dimension" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="id" type="xs:string"/>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="unit" type="xs:string"/>
-      <xs:element name="unitName" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="infraService">
-    <xs:complexContent>
-      <xs:extension base="tns:bundle">
-        <xs:sequence>
-          <xs:element name="latest" type="xs:boolean"/>
-          <xs:element minOccurs="0" ref="tns:service"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
   <xs:complexType name="measurement">
     <xs:sequence>
       <xs:element name="id" type="xs:string"/>
@@ -864,6 +619,227 @@
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="provider">
+    <xs:sequence>
+      <xs:element name="acronym" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Acronym or abbreviation of the provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="areasOfActivity">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Basic research, Applied research or Technological development.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="areaOfActivity" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="categories">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of providers that offer access to the same type of resource or capabilities, within the defined category.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="category" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="contacts">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of provider's contact persons info.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:contact"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="coordinatingCountry" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Country which provides the coordination. In the case of distributed/virtual Providers the country of the coordinating office (headquarters) should be selected.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The description of the provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="esfri" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="esfriDomains">
+        <xs:annotation>
+          <xs:documentation><![CDATA[ESFRI domain classification.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="esfriDomain" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="hostingLegalEntity" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Name of the organisation/institution legally hosting (housing) the RI or its coordinating centre. A distinction is made between: (1) RIs that are self-standing and have a defined and distinct legal entity, (2) RI that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.). If (1) - name of the RI, If (2) - name of the hosting organisation.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Unique identifier of the provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="legalStatus" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[For independent legal entities (1) - legal status of the Provider. For embedded Providers (2) - legal status of the hosting legal entity.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lifeCycleStatus" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Current status of the RI life-cycle.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="location" type="tns:providerLocation">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="logo" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Link to the logo/visual identity of the provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="multimedia">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Link to video, slideshow, photos, screenshots with details of the provider.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" nillable="true" type="xs:anyURI"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Full Name of the organisation providing/offering the service/resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="nationalRoadmap" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Is the RI featured on the national roadmap for research infrastructures]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="networks">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Select the networks the RIs is part of.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="network" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="participatingCountries">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Providers that are funded by several countries should list here all supporting countries (including the Coordinating country).]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="participatingCountry" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="societalGrandChallenges">
+        <xs:annotation>
+          <xs:documentation><![CDATA[RI’s participation in the grand societal challenges as defined by the European Commission (Horizon 2020)]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="societalGrandChallenge" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="tags">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Keywords associated to the Provider to simplify search by relevant keywords.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="tag" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="types">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Defines if the Provider is single-sited, distributed, mobile, virtual, etc.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="type" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="users">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:user"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="website" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Webpage with information about the provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="providerLocation">
+    <xs:sequence>
+      <xs:element name="city" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's location city.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's location name.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="number" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's location street number.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="postalCode" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's location postal code.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="region" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's location region.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="street" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's location street.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="user">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="email" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="surname" type="xs:string"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="providerBundle">
