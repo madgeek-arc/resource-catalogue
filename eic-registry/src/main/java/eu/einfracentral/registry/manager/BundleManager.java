@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Bundle;
-import eu.einfracentral.domain.BundledProvider;
-import eu.einfracentral.domain.BundledService;
-import eu.einfracentral.domain.Identifiable;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -36,10 +33,10 @@ public abstract class BundleManager<T extends Bundle, R extends Identifiable, U 
 
     @Override
     public String getResourceType() {
-        if (typeParameterClass.isAssignableFrom(BundledProvider.class)) {
-            return "bundled_provider";
-        } else if (typeParameterClass.isAssignableFrom(BundledService.class)) {
-            return "bundled_service";
+        if (typeParameterClass.isAssignableFrom(ProviderBundle.class)) {
+            return "provider";
+        } else if (typeParameterClass.isAssignableFrom(InfraService.class)) {
+            return "infra_service";
         }
         return null;
     }

@@ -1,6 +1,6 @@
 package eu.einfracentral.controllers;
 
-import eu.einfracentral.domain.BundledService;
+import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.openminted.registry.core.service.TransformerCRUDService;
 import io.swagger.annotations.ApiOperation;
@@ -20,10 +20,10 @@ import springfox.documentation.annotations.ApiIgnore;
 public class BundledServiceController {
 
     private static final Logger logger = LogManager.getLogger(BundledServiceController.class);
-    private TransformerCRUDService<BundledService, BundledService, Authentication> bundleService;
+    private TransformerCRUDService<InfraService, InfraService, Authentication> bundleService;
 
     @Autowired
-    BundledServiceController(TransformerCRUDService<BundledService, BundledService, Authentication> bundleService) {
+    BundledServiceController(TransformerCRUDService<InfraService, InfraService, Authentication> bundleService) {
         this.bundleService = bundleService;
     }
 
@@ -38,7 +38,7 @@ public class BundledServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #service)")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
-        BundledService ret = this.bundleService.add(new BundledService(service), auth);
+        InfraService ret = this.bundleService.add(new InfraService(service), auth);
         logger.info("User '{}' created a new Service with name '{}' and id '{}'",
                 auth.getName(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);

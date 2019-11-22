@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.BundledService;
+import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service("bundleService")
-public class BundleServiceManager extends BundleManager<BundledService, BundledService, Authentication> {
+public class BundleServiceManager extends BundleManager<InfraService, InfraService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(BundleServiceManager.class);
 
@@ -26,7 +26,7 @@ public class BundleServiceManager extends BundleManager<BundledService, BundledS
 
     @Autowired
     public BundleServiceManager(FacetLabelService facetLabelService) {
-        super(BundledService.class, BundledService.class);
+        super(InfraService.class, InfraService.class);
         this.facetLabelService = facetLabelService;
     }
 
@@ -61,7 +61,7 @@ public class BundleServiceManager extends BundleManager<BundledService, BundledS
     }
 
     @Override
-    public Browsing<BundledService> getAll(FacetFilter filter, Authentication auth) {
+    public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
         List<String> orderedBrowseBy = new ArrayList<>();
 
         //Order Service's facets as we like (+removed Service Name - no4)
@@ -86,8 +86,8 @@ public class BundleServiceManager extends BundleManager<BundledService, BundledS
     }
 
 
-    private Browsing<BundledService> getMatchingServices(FacetFilter ff) {
-        Browsing<BundledService> services;
+    private Browsing<InfraService> getMatchingServices(FacetFilter ff) {
+        Browsing<InfraService> services;
 
         services = getResults(ff);
         if (!services.getResults().isEmpty() && !services.getFacets().isEmpty()) {
