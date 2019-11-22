@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import com.google.gson.Gson;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -30,10 +31,10 @@ public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
-    private ProviderService<Provider, Authentication> providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    CSVController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider) {
+    CSVController(InfraServiceService<InfraService, InfraService> service, ProviderService<ProviderBundle, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
     }
@@ -57,7 +58,7 @@ public class CSVController {
     public ResponseEntity<String> providersToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        Paging<Provider> providers = providerService.getAll(ff, auth);
+        Paging<ProviderBundle> providers = providerService.getAll(ff, auth);
         String csvData = listToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
         return ResponseEntity.ok(csvData);

@@ -137,7 +137,7 @@
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "provider",
+  "name": "provider_bundle",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/class_transformations/eic-registry-model/src/main/resources/schema1.xsd"

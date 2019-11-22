@@ -1,8 +1,10 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.manager.ProviderManager;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -24,17 +26,23 @@ import java.util.Map;
 @Component
 public class RegistrationMailService {
 
-    private static final Logger logger = LogManager.getLogger(ProviderManager.class);
+    private static final Logger logger = LogManager.getLogger(RegistrationMailService.class);
     private MailService mailService;
     private Configuration cfg;
     private ProviderManager providerManager;
 
 
-    @Value("${webapp.front:beta.einfracentral.eu}")
+    @Value("${webapp.front:portal.catris.eu}")
     private String endpoint;
 
-    @Value("${einfracentral.debug:false}")
+    @Value("${project.debug:false}")
     private boolean debug;
+
+    @Value("${project.name:CatRIS}")
+    private String projectName;
+
+    @Value("${project.registration.email:registration@catris.eu}")
+    private String registrationEmail;
 
 
     @Autowired
@@ -46,7 +54,7 @@ public class RegistrationMailService {
     }
 
     @Async
-    public void sendProviderMails(Provider provider) {
+    public void sendProviderMails(ProviderBundle provider) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
         String providerMail;
@@ -54,6 +62,13 @@ public class RegistrationMailService {
 
         String providerSubject = null;
         String regTeamSubject = null;
+
+        String providerName;
+        if (provider != null && provider.getProvider() != null) {
+            providerName = provider.getProvider().getName();
+        } else {
+            throw new ResourceNotFoundException("Provider is null");
+        }
 
         List<Service> serviceList = providerManager.getServices(provider.getId());
         Service serviceTemplate = null;
@@ -66,56 +81,72 @@ public class RegistrationMailService {
         }
         switch (Provider.States.fromString(provider.getStatus())) {
             case PENDING_1:
-                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been received", provider.getName());
-                regTeamSubject = String.format("[eInfraCentral] A new application for registering [%s] as a new service provider has been submitted", provider.getName());
+                providerSubject = String.format("[%s] Your application for registering [%s] " +
+                        "as a new service provider has been received", projectName, providerName);
+                regTeamSubject = String.format("[%s] A new application for registering [%s] " +
+                        "as a new service provider has been submitted", projectName, providerName);
                 break;
             case ST_SUBMISSION:
-                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been accepted", provider.getName());
-                regTeamSubject = String.format("[eInfraCentral] The application of [%s] for registering as a new service provider has been accepted", provider.getName());
+                providerSubject = String.format("[%s] Your application for registering [%s] " +
+                        "as a new service provider has been accepted", projectName, providerName);
+                regTeamSubject = String.format("[%s] The application of [%s] for registering " +
+                        "as a new service provider has been accepted", projectName, providerName);
                 break;
             case REJECTED:
-                providerSubject = String.format("[eInfraCentral] Your application for registering [%s] as a new service provider has been rejected", provider.getName());
-                regTeamSubject = String.format("[eInfraCentral] The application of [%s] for registering as a new service provider has been rejected", provider.getName());
+                providerSubject = String.format("[%s] Your application for registering [%s] " +
+                        "as a new service provider has been rejected", projectName, providerName);
+                regTeamSubject = String.format("[%s] The application of [%s] for registering " +
+                        "as a new service provider has been rejected", projectName, providerName);
                 break;
             case PENDING_2:
                 assert serviceTemplate != null;
-                providerSubject = String.format("[eInfraCentral] Your service [%s] has been received and its approval is pending", serviceTemplate.getName());
-                regTeamSubject = String.format("[eInfraCentral] Approve or reject the information about the new service: [%s] – [%s]", provider.getName(), serviceTemplate.getName());
+                providerSubject = String.format("[%s] Your service [%s] has been received " +
+                        "and its approval is pending", projectName, serviceTemplate.getName());
+                regTeamSubject = String.format("[%s] Approve or reject the information about the new service: " +
+                        "[%s] – [%s]", projectName, provider.getProvider().getName(), serviceTemplate.getName());
                 break;
             case APPROVED:
-                if (provider.getActive()) {
+                if (provider.isActive()) {
                     assert serviceTemplate != null;
-                    providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been accepted", provider.getName(), serviceTemplate.getName());
-                    regTeamSubject = String.format("[eInfraCentral] The service [%s] has been accepted", serviceTemplate.getId());
+                    providerSubject = String.format("[%s] Your service [%s] – [%s]  has been accepted",
+                            projectName, providerName, serviceTemplate.getName());
+                    regTeamSubject = String.format("[%s] The service [%s] has been accepted",
+                            projectName, serviceTemplate.getId());
                     break;
                 } else {
                     assert serviceTemplate != null;
-                    providerSubject = String.format("[eInfraCentral] Your service provider [%s] has been set to inactive", provider.getName());
-                    regTeamSubject = String.format("[eInfraCentral] The service provider [%s] has been set to inactive", provider.getName());
+                    providerSubject = String.format("[%s] Your service provider [%s] has been set to inactive",
+                            projectName, providerName);
+                    regTeamSubject = String.format("[%s] The service provider [%s] has been set to inactive",
+                            projectName, providerName);
                     break;
                 }
             case REJECTED_ST:
                 assert serviceTemplate != null;
-                providerSubject = String.format("[eInfraCentral] Your service [%s] – [%s]  has been rejected", provider.getName(), serviceTemplate.getName());
-                regTeamSubject = String.format("[eInfraCentral] The service [%s] has been rejected", serviceTemplate.getId());
+                providerSubject = String.format("[%s] Your service [%s] – [%s]  has been rejected",
+                        projectName, providerName, serviceTemplate.getName());
+                regTeamSubject = String.format("[%s] The service [%s] has been rejected",
+                        projectName, serviceTemplate.getId());
                 break;
         }
 
         root.put("provider", provider);
         root.put("endpoint", endpoint);
-        root.put("user", provider.getUsers().get(0)); // get the first user's information for the registration team email
+        // get the first user's information for the registration team email
+        root.put("user", provider.getProvider().getUsers().get(0));
 
         try {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
             if (!debug) {
-                mailService.sendMail("registration@einfracentral.eu", regTeamSubject, regTeamMail);
+                mailService.sendMail(registrationEmail, regTeamSubject, regTeamMail);
             }
-            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", "registration@einfracentral.eu", regTeamSubject, regTeamMail);
+            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", registrationEmail,
+                    regTeamSubject, regTeamMail);
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");
-            for (User user : provider.getUsers()) {
+            for (User user : provider.getProvider().getUsers()) {
                 if (user.getEmail() == null || user.getEmail().equals("")) {
                     continue;
                 }

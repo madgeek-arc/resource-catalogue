@@ -27,6 +27,8 @@
 
   <xs:element name="provider" type="tns:provider"/>
 
+  <xs:element name="providerBundle" type="tns:providerBundle"/>
+
   <xs:element name="providerLocation" type="tns:providerLocation"/>
 
   <xs:element name="providerRequest" type="tns:providerRequest"/>
@@ -75,7 +77,6 @@
           <xs:documentation><![CDATA[Acronym or abbreviation of the provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="active" type="xs:boolean"/>
       <xs:element minOccurs="0" name="areasOfActivity">
         <xs:annotation>
           <xs:documentation><![CDATA[Basic research, Applied research or Technological development.]]></xs:documentation>
@@ -211,7 +212,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
       <xs:element minOccurs="0" name="tags">
         <xs:annotation>
           <xs:documentation><![CDATA[Keywords associated to the Provider to simplify search by relevant keywords.]]></xs:documentation>
@@ -862,6 +862,16 @@
     <xs:complexContent>
       <xs:extension base="tns:infraService">
         <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="providerBundle">
+    <xs:complexContent>
+      <xs:extension base="tns:bundle">
+        <xs:sequence>
+          <xs:element minOccurs="0" ref="tns:provider"/>
+        </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

@@ -233,13 +233,13 @@ public class Provider implements Identifiable {
 
 
     // Extra needed fields
-    @XmlElement
-    @ApiModelProperty(hidden = true)
-    private Boolean active;
-
-    @XmlElement
-    @ApiModelProperty(hidden = true)
-    private String status;
+//    @XmlElement
+//    @ApiModelProperty(hidden = true)
+//    private Boolean active;
+//
+//    @XmlElement
+//    @ApiModelProperty(hidden = true)
+//    private String status;
 
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
@@ -307,8 +307,8 @@ public class Provider implements Identifiable {
                 ", areasOfActivity=" + areasOfActivity +
                 ", societalGrandChallenges=" + societalGrandChallenges +
                 ", nationalRoadmap=" + nationalRoadmap +
-                ", active=" + active +
-                ", status='" + status + '\'' +
+//                ", active=" + active +
+//                ", status='" + status + '\'' +
                 ", users=" + users +
                 '}';
     }
@@ -499,21 +499,21 @@ public class Provider implements Identifiable {
         this.nationalRoadmap = nationalRoadmap;
     }
 
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+//    public Boolean getActive() {
+//        return active;
+//    }
+//
+//    public void setActive(Boolean active) {
+//        this.active = active;
+//    }
+//
+//    public String getStatus() {
+//        return status;
+//    }
+//
+//    public void setStatus(String status) {
+//        this.status = status;
+//    }
 
     public List<User> getUsers() {
         return users;

@@ -53,7 +53,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private VocabularyService vocabularyService;
 
     @Autowired
-    private ProviderService providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
     private FunderService funderService;
@@ -469,8 +469,8 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             for (String provider : richService.getService().getProviders()) {
                 ProviderInfo providerInfo = new ProviderInfo();
                 providerInfo.setProviderId(providerService.get(provider, auth).getId());
-                providerInfo.setProviderName(providerService.get(provider, auth).getName());
-                providerInfo.setProviderAcronym(providerService.get(provider, auth).getAcronym());
+                providerInfo.setProviderName(providerService.get(provider, auth).getProvider().getName());
+                providerInfo.setProviderAcronym(providerService.get(provider, auth).getProvider().getAcronym());
                 providerInfoList.add(providerInfo);
             }
             richService.setProviderInfo(providerInfoList);

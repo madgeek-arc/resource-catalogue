@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Facet;
@@ -28,10 +29,10 @@ public class InfoController {
 
     private static final String INFO = "general_INFO";
     private InfraServiceService<InfraService, InfraService> infraService;
-    private ProviderService<Provider, Authentication> providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    InfoController(InfraServiceService<InfraService, InfraService> service, ProviderService<Provider, Authentication> provider) {
+    InfoController(InfraServiceService<InfraService, InfraService> service, ProviderService<ProviderBundle, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
     }

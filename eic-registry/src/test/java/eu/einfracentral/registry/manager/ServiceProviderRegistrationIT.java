@@ -37,7 +37,7 @@ public class ServiceProviderRegistrationIT {
     private static final Logger logger = LogManager.getLogger(ServiceProviderRegistrationIT.class);
 
     @Autowired
-    ProviderService<Provider, Authentication> providerService;
+    ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
     InfraServiceService<InfraService, InfraService> infraServiceService;
@@ -53,7 +53,7 @@ public class ServiceProviderRegistrationIT {
 
     @Test
     public void addInvalidProviderTest() throws MalformedURLException {
-        Provider provider = null;
+        ProviderBundle provider = null;
         try {
             provider = addProvider("*&*");
         } catch (ServiceException e) {
@@ -66,7 +66,7 @@ public class ServiceProviderRegistrationIT {
     @Test
     public void addUpdateAndDeleteProvider() throws ResourceNotFoundException, MalformedURLException {
         String providerId = "wp6";
-        Provider provider;
+        ProviderBundle provider;
         InfraService infraService;
 
         try {
@@ -78,7 +78,7 @@ public class ServiceProviderRegistrationIT {
 
             providerService.verifyProvider(providerId, Provider.States.ST_SUBMISSION, true, securityService.getAdminAccess());
 
-            infraService = new InfraService(createService("WP4_TestService", provider));
+            infraService = new InfraService(createService("WP4_TestService", provider.getProvider()));
 
             infraService = infraServiceService.addService(infraService, securityService.getAdminAccess());
 
@@ -102,7 +102,7 @@ public class ServiceProviderRegistrationIT {
 
     }
 
-    private Provider addProvider(String id) throws MalformedURLException {
+    private ProviderBundle addProvider(String id) throws MalformedURLException {
         List<String> providerTypes = new ArrayList<>();
         providerTypes.add("provider_type-single_sited");
         providerTypes.add("provider_type-distributed");
@@ -156,21 +156,21 @@ public class ServiceProviderRegistrationIT {
         provider.setContacts(contacts);
         provider.setUsers(users);
 
-        return providerService.add(provider, securityService.getAdminAccess());
+        return providerService.add(new ProviderBundle(provider), securityService.getAdminAccess());
     }
 
-    private Provider updateProvider(String id) throws MalformedURLException, ResourceNotFoundException {
+    private ProviderBundle updateProvider(String id) throws MalformedURLException, ResourceNotFoundException {
         // get provider
-        Provider provider = providerService.get(id);
+        ProviderBundle provider = providerService.get(id);
 
         // update provider
-        provider.setName("WP4_Test UPDATED");
-        provider.setAcronym("WP4UPDATED");
-        provider.setWebsite(new URL("http://wp4.test.updated.com"));
-        provider.setDescription("Jtest for PDT WP4 v2.00 01/10/19 UPDATED");
-        provider.setLogo(new URL("https://wp4.testprovider.logo.updated.com"));
-        provider.setLifeCycleStatus("provider_life_cycle_status-being_upgraded");
-        provider.setCoordinatingCountry("EU");
+        provider.getProvider().setName("WP4_Test UPDATED");
+        provider.getProvider().setAcronym("WP4UPDATED");
+        provider.getProvider().setWebsite(new URL("http://wp4.test.updated.com"));
+        provider.getProvider().setDescription("Jtest for PDT WP4 v2.00 01/10/19 UPDATED");
+        provider.getProvider().setLogo(new URL("https://wp4.testprovider.logo.updated.com"));
+        provider.getProvider().setLifeCycleStatus("provider_life_cycle_status-being_upgraded");
+        provider.getProvider().setCoordinatingCountry("EU");
 
         return providerService.update(provider, securityService.getAdminAccess());
     }

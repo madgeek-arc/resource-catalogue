@@ -55,7 +55,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
-        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).getActive());
+        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).isActive());
 
         infraService.setLatest(true);
 
@@ -149,7 +149,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<Provider> providers = providerManager.getAll(ff, null).getResults();
+        List<ProviderBundle> providers = providerManager.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
