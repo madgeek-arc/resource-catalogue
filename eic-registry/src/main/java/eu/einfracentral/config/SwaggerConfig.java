@@ -36,7 +36,7 @@ public class SwaggerConfig {
     @Value("${platform.root:}")
     String platform;
 
-    @Value("${einfracentral.debug:false}")
+    @Value("${project.debug:false}")
     public Boolean isLocalhost;
 
     @Autowired

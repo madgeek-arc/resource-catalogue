@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.EmailMessage;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import org.apache.logging.log4j.LogManager;
@@ -23,11 +24,11 @@ public class ContactController {
     private static final Logger logger = LogManager.getLogger(ContactController.class);
 
     private InfraServiceService<InfraService, InfraService> infraServiceService;
-    private ProviderService<Provider, Authentication> providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
     ContactController(InfraServiceService<InfraService, InfraService> infraServiceService,
-                      ProviderService<Provider, Authentication> providerService) {
+                      ProviderService<ProviderBundle, Authentication> providerService) {
         this.infraServiceService = infraServiceService;
         this.providerService = providerService;
     }
@@ -43,7 +44,7 @@ public class ContactController {
             } else {
                 emailsTo = service.getService().getProviders()
                         .stream()
-                        .map(providerId -> providerService.get(providerId).getContacts().get(0).getEmail())
+                        .map(providerId -> providerService.get(providerId).getProvider().getContacts().get(0).getEmail())
                         .collect(Collectors.toList());
             }
             // TODO: complete this method

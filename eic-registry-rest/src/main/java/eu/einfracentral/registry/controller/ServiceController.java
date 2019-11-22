@@ -43,12 +43,12 @@ public class ServiceController {
 
     private static Logger logger = LogManager.getLogger(ServiceController.class);
     private InfraServiceService<InfraService, InfraService> infraService;
-    private ProviderService<Provider, Authentication> providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
     private MeasurementService<Measurement, Authentication> measurementService;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
-                      ProviderService<Provider, Authentication> provider,
+                      ProviderService<ProviderBundle, Authentication> provider,
                       MeasurementService<Measurement, Authentication> measurementService) {
         this.infraService = service;
         this.providerService = provider;
@@ -329,9 +329,9 @@ public class ServiceController {
     @RequestMapping(path = "pending/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
-        List<Provider> pendingProviders = providerService.getInactive();
+        List<ProviderBundle> pendingProviders = providerService.getInactive();
         List<Service> serviceTemplates = new ArrayList<>();
-        for (Provider provider : pendingProviders) {
+        for (ProviderBundle provider : pendingProviders) {
             if (Provider.States.fromString(provider.getStatus()) == Provider.States.PENDING_2) {
                 serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
             }

@@ -2,9 +2,11 @@ package eu.einfracentral.config.security;
 
 import com.nimbusds.jwt.JWT;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.client.OIDCAuthoritiesMapper;
@@ -29,21 +31,20 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
     private Map<String, SimpleGrantedAuthority> userRolesMap;
+    private String admins;
 
-    private ProviderService<Provider, Authentication> providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
     private SecurityService securityService;
 
-    @Value("${eic.admins}")
-    String eicAdmins;
-
     @Autowired
-    public EICAuthoritiesMapper(@Value("${eic.admins}") String admins, ProviderService<Provider, Authentication> manager,
+    public EICAuthoritiesMapper(@Value("${project.admins}") String admins, ProviderService<ProviderBundle, Authentication> manager,
                                 SecurityService securityService) {
         this.providerService = manager;
         this.securityService = securityService;
         if (admins == null) {
-            throw new RuntimeException("No Admins Provided");
+            throw new ServiceException("No Admins Provided");
         }
+        this.admins = admins;
         mapAuthorities(admins);
     }
 
@@ -73,7 +74,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     }
 
     public void updateAuthorities() {
-        mapAuthorities(eicAdmins);
+        mapAuthorities(admins);
     }
 
     private void mapAuthorities(String admins) {
@@ -81,12 +82,12 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         try {
-            List<Provider> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
+            List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
             if (providers != null) {
                 userRolesMap = providers
                         .stream()
                         .distinct()
-                        .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
+                        .flatMap((Function<ProviderBundle, Stream<String>>) provider -> provider.getProvider().getUsers()
                                 .stream()
                                 .filter(Objects::nonNull)
                                 .map(u -> {

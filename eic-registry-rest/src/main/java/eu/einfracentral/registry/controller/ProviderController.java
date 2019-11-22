@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Metadata;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -33,16 +30,15 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("provider")
 @Api(value = "Get information about a Provider")
-public class ProviderController extends ResourceController<Provider, Authentication> {
+public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
-    private ProviderService<Provider, Authentication> providerManager;
+    private ProviderService<ProviderBundle, Authentication> providerManager;
     private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    ProviderController(ProviderService<Provider, Authentication> service,
+    ProviderController(ProviderService<ProviderBundle, Authentication> service,
                        InfraServiceService<InfraService, InfraService> infraServiceService) {
-        super(service);
         this.providerManager = service;
         this.infraServiceService = infraServiceService;
     }
@@ -50,46 +46,44 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     // Deletes the Provider with the given id.
     @RequestMapping(path = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
-    public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.get(id);
+    public ResponseEntity delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        ProviderBundle provider = providerManager.get(id);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting provider: " + provider.getName());
+        logger.info("Deleting provider: {}", provider.getProvider().getName());
         providerManager.delete(provider);
-        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
-        return new ResponseEntity<>(provider, HttpStatus.OK);
+        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
+        return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
-    @Override
     @ApiOperation(value = "Returns the Provider with the given id.")
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.get(id, auth);
+        Provider provider = providerManager.get(id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
     // Creates a new Provider.
-    @Override
+//    @Override
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
-        ResponseEntity<Provider> ret = super.add(provider, auth);
+        ProviderBundle providerBundle = providerManager.add(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
-        return ret;
+        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
-    @Override
+//    @Override
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ResponseEntity<Provider> ret = super.update(provider, auth);
+        ProviderBundle providerBundle = providerManager.update(new ProviderBundle(provider), auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
-        return ret;
+        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
-    @Override
     @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the eInfraCentral Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -99,7 +93,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<ProviderBundle>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -132,20 +126,20 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     // Get a list of Providers in which the given user is admin.
     @RequestMapping(path = "getServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
-        List<Provider> providers = providerManager.getServiceProviders(email, auth);
-        if (providers == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        List<Provider> providers = providerManager.getServiceProviders(email, auth)
+                .stream()
+                .map(ProviderBundle::getProvider)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
     // Get a list of Providers in which you are admin.
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
-        List<Provider> providers = providerManager.getMyServiceProviders(auth);
-        if (providers == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        List<Provider> providers = providerManager.getMyServiceProviders(auth)
+                .stream()
+                .map(ProviderBundle::getProvider)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
@@ -159,17 +153,20 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     // Get all inactive Providers.
     @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
-        List<Provider> ret = providerManager.getInactive();
+        List<Provider> ret = providerManager.getInactive()
+                .stream()
+                .map(ProviderBundle::getProvider)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     // Accept/Reject a Provider.
     @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
+    public ResponseEntity<ProviderBundle> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                    @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.verifyProvider(id, status, active, auth);
-        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getName(), status, active);
+        ProviderBundle provider = providerManager.verifyProvider(id, status, active, auth);
+        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getProvider().getName(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -178,7 +175,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        Provider provider = providerManager.get(id);
+        ProviderBundle provider = providerManager.get(id);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
         }
@@ -195,7 +192,7 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             infraServiceService.update(service, auth);
             logger.info("User '{}' published(updated) all Services of the Provider with name '{}'",
-                    auth.getName(), provider.getName());
+                    auth.getName(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

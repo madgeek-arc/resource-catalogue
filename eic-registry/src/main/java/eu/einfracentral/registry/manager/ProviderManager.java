@@ -1,10 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.config.security.EICAuthoritiesMapper;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -34,7 +31,7 @@ import java.util.stream.Collectors;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends ResourceManager<Provider> implements ProviderService<Provider, Authentication> {
+public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private InfraServiceService<InfraService, InfraService> infraServiceService;
@@ -51,7 +48,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
                            @Lazy RegistrationMailService registrationMailService,
                            @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
                            @Lazy FieldValidator fieldValidator) {
-        super(Provider.class);
+        super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
@@ -68,16 +65,16 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public Provider add(Provider provider, Authentication auth) {
+    public ProviderBundle add(ProviderBundle provider, Authentication auth) {
 
-        createProviderId(provider);
-        addAuthenticatedUser(provider, auth);
+        createProviderId(provider.getProvider());
+        addAuthenticatedUser(provider.getProvider(), auth);
         validateProvider(provider);
 
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
-        Provider ret;
+        ProviderBundle ret;
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
 
@@ -96,11 +93,11 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public Provider update(Provider provider, Authentication auth) {
+    public ProviderBundle update(ProviderBundle provider, Authentication auth) {
         validateProvider(provider);
         Resource existing = whereID(provider.getId(), true);
-        Provider ex = deserialize(existing);
-        provider.setActive(ex.getActive());
+        ProviderBundle ex = deserialize(existing);
+        provider.setActive(ex.isActive());
         provider.setStatus(ex.getStatus());
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
@@ -125,8 +122,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
      */
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
-    public Provider get(String id) {
-        Provider provider = super.get(id);
+    public ProviderBundle get(String id) {
+        ProviderBundle provider = super.get(id);
         if (provider == null) {
             throw new eu.einfracentral.exception.ResourceNotFoundException(
                     String.format("Could not find provider with id: %s", id));
@@ -136,24 +133,24 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
-    public Provider get(String id, Authentication auth) {
-        Provider provider = get(id);
+    public ProviderBundle get(String id, Authentication auth) {
+        ProviderBundle provider = get(id);
         if (auth == null) {
-            provider.setUsers(null);
+            provider.getProvider().setUsers(null);
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")
                 && securityService.userIsProviderAdmin(auth, provider.getId())) {
             return provider;
         }
-        provider.setUsers(null);
+        provider.getProvider().setUsers(null);
         return provider;
     }
 
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
-    public Browsing<Provider> getAll(FacetFilter ff, Authentication auth) {
-        List<Provider> userProviders = null;
+    public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
+        List<ProviderBundle> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
             if (securityService.hasRole(auth, "ROLE_ADMIN")) {
                 return super.getAll(ff, auth);
@@ -163,13 +160,13 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // retrieve providers
-        Browsing<Provider> providers = super.getAll(ff, auth);
+        Browsing<ProviderBundle> providers = super.getAll(ff, auth);
 
         // create a list of providers without their users
-        List<Provider> modified = providers.getResults()
+        List<ProviderBundle> modified = providers.getResults()
                 .stream()
                 .map(p -> {
-                    p.setUsers(null);
+                    p.getProvider().setUsers(null);
                     return p;
                 })
                 .collect(Collectors.toList());
@@ -187,7 +184,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(Provider provider) {
+    public void delete(ProviderBundle provider) {
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
@@ -211,8 +208,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
-        Provider provider = get(id);
+    public ProviderBundle verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
+        ProviderBundle provider = get(id);
         provider.setStatus(status.getKey());
         switch (status) {
             case APPROVED:
@@ -243,8 +240,8 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
-    public List<Provider> getServiceProviders(String email, Authentication auth) {
-        List<Provider> providers;
+    public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
+        List<ProviderBundle> providers;
         if (auth == null) {
 //            return null; // TODO: enable this when front end can handle 401 properly
             return new ArrayList<>();
@@ -260,7 +257,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         return providers
                 .stream()
                 .map(p -> {
-                    if (p.getUsers() != null && p.getUsers().stream().filter(Objects::nonNull).anyMatch(u -> {
+                    if (p.getProvider().getUsers() != null && p.getProvider().getUsers().stream().filter(Objects::nonNull).anyMatch(u -> {
                         if (u.getEmail() != null) {
                             return u.getEmail().equals(email);
                         }
@@ -275,7 +272,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
 
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
-    public List<Provider> getMyServiceProviders(Authentication auth) {
+    public List<ProviderBundle> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
 //            return null; // TODO: enable this when front end can handle 401 properly
             return new ArrayList<>();
@@ -332,7 +329,7 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     }
 
     @Override
-    public List<Provider> getInactive() {
+    public List<ProviderBundle> getInactive() {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
         ff.setFrom(0);
@@ -391,14 +388,14 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void verifyNewProviders(List<String> providers, Authentication authentication) {
         for (String serviceProvider : providers) {
-            Provider provider = get(serviceProvider);
+            ProviderBundle provider = get(serviceProvider);
             if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
                 verifyProvider(provider.getId(), Provider.States.PENDING_2, false, authentication);
             }
         }
     }
 
-    public void validateProvider(Provider provider) {
+    public void validateProvider(ProviderBundle provider) {
         logger.debug("Validating Provider with id: {}", provider.getId());
 
         try {
@@ -408,8 +405,9 @@ public class ProviderManager extends ResourceManager<Provider> implements Provid
         }
 
         // Validate Provider's National Roadmap
-        if (provider.getNationalRoadmap() != null) {
-            if (!"yes".equalsIgnoreCase(provider.getNationalRoadmap()) && !"no".equalsIgnoreCase(provider.getNationalRoadmap())) {
+        if (provider.getProvider().getNationalRoadmap() != null) {
+            if (!"yes".equalsIgnoreCase(provider.getProvider().getNationalRoadmap())
+                    && !"no".equalsIgnoreCase(provider.getProvider().getNationalRoadmap())) {
                 throw new ValidationException("nationalRoadmap's value should be Yes or No");
             }
         }

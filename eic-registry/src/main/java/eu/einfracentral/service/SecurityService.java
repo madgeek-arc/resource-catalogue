@@ -2,6 +2,7 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -56,15 +57,15 @@ public class SecurityService {
     }
 
     public boolean userIsProviderAdmin(Authentication auth, String providerId) {
-        Provider registeredProvider = providerManager.get(providerId);
+        ProviderBundle registeredProvider = providerManager.get(providerId);
         User user = new User(auth);
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
         }
-        if (registeredProvider.getUsers() == null) {
+        if (registeredProvider.getProvider().getUsers() == null) {
             return false;
         }
-        return registeredProvider.getUsers()
+        return registeredProvider.getProvider().getUsers()
                 .parallelStream()
                 .filter(Objects::nonNull)
                 .anyMatch(u -> {
@@ -112,12 +113,12 @@ public class SecurityService {
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
         List<String> providerIds = service.getService().getProviders();
         for (String providerId : providerIds) {
-            Provider provider = providerManager.get(providerId);
+            ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
-                if ((provider.getActive() == null || provider.getStatus() == null)) {
+                if ((provider.isActive() == null || provider.getStatus() == null)) {
                     throw new ServiceException("Provider active or status field is null");
                 }
-                if (provider.getActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
+                if (provider.isActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
                     if (userIsProviderAdmin(auth, provider.getId())) {
                         return true;
                     }
@@ -136,10 +137,10 @@ public class SecurityService {
 
     @Deprecated
     public boolean providerIsActive(String providerId) {
-        Provider provider = providerManager.get(providerId);
-        if (provider != null && provider.getActive() != null) {
-            if (!provider.getActive()) {
-                throw new ServiceException(String.format("Provider '%s' is not active.", provider.getName()));
+        ProviderBundle provider = providerManager.get(providerId);
+        if (provider != null && provider.isActive() != null) {
+            if (!provider.isActive()) {
+                throw new ServiceException(String.format("Provider '%s' is not active.", provider.getProvider().getName()));
             }
             return true;
         } else {
@@ -151,8 +152,8 @@ public class SecurityService {
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         for (String providerId : service.getService().getProviders()) {
-            Provider provider = providerManager.get(providerId);
-            if (provider != null && provider.getActive() != null && provider.getActive()) {
+            ProviderBundle provider = providerManager.get(providerId);
+            if (provider != null && provider.isActive() != null && provider.isActive()) {
                 if (userIsProviderAdmin(auth, providerId)) {
                     return true;
                 }
