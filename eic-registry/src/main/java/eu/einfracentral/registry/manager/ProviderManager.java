@@ -12,8 +12,6 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ServiceException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +65,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle provider, Authentication auth) {
 
-        createProviderId(provider.getProvider());
+        provider.setId(Provider.createId(provider.getProvider()));
         addAuthenticatedUser(provider.getProvider(), auth);
         validateProvider(provider);
 
@@ -410,19 +408,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     && !"no".equalsIgnoreCase(provider.getProvider().getNationalRoadmap())) {
                 throw new ValidationException("nationalRoadmap's value should be Yes or No");
             }
-        }
-    }
-
-    private void createProviderId(Provider provider) {
-        if (provider.getId() == null || "".equals(provider.getId())) {
-            provider.setId(provider.getAcronym());
-        }
-        provider.setId(StringUtils
-                .stripAccents(provider.getId())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_"));
-        if ("".equals(provider.getId())) {
-            throw new ServiceException("Provider id not valid. Special characters are ignored.");
         }
     }
 
