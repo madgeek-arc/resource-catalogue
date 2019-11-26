@@ -3,6 +3,7 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -12,7 +13,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 import static eu.einfracentral.utils.ValidationLengths.*;
 
