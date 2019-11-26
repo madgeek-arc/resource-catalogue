@@ -117,7 +117,7 @@ public class ServiceController {
         Service s = null;
         try { // check if service already exists
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(infraService.createServiceId(service));
+                service.setId(Service.createId(service));
             }
             s = this.infraService.get(service.getId()).getService();
         } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {

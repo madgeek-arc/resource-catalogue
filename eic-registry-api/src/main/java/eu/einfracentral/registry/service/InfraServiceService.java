@@ -66,13 +66,6 @@ public interface InfraServiceService<T, R> extends ServiceInterface<T, R, Authen
      */
     List<Service> createFeaturedServices();
 
-    /**
-     * Create service id.
-     *
-     * @param service
-     * @return
-     */
-    String createServiceId(Service service);
 //
 //    /**
 //     * Migrates Service's fields for Catris.
