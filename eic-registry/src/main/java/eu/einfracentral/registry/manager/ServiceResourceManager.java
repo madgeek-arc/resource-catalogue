@@ -160,7 +160,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         if (infraService.getService().getId() == null) {
-            infraService.getService().setId(createServiceId(infraService.getService()));
+            infraService.getService().setId(Service.createId(infraService.getService()));
         }
         // if service version is empty set it null
         if ("".equals(infraService.getService().getVersion())) {
@@ -476,16 +476,6 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
             richService.setProviderInfo(providerInfoList);
         }
         return richServices;
-    }
-
-    @Override
-    public String createServiceId(Service service) {
-        String provider = service.getProviders().get(0);
-        return String.format("%s.%s", provider, StringUtils
-                .stripAccents(service.getName())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
     }
 
     /**
