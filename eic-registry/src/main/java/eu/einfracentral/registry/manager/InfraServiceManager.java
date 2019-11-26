@@ -48,8 +48,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#authentication, #infraService)")
-    public InfraService addService(InfraService infraService, Authentication authentication) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #infraService)")
+    public InfraService addService(InfraService infraService, Authentication auth) {
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
             String id = createServiceId(infraService.getService());
             infraService.getService().setId(id);
@@ -60,23 +60,22 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         infraService.setLatest(true);
 
         if (infraService.getMetadata() == null) {
-            Metadata metadata = createServiceMetadata(new User(authentication).getFullName());
-            infraService.setMetadata(metadata);
+            infraService.setMetadata(Metadata.createMetadata(new User(auth).getFullName()));
         }
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
-        ret = super.add(infraService, authentication);
+        ret = super.add(infraService, auth);
 
-        providerManager.verifyNewProviders(infraService.getService().getProviders(), authentication);
+        providerManager.verifyNewProviders(infraService.getService().getProviders(), auth);
 
         return ret;
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or " +
-            "@securityService.providerCanAddServices(#authentication, #infraService)")
-    public InfraService updateService(InfraService infraService, Authentication authentication) {
+            "@securityService.providerCanAddServices(#auth, #infraService)")
+    public InfraService updateService(InfraService infraService, Authentication auth) {
         InfraService ret;
         validate(infraService);
         InfraService existingService;
@@ -94,15 +93,16 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
 
         // update existing service serviceMetadata
-        Metadata metadata = updateServiceMetadata(existingService.getMetadata(), new User(authentication).getFullName());
-        infraService.setMetadata(metadata);
+        infraService.setMetadata(
+                Metadata.updateMetadata(existingService.getMetadata(), new User(auth).getFullName()));
         infraService.setActive(existingService.isActive());
 
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
-                || infraService.getService().getVersion() != null && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
+                || infraService.getService().getVersion() != null
+                && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
-            ret = super.update(infraService, authentication);
+            ret = super.update(infraService, auth);
             logger.info("Updating Service without version change: {}", infraService);
             logger.info("Service Version: {}", infraService.getService().getVersion());
 
@@ -112,13 +112,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
             // set previous service not latest
             existingService.setLatest(false);
-            super.update(existingService, authentication);
+            super.update(existingService, auth);
             logger.info("Updating Service with version change (super.update): {}", existingService);
             logger.info("Service Version: {}", existingService.getService().getVersion());
 
             // set new service as latest
             infraService.setLatest(true);
-            ret = super.add(infraService, authentication);
+            ret = super.add(infraService, auth);
             logger.info("Updating Service with version change (super.add): {}", infraService);
         }
 
@@ -127,7 +127,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or " +
-            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
+            "@securityService.userIsServiceProviderAdmin(#auth, #infraService.id)")
     public void delete(InfraService infraService) {
         super.delete(infraService);
         logger.info("Deleting Service: {}", infraService);
@@ -177,8 +177,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
-                Metadata metadata = updateServiceMetadata(existingService.getMetadata(), "eInfraCentral");
-                infraService.setMetadata(metadata);
+                infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), "eInfraCentral"));
 
                 super.update(infraService, null);
                 logger.info("Updating Service through merging: {}", infraService);
@@ -255,26 +254,5 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //    private InfraService migrate(InfraService service) throws MalformedURLException {
 //        return service;
 //    }
-
-    private Metadata updateServiceMetadata(Metadata metadata, String modifiedBy) {
-        Metadata ret;
-        if (metadata != null) {
-            ret = new Metadata(metadata);
-            ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-            ret.setModifiedBy(modifiedBy);
-        } else {
-            ret = createServiceMetadata(modifiedBy);
-        }
-        return ret;
-    }
-
-    private Metadata createServiceMetadata(String registeredBy) {
-        Metadata ret = new Metadata();
-        ret.setRegisteredBy(registeredBy);
-        ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(registeredBy);
-        ret.setModifiedAt(ret.getRegisteredAt());
-        return ret;
-    }
 
 }

@@ -30,6 +30,27 @@ public class Metadata {
         this.modifiedAt = metadata.getModifiedAt();
     }
 
+    public static Metadata updateMetadata(Metadata metadata, String modifiedBy) {
+        Metadata ret;
+        if (metadata != null) {
+            ret = new Metadata(metadata);
+            ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            ret.setModifiedBy(modifiedBy);
+        } else {
+            ret = createMetadata(modifiedBy);
+        }
+        return ret;
+    }
+
+    public static Metadata createMetadata(String registeredBy) {
+        Metadata ret = new Metadata();
+        ret.setRegisteredBy(registeredBy);
+        ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
+        ret.setModifiedBy(registeredBy);
+        ret.setModifiedAt(ret.getRegisteredAt());
+        return ret;
+    }
+
     @Override
     public String toString() {
         return "Metadata{" +
