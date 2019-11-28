@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,4 +19,19 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public String getResourceType() {
         return "pending_provider";
     }
+
+    @Override
+    public ProviderBundle add(ProviderBundle provider, Authentication auth) {
+
+        provider.setId(Provider.createId(provider.getProvider()));
+
+        if (provider.getStatus() == null){
+            provider.setStatus(Provider.States.PENDING_1.getKey());
+        }
+
+        super.add(provider, auth);
+
+        return provider;
+    }
+
 }

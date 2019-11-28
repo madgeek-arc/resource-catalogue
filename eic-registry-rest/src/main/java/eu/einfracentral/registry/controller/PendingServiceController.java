@@ -3,10 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.ResourceService;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +21,13 @@ public class PendingServiceController extends ResourceController<InfraService, A
     PendingServiceController(ResourceService<InfraService, Authentication> pendingServiceManager) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
+    }
+
+    @PostMapping("/addService")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public Service addService (@RequestBody Service service, @ApiIgnore Authentication auth){
+        InfraService infraService = new InfraService(service);
+        return pendingServiceManager.add(infraService, auth).getService();
     }
 
 }
