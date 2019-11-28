@@ -15,7 +15,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("pendingService")
 public class PendingServiceController extends ResourceController<InfraService, Authentication> {
 
-    public final ResourceService<InfraService, Authentication> pendingServiceManager;
+    private final ResourceService<InfraService, Authentication> pendingServiceManager;
 
     @Autowired
     PendingServiceController(ResourceService<InfraService, Authentication> pendingServiceManager) {
