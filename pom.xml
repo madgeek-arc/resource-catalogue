@@ -39,7 +39,7 @@
         <logging.version>2.6.2</logging.version>
         <jackson.version.core>[2.9.9,)</jackson.version.core>
         <junit-toolbox.version>2.2</junit-toolbox.version>
-        <registry-core.version>2.1.3-SNAPSHOT</registry-core.version>
+        <registry-core.version>2.1.4-SNAPSHOT</registry-core.version>
         <jjwt.version>0.7.0</jjwt.version>
         <springfox.version>2.7.0</springfox.version>
         <javax.mail-version>1.4.3</javax.mail-version>
