@@ -11,18 +11,25 @@ import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.search.SearchRequestBuilder;
+import eu.openminted.registry.core.service.ServiceException;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.PipelineAggregatorBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders;
 import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,6 +37,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,23 +94,32 @@ public class StatisticsManager implements StatisticsService {
                 dateHistogramInterval = DateHistogramInterval.MONTH;
         }
 
-        List<InternalDateHistogram.Bucket> bucketsDay = ((InternalDateHistogram) (elastic
-                .client()
-                .prepareSearch("event")
-                .setTypes("general")
-                .setQuery(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()))
-                .addAggregation(AggregationBuilders.dateHistogram(aggregationName)
-                        .field("instant")
-                        .dateHistogramInterval(dateHistogramInterval)
-                        .format(dateFormat)
-                        .subAggregation(AggregationBuilders.sum("rating").field("value"))
-                        .subAggregation(AggregationBuilders.count("rating_count").field("value"))
-                        .subAggregation(PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating"))
-                        .subAggregation(PipelineAggregatorBuilders.cumulativeSum("ratings_num", "rating_count"))
-                ).execute()
-                .actionGet()
+        DateHistogramAggregationBuilder dateHistogramAggregationBuilder = AggregationBuilders.dateHistogram(aggregationName)
+                .field("instant")
+                .calendarInterval(dateHistogramInterval)
+                .format(dateFormat)
+                .subAggregation(AggregationBuilders.sum("rating").field("value"))
+                .subAggregation(AggregationBuilders.count("rating_count").field("value"))
+                .subAggregation(PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating"))
+                .subAggregation(PipelineAggregatorBuilders.cumulativeSum("ratings_num", "rating_count"));
+
+        SearchRequest search = new SearchRequest("event");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        search.searchType(SearchType.DFS_QUERY_THEN_FETCH);
+        searchSourceBuilder.query(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()));
+        searchSourceBuilder.aggregation(dateHistogramAggregationBuilder);
+        search.source(searchSourceBuilder);
+
+        SearchResponse response = null;
+        try {
+            response = elastic.client().search(search, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+
+        List<? extends Histogram.Bucket> bucketsDay = ((ParsedDateHistogram) response
                 .getAggregations()
-                .get(aggregationName)))
+                .get(aggregationName))
                 .getBuckets();
 
         Map<String, Float> bucketMap = bucketsDay.stream().collect(Collectors.toMap(
@@ -116,7 +133,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> favourites(String id, Interval by) {
         final long[] totalDocCounts = new long[2]; //0 - false documents, ie unfavourites, 1 - true documents, ie favourites
-        List<InternalDateHistogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey(), by).getBuckets();
+        List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.FAVOURITE.getKey(), by).getBuckets();
         return new TreeMap<>(buckets.stream().collect(
                 Collectors.toMap(
                         MultiBucketsAggregation.Bucket::getKeyAsString,
@@ -130,14 +147,14 @@ public class StatisticsManager implements StatisticsService {
                                         subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
                                 ).sum();
                             }
-//                            logger.warn("Favs: {} - Unfavs: {}", totalDocCounts[1], totalDocCounts[0]);
+//                            logger.warn(String.format("Favs: %s - Unfavs: %s", totalDocCounts[1], totalDocCounts[0]));
                             return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
                         }
                 )
         ));
     }
 
-    private InternalDateHistogram histogram(String id, String eventType, Interval by) {
+    private ParsedDateHistogram histogram(String id, String eventType, Interval by) {
 
         String dateFormat;
         String aggregationName;
@@ -165,23 +182,28 @@ public class StatisticsManager implements StatisticsService {
                 dateHistogramInterval = DateHistogramInterval.MONTH;
         }
 
-        SearchRequestBuilder searchRequestBuilder = elastic
-                .client()
-                .prepareSearch("event")
-                .setTypes("general")
-                .setQuery(getEventQueryBuilder(id, eventType))
-                .addAggregation(AggregationBuilders
-                        .dateHistogram(aggregationName)
-                        .field("instant")
-                        .dateHistogramInterval(dateHistogramInterval)
-                        .format(dateFormat)
-                        .subAggregation(AggregationBuilders.terms("value").field("value"))
-                );
-        searchRequestBuilder.setExplain(true);
-        logger.debug(searchRequestBuilder.toString());
+        DateHistogramAggregationBuilder dateHistogramAggregationBuilder = AggregationBuilders
+                .dateHistogram(aggregationName)
+                .field("instant")
+                .calendarInterval(dateHistogramInterval)
+                .format(dateFormat)
+                .subAggregation(AggregationBuilders.terms("value").field("value"));
 
-        return searchRequestBuilder.execute()
-                .actionGet()
+        SearchRequest search = new SearchRequest("event");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        search.searchType(SearchType.DEFAULT);
+        searchSourceBuilder.query(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()));
+        searchSourceBuilder.aggregation(dateHistogramAggregationBuilder);
+        search.source(searchSourceBuilder);
+
+        SearchResponse response = null;
+        try {
+            response = elastic.client().search(search, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+
+        return response
                 .getAggregations()
                 .get(aggregationName);
     }
@@ -189,11 +211,10 @@ public class StatisticsManager implements StatisticsService {
     private QueryBuilder getEventQueryBuilder(String serviceId, String eventType) {
         Date date = new Date();
         Calendar c = Calendar.getInstance();
-        c.setTime(date);
-        c.roll(Calendar.ERA, false);
+        c.setTimeInMillis(0);
         return QueryBuilders.boolQuery()
                 .filter(QueryBuilders.termsQuery("service", serviceId))
-                .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(new Date().getTime()))
+                .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(date.getTime()))
                 .filter(QueryBuilders.termsQuery("type", eventType));
     }
 
