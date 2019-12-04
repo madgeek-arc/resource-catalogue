@@ -15,23 +15,15 @@ import static eu.einfracentral.utils.ValidationLengths.TEXT_LENGTH;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class ServiceOption implements Identifiable {
-
+public class ServiceOption {
 
     // Option Basic Information
-    /**
-     * Identifier of the service option.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 1, example = "(required on PUT only)", required = true)
-    @FieldValidation
-    private String id;
 
     /**
      * Name of the service option.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "String (required)", required = true)
+    @ApiModelProperty(position = 1, example = "String (required)", required = true)
     @FieldValidation(maxLength = NAME_LENGTH)
     private String name;
 
@@ -39,7 +31,7 @@ public class ServiceOption implements Identifiable {
      * Webpage with information about the service option.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 2, example = "URL (required)", required = true)
     @FieldValidation
     private URL url;
 
@@ -47,7 +39,7 @@ public class ServiceOption implements Identifiable {
      * The description of the service option.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "String (required)", required = true)
+    @ApiModelProperty(position = 3, example = "String (required)", required = true)
     @FieldValidation(maxLength = TEXT_LENGTH)
     private String description;
 
@@ -55,7 +47,7 @@ public class ServiceOption implements Identifiable {
      * Link to the logo/visual identity of the service provider.
      */
     @XmlElement
-    @ApiModelProperty(position = 5, example = "URL (optional)")
+    @ApiModelProperty(position = 4, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL logo;
 
@@ -66,7 +58,7 @@ public class ServiceOption implements Identifiable {
      */
     @XmlElementWrapper(name = "contacts", required = true)
     @XmlElement(name = "contact")
-    @ApiModelProperty(position = 6, required = true)
+    @ApiModelProperty(position = 5, required = true)
     @FieldValidation
     private List<Contact> contacts;
 
@@ -77,7 +69,7 @@ public class ServiceOption implements Identifiable {
      */
     @XmlElementWrapper(name = "attributes")
     @XmlElement(name = "attribute")
-    @ApiModelProperty(position = 7, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 6, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> attributes;
 
@@ -88,7 +80,6 @@ public class ServiceOption implements Identifiable {
     @Override
     public String toString() {
         return "ServiceOption{" +
-                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", url=" + url +
                 ", description='" + description + '\'' +
@@ -96,16 +87,6 @@ public class ServiceOption implements Identifiable {
                 ", contacts=" + contacts +
                 ", attributes=" + attributes +
                 '}';
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {

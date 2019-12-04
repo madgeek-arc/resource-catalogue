@@ -4,7 +4,9 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.registry.service.PendingServiceService;
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.ResourceType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service("pendingServiceManager")
-public class PendingServiceManager extends ResourceManager<InfraService> implements ResourceService<InfraService, Authentication> {
+public class PendingServiceManager extends ResourceManager<InfraService> implements PendingServiceService {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceManager.class);
 
@@ -45,31 +47,20 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         return service;
     }
 
-//    public InfraService update(InfraService service, Authentication auth) {
-//        Resource existing;
-//        try {
-//            existing = infraServiceService.getResource(service.getService().getId(), service.getService().getVersion());
-//            if (existing == null) {
-//                logger.warn("Could not find Service with id '{}' and version '{}'. Attempting search without version",
-//                        service.getService().getId(), service.getService().getVersion());
-//                existing = infraServiceService.getResource(service.getService().getId(), null);
-//                if (existing == null) {
-//                    throw new ResourceNotFoundException("Could not find service with id: " + service.getId());
-//                }
-//            }
-//
-//            existing.setPayload(serialize(service));
-//            existing.setResourceTypeName(resourceType.getName());
-//            existing.setResourceType(null);
-//            resourceService.updateResource(existing);
-//            logger.debug("Moving Service to Pending Service: {}", service);
-//
-//        } catch (RuntimeException e) {
-//            logger.error("Could not change resource type to service: {}", service, e);
-//            return service;
-//        }
-//
-//        return service;
-//    }
+    @Override
+    public void transformToPendingService(String serviceId){
+        InfraService service = infraServiceService.get(serviceId);
+        Resource resource = infraServiceService.getResource(service.getService().getId(), service.getService().getVersion());
+        resourceService.changeResourceType(resource, resourceType);
+    }
+
+    @Override
+    public void transformToInfraService(String serviceId){
+        infraServiceService.validate(get(serviceId));
+        ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
+        Resource resource = getResource(serviceId);
+        resource.setResourceType(resourceType);
+        resourceService.changeResourceType(resource, infraResourceType);
+    }
 
 }
