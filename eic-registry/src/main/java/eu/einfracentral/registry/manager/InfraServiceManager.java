@@ -19,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
@@ -196,14 +195,6 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         //just check if validateVocabularies did anything or not
         logger.debug("Validating Service with id: {}", service.getId());
-
-        if (service.getOptions() != null) {
-            for (ServiceOption option : service.getOptions()) {
-
-                // Create Option's id
-                option.setId(UUID.randomUUID().toString());
-            }
-        }
 
         try {
             fieldValidator.validateFields(infraService.getService());
