@@ -40,11 +40,11 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.payload.setId(id);
     }
 
-    public T getPayload() {
+    T getPayload() {
         return payload;
     }
 
-    public void setPayload(T payload) {
+    void setPayload(T payload) {
         this.payload = payload;
     }
 
