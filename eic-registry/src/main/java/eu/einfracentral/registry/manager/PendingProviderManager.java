@@ -2,7 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.service.PendingProviderService;
+import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service("pendingProviderManager")
-public class PendingProviderManager extends ResourceManager<ProviderBundle> implements PendingProviderService {
+public class PendingProviderManager extends ResourceManager<ProviderBundle> implements PendingResourceService<ProviderBundle> {
 
     private final ProviderService<ProviderBundle, Authentication> providerManager;
 
@@ -31,7 +31,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
         provider.setId(Provider.createId(provider.getProvider()));
 
-        if (provider.getStatus() == null){
+        if (provider.getStatus() == null) {
             provider.setStatus(Provider.States.PENDING_1.getKey());
         }
 
@@ -41,19 +41,18 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     }
 
     @Override
-    public void transformToPendingProvider(String providerId){
+    public void transformToPending(String providerId) {
         Resource resource = providerManager.getResource(providerId);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
     }
 
     @Override
-    public void transformToActiveProvider(String providerId){
+    public void transformToActive(String providerId) {
         providerManager.validate(get(providerId));
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
     }
-
 }

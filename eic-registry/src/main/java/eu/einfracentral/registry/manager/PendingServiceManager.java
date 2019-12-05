@@ -4,7 +4,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.PendingServiceService;
+import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service("pendingServiceManager")
-public class PendingServiceManager extends ResourceManager<InfraService> implements PendingServiceService {
+public class PendingServiceManager extends ResourceManager<InfraService> implements PendingResourceService<InfraService> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceManager.class);
 
@@ -48,7 +48,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    public void transformToPendingService(String serviceId){
+    public void transformToPending(String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         Resource resource = infraServiceService.getResource(service.getService().getId(), service.getService().getVersion());
         resource.setResourceTypeName("infra_service");
@@ -56,12 +56,11 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    public void transformToInfraService(String serviceId){
+    public void transformToActive(String serviceId) {
         infraServiceService.validate(get(serviceId));
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = getResource(serviceId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
     }
-
 }

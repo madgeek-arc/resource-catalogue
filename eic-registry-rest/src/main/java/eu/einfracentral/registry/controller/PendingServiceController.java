@@ -2,7 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.registry.service.PendingServiceService;
+import eu.einfracentral.registry.service.PendingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -12,31 +12,31 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("pendingService")
 public class PendingServiceController extends ResourceController<InfraService, Authentication> {
 
-    private final PendingServiceService pendingServiceManager;
+    private final PendingResourceService<InfraService> pendingServiceManager;
 
     @Autowired
-    PendingServiceController(PendingServiceService pendingServiceManager) {
+    PendingServiceController(PendingResourceService<InfraService> pendingServiceManager) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
     }
 
     @PostMapping("/addService")
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Service addService (@RequestBody Service service, @ApiIgnore Authentication auth){
+    public Service addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
         return pendingServiceManager.add(infraService, auth).getService();
     }
 
     @PostMapping("/transformToPending")
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformServiceToPending (@RequestParam String serviceId){
-        pendingServiceManager.transformToPendingService(serviceId);
+    public void transformServiceToPending(@RequestParam String serviceId) {
+        pendingServiceManager.transformToPending(serviceId);
     }
 
     @PostMapping("/transformToInfra")
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformServiceToInfra (@RequestParam String serviceId){
-        pendingServiceManager.transformToInfraService(serviceId);
+    public void transformServiceToInfra(@RequestParam String serviceId) {
+        pendingServiceManager.transformToActive(serviceId);
     }
 
 }
