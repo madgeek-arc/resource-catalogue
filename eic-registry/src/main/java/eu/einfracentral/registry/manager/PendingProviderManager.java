@@ -2,17 +2,23 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.registry.service.PendingProviderService;
+import eu.einfracentral.registry.service.ProviderService;
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service("pendingProviderManager")
-public class PendingProviderManager extends ResourceManager<ProviderBundle> implements ResourceService<ProviderBundle, Authentication> {
+public class PendingProviderManager extends ResourceManager<ProviderBundle> implements PendingProviderService {
+
+    private final ProviderService<ProviderBundle, Authentication> providerManager;
 
     @Autowired
-    public PendingProviderManager() {
+    public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager) {
         super(ProviderBundle.class);
+        this.providerManager = providerManager;
     }
 
     @Override
@@ -32,6 +38,22 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         super.add(provider, auth);
 
         return provider;
+    }
+
+    @Override
+    public void transformToPendingProvider(String providerId){
+        Resource resource = providerManager.getResource(providerId);
+        resource.setResourceTypeName("provider"); //make sure that resource type is present
+        resourceService.changeResourceType(resource, resourceType);
+    }
+
+    @Override
+    public void transformToActiveProvider(String providerId){
+        providerManager.validate(get(providerId));
+        ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
+        Resource resource = getResource(providerId);
+        resource.setResourceType(resourceType);
+        resourceService.changeResourceType(resource, providerResourceType);
     }
 
 }

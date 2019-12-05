@@ -51,6 +51,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public void transformToPendingService(String serviceId){
         InfraService service = infraServiceService.get(serviceId);
         Resource resource = infraServiceService.getResource(service.getService().getId(), service.getService().getVersion());
+        resource.setResourceTypeName("infra_service");
         resourceService.changeResourceType(resource, resourceType);
     }
 
