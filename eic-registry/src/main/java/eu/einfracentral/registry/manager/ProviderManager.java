@@ -67,7 +67,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider.setId(Provider.createId(provider.getProvider()));
         addAuthenticatedUser(provider.getProvider(), auth);
-        validateProvider(provider);
+        validate(provider);
 
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
@@ -92,7 +92,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
-        validateProvider(provider);
+        validate(provider);
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());
@@ -393,7 +393,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public void validateProvider(ProviderBundle provider) {
+    @Override
+    public ProviderBundle validate(ProviderBundle provider) {
         logger.debug("Validating Provider with id: {}", provider.getId());
 
         try {
@@ -409,6 +410,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 throw new ValidationException("nationalRoadmap's value should be Yes or No");
             }
         }
+        return provider;
     }
 
     private void addAuthenticatedUser(Provider provider, Authentication auth) {
