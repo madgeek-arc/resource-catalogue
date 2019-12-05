@@ -23,7 +23,7 @@ import java.util.Random;
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
 @org.springframework.stereotype.Service("infraServiceService")
-public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
+public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 

@@ -36,12 +36,11 @@ import java.util.stream.Collectors;
 import static eu.einfracentral.config.CacheConfig.*;
 import static java.util.stream.Collectors.toList;
 
-public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService>,
-        ServiceInterface<InfraService, InfraService, Authentication> {
+public abstract class AbstractServiceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
 
-    private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
+    private static final Logger logger = LogManager.getLogger(AbstractServiceManager.class);
 
-    public ServiceResourceManager(Class<InfraService> typeParameterClass) {
+    public AbstractServiceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
     }
 
