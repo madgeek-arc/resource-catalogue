@@ -13,6 +13,7 @@ import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     private static final Logger logger = LogManager.getLogger(ResourceManager.class);
 
+    @Lazy
     @Autowired
     private FieldValidator fieldValidator;
 
