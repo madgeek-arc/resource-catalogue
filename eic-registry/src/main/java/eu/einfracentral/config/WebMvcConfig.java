@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.*;
         "eu.einfracentral.controllers",
         "eu.einfracentral.registry.controller"})
 @EnableWebMvc
-public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
+public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
