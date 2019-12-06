@@ -241,7 +241,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
-//            return null; // TODO: enable this when front end can handle 401 properly
             return new ArrayList<>();
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             FacetFilter ff = new FacetFilter();
@@ -272,7 +271,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public List<ProviderBundle> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
-//            return null; // TODO: enable this when front end can handle 401 properly
             return new ArrayList<>();
         }
         FacetFilter ff = new FacetFilter();
