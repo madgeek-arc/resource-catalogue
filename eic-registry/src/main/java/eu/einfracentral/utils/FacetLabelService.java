@@ -36,8 +36,9 @@ public class FacetLabelService {
                 .collect(Collectors.joining(newDelimiter));
     }
 
+    @SuppressWarnings("unchecked")
     public List<Facet> createLabels(List<Facet> facets) {
-        List<Facet> enrichedFacets = new TreeList();
+        List<Facet> enrichedFacets = new TreeList(); // unchecked warning here
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         Map<String, String> providerNames = providerService.getAll(ff, null)

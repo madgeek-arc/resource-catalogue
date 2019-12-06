@@ -11,12 +11,6 @@ public interface
 ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
 
     /**
-     * @param t
-     * @return
-     */
-    T del(T t);
-
-    /**
      * @param field
      * @return
      */

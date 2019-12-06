@@ -59,11 +59,11 @@ public class ResourceController<T extends Identifiable, U extends Authentication
     }
 
     @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore U auth) {
-        ResponseEntity<T> ret = new ResponseEntity<>(service.del(t), HttpStatus.OK);
+    public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore U auth) throws ResourceNotFoundException {
+        service.delete(t);
         logger.debug("User {} deleted {} with id {}", (auth == null) ? "unknown" : auth.getName(),
                 t.getClass().getSimpleName(), t.getId());
-        return ret;
+        return new ResponseEntity<>(t, HttpStatus.OK);
     }
 
     @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})

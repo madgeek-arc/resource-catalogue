@@ -84,15 +84,16 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public void delete(T t) {
-        del(t);
-    }
-
-    @Override
-    public T del(T t) {
         resourceService.deleteResource(whereID(t.getId(), true).getId());
         logger.debug("Deleting Resource {}", t);
-        return t;
     }
+
+//    @Override
+//    public T del(T t) {
+//        resourceService.deleteResource(whereID(t.getId(), true).getId());
+//        logger.debug("Deleting Resource {}", t);
+//        return t;
+//    }
 
     @Override
     public Map<String, List<T>> getBy(String field) {
@@ -119,7 +120,9 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(10000);
         logger.info("Deleting all Resources");
-        return getAll(facetFilter, null).getResults().stream().map(this::del).collect(Collectors.toList());
+        List<T> results = getAll(facetFilter, null).getResults();
+        results.forEach(this::delete);
+        return results;
     }
 
     @Override
