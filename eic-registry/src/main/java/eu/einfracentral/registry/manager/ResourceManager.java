@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -11,6 +12,7 @@ import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -25,6 +27,9 @@ import java.util.stream.Stream;
 public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ResourceManager.class);
+
+    @Autowired
+    private FieldValidator fieldValidator;
 
     public ResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
@@ -117,7 +122,12 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T validate(T t) {
-        logger.debug("Validating Resource {}", t);
+        logger.debug("Validating Resource using FieldValidator");
+        try {
+            fieldValidator.validateFields(t);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
         return t;
     }
 

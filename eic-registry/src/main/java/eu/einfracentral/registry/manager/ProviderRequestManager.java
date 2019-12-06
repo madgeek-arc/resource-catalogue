@@ -3,7 +3,6 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ProviderRequestService;
-import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,12 +18,10 @@ import java.util.UUID;
 public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<ProviderRequest, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
-    private FieldValidator fieldValidator;
 
     @Autowired
-    public ProviderRequestManager(FieldValidator fieldValidator) {
+    public ProviderRequestManager() {
         super(ProviderRequest.class);
-        this.fieldValidator = fieldValidator;
     }
 
     @Override
@@ -73,15 +70,11 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         return ret;
     }
 
+    @Override
     public ProviderRequest validate(ProviderRequest providerRequest) {
-
-        try {
-            fieldValidator.validateFields(providerRequest);
-        } catch (IllegalAccessException e) {
-            logger.error("Validation error:", e);
-        }
-
-        return null;
+        logger.debug("Validating ProviderRequest: {}", providerRequest);
+        super.validate(providerRequest);
+        return providerRequest;
     }
 
 }

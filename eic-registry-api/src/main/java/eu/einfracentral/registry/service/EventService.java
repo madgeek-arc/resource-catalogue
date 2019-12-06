@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
+import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -15,7 +17,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param authentication
      * @return
      */
-    Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws Exception;
+    Event setFavourite(String serviceId, boolean value, Authentication authentication) throws ResourceNotFoundException;
 
     /**
      * Set a rating on a service from the given user.
@@ -25,7 +27,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param value
      * @return
      */
-    Event setRating(String serviceId, String value, Authentication authentication) throws Exception;
+    Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
 
     /**
      * Get all events of a specific type.

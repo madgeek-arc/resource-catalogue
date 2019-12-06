@@ -28,7 +28,6 @@ import static eu.einfracentral.config.CacheConfig.CACHE_EVENTS;
 import static eu.einfracentral.config.CacheConfig.CACHE_SERVICE_EVENTS;
 
 @Component
-@SuppressWarnings("unchecked")
 public class EventManager extends ResourceManager<Event> implements EventService {
 
     private static final Logger logger = LogManager.getLogger(EventManager.class);
@@ -36,7 +35,8 @@ public class EventManager extends ResourceManager<Event> implements EventService
     private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    public EventManager(ParserService parserService, @Lazy InfraServiceService<InfraService, InfraService> infraServiceService) {
+    public EventManager(ParserService parserService,
+                        @Lazy InfraServiceService<InfraService, InfraService> infraServiceService) {
         super(Event.class);
         this.parserService = parserService;
         this.infraServiceService = infraServiceService;
@@ -78,7 +78,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setFavourite(String serviceId, Boolean value, Authentication authentication) throws ResourceNotFoundException {
+    public Event setFavourite(String serviceId, boolean value, Authentication authentication) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
@@ -183,7 +183,6 @@ public class EventManager extends ResourceManager<Event> implements EventService
         sort.put("instant", order);
         ff.setOrderBy(sort);
         List<Event> events = getAll(ff, authentication).getResults();
-        List<String> userList = events.stream().map(Event::getUser).distinct().collect(Collectors.toList());
         List<String> serviceList = events.stream().map(Event::getService).distinct().collect(Collectors.toList());
 
         // for each service
