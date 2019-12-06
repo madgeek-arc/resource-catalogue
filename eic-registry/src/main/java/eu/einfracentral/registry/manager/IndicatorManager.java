@@ -4,7 +4,6 @@ import eu.einfracentral.domain.Indicator;
 import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.IndicatorService;
-import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
@@ -22,13 +21,11 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
     private static final Logger logger = LogManager.getLogger(IndicatorManager.class);
     private MeasurementManager measurementManager;
-    private FieldValidator fieldValidator;
 
     @Autowired
-    public IndicatorManager(@Lazy MeasurementManager measurementManager, @Lazy FieldValidator fieldValidator) {
+    public IndicatorManager(@Lazy MeasurementManager measurementManager) {
         super(Indicator.class);
         this.measurementManager = measurementManager;
-        this.fieldValidator = fieldValidator;
     }
 
     @Override
@@ -39,7 +36,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
     @Override
     public Indicator add(Indicator indicator, Authentication auth) {
-        validateIndicator(indicator);
+        validate(indicator);
         super.add(indicator, auth);
         logger.info("Adding Indicator: {}", indicator);
         return indicator;
@@ -47,7 +44,7 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
     @Override
     public Indicator update(Indicator indicator, Authentication auth) {
-        validateIndicator(indicator);
+        validate(indicator);
         super.update(indicator, auth);
         logger.info("Updating Indicator: {}", indicator);
         return indicator;
@@ -70,14 +67,11 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
         super.delete(indicator);
     }
 
-    public void validateIndicator(Indicator indicator) {
-        logger.debug("Validating Indicator with id: {}", indicator.getId());
+    @Override
+    public Indicator validate(Indicator indicator) {
+        logger.debug("Validating Indicator: {}", indicator);
 
-        try {
-            fieldValidator.validateFields(indicator);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
-        }
+        super.validate(indicator);
 
         List<String> validatedDimensions = new ArrayList<>();
         for (String dimension : indicator.getDimensions()) {
@@ -117,6 +111,8 @@ public class IndicatorManager extends ResourceManager<Indicator> implements Indi
 
         // throws exception if value does not exist
         Indicator.UnitType.fromString(indicator.getUnit());
+
+        return indicator;
     }
 
     boolean hasTime(Indicator indicator) {
