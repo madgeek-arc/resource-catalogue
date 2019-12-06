@@ -20,6 +20,12 @@ public class Metadata {
     @XmlElement(defaultValue = "null")
     private String modifiedAt;
 
+    @XmlElement(defaultValue = "null")
+    private String source;
+
+    @XmlElement(defaultValue = "null")
+    private String originalId;
+
     public Metadata() {
     }
 
@@ -28,6 +34,8 @@ public class Metadata {
         this.modifiedBy = metadata.getModifiedBy();
         this.registeredAt = metadata.getRegisteredAt();
         this.modifiedAt = metadata.getModifiedAt();
+        this.source = metadata.getSource();
+        this.originalId = metadata.getOriginalId();
     }
 
     public static Metadata updateMetadata(Metadata metadata, String modifiedBy) {
@@ -51,6 +59,17 @@ public class Metadata {
         return ret;
     }
 
+    public static Metadata createMetadata(String registeredBy, String originalId, String source) {
+        Metadata metadata = new Metadata();
+        metadata.setRegisteredBy(registeredBy);
+        metadata.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
+        metadata.setModifiedBy(registeredBy);
+        metadata.setModifiedAt(metadata.getRegisteredAt());
+        metadata.setOriginalId(originalId);
+        metadata.setSource(source);
+        return metadata;
+    }
+
     @Override
     public String toString() {
         return "Metadata{" +
@@ -58,6 +77,8 @@ public class Metadata {
                 ", registeredAt='" + registeredAt + '\'' +
                 ", modifiedBy='" + modifiedBy + '\'' +
                 ", modifiedAt='" + modifiedAt + '\'' +
+                ", source='" + source + '\'' +
+                ", originalId='" + originalId + '\'' +
                 '}';
     }
 
@@ -91,5 +112,21 @@ public class Metadata {
 
     public void setModifiedAt(String modifiedAt) {
         this.modifiedAt = modifiedAt;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getOriginalId() {
+        return originalId;
+    }
+
+    public void setOriginalId(String originalId) {
+        this.originalId = originalId;
     }
 }
