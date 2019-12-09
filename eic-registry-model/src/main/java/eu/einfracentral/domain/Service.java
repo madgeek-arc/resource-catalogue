@@ -51,7 +51,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, example = "String (required)", required = true)
-    @FieldValidation(maxLength = TEXT_LENGTH)
+    @FieldValidation
     private String description;
 
     /**
