@@ -58,7 +58,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, example = "String (required)", required = true)
-    @FieldValidation(maxLength = TEXT_LENGTH)
+    @FieldValidation
     private String description;
 
     /**
