@@ -33,7 +33,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
-    @FieldValidation(maxLength = NAME_LENGTH)
+    @FieldValidation
     private String name;
 
     /**
@@ -41,7 +41,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String acronym;
 
     /**
@@ -57,7 +57,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, example = "String (required)", required = true)
-    @FieldValidation(maxLength = TEXT_LENGTH)
+    @FieldValidation
     private String description;
 
     /**
@@ -113,7 +113,7 @@ public class Provider implements Identifiable {
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
     @ApiModelProperty(position = 11, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation(nullable = true)
     private List<String> tags;
 
 
@@ -172,7 +172,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 17, example = "String (optional)")
-    @FieldValidation(nullable = true, maxLength = NAME_LENGTH)
+    @FieldValidation(nullable = true)
     private String hostingLegalEntity;
 
     /**
