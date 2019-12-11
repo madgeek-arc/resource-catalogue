@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import static eu.einfracentral.utils.ValidationLengths.FIELD_LENGTH_SMALL;
-
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ProviderLocation {
@@ -20,7 +18,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String name;
 
     /**
@@ -28,7 +26,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String street;
 
     /**
@@ -36,7 +34,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String number;
 
     /**
@@ -44,7 +42,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String postalCode;
 
     /**
@@ -52,7 +50,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String city;
 
     /**
@@ -60,7 +58,7 @@ public class ProviderLocation {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 6, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String region;
 
     public ProviderLocation() {
