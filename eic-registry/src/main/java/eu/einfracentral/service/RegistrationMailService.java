@@ -132,6 +132,8 @@ public class RegistrationMailService {
 
         root.put("provider", provider);
         root.put("endpoint", endpoint);
+        root.put("project", projectName);
+        root.put("registrationEmail", registrationEmail);
         // get the first user's information for the registration team email
         root.put("user", provider.getProvider().getUsers().get(0));
 
@@ -153,6 +155,7 @@ public class RegistrationMailService {
                 root.remove("user");
                 out.getBuffer().setLength(0);
                 root.put("user", user);
+                root.put("project", projectName);
                 temp.process(root, out);
                 providerMail = out.getBuffer().toString();
                 if (!debug) {

@@ -1,7 +1,7 @@
 Dear Registration Team,
 
 <#if provider.status == "pending initial approval">
-A new application by [${user.name}] – [${user.email}] has been received for registering [${provider.payload.id}] – [${provider.payload.name}] as a new service provider in eInfraCentral.
+A new application by [${user.name}] – [${user.email}] has been received for registering [${provider.payload.id}] – [${provider.payload.name}] as a new service provider in ${project}.
 You can review the application at ${endpoint}/serviceProvidersList and approve or reject it.
 </#if>
 <#if provider.status == "pending service template submission">
@@ -31,4 +31,4 @@ You can view the application status here ${endpoint}/serviceProvidersList.
 </#if>
 
 Best Regards,
-the eInfraCentral Team
+the ${project} Team
