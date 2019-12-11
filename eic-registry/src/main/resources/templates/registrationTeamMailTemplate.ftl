@@ -1,7 +1,7 @@
 Dear Registration Team,
 
 <#if provider.status == "pending initial approval">
-A new application by [${user.name}] – [${user.email}] has been received for registering [${provider.id}] – [${provider.name}] as a new service provider in eInfraCentral.
+A new application by [${user.name}] – [${user.email}] has been received for registering [${provider.id}] – [${provider.name}] as a new service provider in CatRIS.
 You can review the application at ${endpoint}/serviceProvidersList and approve or reject it.
 </#if>
 <#if provider.status == "pending service template submission">
@@ -30,7 +30,7 @@ The application by [${user.name}] [${user.surname}] – [${user.email}] for regi
 You can view the application status here ${endpoint}/serviceProvidersList.
 </#if>
 <#--<#if provider.status == "provider template registration">-->
-<#--A new application by [${user.name}] – [${user.email}] has been received for registering [${provider.id}] – [${provider.name}] as a new service provider in eInfraCentral.-->
+<#--A new application by [${user.name}] – [${user.email}] has been received for registering [${provider.id}] – [${provider.name}] as a new service provider in CatRIS.-->
 <#--You can review the application at ${endpoint}/serviceProvidersList and approve or reject it.-->
 <#--</#if>-->
 <#--<#if provider.status == "provider template approved">-->
@@ -55,4 +55,4 @@ You can view the application status here ${endpoint}/serviceProvidersList.
 <#--</#if>-->
     
 Best Regards,
-the eInfraCentral Team
+the CatRIS Team
