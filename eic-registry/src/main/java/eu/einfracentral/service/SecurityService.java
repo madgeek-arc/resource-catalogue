@@ -14,6 +14,7 @@ import eu.openminted.registry.core.service.ServiceException;
 import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,6 +33,9 @@ public class SecurityService {
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private OIDCAuthenticationToken adminAccess;
 
+    @Value("${project.name:}")
+    private String projectName;
+
     @Autowired
     SecurityService(ProviderManager providerManager, InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.providerManager = providerManager;
@@ -43,7 +47,7 @@ public class SecurityService {
         DefaultUserInfo userInfo = new DefaultUserInfo();
         userInfo.setEmail("no-reply@einfracentral.eu");
         userInfo.setId(1L);
-        userInfo.setGivenName("eInfraCentral");
+        userInfo.setGivenName(projectName);
         userInfo.setFamilyName("");
         adminAccess = new OIDCAuthenticationToken("", "", userInfo, roles, null, "", "");
     }

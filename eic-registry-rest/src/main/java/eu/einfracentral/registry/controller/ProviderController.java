@@ -84,7 +84,7 @@ public class ProviderController {
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the eInfraCentral Catalogue.")
+    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -111,7 +111,7 @@ public class ProviderController {
         return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
 
-    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the eInfraCentral Catalogue.")
+    // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),

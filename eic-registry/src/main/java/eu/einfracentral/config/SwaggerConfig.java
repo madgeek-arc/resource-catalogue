@@ -36,6 +36,9 @@ public class SwaggerConfig {
     @Value("${platform.root:}")
     String platform;
 
+    @Value("${project.name:}")
+    String projectName;
+
     @Value("${project.debug:false}")
     public Boolean isLocalhost;
 
@@ -79,8 +82,8 @@ public class SwaggerConfig {
 
     private ApiInfo getApiInfo() {
         return new ApiInfoBuilder()
-                .title("eInfraCentral")
-                .description("External APIs for the eInfraCentral registry")
+                .title(projectName)
+                .description("External APIs for the " + projectName + " registry")
                 .version(getVersion())
                 .termsOfServiceUrl(String.format("%s/tos", platform))
 //                .license("NAME")
