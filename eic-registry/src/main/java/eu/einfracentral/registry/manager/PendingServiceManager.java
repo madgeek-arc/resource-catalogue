@@ -48,6 +48,13 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
+    public InfraService update (InfraService service, Authentication auth){
+        service.setMetadata(Metadata.updateMetadata(service.getMetadata(), new User(auth).getFullName()));
+        super.update(service, auth);
+        return service;
+    }
+
+    @Override
     public void transformToPending(String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         Resource resource = infraServiceService.getResource(service.getService().getId(), service.getService().getVersion());
