@@ -111,6 +111,33 @@ public class ProviderController {
         return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
 
+    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the eInfraCentral Catalogue.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @RequestMapping(path = "bundle/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            ff.setOrderBy(sort);
+        }
+        ff.setFilter(allRequestParams);
+        return ResponseEntity.ok(providerManager.getAll(ff, auth));
+    }
+
     @ApiOperation(value = "Get a list of services offered by a Provider.")
     @RequestMapping(path = "services/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
@@ -135,12 +162,8 @@ public class ProviderController {
 
     // Get a list of Providers in which you are admin.
     @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
-        List<Provider> providers = providerManager.getMyServiceProviders(auth)
-                .stream()
-                .map(ProviderBundle::getProvider)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(providers, HttpStatus.OK);
+    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(providerManager.getMyServiceProviders(auth), HttpStatus.OK);
     }
 
     // Get the pending services of the given Provider.
