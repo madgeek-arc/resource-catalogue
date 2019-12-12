@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -93,7 +94,7 @@ public class ProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<ProviderBundle>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -108,7 +109,14 @@ public class ProviderController {
             ff.setOrderBy(sort);
         }
         ff.setFilter(allRequestParams);
-        return ResponseEntity.ok(providerManager.getAll(ff, auth));
+        List<Provider> providerList = new LinkedList<>();
+        Paging<ProviderBundle> providerBundlePaging = providerManager.getAll(ff, auth);
+        for (ProviderBundle providerBundle : providerBundlePaging.getResults()){
+            providerList.add(providerBundle.getProvider());
+        }
+        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
+                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
+        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
