@@ -155,7 +155,7 @@ public class ServiceController {
         return ret;
     }
 
-    @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue.")
+    @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -173,7 +173,7 @@ public class ServiceController {
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
 
-    // Filter a list of Services based on a set of filters or get a list of all Services in the eInfraCentral Catalogue.
+    // Filter a list of Services based on a set of filters or get a list of all Services in the Catalogue.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -293,7 +293,7 @@ public class ServiceController {
         return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
     }
 
-    // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the eInfraCentral Catalogue.
+    // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),

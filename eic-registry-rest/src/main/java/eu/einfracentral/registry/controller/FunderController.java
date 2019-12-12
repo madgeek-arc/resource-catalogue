@@ -42,7 +42,7 @@ public class FunderController extends ResourceController<Funder, Authentication>
     }
 
     @Override
-    @ApiOperation(value = "Filter a list of Funders based on a set of filters or get a list of all Funders in the eInfraCentral Catalogue.")
+    @ApiOperation(value = "Filter a list of Funders based on a set of filters or get a list of all Funders in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),

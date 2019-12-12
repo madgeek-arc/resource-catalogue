@@ -55,7 +55,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
 
-    // Filter a list of Measurements based on a set of filters or get a list of all Measurements in the eInfraCentral Catalogue.
+    // Filter a list of Measurements based on a set of filters or get a list of all Measurements in the Catalogue.
     @Override
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),

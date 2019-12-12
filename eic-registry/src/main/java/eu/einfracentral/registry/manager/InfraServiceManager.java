@@ -11,6 +11,7 @@ import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +32,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private Random randomNumberGenerator;
     private FieldValidator fieldValidator;
 
+    @Value("${project.name:}")
+    private String projectName;
 
     @Autowired
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
@@ -176,7 +179,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
-                infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), "eInfraCentral"));
+                infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), projectName));
 
                 super.update(infraService, null);
                 logger.info("Updating Service through merging: {}", infraService);

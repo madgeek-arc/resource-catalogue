@@ -53,7 +53,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     @Override
-    @ApiOperation(value = "Filter a list of Indicators based on a set of filters or get a list of all Indicators in the eInfraCentral Catalogue.")
+    @ApiOperation(value = "Filter a list of Indicators based on a set of filters or get a list of all Indicators in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),

@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("stats")
-@Api("Get information about KPIs and eInfraCentral usage statistics")
+@Api("Get information about KPIs usage statistics")
 public class StatisticsController {
 
     private StatisticsService statisticsService;
