@@ -311,7 +311,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
                 // create service update entries
                 for (Version version : versions) {
-                    tempResource = version.getResource();
+                    tempResource = (version.getResource() == null ? getResourceById(version.getParentId()) : version.getResource());
                     tempResource.setPayload(version.getPayload());
                     service = deserialize(tempResource);
                     if (service != null) {
