@@ -192,7 +192,7 @@ public class StatisticsManager implements StatisticsService {
         SearchRequest search = new SearchRequest("event");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         search.searchType(SearchType.DEFAULT);
-        searchSourceBuilder.query(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()));
+        searchSourceBuilder.query(getEventQueryBuilder(id, eventType));
         searchSourceBuilder.aggregation(dateHistogramAggregationBuilder);
         search.source(searchSourceBuilder);
 
