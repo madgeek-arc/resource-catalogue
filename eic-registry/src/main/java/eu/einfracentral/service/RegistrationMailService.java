@@ -54,7 +54,7 @@ public class RegistrationMailService {
     }
 
     @Async
-    public void sendProviderMails(ProviderBundle provider) {
+    public void sendProviderMails(ProviderBundle providerBundle) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
         String providerMail;
@@ -64,13 +64,13 @@ public class RegistrationMailService {
         String regTeamSubject = null;
 
         String providerName;
-        if (provider != null && provider.getProvider() != null) {
-            providerName = provider.getProvider().getName();
+        if (providerBundle != null && providerBundle.getProvider() != null) {
+            providerName = providerBundle.getProvider().getName();
         } else {
             throw new ResourceNotFoundException("Provider is null");
         }
 
-        List<Service> serviceList = providerManager.getServices(provider.getId());
+        List<Service> serviceList = providerManager.getServices(providerBundle.getId());
         Service serviceTemplate = null;
         if (!serviceList.isEmpty()) {
             root.put("service", serviceList.get(0));
@@ -79,7 +79,7 @@ public class RegistrationMailService {
             serviceTemplate = new Service();
             serviceTemplate.setName("");
         }
-        switch (Provider.States.fromString(provider.getStatus())) {
+        switch (Provider.States.fromString(providerBundle.getStatus())) {
             case PENDING_1:
                 providerSubject = String.format("[%s] Your application for registering [%s] " +
                         "as a new service provider has been received", projectName, providerName);
@@ -103,10 +103,10 @@ public class RegistrationMailService {
                 providerSubject = String.format("[%s] Your service [%s] has been received " +
                         "and its approval is pending", projectName, serviceTemplate.getName());
                 regTeamSubject = String.format("[%s] Approve or reject the information about the new service: " +
-                        "[%s] – [%s]", projectName, provider.getProvider().getName(), serviceTemplate.getName());
+                        "[%s] – [%s]", projectName, providerBundle.getProvider().getName(), serviceTemplate.getName());
                 break;
             case APPROVED:
-                if (provider.isActive()) {
+                if (providerBundle.isActive()) {
                     assert serviceTemplate != null;
                     providerSubject = String.format("[%s] Your service [%s] – [%s]  has been accepted",
                             projectName, providerName, serviceTemplate.getName());
@@ -130,12 +130,12 @@ public class RegistrationMailService {
                 break;
         }
 
-        root.put("provider", provider);
+        root.put("providerBundle", providerBundle);
         root.put("endpoint", endpoint);
         root.put("project", projectName);
         root.put("registrationEmail", registrationEmail);
         // get the first user's information for the registration team email
-        root.put("user", provider.getProvider().getUsers().get(0));
+        root.put("user", providerBundle.getProvider().getUsers().get(0));
 
         try {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
@@ -148,7 +148,7 @@ public class RegistrationMailService {
                     regTeamSubject, regTeamMail);
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");
-            for (User user : provider.getProvider().getUsers()) {
+            for (User user : providerBundle.getProvider().getUsers()) {
                 if (user.getEmail() == null || user.getEmail().equals("")) {
                     continue;
                 }
