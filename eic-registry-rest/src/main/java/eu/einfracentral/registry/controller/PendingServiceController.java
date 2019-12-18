@@ -1,9 +1,13 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.PendingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -37,6 +41,11 @@ public class PendingServiceController extends ResourceController<InfraService, A
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void transformServiceToInfra(@RequestParam String serviceId) {
         pendingServiceManager.transformToActive(serviceId);
+    }
+
+    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
+        return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
 }

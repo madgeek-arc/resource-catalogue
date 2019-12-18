@@ -48,7 +48,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    public InfraService update (InfraService service, Authentication auth){
+    public InfraService update(InfraService service, Authentication auth) {
         service.setMetadata(Metadata.updateMetadata(service.getMetadata(), new User(auth).getFullName()));
         super.update(service, auth);
         return service;
@@ -70,4 +70,9 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
     }
+
+    public Object getPendingRich(String id, Authentication auth) {
+        return infraServiceService.createRichService(get(id), auth);
+    }
+
 }
