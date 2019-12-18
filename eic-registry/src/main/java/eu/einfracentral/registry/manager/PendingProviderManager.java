@@ -55,4 +55,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
     }
+
+    @Override
+    public Object getPendingRich(String id, Authentication auth) {
+        throw new UnsupportedOperationException("Not yet Implemented");
+    }
 }
