@@ -580,27 +580,31 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // Domain Tree
             List<ScientificDomain> domains = new ArrayList<>();
-            for (String subdomain : infraService.getService().getScientificSubdomains()) {
-                ScientificDomain domain = new ScientificDomain();
-                String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics
-                String domainId = "scientific_domain-" + parts[1];
-                domain.setDomain(vocabularyService.get(domainId));
-                domain.setSubdomain(vocabularyService.get(subdomain));
-                domains.add(domain);
+            if (infraService.getService().getScientificSubdomains() != null){
+                for (String subdomain : infraService.getService().getScientificSubdomains()) {
+                    ScientificDomain domain = new ScientificDomain();
+                    String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics
+                    String domainId = "scientific_domain-" + parts[1];
+                    domain.setDomain(vocabularyService.get(domainId));
+                    domain.setSubdomain(vocabularyService.get(subdomain));
+                    domains.add(domain);
+                }
             }
             richService.setDomains(domains);
 
             // Category Tree
             List<Category> categories = new ArrayList<>();
-            for (String subcategory : infraService.getService().getSubcategories()) {
-                Category category = new Category();
-                String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
-                String supercategoryId = "supercategory-" + parts[1];
-                String categoryId = "category-" + parts[1] + "-" + parts[2];
-                category.setSuperCategory(vocabularyService.get(supercategoryId));
-                category.setCategory(vocabularyService.get(categoryId));
-                category.setSubCategory(vocabularyService.get(subcategory));
-                categories.add(category);
+            if (infraService.getService().getSubcategories() != null) {
+                for (String subcategory : infraService.getService().getSubcategories()) {
+                    Category category = new Category();
+                    String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
+                    String supercategoryId = "supercategory-" + parts[1];
+                    String categoryId = "category-" + parts[1] + "-" + parts[2];
+                    category.setSuperCategory(vocabularyService.get(supercategoryId));
+                    category.setCategory(vocabularyService.get(categoryId));
+                    category.setSubCategory(vocabularyService.get(subcategory));
+                    categories.add(category);
+                }
             }
             richService.setCategories(categories);
 
