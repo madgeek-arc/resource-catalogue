@@ -1,7 +1,10 @@
 package eu.einfracentral.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -11,6 +14,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class User implements Identifiable {
+
+    private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement
     private String id;
@@ -35,7 +40,9 @@ public class User implements Identifiable {
     }
 
     public User(Authentication auth) {
-        if (auth instanceof OIDCAuthenticationToken) {
+        if (auth == null) {
+            throw new InsufficientAuthenticationException("User not authenticated");
+        } else if (auth instanceof OIDCAuthenticationToken) {
             this.id = ((OIDCAuthenticationToken) auth).getUserInfo().getSub();
             if (this.id == null) {
                 this.id = "";
@@ -46,8 +53,14 @@ public class User implements Identifiable {
             }
             this.name = ((OIDCAuthenticationToken) auth).getUserInfo().getGivenName();
             this.surname = ((OIDCAuthenticationToken) auth).getUserInfo().getFamilyName();
+        } else if (auth.isAuthenticated()) {
+            this.name = auth.getName();
+            this.id = "";
+            this.email = "";
+            this.surname = "";
+            logger.warn("Authenticated User has missing information: {}", auth);
         } else {
-            throw new RuntimeException("Could not create user. Authentication is not an instance of OIDCAuthentication");
+            throw new InsufficientAuthenticationException("Could not create user. Insufficient user authentication");
         }
     }
 
