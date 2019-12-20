@@ -152,7 +152,6 @@ public class SecurityService {
         }
     }
 
-    @Deprecated
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         for (String providerId : service.getService().getProviders()) {
@@ -166,13 +165,11 @@ public class SecurityService {
         return false;
     }
 
-    @Deprecated
     public boolean serviceIsActive(String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         return service.isActive();
     }
 
-    @Deprecated
     public boolean serviceIsActive(String serviceId, String version) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version
