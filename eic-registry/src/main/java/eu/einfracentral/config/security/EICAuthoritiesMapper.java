@@ -61,9 +61,11 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             authority = userRolesMap.get(userInfo.getEmail());
         }
         if (authority != null) {
-            logger.info(String.format("User %s with email %s mapped as %s", userInfo.getSub(), userInfo.getEmail(), authority.getAuthority()));
             out.add(authority);
         }
+
+        String authoritiesString = out.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        logger.info(String.format("User '%s' with email '%s' mapped as '%s'", userInfo.getSub(), userInfo.getEmail(), authoritiesString));
         return out;
     }
 
