@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("pendingService")
 public class PendingServiceController extends ResourceController<InfraService, Authentication> {
@@ -24,11 +26,11 @@ public class PendingServiceController extends ResourceController<InfraService, A
         this.pendingServiceManager = pendingServiceManager;
     }
 
-    @PostMapping("/addService")
+    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Service addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
-        return pendingServiceManager.add(infraService, auth).getService();
+        return new ResponseEntity<>(pendingServiceManager.add(infraService, auth).getService(), HttpStatus.CREATED);
     }
 
     @PostMapping("/transformToPending")
@@ -43,9 +45,18 @@ public class PendingServiceController extends ResourceController<InfraService, A
         pendingServiceManager.transformToActive(serviceId);
     }
 
-    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
+    @GetMapping(path = "/getId", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<String> getIdFromOriginalId(@RequestParam("originalId") String originalId) {
+        return new ResponseEntity<>(pendingServiceManager.getId(originalId), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getIdMappings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Map<String, String>> getIdFromOriginalId() {
+        return new ResponseEntity<>(pendingServiceManager.getIdOriginalIdMap(), HttpStatus.OK);
+    }
 }
