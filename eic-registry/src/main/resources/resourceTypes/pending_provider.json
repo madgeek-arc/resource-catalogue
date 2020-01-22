@@ -28,13 +28,6 @@
     },
     {
       "multivalued": true,
-      "name": "domains",
-      "label": "Domain",
-      "path": "//*[local-name()='domain']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "categories",
       "label": "Category",
       "path": "//*[local-name()='category']/text()",
@@ -133,6 +126,12 @@
       "multivalued": false,
       "name": "status",
       "path": "//*[local-name()='status']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='originalId']/text()",
       "type": "java.lang.String"
     }
   ],
