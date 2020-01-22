@@ -44,7 +44,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         this.measurementService = measurementService;
     }
 
-    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
@@ -94,9 +94,18 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
+    @GetMapping(path = "/getId", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<String> getIdFromOriginalId(@RequestParam("originalId") String originalId) {
+        return new ResponseEntity<>(pendingServiceManager.getId(originalId), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getIdMappings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Map<String, String>> getIdOriginalIdMappings() {
+        return new ResponseEntity<>(pendingServiceManager.getIdOriginalIdMap(), HttpStatus.OK);
+    }
 }
