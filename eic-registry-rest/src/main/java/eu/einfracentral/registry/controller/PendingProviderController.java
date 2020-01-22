@@ -3,11 +3,13 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.PendingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("pendingProvider")
@@ -33,4 +35,13 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         pendingProviderService.transformToActive(providerId);
     }
 
+    @GetMapping(path = "/getId", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<String> getIdFromOriginalId(@RequestParam("originalId") String originalId) {
+        return new ResponseEntity<>(pendingProviderService.getId(originalId), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getIdMappings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Map<String, String>> getIdFromOriginalId() {
+        return new ResponseEntity<>(pendingProviderService.getIdOriginalIdMap(), HttpStatus.OK);
+    }
 }
