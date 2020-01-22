@@ -182,6 +182,12 @@
       "name": "latest",
       "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='originalId']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",

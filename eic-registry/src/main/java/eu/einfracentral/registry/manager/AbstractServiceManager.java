@@ -408,6 +408,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     return resource;
                 }
             }
+            if (resources.getTotal() > 0) {
+                return resources.getResults().get(0);
+            }
             return null;
         } else if ("latest".equals(serviceVersion)) {
             resources = searchService

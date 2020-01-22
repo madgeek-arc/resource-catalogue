@@ -28,13 +28,6 @@
     },
     {
       "multivalued": true,
-      "name": "domains",
-      "label": "Domain",
-      "path": "//*[local-name()='domain']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "categories",
       "label": "Category",
       "path": "//*[local-name()='category']/text()",

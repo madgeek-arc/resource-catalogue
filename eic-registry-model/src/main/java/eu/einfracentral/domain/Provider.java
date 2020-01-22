@@ -316,7 +316,15 @@ public class Provider implements Identifiable {
 
     public static String createId(Provider provider) {
         if (provider.getId() == null || "".equals(provider.getId())) {
-            return provider.getAcronym();
+            if (provider.getAcronym() != null && !"".equals(provider.getAcronym())){
+                return StringUtils
+                        .stripAccents(provider.getAcronym())
+                        .replace(" ", "_");
+            } else {
+                return StringUtils
+                        .stripAccents(provider.getName())
+                        .replace(" ", "_");
+            }
         }
         return StringUtils
                 .stripAccents(provider.getId())
