@@ -166,6 +166,12 @@
     },
     {
       "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='metadata']/*[local-name()='originalId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "active",
       "defaultValue": false,
       "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
