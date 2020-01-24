@@ -1,11 +1,15 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Service;
 @Service("pendingProviderManager")
 public class PendingProviderManager extends ResourceManager<ProviderBundle> implements PendingResourceService<ProviderBundle> {
 
+    private static final Logger logger = LogManager.getLogger(PendingProviderManager.class);
     private final ProviderService<ProviderBundle, Authentication> providerManager;
 
     @Autowired
@@ -38,6 +43,18 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         super.add(provider, auth);
 
         return provider;
+    }
+
+    @Override
+    public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
+        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), new User(auth).getFullName()));
+        Resource existing = whereID(providerBundle.getId(), true);
+        providerBundle.getProvider().setId(eu.einfracentral.domain.Provider.createId(providerBundle.getProvider()));
+        existing.setPayload(serialize(providerBundle));
+        existing.setResourceType(resourceType);
+        resourceService.updateResource(existing);
+        logger.debug("Updating Pending Provider: {}", providerBundle);
+        return providerBundle;
     }
 
     @Override

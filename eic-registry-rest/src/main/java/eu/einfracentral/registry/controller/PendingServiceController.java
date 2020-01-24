@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 @RequestMapping("pendingService")
 public class PendingServiceController extends ResourceController<InfraService, Authentication> {
 
-    private static Logger logger = LogManager.getLogger(ServiceController.class);
+    private static Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<InfraService> pendingServiceManager;
     private MeasurementService<Measurement, Authentication> measurementService;
 
@@ -44,27 +45,32 @@ public class PendingServiceController extends ResourceController<InfraService, A
         this.measurementService = measurementService;
     }
 
-    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Service> getService(@PathVariable String id) {
+        return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
         return new ResponseEntity<>(pendingServiceManager.add(infraService, auth).getService(), HttpStatus.CREATED);
     }
 
-    @PostMapping("/transformToPending")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/transform/pending")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void transformServiceToPending(@RequestParam String serviceId) {
         pendingServiceManager.transformToPending(serviceId);
     }
 
-    @PostMapping("/transformToInfra")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/transform/active")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void transformServiceToInfra(@RequestParam String serviceId) {
         pendingServiceManager.transformToActive(serviceId);
     }
 
-    @PutMapping(path = "/updateAndTransform", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("isAuthenticated()") // FIXME: authorize only admins and service providers
     public ResponseEntity<Service> pendingToInfra(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         Service service = null;
@@ -97,15 +103,5 @@ public class PendingServiceController extends ResourceController<InfraService, A
     @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/getId", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<String> getIdFromOriginalId(@RequestParam("originalId") String originalId) {
-        return new ResponseEntity<>(pendingServiceManager.getId(originalId), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/getIdMappings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Map<String, String>> getIdOriginalIdMappings() {
-        return new ResponseEntity<>(pendingServiceManager.getIdOriginalIdMap(), HttpStatus.OK);
     }
 }
