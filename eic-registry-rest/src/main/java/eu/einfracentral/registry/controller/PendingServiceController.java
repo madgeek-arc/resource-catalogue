@@ -10,6 +10,7 @@ import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +49,18 @@ public class PendingServiceController extends ResourceController<InfraService, A
     @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getService(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<Service>> getPendingServices(@PathVariable String id) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("providers", id);
+        ff.setQuantity(10000);
+        return new ResponseEntity<>(pendingServiceManager.getAll(ff, null)
+                .getResults()
+                .stream()
+                .map(InfraService::getService)
+                .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @PostMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
