@@ -91,19 +91,39 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     }
 
     @Override
-    public void transformToPending(String providerId) {
-        Resource resource = providerManager.getResource(providerId);
-        resource.setResourceTypeName("provider"); //make sure that resource type is present
-        resourceService.changeResourceType(resource, resourceType);
+    public ProviderBundle transformToPending(ProviderBundle providerBundle, Authentication auth) {
+        return transformToPending(providerBundle.getId(), auth);
     }
 
     @Override
-    public void transformToActive(String providerId) {
-        providerManager.validate(get(providerId));
+    public ProviderBundle transformToPending(String providerId, Authentication auth) {
+        ProviderBundle providerBundle = get(providerId);
+        Resource resource = providerManager.getResource(providerId);
+        resource.setResourceTypeName("provider"); //make sure that resource type is present
+        resourceService.changeResourceType(resource, resourceType);
+        return providerBundle;
+    }
+
+    @Override
+    public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
+        providerManager.validate(providerBundle);
+        providerBundle = update(providerBundle, auth);
+        ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
+        Resource resource = getResource(providerBundle.getId());
+        resource.setResourceType(resourceType);
+        resourceService.changeResourceType(resource, providerResourceType);
+        return providerBundle;
+    }
+
+    @Override
+    public ProviderBundle transformToActive(String providerId, Authentication auth) {
+        ProviderBundle providerBundle = get(providerId);
+        providerManager.validate(providerBundle);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
+        return providerBundle;
     }
 
     @Override
