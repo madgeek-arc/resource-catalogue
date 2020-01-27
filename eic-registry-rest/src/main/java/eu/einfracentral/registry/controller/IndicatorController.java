@@ -5,11 +5,8 @@ import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.registry.service.IndicatorService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,28 +44,14 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
 
     @Override
     @ApiOperation(value = "Returns the Indicator with the given id.")
-    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @Override
-    @ApiOperation(value = "Filter a list of Indicators based on a set of filters or get a list of all Indicators in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
-    @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<Indicator>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
-        return super.getAll(allRequestParams, authentication);
-    }
-
-    @Override
     @ApiOperation(value = "Creates a new Indicator.")
-    @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
         ResponseEntity<Indicator> ret = super.add(indicator, auth);
@@ -78,7 +61,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
 
     // Updates the Indicator assigned the given id with the given Indicator, keeping a version of revisions.
     @Override
-    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Indicator> ret = super.update(indicator, auth);
@@ -87,7 +70,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     // Deletes the Indicator with the given id.
-    @RequestMapping(path = {"{id}"}, method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Indicator indicator = indicatorService.get(id);
@@ -100,7 +83,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     // Returns a list of unused indicator IDs.
-    @RequestMapping(path = {"unused"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = {"unused"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<String>> unused(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();

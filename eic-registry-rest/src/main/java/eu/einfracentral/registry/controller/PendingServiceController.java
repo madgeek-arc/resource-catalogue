@@ -4,16 +4,15 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Measurement;
+import eu.einfracentral.domain.RichService;
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,20 +62,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
                 .map(InfraService::getService)
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
-
-//    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-//            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-//            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-//            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-//            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-//    })
-//    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    @Override
-//    public ResponseEntity<Paging<InfraService>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-//        return super.getAll(allRequestParams, auth);
-//    }
 
     @PostMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("isAuthenticated()")

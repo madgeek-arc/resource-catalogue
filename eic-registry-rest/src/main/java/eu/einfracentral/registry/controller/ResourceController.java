@@ -5,6 +5,9 @@ import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -29,12 +32,12 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         this.service = service;
     }
 
-    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> get(@PathVariable("id") String id, @ApiIgnore U authentication) {
         return new ResponseEntity<>(service.get(id), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.add(t, auth), HttpStatus.CREATED);
         logger.debug("User {} created a new {} with id {}", (auth == null) ? "unknown" : auth.getName(),
@@ -42,7 +45,7 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         return ret;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> update(@RequestBody T t, @ApiIgnore U auth) throws ResourceNotFoundException {
         ResponseEntity<T> ret = new ResponseEntity<>(service.update(t, auth), HttpStatus.OK);
         logger.debug("User {} updated {} with id {}", (auth == null) ? "unknown" : auth.getName(),
@@ -50,7 +53,7 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         return ret;
     }
 
-    @RequestMapping(path = "validate", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> validate(@RequestBody T t, @ApiIgnore U auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.validate(t), HttpStatus.OK);
         logger.debug("User {} validated {} with id {}", (auth == null) ? "unknown" : auth.getName(),
@@ -58,7 +61,7 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         return ret;
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<T> delete(@RequestBody T t, @ApiIgnore U auth) throws ResourceNotFoundException {
         service.delete(t);
         logger.debug("User {} deleted {} with id {}", (auth == null) ? "unknown" : auth.getName(),
@@ -66,14 +69,22 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         return new ResponseEntity<>(t, HttpStatus.OK);
     }
 
-    @RequestMapping(path = "all", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = "all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<T>> delAll(@ApiIgnore U auth) {
         ResponseEntity<List<T>> ret = new ResponseEntity<>(service.delAll(), HttpStatus.OK);
         logger.debug("User {} deleted a list of resources {}", (auth == null) ? "unknown" : auth.getName(), ret);
         return ret;
     }
 
-    @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @ApiOperation(value = "Filter a list of Resources based on a set of filters.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<T>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore U auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
@@ -92,12 +103,12 @@ public class ResourceController<T extends Identifiable, U extends Authentication
         return new ResponseEntity<>(service.getAll(ff, null), HttpStatus.OK);
     }
 
-    @RequestMapping(path = "byID/{ids}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @ApiIgnore U auth) {
         return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
     }
 
-    @RequestMapping(path = "by/{field}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field, @ApiIgnore U auth) {
         return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
