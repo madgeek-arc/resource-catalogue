@@ -59,4 +59,13 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
      */
     List<Measurement> updateAll(String serviceId, List<Measurement> allMeasurements, U authentication);
 
+    /**
+     * Updates existing Measurements of a specific Service, or/and adds new ones
+     *
+     * @param allMeasurements
+     * @param authentication
+     * @return
+     */
+    List<Measurement> updateAll(String serviceId, String newServiceId, List<Measurement> allMeasurements, U authentication);
+
 }

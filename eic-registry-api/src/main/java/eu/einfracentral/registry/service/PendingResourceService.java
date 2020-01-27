@@ -13,6 +13,16 @@ import java.util.stream.Collectors;
 public interface PendingResourceService<T extends Bundle> extends ResourceService<T, Authentication> {
 
     /**
+     * Updates the resource and sets a new id.
+     *
+     * @param t
+     * @param auth
+     * @return
+     */
+    @Override
+    T update(T t, Authentication auth);
+
+    /**
      * Transforms the resource to pending.
      *
      * @param id
@@ -47,7 +57,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
         Browsing<T> resources = this.getAll(ff, null);
         if (resources.getTotal() > 1) {
             throw new ResourceException("Id is not unique", HttpStatus.CONFLICT);
-        } else if(resources.getTotal() == 0) {
+        } else if (resources.getTotal() == 0) {
             throw new ResourceException("Id not found", HttpStatus.NOT_FOUND);
         } else {
             return resources.getResults().get(0).getId();
