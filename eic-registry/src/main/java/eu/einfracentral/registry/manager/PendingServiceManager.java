@@ -64,20 +64,39 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    public void transformToPending(String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
-        Resource resource = infraServiceService.getResource(service.getService().getId(), service.getService().getVersion());
-        resource.setResourceTypeName("infra_service");
-        resourceService.changeResourceType(resource, resourceType);
+    public InfraService transformToPending(InfraService infraService, Authentication auth) {
+        return transformToPending(infraService.getId(), auth);
     }
 
     @Override
-    public void transformToActive(String serviceId) {
-        infraServiceService.validate(get(serviceId));
+    public InfraService transformToPending(String serviceId, Authentication auth) {
+        InfraService infraService = infraServiceService.get(serviceId);
+        Resource resource = infraServiceService.getResource(infraService.getService().getId(), infraService.getService().getVersion());
+        resource.setResourceTypeName("infra_service");
+        resourceService.changeResourceType(resource, resourceType);
+        return infraService;
+    }
+
+    @Override
+    public InfraService transformToActive(InfraService infraService, Authentication auth) {
+        infraServiceService.validate(infraService);
+        infraService = update(infraService, auth);
+        ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
+        Resource resource = getResource(infraService.getId());
+        resource.setResourceType(resourceType);
+        resourceService.changeResourceType(resource, infraResourceType);
+        return infraService;
+    }
+
+    @Override
+    public InfraService transformToActive(String serviceId, Authentication auth) {
+        InfraService infraService = infraServiceService.get(serviceId);
+        infraServiceService.validate(infraService);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = getResource(serviceId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
+        return infraService;
     }
 
     public Object getPendingRich(String id, Authentication auth) {

@@ -72,14 +72,14 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
     @PostMapping("/transform/pending")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformServiceToPending(@RequestParam String serviceId) {
-        pendingServiceManager.transformToPending(serviceId);
+    public void transformServiceToPending(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
+        pendingServiceManager.transformToPending(serviceId, auth);
     }
 
     @PostMapping("/transform/active")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformServiceToInfra(@RequestParam String serviceId) {
-        pendingServiceManager.transformToActive(serviceId);
+    public void transformServiceToInfra(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
+        pendingServiceManager.transformToActive(serviceId, auth);
     }
 
     @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -105,8 +105,9 @@ public class PendingServiceController extends ResourceController<InfraService, A
         }
         InfraService infraService = pendingServiceManager.get(service.getId());
         infraService.setService(service);
-        infraService = pendingServiceManager.update(infraService, auth);
-        pendingServiceManager.transformToActive(service.getId());
+
+        // updated InfraService and transforms to active ( may change InfraService id )
+        infraService = pendingServiceManager.transformToActive(infraService, auth);
 
         this.measurementService.updateAll(service.getId(), infraService.getId(), measurements, auth);
 

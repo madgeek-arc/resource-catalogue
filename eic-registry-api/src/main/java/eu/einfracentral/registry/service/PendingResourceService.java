@@ -25,16 +25,34 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     /**
      * Transforms the resource to pending.
      *
-     * @param id
+     * @param t
+     * @param auth
      */
-    void transformToPending(String id);
+    T transformToPending(T t, Authentication auth);
+
+    /**
+     * Transforms the resource with the specified id to pending.
+     *
+     * @param id
+     * @param auth
+     */
+    T transformToPending(String id, Authentication auth);
 
     /**
      * Transforms the resource to active.
      *
-     * @param id
+     * @param t
+     * @param auth
      */
-    void transformToActive(String id);
+    T transformToActive(T t, Authentication auth);
+
+    /**
+     * Transforms the resource with the specified id to active.
+     *
+     * @param id
+     * @param auth
+     */
+    T transformToActive(String id, Authentication auth);
 
     /**
      * Create a Rich Object from a Pending Resource

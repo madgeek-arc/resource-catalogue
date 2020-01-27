@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Map;
 
@@ -43,23 +44,24 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
     @PostMapping("/transform/pending")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformProviderToPending(@RequestParam String providerId) {
-        pendingProviderService.transformToPending(providerId);
+    public void transformProviderToPending(@RequestParam String providerId, @ApiIgnore Authentication auth) {
+        pendingProviderService.transformToPending(providerId, auth);
     }
 
     @PostMapping("/transform/active")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformProviderToActive(@RequestParam String providerId) {
-        pendingProviderService.transformToActive(providerId);
+    public void transformProviderToActive(@RequestParam String providerId, @ApiIgnore Authentication auth) {
+        pendingProviderService.transformToActive(providerId, auth);
     }
 
     @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
-        providerBundle = pendingProviderService.update(providerBundle, auth);
-        pendingProviderService.transformToActive(providerBundle.getId());
+
+        // updates provider and transforms to active ( may change provider id and all of its services ids )
+        providerBundle = pendingProviderService.transformToActive(providerBundle, auth);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 }
