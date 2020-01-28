@@ -119,6 +119,11 @@ public class ProviderController {
         return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
 
+    @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(providerManager.get(id, auth), HttpStatus.OK);
+    }
+
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
