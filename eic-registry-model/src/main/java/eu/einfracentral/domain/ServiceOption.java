@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
 
-import static eu.einfracentral.utils.ValidationLengths.NAME_LENGTH;
-import static eu.einfracentral.utils.ValidationLengths.TEXT_LENGTH;
-
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ServiceOption {
@@ -24,7 +21,7 @@ public class ServiceOption {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
-    @FieldValidation(maxLength = NAME_LENGTH)
+    @FieldValidation
     private String name;
 
     /**
@@ -40,7 +37,7 @@ public class ServiceOption {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
-    @FieldValidation(maxLength = TEXT_LENGTH)
+    @FieldValidation
     private String description;
 
     /**
