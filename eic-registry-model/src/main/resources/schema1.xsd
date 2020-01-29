@@ -3,6 +3,8 @@
 
   <xs:import schemaLocation="schema2.xsd"/>
 
+  <xs:element name="bundle" type="tns:bundle"/>
+
   <xs:element name="contact" type="tns:contact"/>
 
   <xs:element name="emailMessage" type="tns:emailMessage"/>
@@ -17,7 +19,11 @@
 
   <xs:element name="measurement" type="tns:measurement"/>
 
+  <xs:element name="metadata" type="tns:metadata"/>
+
   <xs:element name="provider" type="tns:provider"/>
+
+  <xs:element name="providerBundle" type="tns:providerBundle"/>
 
   <xs:element name="providerLocation" type="tns:providerLocation"/>
 
@@ -27,13 +33,30 @@
 
   <xs:element name="service" type="tns:service"/>
 
-  <xs:element name="serviceMetadata" type="tns:serviceMetadata"/>
-
   <xs:element name="serviceOption" type="tns:serviceOption"/>
 
   <xs:element name="user" type="tns:user"/>
 
   <xs:element name="vocabulary" type="tns:vocabulary"/>
+
+  <xs:complexType abstract="true" name="bundle">
+    <xs:sequence>
+      <xs:element name="active" type="xs:boolean"/>
+      <xs:element minOccurs="0" ref="tns:metadata"/>
+      <xs:element minOccurs="0" name="status" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="metadata">
+    <xs:sequence>
+      <xs:element default="null" minOccurs="0" name="modifiedAt" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="originalId" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="source" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <xs:complexType name="contact">
     <xs:sequence>
@@ -136,13 +159,14 @@
   </xs:complexType>
 
   <xs:complexType name="infraService">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="active" type="xs:boolean"/>
-      <xs:element name="latest" type="xs:boolean"/>
-      <xs:element ref="tns:service"/>
-      <xs:element minOccurs="0" ref="tns:serviceMetadata"/>
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
-    </xs:sequence>
+    <xs:complexContent>
+      <xs:extension base="tns:bundle">
+        <xs:sequence>
+          <xs:element name="latest" type="xs:boolean"/>
+          <xs:element minOccurs="0" ref="tns:service"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="service">
@@ -542,11 +566,6 @@
           <xs:documentation><![CDATA[The description of the service option.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="id" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Identifier of the service option.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element minOccurs="0" name="logo" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Link to the logo/visual identity of the service provider.]]></xs:documentation>
@@ -562,15 +581,6 @@
           <xs:documentation><![CDATA[Webpage with information about the service option.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="serviceMetadata">
-    <xs:sequence>
-      <xs:element default="null" minOccurs="0" name="modifiedAt" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -607,7 +617,6 @@
           <xs:documentation><![CDATA[Acronym or abbreviation of the provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="active" type="xs:boolean"/>
       <xs:element minOccurs="0" name="areasOfActivity">
         <xs:annotation>
           <xs:documentation><![CDATA[Basic research, Applied research or Technological development.]]></xs:documentation>
@@ -743,7 +752,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
       <xs:element minOccurs="0" name="tags">
         <xs:annotation>
           <xs:documentation><![CDATA[Keywords associated to the Provider to simplify search by relevant keywords.]]></xs:documentation>
@@ -823,13 +831,22 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="providerBundle">
+    <xs:complexContent>
+      <xs:extension base="tns:bundle">
+        <xs:sequence>
+          <xs:element minOccurs="0" ref="tns:provider"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="providerRequest">
     <xs:sequence>
-      <xs:element minOccurs="0" name="date" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="date" type="xs:anySimpleType"/>
       <xs:element minOccurs="0" name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="message" type="tns:emailMessage"/>
       <xs:element minOccurs="0" name="providerId" type="xs:string"/>
-      <xs:element name="status" type="xs:boolean"/>
     </xs:sequence>
   </xs:complexType>
 

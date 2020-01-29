@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -11,6 +12,8 @@ import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -25,6 +28,10 @@ import java.util.stream.Stream;
 public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ResourceManager.class);
+
+    @Lazy
+    @Autowired
+    private FieldValidator fieldValidator;
 
     public ResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
@@ -77,15 +84,16 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public void delete(T t) {
-        del(t);
-    }
-
-    @Override
-    public T del(T t) {
         resourceService.deleteResource(whereID(t.getId(), true).getId());
         logger.debug("Deleting Resource {}", t);
-        return t;
     }
+
+//    @Override
+//    public T del(T t) {
+//        resourceService.deleteResource(whereID(t.getId(), true).getId());
+//        logger.debug("Deleting Resource {}", t);
+//        return t;
+//    }
 
     @Override
     public Map<String, List<T>> getBy(String field) {
@@ -112,12 +120,19 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(10000);
         logger.info("Deleting all Resources");
-        return getAll(facetFilter, null).getResults().stream().map(this::del).collect(Collectors.toList());
+        List<T> results = getAll(facetFilter, null).getResults();
+        results.forEach(this::delete);
+        return results;
     }
 
     @Override
     public T validate(T t) {
-        logger.debug("Validating Resource {}", t);
+        logger.debug("Validating Resource using FieldValidator");
+        try {
+            fieldValidator.validateFields(t);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
         return t;
     }
 

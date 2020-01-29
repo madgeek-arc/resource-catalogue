@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.ServiceMetadata;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -26,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,64 +31,61 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("provider")
 @Api(value = "Get information about a Provider")
-public class ProviderController extends ResourceController<Provider, Authentication> {
+public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
-    private ProviderService<Provider, Authentication> providerManager;
+    private ProviderService<ProviderBundle, Authentication> providerManager;
     private InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    ProviderController(ProviderService<Provider, Authentication> service,
+    ProviderController(ProviderService<ProviderBundle, Authentication> service,
                        InfraServiceService<InfraService, InfraService> infraServiceService) {
-        super(service);
         this.providerManager = service;
         this.infraServiceService = infraServiceService;
     }
 
-//    @ApiOperation(value = "Deletes the Provider with the given id.")
-    @RequestMapping(path = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Deletes the Provider with the given id.
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.get(id);
+        ProviderBundle provider = providerManager.get(id);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting provider: " + provider.getName());
+        logger.info("Deleting provider: {}", provider.getProvider().getName());
         providerManager.delete(provider);
-        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
-        return new ResponseEntity<>(provider, HttpStatus.OK);
+        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
+        return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
-    @Override
     @ApiOperation(value = "Returns the Provider with the given id.")
-    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.get(id, auth);
+        Provider provider = providerManager.get(id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-    @Override
-//    @ApiOperation(value = "Creates a new Provider.")
-    @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Creates a new Provider.
+//    @Override
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
-        ResponseEntity<Provider> ret = super.add(provider, auth);
+        ProviderBundle providerBundle = providerManager.add(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
-        return ret;
+        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
-    @Override
+    //    @Override
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
-    @RequestMapping(method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ResponseEntity<Provider> ret = super.update(provider, auth);
+        ProviderBundle providerBundle = providerManager.update(new ProviderBundle(provider), auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
-        return ret;
+        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
-    @Override
-    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the eInfraCentral Catalogue.")
+    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -98,8 +93,47 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @RequestMapping(path = "all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            ff.setOrderBy(sort);
+        }
+        ff.setFilter(allRequestParams);
+        List<Provider> providerList = new LinkedList<>();
+        Paging<ProviderBundle> providerBundlePaging = providerManager.getAll(ff, auth);
+        for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
+            providerList.add(providerBundle.getProvider());
+        }
+        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
+                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
+        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(providerManager.get(id, auth), HttpStatus.OK);
+    }
+
+    // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -118,67 +152,66 @@ public class ProviderController extends ResourceController<Provider, Authenticat
     }
 
     @ApiOperation(value = "Get a list of services offered by a Provider.")
-    @RequestMapping(path = "services/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(providerManager.getServices(id), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get a featured InfraService offered by a Provider.") // TODO enable in a future release
-    @RequestMapping(path = "featured/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Get a featured InfraService offered by a Provider. // TODO enable in a future release
+    @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get a list of Providers in which the given user is admin.")
-    @RequestMapping(path = "getServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Get a list of Providers in which the given user is admin.
+    @GetMapping(path = "getServiceProviders", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
-        List<Provider> providers = providerManager.getServiceProviders(email, auth);
-        if (providers == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        List<Provider> providers = providerManager.getServiceProviders(email, auth)
+                .stream()
+                .map(ProviderBundle::getProvider)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get a list of Providers in which you are admin.")
-    @RequestMapping(path = "getMyServiceProviders", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Provider>> getMyServiceProviders(@ApiIgnore Authentication auth) {
-        List<Provider> providers = providerManager.getMyServiceProviders(auth);
-        if (providers == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        return new ResponseEntity<>(providers, HttpStatus.OK);
+    // Get a list of Providers in which you are admin.
+    @GetMapping(path = "getMyServiceProviders", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(providerManager.getMyServiceProviders(auth), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get the pending services of the given Provider.")
-    @RequestMapping(path = "services/pending/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Get the pending services of the given Provider.
+    @GetMapping(path = "services/pending/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         List<Service> ret = providerManager.getInactiveServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Get all inactive Providers.")
-    @RequestMapping(path = "inactive/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Get all inactive Providers.
+    @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
-        List<Provider> ret = providerManager.getInactive();
+        List<Provider> ret = providerManager.getInactive()
+                .stream()
+                .map(ProviderBundle::getProvider)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Accept/Reject a Provider.")
-    @RequestMapping(path = "verifyProvider/{id}", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Accept/Reject a Provider.
+    @PatchMapping(path = "verifyProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Provider> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                   @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.verifyProvider(id, status, active, auth);
-        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getName(), status, active);
+    public ResponseEntity<ProviderBundle> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
+                                                         @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
+        ProviderBundle provider = providerManager.verifyProvider(id, status, active, auth);
+        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getProvider().getName(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Publish all Provider services.")
-    @RequestMapping(path = "publishServices", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    // Publish all Provider services.
+    @PatchMapping(path = "publishServices", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        Provider provider = providerManager.get(id);
+        ProviderBundle provider = providerManager.get(id);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
         }
@@ -190,11 +223,12 @@ public class ProviderController extends ResourceController<Provider, Authenticat
             service.setActive(active);
 //            service.setStatus(status.getKey());
             service.setLatest(active);
-            ServiceMetadata sm = service.getServiceMetadata();
-            sm.setModifiedBy("system");
-            sm.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            Metadata metadata = service.getMetadata();
+            metadata.setModifiedBy("system");
+            metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             infraServiceService.update(service, auth);
-            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'", auth.getName(), provider.getName());
+            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'",
+                    auth.getName(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

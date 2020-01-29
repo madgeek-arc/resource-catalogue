@@ -1,7 +1,7 @@
 package eu.einfracentral.manager;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
@@ -50,13 +50,13 @@ public class StatisticsManager implements StatisticsService {
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
     private ElasticConfiguration elastic;
     private AnalyticsService analyticsService;
-    private ProviderService<Provider, Authentication> providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
     private SearchService searchService;
     private ParserService parserService;
 
     @Autowired
     StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
-                      ProviderService<Provider, Authentication> providerService,
+                      ProviderService<ProviderBundle, Authentication> providerService,
                       SearchService searchService, ParserService parserService) {
         this.elastic = elastic;
         this.analyticsService = analyticsService;
@@ -192,7 +192,7 @@ public class StatisticsManager implements StatisticsService {
         SearchRequest search = new SearchRequest("event");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         search.searchType(SearchType.DEFAULT);
-        searchSourceBuilder.query(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()));
+        searchSourceBuilder.query(getEventQueryBuilder(id, eventType));
         searchSourceBuilder.aggregation(dateHistogramAggregationBuilder);
         search.source(searchSourceBuilder);
 

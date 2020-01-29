@@ -11,8 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class UserEventsController {
      * @param auth
      * @return
      */
-    @RequestMapping(path = "favourites", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "favourites", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> favourites(Authentication auth) {
 
         Map<String, String> favouriteServices = new HashMap<>();
@@ -51,12 +51,12 @@ public class UserEventsController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<String> serviceIds = new ArrayList<>();
-        for (InfraService infraService : infraServiceService.getAll(ff, auth).getResults()){
+        for (InfraService infraService : infraServiceService.getAll(ff, auth).getResults()) {
             serviceIds.add(infraService.getService().getId());
         }
 
         for (Event userEvent : userEvents) {
-            if (serviceIds.contains(userEvent.getService())){
+            if (serviceIds.contains(userEvent.getService())) {
                 favouriteServices.putIfAbsent(userEvent.getService(), userEvent.getValue());
             }
         }
@@ -74,12 +74,12 @@ public class UserEventsController {
      * @param auth
      * @return
      */
-    @RequestMapping(path = "ratings", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "ratings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<RichService>> ratings(Authentication auth) {
 
         Map<String, Float> serviceRatings = new HashMap<>();
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.RATING.getKey(), auth);
-        List <RichService> services = new ArrayList<>();
+        List<RichService> services = new ArrayList<>();
         for (Event userEvent : userEvents) {
             serviceRatings.putIfAbsent(userEvent.getService(), Float.parseFloat(userEvent.getValue()));
         }

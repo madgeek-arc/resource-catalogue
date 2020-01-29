@@ -41,7 +41,7 @@ public class User implements Identifiable {
 
     public User(Authentication auth) {
         if (auth == null) {
-            throw new InsufficientAuthenticationException("User not authenticated");
+            throw new InsufficientAuthenticationException("You are not authenticated, please log in.");
         } else if (auth instanceof OIDCAuthenticationToken) {
             this.id = ((OIDCAuthenticationToken) auth).getUserInfo().getSub();
             if (this.id == null) {

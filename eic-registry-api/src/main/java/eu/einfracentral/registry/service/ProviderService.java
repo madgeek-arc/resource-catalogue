@@ -7,27 +7,28 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ProviderService<T, U extends Authentication> extends ResourceService<Provider, Authentication> {
+public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
     @Override
-    Provider add(Provider provider, Authentication authentication);
+    T add(T provider, Authentication authentication);
 
     /**
      * Deletes the provider and all the corresponding services.
      * (Does not delete services that have other providers as well)
+     *
      * @param provider
      */
     @Override
-    void delete(Provider provider);
+    void delete(T provider);
 
 
-    Provider get(String id, Authentication auth);
+    T get(String id, U auth);
 
 
-    List<Provider> getServiceProviders(String email, Authentication authentication);
+    List<T> getServiceProviders(String email, U authentication);
 
 
-    List<Provider> getMyServiceProviders(Authentication authentication);
+    List<T> getMyServiceProviders(U authentication);
 
 
     List<InfraService> getInfraServices(String providerId);
@@ -42,11 +43,11 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     Service getFeaturedService(String providerId);
 
 
-    List<Provider> getInactive();
+    List<T> getInactive();
 
 
     List<InfraService> getInactiveServices(String providerId);
 
 
-    Provider verifyProvider(String id, Provider.States status, Boolean active, Authentication auth);
+    T verifyProvider(String id, Provider.States status, Boolean active, U auth);
 }

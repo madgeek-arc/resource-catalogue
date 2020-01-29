@@ -71,32 +71,28 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     }
 
     @Override
-    public List<ProviderRequest> getAllProviderRequests (String providerId, Authentication auth){
+    public List<ProviderRequest> getAllProviderRequests(String providerId, Authentication auth) {
         List<ProviderRequest> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         List<ProviderRequest> providerRequests = getAll(ff, auth).getResults();
-        for (ProviderRequest providerRequest : providerRequests){
-            if (providerRequest.getProviderId().equals(providerId)){
+        for (ProviderRequest providerRequest : providerRequests) {
+            if (providerRequest.getProviderId().equals(providerId)) {
                 ret.add(providerRequest);
             }
         }
-        if (ret.isEmpty()){
-            throw new ValidationException("Provider with id " +providerId+ " does not exist.");
+        if (ret.isEmpty()) {
+            throw new ValidationException("Provider with id " + providerId + " does not exist.");
         }
 
         return ret;
     }
 
+    @Override
     public ProviderRequest validate(ProviderRequest providerRequest) {
-
-        try {
-            fieldValidator.validateFields(providerRequest);
-        } catch (IllegalAccessException e) {
-            logger.error("Validation error:", e);
-        }
-
-        return null;
+        logger.debug("Validating ProviderRequest: {}", providerRequest);
+        super.validate(providerRequest);
+        return providerRequest;
     }
 
     public void sendMailsToProviders(List<String> serviceIds, EmailMessage message) {

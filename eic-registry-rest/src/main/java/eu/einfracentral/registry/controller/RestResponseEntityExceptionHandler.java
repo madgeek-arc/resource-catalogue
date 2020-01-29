@@ -37,7 +37,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(value = {ResourceNotFoundException. class, NotFoundException.class,
+    @ExceptionHandler(value = {ResourceNotFoundException.class, NotFoundException.class,
             ChangeSetPersister.NotFoundException.class})
     protected ResponseEntity<Object> handleNotFound(RuntimeException ex, WebRequest request) {
         logger.warn("", ex);

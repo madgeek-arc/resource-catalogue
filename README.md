@@ -1,4 +1,4 @@
-# eInfraCentral Catalogue #
+# CatRIS Catalogue #
 ###### What is this project about?
 
 - - -
