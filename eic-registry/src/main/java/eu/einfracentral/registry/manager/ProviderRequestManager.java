@@ -100,6 +100,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
                 providersToBeMailed.put(providerId, providerBundle.getProvider().getContacts().get(0).getEmail());
             }
         }
+        // FIXME:
         for (Map.Entry<String, String> entry : providersToBeMailed.entrySet()) {
             try {
                 mailService.sendMail(entry.getValue(), message.getSenderEmail(), message.getSubject(), message.getMessage());
@@ -107,10 +108,10 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                 ProviderRequest providerRequest = new ProviderRequest();
                 message.setRecipientEmail(entry.getValue());
-                providerRequest.setDate(timestamp);
+//                providerRequest.setDate(Date.from(timestamp.toInstant()));
                 providerRequest.setMessage(message);
                 providerRequest.setProviderId(entry.getKey());
-                providerRequest.setStatus(false);
+//                providerRequest.setStatus(false);
                 add(providerRequest);
             } catch (MessagingException e) {
                 logger.error(e);
