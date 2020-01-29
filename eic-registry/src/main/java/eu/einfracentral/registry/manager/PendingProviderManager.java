@@ -57,6 +57,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
+        providerManager.validate(providerBundle);
         String newId = StringUtils
                 .stripAccents(providerBundle.getProvider().getAcronym())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
@@ -113,11 +114,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
         providerManager.validate(providerBundle);
         providerBundle = update(providerBundle, auth);
-        try {
-            Thread.sleep(2000); // FIXME:
-        } catch (InterruptedException e) {
-            logger.error(e);
-        }
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerBundle.getId());
         resource.setResourceType(resourceType);

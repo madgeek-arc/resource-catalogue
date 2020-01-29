@@ -60,8 +60,14 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
 
+        providerBundle.setProvider(provider);
+        update(providerBundle, auth);
+
         // updates provider and transforms to active ( may change provider id and all of its services ids )
-        providerBundle = pendingProviderService.transformToActive(providerBundle, auth);
+        providerBundle = pendingProviderService.transformToActive(providerBundle.getId(), auth);
+
+//        // updates provider and transforms to active ( may change provider id and all of its services ids )
+//        providerBundle = pendingProviderService.transformToActive(providerBundle, auth);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 }
