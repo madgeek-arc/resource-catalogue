@@ -18,7 +18,6 @@ import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +36,11 @@ import java.util.stream.Collectors;
 import static eu.einfracentral.config.CacheConfig.*;
 import static java.util.stream.Collectors.toList;
 
-public abstract class ServiceResourceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService>,
-        ServiceInterface<InfraService, InfraService, Authentication> {
+public abstract class AbstractServiceManager extends AbstractGenericService<InfraService> implements InfraServiceService<InfraService, InfraService> {
 
-    private static final Logger logger = LogManager.getLogger(ServiceResourceManager.class);
+    private static final Logger logger = LogManager.getLogger(AbstractServiceManager.class);
 
-    public ServiceResourceManager(Class<InfraService> typeParameterClass) {
+    public AbstractServiceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
     }
 
@@ -53,7 +51,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     private VocabularyService vocabularyService;
 
     @Autowired
-    private ProviderService providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
     private FunderService funderService;
@@ -160,7 +158,7 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         if (infraService.getService().getId() == null) {
-            infraService.getService().setId(createServiceId(infraService.getService()));
+            infraService.getService().setId(Service.createId(infraService.getService()));
         }
         // if service version is empty set it null
         if ("".equals(infraService.getService().getVersion())) {
@@ -300,33 +298,33 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                 if (!versions.isEmpty()) {
                     tempResource.setPayload(versions.get(0).getPayload());
                     service = deserialize(tempResource);
-                    if (service != null && service.getServiceMetadata() != null) {
-                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
+                    if (service != null && service.getMetadata() != null) {
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
                     }
                     versions.remove(0);
                 } else {
                     service = deserialize(tempResource);
-                    if (service != null && service.getServiceMetadata() != null) {
-                        historyMap.put(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, true));
+                    if (service != null && service.getMetadata() != null) {
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, true));
                     }
                 }
 
                 // create service update entries
                 for (Version version : versions) {
-                    tempResource = version.getResource();
+                    tempResource = (version.getResource() == null ? getResourceById(version.getParentId()) : version.getResource());
                     tempResource.setPayload(version.getPayload());
                     service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
+                            historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
-                            logger.warn("InfraService with id '{}' does not have ServiceMetadata", service.getService().getId());
+                            logger.warn("InfraService with id '{}' does not have Metadata", service.getService().getId());
                         }
                     }
                 }
                 service = deserialize(resource);
-                if (service != null && service.getServiceMetadata() != null) {
-                    historyMap.putIfAbsent(service.getServiceMetadata().getModifiedAt(), new ServiceHistory(service, false));
+                if (service != null && service.getMetadata() != null) {
+                    historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, false));
                 }
             }
         }
@@ -410,6 +408,9 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
                     return resource;
                 }
             }
+            if (resources.getTotal() > 0) {
+                return resources.getResults().get(0);
+            }
             return null;
         } else if ("latest".equals(serviceVersion)) {
             resources = searchService
@@ -463,29 +464,19 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
         return richServices;
     }
 
-    private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth){
-        for (RichService richService : richServices){
+    private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth) {
+        for (RichService richService : richServices) {
             List<ProviderInfo> providerInfoList = new ArrayList<>();
-            for (String provider : richService.getService().getProviders()){
+            for (String provider : richService.getService().getProviders()) {
                 ProviderInfo providerInfo = new ProviderInfo();
                 providerInfo.setProviderId(providerService.get(provider, auth).getId());
-                providerInfo.setProviderName(providerService.get(provider, auth).getName());
-                providerInfo.setProviderAcronym(providerService.get(provider, auth).getAcronym());
+                providerInfo.setProviderName(providerService.get(provider, auth).getProvider().getName());
+                providerInfo.setProviderAcronym(providerService.get(provider, auth).getProvider().getAcronym());
                 providerInfoList.add(providerInfo);
             }
             richService.setProviderInfo(providerInfoList);
         }
         return richServices;
-    }
-
-    @Override
-    public String createServiceId(Service service) {
-        String provider = service.getProviders().get(0);
-        return String.format("%s.%s", provider, StringUtils
-                .stripAccents(service.getName())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
     }
 
     /**
@@ -592,27 +583,31 @@ public abstract class ServiceResourceManager extends AbstractGenericService<Infr
 
             // Domain Tree
             List<ScientificDomain> domains = new ArrayList<>();
-            for (String subdomain : infraService.getService().getScientificSubdomains()) {
-                ScientificDomain domain = new ScientificDomain();
-                String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics
-                String domainId = "scientific_domain-" + parts[1];
-                domain.setDomain(vocabularyService.get(domainId));
-                domain.setSubdomain(vocabularyService.get(subdomain));
-                domains.add(domain);
+            if (infraService.getService().getScientificSubdomains() != null){
+                for (String subdomain : infraService.getService().getScientificSubdomains()) {
+                    ScientificDomain domain = new ScientificDomain();
+                    String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics
+                    String domainId = "scientific_domain-" + parts[1];
+                    domain.setDomain(vocabularyService.get(domainId));
+                    domain.setSubdomain(vocabularyService.get(subdomain));
+                    domains.add(domain);
+                }
             }
             richService.setDomains(domains);
 
             // Category Tree
             List<Category> categories = new ArrayList<>();
-            for (String subcategory : infraService.getService().getSubcategories()) {
-                Category category = new Category();
-                String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
-                String supercategoryId = "supercategory-" + parts[1];
-                String categoryId = "category-" + parts[1] + "-" + parts[2];
-                category.setSuperCategory(vocabularyService.get(supercategoryId));
-                category.setCategory(vocabularyService.get(categoryId));
-                category.setSubCategory(vocabularyService.get(subcategory));
-                categories.add(category);
+            if (infraService.getService().getSubcategories() != null) {
+                for (String subcategory : infraService.getService().getSubcategories()) {
+                    Category category = new Category();
+                    String[] parts = subcategory.split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
+                    String supercategoryId = "supercategory-" + parts[1];
+                    String categoryId = "category-" + parts[1] + "-" + parts[2];
+                    category.setSuperCategory(vocabularyService.get(supercategoryId));
+                    category.setCategory(vocabularyService.get(categoryId));
+                    category.setSubCategory(vocabularyService.get(subcategory));
+                    categories.add(category);
+                }
             }
             richService.setCategories(categories);
 

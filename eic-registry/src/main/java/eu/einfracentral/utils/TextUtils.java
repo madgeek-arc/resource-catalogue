@@ -7,10 +7,12 @@ public class TextUtils {
 
     private static final Logger logger = LogManager.getLogger(TextUtils.class);
 
-    private TextUtils() {}
+    private TextUtils() {
+    }
 
     /**
      * Trims excessive whitespace in a text.
+     *
      * @param text
      * @return
      */
@@ -23,6 +25,7 @@ public class TextUtils {
 
     /**
      * Prettifies text by removing spaces before the specified characters and leaving one space after them.
+     *
      * @param text
      * @param characters
      * @return
@@ -31,7 +34,7 @@ public class TextUtils {
         if (text != null) {
             text = trimWhitespace(text);
             for (char c : characters.toCharArray()) {
-                text = text.replaceAll("(\\s)?"+String.format("\\%s", c)+"(\\s)?", c+" ");
+                text = text.replaceAll("(\\s)?" + String.format("\\%s", c) + "(\\s)?", c + " ");
             }
             text = text.replaceAll("(\\s)$", "");
         }
@@ -40,6 +43,7 @@ public class TextUtils {
 
     /**
      * Capitalizes first letter.
+     *
      * @param text
      * @return
      */
@@ -49,6 +53,7 @@ public class TextUtils {
 
     /**
      * Formats a numerical value's precision to a maximum number of decimal digits.
+     *
      * @param value
      * @param precision
      * @return

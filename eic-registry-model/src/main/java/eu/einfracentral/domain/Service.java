@@ -3,6 +3,7 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -251,8 +252,6 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private XMLGregorianCalendar lastUpdate;
 
-  
-    // Service Classification Information
     /**
      * Summary of the service/resource features updated from the previous version.
      */
@@ -279,7 +278,7 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private List<String> standards;
 
-  
+
     // Service Contractual Information
     /**
      * Described id the service/resource can be accessed with an ordering process.
@@ -329,8 +328,6 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private URL accessPolicy;
 
-  
-    // Service Maturity Information
     /**
      * Webpage with the supported payment models and restrictions that apply to each of them.
      */
@@ -397,7 +394,7 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private URL maintenance;
 
-  
+
     // Service Contact Information
     /**
      * List of service's contact persons info.
@@ -671,6 +668,7 @@ public class Service implements Identifiable {
     /**
      * Method checking if a {@link List<String>} object is null or is empty or it contains only one entry
      * with an empty String ("")
+     *
      * @param list
      * @return
      */
@@ -689,6 +687,15 @@ public class Service implements Identifiable {
                 privacyPolicy, accessPolicy, paymentModel, pricing, userManual, adminManual, training, helpdesk, monitoring,
                 maintenance, contacts, relatedPlatforms, applications, datasets, otherProducts, publications, aggregatedServices,
                 software);
+    }
+
+    public static String createId(Service service) {
+        String provider = service.getProviders().get(0);
+        return String.format("%s.%s", provider, StringUtils
+                .stripAccents(service.getName())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase());
     }
 
     @Override
@@ -778,7 +785,7 @@ public class Service implements Identifiable {
     }
 
     public void setOptions(List<ServiceOption> options) {
-        this.options= options;
+        this.options = options;
     }
 
     public URL getEndpoint() {

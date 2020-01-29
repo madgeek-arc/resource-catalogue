@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "infra_service_id",
+      "name": "pending_service_id",
       "path": "//*[local-name()='service']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
@@ -166,12 +166,6 @@
     },
     {
       "multivalued": false,
-      "name": "originalId",
-      "path": "//*[local-name()='metadata']/*[local-name()='originalId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "active",
       "defaultValue": false,
       "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
@@ -188,11 +182,17 @@
       "name": "latest",
       "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='originalId']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "infra_service",
+  "name": "pending_service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/class_transformations/eic-registry-model/src/main/resources/schema1.xsd"
+  "schema": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://einfracentral.eu\" version=\"1.0\" xmlns:tns=\"http://einfracentral.eu\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n\t<xs:element name=\"infraService\"/>\n</xs:schema>"
 }

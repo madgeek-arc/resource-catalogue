@@ -8,7 +8,6 @@ import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.TextUtils;
-import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -30,18 +29,16 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     private VocabularyService vocabularyService;
     private InfraServiceService<InfraService, InfraService> infraService;
     private SynchronizerService synchronizerService;
-    private FieldValidator fieldValidator;
 
     @Autowired
     public MeasurementManager(IndicatorManager indicatorManager, VocabularyService vocabularyService,
                               InfraServiceService<InfraService, InfraService> service,
-                              SynchronizerService synchronizerService, FieldValidator fieldValidator) {
+                              SynchronizerService synchronizerService) {
         super(Measurement.class);
         this.vocabularyService = vocabularyService;
         this.infraService = service;
         this.indicatorManager = indicatorManager;
         this.synchronizerService = synchronizerService;
-        this.fieldValidator = fieldValidator;
     }
 
     @Override
@@ -55,7 +52,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             measurement.setId(UUID.randomUUID().toString());
         }
         existsIdentical(measurement);
-        validateMeasurement(measurement);
+        validate(measurement);
         super.add(measurement, auth);
         logger.debug("Adding Measurement {}", measurement);
         synchronizerService.syncAdd(measurement);
@@ -64,7 +61,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Override
     public Measurement update(Measurement measurement, Authentication auth) {
-        validateMeasurement(measurement);
+        validate(measurement);
         Measurement previous = get(measurement.getId());
         if (!previous.getServiceId().equals(measurement.getServiceId())) {
             throw new ValidationException("You cannot change the Service id of the measurement");
@@ -81,11 +78,17 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #serviceId)")
     public List<Measurement> updateAll(String serviceId, List<Measurement> allMeasurements, Authentication auth) {
+        return updateAll(serviceId, serviceId, allMeasurements, auth);
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #serviceId)")
+    public List<Measurement> updateAll(String serviceId, String newServiceId, List<Measurement> allMeasurements, Authentication auth) {
         List<Measurement> updatedMeasurements = new ArrayList<>();
         List<Measurement> existingMeasurements = getAll(serviceId, auth).getResults();
 
-        // set Service ID to every measurement
-        allMeasurements.forEach(measurement -> measurement.setServiceId(serviceId));
+        // set new Service ID to every measurement
+        allMeasurements.forEach(measurement -> measurement.setServiceId(newServiceId));
 
         for (Measurement existingMeasurement : existingMeasurements) {
             for (int i = 0; i < allMeasurements.size(); i++) {
@@ -175,13 +178,10 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         synchronizerService.syncDelete(measurement);
     }
 
-    public void validateMeasurement(Measurement measurement) {
-        logger.debug("Validating Measurement with id: {}", measurement.getId());
-        try {
-            fieldValidator.validateFields(measurement);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
-        }
+    @Override
+    public Measurement validate(Measurement measurement) {
+        logger.debug("Validating Measurement: {}", measurement);
+        super.validate(measurement);
 
         Indicator indicator = indicatorManager.get(measurement.getIndicatorId());
 
@@ -305,6 +305,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
             default:
                 // should never enter this
         }
+        return measurement;
     }
 
     // Validates if Measurement's index complies with Indicator's structure

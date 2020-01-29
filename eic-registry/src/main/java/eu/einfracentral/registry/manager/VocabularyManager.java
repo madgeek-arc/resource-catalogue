@@ -111,7 +111,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            logger.debug("Adding Vocabulary {}", vocabulary.toString());
             add(vocabulary, auth);
         }
     }
@@ -124,14 +123,13 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.setQuantity(10000);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
-            logger.debug("Deleting Vocabulary {}", vocabulary.getName());
             delete(vocabulary);
         }
     }
 
     @Override
     @Cacheable(value = CACHE_VOCABULARY_TREE)
-    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: replace with recursive method
+    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
         VocabularyTree root = new VocabularyTree();
         root.setVocabulary(null);
         Map<String, List<Vocabulary>> vocabularies = getBy("parent_id");
@@ -190,7 +188,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);
-        logger.debug("Adding Resource {}", vocabulary);
+        logger.debug("Adding Vocabulary {}", vocabulary);
         return vocabulary;
     }
 
@@ -204,7 +202,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         existing.setPayload(serialized);
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating Resource {}", vocabulary);
+        logger.debug("Updating Vocabulary {}", vocabulary);
         return vocabulary;
     }
 

@@ -2,6 +2,7 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import eu.openminted.registry.core.service.ServiceException;
 import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,6 +33,9 @@ public class SecurityService {
     private InfraServiceService<InfraService, InfraService> infraServiceService;
     private OIDCAuthenticationToken adminAccess;
 
+    @Value("${project.name:}")
+    private String projectName;
+
     @Autowired
     SecurityService(ProviderManager providerManager, InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.providerManager = providerManager;
@@ -42,7 +47,7 @@ public class SecurityService {
         DefaultUserInfo userInfo = new DefaultUserInfo();
         userInfo.setEmail("no-reply@einfracentral.eu");
         userInfo.setId(1L);
-        userInfo.setGivenName("eInfraCentral");
+        userInfo.setGivenName(projectName);
         userInfo.setFamilyName("");
         adminAccess = new OIDCAuthenticationToken("", "", userInfo, roles, null, "", "");
     }
@@ -56,15 +61,15 @@ public class SecurityService {
     }
 
     public boolean userIsProviderAdmin(Authentication auth, String providerId) {
-        Provider registeredProvider = providerManager.get(providerId);
+        ProviderBundle registeredProvider = providerManager.get(providerId);
         User user = new User(auth);
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
         }
-        if (registeredProvider.getUsers() == null) {
+        if (registeredProvider.getProvider().getUsers() == null) {
             return false;
         }
-        return registeredProvider.getUsers()
+        return registeredProvider.getProvider().getUsers()
                 .parallelStream()
                 .filter(Objects::nonNull)
                 .anyMatch(u -> {
@@ -112,12 +117,12 @@ public class SecurityService {
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
         List<String> providerIds = service.getService().getProviders();
         for (String providerId : providerIds) {
-            Provider provider = providerManager.get(providerId);
+            ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
-                if ((provider.getActive() == null || provider.getStatus() == null)) {
-                    throw new ServiceException("Provider active or status field is null");
+                if (provider.getStatus() == null) {
+                    throw new ServiceException("Provider status field is null");
                 }
-                if (provider.getActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
+                if (provider.isActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
                     if (userIsProviderAdmin(auth, provider.getId())) {
                         return true;
                     }
@@ -136,10 +141,10 @@ public class SecurityService {
 
     @Deprecated
     public boolean providerIsActive(String providerId) {
-        Provider provider = providerManager.get(providerId);
-        if (provider != null && provider.getActive() != null) {
-            if (!provider.getActive()) {
-                throw new ServiceException(String.format("Provider '%s' is not active.", provider.getName()));
+        ProviderBundle provider = providerManager.get(providerId);
+        if (provider != null) {
+            if (!provider.isActive()) {
+                throw new ServiceException(String.format("Provider '%s' is not active.", provider.getProvider().getName()));
             }
             return true;
         } else {
@@ -150,8 +155,8 @@ public class SecurityService {
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
         for (String providerId : service.getService().getProviders()) {
-            Provider provider = providerManager.get(providerId);
-            if (provider != null && provider.getActive() != null && provider.getActive()) {
+            ProviderBundle provider = providerManager.get(providerId);
+            if (provider != null && provider.isActive()) {
                 if (userIsProviderAdmin(auth, providerId)) {
                     return true;
                 }
@@ -165,7 +170,6 @@ public class SecurityService {
         return service.isActive();
     }
 
-    @Deprecated
     public boolean serviceIsActive(String serviceId, String version) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version

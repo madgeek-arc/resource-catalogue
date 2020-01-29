@@ -3,6 +3,7 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -12,7 +13,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import static eu.einfracentral.utils.ValidationLengths.*;
+import static eu.einfracentral.utils.ValidationLengths.FIELD_LENGTH_SMALL;
+import static eu.einfracentral.utils.ValidationLengths.NAME_LENGTH;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -233,13 +235,13 @@ public class Provider implements Identifiable {
 
 
     // Extra needed fields
-    @XmlElement
-    @ApiModelProperty(hidden = true)
-    private Boolean active;
-
-    @XmlElement
-    @ApiModelProperty(hidden = true)
-    private String status;
+//    @XmlElement
+//    @ApiModelProperty(hidden = true)
+//    private Boolean active;
+//
+//    @XmlElement
+//    @ApiModelProperty(hidden = true)
+//    private String status;
 
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
@@ -307,10 +309,28 @@ public class Provider implements Identifiable {
                 ", areasOfActivity=" + areasOfActivity +
                 ", societalGrandChallenges=" + societalGrandChallenges +
                 ", nationalRoadmap=" + nationalRoadmap +
-                ", active=" + active +
-                ", status='" + status + '\'' +
                 ", users=" + users +
                 '}';
+    }
+
+    public static String createId(Provider provider) {
+        if (provider.getId() == null || "".equals(provider.getId())) {
+            if (provider.getAcronym() != null && !"".equals(provider.getAcronym())) {
+                return StringUtils
+                        .stripAccents(provider.getAcronym())
+                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                        .replace(" ", "_");
+            } else {
+                return StringUtils
+                        .stripAccents(provider.getName())
+                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                        .replace(" ", "_");
+            }
+        }
+        return StringUtils
+                .stripAccents(provider.getId())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_");
     }
 
     @Override
@@ -499,21 +519,21 @@ public class Provider implements Identifiable {
         this.nationalRoadmap = nationalRoadmap;
     }
 
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+//    public Boolean getActive() {
+//        return active;
+//    }
+//
+//    public void setActive(Boolean active) {
+//        this.active = active;
+//    }
+//
+//    public String getStatus() {
+//        return status;
+//    }
+//
+//    public void setStatus(String status) {
+//        this.status = status;
+//    }
 
     public List<User> getUsers() {
         return users;

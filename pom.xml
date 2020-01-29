@@ -52,6 +52,7 @@
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
         <spring-security-config.version>5.1.6.RELEASE</spring-security-config.version>
+        <org.apache.commons.version>3.9</org.apache.commons.version>
     </properties>
 
     <dependencyManagement>
@@ -92,6 +93,12 @@
                 <version>${registry-core.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${org.apache.commons.version}</version>
+                <scope>compile</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>

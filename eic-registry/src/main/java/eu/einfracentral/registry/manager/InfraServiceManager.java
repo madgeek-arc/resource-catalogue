@@ -11,6 +11,7 @@ import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,12 +20,11 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
 @org.springframework.stereotype.Service("infraServiceService")
-public class InfraServiceManager extends ServiceResourceManager implements InfraServiceService<InfraService, InfraService> {
+public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
@@ -32,6 +32,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     private Random randomNumberGenerator;
     private FieldValidator fieldValidator;
 
+    @Value("${project.name:}")
+    private String projectName;
 
     @Autowired
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
@@ -48,35 +50,34 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#authentication, #infraService)")
-    public InfraService addService(InfraService infraService, Authentication authentication) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #infraService)")
+    public InfraService addService(InfraService infraService, Authentication auth) {
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
-            String id = createServiceId(infraService.getService());
+            String id = Service.createId(infraService.getService());
             infraService.getService().setId(id);
         }
         validate(infraService);
-        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).getActive());
+        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).isActive());
 
         infraService.setLatest(true);
 
-        if (infraService.getServiceMetadata() == null) {
-            ServiceMetadata serviceMetadata = createServiceMetadata(new User(authentication).getFullName());
-            infraService.setServiceMetadata(serviceMetadata);
+        if (infraService.getMetadata() == null) {
+            infraService.setMetadata(Metadata.createMetadata(new User(auth).getFullName()));
         }
 
-        InfraService ret;
-        ret = super.add(infraService, authentication);
         logger.info("Adding Service: {}", infraService);
+        InfraService ret;
+        ret = super.add(infraService, auth);
 
-        providerManager.verifyNewProviders(infraService.getService().getProviders(), authentication);
+        providerManager.verifyNewProviders(infraService.getService().getProviders(), auth);
 
         return ret;
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or " +
-            "@securityService.providerCanAddServices(#authentication, #infraService)")
-    public InfraService updateService(InfraService infraService, Authentication authentication) {
+            "@securityService.providerCanAddServices(#auth, #infraService)")
+    public InfraService updateService(InfraService infraService, Authentication auth) {
         InfraService ret;
         validate(infraService);
         InfraService existingService;
@@ -94,15 +95,16 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         }
 
         // update existing service serviceMetadata
-        ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), new User(authentication).getFullName());
-        infraService.setServiceMetadata(serviceMetadata);
+        infraService.setMetadata(
+                Metadata.updateMetadata(existingService.getMetadata(), new User(auth).getFullName()));
         infraService.setActive(existingService.isActive());
 
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
-                || infraService.getService().getVersion() != null && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
+                || infraService.getService().getVersion() != null
+                && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
             infraService.setLatest(existingService.isLatest());
             infraService.setStatus(existingService.getStatus());
-            ret = super.update(infraService, authentication);
+            ret = super.update(infraService, auth);
             logger.info("Updating Service without version change: {}", infraService);
             logger.info("Service Version: {}", infraService.getService().getVersion());
 
@@ -112,13 +114,13 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
             // set previous service not latest
             existingService.setLatest(false);
-            super.update(existingService, authentication);
+            super.update(existingService, auth);
             logger.info("Updating Service with version change (super.update): {}", existingService);
             logger.info("Service Version: {}", existingService.getService().getVersion());
 
             // set new service as latest
             infraService.setLatest(true);
-            ret = super.add(infraService, authentication);
+            ret = super.add(infraService, auth);
             logger.info("Updating Service with version change (super.add): {}", infraService);
         }
 
@@ -127,7 +129,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or " +
-            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService.id)")
+            "@securityService.userIsServiceProviderAdmin(#auth, #infraService.id)")
     public void delete(InfraService infraService) {
         super.delete(infraService);
         logger.info("Deleting Service: {}", infraService);
@@ -149,7 +151,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<Provider> providers = providerManager.getAll(ff, null).getResults();
+        List<ProviderBundle> providers = providerManager.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
@@ -177,8 +179,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
-                ServiceMetadata serviceMetadata = updateServiceMetadata(existingService.getServiceMetadata(), "eInfraCentral");
-                infraService.setServiceMetadata(serviceMetadata);
+                infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), projectName));
 
                 super.update(infraService, null);
                 logger.info("Updating Service through merging: {}", infraService);
@@ -198,16 +199,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
         //just check if validateVocabularies did anything or not
         logger.debug("Validating Service with id: {}", service.getId());
 
-        if (service.getOptions() != null) {
-            for (ServiceOption option : service.getOptions()) {
-
-                // Create Option's id
-                option.setId(UUID.randomUUID().toString());
-            }
-        }
-
         try {
-            fieldValidator.validateFields(infraService);
+            fieldValidator.validateFields(infraService.getService());
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
@@ -255,26 +248,5 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 //    private InfraService migrate(InfraService service) throws MalformedURLException {
 //        return service;
 //    }
-
-    private ServiceMetadata updateServiceMetadata(ServiceMetadata serviceMetadata, String modifiedBy) {
-        ServiceMetadata ret;
-        if (serviceMetadata != null) {
-            ret = new ServiceMetadata(serviceMetadata);
-            ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-            ret.setModifiedBy(modifiedBy);
-        } else {
-            ret = createServiceMetadata(modifiedBy);
-        }
-        return ret;
-    }
-
-    private ServiceMetadata createServiceMetadata(String registeredBy) {
-        ServiceMetadata ret = new ServiceMetadata();
-        ret.setRegisteredBy(registeredBy);
-        ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
-        ret.setModifiedBy(registeredBy);
-        ret.setModifiedAt(ret.getRegisteredAt());
-        return ret;
-    }
 
 }
