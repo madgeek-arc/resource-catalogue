@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.EmailMessage;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ProviderRequest;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderRequestService;
@@ -14,12 +11,8 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.mail.MessagingException;
 import java.sql.Timestamp;
@@ -32,10 +25,12 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     private FieldValidator fieldValidator;
     private MailService mailService;
     private InfraServiceService<InfraService, InfraService> infraServiceService;
-    private ProviderService providerService;
+    private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    public ProviderRequestManager(FieldValidator fieldValidator, MailService mailService, InfraServiceService infraServiceService, ProviderService providerService) {
+    public ProviderRequestManager(FieldValidator fieldValidator, MailService mailService,
+                                  InfraServiceService<InfraService, InfraService> infraServiceService,
+                                  ProviderService<ProviderBundle, Authentication> providerService) {
         super(ProviderRequest.class);
         this.fieldValidator = fieldValidator;
         this.mailService = mailService;
@@ -97,18 +92,18 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     public void sendMailsToProviders(List<String> serviceIds, EmailMessage message) {
         Map<String, String> providersToBeMailed = new HashMap<>();
-        for (String serviceId : serviceIds){
+        for (String serviceId : serviceIds) {
             InfraService service = infraServiceService.get(serviceId);
             List<String> providerIds = service.getService().getProviders();
-            for (String providerId : providerIds){
-                Provider provider = providerService.get(providerId, (Authentication) null);
-                providersToBeMailed.put(providerId, provider.getContacts().get(0).getEmail());
+            for (String providerId : providerIds) {
+                ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
+                providersToBeMailed.put(providerId, providerBundle.getProvider().getContacts().get(0).getEmail());
             }
         }
-        for (Map.Entry<String, String> entry : providersToBeMailed.entrySet()){
+        for (Map.Entry<String, String> entry : providersToBeMailed.entrySet()) {
             try {
                 mailService.sendMail(entry.getValue(), message.getSenderEmail(), message.getSubject(), message.getMessage());
-                logger.debug(String.format("Sending mail to %s", entry.getValue()));
+                logger.debug("Sending mail to {}", entry.getValue());
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                 ProviderRequest providerRequest = new ProviderRequest();
                 message.setRecipientEmail(entry.getValue());
@@ -118,7 +113,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
                 providerRequest.setStatus(false);
                 add(providerRequest);
             } catch (MessagingException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
         }
     }
