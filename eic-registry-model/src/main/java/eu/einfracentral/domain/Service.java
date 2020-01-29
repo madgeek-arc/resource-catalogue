@@ -35,7 +35,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
-    @FieldValidation(maxLength = NAME_LENGTH)
+    @FieldValidation
     private String name;
 
     /**
@@ -76,7 +76,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 7, example = "String (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
+    @FieldValidation(nullable = true)
     private String tagline;
 
     /**
@@ -84,7 +84,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 8, example = "String (optional)")
-    @FieldValidation(nullable = true, maxLength = TEXT_LENGTH)
+    @FieldValidation(nullable = true)
     private String userValue;
 
     /**
@@ -93,7 +93,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "userBaseList")
     @XmlElement(name = "userBase")
     @ApiModelProperty(position = 9, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
+    @FieldValidation(nullable = true)
     private List<String> userBaseList;
 
     /**
@@ -102,7 +102,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "useCases")
     @XmlElement(name = "useCase")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
+    @FieldValidation(nullable = true)
     private List<String> useCases;
 
     /**
@@ -213,7 +213,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
     @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation(nullable = true)
     private List<String> tags;
 
 
@@ -241,7 +241,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 25, example = "String (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation(nullable = true)
     private String version;
 
     /**
@@ -257,7 +257,7 @@ public class Service implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 27, example = "String (optional)")
-    @FieldValidation(nullable = true, maxLength = TEXT_LENGTH)
+    @FieldValidation(nullable = true)
     private String changeLog;
 
     /**
@@ -266,7 +266,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
     @ApiModelProperty(position = 28, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
+    @FieldValidation(nullable = true)
     private List<String> certifications;
 
     /**
@@ -275,7 +275,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "standards")
     @XmlElement(name = "standard")
     @ApiModelProperty(position = 29, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH)
+    @FieldValidation(nullable = true)
     private List<String> standards;
 
 
@@ -431,7 +431,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "relatedPlatforms")
     @XmlElement(name = "relatedPlatform")
     @ApiModelProperty(position = 47, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation(nullable = true)
     private List<String> relatedPlatforms;
 
 

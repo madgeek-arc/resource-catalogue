@@ -7,9 +7,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import static eu.einfracentral.utils.ValidationLengths.FIELD_LENGTH;
-import static eu.einfracentral.utils.ValidationLengths.FIELD_LENGTH_SMALL;
-
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -22,7 +19,7 @@ public class Contact {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String firstName;
 
     /**
@@ -30,7 +27,7 @@ public class Contact {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String lastName;
 
     /**
@@ -38,7 +35,7 @@ public class Contact {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH)
+    @FieldValidation
     private String email;
 
     /**
@@ -46,7 +43,7 @@ public class Contact {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, example = "String (required)", required = true)
-    @FieldValidation(maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation
     private String tel;
 
     /**
@@ -54,7 +51,7 @@ public class Contact {
      */
     @XmlElement
     @ApiModelProperty(position = 5, example = "String (optional)")
-    @FieldValidation(nullable = true, maxLength = FIELD_LENGTH_SMALL)
+    @FieldValidation(nullable = true)
     private String position;
 
     public Contact() {
