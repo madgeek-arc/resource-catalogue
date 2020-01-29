@@ -1,8 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Metadata;
-import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.Resource;
@@ -13,17 +11,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service("pendingServiceManager")
 public class PendingServiceManager extends ResourceManager<InfraService> implements PendingResourceService<InfraService> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceManager.class);
 
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final PendingProviderManager pendingProviderManager;
 
     @Autowired
-    public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService) {
+    public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+                                 PendingProviderManager pendingProviderManager) {
         super(InfraService.class);
         this.infraServiceService = infraServiceService;
+        this.pendingProviderManager = pendingProviderManager;
     }
 
     @Override
@@ -43,6 +46,16 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         service.setLatest(true);
 
         super.add(service, auth);
+
+        List<String> serviceProviders = service.getService().getProviders();
+        for (String providerId : serviceProviders) {
+            ProviderBundle bundle = pendingProviderManager.get(providerId);
+            if (bundle.getStatus().equals(Provider.States.PENDING_1.getKey())
+                    || bundle.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                bundle.setStatus(Provider.States.PENDING_2.getKey());
+                pendingProviderManager.update(bundle, auth);
+            }
+        }
 
         return service;
     }

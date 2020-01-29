@@ -13,7 +13,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import static eu.einfracentral.utils.ValidationLengths.*;
+import static eu.einfracentral.utils.ValidationLengths.FIELD_LENGTH_SMALL;
+import static eu.einfracentral.utils.ValidationLengths.NAME_LENGTH;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -308,21 +309,21 @@ public class Provider implements Identifiable {
                 ", areasOfActivity=" + areasOfActivity +
                 ", societalGrandChallenges=" + societalGrandChallenges +
                 ", nationalRoadmap=" + nationalRoadmap +
-//                ", active=" + active +
-//                ", status='" + status + '\'' +
                 ", users=" + users +
                 '}';
     }
 
     public static String createId(Provider provider) {
         if (provider.getId() == null || "".equals(provider.getId())) {
-            if (provider.getAcronym() != null && !"".equals(provider.getAcronym())){
+            if (provider.getAcronym() != null && !"".equals(provider.getAcronym())) {
                 return StringUtils
                         .stripAccents(provider.getAcronym())
+                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                         .replace(" ", "_");
             } else {
                 return StringUtils
                         .stripAccents(provider.getName())
+                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                         .replace(" ", "_");
             }
         }

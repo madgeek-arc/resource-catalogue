@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
-                                  PendingResourceService<InfraService> pendingServiceManager,
+                                  @Lazy PendingResourceService<InfraService> pendingServiceManager,
                                   InfraServiceManager infraServiceManager) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
@@ -58,24 +59,28 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
         String newId = StringUtils
                 .stripAccents(providerBundle.getProvider().getAcronym())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_");
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), new User(auth).getFullName()));
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerBundle.getId());
         ff.setQuantity(10000);
 
-        // update PendingServices of this provider
-        List<InfraService> providerPendingServices = pendingServiceManager.getAll(ff, auth).getResults();
-        for (InfraService service : providerPendingServices) {
-            updateProviderId(service, providerBundle.getId(), newId);
-            pendingServiceManager.update(service, auth);
-        }
+        // if provider id has changed
+        if (!providerBundle.getId().equals(newId)) {
+            // update PendingServices of this provider
+            List<InfraService> providerPendingServices = pendingServiceManager.getAll(ff, auth).getResults();
+            for (InfraService service : providerPendingServices) {
+                updateProviderId(service, providerBundle.getId(), newId);
+                pendingServiceManager.update(service, auth);
+            }
 
-        // update InfraServices of this provider
-        List<InfraService> providerServices = infraServiceManager.getAll(ff, auth).getResults();
-        for (InfraService service : providerServices) {
-            updateProviderId(service, providerBundle.getId(), newId);
-            infraServiceManager.update(service, auth);
+            // update InfraServices of this provider
+            List<InfraService> providerServices = infraServiceManager.getAll(ff, auth).getResults();
+            for (InfraService service : providerServices) {
+                updateProviderId(service, providerBundle.getId(), newId);
+                infraServiceManager.update(service, auth);
+            }
         }
 
         // get existing resource
@@ -108,6 +113,11 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
         providerManager.validate(providerBundle);
         providerBundle = update(providerBundle, auth);
+        try {
+            Thread.sleep(2000); // FIXME:
+        } catch (InterruptedException e) {
+            logger.error(e);
+        }
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerBundle.getId());
         resource.setResourceType(resourceType);
