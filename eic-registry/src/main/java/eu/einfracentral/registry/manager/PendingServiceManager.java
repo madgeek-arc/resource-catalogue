@@ -62,6 +62,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     @Override
     public InfraService update(InfraService infraService, Authentication auth) {
+        infraServiceService.validate(infraService);
         String newId = eu.einfracentral.domain.Service.createId(infraService.getService());
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), new User(auth).getFullName()));
         // get existing resource

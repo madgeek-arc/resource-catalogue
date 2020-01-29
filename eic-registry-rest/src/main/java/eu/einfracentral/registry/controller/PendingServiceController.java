@@ -106,8 +106,10 @@ public class PendingServiceController extends ResourceController<InfraService, A
         InfraService infraService = pendingServiceManager.get(service.getId());
         infraService.setService(service);
 
-        // updated InfraService and transforms to active ( may change InfraService id )
-        infraService = pendingServiceManager.transformToActive(infraService, auth);
+        update(infraService, auth);
+        infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
+//        // updated InfraService and transforms to active ( may change InfraService id )
+//        infraService = pendingServiceManager.transformToActive(infraService, auth);
 
         this.measurementService.updateAll(service.getId(), infraService.getId(), measurements, auth);
 
