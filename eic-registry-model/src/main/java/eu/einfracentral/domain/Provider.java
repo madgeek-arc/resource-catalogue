@@ -13,9 +13,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import static eu.einfracentral.utils.ValidationLengths.FIELD_LENGTH_SMALL;
-import static eu.einfracentral.utils.ValidationLengths.NAME_LENGTH;
-
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Provider implements Identifiable {
