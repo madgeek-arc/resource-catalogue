@@ -27,17 +27,17 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         this.pendingProviderService = pendingProviderService;
     }
 
-    @GetMapping(path = "/provider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/provider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id) {
         return new ResponseEntity<>(pendingProviderService.get(id).getProvider(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<String> getIdFromOriginalId(@RequestParam("originalId") String originalId) {
         return new ResponseEntity<>(pendingProviderService.getId(originalId), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/id/mappings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/id/mappings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Map<String, String>> getIdFromOriginalId() {
         return new ResponseEntity<>(pendingProviderService.getIdOriginalIdMap(), HttpStatus.OK);
     }
@@ -54,7 +54,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         pendingProviderService.transformToActive(providerId, auth);
     }
 
-    @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
