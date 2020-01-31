@@ -69,18 +69,9 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     public List<ProviderRequest> getAllProviderRequests(String providerId, Authentication auth) {
         List<ProviderRequest> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
+        ff.addFilter("provider_id", providerId);
         ff.setQuantity(1000);
-        List<ProviderRequest> providerRequests = getAll(ff, auth).getResults();
-        for (ProviderRequest providerRequest : providerRequests) {
-            if (providerRequest.getProviderId().equals(providerId)) {
-                ret.add(providerRequest);
-            }
-        }
-        if (ret.isEmpty()) {
-            throw new ValidationException("Provider with id " + providerId + " does not exist.");
-        }
-
-        return ret;
+        return getAll(ff, auth).getResults();
     }
 
     @Override
