@@ -46,12 +46,12 @@ public class PendingServiceController extends ResourceController<InfraService, A
         this.measurementService = measurementService;
     }
 
-    @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getService(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<List<Service>> getPendingServices(@PathVariable String id) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", id);
@@ -63,7 +63,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PostMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
@@ -82,7 +82,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         pendingServiceManager.transformToActive(serviceId, auth);
     }
 
-    @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()") // FIXME: authorize only admins and service providers
     public ResponseEntity<Service> pendingToInfra(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
@@ -116,7 +116,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
