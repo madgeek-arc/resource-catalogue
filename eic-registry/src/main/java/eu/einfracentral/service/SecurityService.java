@@ -1,9 +1,11 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.User;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -21,10 +23,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("securityService")
 public class SecurityService {
@@ -82,6 +83,25 @@ public class SecurityService {
                     }
                     return u.getEmail().equals(user.getEmail());
                 });
+    }
+
+    public boolean userIsServiceProviderAdmin(Authentication auth, Map<String, JsonNode> json) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        eu.einfracentral.domain.Service service = null;
+        service = mapper.readValue(json.get("service").toString(), eu.einfracentral.domain.Service.class);
+        if (service == null) {
+            throw new ServiceException("Service is null");
+        }
+
+        if (service.getProviders().isEmpty()) {
+            throw new ValidationException("Service has no providers");
+        }
+        Optional<List<String>> providers = Optional.of(service.getProviders());
+        return providers
+                .get()
+                .stream()
+                .filter(Objects::nonNull)
+                .anyMatch(id -> userIsProviderAdmin(auth, id));
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
