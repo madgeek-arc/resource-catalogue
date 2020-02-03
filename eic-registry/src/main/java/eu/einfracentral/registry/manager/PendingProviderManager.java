@@ -57,7 +57,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
-        providerManager.validate(providerBundle);
         String newId = StringUtils
                 .stripAccents(providerBundle.getProvider().getAcronym())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
