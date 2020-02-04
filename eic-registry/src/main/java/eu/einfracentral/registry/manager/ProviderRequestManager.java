@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Component
-public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<ProviderRequest, Authentication> {
+public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
     private FieldValidator fieldValidator;
@@ -42,7 +42,8 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         return "provider_request";
     }
 
-    public ProviderRequest add(ProviderRequest providerRequest) {
+    @Override
+    public ProviderRequest add(ProviderRequest providerRequest, Authentication auth) {
         providerRequest.setId(UUID.randomUUID().toString());
         validate(providerRequest);
         super.add(providerRequest, null);
@@ -66,21 +67,13 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     @Override
     public List<ProviderRequest> getAllProviderRequests(String providerId, Authentication auth) {
-        List<ProviderRequest> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providerId);
         ff.setQuantity(1000);
         return getAll(ff, auth).getResults();
     }
 
-    @Override
-    public ProviderRequest validate(ProviderRequest providerRequest) {
-        logger.debug("Validating ProviderRequest: {}", providerRequest);
-        super.validate(providerRequest);
-        return providerRequest;
-    }
-
-    public void sendMailsToProviders(List<String> serviceIds, EmailMessage message) {
+    public void sendMailsToProviders(List<String> serviceIds, EmailMessage message, Authentication auth) {
         Map<String, String> providersToBeMailed = new HashMap<>();
         for (String serviceId : serviceIds) {
             InfraService service = infraServiceService.get(serviceId);
@@ -101,7 +94,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
                 providerRequest.setMessage(message);
                 providerRequest.setProviderId(entry.getKey());
                 providerRequest.setRead(false);
-                add(providerRequest);
+                add(providerRequest, auth);
             } catch (MessagingException e) {
                 logger.error(e);
             }

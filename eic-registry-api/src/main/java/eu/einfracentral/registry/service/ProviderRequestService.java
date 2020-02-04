@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ProviderRequestService<T, U extends Authentication> extends ResourceService<ProviderRequest, Authentication> {
+public interface ProviderRequestService<U extends Authentication> extends ResourceService<ProviderRequest, Authentication> {
 
     /**
      * Returns a list with all the requests made on a specific Provider
@@ -24,6 +24,6 @@ public interface ProviderRequestService<T, U extends Authentication> extends Res
      * @param message
      * @return
      */
-    void sendMailsToProviders(List<String> serviceIds, EmailMessage message);
+    void sendMailsToProviders(List<String> serviceIds, EmailMessage message, U authentication);
 
 }

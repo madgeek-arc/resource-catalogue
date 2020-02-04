@@ -88,13 +88,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         logger.debug("Deleting Resource {}", t);
     }
 
-//    @Override
-//    public T del(T t) {
-//        resourceService.deleteResource(whereID(t.getId(), true).getId());
-//        logger.debug("Deleting Resource {}", t);
-//        return t;
-//    }
-
     @Override
     public Map<String, List<T>> getBy(String field) {
         return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
@@ -127,7 +120,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T validate(T t) {
-        logger.debug("Validating Resource using FieldValidator");
+        logger.debug("Validating Resource '{}' using FieldValidator", t);
         try {
             fieldValidator.validateFields(t);
         } catch (IllegalAccessException e) {
