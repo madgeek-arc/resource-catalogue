@@ -843,10 +843,11 @@
 
   <xs:complexType name="providerRequest">
     <xs:sequence>
-      <xs:element minOccurs="0" name="date" type="xs:anySimpleType"/>
+      <xs:element minOccurs="0" name="date" type="xs:dateTime"/>
       <xs:element minOccurs="0" name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="message" type="tns:emailMessage"/>
       <xs:element minOccurs="0" name="providerId" type="xs:string"/>
+      <xs:element name="status" type="xs:boolean"/>
     </xs:sequence>
   </xs:complexType>
 
