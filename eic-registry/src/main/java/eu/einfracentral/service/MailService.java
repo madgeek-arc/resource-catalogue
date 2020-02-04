@@ -68,11 +68,11 @@ public class MailService {
             InternetAddress sender = new InternetAddress(user);
             Message message = new MimeMessage(session);
             message.setFrom(sender);
-            if (!to.isEmpty()) {
-                message.setRecipient(Message.RecipientType.TO, new InternetAddress(String.join(",", to)));
+            for (String address : to) {
+                message.setRecipient(Message.RecipientType.TO, new InternetAddress(address));
             }
-            if (!cc.isEmpty()) {
-                message.setRecipient(Message.RecipientType.CC, new InternetAddress(String.join(",", cc)));
+            for (String address : cc) {
+                message.setRecipient(Message.RecipientType.CC, new InternetAddress(address));
             }
             message.setRecipient(Message.RecipientType.BCC, sender);
             message.setSubject(subject);
