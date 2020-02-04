@@ -8,6 +8,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -37,13 +38,17 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
     private static Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<InfraService> pendingServiceManager;
-    private MeasurementService<Measurement, Authentication> measurementService;
+    private final MeasurementService<Measurement, Authentication> measurementService;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    PendingServiceController(PendingResourceService<InfraService> pendingServiceManager, MeasurementService<Measurement, Authentication> measurementService) {
+    PendingServiceController(PendingResourceService<InfraService> pendingServiceManager,
+                             MeasurementService<Measurement, Authentication> measurementService,
+                             InfraServiceService<InfraService, InfraService> infraServiceService) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
         this.measurementService = measurementService;
+        this.infraServiceService = infraServiceService;
     }
 
     @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -83,7 +88,8 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
     @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("isAuthenticated()") // FIXME: authorize only admins and service providers
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #json)")
+    // FIXME: check this @PreAuthorize and set it to ServiceController as well
     public ResponseEntity<Service> pendingToInfra(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         Service service = null;
@@ -106,10 +112,12 @@ public class PendingServiceController extends ResourceController<InfraService, A
         InfraService infraService = pendingServiceManager.get(service.getId());
         infraService.setService(service);
 
+        // validate the Service and update afterwards
+        infraServiceService.validate(infraService);
         update(infraService, auth);
+
+        // transform to active
         infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
-//        // updated InfraService and transforms to active ( may change InfraService id )
-//        infraService = pendingServiceManager.transformToActive(infraService, auth);
 
         this.measurementService.updateAll(service.getId(), infraService.getId(), measurements, auth);
 
