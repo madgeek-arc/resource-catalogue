@@ -1,5 +1,6 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.exception.ResourceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.*;
@@ -68,11 +70,11 @@ public class MailService {
             InternetAddress sender = new InternetAddress(user);
             Message message = new MimeMessage(session);
             message.setFrom(sender);
-            for (String address : to) {
-                message.setRecipient(Message.RecipientType.TO, new InternetAddress(address));
+            if (to != null) {
+                message.setRecipients(Message.RecipientType.TO, createAddresses(to));
             }
-            for (String address : cc) {
-                message.setRecipient(Message.RecipientType.CC, new InternetAddress(address));
+            if (cc != null) {
+                message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
             }
             message.setRecipient(Message.RecipientType.BCC, sender);
             message.setSubject(subject);
@@ -104,5 +106,13 @@ public class MailService {
     @Async
     public void sendMail(String to, String subject, String text) throws MessagingException {
         sendMail(to, null, subject, text);
+    }
+
+    private InternetAddress[] createAddresses(List<String> emailAddresses) throws AddressException {
+        InternetAddress[] addresses = new InternetAddress[emailAddresses.size()];
+        for (int i = 0; i < emailAddresses.size(); i++) {
+            addresses[i] = new InternetAddress(emailAddresses.get(i));
+        }
+        return addresses;
     }
 }
