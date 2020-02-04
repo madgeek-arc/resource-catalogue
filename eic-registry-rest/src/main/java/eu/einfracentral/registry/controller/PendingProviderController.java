@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,11 +21,14 @@ import java.util.Map;
 public class PendingProviderController extends ResourceController<ProviderBundle, Authentication> {
 
     private final PendingResourceService<ProviderBundle> pendingProviderService;
+    private final ProviderService<ProviderBundle, Authentication> providerManager;
 
     @Autowired
-    PendingProviderController(PendingResourceService<ProviderBundle> pendingProviderService) {
+    PendingProviderController(PendingResourceService<ProviderBundle> pendingProviderService,
+                              ProviderService<ProviderBundle, Authentication> providerManager) {
         super(pendingProviderService);
         this.pendingProviderService = pendingProviderService;
+        this.providerManager = providerManager;
     }
 
     @GetMapping(path = "/provider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -60,14 +64,13 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
 
-        providerBundle.setProvider(provider);
+        // validate the Provider and update afterwards ( update may change provider id and all of its services ids )
+        providerManager.validate(providerBundle);
         update(providerBundle, auth);
 
-        // updates provider and transforms to active ( may change provider id and all of its services ids )
+        // transform to active
         providerBundle = pendingProviderService.transformToActive(providerBundle.getId(), auth);
 
-//        // updates provider and transforms to active ( may change provider id and all of its services ids )
-//        providerBundle = pendingProviderService.transformToActive(providerBundle, auth);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 }
