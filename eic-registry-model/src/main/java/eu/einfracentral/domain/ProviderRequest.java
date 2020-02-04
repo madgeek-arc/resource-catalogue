@@ -5,11 +5,6 @@ import eu.einfracentral.annotation.FieldValidation;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -25,7 +20,7 @@ public class ProviderRequest implements Identifiable {
 
     @XmlElement
     @FieldValidation
-    private Date date;
+    private String date;
 
     @XmlElement
     @FieldValidation(containsId = true, idClass = Provider.class)
@@ -33,17 +28,17 @@ public class ProviderRequest implements Identifiable {
 
     @XmlElement
     @FieldValidation
-    private boolean status;
+    private boolean isRead;
 
     public ProviderRequest() {
     }
 
-    public ProviderRequest(String id, EmailMessage message, Date date, String providerId, boolean status) {
+    public ProviderRequest(String id, EmailMessage message, String date, String providerId, boolean isRead) {
         this.id = id;
         this.message = message;
         this.date = date;
         this.providerId = providerId;
-        this.status = status;
+        this.isRead = isRead;
     }
 
     @Override
@@ -53,7 +48,7 @@ public class ProviderRequest implements Identifiable {
                 ", message=" + message +
                 ", date=" + date +
                 ", providerId='" + providerId + '\'' +
-                ", status=" + status +
+                ", status=" + isRead +
                 '}';
     }
 
@@ -75,11 +70,11 @@ public class ProviderRequest implements Identifiable {
         this.message = message;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -91,11 +86,11 @@ public class ProviderRequest implements Identifiable {
         this.providerId = providerId;
     }
 
-    public boolean isStatus() {
-        return status;
+    public boolean isRead() {
+        return isRead;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setRead(boolean read) {
+        this.isRead = read;
     }
 }

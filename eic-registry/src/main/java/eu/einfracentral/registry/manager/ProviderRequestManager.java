@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderRequestService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -96,13 +95,12 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
             try {
                 mailService.sendMail(entry.getValue(), message.getSenderEmail(), message.getSubject(), message.getMessage());
                 logger.debug("Sending mail to {}", entry.getValue());
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                 ProviderRequest providerRequest = new ProviderRequest();
                 message.setRecipientEmail(entry.getValue());
-//                providerRequest.setDate(Date.from(timestamp.toInstant()));
+                providerRequest.setDate(String.valueOf(System.currentTimeMillis()));
                 providerRequest.setMessage(message);
                 providerRequest.setProviderId(entry.getKey());
-//                providerRequest.setStatus(false);
+                providerRequest.setRead(false);
                 add(providerRequest);
             } catch (MessagingException e) {
                 logger.error(e);
