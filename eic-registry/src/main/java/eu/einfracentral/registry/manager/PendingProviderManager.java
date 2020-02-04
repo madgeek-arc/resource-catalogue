@@ -42,17 +42,18 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     }
 
     @Override
-    public ProviderBundle add(ProviderBundle provider, Authentication auth) {
+    public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
-        provider.setId(Provider.createId(provider.getProvider()));
+        providerBundle.setId(Provider.createId(providerBundle.getProvider()));
+        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), new User(auth).getFullName()));
 
-        if (provider.getStatus() == null) {
-            provider.setStatus(Provider.States.PENDING_1.getKey());
+        if (providerBundle.getStatus() == null) {
+            providerBundle.setStatus(Provider.States.PENDING_1.getKey());
         }
 
-        super.add(provider, auth);
+        super.add(providerBundle, auth);
 
-        return provider;
+        return providerBundle;
     }
 
     @Override
