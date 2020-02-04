@@ -25,10 +25,10 @@ import java.util.List;
 public class ProviderRequestController extends ResourceController<ProviderRequest, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestController.class);
-    private ProviderRequestService<ProviderRequest, Authentication> providerRequestService;
+    private ProviderRequestService<Authentication> providerRequestService;
 
     @Autowired
-    public ProviderRequestController(ProviderRequestService<ProviderRequest, Authentication> service) {
+    public ProviderRequestController(ProviderRequestService<Authentication> service) {
         super(service);
         this.providerRequestService = service;
     }
@@ -46,7 +46,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> add(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) {
         ResponseEntity<ProviderRequest> ret = new ResponseEntity<>(providerRequestService.add(providerRequest, auth), HttpStatus.OK);
-//        logger.info("User {} created a new request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
+        logger.debug("User {} created a new request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return ret;
     }
 
@@ -55,7 +55,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> update(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<ProviderRequest> ret = super.update(providerRequest, auth);
-//        logger.info("User {} updated request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
+        logger.debug("User {} updated request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return ret;
     }
 
@@ -64,7 +64,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     public ResponseEntity<ProviderRequest> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderRequest providerRequest = providerRequestService.get(id);
         providerRequestService.delete(providerRequest);
-//        logger.info("User {} deleted request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
+        logger.debug("User {} deleted request with id {} for the Provider with id {}", auth.getName(), providerRequest.getId(), providerRequest.getProviderId());
         return new ResponseEntity<>(providerRequest, HttpStatus.OK);
     }
 
@@ -78,8 +78,10 @@ public class ProviderRequestController extends ResourceController<ProviderReques
 
     @ApiOperation(value = "Send mails to all providers and creates the Provider Requests.")
     @RequestMapping(path = "sendMailsToProviders", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public void sendMailsToProviders (@RequestParam List<String> serviceIds, @RequestBody EmailMessage message){
-        providerRequestService.sendMailsToProviders(serviceIds, message);
+    public void sendMailsToProviders(@RequestParam List<String> serviceIds,
+                                     @RequestBody EmailMessage message,
+                                     @ApiIgnore Authentication auth) {
+        providerRequestService.sendMailsToProviders(serviceIds, message, auth);
     }
 
 }
