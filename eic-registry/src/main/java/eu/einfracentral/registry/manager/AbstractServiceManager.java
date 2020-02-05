@@ -516,6 +516,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getLanguages() != null) {
                 richService.setLanguageNames(infraService.getService().getLanguages()
                         .stream()
+                        .filter(v -> !v.equals(""))
                         .map(l -> allVocabularies.get(l).getName())
                         .collect(Collectors.toList())
                 );
@@ -525,18 +526,19 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getPlaces() != null) {
                 richService.setPlaceNames(infraService.getService().getPlaces()
                         .stream()
+                        .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
                 );
             }
 
             // TRL Name
-            if (infraService.getService().getTrl() != null) {
+            if (infraService.getService().getTrl() != null && !infraService.getService().getTrl().equals("")) {
                 richService.setTrlName(allVocabularies.get(infraService.getService().getTrl()).getName());
             }
 
             // Phase Name
-            if (infraService.getService().getPhase() != null) {
+            if (infraService.getService().getPhase() != null && !infraService.getService().getPhase().equals("")) {
                 richService.setPhaseName(allVocabularies.get(infraService.getService().getPhase()).getName());
             }
 
@@ -544,6 +546,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getTargetUsers() != null) {
                 richService.setTargetUsersNames(infraService.getService().getTargetUsers()
                         .stream()
+                        .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
                 );
@@ -553,6 +556,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getAccessTypes() != null) {
                 richService.setAccessTypeNames(infraService.getService().getAccessTypes()
                         .stream()
+                        .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
                 );
@@ -562,6 +566,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getAccessModes() != null) {
                 richService.setAccessModeNames(infraService.getService().getAccessModes()
                         .stream()
+                        .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
                 );
@@ -571,13 +576,14 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getFunders() != null) {
                 richService.setFundedByNames(infraService.getService().getFunders()
                         .stream()
+                        .filter(v -> !v.equals(""))
                         .map(p -> allFunders.get(p).getFundingOrganisation())
                         .collect(Collectors.toList())
                 );
             }
 
             // OrderType Name
-            if (infraService.getService().getOrderType() != null) {
+            if (infraService.getService().getOrderType() != null && !infraService.getService().getOrderType().equals("")) {
                 richService.setOrderTypeName(allVocabularies.get(infraService.getService().getOrderType()).getName());
             }
 
