@@ -75,6 +75,14 @@ public class ProviderController {
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
+    @PostMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ProviderBundle> addBundle(@RequestBody ProviderBundle provider, @ApiIgnore Authentication auth) {
+        ProviderBundle providerBundle = providerManager.add(provider, auth);
+        logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), providerBundle.getProvider().getName(), provider.getId());
+        return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
+    }
+
     //    @Override
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -85,6 +93,14 @@ public class ProviderController {
         providerBundle = providerManager.update(providerBundle, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ProviderBundle providerBundle = providerManager.update(provider, auth);
+        logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), providerBundle.getProvider().getName(), provider.getId());
+        return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
