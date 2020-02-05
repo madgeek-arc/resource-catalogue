@@ -87,9 +87,17 @@ public class PendingServiceController extends ResourceController<InfraService, A
         pendingServiceManager.transformToActive(serviceId, auth);
     }
 
+    @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
+    public ResponseEntity<Service> temporarySave(@RequestBody Service service, @ApiIgnore Authentication auth) {
+        InfraService infraService = pendingServiceManager.get(service.getId());
+        infraService.setService(service);
+        return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);
+    }
+
+
     @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #json)")
-    // FIXME: check this @PreAuthorize and set it to ServiceController as well
     public ResponseEntity<Service> pendingToInfra(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         Service service = null;
