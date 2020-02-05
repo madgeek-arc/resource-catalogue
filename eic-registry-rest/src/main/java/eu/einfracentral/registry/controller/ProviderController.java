@@ -80,7 +80,9 @@ public class ProviderController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle providerBundle = providerManager.update(new ProviderBundle(provider), auth);
+        ProviderBundle providerBundle = providerManager.get(provider.getId(), auth);
+        providerBundle.setProvider(provider);
+        providerBundle = providerManager.update(providerBundle, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
