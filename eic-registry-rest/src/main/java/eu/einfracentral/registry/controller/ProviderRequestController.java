@@ -77,8 +77,8 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     }
 
     @ApiOperation(value = "Send mails to all providers and creates the Provider Requests.")
-    @RequestMapping(path = "sendMailsToProviders", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public void sendMailsToProviders(@RequestParam List<String> serviceIds,
+    @PostMapping("{serviceIds}/sendMailsToProviders")
+    public void sendMailsToProviders(@PathVariable("serviceIds") List<String> serviceIds,
                                      @RequestBody EmailMessage message,
                                      @ApiIgnore Authentication auth) {
         providerRequestService.sendMailsToProviders(serviceIds, message, auth);
