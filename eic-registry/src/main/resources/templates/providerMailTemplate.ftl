@@ -6,9 +6,8 @@ Your application will be reviewed by the administration team and you will be not
 </#if>
 <#if providerBundle.status == "pending service template submission">
 You have applied for registering your organization [${providerBundle.provider.id}] - [${providerBundle.provider.name}] as a new service provider in ${project}.
-Your application has been approved and you may proceed with providing one of your services ${endpoint}/newServiceProvider, which can help ${project} assess the type of the service you want to offer.
+Your application has been approved and you may proceed with providing one of your services ${endpoint}/newServiceProvider to complete the registration process.
 The service should be described according to the ${project}’s Service Description Template (SDT), which has been adopted by flagship initiatives such as the EOSC-hub (EGI, EUDAT), GÉANT, OpenAIRE(-Advance) and PRACE, as the standard with which EOSC portal will be populated.
-The latest version of the SDT is available here [https://legacy.gitbook.com/@jnp]. The SDT offers recommendations, best practices for all service attributes and a classification of scientific resources in categories and subcategories to allow for the description of any resource in a catalogue.
 </#if>
 <#if providerBundle.status == "pending service template approval">
 You have provided a new service [${service.id}] – [${service.name}] in ${project}.

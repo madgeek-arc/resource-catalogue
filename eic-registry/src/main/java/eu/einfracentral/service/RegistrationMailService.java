@@ -87,8 +87,9 @@ public class RegistrationMailService {
                         "as a new service provider has been submitted", projectName, providerName);
                 break;
             case ST_SUBMISSION:
-                providerSubject = String.format("[%s] Your application for registering [%s] " +
-                        "as a new service provider has been accepted", projectName, providerName);
+                providerSubject = String.format("[%s] The information you submitted for the new service provider " +
+                        "[%s] has been approved - the submission of a first service is required " +
+                        "to complete the registration process", projectName, providerName);
                 regTeamSubject = String.format("[%s] The application of [%s] for registering " +
                         "as a new service provider has been accepted", projectName, providerName);
                 break;
