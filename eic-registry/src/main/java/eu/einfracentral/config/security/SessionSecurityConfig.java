@@ -109,6 +109,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
+                .antMatchers("/resourcesync/").permitAll()
                 .regexMatchers("/restore/", "/resource.*", "/resourceType.*", "/search.*")
                 .hasAnyRole("ADMIN")
                 .and()
