@@ -3,7 +3,6 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -13,8 +12,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
-
-import static eu.einfracentral.utils.ValidationLengths.*;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -687,15 +684,6 @@ public class Service implements Identifiable {
                 privacyPolicy, accessPolicy, paymentModel, pricing, userManual, adminManual, training, helpdesk, monitoring,
                 maintenance, contacts, relatedPlatforms, applications, datasets, otherProducts, publications, aggregatedServices,
                 software);
-    }
-
-    public static String createId(Service service) {
-        String provider = service.getProviders().get(0);
-        return String.format("%s.%s", provider, StringUtils
-                .stripAccents(service.getName())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
     }
 
     @Override

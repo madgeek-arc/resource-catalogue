@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
@@ -25,15 +26,17 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final PendingResourceService<InfraService> pendingServiceManager;
     private final InfraServiceManager infraServiceManager;
+    private final IdCreator idCreator;
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
                                   @Lazy PendingResourceService<InfraService> pendingServiceManager,
-                                  InfraServiceManager infraServiceManager) {
+                                  InfraServiceManager infraServiceManager, IdCreator idCreator) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.pendingServiceManager = pendingServiceManager;
         this.infraServiceManager = infraServiceManager;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
-        providerBundle.setId(Provider.createId(providerBundle.getProvider()));
+        providerBundle.setId(idCreator.createProviderId(providerBundle.getProvider()));
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), new User(auth).getFullName()));
 
         if (providerBundle.getStatus() == null) {

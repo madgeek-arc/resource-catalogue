@@ -4,6 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -28,20 +29,22 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
-    private ProviderManager providerManager;
-    private Random randomNumberGenerator;
-    private FieldValidator fieldValidator;
+    private final ProviderManager providerManager;
+    private final Random randomNumberGenerator;
+    private final FieldValidator fieldValidator;
+    private final IdCreator idCreator;
 
     @Value("${project.name:}")
     private String projectName;
 
     @Autowired
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
-                               @Lazy FieldValidator fieldValidator) {
+                               @Lazy FieldValidator fieldValidator, IdCreator idCreator) {
         super(InfraService.class);
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
         this.fieldValidator = fieldValidator;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -53,7 +56,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #infraService)")
     public InfraService addService(InfraService infraService, Authentication auth) {
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
-            String id = Service.createId(infraService.getService());
+            String id = idCreator.createServiceId(infraService.getService());
             infraService.getService().setId(id);
         }
         validate(infraService);
