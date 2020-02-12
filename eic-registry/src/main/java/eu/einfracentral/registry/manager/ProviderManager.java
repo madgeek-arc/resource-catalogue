@@ -5,6 +5,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.validator.FieldValidator;
@@ -32,20 +33,22 @@ import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
-    private SecurityService securityService;
-    private Random randomNumberGenerator;
-    private RegistrationMailService registrationMailService;
-    private EICAuthoritiesMapper eicAuthoritiesMapper;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final SecurityService securityService;
+    private final Random randomNumberGenerator;
+    private final RegistrationMailService registrationMailService;
+    private final EICAuthoritiesMapper eicAuthoritiesMapper;
 
-    private FieldValidator fieldValidator;
+    private final FieldValidator fieldValidator;
+    private final IdCreator idCreator;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy RegistrationMailService registrationMailService,
                            @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
-                           @Lazy FieldValidator fieldValidator) {
+                           @Lazy FieldValidator fieldValidator,
+                           IdCreator idCreator) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -53,6 +56,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.registrationMailService = registrationMailService;
         this.eicAuthoritiesMapper = eicAuthoritiesMapper;
         this.fieldValidator = fieldValidator;
+        this.idCreator = idCreator;
     }
 
 
@@ -65,7 +69,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle provider, Authentication auth) {
 
-        provider.setId(Provider.createId(provider.getProvider()));
+        provider.setId(idCreator.createProviderId(provider.getProvider()));
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
 

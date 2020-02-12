@@ -10,6 +10,7 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.AnalyticsService;
+import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SearchServiceEIC;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -70,6 +71,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;
+
+    @Autowired
+    private IdCreator idCreator;
 
     private List<String> browseBy;
     private Map<String, String> labels;
@@ -158,7 +162,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         if (infraService.getService().getId() == null) {
-            infraService.getService().setId(Service.createId(infraService.getService()));
+            infraService.getService().setId(idCreator.createServiceId(infraService.getService()));
         }
         // if service version is empty set it null
         if ("".equals(infraService.getService().getVersion())) {
@@ -589,7 +593,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // Domain Tree
             List<ScientificDomain> domains = new ArrayList<>();
-            if (infraService.getService().getScientificSubdomains() != null){
+            if (infraService.getService().getScientificSubdomains() != null) {
                 for (String subdomain : infraService.getService().getScientificSubdomains()) {
                     ScientificDomain domain = new ScientificDomain();
                     String[] parts = subdomain.split("-"); //scientific_subdomain-natural_sciences-mathematics

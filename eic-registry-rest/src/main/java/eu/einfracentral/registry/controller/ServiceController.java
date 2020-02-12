@@ -10,6 +10,7 @@ import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -41,18 +42,21 @@ import java.util.stream.Collectors;
 @Api(value = "Get Information about a Service")
 public class ServiceController {
 
-    private static Logger logger = LogManager.getLogger(ServiceController.class);
-    private InfraServiceService<InfraService, InfraService> infraService;
-    private ProviderService<ProviderBundle, Authentication> providerService;
-    private MeasurementService<Measurement, Authentication> measurementService;
+    private static final Logger logger = LogManager.getLogger(ServiceController.class);
+    private final InfraServiceService<InfraService, InfraService> infraService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final MeasurementService<Measurement, Authentication> measurementService;
+    private final IdCreator idCreator;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<ProviderBundle, Authentication> provider,
-                      MeasurementService<Measurement, Authentication> measurementService) {
+                      MeasurementService<Measurement, Authentication> measurementService,
+                      IdCreator idCreator) {
         this.infraService = service;
         this.providerService = provider;
         this.measurementService = measurementService;
+        this.idCreator = idCreator;
     }
 
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
@@ -116,7 +120,7 @@ public class ServiceController {
         Service s = null;
         try { // check if service already exists
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(Service.createId(service));
+                service.setId(idCreator.createServiceId(service));
             }
             s = this.infraService.get(service.getId()).getService();
         } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {

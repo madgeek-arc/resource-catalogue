@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
 import org.apache.logging.log4j.LogManager;
@@ -20,13 +21,16 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingProviderManager pendingProviderManager;
+    private final IdCreator idCreator;
 
     @Autowired
     public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService,
-                                 PendingProviderManager pendingProviderManager) {
+                                 PendingProviderManager pendingProviderManager,
+                                 IdCreator idCreator) {
         super(InfraService.class);
         this.infraServiceService = infraServiceService;
         this.pendingProviderManager = pendingProviderManager;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     @Override
     public InfraService add(InfraService service, Authentication auth) {
 
-        service.setId(eu.einfracentral.domain.Service.createId(service.getService()));
+        service.setId(idCreator.createServiceId(service.getService()));
 
         if (service.getMetadata() == null) {
             service.setMetadata(Metadata.createMetadata(new User(auth).getFullName()));
@@ -61,7 +65,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     @Override
     public InfraService update(InfraService infraService, Authentication auth) {
-        String newId = eu.einfracentral.domain.Service.createId(infraService.getService());
+        String newId = idCreator.createServiceId(infraService.getService());
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), new User(auth).getFullName()));
         // get existing resource
         Resource existing = whereID(infraService.getId(), true);

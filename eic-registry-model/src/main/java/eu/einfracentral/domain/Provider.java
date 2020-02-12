@@ -3,7 +3,6 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -308,26 +307,6 @@ public class Provider implements Identifiable {
                 ", nationalRoadmap=" + nationalRoadmap +
                 ", users=" + users +
                 '}';
-    }
-
-    public static String createId(Provider provider) {
-        if (provider.getId() == null || "".equals(provider.getId())) {
-            if (provider.getAcronym() != null && !"".equals(provider.getAcronym())) {
-                return StringUtils
-                        .stripAccents(provider.getAcronym())
-                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                        .replace(" ", "_");
-            } else {
-                return StringUtils
-                        .stripAccents(provider.getName())
-                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                        .replace(" ", "_");
-            }
-        }
-        return StringUtils
-                .stripAccents(provider.getId())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_");
     }
 
     @Override
