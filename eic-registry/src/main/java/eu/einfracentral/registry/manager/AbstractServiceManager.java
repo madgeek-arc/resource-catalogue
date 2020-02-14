@@ -22,6 +22,7 @@ import eu.openminted.registry.core.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -64,7 +65,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private FacetLabelService facetLabelService;
 
     @Autowired
-    private SynchronizerService synchronizerService;
+    @Qualifier("serviceSync")
+    private SynchronizerService<InfraService> synchronizerService;
 
     @Autowired
     private AnalyticsService analyticsService;

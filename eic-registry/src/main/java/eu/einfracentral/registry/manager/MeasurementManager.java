@@ -14,6 +14,7 @@ import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -28,12 +29,12 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     private IndicatorManager indicatorManager;
     private VocabularyService vocabularyService;
     private InfraServiceService<InfraService, InfraService> infraService;
-    private SynchronizerService synchronizerService;
+    private SynchronizerService<Measurement> synchronizerService;
 
     @Autowired
     public MeasurementManager(IndicatorManager indicatorManager, VocabularyService vocabularyService,
                               InfraServiceService<InfraService, InfraService> service,
-                              SynchronizerService synchronizerService) {
+                              @Qualifier("measurementSync") SynchronizerService<Measurement> synchronizerService) {
         super(Measurement.class);
         this.vocabularyService = vocabularyService;
         this.infraService = service;

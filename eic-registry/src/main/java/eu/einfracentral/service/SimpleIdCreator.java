@@ -1,8 +1,6 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ProviderBundle;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +34,11 @@ public class SimpleIdCreator implements IdCreator {
 
     @Override
     public String createServiceId(eu.einfracentral.domain.Service service) {
-            String provider = service.getProviders().get(0);
-            return String.format("%s.%s", provider, StringUtils
-                    .stripAccents(service.getName())
-                    .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                    .replace(" ", "_")
-                    .toLowerCase());
+        String provider = service.getProviders().get(0);
+        return String.format("%s.%s", provider, StringUtils
+                .stripAccents(service.getName())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase());
     }
 }
