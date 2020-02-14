@@ -25,7 +25,7 @@ import static eu.einfracentral.config.CacheConfig.CACHE_VISITS;
 
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-public class AnalyticsService {
+public class AnalyticsService implements Analytics {
 
     private static final Logger logger = LogManager.getLogger(AnalyticsService.class);
     private static final String visitsTemplate = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&period=day&flat=1&filter_limit=100&period=%s&date=last30";
@@ -68,10 +68,12 @@ public class AnalyticsService {
     }
 
     @Cacheable(value = CACHE_VISITS)
+    @Override
     public Map<String, Integer> getAllServiceVisits() {
         return getServiceVisits();
     }
 
+    @Override
     public Map<String, Integer> getVisitsForLabel(String label, StatisticsService.Interval by) {
         try {
             Map<String, Integer> results = StreamSupport.stream(
