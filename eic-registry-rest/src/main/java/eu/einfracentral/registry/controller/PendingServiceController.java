@@ -13,6 +13,7 @@ import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.ApiImplicitParam;
@@ -68,28 +69,10 @@ public class PendingServiceController extends ResourceController<InfraService, A
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<InfraService>> getProviderInfraServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id) {
+    public ResponseEntity<Paging<InfraService>> getProviderInfraServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("providers", id);
-        return new ResponseEntity<>(pendingServiceManager.getAll(ff, null).getResults(), HttpStatus.OK);
-    }
-
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
-    @GetMapping(path = "/service/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<Service>> getProviderServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("providers", id);
-        return new ResponseEntity<>(pendingServiceManager.getAll(ff, null)
-                .getResults()
-                .stream()
-                .map(InfraService::getService)
-                .collect(Collectors.toList()), HttpStatus.OK);
+        return new ResponseEntity<>(pendingServiceManager.getAll(ff, null), HttpStatus.OK);
     }
 
     @PostMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
