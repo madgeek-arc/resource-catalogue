@@ -284,9 +284,9 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
+    public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         ff.addFilter("providers", id);
         return ResponseEntity.ok(infraService.getAll(ff, null));
@@ -334,13 +334,18 @@ public class ServiceController {
     }
 
     // Providing the Service id and version, set the Service to active or inactive.
-    @PatchMapping(path = "publish/{id}/{version}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
-    public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
+    public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService service = infraService.get(id, version);
+        InfraService service;
+        if (version == null || "".equals(version)) {
+            service = infraService.get(id);
+        } else {
+            service = infraService.get(id, version);
+        }
         service.setActive(active);
-        logger.info("User '{}' set Service with name '{}' and id '{}' as active", auth.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' has set Service with name '{}' and id '{}' as active", auth.getName(), service.getService().getName(), service.getService().getId());
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
