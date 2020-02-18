@@ -276,6 +276,22 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
+    public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("latest", "true");
+        ff.addFilter("providers", id);
+        return ResponseEntity.ok(infraService.getAll(ff, null));
+    }
+
     // Get all modification details of a specific Service, providing the Service id.
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
@@ -318,13 +334,18 @@ public class ServiceController {
     }
 
     // Providing the Service id and version, set the Service to active or inactive.
-    @PatchMapping(path = "publish/{id}/{version}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
-    public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
+    public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService service = infraService.get(id, version);
+        InfraService service;
+        if (version == null || "".equals(version)) {
+            service = infraService.get(id);
+        } else {
+            service = infraService.get(id, version);
+        }
         service.setActive(active);
-        logger.info("User '{}' set Service with name '{}' and id '{}' as active", auth.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' has set Service with name '{}' and id '{}' as active", auth.getName(), service.getService().getName(), service.getService().getId());
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
