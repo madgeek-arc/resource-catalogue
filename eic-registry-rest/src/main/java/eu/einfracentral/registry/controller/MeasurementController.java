@@ -83,6 +83,15 @@ public class MeasurementController extends ResourceController<Measurement, Authe
         return ret;
     }
 
+    // Updates existing Measurements of a specific Service, or/and adds new ones.
+    @PostMapping(path = "updateAllPending", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
+    public List<Measurement> updateAll(@RequestParam String serviceId, @RequestParam String newServiceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
+        List<Measurement> ret = measurementManager.updateAll(serviceId, newServiceId, allMeasurements, auth);
+        logger.info("User '{}' updated a list of Measurements {}", auth.getName(), ret);
+        return ret;
+    }
+
     // Deletes the Measurement with the given id.
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
