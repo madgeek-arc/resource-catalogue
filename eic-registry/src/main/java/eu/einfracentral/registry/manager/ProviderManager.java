@@ -21,10 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
@@ -281,7 +278,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        return super.getAll(ff, null).getResults()
+        List<ProviderBundle> re = super.getAll(ff, null).getResults()
                 .stream().map(p -> {
                     if (securityService.userIsProviderAdmin(auth, p.getId())) {
                         return p;
@@ -289,6 +286,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+        Collections.sort(re, new ProviderBundle());
+        return re;
     }
 
     @Override
