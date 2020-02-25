@@ -278,7 +278,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<ProviderBundle> re = super.getAll(ff, null).getResults()
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        order.put("order", "asc");
+        sort.put("name", order);
+        ff.setOrderBy(sort);
+        return super.getAll(ff, null).getResults()
                 .stream().map(p -> {
                     if (securityService.userIsProviderAdmin(auth, p.getId())) {
                         return p;
@@ -286,8 +291,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        Collections.sort(re, new ProviderBundle());
-        return re;
     }
 
     @Override
