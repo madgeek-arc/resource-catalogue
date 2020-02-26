@@ -20,6 +20,14 @@ public class FacetFilterUtils {
     private FacetFilterUtils() {
     }
 
+    public static Map<String, Object> createOrderBy(String field, String orderType) {
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        order.put("order", orderType);
+        sort.put(field, order);
+        return sort;
+    }
+
     // Gets all given filters
     public static Map<String, List<Object>> getFacetFilterFilters(FacetFilter ff) {
         Map<String, Object> filters = new LinkedHashMap<>(ff.getFilter());
