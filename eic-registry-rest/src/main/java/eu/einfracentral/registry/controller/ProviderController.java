@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,10 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,12 +35,15 @@ public class ProviderController {
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
     private ProviderService<ProviderBundle, Authentication> providerManager;
     private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private EventService eventService;
 
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
-                       InfraServiceService<InfraService, InfraService> infraServiceService) {
+                       InfraServiceService<InfraService, InfraService> infraServiceService,
+                       EventService eventService) {
         this.providerManager = service;
         this.infraServiceService = infraServiceService;
+        this.eventService = eventService;
     }
 
     // Deletes the Provider with the given id.
@@ -249,6 +251,28 @@ public class ProviderController {
                     auth.getName(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public void deleteUserInfo (Authentication authentication){
+        String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
+        String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
+        List<Event> allUserFavorites = new ArrayList<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
+//        List<Event> allUserRatings = new ArrayList<> (eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
+        List<ProviderBundle> allUserProviders = new ArrayList<>(providerManager.getMyServiceProviders(authentication));
+        List<User> updatedUsers = new ArrayList<>();
+        for (ProviderBundle providerBundle : allUserProviders){
+            if (providerBundle.getProvider().getUsers().size() > 1){
+                eventService.deleteEvents(allUserFavorites);
+//                eventService.deleteEvents(allUserRatings);
+                for (User user : providerBundle.getProvider().getUsers()){
+                    if (!user.getId().equals(userId) && !user.getEmail().equals(userEmail)){
+                        updatedUsers.add(user);
+                    }
+                }
+                providerBundle.getProvider().setUsers(updatedUsers);
+            }
+        }
     }
 
 
