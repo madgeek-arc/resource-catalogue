@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -278,11 +279,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        order.put("order", "asc");
-        sort.put("name", order);
-        ff.setOrderBy(sort);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, null).getResults()
                 .stream().map(p -> {
                     if (securityService.userIsProviderAdmin(auth, p.getId())) {
@@ -298,6 +295,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerId);
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults();
     }
 
@@ -307,6 +305,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("providers", providerId);
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
@@ -317,6 +316,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
@@ -338,6 +338,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return getAll(ff, null).getResults();
     }
 
@@ -348,6 +349,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults();
     }
 
