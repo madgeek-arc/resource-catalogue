@@ -48,7 +48,7 @@ public class ProviderController {
 
     // Deletes the Provider with the given id.
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.get(id);
         if (provider == null) {
@@ -70,7 +70,7 @@ public class ProviderController {
     // Creates a new Provider.
 //    @Override
     @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle providerBundle = providerManager.add(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
@@ -274,7 +274,7 @@ public class ProviderController {
                 try {
                     providerManager.update(providerBundle, authentication);
                 } catch (ResourceNotFoundException e) {
-                    e.printStackTrace();
+                    logger.error(e);
                 }
             }
         }
