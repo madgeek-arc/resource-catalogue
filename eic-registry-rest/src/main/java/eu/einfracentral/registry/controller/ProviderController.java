@@ -266,8 +266,14 @@ public class ProviderController {
                 eventService.deleteEvents(allUserFavorites);
 //                eventService.deleteEvents(allUserRatings);
                 for (User user : providerBundle.getProvider().getUsers()){
-                    if (!user.getEmail().equals(userEmail)){
-                        updatedUsers.add(user);
+                    if (user.getId() != null){
+                        if (!user.getId().equals("") && !user.getId().equals(userId)){
+                            updatedUsers.add(user);
+                        }
+                    } else {
+                        if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)){
+                            updatedUsers.add(user);
+                        }
                     }
                 }
                 providerBundle.getProvider().setUsers(updatedUsers);
