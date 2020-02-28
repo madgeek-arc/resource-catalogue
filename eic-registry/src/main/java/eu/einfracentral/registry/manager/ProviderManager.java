@@ -24,7 +24,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
@@ -425,6 +428,36 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return provider;
     }
 
+    @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public void deleteUserInfo(Authentication authentication) {
+        String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
+        String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
+        List<Event> allUserEvents = new ArrayList<>();
+        allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
+        allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
+        List<ProviderBundle> allUserProviders = new ArrayList<>(getMyServiceProviders(authentication));
+        for (ProviderBundle providerBundle : allUserProviders) {
+            List<User> updatedUsers = new ArrayList<>();
+            if (providerBundle.getProvider().getUsers().size() > 1) {
+                eventService.deleteEvents(allUserEvents);
+                for (User user : providerBundle.getProvider().getUsers()) {
+                    if (user.getId() != null) {
+                        if (!user.getId().equals(userId)) {
+                            updatedUsers.add(user);
+                        }
+                    } else {
+                        if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)) {
+                            updatedUsers.add(user);
+                        }
+                    }
+                }
+                providerBundle.getProvider().setUsers(updatedUsers);
+                update(providerBundle, authentication);
+            }
+        }
+    }
+
     private void addAuthenticatedUser(Provider provider, Authentication auth) {
         List<User> users;
         User authUser = new User(auth);
@@ -435,34 +468,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (users.stream().noneMatch(u -> u.getEmail().equals(authUser.getEmail()))) {
             users.add(authUser);
             provider.setUsers(users);
-        }
-    }
-
-    public void deleteUserInfo (Authentication authentication){
-        String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
-        String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
-        List<Event> allUserFavorites = new ArrayList<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
-//        List<Event> allUserRatings = new ArrayList<> (eventService.getUserEvents(Event.U0erActionType.RATING.getKey(), authentication));
-        List<ProviderBundle> allUserProviders = new ArrayList<>(getMyServiceProviders(authentication));
-        for (ProviderBundle providerBundle : allUserProviders){
-            List<User> updatedUsers = new ArrayList<>();
-            if (providerBundle.getProvider().getUsers().size() > 1){
-                eventService.deleteEvents(allUserFavorites);
-//                eventService.deleteEvents(allUserRatings);
-                for (User user : providerBundle.getProvider().getUsers()){
-                    if (user.getId() != null){
-                        if (!user.getId().equals(userId)){
-                            updatedUsers.add(user);
-                        }
-                    } else {
-                        if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)){
-                            updatedUsers.add(user);
-                        }
-                    }
-                }
-                providerBundle.getProvider().setUsers(updatedUsers);
-                update(providerBundle, authentication);
-            }
         }
     }
 
