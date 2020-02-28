@@ -8,6 +8,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.PendingResourceService;
@@ -95,9 +96,25 @@ public class PendingServiceController extends ResourceController<InfraService, A
         pendingServiceManager.transformToActive(serviceId, auth);
     }
 
+    @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
+    public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
+        InfraService infraService = new InfraService();
+        infraService.setService(service);
+        try {
+            infraService = pendingServiceManager.get(service.getId());
+            infraService = pendingServiceManager.update(infraService, auth);
+        } catch (ResourceException e) {
+            logger.debug("Pending Service with id '{}' does not exist. Creating it...", service.getId());
+            infraService = pendingServiceManager.add(infraService, auth);
+        }
+        return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
+    }
+
     @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
-    public ResponseEntity<Service> temporarySave(@RequestBody Service service, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) {
+        pendingServiceManager.transformToPending(service.getId(), auth);
         InfraService infraService = pendingServiceManager.get(service.getId());
         infraService.setService(service);
         return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);

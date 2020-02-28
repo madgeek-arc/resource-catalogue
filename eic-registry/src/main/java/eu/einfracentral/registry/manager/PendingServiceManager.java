@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
@@ -50,15 +51,6 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         service.setLatest(true);
 
         super.add(service, auth);
-
-        List<String> serviceProviders = service.getService().getProviders();
-        for (String providerId : serviceProviders) {
-            ProviderBundle bundle = pendingProviderManager.get(providerId);
-            if (bundle.getStatus().equals(Provider.States.PENDING_1.getKey())) {
-                bundle.setStatus(Provider.States.ST_SUBMISSION.getKey());
-                pendingProviderManager.update(bundle, auth);
-            }
-        }
 
         return service;
     }
