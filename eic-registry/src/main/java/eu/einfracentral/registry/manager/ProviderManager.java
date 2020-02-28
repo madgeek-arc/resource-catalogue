@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
@@ -16,6 +17,7 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,6 +41,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
+    private EventService eventService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -46,7 +49,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy RegistrationMailService registrationMailService,
                            @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
                            @Lazy FieldValidator fieldValidator,
-                           IdCreator idCreator) {
+                           IdCreator idCreator, EventService eventService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -55,6 +58,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.eicAuthoritiesMapper = eicAuthoritiesMapper;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
+        this.eventService = eventService;
     }
 
 
@@ -433,4 +437,33 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setUsers(users);
         }
     }
+
+    public void deleteUserInfo (Authentication authentication){
+        String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
+        String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
+        List<Event> allUserFavorites = new ArrayList<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
+//        List<Event> allUserRatings = new ArrayList<> (eventService.getUserEvents(Event.U0erActionType.RATING.getKey(), authentication));
+        List<ProviderBundle> allUserProviders = new ArrayList<>(getMyServiceProviders(authentication));
+        for (ProviderBundle providerBundle : allUserProviders){
+            List<User> updatedUsers = new ArrayList<>();
+            if (providerBundle.getProvider().getUsers().size() > 1){
+                eventService.deleteEvents(allUserFavorites);
+//                eventService.deleteEvents(allUserRatings);
+                for (User user : providerBundle.getProvider().getUsers()){
+                    if (user.getId() != null){
+                        if (!user.getId().equals(userId)){
+                            updatedUsers.add(user);
+                        }
+                    } else {
+                        if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)){
+                            updatedUsers.add(user);
+                        }
+                    }
+                }
+                providerBundle.getProvider().setUsers(updatedUsers);
+                update(providerBundle, authentication);
+            }
+        }
+    }
+
 }

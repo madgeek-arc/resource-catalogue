@@ -255,35 +255,7 @@ public class ProviderController {
 
     @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public void deleteUserInfo (Authentication authentication){
-        String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
-        String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
-        List<Event> allUserFavorites = new ArrayList<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
-//        List<Event> allUserRatings = new ArrayList<> (eventService.getUserEvents(Event.U0erActionType.RATING.getKey(), authentication));
-        List<ProviderBundle> allUserProviders = new ArrayList<>(providerManager.getMyServiceProviders(authentication));
-        for (ProviderBundle providerBundle : allUserProviders){
-            List<User> updatedUsers = new ArrayList<>();
-            if (providerBundle.getProvider().getUsers().size() > 1){
-                eventService.deleteEvents(allUserFavorites);
-//                eventService.deleteEvents(allUserRatings);
-                for (User user : providerBundle.getProvider().getUsers()){
-                    if (user.getId() != null){
-                        if (!user.getId().equals("") && !user.getId().equals(userId)){
-                            updatedUsers.add(user);
-                        }
-                    } else {
-                        if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)){
-                            updatedUsers.add(user);
-                        }
-                    }
-                }
-                providerBundle.getProvider().setUsers(updatedUsers);
-                try {
-                    providerManager.update(providerBundle, authentication);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(e);
-                }
-            }
-        }
+        providerManager.deleteUserInfo(authentication);
     }
 
 
