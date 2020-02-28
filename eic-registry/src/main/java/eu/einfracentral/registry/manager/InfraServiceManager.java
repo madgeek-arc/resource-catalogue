@@ -131,11 +131,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or " +
-            "@securityService.userIsServiceProviderAdmin(#auth, #infraService.id)")
     public void delete(InfraService infraService) {
-        super.delete(infraService);
         logger.info("Deleting Service: {}", infraService);
+        super.delete(infraService);
     }
 
     @Override
