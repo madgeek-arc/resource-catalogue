@@ -442,7 +442,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             if (providerBundle.getProvider().getUsers().size() > 1) {
                 eventService.deleteEvents(allUserEvents);
                 for (User user : providerBundle.getProvider().getUsers()) {
-                    if (user.getId() != null) {
+                    if (user.getId() != null && !"".equals(user.getId())) {
                         if (!user.getId().equals(userId)) {
                             updatedUsers.add(user);
                         }
