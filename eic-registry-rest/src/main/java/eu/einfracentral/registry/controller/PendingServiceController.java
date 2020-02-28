@@ -57,6 +57,15 @@ public class PendingServiceController extends ResourceController<InfraService, A
         this.infraServiceService = infraServiceService;
     }
 
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
+    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService service = pendingServiceManager.get(id);
+        pendingServiceManager.delete(service);
+        logger.info("User '{}' deleted PendingService '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<Service> getService(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);

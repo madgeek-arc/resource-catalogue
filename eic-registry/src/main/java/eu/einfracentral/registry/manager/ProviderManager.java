@@ -287,7 +287,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return super.getAll(ff, null).getResults()
+        return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
                     if (securityService.userIsProviderAdmin(auth, p.getId())) {
                         return p;
