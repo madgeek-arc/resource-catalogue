@@ -438,23 +438,27 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
         List<ProviderBundle> allUserProviders = new ArrayList<>(getMyServiceProviders(authentication));
         for (ProviderBundle providerBundle : allUserProviders) {
+            if (providerBundle.getProvider().getUsers().size() == 1) {
+                throw new ValidationException(String.format("Your user info cannot be deleted, because you are the solely Admin of the Provider [%s]. " +
+                        "You need to delete your Provider first or add more Admins.", providerBundle.getProvider().getName()));
+            }
+        }
+        eventService.deleteEvents(allUserEvents);
+        for (ProviderBundle providerBundle : allUserProviders) {
             List<User> updatedUsers = new ArrayList<>();
-            if (providerBundle.getProvider().getUsers().size() > 1) {
-                eventService.deleteEvents(allUserEvents);
-                for (User user : providerBundle.getProvider().getUsers()) {
-                    if (user.getId() != null && !"".equals(user.getId())) {
-                        if (!user.getId().equals(userId)) {
-                            updatedUsers.add(user);
-                        }
-                    } else {
-                        if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)) {
-                            updatedUsers.add(user);
-                        }
+            for (User user : providerBundle.getProvider().getUsers()) {
+                if (user.getId() != null && !"".equals(user.getId())) {
+                    if (!user.getId().equals(userId)) {
+                        updatedUsers.add(user);
+                    }
+                } else {
+                    if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)) {
+                        updatedUsers.add(user);
                     }
                 }
-                providerBundle.getProvider().setUsers(updatedUsers);
-                update(providerBundle, authentication);
             }
+            providerBundle.getProvider().setUsers(updatedUsers);
+            update(providerBundle, authentication);
         }
     }
 
