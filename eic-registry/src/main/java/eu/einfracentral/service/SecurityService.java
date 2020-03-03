@@ -38,6 +38,9 @@ public class SecurityService {
     @Value("${project.name:}")
     private String projectName;
 
+    @Value("${mail.smtp.user:}")
+    private String projectEmail;
+
     @Autowired
     SecurityService(ProviderManager providerManager,
                     InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -50,7 +53,7 @@ public class SecurityService {
         List<GrantedAuthority> roles = new ArrayList<>();
         roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         DefaultUserInfo userInfo = new DefaultUserInfo();
-        userInfo.setEmail("no-reply@einfracentral.eu");
+        userInfo.setEmail(projectEmail);
         userInfo.setId(1L);
         userInfo.setGivenName(projectName);
         userInfo.setFamilyName("");
