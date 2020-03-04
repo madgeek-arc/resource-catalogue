@@ -71,4 +71,14 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "Bundle{" +
+                "payload=" + payload +
+                ", metadata=" + metadata +
+                ", active=" + active +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }
