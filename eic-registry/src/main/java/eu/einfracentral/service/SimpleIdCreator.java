@@ -13,21 +13,20 @@ public class SimpleIdCreator implements IdCreator {
 
     @Override
     public String createProviderId(Provider provider) {
+        String providerId;
         if (provider.getId() == null || "".equals(provider.getId())) {
             if (provider.getAcronym() != null && !"".equals(provider.getAcronym())) {
-                return StringUtils
-                        .stripAccents(provider.getAcronym())
-                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                        .replace(" ", "_");
+                providerId = provider.getAcronym();
+            } else if (provider.getName() != null && !"".equals(provider.getName())) {
+                providerId = provider.getName();
             } else {
-                return StringUtils
-                        .stripAccents(provider.getName())
-                        .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                        .replace(" ", "_");
+                throw new ValidationException("Provider must have an acronym or name.");
             }
+        } else {
+            providerId = provider.getId();
         }
         return StringUtils
-                .stripAccents(provider.getId())
+                .stripAccents(providerId)
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_");
 
@@ -38,7 +37,7 @@ public class SimpleIdCreator implements IdCreator {
         if (service.getProviders() == null || service.getProviders().isEmpty() || service.getProviders().get(0).equals("")) {
             throw new ValidationException("Service must have at least 1 Provider.");
         }
-        if (service.getName() == null || service.getName().equals("")){
+        if (service.getName() == null || service.getName().equals("")) {
             throw new ValidationException("Service must have a Name.");
         }
         String provider = service.getProviders().get(0);

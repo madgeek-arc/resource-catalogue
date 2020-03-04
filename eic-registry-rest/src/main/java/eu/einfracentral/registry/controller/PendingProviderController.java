@@ -2,9 +2,12 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +22,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("pendingProvider")
 public class PendingProviderController extends ResourceController<ProviderBundle, Authentication> {
+
+    private static final Logger logger = LogManager.getLogger(PendingProviderController.class);
 
     private final PendingResourceService<ProviderBundle> pendingProviderService;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
@@ -72,5 +77,29 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         providerBundle = pendingProviderService.transformToActive(providerBundle.getId(), auth);
 
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
+        ProviderBundle bundle = new ProviderBundle();
+        bundle.setProvider(provider);
+        try {
+            bundle = pendingProviderService.get(provider.getId());
+            bundle = pendingProviderService.update(bundle, auth);
+        } catch (ResourceException e) {
+            logger.debug("Pending Provider with id '{}' does not exist. Creating it...", provider.getId());
+            bundle = pendingProviderService.add(bundle, auth);
+        }
+        return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth, #provider)")
+    public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
+        pendingProviderService.transformToPending(provider.getId(), auth);
+        ProviderBundle bundle = pendingProviderService.get(provider.getId());
+        bundle.setProvider(provider);
+        return new ResponseEntity<>(pendingProviderService.update(bundle, auth).getProvider(), HttpStatus.OK);
     }
 }
