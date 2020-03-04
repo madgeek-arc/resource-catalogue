@@ -106,11 +106,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     @Override
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId);
         Resource resource = providerManager.getResource(providerId);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
-        return providerBundle;
+        return deserialize(resource);
     }
 
     @Override
