@@ -12,6 +12,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +43,22 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
         }
 
         if (filter.getKeyword() != null && !filter.getKeyword().equals("")) {
+            // make first char of keyword universal
+            String keyword = filter.getKeyword();
+            List<String> allPossibleInputs = new ArrayList<>();
+            for (int i = 0; i < keyword.length(); i++) {
+                String nextLetter = String.valueOf(keyword.charAt(i));
+                String output = keyword.replace(nextLetter, "[^\\s\\p{L}\\p{N}]");
+                allPossibleInputs.add(output);
+            }
+
             // create regexp disMaxQuery
             DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
             for (Object field : searchFields) {
-                qb.add(regexpQuery((String) field, ".*" + filter.getKeyword() + ".*"));
+//                qb.add(regexpQuery((String) field, ".*(" + String.join("|", allPossibleInputs) + ").*"));
+                for (String possibleInput : allPossibleInputs) {
+                    qb.add(regexpQuery((String) field, ".*" + possibleInput + ".*"));
+                }
             }
             qb.boost(2f);
             qb.tieBreaker(0.7f);
