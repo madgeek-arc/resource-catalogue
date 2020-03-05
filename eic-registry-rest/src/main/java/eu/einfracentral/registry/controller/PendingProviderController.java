@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -102,4 +103,11 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         bundle.setProvider(provider);
         return new ResponseEntity<>(pendingProviderService.update(bundle, auth).getProvider(), HttpStatus.OK);
     }
+
+    // Get a list of Providers in which you are admin.
+    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(pendingProviderService.getMy(auth), HttpStatus.OK);
+    }
+
 }

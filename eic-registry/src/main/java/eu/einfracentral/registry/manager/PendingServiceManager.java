@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service("pendingServiceManager")
@@ -109,6 +110,11 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     public Object getPendingRich(String id, Authentication auth) {
         return infraServiceService.createRichService(get(id), auth);
+    }
+
+    public List<InfraService> getMy(Authentication auth) {
+        List<InfraService> re = new ArrayList<>();
+        return re;
     }
 
 }
