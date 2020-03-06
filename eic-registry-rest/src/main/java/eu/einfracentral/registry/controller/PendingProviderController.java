@@ -105,8 +105,8 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     // Get a list of Providers in which you are admin.
-    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@ApiIgnore Authentication auth) {
+    @GetMapping(path = "getMyPendingProviders", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public ResponseEntity<List<ProviderBundle>> getMyPendingProviders(@ApiIgnore Authentication auth) {
         return new ResponseEntity<>(pendingProviderService.getMy(auth), HttpStatus.OK);
     }
 

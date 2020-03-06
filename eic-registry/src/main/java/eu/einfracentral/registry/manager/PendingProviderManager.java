@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
@@ -159,6 +160,30 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return service;
     }
 
+    public boolean userIsPendingProviderAdmin(Authentication auth, ProviderBundle registeredProvider) {
+        User user = new User(auth);
+        if (registeredProvider == null) {
+            throw new ResourceNotFoundException("Provider with id '" + registeredProvider.getId() + "' does not exist.");
+        }
+        if (registeredProvider.getProvider().getUsers() == null) {
+            return false;
+        }
+        return registeredProvider.getProvider().getUsers()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .anyMatch(u -> {
+                    if (u.getId() != null) {
+                        if (u.getEmail() != null) {
+                            return u.getId().equals(user.getId())
+                                    || u.getEmail().equals(user.getEmail());
+                        }
+                        return u.getId().equals(user.getId());
+                    }
+                    return u.getEmail().equals(user.getEmail());
+                });
+    }
+
+
     public List<ProviderBundle> getMy(Authentication auth) {
         if (auth == null) {
             return new ArrayList<>();
@@ -168,7 +193,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
-                    if (securityService.userIsProviderAdmin(auth, p.getId())) {
+                    if (userIsPendingProviderAdmin(auth, p)) {
                         return p;
                     } else return null;
                 })
