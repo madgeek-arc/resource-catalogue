@@ -84,12 +84,13 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
-        bundle.setProvider(provider);
         try {
             bundle = pendingProviderService.get(provider.getId());
+            bundle.setProvider(provider);
             bundle = pendingProviderService.update(bundle, auth);
         } catch (ResourceException e) {
             logger.debug("Pending Provider with id '{}' does not exist. Creating it...", provider.getId());
+            bundle.setProvider(provider);
             bundle = pendingProviderService.add(bundle, auth);
         }
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
