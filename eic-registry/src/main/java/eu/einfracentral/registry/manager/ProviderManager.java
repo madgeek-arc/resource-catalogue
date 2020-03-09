@@ -3,11 +3,13 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -15,6 +17,7 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,6 +44,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
+    private EventService eventService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -48,7 +52,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy RegistrationMailService registrationMailService,
                            @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
                            @Lazy FieldValidator fieldValidator,
-                           IdCreator idCreator) {
+                           IdCreator idCreator, EventService eventService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -57,6 +61,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.eicAuthoritiesMapper = eicAuthoritiesMapper;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
+        this.eventService = eventService;
     }
 
 
@@ -281,7 +286,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        return super.getAll(ff, null).getResults()
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
                     if (securityService.userIsProviderAdmin(auth, p.getId())) {
                         return p;
@@ -296,6 +302,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         FacetFilter ff = new FacetFilter();
         ff.addFilter("providers", providerId);
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults();
     }
 
@@ -305,6 +312,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("providers", providerId);
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
@@ -315,6 +323,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
@@ -336,6 +345,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return getAll(ff, null).getResults();
     }
 
@@ -346,6 +356,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults();
     }
 
@@ -417,6 +428,40 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return provider;
     }
 
+    @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public void deleteUserInfo(Authentication authentication) {
+        String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
+        String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
+        List<Event> allUserEvents = new ArrayList<>();
+        allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
+        allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
+        List<ProviderBundle> allUserProviders = new ArrayList<>(getMyServiceProviders(authentication));
+        for (ProviderBundle providerBundle : allUserProviders) {
+            if (providerBundle.getProvider().getUsers().size() == 1) {
+                throw new ValidationException(String.format("Your user info cannot be deleted, because you are the solely Admin of the Provider [%s]. " +
+                        "You need to delete your Provider first or add more Admins.", providerBundle.getProvider().getName()));
+            }
+        }
+        eventService.deleteEvents(allUserEvents);
+        for (ProviderBundle providerBundle : allUserProviders) {
+            List<User> updatedUsers = new ArrayList<>();
+            for (User user : providerBundle.getProvider().getUsers()) {
+                if (user.getId() != null && !"".equals(user.getId())) {
+                    if (!user.getId().equals(userId)) {
+                        updatedUsers.add(user);
+                    }
+                } else {
+                    if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)) {
+                        updatedUsers.add(user);
+                    }
+                }
+            }
+            providerBundle.getProvider().setUsers(updatedUsers);
+            update(providerBundle, authentication);
+        }
+    }
+
     private void addAuthenticatedUser(Provider provider, Authentication auth) {
         List<User> users;
         User authUser = new User(auth);
@@ -429,4 +474,5 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setUsers(users);
         }
     }
+
 }

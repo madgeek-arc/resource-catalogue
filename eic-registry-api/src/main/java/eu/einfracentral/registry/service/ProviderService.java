@@ -50,4 +50,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
 
     T verifyProvider(String id, Provider.States status, Boolean active, U auth);
+
+
+    void deleteUserInfo(Authentication authentication);
 }

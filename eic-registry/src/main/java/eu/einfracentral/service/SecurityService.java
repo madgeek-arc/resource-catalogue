@@ -1,16 +1,18 @@
 package eu.einfracentral.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
 import org.mitre.openid.connect.model.DefaultUserInfo;
@@ -23,30 +25,35 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service("securityService")
 public class SecurityService {
 
-    private ProviderManager providerManager;
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ProviderManager providerManager;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final PendingResourceService<InfraService> pendingServiceManager;
     private OIDCAuthenticationToken adminAccess;
 
     @Value("${project.name:}")
     private String projectName;
 
+    @Value("${mail.smtp.user:}")
+    private String projectEmail;
+
     @Autowired
-    SecurityService(ProviderManager providerManager, InfraServiceService<InfraService, InfraService> infraServiceService) {
+    SecurityService(ProviderManager providerManager,
+                    InfraServiceService<InfraService, InfraService> infraServiceService,
+                    PendingResourceService<InfraService> pendingServiceManager) {
         this.providerManager = providerManager;
         this.infraServiceService = infraServiceService;
+        this.pendingServiceManager = pendingServiceManager;
 
         // create admin access
         List<GrantedAuthority> roles = new ArrayList<>();
         roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         DefaultUserInfo userInfo = new DefaultUserInfo();
-        userInfo.setEmail("no-reply@einfracentral.eu");
+        userInfo.setEmail(projectEmail);
         userInfo.setId(1L);
         userInfo.setGivenName(projectName);
         userInfo.setFamilyName("");
@@ -120,6 +127,12 @@ public class SecurityService {
         InfraService service;
         try {
             service = infraServiceService.get(serviceId);
+        } catch (ResourceException e) {
+            try {
+                service = pendingServiceManager.get(serviceId);
+            } catch (RuntimeException re) {
+                return false;
+            }
         } catch (RuntimeException e) {
             return false;
         }

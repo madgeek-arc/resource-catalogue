@@ -1,9 +1,12 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
@@ -15,7 +18,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service("pendingProviderManager")
@@ -27,16 +32,19 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final PendingResourceService<InfraService> pendingServiceManager;
     private final InfraServiceManager infraServiceManager;
     private final IdCreator idCreator;
+    private final SecurityService securityService;
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
                                   @Lazy PendingResourceService<InfraService> pendingServiceManager,
-                                  InfraServiceManager infraServiceManager, IdCreator idCreator) {
+                                  InfraServiceManager infraServiceManager, IdCreator idCreator,
+                                  @Lazy SecurityService securityService) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.pendingServiceManager = pendingServiceManager;
         this.infraServiceManager = infraServiceManager;
         this.idCreator = idCreator;
+        this.securityService = securityService;
     }
 
     @Override
@@ -106,11 +114,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     @Override
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId);
         Resource resource = providerManager.getResource(providerId);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
-        return providerBundle;
+        return deserialize(resource);
     }
 
     @Override
@@ -152,4 +159,46 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         service.getService().setProviders(providerIds);
         return service;
     }
+
+    public boolean userIsPendingProviderAdmin(Authentication auth, ProviderBundle registeredProvider) {
+        User user = new User(auth);
+        if (registeredProvider == null) {
+            throw new ResourceNotFoundException("Provider with id '" + registeredProvider.getId() + "' does not exist.");
+        }
+        if (registeredProvider.getProvider().getUsers() == null) {
+            return false;
+        }
+        return registeredProvider.getProvider().getUsers()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .anyMatch(u -> {
+                    if (u.getId() != null) {
+                        if (u.getEmail() != null) {
+                            return u.getId().equals(user.getId())
+                                    || u.getEmail().equals(user.getEmail());
+                        }
+                        return u.getId().equals(user.getId());
+                    }
+                    return u.getEmail().equals(user.getEmail());
+                });
+    }
+
+
+    public List<ProviderBundle> getMy(Authentication auth) {
+        if (auth == null) {
+            return new ArrayList<>();
+        }
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return super.getAll(ff, auth).getResults()
+                .stream().map(p -> {
+                    if (userIsPendingProviderAdmin(auth, p)) {
+                        return p;
+                    } else return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
 }

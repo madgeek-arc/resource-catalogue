@@ -59,6 +59,20 @@ public class ServiceController {
         this.idCreator = idCreator;
     }
 
+    @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
+    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService service;
+        if (version.isPresent()) {
+            service = infraService.get(id, version.get());
+        } else {
+            service = infraService.get(id);
+        }
+        infraService.delete(service);
+        logger.info("User '{}' deleted Service '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
