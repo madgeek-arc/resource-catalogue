@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service("pendingServiceManager")
@@ -50,15 +52,6 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         service.setLatest(true);
 
         super.add(service, auth);
-
-        List<String> serviceProviders = service.getService().getProviders();
-        for (String providerId : serviceProviders) {
-            ProviderBundle bundle = pendingProviderManager.get(providerId);
-            if (bundle.getStatus().equals(Provider.States.PENDING_1.getKey())) {
-                bundle.setStatus(Provider.States.ST_SUBMISSION.getKey());
-                pendingProviderManager.update(bundle, auth);
-            }
-        }
 
         return service;
     }
@@ -117,6 +110,11 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     public Object getPendingRich(String id, Authentication auth) {
         return infraServiceService.createRichService(get(id), auth);
+    }
+
+    public List<InfraService> getMy(Authentication auth) {
+        List<InfraService> re = new ArrayList<>();
+        return re;
     }
 
 }

@@ -7,6 +7,7 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -96,4 +97,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
                 .stream()
                 .collect(Collectors.toMap(Bundle::getId, r -> r.getMetadata().getOriginalId()));
     }
+
+    List<T> getMy(Authentication authentication);
+
 }
