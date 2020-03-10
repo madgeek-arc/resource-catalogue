@@ -154,6 +154,14 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     List<Service> createFeaturedServices();
 
+    /**
+     * Gets the InfraService or returns null (no throws).
+     *
+     * @param id
+     * @return
+     */
+    InfraService getOrNull(String id);
+
 //
 //    /**
 //     * Migrates Service's fields for Catris.

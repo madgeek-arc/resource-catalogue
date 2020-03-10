@@ -13,6 +13,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -46,15 +47,20 @@ public class PendingServiceController extends ResourceController<InfraService, A
     private final PendingResourceService<InfraService> pendingServiceManager;
     private final MeasurementService<Measurement, Authentication> measurementService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final MeasurementController measurementController;
+    private final IdCreator idCreator;
 
     @Autowired
     PendingServiceController(PendingResourceService<InfraService> pendingServiceManager,
                              MeasurementService<Measurement, Authentication> measurementService,
-                             InfraServiceService<InfraService, InfraService> infraServiceService) {
+                             InfraServiceService<InfraService, InfraService> infraServiceService,
+                             IdCreator idCreator, MeasurementController measurementController) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
         this.measurementService = measurementService;
         this.infraServiceService = infraServiceService;
+        this.idCreator = idCreator;
+        this.measurementController = measurementController;
     }
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
@@ -86,11 +92,18 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(pendingServiceManager.getAll(ff, null), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
         return new ResponseEntity<>(pendingServiceManager.add(infraService, auth).getService(), HttpStatus.CREATED);
+    }
+
+    @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
+        InfraService infraService = new InfraService(service);
+        return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);
     }
 
     @PostMapping("/transform/pending")
@@ -170,4 +183,50 @@ public class PendingServiceController extends ResourceController<InfraService, A
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
+
+    @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #json)")
+    public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ObjectMapper mapper = new ObjectMapper();
+        Service service = null;
+        List<Measurement> measurements = new ArrayList<>();
+        try {
+            service = mapper.readValue(json.get("service").toString(), Service.class);
+            measurements = Arrays.stream(mapper.readValue(json.get("measurements").toString(), Measurement[].class)).collect(Collectors.toList());
+
+        } catch (JsonParseException e) {
+            logger.error("JsonParseException", e);
+        } catch (JsonMappingException e) {
+            logger.error("JsonMappingException", e);
+        } catch (IOException e) {
+            logger.error("IOException", e);
+        }
+        if (service == null) {
+            throw new ServiceException("Cannot add a null service");
+        }
+        Service s = null;
+        String oldServiceId = service.getId();
+        try { // check if service already exists
+            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
+                service.setId(idCreator.createServiceId(service));
+            }
+            s = this.pendingServiceManager.get(service.getId()).getService();
+        } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
+            // continue with the creation of the service
+        }
+
+        if (s == null) { // if existing service is null, create it, else update it
+            s = this.addService(service, auth).getBody();
+            logger.info("User '{}' added Service:\n{}", auth.getName(), s);
+        } else {
+            if (!s.equals(service)) {
+                s = this.updateService(service, auth).getBody();
+                logger.info("User '{}' updated Service:\n{}", auth.getName(), s);
+            }
+        }
+        measurementController.updateAll(oldServiceId, s.getId(), measurements, auth);
+
+        return new ResponseEntity<>(s, HttpStatus.OK);
+    }
+
 }
