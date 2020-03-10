@@ -2,7 +2,6 @@ package eu.einfracentral.registry.manager;
 
 import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
@@ -35,12 +34,12 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
     @Autowired
     public MeasurementManager(IndicatorManager indicatorManager, VocabularyService vocabularyService,
-                              InfraServiceService<InfraService, InfraService> service,
+                              InfraServiceService<InfraService, InfraService> infraService,
                               @Qualifier("measurementSync") SynchronizerService<Measurement> synchronizerService,
                               PendingServiceManager pendingServiceManager) {
         super(Measurement.class);
         this.vocabularyService = vocabularyService;
-        this.infraService = service;
+        this.infraService = infraService;
         this.indicatorManager = indicatorManager;
         this.synchronizerService = synchronizerService;
         this.pendingServiceManager = pendingServiceManager;
@@ -193,12 +192,9 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         // validate measurement fields
         validateMeasurementStructure(measurement);
 
-        // validate measurement values
         // Validates Service existence
-        InfraService service;
-        try {
-            service = infraService.get(measurement.getServiceId());
-        } catch (ResourceNotFoundException e) {
+        InfraService service = infraService.getOrNull(measurement.getServiceId());
+        if (service == null){
             service = pendingServiceManager.get(measurement.getServiceId());
         }
         if (service == null) {

@@ -216,17 +216,14 @@ public class PendingServiceController extends ResourceController<InfraService, A
         }
 
         if (s == null) { // if existing service is null, create it, else update it
-//            s = this.pendingServiceManager.add(new InfraService(service), auth).getService();
             s = this.addService(service, auth).getBody();
             logger.info("User '{}' added Service:\n{}", auth.getName(), s);
         } else {
             if (!s.equals(service)) {
-//                s = this.pendingServiceManager.update(new InfraService(service), auth).getService();
                 s = this.updateService(service, auth).getBody();
                 logger.info("User '{}' updated Service:\n{}", auth.getName(), s);
             }
         }
-//        this.measurementService.updateAll(oldServiceId, s.getId(), measurements, auth);
         measurementController.updateAll(oldServiceId, s.getId(), measurements, auth);
 
         return new ResponseEntity<>(s, HttpStatus.OK);
