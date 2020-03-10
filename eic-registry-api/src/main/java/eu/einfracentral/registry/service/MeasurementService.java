@@ -53,6 +53,7 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
     /**
      * Updates existing Measurements of a specific Service, or/and adds new ones
      *
+     * @param serviceId
      * @param allMeasurements
      * @param authentication
      * @return
@@ -62,6 +63,8 @@ public interface MeasurementService<T, U extends Authentication> extends Resourc
     /**
      * Updates existing Measurements of a specific Service, or/and adds new ones
      *
+     * @param serviceId
+     * @param newServiceId
      * @param allMeasurements
      * @param authentication
      * @return

@@ -386,6 +386,15 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return parserPool.deserialize(resource, InfraService.class);
     }
 
+    public InfraService getOrNull(String id){
+        Resource serviceResource = getResource(id, "latest");
+        if (serviceResource != null) {
+            return parserPool.deserialize(serviceResource, InfraService.class);
+        } else {
+            return null;
+        }
+    }
+
     private boolean exists(InfraService infraService) {
         if (infraService.getService().getVersion() != null) {
             return getResource(infraService.getService().getId(), infraService.getService().getVersion()) != null;

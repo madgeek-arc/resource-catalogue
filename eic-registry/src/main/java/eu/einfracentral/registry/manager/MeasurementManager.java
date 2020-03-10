@@ -30,16 +30,19 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     private VocabularyService vocabularyService;
     private InfraServiceService<InfraService, InfraService> infraService;
     private SynchronizerService<Measurement> synchronizerService;
+    private PendingServiceManager pendingServiceManager;
 
     @Autowired
     public MeasurementManager(IndicatorManager indicatorManager, VocabularyService vocabularyService,
-                              InfraServiceService<InfraService, InfraService> service,
-                              @Qualifier("measurementSync") SynchronizerService<Measurement> synchronizerService) {
+                              InfraServiceService<InfraService, InfraService> infraService,
+                              @Qualifier("measurementSync") SynchronizerService<Measurement> synchronizerService,
+                              PendingServiceManager pendingServiceManager) {
         super(Measurement.class);
         this.vocabularyService = vocabularyService;
-        this.infraService = service;
+        this.infraService = infraService;
         this.indicatorManager = indicatorManager;
         this.synchronizerService = synchronizerService;
+        this.pendingServiceManager = pendingServiceManager;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         validate(measurement);
         super.add(measurement, auth);
         logger.debug("Adding Measurement {}", measurement);
-        synchronizerService.syncAdd(measurement);
+//        synchronizerService.syncAdd(measurement);
         return measurement;
     }
 
@@ -72,7 +75,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         }
         super.update(measurement, auth);
         logger.debug("Updating Measurement {}", measurement);
-        synchronizerService.syncUpdate(measurement);
+//        synchronizerService.syncUpdate(measurement);
         return measurement;
     }
 
@@ -176,7 +179,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     public void delete(Measurement measurement) {
         super.delete(measurement);
         logger.debug("Deleting Measurement: {}", measurement);
-        synchronizerService.syncDelete(measurement);
+//        synchronizerService.syncDelete(measurement);
     }
 
     @Override
@@ -189,9 +192,12 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
         // validate measurement fields
         validateMeasurementStructure(measurement);
 
-        // validate measurement values
         // Validates Service existence
-        if (infraService.get(measurement.getServiceId()) == null) {
+        InfraService service = infraService.getOrNull(measurement.getServiceId());
+        if (service == null){
+            service = pendingServiceManager.get(measurement.getServiceId());
+        }
+        if (service == null) {
             throw new ValidationException("Service with id: " + measurement.getServiceId() + " does not exist");
         }
 
