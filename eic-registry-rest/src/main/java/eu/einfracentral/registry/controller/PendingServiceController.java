@@ -93,14 +93,14 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
     @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
         return new ResponseEntity<>(pendingServiceManager.add(infraService, auth).getService(), HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
         return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);

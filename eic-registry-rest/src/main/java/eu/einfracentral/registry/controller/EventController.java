@@ -63,7 +63,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     // FAVORITES -------->
     // Set a Service as favorite for a user.
     @PostMapping(path = "favourite/service/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
         if (value) {
@@ -112,7 +112,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     // RATINGS ---------->
     // Set a rating to a Service from the authenticated user.
     @PostMapping(path = "rating/service/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setRating(id, rating, authentication), HttpStatus.OK);
         logger.info("User '{}' rated Service with id '{}', rating value: {}", authentication.getName(), id, rating);

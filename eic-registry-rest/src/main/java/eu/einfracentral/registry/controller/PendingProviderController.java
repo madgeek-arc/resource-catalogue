@@ -65,7 +65,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
