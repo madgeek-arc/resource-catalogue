@@ -1,12 +1,12 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ServiceValidators;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +80,7 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
 
         try { // try to find a service with the same id and version
             existingService = get(infraService.getId(), infraService.getVersion());
-        } catch (ServiceException e) {
+        } catch (ResourceNotFoundException e) {
             // if a service with version = infraService.getVersion() does not exist, get the latest service
             existingService = get(infraService.getId());
         }
