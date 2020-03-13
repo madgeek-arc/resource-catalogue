@@ -1,10 +1,12 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.dto.MapValue;
 import org.joda.time.DateTime;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -115,4 +117,12 @@ public interface StatisticsService {
         }
 
     }
+
+    /**
+     * Providing the Provider's id, get the relation between all his services and their respective countries
+     *
+     * @param id
+     * @return
+     */
+    List<MapValue> providerServiceGeographicalAvailability(String id);
 }

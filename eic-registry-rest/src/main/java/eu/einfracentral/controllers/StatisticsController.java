@@ -1,6 +1,7 @@
 package eu.einfracentral.controllers;
 
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.dto.MapValue;
 import eu.einfracentral.service.StatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -73,5 +75,11 @@ public class StatisticsController {
     @RequestMapping(path = "events", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<?> events(@RequestParam Event.UserActionType type, @RequestParam Date from, @RequestParam Date to, @RequestParam StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.events(type, from, to, by), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and their respective countries.")
+    @RequestMapping(path = "provider/geographicalAvailability/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<MapValue>> geographicalAvailability(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.providerServiceGeographicalAvailability(id), HttpStatus.OK);
     }
 }

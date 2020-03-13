@@ -3,6 +3,8 @@ package eu.einfracentral.manager;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.dto.MapValue;
+import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
@@ -32,6 +34,7 @@ import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.Authentication;
@@ -53,16 +56,22 @@ public class StatisticsManager implements StatisticsService {
     private ProviderService<ProviderBundle, Authentication> providerService;
     private SearchService searchService;
     private ParserService parserService;
+    private InfraServiceManager infraServiceManager;
+
+    @Value("${platform.root:}")
+    String url;
 
     @Autowired
     StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
                       ProviderService<ProviderBundle, Authentication> providerService,
-                      SearchService searchService, ParserService parserService) {
+                      SearchService searchService, ParserService parserService,
+                      InfraServiceManager infraServiceManager) {
         this.elastic = elastic;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
         this.searchService = searchService;
         this.parserService = parserService;
+        this.infraServiceManager = infraServiceManager;
     }
 
     @Override
@@ -353,6 +362,40 @@ public class StatisticsManager implements StatisticsService {
                 duration = date;
         }
         return duration;
+    }
+
+    public List<MapValue> providerServiceGeographicalAvailability(String id){
+        List<MapValue> mapValueList = new ArrayList<>();
+        Map<String, List<String>> outterMap = new HashMap<>();
+        List<Service> allProviderServices = providerService.getServices(id);
+        for (Service service : allProviderServices){
+            List<String> servicePlaces = service.getPlaces();
+            for (String place : servicePlaces){
+                if (!outterMap.containsKey(place)){
+                    outterMap.put(place, Collections.singletonList(service.getId()));
+                } else {
+                    List<String> oldList = outterMap.get(place);
+                    List<String> newList = new ArrayList<>();
+                    newList.addAll(oldList);
+                    newList.add(service.getId());
+                    outterMap.put(place, newList);
+                }
+            }
+        }
+        for (Map.Entry<String, List<String>> entry : outterMap.entrySet()){
+            MapValue mapValue = new MapValue();
+            mapValue.setCountry(entry.getKey());
+            List<MapValue.Values> valuesList = new ArrayList<>();
+            for (String value : entry.getValue()){
+                MapValue.Values values = new MapValue.Values();
+                values.setName(infraServiceManager.get(value).getService().getName());
+                values.setUrl(url + "service/" +value);
+                valuesList.add(values);
+            }
+            mapValue.setValues(valuesList);
+            mapValueList.add(mapValue);
+        }
+        return mapValueList;
     }
 
 }
