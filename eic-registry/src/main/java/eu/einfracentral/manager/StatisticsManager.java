@@ -4,6 +4,7 @@ import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.dto.MapValue;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AnalyticsService;
@@ -365,6 +366,12 @@ public class StatisticsManager implements StatisticsService {
     }
 
     public List<MapValue> providerServiceGeographicalAvailability(String id){
+        try {
+            providerService.get(id).getProvider();
+        } catch (ResourceException e){
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("There is no Provider with the given id [%s]", id));
+        }
         List<MapValue> mapValueList = new ArrayList<>();
         Map<String, List<String>> outterMap = new HashMap<>();
         List<Service> allProviderServices = providerService.getServices(id);
