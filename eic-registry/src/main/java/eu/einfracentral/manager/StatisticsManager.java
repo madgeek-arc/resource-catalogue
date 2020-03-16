@@ -1,15 +1,15 @@
 package eu.einfracentral.manager;
 
-import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MapValue;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
 import eu.openminted.registry.core.configuration.ElasticConfiguration;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
@@ -58,6 +58,7 @@ public class StatisticsManager implements StatisticsService {
     private SearchService searchService;
     private ParserService parserService;
     private InfraServiceManager infraServiceManager;
+    private VocabularyService vocabularyService;
 
     @Value("${platform.root:}")
     String url;
@@ -66,13 +67,14 @@ public class StatisticsManager implements StatisticsService {
     StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
                       ProviderService<ProviderBundle, Authentication> providerService,
                       SearchService searchService, ParserService parserService,
-                      InfraServiceManager infraServiceManager) {
+                      InfraServiceManager infraServiceManager, VocabularyService vocabularyService) {
         this.elastic = elastic;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
         this.searchService = searchService;
         this.parserService = parserService;
         this.infraServiceManager = infraServiceManager;
+        this.vocabularyService = vocabularyService;
     }
 
     @Override
@@ -365,27 +367,62 @@ public class StatisticsManager implements StatisticsService {
         return duration;
     }
 
-    public List<MapValue> providerServiceGeographicalAvailability(String id){
-        try {
-            providerService.get(id).getProvider();
-        } catch (ResourceException e){
-            throw new eu.einfracentral.exception.ResourceNotFoundException(
-                    String.format("There is no Provider with the given id [%s]", id));
-        }
+    public List<MapValue> mapServicesToGeographicalAvailability(String id){
         List<MapValue> mapValueList = new ArrayList<>();
         Map<String, List<String>> outterMap = new HashMap<>();
-        List<Service> allProviderServices = providerService.getServices(id);
-        for (Service service : allProviderServices){
-            List<String> servicePlaces = service.getPlaces();
+        List<InfraService> allServices;
+        if (id != null){
+            try {
+                providerService.get(id).getProvider();
+            } catch (ResourceException e){
+                throw new eu.einfracentral.exception.ResourceNotFoundException(
+                        String.format("There is no Provider with the given id [%s]", id));
+            }
+            allServices = providerService.getInfraServices(id);
+        } else {
+            FacetFilter ff = new FacetFilter();
+            ff.setQuantity(10000);
+            allServices = infraServiceManager.getAll(ff, null).getResults();
+        }
+        for (InfraService infraService : allServices){
+            List<String> servicePlaces = infraService.getService().getPlaces();
             for (String place : servicePlaces){
-                if (!outterMap.containsKey(place)){
-                    outterMap.put(place, Collections.singletonList(service.getId()));
+                if (place.equals("WW")){
+                    String[] placesWW = vocabularyService.getRegion(place);
+                    for (String placeWW : placesWW){
+                        if (!outterMap.containsKey(placeWW)){
+                            outterMap.put(placeWW, Collections.singletonList(infraService.getService().getId()));
+                        } else {
+                            List<String> oldList = outterMap.get(placeWW);
+                            List<String> newList = new ArrayList<>();
+                            newList.addAll(oldList);
+                            newList.add(infraService.getService().getId());
+                            outterMap.put(placeWW, newList);
+                        }
+                    }
+                } else if (place.equals("EU")){
+                    String[] placesEU = vocabularyService.getRegion(place);
+                    for (String placeEU : placesEU){
+                        if (!outterMap.containsKey(placeEU)){
+                            outterMap.put(placeEU, Collections.singletonList(infraService.getService().getId()));
+                        } else {
+                            List<String> oldList = outterMap.get(placeEU);
+                            List<String> newList = new ArrayList<>();
+                            newList.addAll(oldList);
+                            newList.add(infraService.getService().getId());
+                            outterMap.put(placeEU, newList);
+                        }
+                    }
                 } else {
-                    List<String> oldList = outterMap.get(place);
-                    List<String> newList = new ArrayList<>();
-                    newList.addAll(oldList);
-                    newList.add(service.getId());
-                    outterMap.put(place, newList);
+                    if (!outterMap.containsKey(place)){
+                        outterMap.put(place, Collections.singletonList(infraService.getService().getId()));
+                    } else {
+                        List<String> oldList = outterMap.get(place);
+                        List<String> newList = new ArrayList<>();
+                        newList.addAll(oldList);
+                        newList.add(infraService.getService().getId());
+                        outterMap.put(place, newList);
+                    }
                 }
             }
         }
@@ -405,4 +442,67 @@ public class StatisticsManager implements StatisticsService {
         return mapValueList;
     }
 
+    public List<MapValue> mapServicesToProviderCountry(){
+        List<MapValue> mapValueList = new ArrayList<>();
+        Map<String, List<String>> outterMap = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> allServices = infraServiceManager.getAll(ff, null).getResults();
+        for (InfraService infraService : allServices) {
+            for (String providerId : infraService.getService().getProviders()) {
+                String coordinatingCountry = providerService.get(providerId).getProvider().getCoordinatingCountry();
+                if (coordinatingCountry.equals("WW")){
+                    String[] placesWW = vocabularyService.getRegion(coordinatingCountry);
+                    for (String placeWW : placesWW){
+                        if (!outterMap.containsKey(placeWW)){
+                            outterMap.put(placeWW, Collections.singletonList(infraService.getService().getId()));
+                        } else {
+                            List<String> oldList = outterMap.get(placeWW);
+                            List<String> newList = new ArrayList<>();
+                            newList.addAll(oldList);
+                            newList.add(infraService.getService().getId());
+                            outterMap.put(placeWW, newList);
+                        }
+                    }
+                } else if (coordinatingCountry.equals("EU")){
+                    String[] placesEU = vocabularyService.getRegion(coordinatingCountry);
+                    for (String placeEU : placesEU){
+                        if (!outterMap.containsKey(placeEU)){
+                            outterMap.put(placeEU, Collections.singletonList(infraService.getService().getId()));
+                        } else {
+                            List<String> oldList = outterMap.get(placeEU);
+                            List<String> newList = new ArrayList<>();
+                            newList.addAll(oldList);
+                            newList.add(infraService.getService().getId());
+                            outterMap.put(placeEU, newList);
+                        }
+                    }
+                } else {
+                    if (!outterMap.containsKey(coordinatingCountry)){
+                        outterMap.put(coordinatingCountry, Collections.singletonList(infraService.getService().getId()));
+                    } else {
+                        List<String> oldList = outterMap.get(coordinatingCountry);
+                        List<String> newList = new ArrayList<>();
+                        newList.addAll(oldList);
+                        newList.add(infraService.getService().getId());
+                        outterMap.put(coordinatingCountry, newList);
+                    }
+                }
+            }
+        }
+        for (Map.Entry<String, List<String>> entry : outterMap.entrySet()){
+            MapValue mapValue = new MapValue();
+            mapValue.setCountry(entry.getKey());
+            List<MapValue.Values> valuesList = new ArrayList<>();
+            for (String value : entry.getValue()){
+                MapValue.Values values = new MapValue.Values();
+                values.setName(infraServiceManager.get(value).getService().getName());
+                values.setUrl(url + "service/" +value);
+                valuesList.add(values);
+            }
+            mapValue.setValues(valuesList);
+            mapValueList.add(mapValue);
+        }
+        return mapValueList;
+    }
 }

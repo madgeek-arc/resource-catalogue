@@ -119,10 +119,17 @@ public interface StatisticsService {
     }
 
     /**
-     * Providing the Provider's id, get the relation between all his services and their respective countries
+     * Providing the Provider's id, get the relation between all his services and their respective countries.
      *
      * @param id
      * @return
      */
-    List<MapValue> providerServiceGeographicalAvailability(String id);
+    List<MapValue> mapServicesToGeographicalAvailability(String id);
+
+    /**
+     * Get the relation between all the Services and their Coordinating Country.
+     *
+     * @return
+     */
+    List<MapValue> mapServicesToProviderCountry();
 }
