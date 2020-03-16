@@ -78,8 +78,14 @@ public class StatisticsController {
     }
 
     @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and their respective countries.")
-    @RequestMapping(path = "provider/geographicalAvailability/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<List<MapValue>> geographicalAvailability(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.providerServiceGeographicalAvailability(id), HttpStatus.OK);
+    @RequestMapping(path = "provider/mapServicesToGeographicalAvailability", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<MapValue>> mapServicesToGeographicalAvailability(@RequestParam(required = false) String id, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.mapServicesToGeographicalAvailability(id), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get a relation between all Services and their Provider's Country")
+    @RequestMapping(path = "provider/mapServicesToProviderCountry", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<MapValue>> mapServicesToProviderCountry(@ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.mapServicesToProviderCountry(), HttpStatus.OK);
     }
 }
