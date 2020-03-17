@@ -4,14 +4,14 @@ import java.util.List;
 
 public class MapValue {
 
-    private String country;
+    private String key;
     private List<Values> values;
 
     public MapValue(){
     }
 
-    public MapValue(String country, List<Values> values){
-        this.country = country;
+    public MapValue(String key, List<Values> values){
+        this.key = key;
         this.values = values;
     }
 
@@ -45,12 +45,12 @@ public class MapValue {
         }
     }
 
-    public String getCountry() {
-        return country;
+    public String getKey() {
+        return key;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public List<Values> getValues() {
