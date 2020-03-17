@@ -83,9 +83,15 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.mapServicesToGeographicalAvailability(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get a relation between all Services and their Provider's Country")
-    @RequestMapping(path = "provider/mapServicesToProviderCountry", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<List<MapValue>> mapServicesToProviderCountry(@ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(statisticsService.mapServicesToProviderCountry(), HttpStatus.OK);
+    @ApiOperation(value = "Get a relation between all Services and their Coordinating Country")
+    @RequestMapping(path = "provider/mapServicesToCoordinatingCountry", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<MapValue>> mapServicesToCoordinatingCountry(@ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.mapServicesToCoordinatingCountry(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and a specific Vocabulary")
+    @RequestMapping(path = "provider/mapServicesToVocabulary", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<MapValue>> mapServicesToVocabulary(@RequestParam(required = false) String id ,@RequestParam StatisticsService.Vocabulary vocabulary, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(statisticsService.mapServicesToVocabulary(id, vocabulary), HttpStatus.OK);
     }
 }
