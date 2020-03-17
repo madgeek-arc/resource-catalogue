@@ -99,7 +99,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     @Override
     public InfraService transformToActive(String serviceId, Authentication auth) {
-        InfraService infraService = infraServiceService.get(serviceId);
+        InfraService infraService = get(serviceId);
         infraServiceService.validate(infraService);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = getResource(serviceId);
