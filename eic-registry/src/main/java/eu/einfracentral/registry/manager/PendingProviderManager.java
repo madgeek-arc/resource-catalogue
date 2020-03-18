@@ -200,5 +200,22 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
+//
+//    public void changePendingProviderState(ProviderBundle providerBundle){
+//        // FIXME: returns 'false' when equals with Provider.States.ST_SUBMISSION.toString()
+//        if (providerBundle.getStatus().equals("pending service template submission")) {
+//            providerBundle.setStatus(Provider.States.PENDING_2.toString());
+//            super.update(providerBundle, null);
+//        }
+//    }
+//
+//    public ProviderBundle getOrNull(String id){
+//        Resource serviceResource = getResource(id);
+//        if (serviceResource != null) {
+//            return parserPool.deserialize(serviceResource, ProviderBundle.class);
+//        } else {
+//            return null;
+//        }
+//    }
 
 }

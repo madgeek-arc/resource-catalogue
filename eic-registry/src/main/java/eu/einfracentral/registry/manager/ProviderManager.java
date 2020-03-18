@@ -475,4 +475,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
+//    public void changeProviderStateForPendingServices(ProviderBundle providerBundle){
+//        // FIXME: returns 'false' when equals with Provider.States.ST_SUBMISSION.toString()
+//        if (providerBundle.getStatus().equals("pending service template submission")) {
+//            providerBundle.setStatus(Provider.States.PENDING_2.toString());
+//            super.update(providerBundle, null);
+//        }
+//    }
+
 }

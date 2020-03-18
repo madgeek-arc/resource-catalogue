@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
@@ -24,15 +24,17 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingProviderManager pendingProviderManager;
     private final IdCreator idCreator;
+    private final ProviderManager providerManager;
 
     @Autowired
     public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService,
                                  PendingProviderManager pendingProviderManager,
-                                 IdCreator idCreator) {
+                                 IdCreator idCreator, ProviderManager providerManager) {
         super(InfraService.class);
         this.infraServiceService = infraServiceService;
         this.pendingProviderManager = pendingProviderManager;
         this.idCreator = idCreator;
+        this.providerManager = providerManager;
     }
 
     @Override
@@ -58,12 +60,18 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     @Override
     public InfraService update(InfraService infraService, Authentication auth) {
-        String newId = idCreator.createServiceId(infraService.getService());
+//        for (String providerId : infraService.getService().getProviders()){
+//            ProviderBundle providerBundle = pendingProviderManager.getOrNull(providerId);
+//            if (providerBundle == null){
+//                providerBundle = providerManager.get(providerId, auth);
+//                providerManager.changeProviderStateForPendingServices(providerBundle);
+//            } else {
+//                pendingProviderManager.changePendingProviderState(providerBundle);
+//            }
+//        }
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), new User(auth).getFullName()));
         // get existing resource
         Resource existing = whereID(infraService.getId(), true);
-        // change provider id
-        infraService.getService().setId(newId);
         // save existing resource with new payload
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);

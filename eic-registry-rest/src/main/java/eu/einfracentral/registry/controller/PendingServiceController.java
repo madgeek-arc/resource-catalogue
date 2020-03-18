@@ -122,9 +122,9 @@ public class PendingServiceController extends ResourceController<InfraService, A
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService();
-        infraService.setService(service);
         try {
             infraService = pendingServiceManager.get(service.getId());
+            infraService.setService(service);
             infraService = pendingServiceManager.update(infraService, auth);
         } catch (ResourceException e) {
             logger.debug("Pending Service with id '{}' does not exist. Creating it...", service.getId());
@@ -172,7 +172,9 @@ public class PendingServiceController extends ResourceController<InfraService, A
         update(infraService, auth);
 
         // transform to active
-        infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
+        //FIXME: see this
+//        infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
+        infraService = pendingServiceManager.transformToActive(infraService, auth);
 
         this.measurementService.updateAll(service.getId(), infraService.getId(), measurements, auth);
 
