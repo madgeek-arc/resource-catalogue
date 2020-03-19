@@ -128,6 +128,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
             infraService = pendingServiceManager.update(infraService, auth);
         } catch (ResourceException e) {
             logger.debug("Pending Service with id '{}' does not exist. Creating it...", service.getId());
+            infraService.setService(service);
             infraService = pendingServiceManager.add(infraService, auth);
         }
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
