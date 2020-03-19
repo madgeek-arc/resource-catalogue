@@ -1,6 +1,5 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
@@ -40,7 +39,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final SecurityService securityService;
     private final Random randomNumberGenerator;
     private final RegistrationMailService registrationMailService;
-    private final EICAuthoritiesMapper eicAuthoritiesMapper;
 
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -50,7 +48,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy RegistrationMailService registrationMailService,
-                           @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
                            @Lazy FieldValidator fieldValidator,
                            IdCreator idCreator, EventService eventService) {
         super(ProviderBundle.class);
@@ -58,7 +55,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
         this.registrationMailService = registrationMailService;
-        this.eicAuthoritiesMapper = eicAuthoritiesMapper;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
@@ -86,13 +82,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
 
-        // update provider roles
-        try {
-            eicAuthoritiesMapper.updateAuthorities();
-        } catch (RuntimeException e) {
-            logger.error("Could not update authorities map", e);
-        }
-
         // send messages to queue
         registrationMailService.sendProviderMails(provider);
 
@@ -112,13 +101,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {}", provider);
-
-        // update provider roles
-        try {
-            eicAuthoritiesMapper.updateAuthorities();
-        } catch (RuntimeException e) {
-            logger.error("Could not update authorities map", e);
-        }
 
         return provider;
     }
@@ -206,13 +188,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         });
         super.delete(provider);
         logger.debug("Deleting Provider: {}", provider);
-
-        // update provider roles
-        try {
-            eicAuthoritiesMapper.updateAuthorities();
-        } catch (RuntimeException e) {
-            logger.error("Could not update authorities map", e);
-        }
     }
 
     @Override
