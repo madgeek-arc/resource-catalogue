@@ -10,7 +10,6 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +46,12 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         this.securityService = securityService;
     }
 
+
     @Override
     public String getResourceType() {
         return "pending_provider";
     }
+
 
     @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
@@ -67,38 +68,12 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return providerBundle;
     }
 
+
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
-        String newId = StringUtils
-                .stripAccents(providerBundle.getProvider().getAcronym())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_");
-        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), new User(auth).getFullName()));
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("providers", providerBundle.getId());
-        ff.setQuantity(10000);
-
-        // if provider id has changed
-        if (!providerBundle.getId().equals(newId)) {
-            // update PendingServices of this provider
-            List<InfraService> providerPendingServices = pendingServiceManager.getAll(ff, auth).getResults();
-            for (InfraService service : providerPendingServices) {
-                updateProviderId(service, providerBundle.getId(), newId);
-                pendingServiceManager.update(service, auth);
-            }
-
-            // update InfraServices of this provider
-            List<InfraService> providerServices = infraServiceManager.getAll(ff, auth).getResults();
-            for (InfraService service : providerServices) {
-                updateProviderId(service, providerBundle.getId(), newId);
-                infraServiceManager.update(service, auth);
-            }
-        }
 
         // get existing resource
         Resource existing = whereID(providerBundle.getId(), true);
-        // change provider id
-        providerBundle.getProvider().setId(newId);
         // save existing resource with new payload
         existing.setPayload(serialize(providerBundle));
         existing.setResourceType(resourceType);
@@ -107,10 +82,12 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return providerBundle;
     }
 
+
     @Override
     public ProviderBundle transformToPending(ProviderBundle providerBundle, Authentication auth) {
         return transformToPending(providerBundle.getId(), auth);
     }
+
 
     @Override
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
@@ -119,6 +96,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         resourceService.changeResourceType(resource, resourceType);
         return deserialize(resource);
     }
+
 
     @Override
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
@@ -131,6 +109,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return providerBundle;
     }
 
+
     @Override
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
         ProviderBundle providerBundle = get(providerId);
@@ -142,23 +121,12 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return providerBundle;
     }
 
+
     @Override
     public Object getPendingRich(String id, Authentication auth) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
-    private InfraService updateProviderId(InfraService service, String oldId, String newId) {
-        List<String> providerIds = service.getService().getProviders();
-        providerIds = providerIds.stream().map(id -> {
-            if (id.equals(oldId)) {
-                return newId;
-            } else {
-                return id;
-            }
-        }).collect(Collectors.toList());
-        service.getService().setProviders(providerIds);
-        return service;
-    }
 
     public boolean userIsPendingProviderAdmin(Authentication auth, ProviderBundle registeredProvider) {
         User user = new User(auth);
