@@ -183,7 +183,8 @@ public class PendingServiceController extends ResourceController<InfraService, A
             infraService = infraServiceService.addService(new InfraService(service), auth);
             logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
         } else { // else update Pending Service and transform it to Active Service
-            infraService = pendingServiceManager.update(new InfraService(service), auth);
+            infraService.setService(service); // important to keep other fields of InfraService
+            infraService = pendingServiceManager.update(infraService, auth);
             logger.info("User '{}' updated Pending Service:\n{}", auth.getName(), infraService);
 
             // transform to active
@@ -220,7 +221,8 @@ public class PendingServiceController extends ResourceController<InfraService, A
             infraService = pendingServiceManager.add(new InfraService(service), auth);
             logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
         } else {
-            infraService = pendingServiceManager.update(new InfraService(service), auth);
+            infraService.setService(service); // important to keep other fields of InfraService
+            infraService = pendingServiceManager.update(infraService, auth);
             logger.info("User '{}' updated Service:\n{}", auth.getName(), infraService);
         }
         measurementService.updateAll(infraService.getId(), measurements, auth);
