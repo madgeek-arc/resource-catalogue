@@ -173,9 +173,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         update(infraService, auth);
 
         // transform to active
-        //FIXME: see this
-//        infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
-        infraService = pendingServiceManager.transformToActive(infraService, auth);
+        infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
 
         this.measurementService.updateAll(service.getId(), infraService.getId(), measurements, auth);
 
