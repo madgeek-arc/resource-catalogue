@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
@@ -10,11 +9,14 @@ import eu.openminted.registry.core.domain.ResourceType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static eu.einfracentral.config.CacheConfig.*;
 
 @Service("pendingServiceManager")
 public class PendingServiceManager extends ResourceManager<InfraService> implements PendingResourceService<InfraService> {
@@ -43,6 +45,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService service, Authentication auth) {
 
         service.setId(idCreator.createServiceId(service.getService()));
@@ -59,16 +62,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
-//        for (String providerId : infraService.getService().getProviders()){
-//            ProviderBundle providerBundle = pendingProviderManager.getOrNull(providerId);
-//            if (providerBundle == null){
-//                providerBundle = providerManager.get(providerId, auth);
-//                providerManager.changeProviderStateForPendingServices(providerBundle);
-//            } else {
-//                pendingProviderManager.changePendingProviderState(providerBundle);
-//            }
-//        }
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), new User(auth).getFullName()));
         // get existing resource
         Resource existing = whereID(infraService.getId(), true);
@@ -81,11 +76,13 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService transformToPending(InfraService infraService, Authentication auth) {
         return transformToPending(infraService.getId(), auth);
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService transformToPending(String serviceId, Authentication auth) {
         InfraService infraService = infraServiceService.get(serviceId);
         Resource resource = infraServiceService.getResource(infraService.getService().getId(), infraService.getService().getVersion());
@@ -95,6 +92,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService transformToActive(InfraService infraService, Authentication auth) {
         infraServiceService.validate(infraService);
         infraService = update(infraService, auth);
@@ -106,6 +104,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService transformToActive(String serviceId, Authentication auth) {
         InfraService infraService = get(serviceId);
         infraServiceService.validate(infraService);

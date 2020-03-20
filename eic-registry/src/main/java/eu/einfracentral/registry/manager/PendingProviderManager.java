@@ -13,6 +13,7 @@ import eu.openminted.registry.core.domain.ResourceType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @Service("pendingProviderManager")
 public class PendingProviderManager extends ResourceManager<ProviderBundle> implements PendingResourceService<ProviderBundle> {
@@ -54,6 +57,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
 
     @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
         providerBundle.setId(idCreator.createProviderId(providerBundle.getProvider()));
@@ -70,6 +74,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
 
     @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
 
         // get existing resource
@@ -84,12 +89,14 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
 
     @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(ProviderBundle providerBundle, Authentication auth) {
         return transformToPending(providerBundle.getId(), auth);
     }
 
 
     @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
         Resource resource = providerManager.getResource(providerId);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
@@ -99,6 +106,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
 
     @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
         providerManager.validate(providerBundle);
         providerBundle = update(providerBundle, auth);
@@ -111,6 +119,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
 
     @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
         ProviderBundle providerBundle = get(providerId);
         providerManager.validate(providerBundle);
@@ -168,22 +177,5 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-//
-//    public void changePendingProviderState(ProviderBundle providerBundle){
-//        // FIXME: returns 'false' when equals with Provider.States.ST_SUBMISSION.toString()
-//        if (providerBundle.getStatus().equals("pending service template submission")) {
-//            providerBundle.setStatus(Provider.States.PENDING_2.toString());
-//            super.update(providerBundle, null);
-//        }
-//    }
-//
-//    public ProviderBundle getOrNull(String id){
-//        Resource serviceResource = getResource(id);
-//        if (serviceResource != null) {
-//            return parserPool.deserialize(serviceResource, ProviderBundle.class);
-//        } else {
-//            return null;
-//        }
-//    }
 
 }
