@@ -72,8 +72,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         InfraService ret;
         ret = super.add(infraService, auth);
 
-        providerManager.verifyNewProviders(infraService.getService().getProviders(), auth);
-
         return ret;
     }
 

@@ -366,23 +366,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    /**
-     * This method is used to update a list of new providers with status 'Provider.States.ST_SUBMISSION'
-     * to status 'Provider.States.PENDING_2'
-     *
-     * @param providers
-     * @param authentication
-     */
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void verifyNewProviders(List<String> providers, Authentication authentication) {
-        for (String serviceProvider : providers) {
-            ProviderBundle provider = get(serviceProvider);
-            if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
-                verifyProvider(provider.getId(), Provider.States.PENDING_2, false, authentication);
-            }
-        }
-    }
-
     @Override
     public ProviderBundle validate(ProviderBundle provider) {
         logger.debug("Validating Provider with id: {}", provider.getId());
@@ -449,13 +432,5 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setUsers(users);
         }
     }
-
-//    public void changeProviderStateForPendingServices(ProviderBundle providerBundle){
-//        // FIXME: returns 'false' when equals with Provider.States.ST_SUBMISSION.toString()
-//        if (providerBundle.getStatus().equals("pending service template submission")) {
-//            providerBundle.setStatus(Provider.States.PENDING_2.toString());
-//            super.update(providerBundle, null);
-//        }
-//    }
 
 }
