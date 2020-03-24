@@ -61,6 +61,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
         providerBundle.setId(idCreator.createProviderId(providerBundle.getProvider()));
+        logger.trace(String.format("User {%s} is attempting to add a new Pending Provider with id {%s}", auth.getName(), providerBundle.getId()));
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), new User(auth).getFullName()));
 
         if (providerBundle.getStatus() == null) {
@@ -77,6 +78,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
 
+        logger.trace(String.format("User {%s} is attempting to update the Pending Provider with id {%s}", auth.getName(), providerBundle.getId()));
         // get existing resource
         Resource existing = whereID(providerBundle.getId(), true);
         // save existing resource with new payload
@@ -98,6 +100,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
+        logger.trace(String.format("User {%s} is attempting to transform the Active Provider with id {%s} to Pending", auth.getName(), providerId));
         Resource resource = providerManager.getResource(providerId);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
@@ -108,6 +111,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
+        logger.trace(String.format("User {%s} is attempting to transform the Pending Provider with id {%s} to Active", auth.getName(), providerBundle.getId()));
         providerManager.validate(providerBundle);
         providerBundle = update(providerBundle, auth);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
@@ -121,6 +125,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
+        logger.trace(String.format("User {%s} is attempting to transform the Pending Provider with id {%s} to Active", auth.getName(), providerId));
         ProviderBundle providerBundle = get(providerId);
         providerManager.validate(providerBundle);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
