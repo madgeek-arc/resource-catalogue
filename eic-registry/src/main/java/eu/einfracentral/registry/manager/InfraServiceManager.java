@@ -65,7 +65,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.setLatest(true);
 
         if (infraService.getMetadata() == null) {
-            infraService.setMetadata(Metadata.createMetadata(new User(auth).getFullName()));
+            infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
         logger.info("Adding Service: {}", infraService);
@@ -97,7 +97,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // update existing service serviceMetadata
         infraService.setMetadata(
-                Metadata.updateMetadata(existingService.getMetadata(), new User(auth).getFullName()));
+                Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
         infraService.setActive(existingService.isActive());
 
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)

@@ -74,7 +74,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
 
-        provider.setMetadata(Metadata.createMetadata(new User(auth).getFullName()));
+        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
@@ -92,7 +92,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
         validate(provider);
-        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), new User(auth).getFullName()));
+        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName()));
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());
@@ -422,7 +422,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void addAuthenticatedUser(Provider provider, Authentication auth) {
         List<User> users;
-        User authUser = new User(auth);
+        User authUser = User.of(auth);
         users = provider.getUsers();
         if (users == null) {
             users = new ArrayList<>();

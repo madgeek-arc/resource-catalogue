@@ -70,7 +70,7 @@ public class SecurityService {
 
     public boolean userIsProviderAdmin(Authentication auth, String providerId) {
         ProviderBundle registeredProvider = providerManager.get(providerId);
-        User user = new User(auth);
+        User user = User.of(auth);
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
         }
