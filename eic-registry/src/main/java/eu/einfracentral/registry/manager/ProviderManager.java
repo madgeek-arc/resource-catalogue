@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+import static eu.einfracentral.config.CacheConfig.*;
 
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
@@ -387,7 +387,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
     public void deleteUserInfo(Authentication authentication) {
         String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
         String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
