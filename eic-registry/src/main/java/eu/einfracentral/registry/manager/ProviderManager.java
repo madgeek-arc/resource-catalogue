@@ -71,6 +71,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle add(ProviderBundle provider, Authentication auth) {
 
         provider.setId(idCreator.createProviderId(provider.getProvider()));
+        logger.trace("User {} is attempting to add a new Provider with id {}", auth.getName(), provider.getId());
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
 
@@ -91,6 +92,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
+        logger.trace("User {} is attempting to update the Provider with id {}", auth.getName(), provider.getId());
         validate(provider);
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName()));
         Resource existing = whereID(provider.getId(), true);
@@ -176,6 +178,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {
+        logger.trace("User is attempting to delete the Provider with id {}", provider.getId());
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
@@ -193,6 +196,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
+        logger.trace("User {} is attempting to verify the Provider with id {}, given as Status the value {}" +
+                " and as Active the value {}", auth.getName(), id, status, active);
         ProviderBundle provider = get(id);
         provider.setStatus(status.getKey());
         switch (status) {
@@ -353,6 +358,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
+        logger.info("Deactivating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
 //            service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
 //            service.setStatus(null);
@@ -389,6 +395,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
     public void deleteUserInfo(Authentication authentication) {
+        logger.trace("User {} is attempting to delete his User Info", authentication.getName());
         String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
         String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
         List<Event> allUserEvents = new ArrayList<>();
@@ -401,6 +408,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         "You need to delete your Provider first or add more Admins.", providerBundle.getProvider().getName()));
             }
         }
+        logger.info("Attempting to delete all user events");
         eventService.deleteEvents(allUserEvents);
         for (ProviderBundle providerBundle : allUserProviders) {
             List<User> updatedUsers = new ArrayList<>();
