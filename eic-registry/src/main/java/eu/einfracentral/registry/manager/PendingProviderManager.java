@@ -61,7 +61,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
         providerBundle.setId(idCreator.createProviderId(providerBundle.getProvider()));
-        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), new User(auth).getFullName()));
+        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName()));
 
         if (providerBundle.getStatus() == null) {
             providerBundle.setStatus(Provider.States.PENDING_1.getKey());
@@ -138,9 +138,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
 
     public boolean userIsPendingProviderAdmin(Authentication auth, ProviderBundle registeredProvider) {
-        User user = new User(auth);
+        User user = User.of(auth);
         if (registeredProvider == null) {
-            throw new ResourceNotFoundException("Provider with id '" + registeredProvider.getId() + "' does not exist.");
+            throw new ResourceNotFoundException("Provider is null.");
         }
         if (registeredProvider.getProvider().getUsers() == null) {
             return false;
