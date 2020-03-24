@@ -196,8 +196,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
-        logger.trace("User {} is attempting to verify the Provider with id {}, given as Status the value {}" +
-                " and as Active the value {}", auth.getName(), id, status, active);
+//        logger.trace("User is attempting to verify the Provider with id {}, given as Status the value {}" +
+//                " and as Active the value {}", id, status, active);
         ProviderBundle provider = get(id);
         provider.setStatus(status.getKey());
         switch (status) {
