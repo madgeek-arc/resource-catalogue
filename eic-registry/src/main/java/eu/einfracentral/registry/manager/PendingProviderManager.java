@@ -1,11 +1,13 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Metadata;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -14,7 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -31,22 +32,14 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private static final Logger logger = LogManager.getLogger(PendingProviderManager.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerManager;
-    private final PendingResourceService<InfraService> pendingServiceManager;
-    private final InfraServiceManager infraServiceManager;
     private final IdCreator idCreator;
-    private final SecurityService securityService;
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
-                                  @Lazy PendingResourceService<InfraService> pendingServiceManager,
-                                  InfraServiceManager infraServiceManager, IdCreator idCreator,
-                                  @Lazy SecurityService securityService) {
+                                  IdCreator idCreator) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
-        this.pendingServiceManager = pendingServiceManager;
-        this.infraServiceManager = infraServiceManager;
         this.idCreator = idCreator;
-        this.securityService = securityService;
     }
 
 
@@ -61,6 +54,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
         providerBundle.setId(idCreator.createProviderId(providerBundle.getProvider()));
+        logger.trace("User {} is attempting to add a new Pending Provider with id {}", auth.getName(), providerBundle.getId());
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName()));
 
         if (providerBundle.getStatus() == null) {
@@ -77,6 +71,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
 
+        logger.trace("User {} is attempting to update the Pending Provider with id {}", auth.getName(), providerBundle.getId());
         // get existing resource
         Resource existing = whereID(providerBundle.getId(), true);
         // save existing resource with new payload
@@ -98,6 +93,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
+        logger.trace("User {} is attempting to transform the Active Provider with id {} to Pending", auth.getName(), providerId);
         Resource resource = providerManager.getResource(providerId);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
@@ -108,6 +104,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
+        logger.trace("User {} is attempting to transform the Pending Provider with id {} to Active", auth.getName(), providerBundle.getId());
         providerManager.validate(providerBundle);
         providerBundle = update(providerBundle, auth);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
@@ -121,6 +118,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
+        logger.trace("User {} is attempting to transform the Pending Provider with id {} to Active", auth.getName(), providerId);
         ProviderBundle providerBundle = get(providerId);
         providerManager.validate(providerBundle);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");

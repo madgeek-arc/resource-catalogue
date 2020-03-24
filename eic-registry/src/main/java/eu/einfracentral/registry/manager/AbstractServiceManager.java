@@ -166,6 +166,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (infraService.getService().getId() == null) {
             infraService.getService().setId(idCreator.createServiceId(infraService.getService()));
         }
+        logger.trace("User {} is attempting to add a new Service with id {}", auth.getName(), infraService.getId());
         // if service version is empty set it null
         if ("".equals(infraService.getService().getVersion())) {
             infraService.getService().setVersion(null);
@@ -189,6 +190,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
+        logger.trace("User {} is attempting to update the Service with id {}", auth.getName(), infraService.getId());
         // if service version is empty set it null
         if ("".equals(infraService.getService().getVersion())) {
             infraService.getService().setVersion(null);
@@ -211,6 +213,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public void delete(InfraService infraService) {
+        logger.trace("User is attempting to delete the Service with id {}", infraService.getId());
         if (infraService == null || infraService.getService().getId() == null) {
             throw new ServiceException("You cannot delete a null service or service with null id field");
         }
@@ -386,7 +389,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return parserPool.deserialize(resource, InfraService.class);
     }
 
-    public InfraService getOrNull(String id){
+    public InfraService getOrNull(String id) {
         Resource serviceResource = getResource(id, "latest");
         if (serviceResource != null) {
             return parserPool.deserialize(serviceResource, InfraService.class);
@@ -471,7 +474,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Override
     public List<RichService> createRichServices(List<InfraService> infraServices, Authentication auth) {
-
+        logger.trace("User {} is attempting create RichServices from a list of InfraServices", auth.getName());
         List<RichService> richServices = createRichVocabularies(infraServices);
         createRichStatistics(richServices, auth);
         createProviderInfo(richServices, auth);
