@@ -29,7 +29,9 @@ public class ProviderManagementAspect {
         this.providerService = providerService;
     }
 
-
+//    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
+//            "|| execution(* eu.einfracentral.registry.manager.AbstractServiceManager.update(eu.einfracentral.domain.InfraService ,String, org.springframework.security.core.Authentication)) )",
+//            returning = "infraService")
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) ",
             returning = "infraService")
     public void updateProviderState(InfraService infraService) {
@@ -62,6 +64,10 @@ public class ProviderManagementAspect {
                     logger.debug("Updating state of Provider with '{}' to '{}'", providerId, Provider.States.PENDING_2.getKey());
                     providerService.verifyProvider(providerId, Provider.States.PENDING_2, false, null);
                 }
+//                if (Provider.States.fromString(providerService.get(providerId, (Authentication) null).getStatus()) == Provider.States.REJECTED_ST) {
+//                    logger.debug("Updating state of Provider with '{}' to '{}'", providerId, Provider.States.PENDING_2.getKey());
+//                    providerService.verifyProvider(providerId, Provider.States.PENDING_2, false, null);
+//                }
             } catch (RuntimeException e) {
                 logger.error(e);
             }
