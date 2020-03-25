@@ -29,10 +29,8 @@ public class ProviderManagementAspect {
         this.providerService = providerService;
     }
 
-//    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
-//            "|| execution(* eu.einfracentral.registry.manager.AbstractServiceManager.update(eu.einfracentral.domain.InfraService ,String, org.springframework.security.core.Authentication)) )",
-//            returning = "infraService")
-    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) ",
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
+            "|| execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, org.springframework.security.core.Authentication)) )",
             returning = "infraService")
     public void updateProviderState(InfraService infraService) {
         logger.trace("Updating Provider States");
@@ -50,7 +48,8 @@ public class ProviderManagementAspect {
 
 
     /**
-     * This method is used to update a list of new providers with status 'Provider.States.ST_SUBMISSION'
+     * This method is used to update a list of new providers with status
+     * 'Provider.States.ST_SUBMISSION' or 'Provider.States.REJECTED_ST'
      * to status 'Provider.States.PENDING_2'
      *
      * @param infraService
@@ -60,14 +59,13 @@ public class ProviderManagementAspect {
     public void updateServiceProviderStates(InfraService infraService) {
         for (String providerId : infraService.getService().getProviders()) {
             try {
-                if (Provider.States.fromString(providerService.get(providerId, (Authentication) null).getStatus()) == Provider.States.ST_SUBMISSION) {
-                    logger.debug("Updating state of Provider with '{}' to '{}'", providerId, Provider.States.PENDING_2.getKey());
+                ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
+                if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
+                        || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
+                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
+                            providerId, providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
                     providerService.verifyProvider(providerId, Provider.States.PENDING_2, false, null);
                 }
-//                if (Provider.States.fromString(providerService.get(providerId, (Authentication) null).getStatus()) == Provider.States.REJECTED_ST) {
-//                    logger.debug("Updating state of Provider with '{}' to '{}'", providerId, Provider.States.PENDING_2.getKey());
-//                    providerService.verifyProvider(providerId, Provider.States.PENDING_2, false, null);
-//                }
             } catch (RuntimeException e) {
                 logger.error(e);
             }

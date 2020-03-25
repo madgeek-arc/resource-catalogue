@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +55,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
         providerBundle.setId(idCreator.createProviderId(providerBundle.getProvider()));
-        logger.trace("User {} is attempting to add a new Pending Provider with id {}", auth.getName(), providerBundle.getId());
+        logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName()));
 
         if (providerBundle.getStatus() == null) {
@@ -70,8 +71,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
-
-        logger.trace("User {} is attempting to update the Pending Provider with id {}", auth.getName(), providerBundle.getId());
+        logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
         // get existing resource
         Resource existing = whereID(providerBundle.getId(), true);
         // save existing resource with new payload
@@ -93,7 +93,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
-        logger.trace("User {} is attempting to transform the Active Provider with id {} to Pending", auth.getName(), providerId);
+        logger.trace("User '{}' is attempting to transform the Active Provider with id '{}' to Pending", auth, providerId);
         Resource resource = providerManager.getResource(providerId);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
@@ -104,7 +104,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
-        logger.trace("User {} is attempting to transform the Pending Provider with id {} to Active", auth.getName(), providerBundle.getId());
+        logger.trace("User '{}' is attempting to transform the Pending Provider with id '{}' to Active", auth, providerBundle.getId());
         providerManager.validate(providerBundle);
         providerBundle = update(providerBundle, auth);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
@@ -118,7 +118,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
-        logger.trace("User {} is attempting to transform the Pending Provider with id {} to Active", auth.getName(), providerId);
+        logger.trace("User '{}' is attempting to transform the Pending Provider with id {} to Active", auth, providerId);
         ProviderBundle providerBundle = get(providerId);
         providerManager.validate(providerBundle);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
@@ -135,11 +135,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     }
 
 
-    public boolean userIsPendingProviderAdmin(Authentication auth, ProviderBundle registeredProvider) {
-        User user = User.of(auth);
-        if (registeredProvider == null) {
-            throw new ResourceNotFoundException("Provider is null.");
-        }
+    public boolean userIsPendingProviderAdmin(@NotNull User user, @NotNull ProviderBundle registeredProvider) {
         if (registeredProvider.getProvider().getUsers() == null) {
             return false;
         }
@@ -163,12 +159,13 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         if (auth == null) {
             return new ArrayList<>();
         }
+        User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
-                    if (userIsPendingProviderAdmin(auth, p)) {
+                    if (userIsPendingProviderAdmin(user, p)) {
                         return p;
                     } else return null;
                 })
