@@ -131,28 +131,27 @@ public class ServiceController {
         if (service == null) {
             throw new ServiceException("Cannot add a null service");
         }
-        Service s = null;
+        InfraService s = null;
         try { // check if service already exists
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
                 service.setId(idCreator.createServiceId(service));
             }
-            s = this.infraService.get(service.getId()).getService();
+            s = this.infraService.get(service.getId());
         } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service
         }
 
         if (s == null) { // if existing service is null, create it, else update it
-            s = this.infraService.addService(new InfraService(service), auth).getService();
-            logger.info("User '{}' added Service:\n{}", auth.getName(), s);
+            s = this.infraService.addService(new InfraService(service), auth);
+            logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
         } else {
-            if (!s.equals(service)) {
-                s = this.infraService.updateService(new InfraService(service), auth).getService();
-                logger.info("User '{}' updated Service:\n{}", auth.getName(), s);
-            }
+            s.setService(service); // replace with given Service
+            s = this.infraService.updateService(s, auth);
+            logger.info("User '{}' updated Service:\n{}", auth.getName(), infraService);
         }
         this.measurementService.updateAll(s.getId(), measurements, auth);
 
-        return new ResponseEntity<>(s, HttpStatus.OK);
+        return new ResponseEntity<>(s.getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a version of revisions.")

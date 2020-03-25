@@ -71,7 +71,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle add(ProviderBundle provider, Authentication auth) {
 
         provider.setId(idCreator.createProviderId(provider.getProvider()));
-        logger.trace("User {} is attempting to add a new Provider with id {}", auth.getName(), provider.getId());
+        logger.trace("User '{}' is attempting to add a new Provider: {}", auth, provider);
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
 
@@ -92,7 +92,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
-        logger.trace("User {} is attempting to update the Provider with id {}", auth.getName(), provider.getId());
+        logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
         validate(provider);
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName()));
         Resource existing = whereID(provider.getId(), true);
@@ -178,7 +178,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {
-        logger.trace("User is attempting to delete the Provider with id {}", provider.getId());
+        logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
@@ -189,8 +189,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.error("Error deleting Service", e);
             }
         });
-        super.delete(provider);
         logger.debug("Deleting Provider: {}", provider);
+        super.delete(provider);
     }
 
     @Override
@@ -264,12 +264,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (auth == null) {
             return new ArrayList<>();
         }
+        User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
-                    if (securityService.userIsProviderAdmin(auth, p.getId())) {
+                    if (securityService.userIsProviderAdmin(user, p.getId())) {
                         return p;
                     } else return null;
                 })
@@ -348,8 +349,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 //            service.setStatus(null);
             service.setActive(true);
             try {
+                logger.debug("Setting Service with name '{}' as active", service.getService().getName());
                 infraServiceService.update(service, null);
-                logger.info("Setting Service with name '{}' as active", service.getService().getName());
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }
@@ -364,10 +365,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 //            service.setStatus(null);
             service.setActive(false);
             try {
+                logger.debug("Setting Service with id '{}' as inactive", service.getService().getId());
                 infraServiceService.update(service, null);
-                logger.info("Setting Service with name '{}' as inactive", service.getService().getName());
             } catch (ResourceNotFoundException e) {
-                logger.error("Could not update service with name '{}'", service.getService().getName());
+                logger.error("Could not update service with id '{}'", service.getService().getId());
             }
         }
     }
@@ -395,7 +396,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
     public void deleteUserInfo(Authentication authentication) {
-        logger.trace("User {} is attempting to delete his User Info", authentication.getName());
+        logger.trace("User '{}' is attempting to delete his User Info", authentication);
         String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
         String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
         List<Event> allUserEvents = new ArrayList<>();
