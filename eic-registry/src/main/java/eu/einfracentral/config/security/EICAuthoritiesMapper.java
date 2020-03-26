@@ -81,6 +81,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     }
 
     public void updateAuthorities() {
+        logger.info("Updating authorities map");
         mapAuthorities(admins);
     }
 
