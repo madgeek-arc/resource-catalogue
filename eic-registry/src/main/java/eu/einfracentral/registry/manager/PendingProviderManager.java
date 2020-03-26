@@ -85,6 +85,13 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public void delete(ProviderBundle providerBundle) {
+        super.delete(providerBundle);
+    }
+
+
+    @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(ProviderBundle providerBundle, Authentication auth) {
         return transformToPending(providerBundle.getId(), auth);
     }
