@@ -4,10 +4,10 @@ import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -34,13 +34,15 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final IdCreator idCreator;
+    private final RegistrationMailService registrationMailService;
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
-                                  IdCreator idCreator) {
+                                  IdCreator idCreator, RegistrationMailService registrationMailService) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
+        this.registrationMailService = registrationMailService;
     }
 
 
@@ -132,6 +134,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         Resource resource = getResource(providerId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
+
+        // send registration emails
+        registrationMailService.sendProviderMails(providerBundle);
         return providerBundle;
     }
 
