@@ -32,7 +32,7 @@ public class RegistrationMailService {
     private ProviderManager providerManager;
 
 
-    @Value("${webapp.front:portal.catris.eu}")
+    @Value("${webapp.homepage}")
     private String endpoint;
 
     @Value("${project.debug:false}")
