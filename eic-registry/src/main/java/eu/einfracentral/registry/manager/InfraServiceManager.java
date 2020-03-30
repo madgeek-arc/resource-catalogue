@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -15,12 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
@@ -241,6 +245,34 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         } else if (service.getOtherProducts() < 0) {
             throw new ValidationException("Other products number cannot be negative");
         }
+    }
+
+    @Override
+    public InfraService publish(String serviceId, String version, boolean active, Authentication auth) {
+        InfraService service;
+        if (version == null || "".equals(version)) {
+            service = this.get(serviceId);
+        } else {
+            service = this.get(serviceId, version);
+        }
+
+        List<String> activeProviders = service.getService().getProviders()
+                .stream()
+                .map(providerId -> {
+                    ProviderBundle providerBundle = providerManager.get(providerId);
+                    if (providerBundle.getStatus().equals(Provider.States.APPROVED.getKey()) && providerBundle.isActive()) {
+                        return providerId;
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (active && activeProviders.isEmpty()) {
+            throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
+        }
+        service.setActive(active);
+        this.update(service, auth);
+        return service;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
