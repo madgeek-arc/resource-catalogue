@@ -65,7 +65,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, infraService.getId());
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
-        Resource existing = whereID(infraService.getId(), true);
+        Resource existing = this.whereID(infraService.getId(), true);
         // save existing resource with new payload
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);
@@ -96,9 +96,9 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService transformToActive(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, infraService.getId());
         infraServiceService.validate(infraService);
-        infraService = update(infraService, auth);
+        infraService = this.update(infraService, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-        Resource resource = getResource(infraService.getId());
+        Resource resource = this.getResource(infraService.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
         return infraService;
@@ -108,10 +108,10 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService transformToActive(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
-        InfraService infraService = get(serviceId);
+        InfraService infraService = this.get(serviceId);
         infraServiceService.validate(infraService);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-        Resource resource = getResource(serviceId);
+        Resource resource = this.getResource(serviceId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
         return infraService;
