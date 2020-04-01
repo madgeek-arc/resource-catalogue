@@ -5,7 +5,9 @@ import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
+import eu.openminted.registry.core.domain.FacetFilter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -13,15 +15,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class RegistrationMailService {
@@ -30,6 +37,7 @@ public class RegistrationMailService {
     private MailService mailService;
     private Configuration cfg;
     private ProviderManager providerManager;
+    private PendingProviderManager pendingProviderManager;
 
 
     @Value("${webapp.homepage}")
@@ -44,13 +52,20 @@ public class RegistrationMailService {
     @Value("${project.registration.email:registration@catris.eu}")
     private String registrationEmail;
 
+    @Value ("${project.admins}")
+    private String projectAdmins;
+
+    final private String provCron = "0 0 12 ? * Sun";
+    final private String adminCron = "0 0 12 ? * MON,FRI";
+
 
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   ProviderManager providerManager) {
+                                   ProviderManager providerManager, @Lazy PendingProviderManager pendingProviderManager) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
+        this.pendingProviderManager = pendingProviderManager;
     }
 
     @Async
@@ -172,6 +187,68 @@ public class RegistrationMailService {
             logger.error("ERROR", e);
         } catch (MessagingException e) {
             logger.error("Could not send mail", e);
+        }
+    }
+
+//    @Scheduled(cron = provCron)
+    @Scheduled(initialDelay = 0, fixedRate = 60000)
+    public void sendEmailNotificationsToProviders(){
+        List<ProviderBundle> activeProviders = providerManager.getAllActiveForScheduler().getResults();
+        List<ProviderBundle> pendingProviders = pendingProviderManager.getAllPendingForScheduler().getResults();
+        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
+        String to;
+        for (ProviderBundle providerBundle : allProviders){
+            if (providerBundle.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())){
+                if (providerBundle.getProvider().getUsers() != null && !providerBundle.getProvider().getUsers().isEmpty()){
+                    to = providerBundle.getProvider().getUsers().get(0).getEmail();
+                } else{
+                    continue;
+                }
+                String subject = String.format("[%s] Friendly reminder for your Provider [%s]", projectName, providerBundle.getProvider().getName());
+                String text = String.format("We kindly remind you to conclude with the submission of the Service Template for your Provider [%s].", providerBundle.getProvider().getName())
+                        + "\nYou can view your Provider here: " +endpoint+"/myServiceProviders"
+                        + "\n\nBest Regards, \nThe CatRIS Team";
+                try{
+                    if (!debug){
+                        mailService.sendMail(to, subject, text);
+                        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+                    }
+                } catch (MessagingException e) {
+                    logger.error("Could not send mail", e);
+                }
+            }
+        }
+    }
+
+//    @Scheduled(cron = adminCron)
+    @Scheduled(initialDelay = 0, fixedRate = 60000)
+    public void sendEmailNotificationsToAdmins(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
+        String[] admins = projectAdmins.split(",");
+        List<String> providerNamesWaitingForApproval = new ArrayList<>();
+        for (ProviderBundle providerBundle : allProviders) {
+            if (providerBundle.getStatus().equals(Provider.States.PENDING_1.getKey()) || providerBundle.getStatus().equals(Provider.States.PENDING_2.getKey())) {
+                providerNamesWaitingForApproval.add(providerBundle.getProvider().getName());
+            }
+        }
+        if (!providerNamesWaitingForApproval.isEmpty()){
+            for (int i=0; i<admins.length; i++){
+                String to = admins[i];
+                String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
+                String text = "There are Providers and Service Templates waiting to be approved: \n" + providerNamesWaitingForApproval
+                        + "\nYou can review them at: " +endpoint+"/serviceProvidersList"
+                        + "\n\nBest Regards, \nThe CatRIS Team";
+                try{
+                    if (!debug){
+                        mailService.sendMail(to, subject, text);
+                        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+                    }
+                } catch (MessagingException e) {
+                    logger.error("Could not send mail", e);
+                }
+            }
         }
     }
 }
