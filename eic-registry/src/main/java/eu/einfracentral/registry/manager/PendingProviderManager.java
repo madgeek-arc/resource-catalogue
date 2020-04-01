@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
@@ -183,6 +184,12 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public Browsing<ProviderBundle> getAllPendingForScheduler() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        return super.getAll(ff, null);
     }
 
 }
