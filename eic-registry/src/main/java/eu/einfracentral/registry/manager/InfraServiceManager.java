@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
@@ -241,6 +242,12 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         } else if (service.getOtherProducts() < 0) {
             throw new ValidationException("Other products number cannot be negative");
         }
+    }
+
+    public Browsing<InfraService> getAllActiveServicesForScheduler() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        return super.getAll(ff, null);
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

@@ -1,11 +1,10 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
+import eu.einfracentral.registry.manager.PendingServiceManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.openminted.registry.core.domain.FacetFilter;
 import freemarker.template.Configuration;
@@ -23,10 +22,9 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,6 +36,8 @@ public class RegistrationMailService {
     private Configuration cfg;
     private ProviderManager providerManager;
     private PendingProviderManager pendingProviderManager;
+    private InfraServiceManager infraServiceManager;
+    private PendingServiceManager pendingServiceManager;
 
 
     @Value("${webapp.homepage}")
@@ -61,11 +61,14 @@ public class RegistrationMailService {
 
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   ProviderManager providerManager, @Lazy PendingProviderManager pendingProviderManager) {
+                                   ProviderManager providerManager, @Lazy PendingProviderManager pendingProviderManager,
+                                   InfraServiceManager infraServiceManager, PendingServiceManager pendingServiceManager) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
         this.pendingProviderManager = pendingProviderManager;
+        this.infraServiceManager = infraServiceManager;
+        this.pendingServiceManager = pendingServiceManager;
     }
 
     @Async
@@ -216,6 +219,7 @@ public class RegistrationMailService {
                 } catch (MessagingException e) {
                     logger.error("Could not send mail", e);
                 }
+                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
             }
         }
     }
@@ -238,7 +242,7 @@ public class RegistrationMailService {
                 String to = admins[i];
                 String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
                 String text = "There are Providers and Service Templates waiting to be approved: \n" + providerNamesWaitingForApproval
-                        + "\nYou can review them at: " +endpoint+"/serviceProvidersList"
+                        + "\nYou can review them at: " +endpoint+"/serviceProvidersList\n"
                         + "\n\nBest Regards, \nThe CatRIS Team";
                 try{
                     if (!debug){
@@ -248,7 +252,91 @@ public class RegistrationMailService {
                 } catch (MessagingException e) {
                     logger.error("Could not send mail", e);
                 }
+                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
             }
+        }
+    }
+
+//    @Scheduled(cron = "0 12 * * *")
+    @Scheduled(initialDelay = 0, fixedRate = 60000)
+    public void dailyNotificationsToAdmins(){
+        // Create timestamps for today and yesterday
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        Timestamp todayTimestamp = Timestamp.valueOf(today.atStartOfDay());
+        Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
+
+        String[] admins = projectAdmins.split(",");
+        List<String> newProviders = new ArrayList<>();
+        List<String> newServices = new ArrayList<>();
+        List<String> updatedProviders = new ArrayList<>();
+        List<String> updatedServices = new ArrayList<>();
+
+        // Fetch Active/Pending Services and Active/Pending Providers
+        List<ProviderBundle> activeProviders = providerManager.getAllActiveForScheduler().getResults();
+        List<ProviderBundle> pendingProviders = pendingProviderManager.getAllPendingForScheduler().getResults();
+        List<InfraService> activeServices = infraServiceManager.getAllActiveServicesForScheduler().getResults();
+        List<InfraService> pendingServices = pendingServiceManager.getAllPendingServicesForScheduler().getResults();
+        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
+        List<InfraService> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
+        List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
+
+        for (Bundle bundle : allResources){
+            Timestamp modified;
+            Timestamp registered;
+            if (bundle.getMetadata() != null){
+                if (bundle.getMetadata().getModifiedAt() == null || !bundle.getMetadata().getModifiedAt().matches("[0-9]+")){
+                    modified = new Timestamp(Long.parseLong("0"));
+                } else {
+                    modified = new Timestamp(Long.parseLong(bundle.getMetadata().getModifiedAt()));
+                }
+                if (bundle.getMetadata().getRegisteredAt() == null || !bundle.getMetadata().getRegisteredAt().matches("[0-9]+")){
+                    registered = new Timestamp(Long.parseLong("0"));
+                } else {
+                    registered = new Timestamp(Long.parseLong(bundle.getMetadata().getRegisteredAt()));
+                }
+            } else {
+                continue;
+            }
+
+            if (modified.after(yesterdayTimestamp) && modified.before(todayTimestamp)){
+                if (bundle.getId().contains(".")){
+                   updatedServices.add(bundle.getId());
+                } else {
+                    updatedProviders.add(bundle.getId());
+                }
+            }
+            if (registered.after(yesterdayTimestamp) && registered.before(todayTimestamp)){
+                if (bundle.getId().contains(".")){
+                    newServices.add(bundle.getId());
+                } else {
+                    newProviders.add(bundle.getId());
+                }
+            }
+        }
+        for (int i=0; i<admins.length; i++){
+            String to = admins[i];
+            String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
+            String text;
+            if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()){
+                text = "There are no changes to CatRIS Resources today";
+            } else {
+                text = "There are new changes to CatRIS Resources!"
+                        + "\n\nNew Providers: \n" + newProviders
+                        + "\n\nUpdated Providers: \n" +updatedProviders
+                        + "\n\nNew Services: \n" +newServices
+                        + "\n\nUpdated Services: \n" +updatedServices
+                        + "\n\nBest Regards, \nThe CatRIS Team";
+            }
+            try{
+                if (!debug){
+                    mailService.sendMail(to, subject, text);
+                    logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+                }
+            } catch (MessagingException e) {
+                logger.error("Could not send mail", e);
+            }
+            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
         }
     }
 }

@@ -6,6 +6,8 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
 import org.apache.logging.log4j.LogManager;
@@ -124,6 +126,12 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public List<InfraService> getMy(Authentication auth) {
         List<InfraService> re = new ArrayList<>();
         return re;
+    }
+
+    public Browsing<InfraService> getAllPendingServicesForScheduler() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        return super.getAll(ff, null);
     }
 
 }
