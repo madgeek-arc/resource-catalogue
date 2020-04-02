@@ -71,8 +71,8 @@ public class InfraServiceManager extends ServiceResourceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and " +
-            "@securityService.providerCanAddServices(#authentication, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or " +
+            "@securityService.userIsServiceProviderAdmin(#authentication, #infraService)")
     public InfraService updateService(InfraService infraService, Authentication authentication) {
         InfraService ret;
         validate(infraService);
