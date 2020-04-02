@@ -84,8 +84,8 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Creates a new Service.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerCanAddServices(#auth, #service)")
     @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER') and @securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
         logger.info("User " + auth.getName() + " created a new Service " + service.getName() + " with id " + service.getId());
@@ -93,9 +93,8 @@ public class ServiceController {
     }
 
 //    @ApiIgnore
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
-    // @securityService.providerCanAddServices(#auth, #service) is checked when adding/updating service or measurements
     @RequestMapping(path = "serviceWithMeasurements", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #json)")
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         Service service = null;
