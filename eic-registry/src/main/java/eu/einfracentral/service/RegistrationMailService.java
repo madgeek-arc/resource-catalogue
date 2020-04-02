@@ -231,18 +231,24 @@ public class RegistrationMailService {
         ff.setQuantity(10000);
         List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
         String[] admins = projectAdmins.split(",");
-        List<String> providerNamesWaitingForApproval = new ArrayList<>();
+        List<String> providersWaitingForInitialApproval = new ArrayList<>();
+        List<String> providersWaitingForSTApproval = new ArrayList<>();
         for (ProviderBundle providerBundle : allProviders) {
-            if (providerBundle.getStatus().equals(Provider.States.PENDING_1.getKey()) || providerBundle.getStatus().equals(Provider.States.PENDING_2.getKey())) {
-                providerNamesWaitingForApproval.add(providerBundle.getProvider().getName());
+            if (providerBundle.getStatus().equals(Provider.States.PENDING_1.getKey())) {
+                providersWaitingForInitialApproval.add(providerBundle.getProvider().getName());
+            }
+            if (providerBundle.getStatus().equals(Provider.States.PENDING_2.getKey())) {
+                providersWaitingForSTApproval.add(providerBundle.getProvider().getName());
             }
         }
-        if (!providerNamesWaitingForApproval.isEmpty()){
+        if (!providersWaitingForInitialApproval.isEmpty() && !providersWaitingForSTApproval.isEmpty()){
             for (int i=0; i<admins.length; i++){
                 String to = admins[i];
                 String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
-                String text = "There are Providers and Service Templates waiting to be approved: \n" + providerNamesWaitingForApproval
-                        + "\nYou can review them at: " +endpoint+"/serviceProvidersList\n"
+                String text = "There are Providers and Service Templates waiting to be approved."
+                        + "\n\nProviders waiting for Initial Approval:\n" +providersWaitingForInitialApproval
+                        + "\n\nProviders waiting for Service Template Approval:\n" +providersWaitingForSTApproval
+                        + "\n\nYou can review them at: " +endpoint+"/serviceProvidersList"
                         + "\n\nBest Regards, \nThe CatRIS Team";
                 try{
                     if (!debug){
@@ -262,7 +268,7 @@ public class RegistrationMailService {
     public void dailyNotificationsToAdmins(){
         // Create timestamps for today and yesterday
         LocalDate today = LocalDate.now();
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        LocalDate yesterday = LocalDate.now().minusDays(10);
         Timestamp todayTimestamp = Timestamp.valueOf(today.atStartOfDay());
         Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
 
@@ -319,7 +325,7 @@ public class RegistrationMailService {
             String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
             String text;
             if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()){
-                text = "There are no changes to CatRIS Resources today";
+                text = "There are no changes to CatRIS Resources today.";
             } else {
                 text = "There are new changes to CatRIS Resources!"
                         + "\n\nNew Providers: \n" + newProviders
