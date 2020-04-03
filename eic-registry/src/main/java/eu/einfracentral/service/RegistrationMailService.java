@@ -190,7 +190,7 @@ public class RegistrationMailService {
         }
     }
 
-    @Scheduled(cron = "0 0 12 ? * 2/7 *") // At 12:00:00pm, every 7 days starting on Monday, every month
+    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void sendEmailNotificationsToProviders(){
         List<ProviderBundle> activeProviders = providerManager.getAllActiveForScheduler().getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAllPendingForScheduler().getResults();
@@ -220,7 +220,7 @@ public class RegistrationMailService {
         }
     }
 
-    @Scheduled(cron = "0 0 12 ? * 2/2 *") // At 12:00:00pm, every 2 days starting on Monday, every month
+    @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
     public void sendEmailNotificationsToAdmins(){
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -263,7 +263,7 @@ public class RegistrationMailService {
         }
     }
 
-    @Scheduled(cron = "0 0 12 ? * * *") // At 12:00:00pm every day
+    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
     public void dailyNotificationsToAdmins(){
         // Create timestamps for today and yesterday
         LocalDate today = LocalDate.now();
@@ -347,7 +347,7 @@ public class RegistrationMailService {
             } catch (MessagingException e) {
                 logger.error("Could not send mail", e);
             }
-        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+//        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
         }
     }
 }
