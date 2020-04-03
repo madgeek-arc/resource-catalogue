@@ -225,6 +225,7 @@ public class RegistrationMailService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
+        String[] admins = projectAdmins.split(",");
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
         List<String> providersWaitingForSTApproval = new ArrayList<>();
         for (ProviderBundle providerBundle : allProviders) {
@@ -236,22 +237,29 @@ public class RegistrationMailService {
             }
         }
         if (!providersWaitingForInitialApproval.isEmpty() && !providersWaitingForSTApproval.isEmpty()){
-            String to = "registration@catris.eu";
-            String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
-            String text = "There are Providers and Service Templates waiting to be approved."
-                    + "\n\nProviders waiting for Initial Approval:\n" +providersWaitingForInitialApproval
-                    + "\n\nProviders waiting for Service Template Approval:\n" +providersWaitingForSTApproval
-                    + "\n\nYou can review them at: " +endpoint+"/serviceProvidersList"
-                    + "\n\nBest Regards, \nThe CatRIS Team";
-            try{
-                if (!debug){
-                    mailService.sendMail(to, subject, text);
-                    logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+            for (int i=0; i<admins.length+1; i++){
+                String to;
+                if (i == admins.length){
+                    to = "registration@catris.eu";
+                } else {
+                    to = admins[i];
                 }
-            } catch (MessagingException e) {
-                logger.error("Could not send mail", e);
-            }
+                String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
+                String text = "There are Providers and Service Templates waiting to be approved."
+                        + "\n\nProviders waiting for Initial Approval:\n" +providersWaitingForInitialApproval
+                        + "\n\nProviders waiting for Service Template Approval:\n" +providersWaitingForSTApproval
+                        + "\n\nYou can review them at: " +endpoint+"/serviceProvidersList"
+                        + "\n\nBest Regards, \nThe CatRIS Team";
+                try{
+                    if (!debug){
+                        mailService.sendMail(to, subject, text);
+                        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+                    }
+                } catch (MessagingException e) {
+                    logger.error("Could not send mail", e);
+                }
 //            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+            }
         }
     }
 
@@ -262,6 +270,8 @@ public class RegistrationMailService {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Timestamp todayTimestamp = Timestamp.valueOf(today.atStartOfDay());
         Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
+
+        String[] admins = projectAdmins.split(",");
 
         List<String> newProviders = new ArrayList<>();
         List<String> newServices = new ArrayList<>();
@@ -310,27 +320,34 @@ public class RegistrationMailService {
                 }
             }
         }
-        String to = "registration@catris.eu";
-        String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
-        String text;
-        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()){
-            text = "There are no changes to CatRIS Resources today.";
-        } else {
-            text = "There are new changes to CatRIS Resources!"
-                    + "\n\nNew Providers: \n" + newProviders
-                    + "\n\nUpdated Providers: \n" +updatedProviders
-                    + "\n\nNew Services: \n" +newServices
-                    + "\n\nUpdated Services: \n" +updatedServices
-                    + "\n\nBest Regards, \nThe CatRIS Team";
-        }
-        try{
-            if (!debug){
-                mailService.sendMail(to, subject, text);
-                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+        for (int i=0; i<admins.length+1; i++){
+            String to;
+            if (i == admins.length){
+                to = "registration@catris.eu";
+            } else {
+                to = admins[i];
             }
-        } catch (MessagingException e) {
-            logger.error("Could not send mail", e);
+            String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
+            String text;
+            if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()){
+                text = "There are no changes to CatRIS Resources today.";
+            } else {
+                text = "There are new changes to CatRIS Resources!"
+                        + "\n\nNew Providers: \n" + newProviders
+                        + "\n\nUpdated Providers: \n" +updatedProviders
+                        + "\n\nNew Services: \n" +newServices
+                        + "\n\nUpdated Services: \n" +updatedServices
+                        + "\n\nBest Regards, \nThe CatRIS Team";
+            }
+            try{
+                if (!debug){
+                    mailService.sendMail(to, subject, text);
+                    logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+                }
+            } catch (MessagingException e) {
+                logger.error("Could not send mail", e);
+            }
+        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
         }
-//        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
     }
 }
