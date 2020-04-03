@@ -55,9 +55,6 @@ public class RegistrationMailService {
     @Value ("${project.admins}")
     private String projectAdmins;
 
-    final private String provCron = "0 0 12 ? * Sun";
-    final private String adminCron = "0 0 12 ? * MON,FRI";
-
 
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
@@ -193,8 +190,7 @@ public class RegistrationMailService {
         }
     }
 
-//    @Scheduled(cron = provCron)
-    @Scheduled(initialDelay = 0, fixedRate = 60000)
+    @Scheduled(cron = "0 0 12 ? * 2/7 *") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void sendEmailNotificationsToProviders(){
         List<ProviderBundle> activeProviders = providerManager.getAllActiveForScheduler().getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAllPendingForScheduler().getResults();
@@ -219,18 +215,16 @@ public class RegistrationMailService {
                 } catch (MessagingException e) {
                     logger.error("Could not send mail", e);
                 }
-                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+//                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
             }
         }
     }
 
-//    @Scheduled(cron = adminCron)
-    @Scheduled(initialDelay = 0, fixedRate = 60000)
+    @Scheduled(cron = "0 0 12 ? * 2/2 *") // At 12:00:00pm, every 2 days starting on Monday, every month
     public void sendEmailNotificationsToAdmins(){
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
-        String[] admins = projectAdmins.split(",");
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
         List<String> providersWaitingForSTApproval = new ArrayList<>();
         for (ProviderBundle providerBundle : allProviders) {
@@ -242,37 +236,33 @@ public class RegistrationMailService {
             }
         }
         if (!providersWaitingForInitialApproval.isEmpty() && !providersWaitingForSTApproval.isEmpty()){
-            for (int i=0; i<admins.length; i++){
-                String to = admins[i];
-                String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
-                String text = "There are Providers and Service Templates waiting to be approved."
-                        + "\n\nProviders waiting for Initial Approval:\n" +providersWaitingForInitialApproval
-                        + "\n\nProviders waiting for Service Template Approval:\n" +providersWaitingForSTApproval
-                        + "\n\nYou can review them at: " +endpoint+"/serviceProvidersList"
-                        + "\n\nBest Regards, \nThe CatRIS Team";
-                try{
-                    if (!debug){
-                        mailService.sendMail(to, subject, text);
-                        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
-                    }
-                } catch (MessagingException e) {
-                    logger.error("Could not send mail", e);
+            String to = "registration@catris.eu";
+            String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
+            String text = "There are Providers and Service Templates waiting to be approved."
+                    + "\n\nProviders waiting for Initial Approval:\n" +providersWaitingForInitialApproval
+                    + "\n\nProviders waiting for Service Template Approval:\n" +providersWaitingForSTApproval
+                    + "\n\nYou can review them at: " +endpoint+"/serviceProvidersList"
+                    + "\n\nBest Regards, \nThe CatRIS Team";
+            try{
+                if (!debug){
+                    mailService.sendMail(to, subject, text);
+                    logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
                 }
-                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+            } catch (MessagingException e) {
+                logger.error("Could not send mail", e);
             }
+//            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
         }
     }
 
-//    @Scheduled(cron = "0 12 * * *")
-    @Scheduled(initialDelay = 0, fixedRate = 60000)
+    @Scheduled(cron = "0 0 12 ? * * *") // At 12:00:00pm every day
     public void dailyNotificationsToAdmins(){
         // Create timestamps for today and yesterday
         LocalDate today = LocalDate.now();
-        LocalDate yesterday = LocalDate.now().minusDays(10);
+        LocalDate yesterday = LocalDate.now().minusDays(1);
         Timestamp todayTimestamp = Timestamp.valueOf(today.atStartOfDay());
         Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
 
-        String[] admins = projectAdmins.split(",");
         List<String> newProviders = new ArrayList<>();
         List<String> newServices = new ArrayList<>();
         List<String> updatedProviders = new ArrayList<>();
@@ -320,29 +310,27 @@ public class RegistrationMailService {
                 }
             }
         }
-        for (int i=0; i<admins.length; i++){
-            String to = admins[i];
-            String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
-            String text;
-            if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()){
-                text = "There are no changes to CatRIS Resources today.";
-            } else {
-                text = "There are new changes to CatRIS Resources!"
-                        + "\n\nNew Providers: \n" + newProviders
-                        + "\n\nUpdated Providers: \n" +updatedProviders
-                        + "\n\nNew Services: \n" +newServices
-                        + "\n\nUpdated Services: \n" +updatedServices
-                        + "\n\nBest Regards, \nThe CatRIS Team";
-            }
-            try{
-                if (!debug){
-                    mailService.sendMail(to, subject, text);
-                    logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
-                }
-            } catch (MessagingException e) {
-                logger.error("Could not send mail", e);
-            }
-            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+        String to = "registration@catris.eu";
+        String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
+        String text;
+        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()){
+            text = "There are no changes to CatRIS Resources today.";
+        } else {
+            text = "There are new changes to CatRIS Resources!"
+                    + "\n\nNew Providers: \n" + newProviders
+                    + "\n\nUpdated Providers: \n" +updatedProviders
+                    + "\n\nNew Services: \n" +newServices
+                    + "\n\nUpdated Services: \n" +updatedServices
+                    + "\n\nBest Regards, \nThe CatRIS Team";
         }
+        try{
+            if (!debug){
+                mailService.sendMail(to, subject, text);
+                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+            }
+        } catch (MessagingException e) {
+            logger.error("Could not send mail", e);
+        }
+//        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
     }
 }
