@@ -24,7 +24,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,6 +41,7 @@ public class RegistrationMailService {
     private PendingProviderManager pendingProviderManager;
     private InfraServiceManager infraServiceManager;
     private PendingServiceManager pendingServiceManager;
+    private SecurityService securityService;
 
 
     @Value("${webapp.homepage}")
@@ -52,20 +56,24 @@ public class RegistrationMailService {
     @Value("${project.registration.email:registration@catris.eu}")
     private String registrationEmail;
 
-    @Value ("${project.admins}")
+    @Value("${project.admins}")
     private String projectAdmins;
 
 
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   ProviderManager providerManager, @Lazy PendingProviderManager pendingProviderManager,
-                                   InfraServiceManager infraServiceManager, PendingServiceManager pendingServiceManager) {
+                                   ProviderManager providerManager,
+                                   @Lazy PendingProviderManager pendingProviderManager,
+                                   InfraServiceManager infraServiceManager,
+                                   PendingServiceManager pendingServiceManager,
+                                   SecurityService securityService) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
         this.pendingProviderManager = pendingProviderManager;
         this.infraServiceManager = infraServiceManager;
         this.pendingServiceManager = pendingServiceManager;
+        this.securityService = securityService;
     }
 
     @Async
@@ -191,24 +199,26 @@ public class RegistrationMailService {
     }
 
     @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
-    public void sendEmailNotificationsToProviders(){
-        List<ProviderBundle> activeProviders = providerManager.getAllActiveForScheduler().getResults();
-        List<ProviderBundle> pendingProviders = pendingProviderManager.getAllPendingForScheduler().getResults();
+    public void sendEmailNotificationsToProviders() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
         String to;
-        for (ProviderBundle providerBundle : allProviders){
-            if (providerBundle.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())){
-                if (providerBundle.getProvider().getUsers() != null && !providerBundle.getProvider().getUsers().isEmpty()){
+        for (ProviderBundle providerBundle : allProviders) {
+            if (providerBundle.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                if (providerBundle.getProvider().getUsers() != null && !providerBundle.getProvider().getUsers().isEmpty()) {
                     to = providerBundle.getProvider().getUsers().get(0).getEmail();
-                } else{
+                } else {
                     continue;
                 }
                 String subject = String.format("[%s] Friendly reminder for your Provider [%s]", projectName, providerBundle.getProvider().getName());
                 String text = String.format("We kindly remind you to conclude with the submission of the Service Template for your Provider [%s].", providerBundle.getProvider().getName())
-                        + "\nYou can view your Provider here: " +endpoint+"/myServiceProviders"
+                        + "\nYou can view your Provider here: " + endpoint + "/myServiceProviders"
                         + "\n\nBest Regards, \nThe CatRIS Team";
-                try{
-                    if (!debug){
+                try {
+                    if (!debug) {
                         mailService.sendMail(to, subject, text);
                         logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
                     }
@@ -221,7 +231,7 @@ public class RegistrationMailService {
     }
 
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
-    public void sendEmailNotificationsToAdmins(){
+    public void sendEmailNotificationsToAdmins() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
@@ -236,22 +246,22 @@ public class RegistrationMailService {
                 providersWaitingForSTApproval.add(providerBundle.getProvider().getName());
             }
         }
-        if (!providersWaitingForInitialApproval.isEmpty() && !providersWaitingForSTApproval.isEmpty()){
-            for (int i=0; i<admins.length+1; i++){
+        if (!providersWaitingForInitialApproval.isEmpty() && !providersWaitingForSTApproval.isEmpty()) {
+            for (int i = 0; i < admins.length + 1; i++) {
                 String to;
-                if (i == admins.length){
+                if (i == admins.length) {
                     to = "registration@catris.eu";
                 } else {
                     to = admins[i];
                 }
                 String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
                 String text = "There are Providers and Service Templates waiting to be approved."
-                        + "\n\nProviders waiting for Initial Approval:\n" +providersWaitingForInitialApproval
-                        + "\n\nProviders waiting for Service Template Approval:\n" +providersWaitingForSTApproval
-                        + "\n\nYou can review them at: " +endpoint+"/serviceProvidersList"
+                        + "\n\nProviders waiting for Initial Approval:\n" + providersWaitingForInitialApproval
+                        + "\n\nProviders waiting for Service Template Approval:\n" + providersWaitingForSTApproval
+                        + "\n\nYou can review them at: " + endpoint + "/serviceProvidersList"
                         + "\n\nBest Regards, \nThe CatRIS Team";
-                try{
-                    if (!debug){
+                try {
+                    if (!debug) {
                         mailService.sendMail(to, subject, text);
                         logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
                     }
@@ -264,7 +274,7 @@ public class RegistrationMailService {
     }
 
     @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
-    public void dailyNotificationsToAdmins(){
+    public void dailyNotificationsToAdmins() {
         // Create timestamps for today and yesterday
         LocalDate today = LocalDate.now();
         LocalDate yesterday = LocalDate.now().minusDays(1);
@@ -279,24 +289,26 @@ public class RegistrationMailService {
         List<String> updatedServices = new ArrayList<>();
 
         // Fetch Active/Pending Services and Active/Pending Providers
-        List<ProviderBundle> activeProviders = providerManager.getAllActiveForScheduler().getResults();
-        List<ProviderBundle> pendingProviders = pendingProviderManager.getAllPendingForScheduler().getResults();
-        List<InfraService> activeServices = infraServiceManager.getAllActiveServicesForScheduler().getResults();
-        List<InfraService> pendingServices = pendingServiceManager.getAllPendingServicesForScheduler().getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<InfraService> activeServices = infraServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<InfraService> pendingServices = pendingServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
         List<InfraService> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
         List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
 
-        for (Bundle bundle : allResources){
+        for (Bundle bundle : allResources) {
             Timestamp modified;
             Timestamp registered;
-            if (bundle.getMetadata() != null){
-                if (bundle.getMetadata().getModifiedAt() == null || !bundle.getMetadata().getModifiedAt().matches("[0-9]+")){
+            if (bundle.getMetadata() != null) {
+                if (bundle.getMetadata().getModifiedAt() == null || !bundle.getMetadata().getModifiedAt().matches("[0-9]+")) {
                     modified = new Timestamp(Long.parseLong("0"));
                 } else {
                     modified = new Timestamp(Long.parseLong(bundle.getMetadata().getModifiedAt()));
                 }
-                if (bundle.getMetadata().getRegisteredAt() == null || !bundle.getMetadata().getRegisteredAt().matches("[0-9]+")){
+                if (bundle.getMetadata().getRegisteredAt() == null || !bundle.getMetadata().getRegisteredAt().matches("[0-9]+")) {
                     registered = new Timestamp(Long.parseLong("0"));
                 } else {
                     registered = new Timestamp(Long.parseLong(bundle.getMetadata().getRegisteredAt()));
@@ -305,42 +317,42 @@ public class RegistrationMailService {
                 continue;
             }
 
-            if (modified.after(yesterdayTimestamp) && modified.before(todayTimestamp)){
-                if (bundle.getId().contains(".")){
-                   updatedServices.add(bundle.getId());
+            if (modified.after(yesterdayTimestamp) && modified.before(todayTimestamp)) {
+                if (bundle.getId().contains(".")) {
+                    updatedServices.add(bundle.getId());
                 } else {
                     updatedProviders.add(bundle.getId());
                 }
             }
-            if (registered.after(yesterdayTimestamp) && registered.before(todayTimestamp)){
-                if (bundle.getId().contains(".")){
+            if (registered.after(yesterdayTimestamp) && registered.before(todayTimestamp)) {
+                if (bundle.getId().contains(".")) {
                     newServices.add(bundle.getId());
                 } else {
                     newProviders.add(bundle.getId());
                 }
             }
         }
-        for (int i=0; i<admins.length+1; i++){
+        for (int i = 0; i < admins.length + 1; i++) {
             String to;
-            if (i == admins.length){
+            if (i == admins.length) {
                 to = "registration@catris.eu";
             } else {
                 to = admins[i];
             }
             String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
             String text;
-            if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()){
+            if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()) {
                 text = "There are no changes to CatRIS Resources today.";
             } else {
                 text = "There are new changes to CatRIS Resources!"
                         + "\n\nNew Providers: \n" + newProviders
-                        + "\n\nUpdated Providers: \n" +updatedProviders
-                        + "\n\nNew Services: \n" +newServices
-                        + "\n\nUpdated Services: \n" +updatedServices
+                        + "\n\nUpdated Providers: \n" + updatedProviders
+                        + "\n\nNew Services: \n" + newServices
+                        + "\n\nUpdated Services: \n" + updatedServices
                         + "\n\nBest Regards, \nThe CatRIS Team";
             }
-            try{
-                if (!debug){
+            try {
+                if (!debug) {
                     mailService.sendMail(to, subject, text);
                     logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
                 }
