@@ -176,12 +176,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providers;
     }
 
-    public Browsing<ProviderBundle> getAllActiveForScheduler() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        return super.getAll(ff, null);
-    }
-
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {

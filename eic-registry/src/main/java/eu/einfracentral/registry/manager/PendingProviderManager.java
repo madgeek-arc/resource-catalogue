@@ -186,10 +186,4 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
                 .collect(Collectors.toList());
     }
 
-    public Browsing<ProviderBundle> getAllPendingForScheduler() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        return super.getAll(ff, null);
-    }
-
 }

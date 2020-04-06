@@ -128,10 +128,4 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         return re;
     }
 
-    public Browsing<InfraService> getAllPendingServicesForScheduler() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        return super.getAll(ff, null);
-    }
-
 }
