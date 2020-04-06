@@ -351,15 +351,8 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService service;
-        if (version == null || "".equals(version)) {
-            service = infraService.get(id);
-        } else {
-            service = infraService.get(id, version);
-        }
-        service.setActive(active);
-        logger.info("User '{}' has set Service with name '{}' and id '{}' as active", auth.getName(), service.getService().getName(), service.getService().getId());
-        return ResponseEntity.ok(infraService.update(service, auth));
+        logger.info("User '{}' attempts to save Service with id '{}' and version '{}' as '{}'", auth, id, version, active);
+        return ResponseEntity.ok(infraService.publish(id, version, active, auth));
     }
 
     // Get all pending Service Templates.

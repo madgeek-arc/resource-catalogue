@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -238,7 +239,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
-            return new ArrayList<>();
+            throw new UnauthorizedUserException("Please log in.");
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(10000);
@@ -268,7 +269,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public List<ProviderBundle> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
-            return new ArrayList<>();
+            throw new UnauthorizedUserException("Please log in.");
         }
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
