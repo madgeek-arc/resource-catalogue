@@ -3,6 +3,7 @@ package eu.einfracentral.config.security;
 import com.nimbusds.jwt.JWT;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -34,12 +35,16 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     private String admins;
 
     private ProviderService<ProviderBundle, Authentication> providerService;
+    private PendingResourceService<ProviderBundle> pendingProviderService;
     private SecurityService securityService;
 
     @Autowired
-    public EICAuthoritiesMapper(@Value("${project.admins}") String admins, ProviderService<ProviderBundle, Authentication> manager,
+    public EICAuthoritiesMapper(@Value("${project.admins}") String admins,
+                                ProviderService<ProviderBundle, Authentication> manager,
+                                PendingResourceService<ProviderBundle> pendingProviderService,
                                 SecurityService securityService) {
         this.providerService = manager;
+        this.pendingProviderService = pendingProviderService;
         this.securityService = securityService;
         if (admins == null) {
             throw new ServiceException("No Admins Provided");
@@ -76,6 +81,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     }
 
     public void updateAuthorities() {
+        logger.info("Updating authorities map");
         mapAuthorities(admins);
     }
 
@@ -85,24 +91,30 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         ff.setQuantity(10000);
         try {
             List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
-            if (providers != null) {
-                userRolesMap = providers
-                        .stream()
-                        .distinct()
-                        .flatMap((Function<ProviderBundle, Stream<String>>) provider -> provider.getProvider().getUsers()
-                                .stream()
-                                .filter(Objects::nonNull)
-                                .map(u -> {
-                                    if (u.getId() != null && !"".equals(u.getId())) {
-                                        return u.getId();
-                                    }
-                                    return u.getEmail();
-                                }))
-                        .filter(Objects::nonNull)
-                        .distinct()
-                        .collect(Collectors
-                                .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
-            }
+            providers.addAll(pendingProviderService.getAll(ff, null).getResults());
+            userRolesMap = providers
+                    .stream()
+                    .distinct()
+                    .map(providerBundle -> {
+                        if (providerBundle.getProvider() != null && providerBundle.getProvider().getUsers() != null) {
+                            return providerBundle.getProvider();
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .map(u -> {
+                                if (u.getId() != null && !"".equals(u.getId())) {
+                                    return u.getId();
+                                }
+                                return u.getEmail();
+                            }))
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors
+                            .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
         } catch (Exception e) {
             logger.warn("There are no Provider entries in DB");
         }

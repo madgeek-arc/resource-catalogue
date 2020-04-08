@@ -163,6 +163,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
+        logger.trace("User '{}' is attempting to add a new Service: {}", auth, infraService);
         if (infraService.getService().getId() == null) {
             infraService.getService().setId(idCreator.createServiceId(infraService.getService()));
         }
@@ -189,6 +190,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Service: {}", auth, infraService);
         // if service version is empty set it null
         if ("".equals(infraService.getService().getVersion())) {
             infraService.getService().setVersion(null);
@@ -202,8 +204,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         synchronizerService.syncUpdate(infraService);
 
         prettifyServiceTextFields(infraService, ",");
-
         existing.setPayload(serialize(infraService));
+        existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         return infraService;
     }
@@ -211,6 +213,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public void delete(InfraService infraService) {
+        logger.trace("User is attempting to delete the Service: {}", infraService);
         if (infraService == null || infraService.getService().getId() == null) {
             throw new ServiceException("You cannot delete a null service or service with null id field");
         }
@@ -386,7 +389,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return parserPool.deserialize(resource, InfraService.class);
     }
 
-    public InfraService getOrNull(String id){
+    public InfraService getOrNull(String id) {
         Resource serviceResource = getResource(id, "latest");
         if (serviceResource != null) {
             return parserPool.deserialize(serviceResource, InfraService.class);
@@ -471,7 +474,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Override
     public List<RichService> createRichServices(List<InfraService> infraServices, Authentication auth) {
-
+        logger.trace("Creating RichServices from a list of InfraServices\nAuthentication: {}", auth);
         List<RichService> richServices = createRichVocabularies(infraServices);
         createRichStatistics(richServices, auth);
         createProviderInfo(richServices, auth);

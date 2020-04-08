@@ -39,29 +39,33 @@ public class User implements Identifiable {
         this.surname = surname;
     }
 
-    public User(Authentication auth) {
+    public static User of(Authentication auth) {
+        logger.trace("Creating User from Authentication\n{}", auth);
+        User user = new User();
         if (auth == null) {
             throw new InsufficientAuthenticationException("You are not authenticated, please log in.");
         } else if (auth instanceof OIDCAuthenticationToken) {
-            this.id = ((OIDCAuthenticationToken) auth).getUserInfo().getSub();
-            if (this.id == null) {
-                this.id = "";
+            user.id = ((OIDCAuthenticationToken) auth).getUserInfo().getSub();
+            if (user.id == null) {
+                user.id = "";
             }
-            this.email = ((OIDCAuthenticationToken) auth).getUserInfo().getEmail();
-            if (this.email == null) {
-                this.email = "";
+            user.email = ((OIDCAuthenticationToken) auth).getUserInfo().getEmail();
+            if (user.email == null) {
+                user.email = "";
             }
-            this.name = ((OIDCAuthenticationToken) auth).getUserInfo().getGivenName();
-            this.surname = ((OIDCAuthenticationToken) auth).getUserInfo().getFamilyName();
+            user.name = ((OIDCAuthenticationToken) auth).getUserInfo().getGivenName();
+            user.surname = ((OIDCAuthenticationToken) auth).getUserInfo().getFamilyName();
         } else if (auth.isAuthenticated()) {
-            this.name = auth.getName();
-            this.id = "";
-            this.email = "";
-            this.surname = "";
+            user.name = auth.getName();
+            user.id = "";
+            user.email = "";
+            user.surname = "";
             logger.warn("Authenticated User has missing information: {}", auth);
         } else {
             throw new InsufficientAuthenticationException("Could not create user. Insufficient user authentication");
         }
+        logger.debug("User from Authentication: {}", user);
+        return user;
     }
 
     @Override
