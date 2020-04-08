@@ -1,6 +1,5 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.config.security.EICAuthoritiesMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
@@ -23,6 +22,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+import static eu.einfracentral.config.CacheConfig.*;
 
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
@@ -40,7 +40,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final SecurityService securityService;
     private final Random randomNumberGenerator;
     private final RegistrationMailService registrationMailService;
-    private final EICAuthoritiesMapper eicAuthoritiesMapper;
 
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -50,7 +49,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy RegistrationMailService registrationMailService,
-                           @Lazy EICAuthoritiesMapper eicAuthoritiesMapper,
                            @Lazy FieldValidator fieldValidator,
                            IdCreator idCreator, EventService eventService) {
         super(ProviderBundle.class);
@@ -58,7 +56,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
         this.registrationMailService = registrationMailService;
-        this.eicAuthoritiesMapper = eicAuthoritiesMapper;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
@@ -75,23 +72,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle add(ProviderBundle provider, Authentication auth) {
 
         provider.setId(idCreator.createProviderId(provider.getProvider()));
+        logger.trace("User '{}' is attempting to add a new Provider: {}", auth, provider);
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
 
-        provider.setMetadata(Metadata.createMetadata(new User(auth).getFullName()));
+        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ProviderBundle ret;
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
-
-        // update provider roles
-        try {
-            eicAuthoritiesMapper.updateAuthorities();
-        } catch (RuntimeException e) {
-            logger.error("Could not update authorities map", e);
-        }
 
         // send messages to queue
         registrationMailService.sendProviderMails(provider);
@@ -102,8 +93,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
         validate(provider);
-        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), new User(auth).getFullName()));
+        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName()));
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());
@@ -112,13 +104,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {}", provider);
-
-        // update provider roles
-        try {
-            eicAuthoritiesMapper.updateAuthorities();
-        } catch (RuntimeException e) {
-            logger.error("Could not update authorities map", e);
-        }
 
         return provider;
     }
@@ -194,6 +179,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {
+        logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
@@ -204,20 +190,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.error("Error deleting Service", e);
             }
         });
-        super.delete(provider);
         logger.debug("Deleting Provider: {}", provider);
-
-        // update provider roles
-        try {
-            eicAuthoritiesMapper.updateAuthorities();
-        } catch (RuntimeException e) {
-            logger.error("Could not update authorities map", e);
-        }
+        super.delete(provider);
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
+//        logger.trace("User is attempting to verify the Provider with id {}, given as Status the value {}" +
+//                " and as Active the value {}", id, status, active);
         ProviderBundle provider = get(id);
         provider.setStatus(status.getKey());
         switch (status) {
@@ -252,7 +233,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
-            return new ArrayList<>();
+            throw new UnauthorizedUserException("Please log in.");
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(10000);
@@ -282,14 +263,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public List<ProviderBundle> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
-            return new ArrayList<>();
+            throw new UnauthorizedUserException("Please log in.");
         }
+        User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
-                    if (securityService.userIsProviderAdmin(auth, p.getId())) {
+                    if (securityService.userIsProviderAdmin(user, p.getId())) {
                         return p;
                     } else return null;
                 })
@@ -368,8 +350,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 //            service.setStatus(null);
             service.setActive(true);
             try {
+                logger.debug("Setting Service with name '{}' as active", service.getService().getName());
                 infraServiceService.update(service, null);
-                logger.info("Setting Service with name '{}' as active", service.getService().getName());
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }
@@ -378,32 +360,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
+        logger.info("Deactivating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
 //            service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
 //            service.setStatus(null);
             service.setActive(false);
             try {
+                logger.debug("Setting Service with id '{}' as inactive", service.getService().getId());
                 infraServiceService.update(service, null);
-                logger.info("Setting Service with name '{}' as inactive", service.getService().getName());
             } catch (ResourceNotFoundException e) {
-                logger.error("Could not update service with name '{}'", service.getService().getName());
-            }
-        }
-    }
-
-    /**
-     * This method is used to update a list of new providers with status 'Provider.States.ST_SUBMISSION'
-     * to status 'Provider.States.PENDING_2'
-     *
-     * @param providers
-     * @param authentication
-     */
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void verifyNewProviders(List<String> providers, Authentication authentication) {
-        for (String serviceProvider : providers) {
-            ProviderBundle provider = get(serviceProvider);
-            if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
-                verifyProvider(provider.getId(), Provider.States.PENDING_2, false, authentication);
+                logger.error("Could not update service with id '{}'", service.getService().getId());
             }
         }
     }
@@ -429,8 +395,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
     public void deleteUserInfo(Authentication authentication) {
+        logger.trace("User '{}' is attempting to delete his User Info", authentication);
         String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
         String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
         List<Event> allUserEvents = new ArrayList<>();
@@ -443,6 +410,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         "You need to delete your Provider first or add more Admins.", providerBundle.getProvider().getName()));
             }
         }
+        logger.info("Attempting to delete all user events");
         eventService.deleteEvents(allUserEvents);
         for (ProviderBundle providerBundle : allUserProviders) {
             List<User> updatedUsers = new ArrayList<>();
@@ -464,7 +432,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void addAuthenticatedUser(Provider provider, Authentication auth) {
         List<User> users;
-        User authUser = new User(auth);
+        User authUser = User.of(auth);
         users = provider.getUsers();
         if (users == null) {
             users = new ArrayList<>();

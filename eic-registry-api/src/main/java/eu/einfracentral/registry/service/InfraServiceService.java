@@ -19,17 +19,21 @@ import java.util.Map;
 public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, Authentication> {
 
     /**
-     * @param service, auth
+     * Method to add a new service.
+     *
+     * @param service
+     * @param auth
      * @return
-     * @throws Exception
      */
     T addService(T service, Authentication auth);
 
     /**
-     * @param service, auth
+     * Method to update a service.
+     *
+     * @param service
+     * @param auth
      * @return
      * @throws ResourceNotFoundException
-     * @throws Exception
      */
     T updateService(T service, Authentication auth) throws ResourceNotFoundException;
 
@@ -161,6 +165,17 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     InfraService getOrNull(String id);
+
+    /**
+     * Sets a Service as active/inactive.
+     *
+     * @param serviceId
+     * @param version
+     * @param active
+     * @param auth
+     * @return
+     */
+    InfraService publish(String serviceId, String version, boolean active, Authentication auth);
 
 //
 //    /**

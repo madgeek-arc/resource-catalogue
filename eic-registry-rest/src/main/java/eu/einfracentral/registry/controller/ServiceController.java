@@ -74,14 +74,14 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the specified version of a Service, providing the Service id and version.")
-    @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or " +
             "(@securityService.userIsServiceProviderAdmin(#auth, #id) or @securityService.userIsServiceProviderAdmin(#auth, #version))")
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
@@ -131,28 +131,27 @@ public class ServiceController {
         if (service == null) {
             throw new ServiceException("Cannot add a null service");
         }
-        Service s = null;
+        InfraService s = null;
         try { // check if service already exists
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
                 service.setId(idCreator.createServiceId(service));
             }
-            s = this.infraService.get(service.getId()).getService();
+            s = this.infraService.get(service.getId());
         } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service
         }
 
         if (s == null) { // if existing service is null, create it, else update it
-            s = this.infraService.addService(new InfraService(service), auth).getService();
-            logger.info("User '{}' added Service:\n{}", auth.getName(), s);
+            s = this.infraService.addService(new InfraService(service), auth);
+            logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
         } else {
-            if (!s.equals(service)) {
-                s = this.infraService.updateService(new InfraService(service), auth).getService();
-                logger.info("User '{}' updated Service:\n{}", auth.getName(), s);
-            }
+            s.setService(service); // replace with given Service
+            s = this.infraService.updateService(s, auth);
+            logger.info("User '{}' updated Service:\n{}", auth.getName(), infraService);
         }
         this.measurementService.updateAll(s.getId(), measurements, auth);
 
-        return new ResponseEntity<>(s, HttpStatus.OK);
+        return new ResponseEntity<>(s.getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a version of revisions.")
@@ -352,15 +351,8 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService service;
-        if (version == null || "".equals(version)) {
-            service = infraService.get(id);
-        } else {
-            service = infraService.get(id, version);
-        }
-        service.setActive(active);
-        logger.info("User '{}' has set Service with name '{}' and id '{}' as active", auth.getName(), service.getService().getName(), service.getService().getId());
-        return ResponseEntity.ok(infraService.update(service, auth));
+        logger.info("User '{}' attempts to save Service with id '{}' and version '{}' as '{}'", auth, id, version, active);
+        return ResponseEntity.ok(infraService.publish(id, version, active, auth));
     }
 
     // Get all pending Service Templates.

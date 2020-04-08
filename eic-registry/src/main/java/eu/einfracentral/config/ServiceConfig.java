@@ -33,6 +33,7 @@ import java.util.Random;
 @Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
+@EnableAspectJAutoProxy
 @EnableAsync
 @EnableJms
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {

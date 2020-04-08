@@ -25,6 +25,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Service("securityService")
@@ -68,9 +69,32 @@ public class SecurityService {
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
-    public boolean userIsProviderAdmin(Authentication auth, String providerId) {
+    public boolean userIsProviderAdmin(Authentication auth, @NotNull String providerId) {
         ProviderBundle registeredProvider = providerManager.get(providerId);
-        User user = new User(auth);
+        User user = User.of(auth);
+        if (registeredProvider == null) {
+            throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
+        }
+        if (registeredProvider.getProvider().getUsers() == null) {
+            return false;
+        }
+        return registeredProvider.getProvider().getUsers()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .anyMatch(u -> {
+                    if (u.getId() != null) {
+                        if (u.getEmail() != null) {
+                            return u.getId().equals(user.getId())
+                                    || u.getEmail().equals(user.getEmail());
+                        }
+                        return u.getId().equals(user.getId());
+                    }
+                    return u.getEmail().equals(user.getEmail());
+                });
+    }
+
+    public boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId) {
+        ProviderBundle registeredProvider = providerManager.get(providerId);
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
         }
@@ -100,6 +124,7 @@ public class SecurityService {
             throw new ServiceException("Service is null");
         }
 
+        User user = User.of(auth);
         if (service.getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
         }
@@ -108,19 +133,24 @@ public class SecurityService {
                 .get()
                 .stream()
                 .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(auth, id));
+                .anyMatch(id -> userIsProviderAdmin(user, id));
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
         if (service.getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
         }
+        User user = User.of(auth);
         Optional<List<String>> providers = Optional.of(service.getProviders());
         return providers
                 .get()
                 .stream()
                 .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(auth, id));
+                .anyMatch(id -> userIsProviderAdmin(user, id));
+    }
+
+    public boolean userIsServiceProviderAdmin(Authentication auth, InfraService infraService) {
+        return userIsServiceProviderAdmin(auth, infraService.getService());
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, String serviceId) {
@@ -139,17 +169,55 @@ public class SecurityService {
         if (service.getService().getProviders().isEmpty()) {
             throw new ValidationException("Service has no providers");
         }
+        User user = User.of(auth);
         Optional<List<String>> providers = Optional.of(service.getService().getProviders());
         return providers
                 .get()
                 .stream()
                 .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(auth, id));
+                .anyMatch(id -> userIsProviderAdmin(user, id));
+    }
+
+    public boolean providerCanAddServices(Authentication auth, String serviceId) {
+        return providerCanAddServices(auth, infraServiceService.get(serviceId));
     }
 
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
         List<String> providerIds = service.getService().getProviders();
         for (String providerId : providerIds) {
+            ProviderBundle provider = providerManager.get(providerId);
+            if (userIsProviderAdmin(auth, provider.getId())) {
+                if (provider.getStatus() == null) {
+                    throw new ServiceException("Provider status field is null");
+                }
+                if (provider.isActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
+                    if (userIsProviderAdmin(auth, provider.getId())) {
+                        return true;
+                    }
+                } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                    FacetFilter ff = new FacetFilter();
+                    ff.addFilter("providers", provider.getId());
+                    if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                        return true;
+                    }
+                    throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean providerCanAddServices(Authentication auth, Map<String, JsonNode> json) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        eu.einfracentral.domain.Service service = null;
+        service = mapper.readValue(json.get("service").toString(), eu.einfracentral.domain.Service.class);
+        if (service == null) {
+            throw new ServiceException("Service is null");
+        }
+        if (service.getProviders().isEmpty()) {
+            throw new ValidationException("Service has no providers");
+        }
+        for (String providerId : service.getProviders()) {
             ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
                 if (provider.getStatus() == null) {
