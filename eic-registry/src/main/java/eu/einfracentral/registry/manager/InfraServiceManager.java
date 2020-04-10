@@ -3,7 +3,6 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
-import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.ObjectUtils;
@@ -22,9 +21,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
@@ -64,7 +61,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
-        infraService.setActive(providerManager.get(infraService.getService().getProviders().get(0)).isActive());
+        infraService.setActive(providerManager.get(infraService.getService().getServiceOrganisation()).isActive());
 
         infraService.setLatest(true);
 
@@ -208,66 +205,24 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             logger.error("", e);
         }
 
-        validateExtraFields(service);
-
         return true;
-    }
-
-    // Validate the correctness of Service Aggregator Information
-    private void validateExtraFields(Service service) {
-        if (service.getAggregatedServices() == null) {
-            service.setAggregatedServices(1);
-        } else if (service.getAggregatedServices() < 1) {
-            throw new ValidationException("Aggregated services cannot be less than 1");
-        }
-        if (service.getPublications() == null) {
-            service.setPublications(0);
-        } else if (service.getPublications() < 0) {
-            throw new ValidationException("Publications number cannot be negative");
-        }
-        if (service.getDatasets() == null) {
-            service.setDatasets(0);
-        } else if (service.getDatasets() < 0) {
-            throw new ValidationException("Data(sets) number cannot be negative");
-        }
-        if (service.getSoftware() == null) {
-            service.setSoftware(0);
-        } else if (service.getSoftware() < 0) {
-            throw new ValidationException("Software number cannot be negative");
-        }
-        if (service.getApplications() == null) {
-            service.setApplications(0);
-        } else if (service.getApplications() < 0) {
-            throw new ValidationException("Applications number cannot be negative");
-        }
-        if (service.getOtherProducts() == null) {
-            service.setOtherProducts(0);
-        } else if (service.getOtherProducts() < 0) {
-            throw new ValidationException("Other products number cannot be negative");
-        }
     }
 
     @Override
     public InfraService publish(String serviceId, String version, boolean active, Authentication auth) {
         InfraService service;
+        String activeProvider = "";
         if (version == null || "".equals(version)) {
             service = this.get(serviceId);
         } else {
             service = this.get(serviceId, version);
         }
 
-        List<String> activeProviders = service.getService().getProviders()
-                .stream()
-                .map(providerId -> {
-                    ProviderBundle providerBundle = providerManager.get(providerId);
-                    if (providerBundle.getStatus().equals(Provider.States.APPROVED.getKey()) && providerBundle.isActive()) {
-                        return providerId;
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        if (active && activeProviders.isEmpty()) {
+        ProviderBundle providerBundle = providerManager.get(service.getService().getServiceOrganisation());
+        if (providerBundle.getStatus().equals(Provider.States.APPROVED.getKey()) && providerBundle.isActive()) {
+            activeProvider = service.getService().getServiceOrganisation();
+        }
+        if (active && activeProvider.equals("")) {
             throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
         }
         service.setActive(active);

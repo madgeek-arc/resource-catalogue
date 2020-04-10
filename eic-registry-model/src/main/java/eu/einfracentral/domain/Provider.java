@@ -19,7 +19,7 @@ public class Provider implements Identifiable {
 
     // Provider Basic Information
     /**
-     * Unique identifier of the provider.
+     * Unique identifier of the Provider.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
@@ -27,7 +27,7 @@ public class Provider implements Identifiable {
     private String id;
 
     /**
-     * Full Name of the organisation providing/offering the service/resource.
+     * Full Name of the Provider offering the resource and acting as main contact point.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
@@ -35,75 +35,79 @@ public class Provider implements Identifiable {
     private String name;
 
     /**
-     * Acronym or abbreviation of the provider.
+     * Abbreviation or short name of the Provider.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
     @FieldValidation
-    private String acronym;
+    private String abbreviation;
 
     /**
-     * Webpage with information about the provider.
+     * Legal status of the Provider. The legal status is usually noted in the registration act/statutes. For independent legal entities (1) - legal status of the Provider.
+     * For embedded providers (2) - legal status of the hosting legal entity. It is also possible to select Not a legal entity.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 4, example = "String (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
+    private String legalStatus;
+
+    /**
+     * 	Webpage with information about the Provider.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 5, example = "URL (required)", required = true)
     @FieldValidation
     private URL website;
 
+
+    // Provider Marketing Information
     /**
-     * The description of the provider.
+     * The description of the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "String (required)", required = true)
+    @ApiModelProperty(position = 6, example = "String (required)", required = true)
     @FieldValidation
     private String description;
 
     /**
-     * Link to the logo/visual identity of the provider.
+     * Link to the logo/visual identity of the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 7, example = "URL (required)", required = true)
     @FieldValidation
     private URL logo;
 
     /**
-     * Link to video, slideshow, photos, screenshots with details of the provider.
+     * Link to video, slideshow, photos, screenshots with details of the Provider.
      */
     @XmlElementWrapper(name = "multimedia")
 //    @XmlElement(name = "multimedia")
-    @ApiModelProperty(position = 7, dataType = "List", example = "URL[] (optional)")
+    @ApiModelProperty(position = 8, dataType = "List", example = "URL[] (optional)")
     @FieldValidation(nullable = true)
     private List<URL> multimedia;
 
 
     // Provider Classification Information
     /**
+     * 	A named group of providers that offer access to the same type of resource or capabilities, within the defined domain.
+     */
+    @XmlElementWrapper(name = "scientificSubdomains")
+    @XmlElement(name = "scientificSubdomain")
+    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SCIENTIFIC_SUBDOMAIN)
+    private List<String> scientificSubdomains;
+
+    /**
      * Defines if the Provider is single-sited, distributed, mobile, virtual, etc.
      */
-    @XmlElementWrapper(name = "types", required = true)
+    @XmlElementWrapper(name = "types")
     @XmlElement(name = "type")
-    @ApiModelProperty(position = 8, dataType = "List", example = "String[] (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_TYPE)
-    private List<String> types;
-
-    /**
-     * A named group of providers that offer access to the same type of resource or capabilities, within the defined category.
-     */
-    @XmlElementWrapper(name = "categories", required = true)
-    @XmlElement(name = "category")
-    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_CATEGORY)
-    private List<String> categories;
-
-    /**
-     * ESFRI domain classification.
-     */
-    @XmlElementWrapper(name = "esfriDomains")
-    @XmlElement(name = "esfriDomain")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_DOMAIN)
-    private List<String> esfriDomains;
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_TYPE)
+    private List<String> types;
 
     /**
      * Keywords associated to the Provider to simplify search by relevant keywords.
@@ -115,58 +119,61 @@ public class Provider implements Identifiable {
     private List<String> tags;
 
 
-    // Provider Maturity Information
-    /**
-     * Current status of the RI life-cycle.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 12, example = "String (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LIFE_CYCLE_STATUS)
-    private String lifeCycleStatus;
-
-
     // Provider Location Information
     /**
      * Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, required = true)
+    @ApiModelProperty(position = 12, example = "ProviderLocation (required)", required = true)
     @FieldValidation
     private ProviderLocation location;
-
-    /**
-     * Country which provides the coordination. In the case of distributed/virtual Providers the country of the coordinating office (headquarters) should be selected.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 14, example = "String (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.PLACE)
-    private String coordinatingCountry;
-
-    /**
-     * Providers that are funded by several countries should list here all supporting countries (including the Coordinating country).
-     */
-    @XmlElementWrapper(name = "participatingCountries")
-    @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 15, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PLACE)
-    private List<String> participatingCountries;
 
 
     // Provider Contact Information
     /**
-     * List of provider's contact persons info.
+     * Provider's main contact info.
      */
-    @XmlElementWrapper(name = "contacts", required = true)
-    @XmlElement(name = "contact")
-    @ApiModelProperty(position = 16, required = true)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 13, example = "ProviderMainContact (required)", required = true)
     @FieldValidation
-    private List<Contact> contacts;
+    private ProviderMainContact providerMainContact;
+
+    /**
+     * List of the Provider's public contacts info.
+     */
+    @XmlElementWrapper(name = "providerPublicContacts")
+    @XmlElement(name = "providerPublicContact")
+    @ApiModelProperty(position = 14, dataType = "List", example = "ProviderPublicContact[] (optional)")
+    @FieldValidation(nullable = true)
+    private List<ProviderPublicContact> providerPublicContacts;
+
+
+    // Provider Maturity Information
+    /**
+     * Current status of the Provider/Research infrastucture life-cycle.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 15, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LIFE_CYCLE_STATUS)
+    private String lifeCycleStatus;
+
+    /**
+     * 	List of certifications obtained for the Provider (including the certification body and any certificate number).
+     */
+    @XmlElementWrapper(name = "certifications")
+    @XmlElement(name = "certification")
+    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true)
+    private List<String> certifications;
 
 
     // Provider Other Information
     /**
-     * Name of the organisation/institution legally hosting (housing) the RI or its coordinating centre. A distinction is made between: (1) RIs that are self-standing and have a defined and distinct legal entity, (2) RI that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.). If (1) - name of the RI, If (2) - name of the hosting organisation.
+     * Name of the organisation/institution legally hosting (housing) the provider/research infrastructure or its coordinating centre.
+     * A distinction is made between: (1) research infrastructures that are self-standing and have a defined and distinct legal entity,
+     * (2) research infrastructures that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.).
+     * If (1) - name of the research infrastructure, If (2) - name of the hosting organisation.
      */
     @XmlElement
     @ApiModelProperty(position = 17, example = "String (optional)")
@@ -174,71 +181,76 @@ public class Provider implements Identifiable {
     private String hostingLegalEntity;
 
     /**
-     * For independent legal entities (1) - legal status of the Provider. For embedded Providers (2) - legal status of the hosting legal entity.
+     * 	Providers/Research Infrastructures that are funded by several countries should list here all supporting countries (including the Coordinating country).
      */
-    @XmlElement
-    @ApiModelProperty(position = 18, example = "String (optional)")
+    @XmlElementWrapper(name = "participatingCountries")
+    @XmlElement(name = "participatingCountry")
+    @ApiModelProperty(position = 18, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
-    private String legalStatus;
+    @VocabularyValidation(type = Vocabulary.Type.PLACE)
+    private List<String> participatingCountries;
 
     /**
-     * If the RI is (part of) an ESFRI project indicate how the RI participates: a) RI is node of an ESFRI project, b) RI is an ESFRI project, c) RI is an ESFRI landmark.
+     * 	Select the affiliations, networks of the Provider.
      */
-    @XmlElement
-    @ApiModelProperty(position = 19, example = "String (optional)")
+    @XmlElementWrapper(name = "affiliations")
+    @XmlElement(name = "affiliation")
+    @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI)
-    private String esfri;
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AFFILIATION)
+    private List<String> affiliations;
 
     /**
-     * Select the networks the RIs is part of.
+     * ESFRI domain classification.
      */
-    @XmlElementWrapper(name = "networks")
-    @XmlElement(name = "network")
+    @XmlElementWrapper(name = "esfriDomains")
+    @XmlElement(name = "esfriDomain")
     @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORKS)
-    private List<String> networks;
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_DOMAIN)
+    private List<String> esfriDomains;
+
+    /**
+     * If the research infrastructure is (part of) an ESFRI project indicate how the RI participates:
+     * a) is a node of an ESFRI project, b) is an ESFRI project, c) is an ESFRI landmark, d) is not an ESFRI project or landmark.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 21, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_TYPE)
+    private String esfriType;
 
     /**
      * Basic research, Applied research or Technological development.
      */
     @XmlElementWrapper(name = "areasOfActivity")
     @XmlElement(name = "areaOfActivity")
-    @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AREA_OF_ACTIVITY)
     private List<String> areasOfActivity;
 
     /**
-     * RI’s participation in the grand societal challenges as defined by the European Commission (Horizon 2020)
+     * 	Provider’s participation in the grand societal challenges as defined by the European Commission
      */
     @XmlElementWrapper(name = "societalGrandChallenges")
     @XmlElement(name = "societalGrandChallenge")
-    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 23, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SOCIETAL_GRAND_CHALLENGES)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SOCIETAL_GRAND_CHALLENGE)
     private List<String> societalGrandChallenges;
 
     /**
-     * Is the RI featured on the national roadmap for research infrastructures
+     * 	Provider being part of a national roadmap for research infrastructures
      */
-    @XmlElement
-    @ApiModelProperty(position = 23, example = "Yes or No (optional)")
+    @XmlElementWrapper(name = "nationalRoadmaps")
+    @XmlElement(name = "nationalRoadmap")
+    @ApiModelProperty(position = 24, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
-    private String nationalRoadmap;
+    private List<String> nationalRoadmaps;
 
 
     // Extra needed fields
-//    @XmlElement
-//    @ApiModelProperty(hidden = true)
-//    private Boolean active;
-//
-//    @XmlElement
-//    @ApiModelProperty(hidden = true)
-//    private String status;
-
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
     @ApiModelProperty(position = 24, required = true)
@@ -284,27 +296,28 @@ public class Provider implements Identifiable {
         return "Provider{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", acronym='" + acronym + '\'' +
+                ", abbreviation='" + abbreviation + '\'' +
+                ", legalStatus='" + legalStatus + '\'' +
                 ", website=" + website +
                 ", description='" + description + '\'' +
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
+                ", scientificSubdomains=" + scientificSubdomains +
                 ", types=" + types +
-                ", categories=" + categories +
-                ", esfriDomains=" + esfriDomains +
                 ", tags=" + tags +
-                ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
                 ", location=" + location +
-                ", coordinatingCountry='" + coordinatingCountry + '\'' +
-                ", participatingCountries=" + participatingCountries +
-                ", contacts=" + contacts +
+                ", providerMainContact=" + providerMainContact +
+                ", providerPublicContacts=" + providerPublicContacts +
+                ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
+                ", certifications=" + certifications +
                 ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
-                ", legalStatus='" + legalStatus + '\'' +
-                ", esfri='" + esfri + '\'' +
-                ", networks=" + networks +
+                ", participatingCountries=" + participatingCountries +
+                ", affiliations=" + affiliations +
+                ", esfriDomains=" + esfriDomains +
+                ", esfriType='" + esfriType + '\'' +
                 ", areasOfActivity=" + areasOfActivity +
                 ", societalGrandChallenges=" + societalGrandChallenges +
-                ", nationalRoadmap=" + nationalRoadmap +
+                ", nationalRoadmaps=" + nationalRoadmaps +
                 ", users=" + users +
                 '}';
     }
@@ -327,12 +340,20 @@ public class Provider implements Identifiable {
         this.name = name;
     }
 
-    public String getAcronym() {
-        return acronym;
+    public String getAbbreviation() {
+        return abbreviation;
     }
 
-    public void setAcronym(String acronym) {
-        this.acronym = acronym;
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+
+    public String getLegalStatus() {
+        return legalStatus;
+    }
+
+    public void setLegalStatus(String legalStatus) {
+        this.legalStatus = legalStatus;
     }
 
     public URL getWebsite() {
@@ -367,28 +388,20 @@ public class Provider implements Identifiable {
         this.multimedia = multimedia;
     }
 
+    public List<String> getScientificSubdomains() {
+        return scientificSubdomains;
+    }
+
+    public void setScientificSubdomains(List<String> scientificSubdomains) {
+        this.scientificSubdomains = scientificSubdomains;
+    }
+
     public List<String> getTypes() {
         return types;
     }
 
     public void setTypes(List<String> types) {
         this.types = types;
-    }
-
-    public List<String> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<String> categories) {
-        this.categories = categories;
-    }
-
-    public List<String> getEsfriDomains() {
-        return esfriDomains;
-    }
-
-    public void setEsfriDomains(List<String> esfriDomains) {
-        this.esfriDomains = esfriDomains;
     }
 
     public List<String> getTags() {
@@ -399,14 +412,6 @@ public class Provider implements Identifiable {
         this.tags = tags;
     }
 
-    public String getLifeCycleStatus() {
-        return lifeCycleStatus;
-    }
-
-    public void setLifeCycleStatus(String lifeCycleStatus) {
-        this.lifeCycleStatus = lifeCycleStatus;
-    }
-
     public ProviderLocation getLocation() {
         return location;
     }
@@ -415,28 +420,36 @@ public class Provider implements Identifiable {
         this.location = location;
     }
 
-    public String getCoordinatingCountry() {
-        return coordinatingCountry;
+    public ProviderMainContact getProviderMainContact() {
+        return providerMainContact;
     }
 
-    public void setCoordinatingCountry(String coordinatingCountry) {
-        this.coordinatingCountry = coordinatingCountry;
+    public void setProviderMainContact(ProviderMainContact providerMainContact) {
+        this.providerMainContact = providerMainContact;
     }
 
-    public List<String> getParticipatingCountries() {
-        return participatingCountries;
+    public List<ProviderPublicContact> getProviderPublicContacts() {
+        return providerPublicContacts;
     }
 
-    public void setParticipatingCountries(List<String> participatingCountries) {
-        this.participatingCountries = participatingCountries;
+    public void setProviderPublicContacts(List<ProviderPublicContact> providerPublicContacts) {
+        this.providerPublicContacts = providerPublicContacts;
     }
 
-    public List<Contact> getContacts() {
-        return contacts;
+    public String getLifeCycleStatus() {
+        return lifeCycleStatus;
     }
 
-    public void setContacts(List<Contact> contacts) {
-        this.contacts = contacts;
+    public void setLifeCycleStatus(String lifeCycleStatus) {
+        this.lifeCycleStatus = lifeCycleStatus;
+    }
+
+    public List<String> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(List<String> certifications) {
+        this.certifications = certifications;
     }
 
     public String getHostingLegalEntity() {
@@ -447,28 +460,36 @@ public class Provider implements Identifiable {
         this.hostingLegalEntity = hostingLegalEntity;
     }
 
-    public String getLegalStatus() {
-        return legalStatus;
+    public List<String> getParticipatingCountries() {
+        return participatingCountries;
     }
 
-    public void setLegalStatus(String legalStatus) {
-        this.legalStatus = legalStatus;
+    public void setParticipatingCountries(List<String> participatingCountries) {
+        this.participatingCountries = participatingCountries;
     }
 
-    public String getEsfri() {
-        return esfri;
+    public List<String> getAffiliations() {
+        return affiliations;
     }
 
-    public void setEsfri(String esfri) {
-        this.esfri = esfri;
+    public void setAffiliations(List<String> affiliations) {
+        this.affiliations = affiliations;
     }
 
-    public List<String> getNetworks() {
-        return networks;
+    public List<String> getEsfriDomains() {
+        return esfriDomains;
     }
 
-    public void setNetworks(List<String> networks) {
-        this.networks = networks;
+    public void setEsfriDomains(List<String> esfriDomains) {
+        this.esfriDomains = esfriDomains;
+    }
+
+    public String getEsfriType() {
+        return esfriType;
+    }
+
+    public void setEsfriType(String esfriType) {
+        this.esfriType = esfriType;
     }
 
     public List<String> getAreasOfActivity() {
@@ -487,29 +508,13 @@ public class Provider implements Identifiable {
         this.societalGrandChallenges = societalGrandChallenges;
     }
 
-    public String getNationalRoadmap() {
-        return nationalRoadmap;
+    public List<String> getNationalRoadmaps() {
+        return nationalRoadmaps;
     }
 
-    public void setNationalRoadmap(String nationalRoadmap) {
-        this.nationalRoadmap = nationalRoadmap;
+    public void setNationalRoadmaps(List<String> nationalRoadmaps) {
+        this.nationalRoadmaps = nationalRoadmaps;
     }
-
-//    public Boolean getActive() {
-//        return active;
-//    }
-//
-//    public void setActive(Boolean active) {
-//        this.active = active;
-//    }
-//
-//    public String getStatus() {
-//        return status;
-//    }
-//
-//    public void setStatus(String status) {
-//        this.status = status;
-//    }
 
     public List<User> getUsers() {
         return users;
