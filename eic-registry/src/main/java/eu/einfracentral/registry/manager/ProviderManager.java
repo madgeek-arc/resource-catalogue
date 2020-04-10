@@ -183,9 +183,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
-                if (s.getService().getProviders().size() == 1) {
-                    infraServiceService.delete(s);
-                }
+                infraServiceService.delete(s);
             } catch (ResourceNotFoundException e) {
                 logger.error("Error deleting Service", e);
             }
@@ -384,13 +382,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             logger.error("", e);
         }
 
-        // Validate Provider's National Roadmap
-        if (provider.getProvider().getNationalRoadmap() != null) {
-            if (!"yes".equalsIgnoreCase(provider.getProvider().getNationalRoadmap())
-                    && !"no".equalsIgnoreCase(provider.getProvider().getNationalRoadmap())) {
-                throw new ValidationException("nationalRoadmap's value should be Yes or No");
-            }
-        }
         return provider;
     }
 

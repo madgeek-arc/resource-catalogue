@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.ObjectUtils;
@@ -203,6 +204,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             fieldValidator.validateFields(infraService.getService());
         } catch (IllegalAccessException e) {
             logger.error("", e);
+        }
+
+        // Validate Service's EOSC ordering
+        if (!"yes".equalsIgnoreCase(service.getOrderViaEoscPortal()) && !"no".equalsIgnoreCase(service.getOrderViaEoscPortal())) {
+            throw new ValidationException("orderViaEoscPortal's value should be Yes or No");
         }
 
         return true;
