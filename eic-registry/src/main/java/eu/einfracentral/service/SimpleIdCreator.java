@@ -11,6 +11,7 @@ public class SimpleIdCreator implements IdCreator {
     SimpleIdCreator() {
     }
 
+
     @Override
     public String createProviderId(Provider provider) {
         String providerId;
@@ -27,10 +28,13 @@ public class SimpleIdCreator implements IdCreator {
         }
         return StringUtils
                 .stripAccents(providerId)
+                .replaceAll("[\n\t\\s]+", " ")
+                .replaceAll("\\s+$", "")
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_");
 
     }
+
 
     @Override
     public String createServiceId(eu.einfracentral.domain.Service service) {
@@ -43,6 +47,8 @@ public class SimpleIdCreator implements IdCreator {
         String provider = service.getProviders().get(0);
         return String.format("%s.%s", provider, StringUtils
                 .stripAccents(service.getName())
+                .replaceAll("[\n\t\\s]+", " ")
+                .replaceAll("\\s+$", "")
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_")
                 .toLowerCase());
