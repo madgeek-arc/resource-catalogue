@@ -60,20 +60,16 @@ public class ProviderManagementAspect {
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(InfraService infraService) {
-        List<String> allServiceProviders = infraService.getService().getServiceProviders();
-        allServiceProviders.add(infraService.getService().getServiceOrganisation());
-        for (String providerId : allServiceProviders) {
-            try {
-                ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
-                if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
-                        || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
-                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                            providerId, providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
-                    providerService.verifyProvider(providerId, Provider.States.PENDING_2, false, null);
-                }
-            } catch (RuntimeException e) {
-                logger.error(e);
+        try {
+            ProviderBundle providerBundle = providerService.get(infraService.getService().getServiceOrganisation(), (Authentication) null);
+            if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
+                    || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
+                logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
+                        infraService.getService().getServiceOrganisation(), providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
+                providerService.verifyProvider(infraService.getService().getServiceOrganisation(), Provider.States.PENDING_2, false, null);
             }
+        } catch (RuntimeException e) {
+            logger.error(e);
         }
     }
 }

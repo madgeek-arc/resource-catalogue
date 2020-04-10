@@ -107,31 +107,36 @@ public class ServiceProviderRegistrationIT {
         providerTypes.add("provider_type-single_sited");
         providerTypes.add("provider_type-distributed");
 
-        List<String> providerCategories = new ArrayList<>();
-        providerCategories.add("provider_category-agronomy_forestry_plant_breeding_centres");
-        providerCategories.add("provider_category-animal_facilities");
+        List<String> providerScientificSubdomains = new ArrayList<>();
+        providerScientificSubdomains.add("pprovider_scientific_subdomain-agronomy_forestry_plant_breeding_centres");
+        providerScientificSubdomains.add("provider_scientific_subdomain-animal_facilities");
 
         ProviderLocation providerLocation = new ProviderLocation();
         providerLocation.setCity("Athens");
-        providerLocation.setName("ARC");
-        providerLocation.setNumber("6");
+        providerLocation.setStreetNameAndNumber("Epidayrou 6");
         providerLocation.setPostalCode("12345");
         providerLocation.setRegion("Attica");
-        providerLocation.setStreet("Epidayrou");
 
-        Contact contact1 = new Contact();
+        ProviderMainContact mainContact = new ProviderMainContact();
+        mainContact.setPhone("0101010101");
+        mainContact.setEmail("maincontact@gmail.com");
+        mainContact.setFirstName("MainName");
+        mainContact.setLastName("MainSurname");
+        mainContact.setPosition("Manager");
+
+        ProviderPublicContact contact1 = new ProviderPublicContact();
         contact1.setEmail("contact1@gmail.com");
         contact1.setFirstName("FirstName1");
         contact1.setLastName("LastName1");
-        contact1.setTel("0123456789");
-        Contact contact2 = new Contact();
+        contact1.setPhone("0123456789");
+        ProviderPublicContact contact2 = new ProviderPublicContact();
         contact2.setEmail("contact2@gmail.com");
         contact2.setFirstName("FirstName1");
         contact2.setLastName("LastName1");
-        contact2.setTel("9876543210");
-        List<Contact> contacts = new ArrayList<>();
-        contacts.add(contact1);
-        contacts.add(contact2);
+        contact2.setPhone("9876543210");
+        List<ProviderPublicContact> publicContacts = new ArrayList<>();
+        publicContacts.add(contact1);
+        publicContacts.add(contact2);
 
         List<User> users = new ArrayList<>();
         User user = new User();
@@ -144,16 +149,16 @@ public class ServiceProviderRegistrationIT {
         Provider provider = new Provider();
         provider.setId(id);
         provider.setName("WP4_TestProvider");
-        provider.setAcronym("WP4");
+        provider.setAbbreviation("WP4");
         provider.setWebsite(new URL("http://wp4.testprovider.com"));
         provider.setDescription("Jtest for PDT WP4 v2.00 01/10/19");
         provider.setLogo(new URL("https://wp4.testprovider.logo.com"));
         provider.setTypes(providerTypes);
-        provider.setCategories(providerCategories);
+        provider.setScientificSubdomains(providerScientificSubdomains);
         provider.setLifeCycleStatus("provider_life_cycle_status-under_construction");
         provider.setLocation(providerLocation);
-        provider.setCoordinatingCountry("GR");
-        provider.setContacts(contacts);
+        provider.setProviderMainContact(mainContact);
+        provider.setProviderPublicContacts(publicContacts);
         provider.setUsers(users);
 
         return providerService.add(new ProviderBundle(provider), securityService.getAdminAccess());
@@ -165,12 +170,12 @@ public class ServiceProviderRegistrationIT {
 
         // update provider
         provider.getProvider().setName("WP4_Test UPDATED");
-        provider.getProvider().setAcronym("WP4UPDATED");
+        provider.getProvider().setAbbreviation("WP4UPDATED");
         provider.getProvider().setWebsite(new URL("http://wp4.test.updated.com"));
         provider.getProvider().setDescription("Jtest for PDT WP4 v2.00 01/10/19 UPDATED");
         provider.getProvider().setLogo(new URL("https://wp4.testprovider.logo.updated.com"));
         provider.getProvider().setLifeCycleStatus("provider_life_cycle_status-being_upgraded");
-        provider.getProvider().setCoordinatingCountry("EU");
+        provider.getProvider().getLocation().setCountry("EU");
 
         return providerService.update(provider, securityService.getAdminAccess());
     }
@@ -197,33 +202,32 @@ public class ServiceProviderRegistrationIT {
         places.add("GR");
         places.add("FR");
 
-        Contact contact1 = new Contact();
+        ServicePublicContact contact1 = new ServicePublicContact();
         contact1.setEmail("contact1@gmail.com");
         contact1.setFirstName("FirstName1");
         contact1.setLastName("LastName1");
-        contact1.setTel("0123456789");
-        Contact contact2 = new Contact();
+        contact1.setPhone("0123456789");
+        ServicePublicContact contact2 = new ServicePublicContact();
         contact2.setEmail("contact2@gmail.com");
         contact2.setFirstName("FirstName1");
         contact2.setLastName("LastName1");
-        contact2.setTel("9876543210");
-        List<Contact> contacts = new ArrayList<>();
+        contact2.setPhone("9876543210");
+        List<ServicePublicContact> contacts = new ArrayList<>();
         contacts.add(contact1);
         contacts.add(contact2);
 
         Service service = new Service();
         service.setName(serviceName);
-        service.setUrl(new URL("https:wp4.testservice.com"));
+        service.setWebpage(new URL("https:wp4.testservice.com"));
         service.setDescription("Jtest for SDT WP4 v2.00 01/10/19");
         service.setLogo(new URL("https:wp4.testservice.logo.com"));
-        service.setProviders(Collections.singletonList(provider.getId()));
+        service.setServiceOrganisation(provider.getId());
         service.setScientificSubdomains(scientificSubdomains);
         service.setSubcategories(subcategories);
         service.setTargetUsers(targetUsers);
         service.setLanguages(languages);
-        service.setPlaces(places);
-        service.setOrderType("order_type-order_required");
-        service.setContacts(contacts);
+        service.setGeographicalAvailabilities(places);
+        service.setServicePublicContacts(contacts);
 
         return service;
     }

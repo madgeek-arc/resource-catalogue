@@ -125,10 +125,12 @@ public class SecurityService {
         }
 
         User user = User.of(auth);
-        if (service.getProviders().isEmpty()) {
-            throw new ValidationException("Service has no providers");
+        if (service.getServiceOrganisation() == null || service.getServiceOrganisation().equals("")) {
+            throw new ValidationException("Service has no Service Organisation");
         }
-        Optional<List<String>> providers = Optional.of(service.getProviders());
+        List<String> allProviders = service.getServiceProviders();
+        allProviders.add(service.getServiceOrganisation());
+        Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
                 .stream()
@@ -137,11 +139,13 @@ public class SecurityService {
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
-        if (service.getProviders().isEmpty()) {
-            throw new ValidationException("Service has no providers");
+        if (service.getServiceOrganisation() == null || service.getServiceOrganisation().equals("")) {
+            throw new ValidationException("Service has no Service Organisation");
         }
         User user = User.of(auth);
-        Optional<List<String>> providers = Optional.of(service.getProviders());
+        List<String> allProviders = service.getServiceProviders();
+        allProviders.add(service.getServiceOrganisation());
+        Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
                 .stream()
@@ -166,11 +170,13 @@ public class SecurityService {
         } catch (RuntimeException e) {
             return false;
         }
-        if (service.getService().getProviders().isEmpty()) {
-            throw new ValidationException("Service has no providers");
+        if (service.getService().getServiceOrganisation() == null || service.getService().getServiceOrganisation().equals("")) {
+            throw new ValidationException("Service has no Service Organisation");
         }
         User user = User.of(auth);
-        Optional<List<String>> providers = Optional.of(service.getService().getProviders());
+        List<String> allProviders = service.getService().getServiceProviders();
+        allProviders.add(service.getService().getServiceOrganisation());
+        Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
                 .stream()
@@ -183,7 +189,8 @@ public class SecurityService {
     }
 
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
-        List<String> providerIds = service.getService().getProviders();
+        List<String> providerIds = service.getService().getServiceProviders();
+        providerIds.add((service.getService().getServiceOrganisation()));
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
@@ -214,10 +221,12 @@ public class SecurityService {
         if (service == null) {
             throw new ServiceException("Service is null");
         }
-        if (service.getProviders().isEmpty()) {
-            throw new ValidationException("Service has no providers");
+        if (service.getServiceOrganisation() == null || service.getServiceOrganisation().equals("")) {
+            throw new ValidationException("Service has no Service Organisation");
         }
-        for (String providerId : service.getProviders()) {
+        List<String> providerIds = service.getServiceProviders();
+        providerIds.add(service.getServiceOrganisation());
+        for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
                 if (provider.getStatus() == null) {
@@ -255,7 +264,9 @@ public class SecurityService {
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
-        for (String providerId : service.getService().getProviders()) {
+        List<String> providerIds = service.getService().getServiceProviders();
+        providerIds.add(service.getService().getServiceOrganisation());
+        for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (provider != null && provider.isActive()) {
                 if (userIsProviderAdmin(auth, providerId)) {
