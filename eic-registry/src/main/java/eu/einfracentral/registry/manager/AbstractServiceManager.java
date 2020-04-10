@@ -485,11 +485,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth) {
         for (RichService richService : richServices) {
             List<ProviderInfo> providerInfoList = new ArrayList<>();
-            for (String provider : richService.getService().getProviders()) {
+            List<String> allProviders = richService.getService().getServiceProviders();
+            allProviders.add(richService.getService().getServiceOrganisation());
+            for (String provider : allProviders) {
                 ProviderInfo providerInfo = new ProviderInfo();
                 providerInfo.setProviderId(providerService.get(provider, auth).getId());
                 providerInfo.setProviderName(providerService.get(provider, auth).getProvider().getName());
-                providerInfo.setProviderAcronym(providerService.get(provider, auth).getProvider().getAcronym());
+                providerInfo.setProviderAcronym(providerService.get(provider, auth).getProvider().getAbbreviation());
                 providerInfoList.add(providerInfo);
             }
             richService.setProviderInfo(providerInfoList);
@@ -507,7 +509,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
         infraService.getService().setDescription(TextUtils.prettifyText(infraService.getService().getDescription(), specialCharacters));
-        infraService.getService().setUserValue(TextUtils.prettifyText(infraService.getService().getUserValue(), specialCharacters));
         infraService.getService().setChangeLog(TextUtils.prettifyText(infraService.getService().getChangeLog(), specialCharacters));
         return infraService;
     }
@@ -541,8 +542,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             }
 
             // Place Names
-            if (infraService.getService().getPlaces() != null) {
-                richService.setPlaceNames(infraService.getService().getPlaces()
+            if (infraService.getService().getGeographicalAvailabilities() != null) {
+                richService.setPlaceNames(infraService.getService().getGeographicalAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -598,11 +599,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                         .map(p -> allFunders.get(p).getFundingOrganisation())
                         .collect(Collectors.toList())
                 );
-            }
-
-            // OrderType Name
-            if (infraService.getService().getOrderType() != null && !infraService.getService().getOrderType().equals("")) {
-                richService.setOrderTypeName(allVocabularies.get(infraService.getService().getOrderType()).getName());
             }
 
             // Domain Tree

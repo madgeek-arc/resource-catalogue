@@ -14,6 +14,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @Aspect
@@ -57,7 +60,9 @@ public class ProviderManagementAspect {
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(InfraService infraService) {
-        for (String providerId : infraService.getService().getProviders()) {
+        List<String> allServiceProviders = infraService.getService().getServiceProviders();
+        allServiceProviders.add(infraService.getService().getServiceOrganisation());
+        for (String providerId : allServiceProviders) {
             try {
                 ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
                 if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
