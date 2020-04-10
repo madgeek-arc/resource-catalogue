@@ -17,14 +17,22 @@
     {
       "multivalued": false,
       "name": "service_version",
+      "label": "Service Version",
       "path": "//*[local-name()='service']/*[local-name()='version']/text()",
       "type": "java.lang.String"
     },
     {
+      "multivalued": false,
+      "name": "service_organisation",
+      "label": "Service Organisation",
+      "path": "//*[local-name()='service']/*[local-name()='serviceOrganisation']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": true,
-      "name": "providers",
-      "label": "Provider",
-      "path": "//*[local-name()='service']//*[local-name()='provider']/text()",
+      "name": "service_providers",
+      "label": "Service Providers",
+      "path": "//*[local-name()='service']//*[local-name()='serviceProvider']/text()",
       "type": "java.lang.String"
     },
     {
@@ -57,9 +65,9 @@
     },
     {
       "multivalued": true,
-      "name": "places",
-      "label": "Place",
-      "path": "//*[local-name()='service']//*[local-name()='place']/text()",
+      "name": "geographical_availabilities",
+      "label": "Geographical Availability",
+      "path": "//*[local-name()='service']//*[local-name()='geographicalAvailability']/text()",
       "type": "java.lang.String"
     },
     {
@@ -99,44 +107,43 @@
     },
     {
       "multivalued": false,
-      "name": "orderType",
-      "label": "Order Type",
-      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "description",
+      "label": "Description",
       "path": "//*[local-name()='service']/*[local-name()='description']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "tagline",
+      "label": "Tagline",
       "path": "//*[local-name()='service']/*[local-name()='tagline']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "user_value",
-      "path": "//*[local-name()='service']/*[local-name()='userValue']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "user_base",
-      "path": "//*[local-name()='service']//*[local-name()='userBase']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "use_cases",
+      "label": "Use Case",
       "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
+      "name": "target_customer_tags",
+      "label": "Target Customer Tag",
+      "path": "//*[local-name()='service']//*[local-name()='targetCustomerTag']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "open_source_technologies",
+      "label": "Open Source Technology",
+      "path": "//*[local-name()='service']//*[local-name()='openSourceTechnology']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
       "name": "tags",
+      "label": "Tag",
       "path": "//*[local-name()='service']//*[local-name()='tag']/text()",
       "type": "java.lang.String"
     },
@@ -194,5 +201,5 @@
   "name": "pending_service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schema": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://einfracentral.eu\" version=\"1.0\" xmlns:tns=\"http://einfracentral.eu\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n\t<xs:element name=\"infraService\"/>\n</xs:schema>"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris_v2.11/eic-registry-model/src/main/resources/schema1.xsd"
 }

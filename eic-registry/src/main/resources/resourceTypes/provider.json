@@ -10,13 +10,29 @@
     {
       "multivalued": false,
       "name": "name",
+      "label": "Provider Name",
       "path": "//*[local-name()='provider']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "acronym",
-      "path": "//*[local-name()='acronym']/text()",
+      "name": "abbreviation",
+      "label": "Abbreviation",
+      "path": "//*[local-name()='abbreviation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "legal_status",
+      "label": "Legal Status",
+      "path": "//*[local-name()='legalStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "label": "Scientific Subdomain",
+      "path": "//*[local-name()='scientificSubdomain']/text()",
       "type": "java.lang.String"
     },
     {
@@ -28,59 +44,49 @@
     },
     {
       "multivalued": true,
-      "name": "categories",
-      "label": "Category",
-      "path": "//*[local-name()='category']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "esfriDomains",
-      "label": "Esfri Domain",
-      "path": "//*[local-name()='esfriDomain']/text()",
+      "name": "affiliations",
+      "label": "Affiliation",
+      "path": "//*[local-name()='affiliation']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "tags",
+      "label": "Tag",
       "path": "//*[local-name()='tag']/text()",
       "type": "java.lang.String"
     },
     {
+      "multivalued": true,
+      "name": "esfri_domains",
+      "label": "Esfri Domain",
+      "path": "//*[local-name()='esfriDomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": false,
-      "name": "lifeCycleStatus",
+      "name": "life_cycle_status",
+      "label": "Life Cycle Status",
       "path": "//*[local-name()='lifeCycleStatus']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "legalStatus",
-      "path": "//*[local-name()='legalStatus']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "esfri",
-      "path": "//*[local-name()='esfri']/text()",
+      "name": "esfri_type",
+      "label": "Esfri Type",
+      "path": "//*[local-name()='esfriType']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "networks",
-      "label": "Network",
-      "path": "//*[local-name()='network']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "areasOfActivity",
+      "name": "areas_of_activity",
       "label": "Area of Activity",
       "path": "//*[local-name()='areaOfActivity']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "societalGrandChallenges",
+      "name": "societal_grand_challenges",
       "label": "Societal Grand Challenge",
       "path": "//*[local-name()='societalGrandChallenge']/text()",
       "type": "java.lang.String"
@@ -139,5 +145,5 @@
   "name": "provider",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris_v2.11/eic-registry-model/src/main/resources/schema1.xsd"
 }
