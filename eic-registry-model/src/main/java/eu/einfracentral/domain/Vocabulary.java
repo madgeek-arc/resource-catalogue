@@ -64,7 +64,7 @@ public class Vocabulary implements Identifiable {
         PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
         PROVIDER_AFFILIATION("Provider affiliation"),
         PROVIDER_SOCIETAL_GRAND_CHALLENGE("Provider societal grand challenge"),
-        PROVIDER_TYPE("Provider type");
+        PROVIDER_STRUCTURE_TYPE("Provider structure type");
 
         private final String type;
 
