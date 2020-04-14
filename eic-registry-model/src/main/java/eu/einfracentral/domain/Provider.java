@@ -106,7 +106,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "type")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_TYPE)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STRUCTURE_TYPE)
     private List<String> types;
 
     /**
