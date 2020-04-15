@@ -50,10 +50,17 @@ public class FacetLabelService {
     }
 
     String getProviderLabel(String value) {
+        if (providerService.get(value) == null) {
+            return value;
+        }
         return providerService.get(value).getName();
     }
 
     String getVocabularyLabel(String type, String value) {
+        VocabularyEntry vocabularyEntry = vocabularyService.get(type).getEntries().get(value);
+        if (vocabularyEntry == null) {
+            return value;
+        }
         return vocabularyService.get(type).getEntries().get(value).getName();
     }
 
