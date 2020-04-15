@@ -102,12 +102,12 @@ public class Provider implements Identifiable {
     /**
      * Defines if the Provider is single-sited, distributed, mobile, virtual, etc.
      */
-    @XmlElementWrapper(name = "types")
-    @XmlElement(name = "type")
+    @XmlElementWrapper(name = "structureTypes")
+    @XmlElement(name = "structureType")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STRUCTURE_TYPE)
-    private List<String> types;
+    private List<String> structureTypes;
 
     /**
      * Keywords associated to the Provider to simplify search by relevant keywords.
@@ -124,7 +124,7 @@ public class Provider implements Identifiable {
      * Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 12, example = "ProviderLocation (required)", required = true)
+    @ApiModelProperty(position = 12, required = true)
     @FieldValidation
     private ProviderLocation location;
 
@@ -134,7 +134,7 @@ public class Provider implements Identifiable {
      * Provider's main contact info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, example = "ProviderMainContact (required)", required = true)
+    @ApiModelProperty(position = 13, required = true)
     @FieldValidation
     private ProviderMainContact providerMainContact;
 
@@ -143,7 +143,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "providerPublicContacts")
     @XmlElement(name = "providerPublicContact")
-    @ApiModelProperty(position = 14, dataType = "List", example = "ProviderPublicContact[] (optional)")
+    @ApiModelProperty(position = 14, dataType = "List")
     @FieldValidation(nullable = true)
     private List<ProviderPublicContact> providerPublicContacts;
 
@@ -303,7 +303,7 @@ public class Provider implements Identifiable {
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
                 ", scientificSubdomains=" + scientificSubdomains +
-                ", types=" + types +
+                ", types=" + structureTypes +
                 ", tags=" + tags +
                 ", location=" + location +
                 ", providerMainContact=" + providerMainContact +
@@ -396,12 +396,12 @@ public class Provider implements Identifiable {
         this.scientificSubdomains = scientificSubdomains;
     }
 
-    public List<String> getTypes() {
-        return types;
+    public List<String> getStructureTypes() {
+        return structureTypes;
     }
 
-    public void setTypes(List<String> types) {
-        this.types = types;
+    public void setStructureTypes(List<String> structureTypes) {
+        this.structureTypes = structureTypes;
     }
 
     public List<String> getTags() {

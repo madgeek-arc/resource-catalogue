@@ -772,6 +772,16 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element minOccurs="0" name="structureTypes">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Defines if the Provider is single-sited, distributed, mobile, virtual, etc.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="structureType" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element minOccurs="0" name="tags">
         <xs:annotation>
           <xs:documentation><![CDATA[Keywords associated to the Provider to simplify search by relevant keywords.]]></xs:documentation>
@@ -779,16 +789,6 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="tag" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="types">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Defines if the Provider is single-sited, distributed, mobile, virtual, etc.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="type" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
