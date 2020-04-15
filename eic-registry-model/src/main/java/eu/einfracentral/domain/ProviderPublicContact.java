@@ -16,7 +16,7 @@ public class ProviderPublicContact {
      */
     @XmlElement
     @ApiModelProperty(position = 1, example = "String (optional)")
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private String firstName;
 
     /**
@@ -24,7 +24,7 @@ public class ProviderPublicContact {
      */
     @XmlElement
     @ApiModelProperty(position = 2, example = "String (optional)")
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private String lastName;
 
     /**
