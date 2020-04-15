@@ -37,17 +37,17 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         this.providerManager = providerManager;
     }
 
-    @GetMapping(path = "/provider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id) {
         return new ResponseEntity<>(pendingProviderService.get(id).getProvider(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/id", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getIdFromOriginalId(@RequestParam("originalId") String originalId) {
         return new ResponseEntity<>(pendingProviderService.getId(originalId), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/id/mappings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/id/mappings", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, String>> getIdFromOriginalId() {
         return new ResponseEntity<>(pendingProviderService.getIdOriginalIdMap(), HttpStatus.OK);
     }
@@ -64,7 +64,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         pendingProviderService.transformToActive(providerId, auth);
     }
 
-    @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
@@ -80,7 +80,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
-    @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
@@ -96,7 +96,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 
-    @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth, #provider)")
     public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         pendingProviderService.transformToPending(provider.getId(), auth);
@@ -106,7 +106,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     // Get a list of Providers in which you are admin.
-    @GetMapping(path = "getMyPendingProviders", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "getMyPendingProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyPendingProviders(@ApiIgnore Authentication auth) {
         return new ResponseEntity<>(pendingProviderService.getMy(auth), HttpStatus.OK);
     }

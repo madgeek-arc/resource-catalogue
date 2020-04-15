@@ -44,14 +44,14 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
 
     @Override
     @ApiOperation(value = "Returns the Indicator with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @Override
     @ApiOperation(value = "Creates a new Indicator.")
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
         ResponseEntity<Indicator> ret = super.add(indicator, auth);
@@ -61,7 +61,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
 
     // Updates the Indicator assigned the given id with the given Indicator, keeping a version of revisions.
     @Override
-    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> update(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Indicator> ret = super.update(indicator, auth);
@@ -70,7 +70,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     // Deletes the Indicator with the given id.
-    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Indicator> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Indicator indicator = indicatorService.get(id);
@@ -83,7 +83,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     // Returns a list of unused indicator IDs.
-    @GetMapping(path = {"unused"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = {"unused"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<String>> unused(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();

@@ -35,14 +35,14 @@ public class ProviderRequestController extends ResourceController<ProviderReques
 
     @Override
     @ApiOperation(value = "Returns the request with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<ProviderRequest> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @Override
     @ApiOperation(value = "Adds the given request.")
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> add(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) {
         ResponseEntity<ProviderRequest> ret = new ResponseEntity<>(providerRequestService.add(providerRequest, auth), HttpStatus.OK);
@@ -51,7 +51,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     }
 
     @Override
-    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> update(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<ProviderRequest> ret = super.update(providerRequest, auth);
@@ -59,7 +59,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
         return ret;
     }
 
-    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderRequest providerRequest = providerRequestService.get(id);
@@ -69,7 +69,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     }
 
     @ApiOperation(value = "Returns a list with all the requests made on a specific Provider.")
-    @GetMapping(path = "allProviderRequests", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "allProviderRequests", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<ProviderRequest> getAllProviderRequests(@RequestParam String providerId, @ApiIgnore Authentication auth) {
         return providerRequestService.getAllProviderRequests(providerId, auth);

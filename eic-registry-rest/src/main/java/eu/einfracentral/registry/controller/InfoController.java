@@ -37,7 +37,7 @@ public class InfoController {
     }
 
     // Get Info about #SPs, #Services etc.
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@ApiIgnore Authentication authentication) {
         Map<Object, Object> servicesInfo = new HashMap<>();
         FacetFilter ff = new FacetFilter();

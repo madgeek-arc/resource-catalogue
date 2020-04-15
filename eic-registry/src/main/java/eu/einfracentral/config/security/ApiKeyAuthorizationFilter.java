@@ -66,7 +66,7 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
             chain.doFilter(req, res);
         } catch (RuntimeException | ParseException e) {
             log.error(e);
-            res.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
             ObjectMapper mapper = new ObjectMapper();
             UnauthorizedUserException exception = new UnauthorizedUserException(e.getMessage(), e);
             res.getWriter().append(mapper.writeValueAsString(exception));

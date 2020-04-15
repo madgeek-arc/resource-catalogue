@@ -36,7 +36,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
      **/
 
     @ApiOperation(value = "Returns a list of EU countries.")
-    @GetMapping(path = "countries/EU", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "countries/EU", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String[]> getEU() {
         return new ResponseEntity<>(vocabularyService.getRegion("EU"), HttpStatus.OK);
     }
