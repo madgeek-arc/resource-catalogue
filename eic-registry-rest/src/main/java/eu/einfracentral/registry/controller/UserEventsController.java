@@ -40,7 +40,7 @@ public class UserEventsController {
      * @param auth
      * @return
      */
-    @GetMapping(path = "favourites", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "favourites", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RichService>> favourites(Authentication auth) {
 
         Map<String, String> favouriteServices = new HashMap<>();
@@ -74,7 +74,7 @@ public class UserEventsController {
      * @param auth
      * @return
      */
-    @GetMapping(path = "ratings", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "ratings", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RichService>> ratings(Authentication auth) {
 
         Map<String, Float> serviceRatings = new HashMap<>();

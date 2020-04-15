@@ -32,14 +32,14 @@ public class FunderController extends ResourceController<Funder, Authentication>
 
     @Override
     @ApiOperation(value = "Returns the Funder with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Funder> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     // Creates a new Funder.
     @Override
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> add(@RequestBody Funder funder, @ApiIgnore Authentication auth) {
         ResponseEntity<Funder> ret = new ResponseEntity<>(funderService.add(funder, auth), HttpStatus.OK);
@@ -48,14 +48,14 @@ public class FunderController extends ResourceController<Funder, Authentication>
     }
 
     // Adds all Funders
-    @PostMapping(path = "/addAll", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "/addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addAll(@RequestBody List<Funder> funders, @ApiIgnore Authentication auth) {
         funderService.addAll(funders, auth);
     }
 
     // Deletes the Funder with the given id.
-    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Funder> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Funder funder = funderService.get(id);

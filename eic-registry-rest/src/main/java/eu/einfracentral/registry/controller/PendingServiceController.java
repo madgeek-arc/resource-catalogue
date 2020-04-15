@@ -63,7 +63,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = pendingServiceManager.get(id);
@@ -73,13 +73,13 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> getService(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
 
 
-    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
@@ -92,16 +92,16 @@ public class PendingServiceController extends ResourceController<InfraService, A
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#id)")
-    public ResponseEntity<Paging<InfraService>> getProviderInfraServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<InfraService>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("providers", id);
         return new ResponseEntity<>(pendingServiceManager.getAll(ff, null), HttpStatus.OK);
     }
 
 
-    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
@@ -109,7 +109,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = pendingServiceManager.get(service.getId());
@@ -132,7 +132,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService();
@@ -149,7 +149,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToPending(service.getId(), auth);
@@ -159,7 +159,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @PutMapping(path = "/transform/service", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "/transform/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #json)")
     public ResponseEntity<Service> pendingToInfra(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
         Pair<Service, List<Measurement>> serviceAndMeasurementsPair = getServiceAndMeasurements(json);
@@ -198,7 +198,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #json)")
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
         Pair<Service, List<Measurement>> serviceAndMeasurementsPair = getServiceAndMeasurements(json);

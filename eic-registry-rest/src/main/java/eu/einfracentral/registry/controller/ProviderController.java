@@ -46,7 +46,7 @@ public class ProviderController {
     }
 
     // Deletes the Provider with the given id.
-    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.get(id);
@@ -60,7 +60,7 @@ public class ProviderController {
     }
 
     @ApiOperation(value = "Returns the Provider with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -68,7 +68,7 @@ public class ProviderController {
 
     // Creates a new Provider.
 //    @Override
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle providerBundle = providerManager.add(new ProviderBundle(provider), auth);
@@ -76,7 +76,7 @@ public class ProviderController {
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
-    @PostMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> addBundle(@RequestBody ProviderBundle provider, @ApiIgnore Authentication auth) {
         ProviderBundle providerBundle = providerManager.add(provider, auth);
@@ -86,7 +86,7 @@ public class ProviderController {
 
     //    @Override
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
-    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.get(provider.getId(), auth);
@@ -96,7 +96,7 @@ public class ProviderController {
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
-    @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.update(provider, auth);

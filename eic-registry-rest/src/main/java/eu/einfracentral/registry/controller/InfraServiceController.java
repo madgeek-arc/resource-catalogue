@@ -39,7 +39,7 @@ public class InfraServiceController {
         this.infraService = service;
     }
 
-    @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         InfraService service;
@@ -55,7 +55,7 @@ public class InfraServiceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(path = "delete/all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = "delete/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         FacetFilter ff = new FacetFilter();
@@ -68,19 +68,19 @@ public class InfraServiceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping(path = {"updateFields/all"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PatchMapping(path = {"updateFields/all"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> updateFields(InfraService service, Authentication authentication) {
         return new ResponseEntity<>(infraService.eInfraCentralUpdate(service), HttpStatus.OK);
     }
 
 
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id), HttpStatus.OK);
     }
 
-    @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InfraService> get(@PathVariable("id") String id, @PathVariable("version") String version,
                                             Authentication auth) {
         InfraService ret = infraService.get(id, version);

@@ -35,13 +35,13 @@ public class MeasurementController extends ResourceController<Measurement, Authe
 
     @Override
     @ApiOperation(value = "Returns the Measurement with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @ApiOperation(value = "Returns all Measurements for the specific service.")
-    @GetMapping(path = "service/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Measurement>> getServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(measurementManager.getAll(id, auth));
     }
