@@ -199,7 +199,7 @@ public class Service implements Identifiable {
      * Service's Main Contact/Service Owner info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 19, example = "ServiceMainContact (required)", required = true)
+    @ApiModelProperty(position = 19, required = true)
     @FieldValidation
     private ServiceMainContact serviceMainContact;
 
@@ -208,7 +208,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "servicePublicContacts")
     @XmlElement(name = "servicePublicContact")
-    @ApiModelProperty(position = 20, dataType = "List", example = "ServicePublicContact[] (optional)")
+    @ApiModelProperty(position = 20, dataType = "List")
     @FieldValidation(nullable = true)
     private List<ServicePublicContact> servicePublicContacts;
 
