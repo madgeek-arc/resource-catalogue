@@ -23,7 +23,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -153,7 +152,7 @@ public class ServiceProviderRegistrationIT {
         provider.setWebsite(new URL("http://wp4.testprovider.com"));
         provider.setDescription("Jtest for PDT WP4 v2.00 01/10/19");
         provider.setLogo(new URL("https://wp4.testprovider.logo.com"));
-        provider.setTypes(providerTypes);
+        provider.setStructureTypes(providerTypes);
         provider.setScientificSubdomains(providerScientificSubdomains);
         provider.setLifeCycleStatus("provider_life_cycle_status-under_construction");
         provider.setLocation(providerLocation);
