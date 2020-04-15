@@ -4,6 +4,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.RegistrationMailService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -23,11 +24,15 @@ public class ProviderManagementAspect {
     private static final Logger logger = LogManager.getLogger(ProviderManagementAspect.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final RegistrationMailService registrationMailService;
 
     @Autowired
-    public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService) {
+    public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
+                                    RegistrationMailService registrationMailService) {
         this.providerService = providerService;
+        this.registrationMailService = registrationMailService;
     }
+
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
             "|| execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, org.springframework.security.core.Authentication)) )",
@@ -44,6 +49,21 @@ public class ProviderManagementAspect {
     public void updateProviderState(InfraService infraService, Authentication auth) {
         logger.trace("Updating Provider States");
         updateServiceProviderStates(infraService);
+    }
+
+
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String," +
+            " eu.einfracentral.domain.Provider.States, Boolean, org.springframework.security.core.Authentication)) ||" +
+            "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
+            "org.springframework.security.core.Authentication)) ||" +
+            "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
+            "eu.einfracentral.domain.ProviderBundle, org.springframework.security.core.Authentication)) || " +
+            "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
+            "String, org.springframework.security.core.Authentication)))",
+            returning = "providerBundle")
+    public void providerRegistrationEmails(ProviderBundle providerBundle) {
+        logger.trace("Sending Registration emails");
+        registrationMailService.sendProviderMails(providerBundle);
     }
 
 

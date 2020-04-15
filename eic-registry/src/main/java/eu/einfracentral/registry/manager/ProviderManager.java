@@ -6,7 +6,6 @@ import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
@@ -39,8 +38,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final SecurityService securityService;
     private final Random randomNumberGenerator;
-    private final RegistrationMailService registrationMailService;
-
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private EventService eventService;
@@ -48,14 +45,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           @Lazy RegistrationMailService registrationMailService,
                            @Lazy FieldValidator fieldValidator,
                            IdCreator idCreator, EventService eventService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.registrationMailService = registrationMailService;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
@@ -83,9 +78,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle ret;
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
-
-        // send messages to queue
-        registrationMailService.sendProviderMails(provider);
 
         return ret;
     }
@@ -197,8 +189,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
-//        logger.trace("User is attempting to verify the Provider with id {}, given as Status the value {}" +
-//                " and as Active the value {}", id, status, active);
+        logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         ProviderBundle provider = get(id);
         provider.setStatus(status.getKey());
         switch (status) {
@@ -212,9 +203,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             default:
                 provider.setActive(false);
         }
-
-        // send registration emails
-        registrationMailService.sendProviderMails(provider);
 
         if (active != null) {
             provider.setActive(active);
