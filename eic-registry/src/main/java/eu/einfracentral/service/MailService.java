@@ -91,6 +91,11 @@ public class MailService {
     }
 
     @Async
+    public void sendMail(List<String> to, String subject, String text) throws MessagingException {
+        sendMail(to, null, subject, text);
+    }
+
+    @Async
     public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
         List<String> addrTo = new ArrayList<>();
         List<String> addrCc = new ArrayList<>();

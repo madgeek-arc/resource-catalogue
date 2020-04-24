@@ -24,10 +24,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,13 +32,13 @@ import java.util.stream.Stream;
 public class RegistrationMailService {
 
     private static final Logger logger = LogManager.getLogger(RegistrationMailService.class);
-    private MailService mailService;
-    private Configuration cfg;
-    private ProviderManager providerManager;
-    private PendingProviderManager pendingProviderManager;
-    private InfraServiceManager infraServiceManager;
-    private PendingServiceManager pendingServiceManager;
-    private SecurityService securityService;
+    private final MailService mailService;
+    private final Configuration cfg;
+    private final ProviderManager providerManager;
+    private final PendingProviderManager pendingProviderManager;
+    private final InfraServiceManager infraServiceManager;
+    private final PendingServiceManager pendingServiceManager;
+    private final SecurityService securityService;
 
 
     @Value("${webapp.homepage}")
@@ -56,8 +53,7 @@ public class RegistrationMailService {
     @Value("${project.registration.email:registration@catris.eu}")
     private String registrationEmail;
 
-    @Value("${project.admins}")
-    private String projectAdmins;
+    private final List<String> projectAdmins;
 
 
     @Autowired
@@ -66,7 +62,8 @@ public class RegistrationMailService {
                                    @Lazy PendingProviderManager pendingProviderManager,
                                    InfraServiceManager infraServiceManager,
                                    PendingServiceManager pendingServiceManager,
-                                   SecurityService securityService) {
+                                   SecurityService securityService,
+                                   @Value("${project.admins}") String admins) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
@@ -74,6 +71,7 @@ public class RegistrationMailService {
         this.infraServiceManager = infraServiceManager;
         this.pendingServiceManager = pendingServiceManager;
         this.securityService = securityService;
+        this.projectAdmins = Arrays.asList(admins.split("\\s*\\,\\s*"));
     }
 
     @Async
@@ -83,13 +81,10 @@ public class RegistrationMailService {
         String providerMail;
         String regTeamMail;
 
-        String providerSubject = null;
-        String regTeamSubject = null;
+        String providerSubject;
+        String regTeamSubject;
 
-        String providerName;
-        if (providerBundle != null && providerBundle.getProvider() != null) {
-            providerName = providerBundle.getProvider().getName();
-        } else {
+        if (providerBundle == null || providerBundle.getProvider() == null) {
             throw new ResourceNotFoundException("Provider is null");
         }
 
@@ -102,57 +97,9 @@ public class RegistrationMailService {
             serviceTemplate = new Service();
             serviceTemplate.setName("");
         }
-        switch (Provider.States.fromString(providerBundle.getStatus())) {
-            case PENDING_1:
-                providerSubject = String.format("[%s] Your application for registering [%s] " +
-                        "as a new service provider has been received", projectName, providerName);
-                regTeamSubject = String.format("[%s] A new application for registering [%s] " +
-                        "as a new service provider has been submitted", projectName, providerName);
-                break;
-            case ST_SUBMISSION:
-                providerSubject = String.format("[%s] The information you submitted for the new service provider " +
-                        "[%s] has been approved - the submission of a first service is required " +
-                        "to complete the registration process", projectName, providerName);
-                regTeamSubject = String.format("[%s] The application of [%s] for registering " +
-                        "as a new service provider has been accepted", projectName, providerName);
-                break;
-            case REJECTED:
-                providerSubject = String.format("[%s] Your application for registering [%s] " +
-                        "as a new service provider has been rejected", projectName, providerName);
-                regTeamSubject = String.format("[%s] The application of [%s] for registering " +
-                        "as a new service provider has been rejected", projectName, providerName);
-                break;
-            case PENDING_2:
-                assert serviceTemplate != null;
-                providerSubject = String.format("[%s] Your service [%s] has been received " +
-                        "and its approval is pending", projectName, serviceTemplate.getName());
-                regTeamSubject = String.format("[%s] Approve or reject the information about the new service: " +
-                        "[%s] – [%s]", projectName, providerBundle.getProvider().getName(), serviceTemplate.getName());
-                break;
-            case APPROVED:
-                if (providerBundle.isActive()) {
-                    assert serviceTemplate != null;
-                    providerSubject = String.format("[%s] Your service [%s] – [%s]  has been accepted",
-                            projectName, providerName, serviceTemplate.getName());
-                    regTeamSubject = String.format("[%s] The service [%s] has been accepted",
-                            projectName, serviceTemplate.getId());
-                    break;
-                } else {
-                    assert serviceTemplate != null;
-                    providerSubject = String.format("[%s] Your service provider [%s] has been set to inactive",
-                            projectName, providerName);
-                    regTeamSubject = String.format("[%s] The service provider [%s] has been set to inactive",
-                            projectName, providerName);
-                    break;
-                }
-            case REJECTED_ST:
-                assert serviceTemplate != null;
-                providerSubject = String.format("[%s] Your service [%s] – [%s]  has been rejected",
-                        projectName, providerName, serviceTemplate.getName());
-                regTeamSubject = String.format("[%s] The service [%s] has been rejected",
-                        projectName, serviceTemplate.getId());
-                break;
-        }
+
+        providerSubject = getProviderSubject(providerBundle, serviceTemplate);
+        regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate);
 
         root.put("providerBundle", providerBundle);
         root.put("endpoint", endpoint);
@@ -168,7 +115,7 @@ public class RegistrationMailService {
             if (!debug) {
                 mailService.sendMail(registrationEmail, regTeamSubject, regTeamMail);
             }
-            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", registrationEmail,
+            logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", registrationEmail,
                     regTeamSubject, regTeamMail);
 
             temp = cfg.getTemplate("providerMailTemplate.ftl");
@@ -185,7 +132,7 @@ public class RegistrationMailService {
                 if (!debug) {
                     mailService.sendMail(user.getEmail(), providerSubject, providerMail);
                 }
-                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), providerSubject, providerMail);
+                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), providerSubject, providerMail);
             }
 
             out.close();
@@ -205,27 +152,22 @@ public class RegistrationMailService {
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
-        String to;
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+
         for (ProviderBundle providerBundle : allProviders) {
             if (providerBundle.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
-                if (providerBundle.getProvider().getUsers() != null && !providerBundle.getProvider().getUsers().isEmpty()) {
-                    to = providerBundle.getProvider().getUsers().get(0).getEmail();
-                } else {
+                if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
                     continue;
                 }
                 String subject = String.format("[%s] Friendly reminder for your Provider [%s]", projectName, providerBundle.getProvider().getName());
-                String text = String.format("We kindly remind you to conclude with the submission of the Service Template for your Provider [%s].", providerBundle.getProvider().getName())
-                        + "\nYou can view your Provider here: " + endpoint + "/myServiceProviders"
-                        + "\n\nBest Regards, \nThe CatRIS Team";
-                try {
-                    if (!debug) {
-                        mailService.sendMail(to, subject, text);
-                        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
-                    }
-                } catch (MessagingException e) {
-                    logger.error("Could not send mail", e);
+                root.put("providerBundle", providerBundle);
+                for (User user : providerBundle.getProvider().getUsers()) {
+                    root.put("user", user);
+                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail());
                 }
-//                logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
             }
         }
     }
@@ -235,7 +177,7 @@ public class RegistrationMailService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
-        String[] admins = projectAdmins.split(",");
+
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
         List<String> providersWaitingForSTApproval = new ArrayList<>();
         for (ProviderBundle providerBundle : allProviders) {
@@ -246,30 +188,18 @@ public class RegistrationMailService {
                 providersWaitingForSTApproval.add(providerBundle.getProvider().getName());
             }
         }
-        if (!providersWaitingForInitialApproval.isEmpty() && !providersWaitingForSTApproval.isEmpty()) {
-            for (int i = 0; i < admins.length + 1; i++) {
-                String to;
-                if (i == admins.length) {
-                    to = "registration@catris.eu";
-                } else {
-                    to = admins[i];
-                }
-                String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
-                String text = "There are Providers and Service Templates waiting to be approved."
-                        + "\n\nProviders waiting for Initial Approval:\n" + providersWaitingForInitialApproval
-                        + "\n\nProviders waiting for Service Template Approval:\n" + providersWaitingForSTApproval
-                        + "\n\nYou can review them at: " + endpoint + "/serviceProvidersList"
-                        + "\n\nBest Regards, \nThe CatRIS Team";
-                try {
-                    if (!debug) {
-                        mailService.sendMail(to, subject, text);
-                        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
-                    }
-                } catch (MessagingException e) {
-                    logger.error("Could not send mail", e);
-                }
-//            logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
-            }
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("iaProviders", providersWaitingForInitialApproval);
+        root.put("stProviders", providersWaitingForSTApproval);
+
+        String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
+        if (!providersWaitingForInitialApproval.isEmpty() || !providersWaitingForSTApproval.isEmpty()) {
+            List<String> recipients = new ArrayList<>(projectAdmins);
+            recipients.add(registrationEmail);
+            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, recipients);
         }
     }
 
@@ -280,8 +210,6 @@ public class RegistrationMailService {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Timestamp todayTimestamp = Timestamp.valueOf(today.atStartOfDay());
         Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
-
-        String[] admins = projectAdmins.split(",");
 
         List<String> newProviders = new ArrayList<>();
         List<String> newServices = new ArrayList<>();
@@ -332,34 +260,155 @@ public class RegistrationMailService {
                 }
             }
         }
-        for (int i = 0; i < admins.length + 1; i++) {
-            String to;
-            if (i == admins.length) {
-                to = "registration@catris.eu";
-            } else {
-                to = admins[i];
-            }
-            String subject = String.format("[%s] Daily Notification - Changes to CatRIS Resources", projectName);
-            String text;
-            if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()) {
-                text = "There are no changes to CatRIS Resources today.";
-            } else {
-                text = "There are new changes to CatRIS Resources!"
-                        + "\n\nNew Providers: \n" + newProviders
-                        + "\n\nUpdated Providers: \n" + updatedProviders
-                        + "\n\nNew Services: \n" + newServices
-                        + "\n\nUpdated Services: \n" + updatedServices
-                        + "\n\nBest Regards, \nThe CatRIS Team";
-            }
-            try {
-                if (!debug) {
-                    mailService.sendMail(to, subject, text);
-                    logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
-                }
-            } catch (MessagingException e) {
-                logger.error("Could not send mail", e);
-            }
-//        logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", to, subject, text);
+
+        boolean changes = true;
+        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()) {
+            changes = false;
         }
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("changes", changes);
+        root.put("project", projectName);
+        root.put("newProviders", newProviders);
+        root.put("updatedProviders", updatedProviders);
+        root.put("newServices", newServices);
+        root.put("updatedServices", updatedServices);
+
+        String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
+        List<String> recipients = new ArrayList<>(projectAdmins);
+        recipients.add(registrationEmail);
+        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, recipients);
+    }
+
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email) {
+        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email));
+    }
+
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails) {
+        if (emails == null || emails.isEmpty()) {
+            logger.error("emails empty or null");
+            return;
+        }
+        try (StringWriter out = new StringWriter()) {
+            Template temp = cfg.getTemplate(templateName);
+            temp.process(root, out);
+            String mailBody = out.getBuffer().toString();
+
+            if (!debug) {
+                mailService.sendMail(emails, subject, mailBody);
+            }
+            logger.info("\nRecipients: {}\nTitle: {}\nMail body: \n{}", String.join(", ", emails), subject, mailBody);
+
+        } catch (IOException e) {
+            logger.error("Error finding mail template '{}'", templateName, e);
+        } catch (TemplateException e) {
+            logger.error("ERROR", e);
+        } catch (MessagingException e) {
+            logger.error("Could not send mail", e);
+        }
+    }
+
+    private String getProviderSubject(ProviderBundle providerBundle, Service serviceTemplate) {
+        if (providerBundle == null || providerBundle.getProvider() == null) {
+            logger.error("Provider is null");
+            return String.format("[%s]", this.projectName);
+        }
+
+        String subject;
+        String providerName = providerBundle.getProvider().getName();
+
+        switch (Provider.States.fromString(providerBundle.getStatus())) {
+            case PENDING_1:
+                subject = String.format("[%s] Your application for registering [%s] " +
+                        "as a new service provider has been received", this.projectName, providerName);
+                break;
+            case ST_SUBMISSION:
+                subject = String.format("[%s] The information you submitted for the new service provider " +
+                        "[%s] has been approved - the submission of a first service is required " +
+                        "to complete the registration process", this.projectName, providerName);
+                break;
+            case REJECTED:
+                subject = String.format("[%s] Your application for registering [%s] " +
+                        "as a new service provider has been rejected", this.projectName, providerName);
+                break;
+            case PENDING_2:
+                assert serviceTemplate != null;
+                subject = String.format("[%s] Your service [%s] has been received " +
+                        "and its approval is pending", projectName, serviceTemplate.getName());
+                break;
+            case APPROVED:
+                if (providerBundle.isActive()) {
+                    assert serviceTemplate != null;
+                    subject = String.format("[%s] Your service [%s] – [%s]  has been accepted",
+                            projectName, providerName, serviceTemplate.getName());
+                    break;
+                } else {
+                    assert serviceTemplate != null;
+                    subject = String.format("[%s] Your service provider [%s] has been set to inactive",
+                            projectName, providerName);
+                    break;
+                }
+            case REJECTED_ST:
+                assert serviceTemplate != null;
+                subject = String.format("[%s] Your service [%s] – [%s]  has been rejected",
+                        projectName, providerName, serviceTemplate.getName());
+                break;
+            default:
+                subject = String.format("[%s] Provider Registration", this.projectName);
+        }
+
+        return subject;
+    }
+
+
+    private String getRegTeamSubject(ProviderBundle providerBundle, Service serviceTemplate) {
+        if (providerBundle == null || providerBundle.getProvider() == null) {
+            logger.error("Provider is null");
+            return String.format("[%s]", this.projectName);
+        }
+
+        String subject;
+        String providerName = providerBundle.getProvider().getName();
+
+        switch (Provider.States.fromString(providerBundle.getStatus())) {
+            case PENDING_1:
+                subject = String.format("[%s] A new application for registering [%s] " +
+                        "as a new service provider has been submitted", this.projectName, providerName);
+                break;
+            case ST_SUBMISSION:
+                subject = String.format("[%s] The application of [%s] for registering " +
+                        "as a new service provider has been accepted", this.projectName, providerName);
+                break;
+            case REJECTED:
+                subject = String.format("[%s] The application of [%s] for registering " +
+                        "as a new service provider has been rejected", this.projectName, providerName);
+                break;
+            case PENDING_2:
+                assert serviceTemplate != null;
+                subject = String.format("[%s] Approve or reject the information about the new service: " +
+                        "[%s] – [%s]", projectName, providerBundle.getProvider().getName(), serviceTemplate.getName());
+                break;
+            case APPROVED:
+                if (providerBundle.isActive()) {
+                    assert serviceTemplate != null;
+                    subject = String.format("[%s] The service [%s] has been accepted",
+                            projectName, serviceTemplate.getId());
+                    break;
+                } else {
+                    assert serviceTemplate != null;
+                    subject = String.format("[%s] The service provider [%s] has been set to inactive",
+                            projectName, providerName);
+                    break;
+                }
+            case REJECTED_ST:
+                assert serviceTemplate != null;
+                subject = String.format("[%s] The service [%s] has been rejected",
+                        projectName, serviceTemplate.getId());
+                break;
+            default:
+                subject = String.format("[%s] Provider Registration", this.projectName);
+        }
+
+        return subject;
     }
 }
