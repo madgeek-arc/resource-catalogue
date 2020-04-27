@@ -623,7 +623,7 @@
       </xs:element>
       <xs:element minOccurs="0" name="affiliations">
         <xs:annotation>
-          <xs:documentation><![CDATA[Select the affiliations, networks of the Provider.]]></xs:documentation>
+          <xs:documentation><![CDATA[Providers that are members or, affiliated or associated with other organisations should list those organisations here]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -685,7 +685,12 @@ If (1) - name of the research infrastructure, If (2) - name of the hosting organ
           <xs:documentation><![CDATA[Unique identifier of the Provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="legalStatus" type="xs:string">
+      <xs:element name="legalEntity" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A Y/N question to define whether the Provider is a Legal Entity or not.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="legalStatus" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Legal status of the Provider. The legal status is usually noted in the registration act/statutes. For independent legal entities (1) - legal status of the Provider.
 For embedded providers (2) - legal status of the hosting legal entity. It is also possible to select Not a legal entity.]]></xs:documentation>
@@ -728,6 +733,16 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="nationalRoadmap" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="networks">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Select the networks the Provider is participating in.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="network" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -774,7 +789,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="structureTypes">
         <xs:annotation>
-          <xs:documentation><![CDATA[Defines if the Provider is single-sited, distributed, mobile, virtual, etc.]]></xs:documentation>
+          <xs:documentation><![CDATA[Defines the Provider structure type (single-sited, distributed, mobile, virtual, etc.)]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>

@@ -43,22 +43,30 @@ public class Provider implements Identifiable {
     private String abbreviation;
 
     /**
-     * Legal status of the Provider. The legal status is usually noted in the registration act/statutes. For independent legal entities (1) - legal status of the Provider.
-     * For embedded providers (2) - legal status of the hosting legal entity. It is also possible to select Not a legal entity.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "String (required)", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
-    private String legalStatus;
-
-    /**
      * 	Webpage with information about the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 4, example = "URL (required)", required = true)
     @FieldValidation
     private URL website;
+
+    /**
+     * 	A Y/N question to define whether the Provider is a Legal Entity or not.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 5, example = "Yes or No (required)", required = true)
+    @FieldValidation
+    private String legalEntity;
+
+    /**
+     * Legal status of the Provider. The legal status is usually noted in the registration act/statutes. For independent legal entities (1) - legal status of the Provider.
+     * For embedded providers (2) - legal status of the hosting legal entity. It is also possible to select Not a legal entity.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 6, example = "String (optional)")
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
+    private String legalStatus;
 
 
     // Provider Marketing Information
@@ -66,7 +74,7 @@ public class Provider implements Identifiable {
      * The description of the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "String (required)", required = true)
+    @ApiModelProperty(position = 7, example = "String (required)", required = true)
     @FieldValidation
     private String description;
 
@@ -74,7 +82,7 @@ public class Provider implements Identifiable {
      * Link to the logo/visual identity of the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 7, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 8, example = "URL (required)", required = true)
     @FieldValidation
     private URL logo;
 
@@ -83,7 +91,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
 //    @XmlElement(name = "multimedia")
-    @ApiModelProperty(position = 8, dataType = "List", example = "URL[] (optional)")
+    @ApiModelProperty(position = 9, dataType = "List", example = "URL[] (optional)")
     @FieldValidation(nullable = true)
     private List<URL> multimedia;
 
@@ -94,20 +102,10 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificSubdomains")
     @XmlElement(name = "scientificSubdomain")
-    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SCIENTIFIC_SUBDOMAIN)
     private List<String> scientificSubdomains;
-
-    /**
-     * Defines if the Provider is single-sited, distributed, mobile, virtual, etc.
-     */
-    @XmlElementWrapper(name = "structureTypes")
-    @XmlElement(name = "structureType")
-    @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STRUCTURE_TYPE)
-    private List<String> structureTypes;
 
     /**
      * Keywords associated to the Provider to simplify search by relevant keywords.
@@ -191,21 +189,40 @@ public class Provider implements Identifiable {
     private List<String> participatingCountries;
 
     /**
-     * 	Select the affiliations, networks of the Provider.
+     * 	Providers that are members or, affiliated or associated with other organisations should list those organisations here
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
     @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AFFILIATION)
+    @FieldValidation(nullable = true)
     private List<String> affiliations;
+
+    /**
+     * 	Select the networks the Provider is participating in.
+     */
+    @XmlElementWrapper(name = "networks")
+    @XmlElement(name = "network")
+    @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
+    private List<String> networks;
+
+    /**
+     * 	Defines the Provider structure type (single-sited, distributed, mobile, virtual, etc.)
+     */
+    @XmlElementWrapper(name = "structureTypes")
+    @XmlElement(name = "structureType")
+    @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STRUCTURE_TYPE)
+    private List<String> structureTypes;
 
     /**
      * ESFRI domain classification.
      */
     @XmlElementWrapper(name = "esfriDomains")
     @XmlElement(name = "esfriDomain")
-    @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_DOMAIN)
     private List<String> esfriDomains;
@@ -215,7 +232,7 @@ public class Provider implements Identifiable {
      * a) is a node of an ESFRI project, b) is an ESFRI project, c) is an ESFRI landmark, d) is not an ESFRI project or landmark.
      */
     @XmlElement
-    @ApiModelProperty(position = 21, example = "String (optional)")
+    @ApiModelProperty(position = 23, example = "String (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_TYPE)
     private String esfriType;
@@ -225,7 +242,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "areasOfActivity")
     @XmlElement(name = "areaOfActivity")
-    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 24, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AREA_OF_ACTIVITY)
     private List<String> areasOfActivity;
@@ -235,7 +252,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "societalGrandChallenges")
     @XmlElement(name = "societalGrandChallenge")
-    @ApiModelProperty(position = 23, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 25, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SOCIETAL_GRAND_CHALLENGE)
     private List<String> societalGrandChallenges;
@@ -245,7 +262,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "nationalRoadmaps")
     @XmlElement(name = "nationalRoadmap")
-    @ApiModelProperty(position = 24, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 26, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> nationalRoadmaps;
 
@@ -253,7 +270,7 @@ public class Provider implements Identifiable {
     // Extra needed fields
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 24, required = true)
+    @ApiModelProperty(position = 27, required = true)
     @FieldValidation
     private List<User> users;
 
@@ -297,13 +314,13 @@ public class Provider implements Identifiable {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", abbreviation='" + abbreviation + '\'' +
-                ", legalStatus='" + legalStatus + '\'' +
                 ", website=" + website +
+                ", legalEntity='" + legalEntity + '\'' +
+                ", legalStatus='" + legalStatus + '\'' +
                 ", description='" + description + '\'' +
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
                 ", scientificSubdomains=" + scientificSubdomains +
-                ", types=" + structureTypes +
                 ", tags=" + tags +
                 ", location=" + location +
                 ", providerMainContact=" + providerMainContact +
@@ -313,6 +330,8 @@ public class Provider implements Identifiable {
                 ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
                 ", participatingCountries=" + participatingCountries +
                 ", affiliations=" + affiliations +
+                ", networks=" + networks +
+                ", structureTypes=" + structureTypes +
                 ", esfriDomains=" + esfriDomains +
                 ", esfriType='" + esfriType + '\'' +
                 ", areasOfActivity=" + areasOfActivity +
@@ -348,20 +367,28 @@ public class Provider implements Identifiable {
         this.abbreviation = abbreviation;
     }
 
-    public String getLegalStatus() {
-        return legalStatus;
-    }
-
-    public void setLegalStatus(String legalStatus) {
-        this.legalStatus = legalStatus;
-    }
-
     public URL getWebsite() {
         return website;
     }
 
     public void setWebsite(URL website) {
         this.website = website;
+    }
+
+    public String getLegalEntity() {
+        return legalEntity;
+    }
+
+    public void setLegalEntity(String legalEntity) {
+        this.legalEntity = legalEntity;
+    }
+
+    public String getLegalStatus() {
+        return legalStatus;
+    }
+
+    public void setLegalStatus(String legalStatus) {
+        this.legalStatus = legalStatus;
     }
 
     public String getDescription() {
@@ -394,14 +421,6 @@ public class Provider implements Identifiable {
 
     public void setScientificSubdomains(List<String> scientificSubdomains) {
         this.scientificSubdomains = scientificSubdomains;
-    }
-
-    public List<String> getStructureTypes() {
-        return structureTypes;
-    }
-
-    public void setStructureTypes(List<String> structureTypes) {
-        this.structureTypes = structureTypes;
     }
 
     public List<String> getTags() {
@@ -474,6 +493,22 @@ public class Provider implements Identifiable {
 
     public void setAffiliations(List<String> affiliations) {
         this.affiliations = affiliations;
+    }
+
+    public List<String> getNetworks() {
+        return networks;
+    }
+
+    public void setNetworks(List<String> networks) {
+        this.networks = networks;
+    }
+
+    public List<String> getStructureTypes() {
+        return structureTypes;
+    }
+
+    public void setStructureTypes(List<String> structureTypes) {
+        this.structureTypes = structureTypes;
     }
 
     public List<String> getEsfriDomains() {

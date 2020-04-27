@@ -62,7 +62,7 @@ public class Vocabulary implements Identifiable {
         PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
         PROVIDER_LEGAL_STATUS("Provider legal status"),
         PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
-        PROVIDER_AFFILIATION("Provider affiliation"),
+        PROVIDER_NETWORK("Provider network"),
         PROVIDER_SOCIETAL_GRAND_CHALLENGE("Provider societal grand challenge"),
         PROVIDER_STRUCTURE_TYPE("Provider structure type");
 
