@@ -51,6 +51,13 @@
     },
     {
       "multivalued": true,
+      "name": "networks",
+      "label": "Network",
+      "path": "//*[local-name()='network']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
       "name": "tags",
       "label": "Tag",
       "path": "//*[local-name()='tag']/text()",
