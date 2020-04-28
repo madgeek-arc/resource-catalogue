@@ -104,7 +104,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "scientificSubdomain")
     @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SCIENTIFIC_SUBDOMAIN)
+    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
     private List<String> scientificSubdomains;
 
     /**
