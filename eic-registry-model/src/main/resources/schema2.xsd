@@ -53,8 +53,6 @@
       <xs:enumeration value="ACCESS_TYPE"/>
       <xs:enumeration value="ACCESS_MODE"/>
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
-      <xs:enumeration value="PROVIDER_SCIENTIFIC_DOMAIN"/>
-      <xs:enumeration value="PROVIDER_SCIENTIFIC_SUBDOMAIN"/>
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
       <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
       <xs:enumeration value="PROVIDER_LEGAL_STATUS"/>
