@@ -1,8 +1,12 @@
 package eu.einfracentral.manager;
 
-import eu.einfracentral.domain.*;
-import eu.einfracentral.dto.MapValue;
-import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.domain.Event;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.Service;
+import eu.einfracentral.dto.MapValues;
+import eu.einfracentral.dto.PlaceCount;
+import eu.einfracentral.dto.Value;
 import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -34,14 +38,18 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.pipeline.SimpleValue;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import org.postgresql.jdbc.PgArray;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,22 +60,24 @@ import static eu.einfracentral.config.CacheConfig.CACHE_VISITS;
 public class StatisticsManager implements StatisticsService {
 
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
-    private ElasticConfiguration elastic;
-    private AnalyticsService analyticsService;
-    private ProviderService<ProviderBundle, Authentication> providerService;
-    private SearchService searchService;
-    private ParserService parserService;
-    private InfraServiceManager infraServiceManager;
-    private VocabularyService vocabularyService;
+    private final ElasticConfiguration elastic;
+    private final AnalyticsService analyticsService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final SearchService searchService;
+    private final ParserService parserService;
+    private final InfraServiceManager infraServiceManager;
+    private final VocabularyService vocabularyService;
+    private final DataSource dataSource;
 
-    @Value("${platform.root:}")
+    @org.springframework.beans.factory.annotation.Value("${platform.root:}")
     String url;
 
     @Autowired
     StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
                       ProviderService<ProviderBundle, Authentication> providerService,
                       SearchService searchService, ParserService parserService,
-                      InfraServiceManager infraServiceManager, VocabularyService vocabularyService) {
+                      InfraServiceManager infraServiceManager, VocabularyService vocabularyService,
+                      DataSource dataSource) {
         this.elastic = elastic;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
@@ -75,6 +85,7 @@ public class StatisticsManager implements StatisticsService {
         this.parserService = parserService;
         this.infraServiceManager = infraServiceManager;
         this.vocabularyService = vocabularyService;
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -367,162 +378,250 @@ public class StatisticsManager implements StatisticsService {
         return duration;
     }
 
-    public List<MapValue> mapServicesToGeographicalAvailability(String id){
-        Map<String, List<String>> outterMap = new HashMap<>();
-        List<InfraService> allServices;
-        if (id != null){
-            try {
-                providerService.get(id).getProvider();
-            } catch (ResourceException e){
-                throw new eu.einfracentral.exception.ResourceNotFoundException(
-                        String.format("There is no Provider with the given id [%s]", id));
-            }
-            allServices = providerService.getInfraServices(id);
-        } else {
-            FacetFilter ff = new FacetFilter();
-            ff.setQuantity(10000);
-            allServices = infraServiceManager.getAll(ff, null).getResults();
+    @Override
+    public List<PlaceCount> servicesPerPlace(String providerId) {
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+
+        in.addValue("providerId", providerId);
+        String query = "SELECT unnest(places) AS place, count(unnest(places)) AS count FROM infra_service_view WHERE latest=true AND active = true ";
+
+        if (providerId != null) {
+            query += " AND :providerId=ANY(providers) ";
         }
-        for (InfraService infraService : allServices){
-            String serviceId = infraService.getService().getId();
-            List<String> servicePlaces = infraService.getService().getPlaces();
-            for (String place : servicePlaces){
-                createOutterMap(outterMap, place, serviceId);
+        query += " GROUP BY unnest(places);";
+
+        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
+        Map<String, Integer> mapCounts = new HashMap<>();
+        List<PlaceCount> placeCounts = new ArrayList<>();
+
+        for (Map<String, Object> record : records) {
+            if (record.get("place").toString().equalsIgnoreCase("EU")) {
+                for (String place : vocabularyService.getRegion("EU")) {
+                    int count = Integer.parseInt(record.get("count").toString());
+                    if (mapCounts.containsKey(place)) {
+                        count += mapCounts.get(place);
+                    }
+                    mapCounts.put(place, count);
+                }
+            } else if (record.get("place").toString().equalsIgnoreCase("WW")) {
+                for (String place : vocabularyService.getRegion("WW")) {
+                    int count = Integer.parseInt(record.get("count").toString());
+                    if (mapCounts.containsKey(place)) {
+                        count += mapCounts.get(place);
+                    }
+                    mapCounts.put(place, count);
+                }
+            } else {
+                mapCounts.put(record.get("place").toString(), Integer.parseInt(record.get("count").toString()));
             }
         }
-        return createMapValue(outterMap);
+
+        for (Map.Entry<String, Integer> entry : mapCounts.entrySet()) {
+            placeCounts.add(new PlaceCount(entry.getKey(), entry.getValue()));
+        }
+
+        return placeCounts;
     }
 
-    public List<MapValue> mapServicesToCoordinatingCountry(){
-        Map<String, List<String>> outterMap = new HashMap<>();
+    @Override
+    public List<Value> servicesByPlace(String providerId, String place) {
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+
+        in.addValue("providerId", providerId);
+        in.addValue("place", place);
+        String query = "SELECT infra_service_id, name FROM infra_service_view WHERE latest=true AND active=true ";
+
+        if (providerId != null) {
+            query += " AND :providerId=ANY(providers) ";
+        }
+
+        if (place != null) {
+            Set<String> places = new HashSet<>(Arrays.asList(vocabularyService.getRegion("EU")));
+
+            if (!place.equalsIgnoreCase("WW")) {
+                query += " AND ( :place=ANY(places) ";
+
+                // if Place belongs to EU then search for EU as well
+                if (places.contains(place) || place.equalsIgnoreCase("EU")) {
+                    query += " OR 'EU'=ANY(places) ";
+                }
+                // always search for WW (because every Place belongs to WW)
+                query += " OR 'WW'=ANY(places) )";
+            }
+        }
+
+        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
+        List<Value> placeServices;
+
+        placeServices = records
+                .stream()
+                .map(record -> new Value(record.get("infra_service_id").toString(), record.get("name").toString()))
+                .collect(Collectors.toList());
+        return placeServices;
+    }
+
+    @Override
+    public List<MapValues> mapServicesToGeographicalAvailability(String providerId) {
+        Map<String, Set<Value>> placeServices = new HashMap<>();
+        String[] world = vocabularyService.getRegion("WW");
+        String[] eu = vocabularyService.getRegion("EU");
+        for (String place : world) {
+            placeServices.put(place, new HashSet<>());
+        }
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+        in.addValue("providerId", providerId);
+
+        String query = "SELECT infra_service_id, name, places FROM infra_service_view WHERE latest=true AND active=true ";
+        if (providerId != null) {
+            query += " AND :providerId=ANY(providers) ";
+        }
+
+        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
+
+        try {
+            for (Map<String, Object> entry : records) {
+                Value value = new Value();
+                value.setId(entry.get("infra_service_id").toString());
+                value.setName(entry.get("name").toString());
+                PgArray pgArray = ((PgArray) entry.get("places"));
+
+                for (String place : ((String[]) pgArray.getArray())) {
+                    String[] expandedPlaces;
+                    if (place.equalsIgnoreCase("WW")) {
+                        expandedPlaces = world;
+                    } else if (place.equalsIgnoreCase("EU")) {
+                        expandedPlaces = eu;
+                    } else {
+                        expandedPlaces = new String[]{place};
+                    }
+                    for (String p : expandedPlaces) {
+                        Set<Value> values = placeServices.get(p);
+                        values.add(value);
+                        placeServices.put(p, values);
+                    }
+                }
+            }
+        } catch (SQLException throwables) {
+            logger.error(throwables);
+        }
+
+        return toListMapValues(placeServices);
+    }
+
+    @Override
+    public List<MapValues> mapServicesToCoordinatingCountry() {
+        Map<String, Set<Value>> mapValues = new HashMap<>();
+        for (String place : vocabularyService.getRegion("WW")) {
+            mapValues.put(place, new HashSet<>());
+        }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+
+        Map<String, Set<String>> providerCountries = providerCountriesMap();
+
         List<InfraService> allServices = infraServiceManager.getAll(ff, null).getResults();
         for (InfraService infraService : allServices) {
-            String serviceId = infraService.getService().getId();
+            Value value = new Value(infraService.getId(), infraService.getService().getName());
+
+            Set<String> countries = new HashSet<>();
             for (String providerId : infraService.getService().getProviders()) {
-                String coordinatingCountry = providerService.get(providerId).getProvider().getCoordinatingCountry();
-                createOutterMap(outterMap, coordinatingCountry, serviceId);
+                countries.addAll(providerCountries.get(providerId));
+            }
+
+            for (String country : countries) {
+                Set<Value> values = mapValues.get(country);
+                values.add(value);
+                mapValues.put(country, values);
             }
         }
-        return createMapValue(outterMap);
+
+        return toListMapValues(mapValues);
     }
 
-    public List<MapValue> mapServicesToVocabulary(String id ,Vocabulary vocabulary){
-        Map<String, List<String>> outterMap = new HashMap<>();
-        List<InfraService> allServices;
-        if (id != null){
-            try {
-                providerService.get(id).getProvider();
-            } catch (ResourceException e){
-                throw new eu.einfracentral.exception.ResourceNotFoundException(
-                        String.format("There is no Provider with the given id [%s]", id));
+    @Override
+    public List<MapValues> mapServicesToVocabulary(String providerId, Vocabulary vocabulary) {
+        Map<String, Set<Value>> vocabularyServices = new HashMap<>();
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+        in.addValue("providerId", providerId);
+
+        String query = "SELECT infra_service_id, name, " + vocabulary.getKey()
+                + " FROM infra_service_view WHERE latest=true AND active=true ";
+        if (providerId != null) {
+            query += " AND :providerId=ANY(providers)";
+        }
+
+        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
+
+        try {
+            for (Map<String, Object> entry : records) {
+                Value value = new Value();
+                value.setId(entry.get("infra_service_id").toString());
+                value.setName(entry.get("name").toString());
+
+                // TODO: refactor this code and Vocabulary enum
+                String[] vocabularyValues;
+                if (vocabulary != Vocabulary.ORDER_TYPE) { // because order type is not multivalued
+                    PgArray pgArray = ((PgArray) entry.get(vocabulary.getKey()));
+                    vocabularyValues = ((String[]) pgArray.getArray());
+                } else {
+                    vocabularyValues = new String[]{((String) entry.get(vocabulary.getKey()))};
+                }
+
+                for (String voc : vocabularyValues) {
+                    Set<Value> values;
+                    if (vocabularyServices.containsKey(voc)) {
+                        values = vocabularyServices.get(voc);
+                    } else {
+                        values = new HashSet<>();
+                    }
+                    values.add(value);
+                    vocabularyServices.put(voc, values);
+                }
             }
-            allServices = providerService.getInfraServices(id);
-        } else {
-            FacetFilter ff = new FacetFilter();
-            ff.setQuantity(10000);
-            allServices = infraServiceManager.getAll(ff, null).getResults();
+        } catch (SQLException throwables) {
+            logger.error(throwables);
         }
-        for (InfraService infraService : allServices){
-            String serviceId = infraService.getService().getId();
-             switch (vocabulary){
-                 case SUBCATEGORY:
-                     List<String> subcategories = infraService.getService().getSubcategories();
-                     for (String subcategory : subcategories){
-                         createOutterMap(outterMap, subcategory, serviceId);
-                     }
-                     break;
-                 case SUBDOMAIN:
-                     List<String> subdomains = infraService.getService().getScientificSubdomains();
-                     for (String subdomain : subdomains){
-                         createOutterMap(outterMap, subdomain, serviceId);
-                     }
-                     break;
-                 case TARGET_USERS:
-                     List<String> targetUsers = infraService.getService().getTargetUsers();
-                     for (String targetUser : targetUsers){
-                         createOutterMap(outterMap, targetUser, serviceId);
-                     }
-                     break;
-                 case ACCESS_MODES:
-                     List<String> accessModes = infraService.getService().getAccessModes();
-                     for (String accessMode : accessModes){
-                         createOutterMap(outterMap, accessMode, serviceId);
-                     }
-                     break;
-                 case ACCESS_TYPES:
-                     List<String> accessTypes = infraService.getService().getAccessTypes();
-                     for (String accessType : accessTypes){
-                         createOutterMap(outterMap, accessType, serviceId);
-                     }
-                     break;
-                 case ORDER_TYPE:
-                     createOutterMap(outterMap, infraService.getService().getOrderType(), serviceId);
-                     break;
-                 default:
-                     break;
-             }
-        }
-        return createMapValue(outterMap);
+
+        return toListMapValues(vocabularyServices);
     }
 
-    public Map<String, List<String>> createOutterMap(Map<String, List<String>> outterMap ,String key, String serviceId){
-        if (key.equals("WW")){
-            String[] placesWW = vocabularyService.getRegion(key);
-            for (String placeWW : placesWW){
-                if (!outterMap.containsKey(placeWW)){
-                    outterMap.put(placeWW, Collections.singletonList(serviceId));
-                } else {
-                    List<String> oldList = outterMap.get(placeWW);
-                    List<String> newList = new ArrayList<>();
-                    newList.addAll(oldList);
-                    newList.add(serviceId);
-                    outterMap.put(placeWW, newList);
-                }
-            }
-        } else if (key.equals("EU")){
-            String[] placesEU = vocabularyService.getRegion(key);
-            for (String placeEU : placesEU){
-                if (!outterMap.containsKey(placeEU)){
-                    outterMap.put(placeEU, Collections.singletonList(serviceId));
-                } else {
-                    List<String> oldList = outterMap.get(placeEU);
-                    List<String> newList = new ArrayList<>();
-                    newList.addAll(oldList);
-                    newList.add(serviceId);
-                    outterMap.put(placeEU, newList);
-                }
-            }
-        } else {
-            if (!outterMap.containsKey(key)){
-                outterMap.put(key, Collections.singletonList(serviceId));
+    private Map<String, Set<String>> providerCountriesMap() {
+        Map<String, Set<String>> providerCountries = new HashMap<>();
+        String[] world = vocabularyService.getRegion("WW");
+        String[] eu = vocabularyService.getRegion("EU");
+
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+
+        for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
+            Set<String> countries = new HashSet<>();
+            String country = providerBundle.getProvider().getCoordinatingCountry();
+            if (country.equalsIgnoreCase("WW")) {
+                countries.addAll(Arrays.asList(world));
+            } else if (country.equalsIgnoreCase("EU")) {
+                countries.addAll(Arrays.asList(eu));
             } else {
-                List<String> oldList = outterMap.get(key);
-                List<String> newList = new ArrayList<>();
-                newList.addAll(oldList);
-                newList.add(serviceId);
-                outterMap.put(key, newList);
+                countries.add(country);
             }
+            providerCountries.put(providerBundle.getId(), countries);
         }
-        return outterMap;
+        return providerCountries;
     }
 
-    public List<MapValue> createMapValue(Map<String, List<String>> outterMap){
-        List<MapValue> mapValueList = new ArrayList<>();
-        for (Map.Entry<String, List<String>> entry : outterMap.entrySet()){
-            MapValue mapValue = new MapValue();
-            mapValue.setKey(entry.getKey());
-            List<MapValue.Values> valuesList = new ArrayList<>();
-            for (String value : entry.getValue()){
-                MapValue.Values values = new MapValue.Values();
-                values.setName(infraServiceManager.get(value).getService().getName());
-                values.setUrl(url + "service/" +value);
-                valuesList.add(values);
-            }
-            mapValue.setValues(valuesList);
-            mapValueList.add(mapValue);
+    private List<MapValues> toListMapValues(Map<String, Set<Value>> mapSetValues) {
+        List<MapValues> mapValuesList = new ArrayList<>();
+        for (Map.Entry<String, Set<Value>> entry : mapSetValues.entrySet()) {
+            MapValues mapValues = new MapValues();
+            mapValues.setKey(entry.getKey());
+            mapValues.setValues(new ArrayList<>(entry.getValue()));
+            mapValuesList.add(mapValues);
         }
-        return mapValueList;
+        return mapValuesList;
     }
 }

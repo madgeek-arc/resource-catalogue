@@ -30,23 +30,23 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     List<T> getMyServiceProviders(U authentication);
 
-
+    // TODO: move to Infra
     List<InfraService> getInfraServices(String providerId);
 
-
+    // TODO: move to Infra
     List<Service> getServices(String providerId);
 
-
+    // TODO: move to Infra
     List<Service> getActiveServices(String providerId);
 
-
+    // TODO: move to Infra
     Service getFeaturedService(String providerId);
+
+    // TODO: move to Infra
+    List<InfraService> getInactiveServices(String providerId);
 
 
     List<T> getInactive();
-
-
-    List<InfraService> getInactiveServices(String providerId);
 
 
     T verifyProvider(String id, Provider.States status, Boolean active, U auth);
