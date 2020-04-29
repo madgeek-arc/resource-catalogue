@@ -1,7 +1,9 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.dto.MapValue;
+import eu.einfracentral.dto.MapValues;
+import eu.einfracentral.dto.PlaceCount;
+import eu.einfracentral.dto.Value;
 import org.joda.time.DateTime;
 
 import java.util.Arrays;
@@ -119,19 +121,35 @@ public interface StatisticsService {
     }
 
     /**
+     * List of Place names and total number of Services offered by the specified Provider.
+     *
+     * @param providerId
+     * @return
+     */
+    List<PlaceCount> servicesPerPlace(String providerId);
+
+    /**
+     * List of Place names and total number of Services offered by the specified Provider.
+     *
+     * @param providerId
+     * @return
+     */
+    List<Value> servicesByPlace(String providerId, String place);
+
+    /**
      * Providing the Provider's id, get the relation between all his services and their respective countries.
      *
      * @param id
      * @return
      */
-    List<MapValue> mapServicesToGeographicalAvailability(String id);
+    List<MapValues> mapServicesToGeographicalAvailability(String id);
 
     /**
      * Get the relation between all the Services and their Coordinating Country.
      *
      * @return
      */
-    List<MapValue> mapServicesToCoordinatingCountry();
+    List<MapValues> mapServicesToCoordinatingCountry();
 
     /**
      * Providing the Provider's id, get the relation between all his services and a specific Vocabulary (e.g. subcategories).
@@ -140,15 +158,15 @@ public interface StatisticsService {
      * @param vocabulary
      * @return
      */
-    List<MapValue> mapServicesToVocabulary(String id, Vocabulary vocabulary);
+    List<MapValues> mapServicesToVocabulary(String id, Vocabulary vocabulary);
 
     enum Vocabulary {
-        SUBCATEGORY("SUBCATEGORY"),
-        SUBDOMAIN("SUBDOMAIN"),
-        TARGET_USERS("TARGET_USERS"),
-        ACCESS_MODES("ACCESS_MODES"),
-        ACCESS_TYPES("ACCESS_TYPES"),
-        ORDER_TYPE("ORDER_TYPE");
+        SUBCATEGORY("subcategories"),
+        SUBDOMAIN("scientific_subdomains"),
+        TARGET_USERS("target_users"),
+        ACCESS_MODES("access_modes"),
+        ACCESS_TYPES("access_types"),
+        ORDER_TYPE("ordertype");
 
         private final String vocabulary;
 
