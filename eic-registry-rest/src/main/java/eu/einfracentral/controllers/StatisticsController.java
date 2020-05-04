@@ -1,6 +1,9 @@
 package eu.einfracentral.controllers;
 
 import eu.einfracentral.domain.Event;
+import eu.einfracentral.dto.MapValues;
+import eu.einfracentral.dto.PlaceCount;
+import eu.einfracentral.dto.Value;
 import eu.einfracentral.service.StatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -73,5 +77,37 @@ public class StatisticsController {
     @RequestMapping(path = "events", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> events(@RequestParam Event.UserActionType type, @RequestParam Date from, @RequestParam Date to, @RequestParam StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.events(type, from, to, by), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and their respective countries.")
+    @GetMapping(path = "provider/mapServicesToGeographicalAvailability", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<MapValues>> mapServicesToGeographicalAvailability(@RequestParam(required = false) String providerId) {
+        return new ResponseEntity<>(statisticsService.mapServicesToGeographicalAvailability(providerId), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get a relation between all Services and their Coordinating Country")
+    @GetMapping(path = "provider/mapServicesToCoordinatingCountry", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<MapValues>> mapServicesToCoordinatingCountry() {
+        return new ResponseEntity<>(statisticsService.mapServicesToCoordinatingCountry(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and a specific Vocabulary")
+    @GetMapping(path = "provider/mapServicesToVocabulary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<MapValues>> mapServicesToVocabulary(@RequestParam(required = false) String providerId,
+                                                                   @RequestParam StatisticsService.Vocabulary vocabulary) {
+        return new ResponseEntity<>(statisticsService.mapServicesToVocabulary(providerId, vocabulary), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get a list of places and their corresponding number of Services offered by the specified provider.")
+    @GetMapping(path = "provider/servicesPerPlace", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PlaceCount>> servicesPerPlace(@RequestParam(required = false) String providerId) {
+        return new ResponseEntity<>(statisticsService.servicesPerPlace(providerId), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get a list of places and their corresponding Services offered by the specified provider.")
+    @GetMapping(path = "provider/servicesByPlace", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Value>> servicesByPlace(@RequestParam(required = false) String providerId,
+                                                       @RequestParam(required = false) String place) {
+        return new ResponseEntity<>(statisticsService.servicesByPlace(providerId, place), HttpStatus.OK);
     }
 }
