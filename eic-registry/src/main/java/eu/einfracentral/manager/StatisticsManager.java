@@ -617,10 +617,12 @@ public class StatisticsManager implements StatisticsService {
     private List<MapValues> toListMapValues(Map<String, Set<Value>> mapSetValues) {
         List<MapValues> mapValuesList = new ArrayList<>();
         for (Map.Entry<String, Set<Value>> entry : mapSetValues.entrySet()) {
-            MapValues mapValues = new MapValues();
-            mapValues.setKey(entry.getKey());
-            mapValues.setValues(new ArrayList<>(entry.getValue()));
-            mapValuesList.add(mapValues);
+            if (!entry.getValue().isEmpty()) {
+                MapValues mapValues = new MapValues();
+                mapValues.setKey(entry.getKey());
+                mapValues.setValues(new ArrayList<>(entry.getValue()));
+                mapValuesList.add(mapValues);
+            }
         }
         return mapValuesList;
     }
