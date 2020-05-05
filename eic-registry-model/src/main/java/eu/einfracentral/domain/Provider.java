@@ -19,7 +19,7 @@ public class Provider implements Identifiable {
 
     // Provider Basic Information
     /**
-     * Unique identifier of the Provider.
+     * A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
@@ -238,11 +238,21 @@ public class Provider implements Identifiable {
     private String esfriType;
 
     /**
+     * MERIL scientific subdomain classification.
+     */
+    @XmlElementWrapper(name = "merilScientificSubdomains")
+    @XmlElement(name = "merilScientificSubdomain")
+    @ApiModelProperty(position = 24, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN)
+    private List<String> merilScientificSubdomains;
+
+    /**
      * Basic research, Applied research or Technological development.
      */
     @XmlElementWrapper(name = "areasOfActivity")
     @XmlElement(name = "areaOfActivity")
-    @ApiModelProperty(position = 24, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 25, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AREA_OF_ACTIVITY)
     private List<String> areasOfActivity;
@@ -252,7 +262,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "societalGrandChallenges")
     @XmlElement(name = "societalGrandChallenge")
-    @ApiModelProperty(position = 25, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 26, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SOCIETAL_GRAND_CHALLENGE)
     private List<String> societalGrandChallenges;
@@ -262,7 +272,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "nationalRoadmaps")
     @XmlElement(name = "nationalRoadmap")
-    @ApiModelProperty(position = 26, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 27, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> nationalRoadmaps;
 
@@ -270,7 +280,7 @@ public class Provider implements Identifiable {
     // Extra needed fields
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 27, required = true)
+    @ApiModelProperty(position = 28, required = true)
     @FieldValidation
     private List<User> users;
 
@@ -334,6 +344,7 @@ public class Provider implements Identifiable {
                 ", structureTypes=" + structureTypes +
                 ", esfriDomains=" + esfriDomains +
                 ", esfriType='" + esfriType + '\'' +
+                ", merilScientificSubdomains=" + merilScientificSubdomains +
                 ", areasOfActivity=" + areasOfActivity +
                 ", societalGrandChallenges=" + societalGrandChallenges +
                 ", nationalRoadmaps=" + nationalRoadmaps +
@@ -525,6 +536,14 @@ public class Provider implements Identifiable {
 
     public void setEsfriType(String esfriType) {
         this.esfriType = esfriType;
+    }
+
+    public List<String> getMerilScientificSubdomains() {
+        return merilScientificSubdomains;
+    }
+
+    public void setMerilScientificSubdomains(List<String> merilScientificSubdomains) {
+        this.merilScientificSubdomains = merilScientificSubdomains;
     }
 
     public List<String> getAreasOfActivity() {
