@@ -682,7 +682,7 @@ If (1) - name of the research infrastructure, If (2) - name of the hosting organ
       </xs:element>
       <xs:element name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Unique identifier of the Provider.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="legalEntity" type="xs:string">
@@ -710,6 +710,16 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         <xs:annotation>
           <xs:documentation><![CDATA[Link to the logo/visual identity of the Provider.]]></xs:documentation>
         </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="merilScientificSubdomains">
+        <xs:annotation>
+          <xs:documentation><![CDATA[MERIL scientific subdomain classification.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="merilScientificSubdomain" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="multimedia">
         <xs:annotation>
