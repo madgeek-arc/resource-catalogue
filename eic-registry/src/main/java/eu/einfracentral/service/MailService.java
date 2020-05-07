@@ -1,6 +1,5 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.exception.ResourceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +43,9 @@ public class MailService {
     @Value("${mail.smtp.ssl.enable}")
     String ssl;
 
+    @Value("${email.enable.all:true}")
+    boolean enableEmail;
+
     @PostConstruct
     private void postConstruct() {
         Properties sessionProps = new Properties();
@@ -64,53 +66,61 @@ public class MailService {
 
     @Async
     public void sendMail(List<String> to, List<String> cc, String subject, String text) throws MessagingException {
-        Transport transport = null;
-        try {
-            transport = session.getTransport();
-            InternetAddress sender = new InternetAddress(user);
-            Message message = new MimeMessage(session);
-            message.setFrom(sender);
-            if (to != null) {
-                message.setRecipients(Message.RecipientType.TO, createAddresses(to));
-            }
-            if (cc != null) {
-                message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
-            }
-            message.setRecipient(Message.RecipientType.BCC, sender);
-            message.setSubject(subject);
-            message.setText(text);
-            transport.connect();
-            Transport.send(message);
-        } catch (MessagingException e) {
-            logger.error("ERROR", e);
-        } finally {
-            if (transport != null) {
-                transport.close();
+        if (enableEmail){
+            Transport transport = null;
+            try {
+                transport = session.getTransport();
+                InternetAddress sender = new InternetAddress(user);
+                Message message = new MimeMessage(session);
+                message.setFrom(sender);
+                if (to != null) {
+                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
+                }
+                if (cc != null) {
+                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
+                }
+                message.setRecipient(Message.RecipientType.BCC, sender);
+                message.setSubject(subject);
+                message.setText(text);
+                transport.connect();
+                Transport.send(message);
+            } catch (MessagingException e) {
+                logger.error("ERROR", e);
+            } finally {
+                if (transport != null) {
+                    transport.close();
+                }
             }
         }
     }
 
     @Async
     public void sendMail(List<String> to, String subject, String text) throws MessagingException {
-        sendMail(to, null, subject, text);
+        if (enableEmail){
+            sendMail(to, null, subject, text);
+        }
     }
 
     @Async
     public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
-        List<String> addrTo = new ArrayList<>();
-        List<String> addrCc = new ArrayList<>();
-        if (to != null) {
-            addrTo.addAll(Arrays.stream(to.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+        if (enableEmail){
+            List<String> addrTo = new ArrayList<>();
+            List<String> addrCc = new ArrayList<>();
+            if (to != null) {
+                addrTo.addAll(Arrays.stream(to.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+            }
+            if (cc != null) {
+                addrTo.addAll(Arrays.stream(cc.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+            }
+            sendMail(addrTo, addrCc, subject, text);
         }
-        if (cc != null) {
-            addrTo.addAll(Arrays.stream(cc.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
-        }
-        sendMail(addrTo, addrCc, subject, text);
     }
 
     @Async
     public void sendMail(String to, String subject, String text) throws MessagingException {
-        sendMail(to, null, subject, text);
+        if (enableEmail){
+            sendMail(to, null, subject, text);
+        }
     }
 
     private InternetAddress[] createAddresses(List<String> emailAddresses) throws AddressException {

@@ -53,6 +53,9 @@ public class RegistrationMailService {
     @Value("${project.registration.email:registration@catris.eu}")
     private String registrationEmail;
 
+    @Value("${email.enable.notifications:true}")
+    private boolean enableEmailNotifications;
+
     private final List<String> projectAdmins;
 
 
@@ -112,9 +115,7 @@ public class RegistrationMailService {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
             temp.process(root, out);
             regTeamMail = out.getBuffer().toString();
-            if (!debug) {
-                mailService.sendMail(registrationEmail, regTeamSubject, regTeamMail);
-            }
+            mailService.sendMail(registrationEmail, regTeamSubject, regTeamMail);
             logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", registrationEmail,
                     regTeamSubject, regTeamMail);
 
@@ -129,9 +130,7 @@ public class RegistrationMailService {
                 root.put("project", projectName);
                 temp.process(root, out);
                 providerMail = out.getBuffer().toString();
-                if (!debug) {
-                    mailService.sendMail(user.getEmail(), providerSubject, providerMail);
-                }
+                mailService.sendMail(user.getEmail(), providerSubject, providerMail);
                 logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), providerSubject, providerMail);
             }
 
@@ -294,7 +293,7 @@ public class RegistrationMailService {
             temp.process(root, out);
             String mailBody = out.getBuffer().toString();
 
-            if (!debug) {
+            if (enableEmailNotifications) {
                 mailService.sendMail(emails, subject, mailBody);
             }
             logger.info("\nRecipients: {}\nTitle: {}\nMail body: \n{}", String.join(", ", emails), subject, mailBody);
