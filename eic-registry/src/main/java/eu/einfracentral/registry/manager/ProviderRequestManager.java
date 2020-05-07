@@ -123,15 +123,13 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
                 Template temp = cfg.getTemplate("providerRequestProviderTemplate.ftl");
                 temp.process(root, out1);
                 String providerMail = out1.getBuffer().toString();
-                if (!debug) {
-                    mailService.sendMail(entry.getValue(), providerSubject, providerMail);
-                }
+                mailService.sendMail(entry.getValue(), providerSubject, providerMail);
                 logger.info("Recipient: {}\nTitle: {}\nMail body: \n{}", entry.getValue(), providerSubject, providerMail);
 
                 temp = cfg.getTemplate("providerRequestUserTemplate.ftl");
                 temp.process(root, out2);
                 String userMail = out2.getBuffer().toString();
-                if (!debug && !sendOnce) {
+                if (!sendOnce) {
                     mailService.sendMail(message.getSenderEmail(), userSubject, userMail);
                     sendOnce = true;
                 }
