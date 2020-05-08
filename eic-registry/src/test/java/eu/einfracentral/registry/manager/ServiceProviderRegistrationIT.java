@@ -156,8 +156,8 @@ public class ServiceProviderRegistrationIT {
         provider.setScientificSubdomains(providerScientificSubdomains);
         provider.setLifeCycleStatus("provider_life_cycle_status-under_construction");
         provider.setLocation(providerLocation);
-        provider.setProviderMainContact(mainContact);
-        provider.setProviderPublicContacts(publicContacts);
+        provider.setMainContact(mainContact);
+        provider.setPublicContacts(publicContacts);
         provider.setUsers(users);
 
         return providerService.add(new ProviderBundle(provider), securityService.getAdminAccess());
@@ -226,7 +226,7 @@ public class ServiceProviderRegistrationIT {
         service.setTargetUsers(targetUsers);
         service.setLanguageAvailabilities(languages);
         service.setGeographicalAvailabilities(places);
-        service.setServicePublicContacts(contacts);
+        service.setPublicContacts(contacts);
 
         return service;
     }

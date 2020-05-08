@@ -134,16 +134,16 @@ public class Provider implements Identifiable {
     @XmlElement(required = true)
     @ApiModelProperty(position = 13, required = true)
     @FieldValidation
-    private ProviderMainContact providerMainContact;
+    private ProviderMainContact mainContact;
 
     /**
      * List of the Provider's public contacts info.
      */
-    @XmlElementWrapper(name = "providerPublicContacts")
-    @XmlElement(name = "providerPublicContact")
+    @XmlElementWrapper(name = "publicContacts")
+    @XmlElement(name = "publicContact")
     @ApiModelProperty(position = 14, dataType = "List")
     @FieldValidation(nullable = true)
-    private List<ProviderPublicContact> providerPublicContacts;
+    private List<ProviderPublicContact> publicContacts;
 
 
     // Provider Maturity Information
@@ -333,8 +333,8 @@ public class Provider implements Identifiable {
                 ", scientificSubdomains=" + scientificSubdomains +
                 ", tags=" + tags +
                 ", location=" + location +
-                ", providerMainContact=" + providerMainContact +
-                ", providerPublicContacts=" + providerPublicContacts +
+                ", providerMainContact=" + mainContact +
+                ", providerPublicContacts=" + publicContacts +
                 ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
                 ", certifications=" + certifications +
                 ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
@@ -450,20 +450,20 @@ public class Provider implements Identifiable {
         this.location = location;
     }
 
-    public ProviderMainContact getProviderMainContact() {
-        return providerMainContact;
+    public ProviderMainContact getMainContact() {
+        return mainContact;
     }
 
-    public void setProviderMainContact(ProviderMainContact providerMainContact) {
-        this.providerMainContact = providerMainContact;
+    public void setMainContact(ProviderMainContact mainContact) {
+        this.mainContact = mainContact;
     }
 
-    public List<ProviderPublicContact> getProviderPublicContacts() {
-        return providerPublicContacts;
+    public List<ProviderPublicContact> getPublicContacts() {
+        return publicContacts;
     }
 
-    public void setProviderPublicContacts(List<ProviderPublicContact> providerPublicContacts) {
-        this.providerPublicContacts = providerPublicContacts;
+    public void setPublicContacts(List<ProviderPublicContact> publicContacts) {
+        this.publicContacts = publicContacts;
     }
 
     public String getLifeCycleStatus() {

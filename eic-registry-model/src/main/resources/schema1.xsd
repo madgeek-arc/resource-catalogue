@@ -273,6 +273,11 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           <xs:documentation><![CDATA[Link to the logo/visual identity of the Resource. The logo will be visible at the Portal.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="mainContact" type="tns:serviceMainContact">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Service's Main Contact/Resource Owner info.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element minOccurs="0" name="maintenance" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Webpage with information about planned maintenance windows for this Resource.]]></xs:documentation>
@@ -327,6 +332,16 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         <xs:annotation>
           <xs:documentation><![CDATA[Link to the privacy policy applicable to the Resource.]]></xs:documentation>
         </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="publicContacts">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of the Service's Public Contacts info.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:servicePublicContact"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="quotation" type="xs:string">
         <xs:annotation>
@@ -402,17 +417,6 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         <xs:annotation>
           <xs:documentation><![CDATA[Webpage with the information about the levels of performance that a Provider is expected to deliver.]]></xs:documentation>
         </xs:annotation>
-      </xs:element>
-      <xs:element ref="tns:serviceMainContact"/>
-      <xs:element minOccurs="0" name="servicePublicContacts">
-        <xs:annotation>
-          <xs:documentation><![CDATA[List of the Service's Public Contacts info.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:servicePublicContact"/>
-          </xs:sequence>
-        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="standards">
         <xs:annotation>
@@ -700,6 +704,11 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
           <xs:documentation><![CDATA[Link to the logo/visual identity of the Provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="mainContact" type="tns:providerMainContact">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's main contact info.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element minOccurs="0" name="merilScientificSubdomains">
         <xs:annotation>
           <xs:documentation><![CDATA[MERIL scientific subdomain classification.]]></xs:documentation>
@@ -755,14 +764,13 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element ref="tns:providerMainContact"/>
-      <xs:element minOccurs="0" name="providerPublicContacts">
+      <xs:element minOccurs="0" name="publicContacts">
         <xs:annotation>
           <xs:documentation><![CDATA[List of the Provider's public contacts info.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:providerPublicContact"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:providerPublicContact"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
