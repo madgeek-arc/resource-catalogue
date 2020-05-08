@@ -52,7 +52,7 @@ public class ProviderLocation {
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, example = "String (required)", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PLACE)
+    @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private String country;
 
     public ProviderLocation() {

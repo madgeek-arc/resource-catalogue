@@ -92,8 +92,8 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         for (String serviceId : serviceIds) {
             InfraService service = infraServiceService.get(serviceId);
             serviceNames.add(service.getService().getName());
-            List<String> providerIds = service.getService().getServiceProviders();
-            providerIds.add(service.getService().getServiceOrganisation());
+            List<String> providerIds = service.getService().getResourceProviders();
+            providerIds.add(service.getService().getResourceOrganisation());
             for (String providerId : providerIds) {
                 ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
                 providerContactNames.put(providerBundle.getProvider().getProviderMainContact().getLastName(), providerBundle.getProvider().getProviderMainContact().getFirstName());

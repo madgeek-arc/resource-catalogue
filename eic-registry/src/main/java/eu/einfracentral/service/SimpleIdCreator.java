@@ -34,13 +34,13 @@ public class SimpleIdCreator implements IdCreator {
 
     @Override
     public String createServiceId(eu.einfracentral.domain.Service service) {
-        if (service.getServiceOrganisation() == null || service.getServiceOrganisation().equals("")) {
+        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
             throw new ValidationException("Service must have a Service Organisation.");
         }
         if (service.getName() == null || service.getName().equals("")) {
             throw new ValidationException("Service must have a Name.");
         }
-        String provider = service.getServiceOrganisation();
+        String provider = service.getResourceOrganisation();
         return String.format("%s.%s", provider, StringUtils
                 .stripAccents(service.getName())
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")

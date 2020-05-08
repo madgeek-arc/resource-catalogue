@@ -62,7 +62,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
-        infraService.setActive(providerManager.get(infraService.getService().getServiceOrganisation()).isActive());
+        infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
 
@@ -206,11 +206,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             logger.error("", e);
         }
 
-        // Validate Service's EOSC ordering
-        if (!"yes".equalsIgnoreCase(service.getOrderViaEoscPortal()) && !"no".equalsIgnoreCase(service.getOrderViaEoscPortal())) {
-            throw new ValidationException("orderViaEoscPortal's value should be Yes or No");
-        }
-
         return true;
     }
 
@@ -224,9 +219,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             service = this.get(serviceId, version);
         }
 
-        ProviderBundle providerBundle = providerManager.get(service.getService().getServiceOrganisation());
+        ProviderBundle providerBundle = providerManager.get(service.getService().getResourceOrganisation());
         if (providerBundle.getStatus().equals(Provider.States.APPROVED.getKey()) && providerBundle.isActive()) {
-            activeProvider = service.getService().getServiceOrganisation();
+            activeProvider = service.getService().getResourceOrganisation();
         }
         if (active && activeProvider.equals("")) {
             throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
