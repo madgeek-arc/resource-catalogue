@@ -15,7 +15,7 @@ public class ServiceMainContact {
 
     // Contact Basic Information
     /**
-     * First Name of the service/resource's main contact person/manager.
+     * First Name of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, example = "String (required)", required = true)
@@ -23,7 +23,7 @@ public class ServiceMainContact {
     private String firstName;
 
     /**
-     * Last Name of the service/resource's main contact person/manager.
+     * Last Name of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
@@ -31,7 +31,7 @@ public class ServiceMainContact {
     private String lastName;
 
     /**
-     * Email of the service/resource's main contact person/manager.
+     * Email of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
@@ -39,7 +39,7 @@ public class ServiceMainContact {
     private String email;
 
     /**
-     * Telephone of the service/resource's main contact person/manager.
+     * Telephone of the Resource's main contact person/manager.
      */
     @XmlElement
     @ApiModelProperty(position = 4, example = "String (optional)")
@@ -47,7 +47,7 @@ public class ServiceMainContact {
     private String phone;
 
     /**
-     * Position of the service/resource's main contact person/manager.
+     * Position of the Resource's main contact person/manager.
      */
     @XmlElement
     @ApiModelProperty(position = 5, example = "String (optional)")
@@ -57,9 +57,9 @@ public class ServiceMainContact {
     /**
      * The organisation to which the contact is affiliated.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "String (required)", required = true)
-    @FieldValidation(containsId = true, idClass = Provider.class)
+    @XmlElement
+    @ApiModelProperty(position = 6, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String organisation;
 
     public ServiceMainContact() {

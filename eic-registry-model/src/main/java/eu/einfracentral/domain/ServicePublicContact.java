@@ -16,7 +16,7 @@ public class ServicePublicContact {
 
     // Contact Basic Information
     /**
-     * First Name of the service/resource's contact person to be displayed at the portal.
+     * First Name of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
     @ApiModelProperty(position = 1, example = "String (optional)")
@@ -24,7 +24,7 @@ public class ServicePublicContact {
     private String firstName;
 
     /**
-     * Last Name of the service/resource's contact person to be displayed at the portal.
+     * Last Name of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
     @ApiModelProperty(position = 2, example = "String (optional)")
@@ -32,7 +32,7 @@ public class ServicePublicContact {
     private String lastName;
 
     /**
-     * Email of the service/resource's contact person to be displayed at the portal.
+     * Email of the Resource's contact person or a generic email of the Provider to be displayed at the portal.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, example = "String (required)", required = true)
@@ -40,7 +40,7 @@ public class ServicePublicContact {
     private String email;
 
     /**
-     * Telephone of the service/resource's contact person to be displayed at the portal.
+     * Telephone of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
     @ApiModelProperty(position = 4, example = "String (optional)")
@@ -48,7 +48,7 @@ public class ServicePublicContact {
     private String phone;
 
     /**
-     * Position of the service/resource's contact person to be displayed at the portal.
+     * Position of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
     @ApiModelProperty(position = 5, example = "String (optional)")
@@ -58,9 +58,9 @@ public class ServicePublicContact {
     /**
      * The organisation to which the contact is affiliated.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "String (required)", required = true)
-    @FieldValidation(containsId = true, idClass = Provider.class)
+    @XmlElement
+    @ApiModelProperty(position = 6, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String organisation;
 
     public ServicePublicContact() {

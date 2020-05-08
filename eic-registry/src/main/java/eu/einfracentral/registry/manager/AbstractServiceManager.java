@@ -485,8 +485,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth) {
         for (RichService richService : richServices) {
             List<ProviderInfo> providerInfoList = new ArrayList<>();
-            List<String> allProviders = richService.getService().getServiceProviders();
-            allProviders.add(richService.getService().getServiceOrganisation());
+            List<String> allProviders = richService.getService().getResourceProviders();
+            allProviders.add(richService.getService().getResourceOrganisation());
             for (String provider : allProviders) {
                 ProviderInfo providerInfo = new ProviderInfo();
                 providerInfo.setProviderId(providerService.get(provider, auth).getId());
@@ -509,7 +509,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
         infraService.getService().setDescription(TextUtils.prettifyText(infraService.getService().getDescription(), specialCharacters));
-        infraService.getService().setChangeLog(TextUtils.prettifyText(infraService.getService().getChangeLog(), specialCharacters));
         return infraService;
     }
 
@@ -532,8 +531,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             RichService richService = new RichService(infraService);
 
             // Language Names
-            if (infraService.getService().getLanguages() != null) {
-                richService.setLanguageNames(infraService.getService().getLanguages()
+            if (infraService.getService().getLanguageAvailabilities() != null) {
+                richService.setLanguageNames(infraService.getService().getLanguageAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(l -> allVocabularies.get(l).getName())
@@ -554,11 +553,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             // TRL Name
             if (infraService.getService().getTrl() != null && !infraService.getService().getTrl().equals("")) {
                 richService.setTrlName(allVocabularies.get(infraService.getService().getTrl()).getName());
-            }
-
-            // Phase Name
-            if (infraService.getService().getPhase() != null && !infraService.getService().getPhase().equals("")) {
-                richService.setPhaseName(allVocabularies.get(infraService.getService().getPhase()).getName());
             }
 
             // TargetUsers Names
@@ -592,8 +586,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             }
 
             // Funders Names
-            if (infraService.getService().getFunders() != null) {
-                richService.setFundedByNames(infraService.getService().getFunders()
+            if (infraService.getService().getFundingBody() != null) {
+                richService.setFundedByNames(infraService.getService().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allFunders.get(p).getFundingOrganisation())

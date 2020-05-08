@@ -125,11 +125,12 @@ public class SecurityService {
         }
 
         User user = User.of(auth);
-        if (service.getServiceOrganisation() == null || service.getServiceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
+        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
+            throw new ValidationException("Service has no Resource Organisation");
         }
-        List<String> allProviders = service.getServiceProviders();
-        allProviders.add(service.getServiceOrganisation());
+//        List<String> allProviders = service.getResourceProviders();
+//        allProviders.add(service.getResourceOrganisation());
+        List<String> allProviders = Collections.singletonList(service.getResourceOrganisation());
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
@@ -139,12 +140,13 @@ public class SecurityService {
     }
 
     public boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
-        if (service.getServiceOrganisation() == null || service.getServiceOrganisation().equals("")) {
+        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
             throw new ValidationException("Service has no Service Organisation");
         }
         User user = User.of(auth);
-        List<String> allProviders = service.getServiceProviders();
-        allProviders.add(service.getServiceOrganisation());
+//        List<String> allProviders = service.getResourceProviders();
+//        allProviders.add(service.getResourceOrganisation());
+        List<String> allProviders = Collections.singletonList(service.getResourceOrganisation());
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
@@ -170,12 +172,13 @@ public class SecurityService {
         } catch (RuntimeException e) {
             return false;
         }
-        if (service.getService().getServiceOrganisation() == null || service.getService().getServiceOrganisation().equals("")) {
+        if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
             throw new ValidationException("Service has no Service Organisation");
         }
         User user = User.of(auth);
-        List<String> allProviders = service.getService().getServiceProviders();
-        allProviders.add(service.getService().getServiceOrganisation());
+//        List<String> allProviders = service.getService().getResourceProviders();
+//        allProviders.add(service.getService().getResourceOrganisation());
+        List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
@@ -189,8 +192,9 @@ public class SecurityService {
     }
 
     public boolean providerCanAddServices(Authentication auth, InfraService service) {
-        List<String> providerIds = service.getService().getServiceProviders();
-        providerIds.add((service.getService().getServiceOrganisation()));
+//        List<String> providerIds = service.getService().getResourceProviders();
+//        providerIds.add((service.getService().getResourceOrganisation()));
+        List<String> providerIds = Collections.singletonList(service.getService().getResourceOrganisation());
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
@@ -221,11 +225,12 @@ public class SecurityService {
         if (service == null) {
             throw new ServiceException("Service is null");
         }
-        if (service.getServiceOrganisation() == null || service.getServiceOrganisation().equals("")) {
+        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
             throw new ValidationException("Service has no Service Organisation");
         }
-        List<String> providerIds = service.getServiceProviders();
-        providerIds.add(service.getServiceOrganisation());
+//        List<String> providerIds = service.getResourceProviders();
+//        providerIds.add(service.getResourceOrganisation());
+        List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
@@ -264,8 +269,9 @@ public class SecurityService {
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
         InfraService service = infraServiceService.get(serviceId);
-        List<String> providerIds = service.getService().getServiceProviders();
-        providerIds.add(service.getService().getServiceOrganisation());
+//        List<String> providerIds = service.getService().getResourceProviders();
+//        providerIds.add(service.getService().getResourceOrganisation());
+        List<String> providerIds = Collections.singletonList(service.getService().getResourceOrganisation());
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (provider != null && provider.isActive()) {

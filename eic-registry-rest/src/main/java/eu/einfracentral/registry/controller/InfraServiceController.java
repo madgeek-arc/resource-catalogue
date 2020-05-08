@@ -92,7 +92,7 @@ public class InfraServiceController {
     public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
         logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication.getName(), service.getService().getName(), service.getService().getId(), service.getService().getVersion());
-        logger.info(" Service Organisation: {}", service.getService().getServiceOrganisation());
+        logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
         return ret;
     }
 

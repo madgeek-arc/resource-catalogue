@@ -220,11 +220,11 @@ public class ServiceProviderRegistrationIT {
         service.setWebpage(new URL("https:wp4.testservice.com"));
         service.setDescription("Jtest for SDT WP4 v2.00 01/10/19");
         service.setLogo(new URL("https:wp4.testservice.logo.com"));
-        service.setServiceOrganisation(provider.getId());
+        service.setResourceOrganisation(provider.getId());
         service.setScientificSubdomains(scientificSubdomains);
         service.setSubcategories(subcategories);
         service.setTargetUsers(targetUsers);
-        service.setLanguages(languages);
+        service.setLanguageAvailabilities(languages);
         service.setGeographicalAvailabilities(places);
         service.setServicePublicContacts(contacts);
 

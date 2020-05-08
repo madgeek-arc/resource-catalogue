@@ -14,9 +14,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @Aspect
@@ -61,12 +58,12 @@ public class ProviderManagementAspect {
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(InfraService infraService) {
         try {
-            ProviderBundle providerBundle = providerService.get(infraService.getService().getServiceOrganisation(), (Authentication) null);
+            ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), (Authentication) null);
             if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
                     || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        infraService.getService().getServiceOrganisation(), providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
-                providerService.verifyProvider(infraService.getService().getServiceOrganisation(), Provider.States.PENDING_2, false, null);
+                        infraService.getService().getResourceOrganisation(), providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
+                providerService.verifyProvider(infraService.getService().getResourceOrganisation(), Provider.States.PENDING_2, false, null);
             }
         } catch (RuntimeException e) {
             logger.error(e);
