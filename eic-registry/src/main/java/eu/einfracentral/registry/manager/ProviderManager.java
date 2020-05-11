@@ -131,6 +131,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle provider = get(id);
         if (auth == null) {
             provider.getProvider().setUsers(null);
+            provider.getProvider().setMainContact(null);
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")
@@ -138,6 +139,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             return provider;
         }
         provider.getProvider().setUsers(null);
+        provider.getProvider().setMainContact(null);
         return provider;
     }
 
@@ -161,6 +163,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 .stream()
                 .map(p -> {
                     p.getProvider().setUsers(null);
+                    p.getProvider().setMainContact(null);
                     return p;
                 })
                 .collect(Collectors.toList());
