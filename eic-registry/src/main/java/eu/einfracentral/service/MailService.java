@@ -43,8 +43,8 @@ public class MailService {
     @Value("${mail.smtp.ssl.enable}")
     String ssl;
 
-    @Value("${email.enable.all:true}")
-    boolean enableEmail;
+    @Value("${emails.send:true}")
+    boolean enableEmails;
 
     @PostConstruct
     private void postConstruct() {
@@ -66,7 +66,7 @@ public class MailService {
 
     @Async
     public void sendMail(List<String> to, List<String> cc, String subject, String text) throws MessagingException {
-        if (enableEmail){
+        if (enableEmails) {
             Transport transport = null;
             try {
                 transport = session.getTransport();
@@ -96,31 +96,25 @@ public class MailService {
 
     @Async
     public void sendMail(List<String> to, String subject, String text) throws MessagingException {
-        if (enableEmail){
-            sendMail(to, null, subject, text);
-        }
+        sendMail(to, null, subject, text);
     }
 
     @Async
     public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
-        if (enableEmail){
-            List<String> addrTo = new ArrayList<>();
-            List<String> addrCc = new ArrayList<>();
-            if (to != null) {
-                addrTo.addAll(Arrays.stream(to.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
-            }
-            if (cc != null) {
-                addrTo.addAll(Arrays.stream(cc.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
-            }
-            sendMail(addrTo, addrCc, subject, text);
+        List<String> addrTo = new ArrayList<>();
+        List<String> addrCc = new ArrayList<>();
+        if (to != null) {
+            addrTo.addAll(Arrays.stream(to.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
         }
+        if (cc != null) {
+            addrTo.addAll(Arrays.stream(cc.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+        }
+        sendMail(addrTo, addrCc, subject, text);
     }
 
     @Async
     public void sendMail(String to, String subject, String text) throws MessagingException {
-        if (enableEmail){
-            sendMail(to, null, subject, text);
-        }
+        sendMail(to, null, subject, text);
     }
 
     private InternetAddress[] createAddresses(List<String> emailAddresses) throws AddressException {
