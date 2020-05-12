@@ -268,6 +268,11 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           <xs:documentation><![CDATA[Date of the latest update of the Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="0" name="lifeCycleStatus" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Phase of the Resource life-cycle.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="logo" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Link to the logo/visual identity of the Resource. The logo will be visible at the Portal.]]></xs:documentation>
@@ -343,11 +348,6 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="quotation" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Email of the quotations department.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element minOccurs="0" name="relatedPlatforms">
         <xs:annotation>
           <xs:documentation><![CDATA[List of suites or thematic platforms in which the Resource is engaged or Providers (Provider groups) contributing to this Resource.]]></xs:documentation>
@@ -412,6 +412,11 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
             <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubdomain" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
+      </xs:element>
+      <xs:element name="securityContactEmail" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The email to contact the Provider for critical security issues about this Resource.]]></xs:documentation>
+        </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="serviceLevel" type="xs:anyURI">
         <xs:annotation>
