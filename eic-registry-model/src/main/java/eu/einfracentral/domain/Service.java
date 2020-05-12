@@ -302,11 +302,10 @@ public class Service implements Identifiable {
     /**
      * Summary of the Resource features updated from the previous version.
      */
-    @XmlElementWrapper(name = "changeLogs")
-    @XmlElement(name = "changeLog")
+    @XmlElementWrapper(name = "changeLog")
     @ApiModelProperty(position = 31, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
-    private List<String> changeLogs;
+    private List<String> changeLog;
 
 
     // Service Dependencies Information
@@ -482,7 +481,7 @@ public class Service implements Identifiable {
         // No arg constructor
     }
 
-    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificSubdomains, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLogs, List<String> requiredServices, List<String> relatedServices, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
+    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificSubdomains, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredServices, List<String> relatedServices, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
         this.id = id;
         this.name = name;
         this.resourceOrganisation = resourceOrganisation;
@@ -513,7 +512,7 @@ public class Service implements Identifiable {
         this.openSourceTechnologies = openSourceTechnologies;
         this.version = version;
         this.lastUpdate = lastUpdate;
-        this.changeLogs = changeLogs;
+        this.changeLog = changeLog;
         this.requiredServices = requiredServices;
         this.relatedServices = relatedServices;
         this.relatedPlatforms = relatedPlatforms;
@@ -570,7 +569,7 @@ public class Service implements Identifiable {
                 Objects.equals(openSourceTechnologies, service.openSourceTechnologies) &&
                 Objects.equals(version, service.version) &&
                 Objects.equals(lastUpdate, service.lastUpdate) &&
-                Objects.equals(changeLogs, service.changeLogs) &&
+                Objects.equals(changeLog, service.changeLog) &&
                 Objects.equals(requiredServices, service.requiredServices) &&
                 Objects.equals(relatedServices, service.relatedServices) &&
                 Objects.equals(relatedPlatforms, service.relatedPlatforms) &&
@@ -594,7 +593,7 @@ public class Service implements Identifiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificSubdomains, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLogs, requiredServices, relatedServices, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
+        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificSubdomains, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredServices, relatedServices, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -868,12 +867,12 @@ public class Service implements Identifiable {
         this.lastUpdate = lastUpdate;
     }
 
-    public List<String> getChangeLogs() {
-        return changeLogs;
+    public List<String> getChangeLog() {
+        return changeLog;
     }
 
-    public void setChangeLogs(List<String> changeLogs) {
-        this.changeLogs = changeLogs;
+    public void setChangeLog(List<String> changeLog) {
+        this.changeLog = changeLog;
     }
 
     public List<String> getRequiredServices() {
