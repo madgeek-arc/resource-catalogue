@@ -197,7 +197,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "resourceGeographicLocations")
     @XmlElement(name = "resourceGeographicLocation")
     @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> resourceGeographicLocations;
 
@@ -220,23 +220,48 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private List<ServicePublicContact> publicContacts;
 
+    /**
+     * The email to ask more information from the Provider about this Resource.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 22, example = "String (required)", required = true)
+    @FieldValidation
+    private String helpdeskEmail;
+
+    /**
+     * The email to contact the Provider for critical security issues about this Resource.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 23, example = "String (required)", required = true)
+    @FieldValidation
+    private String securityContactEmail;
+
 
     // Service Maturity Information
     /**
      * The Technology Readiness Level of the Resource updated in the context of the EOSC.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 22, example = "String (required)", required = true)
+    @ApiModelProperty(position = 24, example = "String (required)", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TRL)
     private String trl;
+
+    /**
+     * Phase of the Resource life-cycle.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 25, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.LIFE_CYCLE_STATUS)
+    private String lifeCycleStatus;
 
     /**
      * List of certifications obtained for the Resource (including the certification body).
      */
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
-    @ApiModelProperty(position = 23, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 26, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> certifications;
 
@@ -245,7 +270,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "standards")
     @XmlElement(name = "standard")
-    @ApiModelProperty(position = 24, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 27, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> standards;
 
@@ -254,7 +279,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "openSourceTechnologies")
     @XmlElement(name = "openSourceTechnology")
-    @ApiModelProperty(position = 25, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 28, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> openSourceTechnologies;
 
@@ -262,7 +287,7 @@ public class Service implements Identifiable {
      * Version of the Resource that is in force.
      */
     @XmlElement
-    @ApiModelProperty(position = 26, example = "String (optional)")
+    @ApiModelProperty(position = 29, example = "String (optional)")
     @FieldValidation(nullable = true)
     private String version;
 
@@ -270,7 +295,7 @@ public class Service implements Identifiable {
      * Date of the latest update of the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 27, example = "XMLGregorianCalendar (optional)")
+    @ApiModelProperty(position = 30, example = "XMLGregorianCalendar (optional)")
     @FieldValidation(nullable = true)
     private XMLGregorianCalendar lastUpdate;
 
@@ -279,7 +304,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "changeLogs")
     @XmlElement(name = "changeLog")
-    @ApiModelProperty(position = 28, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 31, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> changeLogs;
 
@@ -290,7 +315,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "requiredServices")
     @XmlElement(name = "requiredService")
-    @ApiModelProperty(position = 29, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 32, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
     private List<String> requiredServices;
 
@@ -299,7 +324,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedServices")
     @XmlElement(name = "relatedService")
-    @ApiModelProperty(position = 30, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 33, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
     private List<String> relatedServices;
 
@@ -308,7 +333,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedPlatforms")
     @XmlElement(name = "relatedPlatform")
-    @ApiModelProperty(position = 31, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 34, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> relatedPlatforms;
 
@@ -318,7 +343,7 @@ public class Service implements Identifiable {
      * Name of the funding body that supported the development and/or operation of the Resource.
      */
     @XmlElementWrapper(name = "fundingBody")
-    @ApiModelProperty(position = 32, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 35, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Funder.class)
     private List<String> fundingBody;
 
@@ -327,7 +352,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "fundingPrograms")
     @XmlElement(name = "fundingProgram")
-    @ApiModelProperty(position = 33, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 36, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.FUNDING_PROGRAM)
     private List<String> fundingPrograms;
@@ -337,25 +362,17 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "grantProjectNames")
     @XmlElement(name = "grantProjectName")
-    @ApiModelProperty(position = 34, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 37, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> grantProjectNames;
 
 
     // Service Management Information
     /**
-     * The email to ask more information from the Provider about this Resource.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 35, example = "String (required)", required = true)
-    @FieldValidation
-    private String helpdeskEmail;
-
-    /**
      * The URL to a webpage to ask more information from the Provider about this Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 36, example = "URL (optional)")
+    @ApiModelProperty(position = 38, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL helpdeskPage;
 
@@ -363,7 +380,7 @@ public class Service implements Identifiable {
      * Link to the Resource user manual and documentation.
      */
     @XmlElement
-    @ApiModelProperty(position = 37, example = "URL (optional)")
+    @ApiModelProperty(position = 39, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL userManual;
 
@@ -371,7 +388,7 @@ public class Service implements Identifiable {
      * Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 38, example = "URL (optional)")
+    @ApiModelProperty(position = 40, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL termsOfUse;
 
@@ -379,7 +396,7 @@ public class Service implements Identifiable {
      * Link to the privacy policy applicable to the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 39, example = "URL (optional)")
+    @ApiModelProperty(position = 41, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL privacyPolicy;
 
@@ -387,7 +404,7 @@ public class Service implements Identifiable {
      * Information about the access policies that apply.
      */
     @XmlElement
-    @ApiModelProperty(position = 40, example = "URL (optional)")
+    @ApiModelProperty(position = 42, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL accessPolicy;
 
@@ -395,7 +412,7 @@ public class Service implements Identifiable {
      * Webpage with the information about the levels of performance that a Provider is expected to deliver.
      */
     @XmlElement
-    @ApiModelProperty(position = 41, example = "URL (optional)")
+    @ApiModelProperty(position = 43, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL serviceLevel;
 
@@ -403,7 +420,7 @@ public class Service implements Identifiable {
      * Webpage to training information on the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 42, example = "URL (optional)")
+    @ApiModelProperty(position = 44, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL trainingInformation;
 
@@ -411,7 +428,7 @@ public class Service implements Identifiable {
      * Webpage with monitoring information about this Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 43, example = "URL (optional)")
+    @ApiModelProperty(position = 45, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL statusMonitoring;
 
@@ -419,7 +436,7 @@ public class Service implements Identifiable {
      * Webpage with information about planned maintenance windows for this Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 44, example = "URL (optional)")
+    @ApiModelProperty(position = 46, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL maintenance;
 
@@ -429,7 +446,7 @@ public class Service implements Identifiable {
      * Information on the order type (requires an ordering procedure, or no ordering and if fully open or requires authentication).
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 45, example = "String (required)", required = true)
+    @ApiModelProperty(position = 47, example = "String (required)", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ORDER_TYPE)
     private String orderType;
@@ -438,17 +455,9 @@ public class Service implements Identifiable {
      * Webpage through which an order for the Resource can be placed.
      */
     @XmlElement
-    @ApiModelProperty(position = 46, example = "URL (optional)")
+    @ApiModelProperty(position = 48, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL order;
-
-    /**
-     * Email of the quotations department.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 47, example = "String (optional)")
-    @FieldValidation(nullable = true)
-    private String quotation;
 
 
     // Service Financial Information
@@ -456,7 +465,7 @@ public class Service implements Identifiable {
      * Webpage with the supported payment models and restrictions that apply to each of them.
      */
     @XmlElement
-    @ApiModelProperty(position = 48, example = "URL (optional)")
+    @ApiModelProperty(position = 49, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL paymentModel;
 
@@ -464,7 +473,7 @@ public class Service implements Identifiable {
      * Webpage with the information on the price scheme for this Resource in case the customer is charged for.
      */
     @XmlElement
-    @ApiModelProperty(position = 49, example = "URL (optional)")
+    @ApiModelProperty(position = 50, example = "URL (optional)")
     @FieldValidation(nullable = true)
     private URL pricing;
 
@@ -473,7 +482,7 @@ public class Service implements Identifiable {
         // No arg constructor
     }
 
-    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificSubdomains, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String trl, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLogs, List<String> requiredServices, List<String> relatedServices, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, String helpdeskEmail, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, String quotation, URL paymentModel, URL pricing) {
+    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificSubdomains, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLogs, List<String> requiredServices, List<String> relatedServices, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
         this.id = id;
         this.name = name;
         this.resourceOrganisation = resourceOrganisation;
@@ -495,7 +504,10 @@ public class Service implements Identifiable {
         this.resourceGeographicLocations = resourceGeographicLocations;
         this.mainContact = mainContact;
         this.publicContacts = publicContacts;
+        this.helpdeskEmail = helpdeskEmail;
+        this.securityContactEmail = securityContactEmail;
         this.trl = trl;
+        this.lifeCycleStatus = lifeCycleStatus;
         this.certifications = certifications;
         this.standards = standards;
         this.openSourceTechnologies = openSourceTechnologies;
@@ -508,7 +520,6 @@ public class Service implements Identifiable {
         this.fundingBody = fundingBody;
         this.fundingPrograms = fundingPrograms;
         this.grantProjectNames = grantProjectNames;
-        this.helpdeskEmail = helpdeskEmail;
         this.helpdeskPage = helpdeskPage;
         this.userManual = userManual;
         this.termsOfUse = termsOfUse;
@@ -520,7 +531,6 @@ public class Service implements Identifiable {
         this.maintenance = maintenance;
         this.orderType = orderType;
         this.order = order;
-        this.quotation = quotation;
         this.paymentModel = paymentModel;
         this.pricing = pricing;
     }
@@ -551,7 +561,10 @@ public class Service implements Identifiable {
                 Objects.equals(resourceGeographicLocations, service.resourceGeographicLocations) &&
                 Objects.equals(mainContact, service.mainContact) &&
                 Objects.equals(publicContacts, service.publicContacts) &&
+                Objects.equals(helpdeskEmail, service.helpdeskEmail) &&
+                Objects.equals(securityContactEmail, service.securityContactEmail) &&
                 Objects.equals(trl, service.trl) &&
+                Objects.equals(lifeCycleStatus, service.lifeCycleStatus) &&
                 Objects.equals(certifications, service.certifications) &&
                 Objects.equals(standards, service.standards) &&
                 Objects.equals(openSourceTechnologies, service.openSourceTechnologies) &&
@@ -564,7 +577,6 @@ public class Service implements Identifiable {
                 Objects.equals(fundingBody, service.fundingBody) &&
                 Objects.equals(fundingPrograms, service.fundingPrograms) &&
                 Objects.equals(grantProjectNames, service.grantProjectNames) &&
-                Objects.equals(helpdeskEmail, service.helpdeskEmail) &&
                 Objects.equals(helpdeskPage, service.helpdeskPage) &&
                 Objects.equals(userManual, service.userManual) &&
                 Objects.equals(termsOfUse, service.termsOfUse) &&
@@ -576,14 +588,13 @@ public class Service implements Identifiable {
                 Objects.equals(maintenance, service.maintenance) &&
                 Objects.equals(orderType, service.orderType) &&
                 Objects.equals(order, service.order) &&
-                Objects.equals(quotation, service.quotation) &&
                 Objects.equals(paymentModel, service.paymentModel) &&
                 Objects.equals(pricing, service.pricing);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificSubdomains, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, trl, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLogs, requiredServices, relatedServices, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskEmail, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, quotation, paymentModel, pricing);
+        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificSubdomains, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLogs, requiredServices, relatedServices, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -785,12 +796,36 @@ public class Service implements Identifiable {
         this.publicContacts = publicContacts;
     }
 
+    public String getHelpdeskEmail() {
+        return helpdeskEmail;
+    }
+
+    public void setHelpdeskEmail(String helpdeskEmail) {
+        this.helpdeskEmail = helpdeskEmail;
+    }
+
+    public String getSecurityContactEmail() {
+        return securityContactEmail;
+    }
+
+    public void setSecurityContactEmail(String securityContactEmail) {
+        this.securityContactEmail = securityContactEmail;
+    }
+
     public String getTrl() {
         return trl;
     }
 
     public void setTrl(String trl) {
         this.trl = trl;
+    }
+
+    public String getLifeCycleStatus() {
+        return lifeCycleStatus;
+    }
+
+    public void setLifeCycleStatus(String lifeCycleStatus) {
+        this.lifeCycleStatus = lifeCycleStatus;
     }
 
     public List<String> getCertifications() {
@@ -889,14 +924,6 @@ public class Service implements Identifiable {
         this.grantProjectNames = grantProjectNames;
     }
 
-    public String getHelpdeskEmail() {
-        return helpdeskEmail;
-    }
-
-    public void setHelpdeskEmail(String helpdeskEmail) {
-        this.helpdeskEmail = helpdeskEmail;
-    }
-
     public URL getHelpdeskPage() {
         return helpdeskPage;
     }
@@ -983,14 +1010,6 @@ public class Service implements Identifiable {
 
     public void setOrder(URL order) {
         this.order = order;
-    }
-
-    public String getQuotation() {
-        return quotation;
-    }
-
-    public void setQuotation(String quotation) {
-        this.quotation = quotation;
     }
 
     public URL getPaymentModel() {

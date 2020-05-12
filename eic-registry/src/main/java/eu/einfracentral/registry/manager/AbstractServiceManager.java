@@ -519,6 +519,10 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (!services.getResults().isEmpty() && !services.getFacets().isEmpty()) {
             services.setFacets(facetLabelService.createLabels(services.getFacets()));
         }
+        for (InfraService service : services.getResults()){
+            service.getService().setMainContact(null);
+            service.getService().setSecurityContactEmail(null);
+        }
         return services;
     }
 
