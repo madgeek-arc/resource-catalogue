@@ -64,7 +64,7 @@ public class Provider implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 6, example = "String (optional)")
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
     private String legalStatus;
 
