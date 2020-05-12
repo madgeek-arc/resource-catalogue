@@ -1,12 +1,17 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.EmailMessage;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderRequestService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.MailService;
 import eu.openminted.registry.core.domain.FacetFilter;
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +29,10 @@ import java.util.*;
 public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
-    private MailService mailService;
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
-    private ProviderService<ProviderBundle, Authentication> providerService;
-    private Configuration cfg;
-
-    @Value("${project.debug:false}")
-    private boolean debug;
+    private final MailService mailService;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final Configuration cfg;
 
     @Value("${project.name:CatRIS}")
     private String projectName;

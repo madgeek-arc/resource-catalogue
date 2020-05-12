@@ -44,16 +44,13 @@ public class RegistrationMailService {
     @Value("${webapp.homepage}")
     private String endpoint;
 
-    @Value("${project.debug:false}")
-    private boolean debug;
-
     @Value("${project.name:CatRIS}")
     private String projectName;
 
     @Value("${project.registration.email:registration@catris.eu}")
     private String registrationEmail;
 
-    @Value("${email.enable.notifications:true}")
+    @Value("${emails.send.notifications:true}")
     private boolean enableEmailNotifications;
 
     private final List<String> projectAdmins;
