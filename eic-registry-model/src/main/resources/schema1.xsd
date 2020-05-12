@@ -180,13 +180,13 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="changeLogs">
+      <xs:element minOccurs="0" name="changeLog">
         <xs:annotation>
           <xs:documentation><![CDATA[Summary of the Resource features updated from the previous version.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="changeLog" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="changeLog" nillable="true" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
