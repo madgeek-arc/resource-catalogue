@@ -9,8 +9,6 @@
 
   <xs:element name="event" type="tns:event"/>
 
-  <xs:element name="funder" type="tns:funder"/>
-
   <xs:element name="indicator" type="tns:indicator"/>
 
   <xs:element name="infraService" type="tns:infraService"/>
@@ -103,16 +101,6 @@
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="funder">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="acronym" type="xs:string"/>
-      <xs:element minOccurs="0" name="country" type="xs:string"/>
-      <xs:element minOccurs="0" name="fundingOrganisation" type="xs:string"/>
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-      <xs:element minOccurs="0" name="organisationLocalLanguage" type="xs:string"/>
-    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="indicator">

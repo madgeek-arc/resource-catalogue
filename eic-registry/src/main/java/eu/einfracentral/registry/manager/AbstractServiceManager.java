@@ -56,9 +56,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    private FunderService funderService;
-
-    @Autowired
     private EventService eventService;
 
     @Autowired
@@ -528,7 +525,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     private List<RichService> createRichVocabularies(List<InfraService> infraServices) {
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
-        Map<String, Funder> allFunders = funderService.getFundersMap();
         List<RichService> richServices = new ArrayList<>();
 
         for (InfraService infraService : infraServices) {
@@ -594,7 +590,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 richService.setFundedByNames(infraService.getService().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
-                        .map(p -> allFunders.get(p).getFundingOrganisation())
+                        .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
                 );
             }
