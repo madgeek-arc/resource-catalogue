@@ -53,6 +53,7 @@
       <xs:enumeration value="ACCESS_TYPE"/>
       <xs:enumeration value="ACCESS_MODE"/>
       <xs:enumeration value="ORDER_TYPE"/>
+      <xs:enumeration value="FUNDING_BODY"/>
       <xs:enumeration value="FUNDING_PROGRAM"/>
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>

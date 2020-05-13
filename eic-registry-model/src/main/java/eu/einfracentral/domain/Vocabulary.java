@@ -56,6 +56,7 @@ public class Vocabulary implements Identifiable {
         ACCESS_TYPE("Access type"),
         ACCESS_MODE("Access mode"),
         ORDER_TYPE("Order type"),
+        FUNDING_BODY("Funding body"),
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
