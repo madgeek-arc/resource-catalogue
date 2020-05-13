@@ -343,7 +343,8 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "fundingBody")
     @ApiModelProperty(position = 35, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Funder.class)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.FUNDING_BODY)
     private List<String> fundingBody;
 
     /**
