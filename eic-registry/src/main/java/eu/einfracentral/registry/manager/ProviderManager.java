@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
@@ -40,13 +41,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final Random randomNumberGenerator;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
-    private EventService eventService;
+    private final EventService eventService;
+    private final JmsTemplate jmsTopicTemplate;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy FieldValidator fieldValidator,
-                           IdCreator idCreator, EventService eventService) {
+                           IdCreator idCreator,
+                           EventService eventService,
+                           JmsTemplate jmsTopicTemplate) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -54,6 +58,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
+        this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
 
@@ -79,6 +84,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
 
+        jmsTopicTemplate.convertAndSend("provider.create", provider);
+
         return ret;
     }
 
@@ -96,6 +103,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {}", provider);
+
+        jmsTopicTemplate.convertAndSend("provider.update", provider);
 
         return provider;
     }
@@ -183,6 +192,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         });
         logger.debug("Deleting Provider: {}", provider);
+
+        jmsTopicTemplate.convertAndSend("provider.delete", provider);
+
         super.delete(provider);
     }
 
