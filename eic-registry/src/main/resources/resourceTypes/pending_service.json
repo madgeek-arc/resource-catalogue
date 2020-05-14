@@ -16,23 +16,23 @@
     },
     {
       "multivalued": false,
-      "name": "service_version",
-      "label": "Service Version",
+      "name": "version",
+      "label": "Version",
       "path": "//*[local-name()='service']/*[local-name()='version']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "service_organisation",
-      "label": "Service Organisation",
-      "path": "//*[local-name()='service']/*[local-name()='serviceOrganisation']/text()",
+      "name": "resource_organisation",
+      "label": "Resource Organisation",
+      "path": "//*[local-name()='service']/*[local-name()='resourceOrganisation']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "service_providers",
-      "label": "Service Providers",
-      "path": "//*[local-name()='service']//*[local-name()='serviceProvider']/text()",
+      "name": "resource_providers",
+      "label": "Resource Providers",
+      "path": "//*[local-name()='service']//*[local-name()='resourceProviders']/text()",
       "type": "java.lang.String"
     },
     {
@@ -58,20 +58,6 @@
     },
     {
       "multivalued": true,
-      "name": "languages",
-      "label": "Language",
-      "path": "//*[local-name()='service']//*[local-name()='language']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "geographical_availabilities",
-      "label": "Geographical Availability",
-      "path": "//*[local-name()='service']//*[local-name()='geographicalAvailability']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "access_types",
       "label": "Access Type",
       "path": "//*[local-name()='service']//*[local-name()='accessType']/text()",
@@ -86,16 +72,23 @@
     },
     {
       "multivalued": true,
-      "name": "funders",
-      "label": "Funders",
-      "path": "//*[local-name()='service']//*[local-name()='funder']/text()",
+      "name": "language_availabilities",
+      "label": "Language Availability",
+      "path": "//*[local-name()='service']//*[local-name()='languageAvailability']/text()",
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "phase",
-      "label": "Phase",
-      "path": "//*[local-name()='service']/*[local-name()='phase']/text()",
+      "multivalued": true,
+      "name": "geographical_availabilities",
+      "label": "Geographical Availability",
+      "path": "//*[local-name()='service']//*[local-name()='geographicalAvailability']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "resource_geographic_locations",
+      "label": "Resource Geographic Location",
+      "path": "//*[local-name()='service']//*[local-name()='resourceGeographicLocation']/text()",
       "type": "java.lang.String"
     },
     {
@@ -103,6 +96,27 @@
       "name": "trl",
       "label": "TRL",
       "path": "//*[local-name()='service']/*[local-name()='trl']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "life_cycle_status",
+      "label": "Life Cycle Status",
+      "path": "//*[local-name()='service']//*[local-name()='lifeCycleStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_body",
+      "label": "Funding Body",
+      "path": "//*[local-name()='service']//*[local-name()='fundingBody']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_programs",
+      "label": "Funding Program",
+      "path": "//*[local-name()='service']//*[local-name()='fundingProgram']/text()",
       "type": "java.lang.String"
     },
     {
@@ -124,13 +138,6 @@
       "name": "use_cases",
       "label": "Use Case",
       "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "target_customer_tags",
-      "label": "Target Customer Tag",
-      "path": "//*[local-name()='service']//*[local-name()='targetCustomerTag']/text()",
       "type": "java.lang.String"
     },
     {
@@ -173,6 +180,12 @@
     },
     {
       "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='metadata']/*[local-name()='originalId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "active",
       "defaultValue": false,
       "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
@@ -189,12 +202,6 @@
       "name": "latest",
       "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
       "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
-      "name": "originalId",
-      "path": "//*[local-name()='originalId']/text()",
-      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
