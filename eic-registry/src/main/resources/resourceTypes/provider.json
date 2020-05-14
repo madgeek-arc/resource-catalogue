@@ -23,6 +23,13 @@
     },
     {
       "multivalued": false,
+      "name": "legal_entity",
+      "label": "Legal Entity",
+      "path": "//*[local-name()='legalEntity']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "legal_status",
       "label": "Legal Status",
       "path": "//*[local-name()='legalStatus']/text()",
@@ -37,9 +44,16 @@
     },
     {
       "multivalued": true,
-      "name": "types",
-      "label": "Type",
-      "path": "//*[local-name()='type']/text()",
+      "name": "meril_scientific_subdomains",
+      "label": "Meril Scientific Subdomain",
+      "path": "//*[local-name()='merilScientificSubdomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "structure_types",
+      "label": "Structure Type",
+      "path": "//*[local-name()='structureType']/text()",
       "type": "java.lang.String"
     },
     {
