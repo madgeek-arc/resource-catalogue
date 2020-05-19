@@ -312,20 +312,20 @@ public class Service implements Identifiable {
     /**
      * List of other Resources required to use this Resource.
      */
-    @XmlElementWrapper(name = "requiredServices")
-    @XmlElement(name = "requiredService")
+    @XmlElementWrapper(name = "requiredResources")
+    @XmlElement(name = "requiredResource")
     @ApiModelProperty(position = 32, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
-    private List<String> requiredServices;
+    private List<String> requiredResources;
 
     /**
      * List of other Resources that are commonly used with this Resource.
      */
-    @XmlElementWrapper(name = "relatedServices")
-    @XmlElement(name = "relatedService")
+    @XmlElementWrapper(name = "relatedResources")
+    @XmlElement(name = "relatedResource")
     @ApiModelProperty(position = 33, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
-    private List<String> relatedServices;
+    private List<String> relatedResources;
 
     /**
      * List of suites or thematic platforms in which the Resource is engaged or Providers (Provider groups) contributing to this Resource.
@@ -482,7 +482,7 @@ public class Service implements Identifiable {
         // No arg constructor
     }
 
-    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificSubdomains, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredServices, List<String> relatedServices, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
+    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificSubdomains, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
         this.id = id;
         this.name = name;
         this.resourceOrganisation = resourceOrganisation;
@@ -514,8 +514,8 @@ public class Service implements Identifiable {
         this.version = version;
         this.lastUpdate = lastUpdate;
         this.changeLog = changeLog;
-        this.requiredServices = requiredServices;
-        this.relatedServices = relatedServices;
+        this.requiredResources = requiredResources;
+        this.relatedResources = relatedResources;
         this.relatedPlatforms = relatedPlatforms;
         this.fundingBody = fundingBody;
         this.fundingPrograms = fundingPrograms;
@@ -571,8 +571,8 @@ public class Service implements Identifiable {
                 Objects.equals(version, service.version) &&
                 Objects.equals(lastUpdate, service.lastUpdate) &&
                 Objects.equals(changeLog, service.changeLog) &&
-                Objects.equals(requiredServices, service.requiredServices) &&
-                Objects.equals(relatedServices, service.relatedServices) &&
+                Objects.equals(requiredResources, service.requiredResources) &&
+                Objects.equals(relatedResources, service.relatedResources) &&
                 Objects.equals(relatedPlatforms, service.relatedPlatforms) &&
                 Objects.equals(fundingBody, service.fundingBody) &&
                 Objects.equals(fundingPrograms, service.fundingPrograms) &&
@@ -594,7 +594,7 @@ public class Service implements Identifiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificSubdomains, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredServices, relatedServices, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
+        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificSubdomains, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -876,20 +876,20 @@ public class Service implements Identifiable {
         this.changeLog = changeLog;
     }
 
-    public List<String> getRequiredServices() {
-        return requiredServices;
+    public List<String> getRequiredResources() {
+        return requiredResources;
     }
 
-    public void setRequiredServices(List<String> requiredServices) {
-        this.requiredServices = requiredServices;
+    public void setRequiredResources(List<String> requiredResources) {
+        this.requiredResources = requiredResources;
     }
 
-    public List<String> getRelatedServices() {
-        return relatedServices;
+    public List<String> getRelatedResources() {
+        return relatedResources;
     }
 
-    public void setRelatedServices(List<String> relatedServices) {
-        this.relatedServices = relatedServices;
+    public void setRelatedResources(List<String> relatedResources) {
+        this.relatedResources = relatedResources;
     }
 
     public List<String> getRelatedPlatforms() {
