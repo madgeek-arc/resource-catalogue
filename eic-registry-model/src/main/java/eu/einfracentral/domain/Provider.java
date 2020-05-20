@@ -333,8 +333,8 @@ public class Provider implements Identifiable {
                 ", scientificSubdomains=" + scientificSubdomains +
                 ", tags=" + tags +
                 ", location=" + location +
-                ", providerMainContact=" + mainContact +
-                ", providerPublicContacts=" + publicContacts +
+                ", mainContact=" + mainContact +
+                ", publicContacts=" + publicContacts +
                 ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
                 ", certifications=" + certifications +
                 ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
