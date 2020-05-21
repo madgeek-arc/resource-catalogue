@@ -4,6 +4,7 @@ import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -112,6 +114,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Provider with id '{}' to Active", auth, providerBundle.getId());
         providerManager.validate(providerBundle);
+        if (providerManager.get(providerBundle.getId(), (Authentication) null) != null) {
+            throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
+        }
         providerBundle = update(providerBundle, auth);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerBundle.getId());
@@ -126,6 +131,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Provider with id {} to Active", auth, providerId);
         ProviderBundle providerBundle = get(providerId);
+        if (providerManager.get(providerBundle.getId(), (Authentication) null) != null) {
+            throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
+        }
         providerManager.validate(providerBundle);
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerId);
