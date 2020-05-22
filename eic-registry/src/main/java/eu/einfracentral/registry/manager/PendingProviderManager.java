@@ -114,7 +114,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Provider with id '{}' to Active", auth, providerBundle.getId());
         providerManager.validate(providerBundle);
-        if (providerManager.get(providerBundle.getId(), (Authentication) null) != null) {
+        if (providerManager.exists(providerBundle)) {
             throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
         }
         providerBundle = update(providerBundle, auth);
@@ -131,7 +131,8 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Provider with id {} to Active", auth, providerId);
         ProviderBundle providerBundle = get(providerId);
-        if (providerManager.get(providerBundle.getId(), (Authentication) null) != null) {
+
+        if (providerManager.exists(providerBundle)) {
             throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
         }
         providerManager.validate(providerBundle);

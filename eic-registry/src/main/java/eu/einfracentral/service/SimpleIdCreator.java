@@ -28,7 +28,7 @@ public class SimpleIdCreator implements IdCreator {
         }
         return StringUtils
                 .stripAccents(providerId)
-                .replaceAll("[\n\t\\s]+", " ")
+                .replaceAll("[\\n\\t\\s]+", " ")
                 .replaceAll("\\s+$", "")
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_");

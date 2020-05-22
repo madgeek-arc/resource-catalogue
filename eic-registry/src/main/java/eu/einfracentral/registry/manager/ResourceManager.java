@@ -129,12 +129,13 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return t;
     }
 
-    public ParserService.ParserServiceTypes getCoreFormat() {
-        return ParserService.ParserServiceTypes.XML;
+    @Override
+    public boolean exists(T t) {
+        return whereID(t.getId(), false) != null;
     }
 
-    protected boolean exists(T t) {
-        return whereID(t.getId(), false) != null;
+    public ParserService.ParserServiceTypes getCoreFormat() {
+        return ParserService.ParserServiceTypes.XML;
     }
 
     protected String serialize(T t) {
