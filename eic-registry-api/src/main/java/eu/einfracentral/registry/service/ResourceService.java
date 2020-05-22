@@ -45,4 +45,12 @@ ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
      * @return
      */
     Resource getResource(String id);
+
+    /**
+     * Check if resource exists.
+     *
+     * @param t
+     * @return
+     */
+    boolean exists(T t);
 }
