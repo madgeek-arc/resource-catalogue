@@ -51,7 +51,7 @@ public class InfraServiceController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         infraService.delete(service);
-        logger.info("User '{}' deleted InfraService '{}' with id: '{}'", authentication.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' deleted InfraService '{}' with id: '{}'", authentication, service.getService().getName(), service.getService().getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -91,7 +91,7 @@ public class InfraServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication.getName(), service.getService().getName(), service.getService().getId(), service.getService().getVersion());
+        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
         logger.info(" Service Providers: {}", service.getService().getProviders());
         return ret;
     }
@@ -100,7 +100,7 @@ public class InfraServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated InfraService '{}' with id: {}", authentication.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' updated InfraService '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
         return ret;
     }
 
