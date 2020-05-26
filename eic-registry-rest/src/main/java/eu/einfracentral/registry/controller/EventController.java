@@ -67,9 +67,9 @@ public class EventController extends ResourceController<Event, Authentication> {
     public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
         if (value) {
-            logger.info("User '{}' set Service with id '{}' as FAVORITE", authentication.getName(), id);
+            logger.info("User '{}' set Service with id '{}' as FAVORITE", authentication, id);
         } else {
-            logger.info("User '{}' set Service with id '{}' as UNFAVORITE", authentication.getName(), id);
+            logger.info("User '{}' set Service with id '{}' as UNFAVORITE", authentication, id);
         }
         return ret;
     }
@@ -115,7 +115,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setRating(id, rating, authentication), HttpStatus.OK);
-        logger.info("User '{}' rated Service with id '{}', rating value: {}", authentication.getName(), id, rating);
+        logger.info("User '{}' rated Service with id '{}', rating value: {}", authentication, id, rating);
         return ret;
     }
 
