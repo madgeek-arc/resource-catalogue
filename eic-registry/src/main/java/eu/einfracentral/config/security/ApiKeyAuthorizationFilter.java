@@ -32,9 +32,9 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
-    private ServerConfigurationService serverConfigurationService;
+    private final ServerConfigurationService serverConfigurationService;
 
-    private AuthenticationProvider authenticationProvider;
+    private final AuthenticationProvider authenticationProvider;
 
     public ApiKeyAuthorizationFilter(ServerConfigurationService serverConfigurationService,
                                      OIDCAuthenticationProvider openIdConnectAuthenticationProvider) {
@@ -77,8 +77,11 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
+        if (StringUtils.hasText(bearerToken)) {
+            if (bearerToken.startsWith("Bearer ")) {
+                return bearerToken.substring(7);
+            }
+            return bearerToken;
         }
         return null;
     }

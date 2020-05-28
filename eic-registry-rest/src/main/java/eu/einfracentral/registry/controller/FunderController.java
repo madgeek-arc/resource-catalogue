@@ -2,7 +2,10 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Funder;
 import eu.einfracentral.registry.service.FunderService;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,12 +19,13 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("funder")
 public class FunderController extends ResourceController<Funder, Authentication> {
 
-    private FunderService funderService;
+    private final FunderService funderService;
     private static final Logger logger = LogManager.getLogger(FunderController.class);
 
     @Autowired
@@ -45,6 +49,20 @@ public class FunderController extends ResourceController<Funder, Authentication>
         ResponseEntity<Funder> ret = new ResponseEntity<>(funderService.add(funder, auth), HttpStatus.OK);
         logger.info("User '{}' created a new Funder with name '{}' and id '{}'", auth.getName(), funder.getFundingOrganisation(), funder.getId());
         return ret;
+    }
+
+    @Override
+    @ApiOperation(value = "Filter a list of Funders based on a set of filters.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<Funder>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        return super.getAll(allRequestParams, auth);
     }
 
     // Adds all Funders

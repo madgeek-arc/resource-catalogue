@@ -23,7 +23,7 @@ import java.util.Map;
 @Api(value = "Get information about the vocabularies")
 public class VocabularyController extends ResourceController<Vocabulary, Authentication> {
 
-    private VocabularyService vocabularyService;
+    private final VocabularyService vocabularyService;
 
     @Autowired
     VocabularyController(VocabularyService vocabularyService) {
@@ -83,7 +83,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
      * Secured methods
      **/
 
-    @ApiOperation(value = "Adds a new Vocabulary")
+//    @ApiOperation(value = "Adds a new Vocabulary")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
@@ -91,7 +91,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.add(vocabulary, auth);
     }
 
-    @ApiOperation(value = "Updates a new Vocabulary")
+//    @ApiOperation(value = "Updates a Vocabulary")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
@@ -99,7 +99,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.update(vocabulary, auth);
     }
 
-    @ApiOperation(value = "Delete a Vocabulary")
+//    @ApiOperation(value = "Deletes a Vocabulary")
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
@@ -107,14 +107,14 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.delete(vocabulary, auth);
     }
 
-    @ApiOperation(value = "Adds all new Vocabularies")
+//    @ApiOperation(value = "Adds all new Vocabularies")
     @PostMapping(path = "/addAll", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addAll(@RequestBody List<Vocabulary> newVocabularies, @ApiIgnore Authentication auth) {
         vocabularyService.addAll(newVocabularies, auth);
     }
 
-    @ApiOperation(value = "Delete All Vocs")
+//    @ApiOperation(value = "Delete All Vocs")
     @DeleteMapping(path = "/deleteAll", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteAll(@ApiIgnore Authentication auth) {

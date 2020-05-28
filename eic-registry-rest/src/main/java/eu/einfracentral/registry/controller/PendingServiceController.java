@@ -18,6 +18,7 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import org.apache.logging.log4j.LogManager;
@@ -42,9 +43,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("pendingService")
+@Api(value = "Get information about a Pending Service")
 public class PendingServiceController extends ResourceController<InfraService, Authentication> {
 
-    private static Logger logger = LogManager.getLogger(PendingServiceController.class);
+    private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<InfraService> pendingServiceManager;
     private final MeasurementService<Measurement, Authentication> measurementService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;

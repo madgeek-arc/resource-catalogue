@@ -6,6 +6,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import io.swagger.annotations.Api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("pendingProvider")
+@Api(value = "Get information about a Pending Provider")
 public class PendingProviderController extends ResourceController<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingProviderController.class);
