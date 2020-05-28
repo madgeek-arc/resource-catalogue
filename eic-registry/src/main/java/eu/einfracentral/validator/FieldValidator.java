@@ -8,7 +8,6 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.IndicatorManager;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.FunderService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import java.util.Iterator;
 public class FieldValidator {
 
     private final VocabularyService vocabularyService;
-    private final FunderService funderService;
     private final ProviderManager providerService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IndicatorManager indicatorService;
@@ -32,12 +30,10 @@ public class FieldValidator {
 
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
-                          FunderService funderService,
                           ProviderManager providerService,
                           InfraServiceService<InfraService, InfraService> infraServiceService,
                           IndicatorManager indicatorService) {
         this.vocabularyService = vocabularyService;
-        this.funderService = funderService;
         this.providerService = providerService;
         this.infraServiceService = infraServiceService;
         this.indicatorService = indicatorService;
@@ -163,11 +159,6 @@ public class FieldValidator {
                             && providerService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Provider",
-                                        field.getName()));
-                    } else if (Funder.class.equals(annotation.idClass())
-                            && funderService.get(o.toString()) == null) {
-                        throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Funder",
                                         field.getName()));
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
                             || InfraService.class.equals(annotation.idClass()))

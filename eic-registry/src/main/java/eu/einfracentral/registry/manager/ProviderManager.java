@@ -132,6 +132,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle provider = get(id);
         if (auth == null) {
             provider.getProvider().setUsers(null);
+            provider.getProvider().setMainContact(null);
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")
@@ -139,6 +140,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             return provider;
         }
         provider.getProvider().setUsers(null);
+        provider.getProvider().setMainContact(null);
         return provider;
     }
 
@@ -162,6 +164,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 .stream()
                 .map(p -> {
                     p.getProvider().setUsers(null);
+                    p.getProvider().setMainContact(null);
                     return p;
                 })
                 .collect(Collectors.toList());
@@ -184,9 +187,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
-                if (s.getService().getProviders().size() == 1) {
-                    infraServiceService.delete(s);
-                }
+                infraServiceService.delete(s);
             } catch (ResourceNotFoundException e) {
                 logger.error("Error deleting Service", e);
             }
@@ -384,13 +385,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             logger.error("", e);
         }
 
-        // Validate Provider's National Roadmap
-        if (provider.getProvider().getNationalRoadmap() != null) {
-            if (!"yes".equalsIgnoreCase(provider.getProvider().getNationalRoadmap())
-                    && !"no".equalsIgnoreCase(provider.getProvider().getNationalRoadmap())) {
-                throw new ValidationException("nationalRoadmap's value should be Yes or No");
-            }
+        // Validate Provider's legalEntity
+        if (!"yes".equalsIgnoreCase(provider.getProvider().getLegalEntity()) && !"no".equalsIgnoreCase(provider.getProvider().getLegalEntity())) {
+            throw new ValidationException("legalEntity's value should be Yes or No");
         }
+
         return provider;
     }
 

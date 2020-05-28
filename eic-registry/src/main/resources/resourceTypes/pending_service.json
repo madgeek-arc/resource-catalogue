@@ -16,15 +16,23 @@
     },
     {
       "multivalued": false,
-      "name": "service_version",
+      "name": "version",
+      "label": "Version",
       "path": "//*[local-name()='service']/*[local-name()='version']/text()",
       "type": "java.lang.String"
     },
     {
+      "multivalued": false,
+      "name": "resource_organisation",
+      "label": "Resource Organisation",
+      "path": "//*[local-name()='service']/*[local-name()='resourceOrganisation']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": true,
-      "name": "providers",
-      "label": "Provider",
-      "path": "//*[local-name()='service']//*[local-name()='provider']/text()",
+      "name": "resource_providers",
+      "label": "Resource Providers",
+      "path": "//*[local-name()='service']//*[local-name()='resourceProviders']/text()",
       "type": "java.lang.String"
     },
     {
@@ -50,20 +58,6 @@
     },
     {
       "multivalued": true,
-      "name": "languages",
-      "label": "Language",
-      "path": "//*[local-name()='service']//*[local-name()='language']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "places",
-      "label": "Place",
-      "path": "//*[local-name()='service']//*[local-name()='place']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "access_types",
       "label": "Access Type",
       "path": "//*[local-name()='service']//*[local-name()='accessType']/text()",
@@ -78,16 +72,23 @@
     },
     {
       "multivalued": true,
-      "name": "funders",
-      "label": "Funders",
-      "path": "//*[local-name()='service']//*[local-name()='funder']/text()",
+      "name": "language_availabilities",
+      "label": "Language Availability",
+      "path": "//*[local-name()='service']//*[local-name()='languageAvailability']/text()",
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "phase",
-      "label": "Phase",
-      "path": "//*[local-name()='service']/*[local-name()='phase']/text()",
+      "multivalued": true,
+      "name": "geographical_availabilities",
+      "label": "Geographical Availability",
+      "path": "//*[local-name()='service']//*[local-name()='geographicalAvailability']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "resource_geographic_locations",
+      "label": "Resource Geographic Location",
+      "path": "//*[local-name()='service']//*[local-name()='resourceGeographicLocation']/text()",
       "type": "java.lang.String"
     },
     {
@@ -99,44 +100,57 @@
     },
     {
       "multivalued": false,
-      "name": "orderType",
-      "label": "Order Type",
-      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
+      "name": "life_cycle_status",
+      "label": "Life Cycle Status",
+      "path": "//*[local-name()='service']//*[local-name()='lifeCycleStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_body",
+      "label": "Funding Body",
+      "path": "//*[local-name()='service']//*[local-name()='fundingBody']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_programs",
+      "label": "Funding Program",
+      "path": "//*[local-name()='service']//*[local-name()='fundingProgram']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "description",
+      "label": "Description",
       "path": "//*[local-name()='service']/*[local-name()='description']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "tagline",
+      "label": "Tagline",
       "path": "//*[local-name()='service']/*[local-name()='tagline']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "user_value",
-      "path": "//*[local-name()='service']/*[local-name()='userValue']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "user_base",
-      "path": "//*[local-name()='service']//*[local-name()='userBase']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "use_cases",
+      "label": "Use Case",
       "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
+      "name": "open_source_technologies",
+      "label": "Open Source Technology",
+      "path": "//*[local-name()='service']//*[local-name()='openSourceTechnology']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
       "name": "tags",
+      "label": "Tag",
       "path": "//*[local-name()='service']//*[local-name()='tag']/text()",
       "type": "java.lang.String"
     },
@@ -166,6 +180,12 @@
     },
     {
       "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='metadata']/*[local-name()='originalId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "active",
       "defaultValue": false,
       "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
@@ -182,17 +202,11 @@
       "name": "latest",
       "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
       "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
-      "name": "originalId",
-      "path": "//*[local-name()='originalId']/text()",
-      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
   "name": "pending_service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schema": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://einfracentral.eu\" version=\"1.0\" xmlns:tns=\"http://einfracentral.eu\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n\t<xs:element name=\"infraService\"/>\n</xs:schema>"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris_v2.11/eic-registry-model/src/main/resources/schema1.xsd"
 }

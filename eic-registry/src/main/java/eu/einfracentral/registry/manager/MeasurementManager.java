@@ -212,7 +212,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
 
         if (measurement.getLocations() != null) {
             List<String> verifiedLocations = new ArrayList<>();
-            Map<String, Vocabulary> placesVocabulary = vocabularyService.getByType(Vocabulary.Type.PLACE)
+            Map<String, Vocabulary> placesVocabulary = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
                     .stream()
                     .collect(Collectors.toMap(Vocabulary::getId, v -> v));
             for (String location : measurement.getLocations()) {

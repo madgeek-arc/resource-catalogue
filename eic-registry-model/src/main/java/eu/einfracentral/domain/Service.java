@@ -3,6 +3,7 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -17,10 +18,9 @@ import java.util.Objects;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Service implements Identifiable {
 
-
-    // Basic Service Information
+    // Service Basic Information
     /**
-     * Global unique and persistent identifier of the service/resource.
+     * A persistent identifier, a unique reference to the Resource in the context of the EOSC Portal.
      */
     @XmlElement
     @ApiModelProperty(position = 1, example = "(required on PUT only)")
@@ -28,7 +28,7 @@ public class Service implements Identifiable {
     private String id;
 
     /**
-     * Brief and descriptive name of service/resource as assigned by the service/resource provider.
+     * Brief and descriptive name of Resource as assigned by the Provider.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, example = "String (required)", required = true)
@@ -36,623 +36,565 @@ public class Service implements Identifiable {
     private String name;
 
     /**
-     * Webpage with information about the service/resource usually hosted and maintained by the service/resource provider.
+     * The name (or abbreviation) of the organisation that manages or delivers the resource, or that coordinates resource delivery in a federated scenario.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "URL (required)", required = true)
-    @FieldValidation
-    private URL url;
+    @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Provider.class)
+    private String resourceOrganisation;
 
     /**
-     * A high-level description in fairly non-technical terms of what the service/resource does, functionality it provides and resources it enables to access.
+     * The name(s) (or abbreviation(s)) of Provider(s) that manage or deliver the Resource in federated scenarios.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "String (required)", required = true)
-    @FieldValidation
-    private String description;
+    @XmlElementWrapper(name = "resourceProviders")
+    @XmlElement(name = "resourceProvider")
+    @ApiModelProperty(position = 4, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
+    private List<String> resourceProviders;
 
     /**
-     * Link to the logo/visual identity of the service. The logo will be visible at the Portal.
+     * Webpage with information about the Resource usually hosted and maintained by the Provider.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, example = "URL (required)", required = true)
     @FieldValidation
-    private URL logo;
+    private URL webpage;
+
+
+    // Service Marketing Information
+    /**
+     * A high-level description in fairly non-technical terms of a) what the Resource does, functionality it provides and Resources it enables to access,
+     * b) the benefit to a user/customer delivered by a Resource; benefits are usually related to alleviating pains
+     * (e.g., eliminate undesired outcomes, obstacles or risks) or producing gains (e.g. increased performance, social gains, positive emotions or cost saving),
+     * c) list of customers, communities, users, etc. using the Resource.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 6, example = "String (required)", required = true)
+    @FieldValidation
+    private String description;
 
     /**
-     * Link to video, screenshots or slides showing details of the service/resource.
+     * Short catch-phrase for marketing and advertising purposes. It will be usually displayed close to the Resource name and should refer to the main value or purpose of the Resource.
      */
-    @XmlElementWrapper(name = "multimediaUrls")
-    @XmlElement(name = "multimediaUrl")
-    @ApiModelProperty(position = 6, dataType = "List", example = "URL[] (optional)")
-    @FieldValidation(nullable = true)
-    private List<URL> multimediaUrls;
-
-    /**
-     * Short catch-phrase for marketing and advertising purposes. It will be usually displayed close the service name and should refer to the main value or purpose of the service.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 7, example = "String (optional)")
-    @FieldValidation(nullable = true)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 7, example = "String (required)", required = true)
+    @FieldValidation
     private String tagline;
 
     /**
-     * The benefit to a user/customer delivered by a service; benefits are usually related to alleviating pains (e.g., eliminate undesired outcomes, obstacles or risks) or producing gains (e.g. increased performance, social gains, positive emotions or cost saving).
+     * Link to the logo/visual identity of the Resource. The logo will be visible at the Portal.
      */
-    @XmlElement
-    @ApiModelProperty(position = 8, example = "String (optional)")
-    @FieldValidation(nullable = true)
-    private String userValue;
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 8, example = "URL (required)", required = true)
+    @FieldValidation
+    private URL logo;
 
     /**
-     * List of customers, communities, users, etc. using the service.
+     * Link to video, screenshots or slides showing details of the Resource.
      */
-    @XmlElementWrapper(name = "userBaseList")
-    @XmlElement(name = "userBase")
-    @ApiModelProperty(position = 9, dataType = "List", example = "String[] (optional)")
+    @XmlElementWrapper(name = "multimedia")
+    @ApiModelProperty(position = 9, dataType = "List", example = "URL[] (optional)")
     @FieldValidation(nullable = true)
-    private List<String> userBaseList;
+    private List<URL> multimedia;
 
     /**
-     * List of use cases supported by this service/resource.
+     * Link to use cases supported by this Resource.
      */
     @XmlElementWrapper(name = "useCases")
     @XmlElement(name = "useCase")
-    @ApiModelProperty(position = 10, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 10, dataType = "List", example = "URL[] (optional)")
     @FieldValidation(nullable = true)
-    private List<String> useCases;
-
-    /**
-     * High-level description of the various options or forms in which the service/resource can be instantiated.
-     */
-    @XmlElementWrapper(name = "options")
-    @XmlElement(name = "option")
-    @ApiModelProperty(position = 11)
-    @FieldValidation(nullable = true)
-    private List<ServiceOption> options;
-
-    /**
-     * Main URL to use the service (in the case of networked service).
-     */
-    @XmlElement
-    @ApiModelProperty(position = 12, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL endpoint;
+    private List<URL> useCases;
 
 
     // Service Classification Information
     /**
-     * The organisation that manages and delivers the service/resource.
-     */
-    @XmlElementWrapper(name = "providers", required = true)
-    @XmlElement(name = "provider")
-    @ApiModelProperty(position = 13, dataType = "List", example = "String[] (required)", required = true)
-    @FieldValidation(containsId = true, idClass = Provider.class)
-    private List<String> providers;
-
-    /**
-     * The subbranch of science, scientific subdicipline that is related to the service/resource.
+     * The subbranch of science, scientific subdicipline that is related to the Resource.
      */
     @XmlElementWrapper(name = "scientificSubdomains", required = true)
     @XmlElement(name = "scientificSubdomain")
-    @ApiModelProperty(position = 14, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 11, dataType = "List", example = "String[] (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
     private List<String> scientificSubdomains;
 
     /**
-     * A named group of services/resources that offer access to the same type of resource or capabilities, within the defined service category.
+     * A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.
      */
     @XmlElementWrapper(name = "subcategories", required = true)
     @XmlElement(name = "subcategory")
-    @ApiModelProperty(position = 15, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 12, dataType = "List", example = "String[] (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SUBCATEGORY)
     private List<String> subcategories;
 
     /**
-     * Type of users/customers that commissions a service/resource provider to deliver a service.
+     * Type of users/customers that commissions a Provider to deliver a Resource.
      */
     @XmlElementWrapper(name = "targetUsers", required = true)
     @XmlElement(name = "targetUser")
-    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.TARGET_USERS)
+    @ApiModelProperty(position = 13, dataType = "List", example = "String[] (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TARGET_USER)
     private List<String> targetUsers;
-
-    /**
-     * Languages of the user interface of the service or the resource.
-     */
-    @XmlElementWrapper(name = "languages", required = true)
-    @XmlElement(name = "language")
-    @ApiModelProperty(position = 17, dataType = "List", example = "String[] (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
-    private List<String> languages;
-
-    /**
-     * Countries where the service/resource is offered.
-     */
-    @XmlElementWrapper(name = "places", required = true)
-    @XmlElement(name = "place")
-    @ApiModelProperty(position = 18, dataType = "List", example = "String[] (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.PLACE)
-    private List<String> places;
 
     /**
      * The way a user can access the service/resource (Remote, Physical, Virtual, etc.).
      */
     @XmlElementWrapper(name = "accessTypes")
     @XmlElement(name = "accessType")
-    @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 14, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ACCESS_TYPE)
     private List<String> accessTypes;
 
     /**
-     * The mode a user can access the service/resource (Excellence Driven, Market driven, etc).
+     * Eligibility/criteria for granting access to users (excellence-based, free-conditionally, free etc.).
      */
     @XmlElementWrapper(name = "accessModes")
     @XmlElement(name = "accessMode")
-    @ApiModelProperty(position = 20, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 15, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ACCESS_MODE)
     private List<String> accessModes;
 
     /**
-     * Sources of funding for the development and/or operation of the service.
-     */
-    @XmlElementWrapper(name = "funders")
-    @XmlElement(name = "funder")
-    @ApiModelProperty(position = 21, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Funder.class)
-    private List<String> funders;
-
-    /**
-     * Keywords associated to the service/resource to simplify search by relevant keywords.
+     * Keywords associated to the Resource to simplify search by relevant keywords.
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 22, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> tags;
 
 
-    // Service Maturity Information
+    // Service Geographical and Language Availability Information
     /**
-     * Phase of the service/resource lifecycle.
+     * Locations where the Resource is offered.
      */
-    @XmlElement
-    @ApiModelProperty(position = 23, example = "String (optional)")
+    @XmlElementWrapper(name = "geographicalAvailabilities", required = true)
+    @XmlElement(name = "geographicalAvailability")
+    @ApiModelProperty(position = 17, dataType = "List", example = "String[] (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.GEOGRAPHICAL_AVAILABILITY)
+    private List<String> geographicalAvailabilities;
+
+    /**
+     * Languages of the (user interface of the) Resource.
+     */
+    @XmlElementWrapper(name = "languageAvailabilities", required = true)
+    @XmlElement(name = "languageAvailability")
+    @ApiModelProperty(position = 18, dataType = "List", example = "String[] (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
+    private List<String> languageAvailabilities;
+
+
+    // Service Resource Location Information
+    /**
+     * List of geographic locations where data is stored and processed.
+     */
+    @XmlElementWrapper(name = "resourceGeographicLocations")
+    @XmlElement(name = "resourceGeographicLocation")
+    @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PHASE)
-    private String phase;
-
-    /**
-     * The Technology Readiness Level of the Tag of the service/resource.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 24, example = "String (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TRL)
-    private String trl;
-
-    /**
-     * Version of the service/resource that is in force.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 25, example = "String (optional)")
-    @FieldValidation(nullable = true)
-    private String version;
-
-    /**
-     * Date of the latest update of the service/resource.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 26, example = "XMLGregorianCalendar (optional)")
-    @FieldValidation(nullable = true)
-    private XMLGregorianCalendar lastUpdate;
-
-    /**
-     * Summary of the service/resource features updated from the previous version.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 27, example = "String (optional)")
-    @FieldValidation(nullable = true)
-    private String changeLog;
-
-    /**
-     * List of certifications obtained for the service (including the certification body).
-     */
-    @XmlElementWrapper(name = "certifications")
-    @XmlElement(name = "certification")
-    @ApiModelProperty(position = 28, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true)
-    private List<String> certifications;
-
-    /**
-     * List of standards supported by the service.
-     */
-    @XmlElementWrapper(name = "standards")
-    @XmlElement(name = "standard")
-    @ApiModelProperty(position = 29, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true)
-    private List<String> standards;
-
-
-    // Service Contractual Information
-    /**
-     * Described id the service/resource can be accessed with an ordering process.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 30, example = "String (required)", required = true)
-    @VocabularyValidation(type = Vocabulary.Type.ORDER_TYPE)
-    private String orderType;
-
-    /**
-     * Webpage to request the service/resource from the service/resource provider.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 31, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL order;
-
-    /**
-     * Webpage with the information about the levels of performance that a service/resource provider is expected to deliver.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 32, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL sla;
-
-    /**
-     * Webpage describing the rules, service/resource conditions and usage policy which one must agree to abide by in order to use the service.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 33, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL termsOfUse;
-
-    /**
-     * Link to the privacy policy applicable to the service.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 34, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL privacyPolicy;
-
-    /**
-     * Webpage to the information about the access policies that apply.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 35, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL accessPolicy;
-
-    /**
-     * Webpage with the supported payment models and restrictions that apply to each of them.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 36, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL paymentModel;
-
-    /**
-     * Webpage with the information on the price scheme for this service in case the customer is charged for.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 37, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL pricing;
-
-
-    // Service Support Information
-    /**
-     * Link to the service/resource user manual and documentation.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 38, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL userManual;
-
-    /**
-     * Link to the service/resource admin manual and documentation.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 39, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL adminManual;
-
-    /**
-     * Webpage to training information on the service.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 40, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL training;
-
-    /**
-     * The URL to a webpage with the contact person or helpdesk to ask more information from the service/resource provider about this service.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 41, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL helpdesk;
-
-    /**
-     * Webpage with monitoring information about this service.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 42, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL monitoring;
-
-    /**
-     * Webpage with information about planned maintenance windows for this service.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 43, example = "URL (optional)")
-    @FieldValidation(nullable = true)
-    private URL maintenance;
+    @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
+    private List<String> resourceGeographicLocations;
 
 
     // Service Contact Information
     /**
-     * List of service's contact persons info.
+     * Service's Main Contact/Resource Owner info.
      */
-    @XmlElementWrapper(name = "contacts", required = true)
-    @XmlElement(name = "contact")
-    @ApiModelProperty(position = 44, required = true)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 20, required = true)
     @FieldValidation
-    private List<Contact> contacts;
+    private ServiceMainContact mainContact;
 
-
-    // Service Other Information
     /**
-     * List of other services required with this service.
+     * List of the Service's Public Contacts info.
      */
-    @XmlElementWrapper(name = "requiredServices")
-    @XmlElement(name = "requiredService")
-    @ApiModelProperty(position = 45, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
-    private List<String> requiredServices;
+    @XmlElementWrapper(name = "publicContacts")
+    @XmlElement(name = "publicContact")
+    @ApiModelProperty(position = 21, dataType = "List")
+    @FieldValidation(nullable = true)
+    private List<ServicePublicContact> publicContacts;
 
     /**
-     * List of other services that are commonly used with this service.
+     * The email to ask more information from the Provider about this Resource.
      */
-    @XmlElementWrapper(name = "relatedServices")
-    @XmlElement(name = "relatedService")
-    @ApiModelProperty(position = 46, dataType = "List", example = "String[] (optional)")
-    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
-    private List<String> relatedServices;
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 22, example = "String (required)", required = true)
+    @FieldValidation
+    private String helpdeskEmail;
 
     /**
-     * List of service's related platforms.
+     * The email to contact the Provider for critical security issues about this Resource.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 23, example = "String (required)", required = true)
+    @FieldValidation
+    private String securityContactEmail;
+
+
+    // Service Maturity Information
+    /**
+     * The Technology Readiness Level of the Resource updated in the context of the EOSC.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 24, example = "String (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TRL)
+    private String trl;
+
+    /**
+     * Phase of the Resource life-cycle.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 25, example = "String (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.LIFE_CYCLE_STATUS)
+    private String lifeCycleStatus;
+
+    /**
+     * List of certifications obtained for the Resource (including the certification body).
+     */
+    @XmlElementWrapper(name = "certifications")
+    @XmlElement(name = "certification")
+    @ApiModelProperty(position = 26, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true)
+    private List<String> certifications;
+
+    /**
+     * List of standards supported by the Resource.
+     */
+    @XmlElementWrapper(name = "standards")
+    @XmlElement(name = "standard")
+    @ApiModelProperty(position = 27, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true)
+    private List<String> standards;
+
+    /**
+     * List of open source technologies supported by the Resource.
+     */
+    @XmlElementWrapper(name = "openSourceTechnologies")
+    @XmlElement(name = "openSourceTechnology")
+    @ApiModelProperty(position = 28, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true)
+    private List<String> openSourceTechnologies;
+
+    /**
+     * Version of the Resource that is in force.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 29, example = "String (optional)")
+    @FieldValidation(nullable = true)
+    private String version;
+
+    /**
+     * Date of the latest update of the Resource.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 30, example = "XMLGregorianCalendar (optional)")
+    @FieldValidation(nullable = true)
+    private XMLGregorianCalendar lastUpdate;
+
+    /**
+     * Summary of the Resource features updated from the previous version.
+     */
+    @XmlElementWrapper(name = "changeLog")
+    @ApiModelProperty(position = 31, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true)
+    private List<String> changeLog;
+
+
+    // Service Dependencies Information
+    /**
+     * List of other Resources required to use this Resource.
+     */
+    @XmlElementWrapper(name = "requiredResources")
+    @XmlElement(name = "requiredResource")
+    @ApiModelProperty(position = 32, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+    private List<String> requiredResources;
+
+    /**
+     * List of other Resources that are commonly used with this Resource.
+     */
+    @XmlElementWrapper(name = "relatedResources")
+    @XmlElement(name = "relatedResource")
+    @ApiModelProperty(position = 33, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+    private List<String> relatedResources;
+
+    /**
+     * List of suites or thematic platforms in which the Resource is engaged or Providers (Provider groups) contributing to this Resource.
      */
     @XmlElementWrapper(name = "relatedPlatforms")
     @XmlElement(name = "relatedPlatform")
-    @ApiModelProperty(position = 47, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 34, dataType = "List", example = "String[] (optional)")
     @FieldValidation(nullable = true)
     private List<String> relatedPlatforms;
 
 
-    // Service Aggregator Information
+    // Service Attribution Information
     /**
-     * Number of services offered under the record.
+     * Name of the funding body that supported the development and/or operation of the Resource.
      */
-    @XmlElement(defaultValue = "1")
-    @ApiModelProperty(position = 48, example = "(default = 1) (optional)")
-    private Integer aggregatedServices = 1;
+    @XmlElementWrapper(name = "fundingBody")
+    @ApiModelProperty(position = 35, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.FUNDING_BODY)
+    private List<String> fundingBody;
 
     /**
-     * Number of publications offered under the record.
+     * Name of the funding program that supported the development and/or operation of the Resource.
      */
-    @XmlElement(defaultValue = "0")
-    @ApiModelProperty(position = 49, example = "(default = 0) (optional)")
-    private Integer publications = 0;
+    @XmlElementWrapper(name = "fundingPrograms")
+    @XmlElement(name = "fundingProgram")
+    @ApiModelProperty(position = 36, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.FUNDING_PROGRAM)
+    private List<String> fundingPrograms;
 
     /**
-     * Number of datasets offered under the record.
+     * Name of the project that supported the development and/or operation of the Resource.
      */
-    @XmlElement(defaultValue = "0")
-    @ApiModelProperty(position = 50, example = "(default = 0) (optional)")
-    private Integer datasets = 0;
+    @XmlElementWrapper(name = "grantProjectNames")
+    @XmlElement(name = "grantProjectName")
+    @ApiModelProperty(position = 37, dataType = "List", example = "String[] (optional)")
+    @FieldValidation(nullable = true)
+    private List<String> grantProjectNames;
+
+
+    // Service Management Information
+    /**
+     * The URL to a webpage to ask more information from the Provider about this Resource.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 38, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL helpdeskPage;
 
     /**
-     * Number of softwares offered under the record.
+     * Link to the Resource user manual and documentation.
      */
-    @XmlElement(defaultValue = "0")
-    @ApiModelProperty(position = 51, example = "(default = 0) (optional)")
-    private Integer software = 0;
+    @XmlElement
+    @ApiModelProperty(position = 39, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL userManual;
 
     /**
-     * Number of applications offered under the record.
+     * Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.
      */
-    @XmlElement(defaultValue = "0")
-    @ApiModelProperty(position = 52, example = "(default = 0) (optional)")
-    private Integer applications = 0;
+    @XmlElement
+    @ApiModelProperty(position = 40, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL termsOfUse;
 
     /**
-     * Other resources offered under the record.
+     * Link to the privacy policy applicable to the Resource.
      */
-    @XmlElement(defaultValue = "0")
-    @ApiModelProperty(position = 53, example = "(default = 0) (optional)")
-    private Integer otherProducts = 0;
+    @XmlElement
+    @ApiModelProperty(position = 41, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL privacyPolicy;
+
+    /**
+     * Information about the access policies that apply.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 42, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL accessPolicy;
+
+    /**
+     * Webpage with the information about the levels of performance that a Provider is expected to deliver.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 43, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL serviceLevel;
+
+    /**
+     * Webpage to training information on the Resource.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 44, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL trainingInformation;
+
+    /**
+     * Webpage with monitoring information about this Resource.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 45, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL statusMonitoring;
+
+    /**
+     * Webpage with information about planned maintenance windows for this Resource.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 46, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL maintenance;
+
+
+    // Service Access & Order Information
+    /**
+     * Information on the order type (requires an ordering procedure, or no ordering and if fully open or requires authentication).
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 47, example = "String (required)", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.ORDER_TYPE)
+    private String orderType;
+
+    /**
+     * Webpage through which an order for the Resource can be placed.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 48, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL order;
+
+
+    // Service Financial Information
+    /**
+     * Webpage with the supported payment models and restrictions that apply to each of them.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 49, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL paymentModel;
+
+    /**
+     * Webpage with the information on the price scheme for this Resource in case the customer is charged for.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 50, example = "URL (optional)")
+    @FieldValidation(nullable = true)
+    private URL pricing;
 
 
     public Service() {
         // No arg constructor
     }
 
-    public Service(Service service) {
-        this.id = service.id;
-        this.name = service.name;
-        this.url = service.url;
-        this.description = service.description;
-        this.logo = service.logo;
-        this.tagline = service.tagline;
-        this.userValue = service.userValue;
-        this.userBaseList = service.userBaseList;
-        this.useCases = service.useCases;
-        this.multimediaUrls = service.multimediaUrls;
-        this.options = service.options;
-        this.endpoint = service.endpoint;
-        this.requiredServices = service.requiredServices;
-        this.relatedServices = service.relatedServices;
-        this.providers = service.providers;
-        this.targetUsers = service.targetUsers;
-        this.subcategories = service.subcategories;
-        this.scientificSubdomains = service.scientificSubdomains;
-        this.languages = service.languages;
-        this.places = service.places;
-        this.accessTypes = service.accessTypes;
-        this.accessModes = service.accessModes;
-        this.tags = service.tags;
-        this.funders = service.funders;
-        this.phase = service.phase;
-        this.trl = service.trl;
-        this.version = service.version;
-        this.lastUpdate = service.lastUpdate;
-        this.changeLog = service.changeLog;
-        this.certifications = service.certifications;
-        this.standards = service.standards;
-        this.orderType = service.orderType;
-        this.order = service.order;
-        this.sla = service.sla;
-        this.termsOfUse = service.termsOfUse;
-        this.privacyPolicy = service.privacyPolicy;
-        this.accessPolicy = service.accessPolicy;
-        this.paymentModel = service.paymentModel;
-        this.pricing = service.pricing;
-        this.userManual = service.userManual;
-        this.adminManual = service.adminManual;
-        this.training = service.training;
-        this.helpdesk = service.helpdesk;
-        this.monitoring = service.monitoring;
-        this.maintenance = service.maintenance;
-        this.contacts = service.contacts;
-        this.relatedPlatforms = service.relatedPlatforms;
-        this.aggregatedServices = service.aggregatedServices;
-        this.publications = service.publications;
-        this.datasets = service.datasets;
-        this.software = service.software;
-        this.applications = service.applications;
-        this.otherProducts = service.otherProducts;
-    }
-
-    @Override
-    public String toString() {
-        return "Service{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", url=" + url +
-                ", description='" + description + '\'' +
-                ", logo=" + logo +
-                ", multimediaUrls=" + multimediaUrls +
-                ", tagline='" + tagline + '\'' +
-                ", userValue='" + userValue + '\'' +
-                ", userBaseList=" + userBaseList +
-                ", useCases=" + useCases +
-                ", options=" + options +
-                ", endpoint=" + endpoint +
-                ", providers=" + providers +
-                ", scientificSubdomains=" + scientificSubdomains +
-                ", subcategories=" + subcategories +
-                ", targetUsers=" + targetUsers +
-                ", languages=" + languages +
-                ", places=" + places +
-                ", accessTypes=" + accessTypes +
-                ", accessModes=" + accessModes +
-                ", funders=" + funders +
-                ", tags=" + tags +
-                ", phase='" + phase + '\'' +
-                ", trl='" + trl + '\'' +
-                ", version='" + version + '\'' +
-                ", lastUpdate=" + lastUpdate +
-                ", changeLog='" + changeLog + '\'' +
-                ", certifications=" + certifications +
-                ", standards=" + standards +
-                ", orderType='" + orderType + '\'' +
-                ", order=" + order +
-                ", sla=" + sla +
-                ", termsOfUse=" + termsOfUse +
-                ", privacyPolicy=" + privacyPolicy +
-                ", accessPolicy=" + accessPolicy +
-                ", paymentModel=" + paymentModel +
-                ", pricing=" + pricing +
-                ", userManual=" + userManual +
-                ", adminManual=" + adminManual +
-                ", training=" + training +
-                ", helpdesk=" + helpdesk +
-                ", monitoring=" + monitoring +
-                ", maintenance=" + maintenance +
-                ", contacts=" + contacts +
-                ", requiredServices=" + requiredServices +
-                ", relatedServices=" + relatedServices +
-                ", relatedPlatforms=" + relatedPlatforms +
-                ", aggregatedServices=" + aggregatedServices +
-                ", publications=" + publications +
-                ", datasets=" + datasets +
-                ", software=" + software +
-                ", applications=" + applications +
-                ", otherProducts=" + otherProducts +
-                '}';
+    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificSubdomains, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
+        this.id = id;
+        this.name = name;
+        this.resourceOrganisation = resourceOrganisation;
+        this.resourceProviders = resourceProviders;
+        this.webpage = webpage;
+        this.description = description;
+        this.tagline = tagline;
+        this.logo = logo;
+        this.multimedia = multimedia;
+        this.useCases = useCases;
+        this.scientificSubdomains = scientificSubdomains;
+        this.subcategories = subcategories;
+        this.targetUsers = targetUsers;
+        this.accessTypes = accessTypes;
+        this.accessModes = accessModes;
+        this.tags = tags;
+        this.geographicalAvailabilities = geographicalAvailabilities;
+        this.languageAvailabilities = languageAvailabilities;
+        this.resourceGeographicLocations = resourceGeographicLocations;
+        this.mainContact = mainContact;
+        this.publicContacts = publicContacts;
+        this.helpdeskEmail = helpdeskEmail;
+        this.securityContactEmail = securityContactEmail;
+        this.trl = trl;
+        this.lifeCycleStatus = lifeCycleStatus;
+        this.certifications = certifications;
+        this.standards = standards;
+        this.openSourceTechnologies = openSourceTechnologies;
+        this.version = version;
+        this.lastUpdate = lastUpdate;
+        this.changeLog = changeLog;
+        this.requiredResources = requiredResources;
+        this.relatedResources = relatedResources;
+        this.relatedPlatforms = relatedPlatforms;
+        this.fundingBody = fundingBody;
+        this.fundingPrograms = fundingPrograms;
+        this.grantProjectNames = grantProjectNames;
+        this.helpdeskPage = helpdeskPage;
+        this.userManual = userManual;
+        this.termsOfUse = termsOfUse;
+        this.privacyPolicy = privacyPolicy;
+        this.accessPolicy = accessPolicy;
+        this.serviceLevel = serviceLevel;
+        this.trainingInformation = trainingInformation;
+        this.statusMonitoring = statusMonitoring;
+        this.maintenance = maintenance;
+        this.orderType = orderType;
+        this.order = order;
+        this.paymentModel = paymentModel;
+        this.pricing = pricing;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Service)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Service service = (Service) o;
         return Objects.equals(id, service.id) &&
                 Objects.equals(name, service.name) &&
-                Objects.equals(url, service.url) &&
+                Objects.equals(resourceOrganisation, service.resourceOrganisation) &&
+                Objects.equals(resourceProviders, service.resourceProviders) &&
+                Objects.equals(webpage, service.webpage) &&
                 Objects.equals(description, service.description) &&
-                Objects.equals(logo, service.logo) &&
                 Objects.equals(tagline, service.tagline) &&
-                Objects.equals(userValue, service.userValue) &&
-                stringListsAreEqual(userBaseList, service.userBaseList) &&
-                stringListsAreEqual(useCases, service.useCases) &&
-                Objects.equals(multimediaUrls, service.multimediaUrls) &&
-                Objects.equals(options, service.options) &&
-                Objects.equals(endpoint, service.endpoint) &&
-                stringListsAreEqual(requiredServices, service.requiredServices) &&
-                stringListsAreEqual(relatedServices, service.relatedServices) &&
-                stringListsAreEqual(providers, service.providers) &&
-                stringListsAreEqual(scientificSubdomains, service.scientificSubdomains) &&
-                stringListsAreEqual(subcategories, service.subcategories) &&
-                stringListsAreEqual(targetUsers, service.targetUsers) &&
-                stringListsAreEqual(languages, service.languages) &&
-                stringListsAreEqual(places, service.places) &&
-                stringListsAreEqual(accessTypes, service.accessTypes) &&
-                stringListsAreEqual(accessModes, service.accessModes) &&
-                stringListsAreEqual(funders, service.funders) &&
-                stringListsAreEqual(tags, service.tags) &&
-                Objects.equals(phase, service.phase) &&
+                Objects.equals(logo, service.logo) &&
+                Objects.equals(multimedia, service.multimedia) &&
+                Objects.equals(useCases, service.useCases) &&
+                Objects.equals(scientificSubdomains, service.scientificSubdomains) &&
+                Objects.equals(subcategories, service.subcategories) &&
+                Objects.equals(targetUsers, service.targetUsers) &&
+                Objects.equals(accessTypes, service.accessTypes) &&
+                Objects.equals(accessModes, service.accessModes) &&
+                Objects.equals(tags, service.tags) &&
+                Objects.equals(geographicalAvailabilities, service.geographicalAvailabilities) &&
+                Objects.equals(languageAvailabilities, service.languageAvailabilities) &&
+                Objects.equals(resourceGeographicLocations, service.resourceGeographicLocations) &&
+                Objects.equals(mainContact, service.mainContact) &&
+                Objects.equals(publicContacts, service.publicContacts) &&
+                Objects.equals(helpdeskEmail, service.helpdeskEmail) &&
+                Objects.equals(securityContactEmail, service.securityContactEmail) &&
                 Objects.equals(trl, service.trl) &&
+                Objects.equals(lifeCycleStatus, service.lifeCycleStatus) &&
+                Objects.equals(certifications, service.certifications) &&
+                Objects.equals(standards, service.standards) &&
+                Objects.equals(openSourceTechnologies, service.openSourceTechnologies) &&
                 Objects.equals(version, service.version) &&
                 Objects.equals(lastUpdate, service.lastUpdate) &&
                 Objects.equals(changeLog, service.changeLog) &&
-                stringListsAreEqual(certifications, service.certifications) &&
-                stringListsAreEqual(standards, service.standards) &&
-                Objects.equals(orderType, service.orderType) &&
-                Objects.equals(order, service.order) &&
-                Objects.equals(sla, service.sla) &&
+                Objects.equals(requiredResources, service.requiredResources) &&
+                Objects.equals(relatedResources, service.relatedResources) &&
+                Objects.equals(relatedPlatforms, service.relatedPlatforms) &&
+                Objects.equals(fundingBody, service.fundingBody) &&
+                Objects.equals(fundingPrograms, service.fundingPrograms) &&
+                Objects.equals(grantProjectNames, service.grantProjectNames) &&
+                Objects.equals(helpdeskPage, service.helpdeskPage) &&
+                Objects.equals(userManual, service.userManual) &&
                 Objects.equals(termsOfUse, service.termsOfUse) &&
                 Objects.equals(privacyPolicy, service.privacyPolicy) &&
                 Objects.equals(accessPolicy, service.accessPolicy) &&
-                Objects.equals(paymentModel, service.paymentModel) &&
-                Objects.equals(pricing, service.pricing) &&
-                Objects.equals(userManual, service.userManual) &&
-                Objects.equals(adminManual, service.adminManual) &&
-                Objects.equals(training, service.training) &&
-                Objects.equals(helpdesk, service.helpdesk) &&
-                Objects.equals(monitoring, service.monitoring) &&
+                Objects.equals(serviceLevel, service.serviceLevel) &&
+                Objects.equals(trainingInformation, service.trainingInformation) &&
+                Objects.equals(statusMonitoring, service.statusMonitoring) &&
                 Objects.equals(maintenance, service.maintenance) &&
-                Objects.equals(contacts, service.contacts) &&
-                Objects.equals(relatedPlatforms, service.relatedPlatforms) &&
-                Objects.equals(applications, service.applications) &&
-                Objects.equals(datasets, service.datasets) &&
-                Objects.equals(otherProducts, service.otherProducts) &&
-                Objects.equals(publications, service.publications) &&
-                Objects.equals(aggregatedServices, service.aggregatedServices) &&
-                Objects.equals(software, service.software);
+                Objects.equals(orderType, service.orderType) &&
+                Objects.equals(order, service.order) &&
+                Objects.equals(paymentModel, service.paymentModel) &&
+                Objects.equals(pricing, service.pricing);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificSubdomains, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -675,15 +617,13 @@ public class Service implements Identifiable {
         } else return list.size() == 1 && "".equals(list.get(0));
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, url, description, logo, tagline, userValue, userBaseList, useCases,
-                multimediaUrls, options, endpoint, requiredServices, relatedServices, providers, scientificSubdomains,
-                subcategories, targetUsers, languages, places, accessTypes, accessModes, funders, tags, phase, trl,
-                version, lastUpdate, changeLog, certifications, standards, orderType, order, sla, termsOfUse,
-                privacyPolicy, accessPolicy, paymentModel, pricing, userManual, adminManual, training, helpdesk, monitoring,
-                maintenance, contacts, relatedPlatforms, applications, datasets, otherProducts, publications, aggregatedServices,
-                software);
+    public static String createId(Service service) {
+        String provider = service.getResourceOrganisation();
+        return String.format("%s.%s", provider, StringUtils
+                .stripAccents(service.getName())
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase());
     }
 
     @Override
@@ -704,12 +644,28 @@ public class Service implements Identifiable {
         this.name = name;
     }
 
-    public URL getUrl() {
-        return url;
+    public String getResourceOrganisation() {
+        return resourceOrganisation;
     }
 
-    public void setUrl(URL url) {
-        this.url = url;
+    public void setResourceOrganisation(String resourceOrganisation) {
+        this.resourceOrganisation = resourceOrganisation;
+    }
+
+    public List<String> getResourceProviders() {
+        return resourceProviders;
+    }
+
+    public void setResourceProviders(List<String> resourceProviders) {
+        this.resourceProviders = resourceProviders;
+    }
+
+    public URL getWebpage() {
+        return webpage;
+    }
+
+    public void setWebpage(URL webpage) {
+        this.webpage = webpage;
     }
 
     public String getDescription() {
@@ -720,14 +676,6 @@ public class Service implements Identifiable {
         this.description = description;
     }
 
-    public URL getLogo() {
-        return logo;
-    }
-
-    public void setLogo(URL logo) {
-        this.logo = logo;
-    }
-
     public String getTagline() {
         return tagline;
     }
@@ -736,76 +684,28 @@ public class Service implements Identifiable {
         this.tagline = tagline;
     }
 
-    public String getUserValue() {
-        return userValue;
+    public URL getLogo() {
+        return logo;
     }
 
-    public void setUserValue(String userValue) {
-        this.userValue = userValue;
+    public void setLogo(URL logo) {
+        this.logo = logo;
     }
 
-    public List<String> getUserBaseList() {
-        return userBaseList;
+    public List<URL> getMultimedia() {
+        return multimedia;
     }
 
-    public void setUserBaseList(List<String> userBaseList) {
-        this.userBaseList = userBaseList;
+    public void setMultimedia(List<URL> multimedia) {
+        this.multimedia = multimedia;
     }
 
-    public List<String> getUseCases() {
+    public List<URL> getUseCases() {
         return useCases;
     }
 
-    public void setUseCases(List<String> useCases) {
+    public void setUseCases(List<URL> useCases) {
         this.useCases = useCases;
-    }
-
-    public List<URL> getMultimediaUrls() {
-        return multimediaUrls;
-    }
-
-    public void setMultimediaUrls(List<URL> multimediaUrls) {
-        this.multimediaUrls = multimediaUrls;
-    }
-
-    public List<ServiceOption> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<ServiceOption> options) {
-        this.options = options;
-    }
-
-    public URL getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(URL endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public List<String> getRequiredServices() {
-        return requiredServices;
-    }
-
-    public void setRequiredServices(List<String> requiredServices) {
-        this.requiredServices = requiredServices;
-    }
-
-    public List<String> getRelatedServices() {
-        return relatedServices;
-    }
-
-    public void setRelatedServices(List<String> relatedServices) {
-        this.relatedServices = relatedServices;
-    }
-
-    public List<String> getProviders() {
-        return providers;
-    }
-
-    public void setProviders(List<String> providers) {
-        this.providers = providers;
     }
 
     public List<String> getScientificSubdomains() {
@@ -832,22 +732,6 @@ public class Service implements Identifiable {
         this.targetUsers = targetUsers;
     }
 
-    public List<String> getLanguages() {
-        return languages;
-    }
-
-    public void setLanguages(List<String> languages) {
-        this.languages = languages;
-    }
-
-    public List<String> getPlaces() {
-        return places;
-    }
-
-    public void setPlaces(List<String> places) {
-        this.places = places;
-    }
-
     public List<String> getAccessTypes() {
         return accessTypes;
     }
@@ -864,14 +748,6 @@ public class Service implements Identifiable {
         this.accessModes = accessModes;
     }
 
-    public List<String> getFunders() {
-        return funders;
-    }
-
-    public void setFunders(List<String> funders) {
-        this.funders = funders;
-    }
-
     public List<String> getTags() {
         return tags;
     }
@@ -880,12 +756,60 @@ public class Service implements Identifiable {
         this.tags = tags;
     }
 
-    public String getPhase() {
-        return phase;
+    public List<String> getGeographicalAvailabilities() {
+        return geographicalAvailabilities;
     }
 
-    public void setPhase(String phase) {
-        this.phase = phase;
+    public void setGeographicalAvailabilities(List<String> geographicalAvailabilities) {
+        this.geographicalAvailabilities = geographicalAvailabilities;
+    }
+
+    public List<String> getLanguageAvailabilities() {
+        return languageAvailabilities;
+    }
+
+    public void setLanguageAvailabilities(List<String> languageAvailabilities) {
+        this.languageAvailabilities = languageAvailabilities;
+    }
+
+    public List<String> getResourceGeographicLocations() {
+        return resourceGeographicLocations;
+    }
+
+    public void setResourceGeographicLocations(List<String> resourceGeographicLocations) {
+        this.resourceGeographicLocations = resourceGeographicLocations;
+    }
+
+    public ServiceMainContact getMainContact() {
+        return mainContact;
+    }
+
+    public void setMainContact(ServiceMainContact mainContact) {
+        this.mainContact = mainContact;
+    }
+
+    public List<ServicePublicContact> getPublicContacts() {
+        return publicContacts;
+    }
+
+    public void setPublicContacts(List<ServicePublicContact> publicContacts) {
+        this.publicContacts = publicContacts;
+    }
+
+    public String getHelpdeskEmail() {
+        return helpdeskEmail;
+    }
+
+    public void setHelpdeskEmail(String helpdeskEmail) {
+        this.helpdeskEmail = helpdeskEmail;
+    }
+
+    public String getSecurityContactEmail() {
+        return securityContactEmail;
+    }
+
+    public void setSecurityContactEmail(String securityContactEmail) {
+        this.securityContactEmail = securityContactEmail;
     }
 
     public String getTrl() {
@@ -896,28 +820,12 @@ public class Service implements Identifiable {
         this.trl = trl;
     }
 
-    public String getVersion() {
-        return version;
+    public String getLifeCycleStatus() {
+        return lifeCycleStatus;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public XMLGregorianCalendar getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(XMLGregorianCalendar lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public String getChangeLog() {
-        return changeLog;
-    }
-
-    public void setChangeLog(String changeLog) {
-        this.changeLog = changeLog;
+    public void setLifeCycleStatus(String lifeCycleStatus) {
+        this.lifeCycleStatus = lifeCycleStatus;
     }
 
     public List<String> getCertifications() {
@@ -936,28 +844,100 @@ public class Service implements Identifiable {
         this.standards = standards;
     }
 
-    public String getOrderType() {
-        return orderType;
+    public List<String> getOpenSourceTechnologies() {
+        return openSourceTechnologies;
     }
 
-    public void setOrderType(String orderType) {
-        this.orderType = orderType;
+    public void setOpenSourceTechnologies(List<String> openSourceTechnologies) {
+        this.openSourceTechnologies = openSourceTechnologies;
     }
 
-    public URL getOrder() {
-        return order;
+    public String getVersion() {
+        return version;
     }
 
-    public void setOrder(URL order) {
-        this.order = order;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
-    public URL getSla() {
-        return sla;
+    public XMLGregorianCalendar getLastUpdate() {
+        return lastUpdate;
     }
 
-    public void setSla(URL sla) {
-        this.sla = sla;
+    public void setLastUpdate(XMLGregorianCalendar lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public List<String> getChangeLog() {
+        return changeLog;
+    }
+
+    public void setChangeLog(List<String> changeLog) {
+        this.changeLog = changeLog;
+    }
+
+    public List<String> getRequiredResources() {
+        return requiredResources;
+    }
+
+    public void setRequiredResources(List<String> requiredResources) {
+        this.requiredResources = requiredResources;
+    }
+
+    public List<String> getRelatedResources() {
+        return relatedResources;
+    }
+
+    public void setRelatedResources(List<String> relatedResources) {
+        this.relatedResources = relatedResources;
+    }
+
+    public List<String> getRelatedPlatforms() {
+        return relatedPlatforms;
+    }
+
+    public void setRelatedPlatforms(List<String> relatedPlatforms) {
+        this.relatedPlatforms = relatedPlatforms;
+    }
+
+    public List<String> getFundingBody() {
+        return fundingBody;
+    }
+
+    public void setFundingBody(List<String> fundingBody) {
+        this.fundingBody = fundingBody;
+    }
+
+    public List<String> getFundingPrograms() {
+        return fundingPrograms;
+    }
+
+    public void setFundingPrograms(List<String> fundingPrograms) {
+        this.fundingPrograms = fundingPrograms;
+    }
+
+    public List<String> getGrantProjectNames() {
+        return grantProjectNames;
+    }
+
+    public void setGrantProjectNames(List<String> grantProjectNames) {
+        this.grantProjectNames = grantProjectNames;
+    }
+
+    public URL getHelpdeskPage() {
+        return helpdeskPage;
+    }
+
+    public void setHelpdeskPage(URL helpdeskPage) {
+        this.helpdeskPage = helpdeskPage;
+    }
+
+    public URL getUserManual() {
+        return userManual;
+    }
+
+    public void setUserManual(URL userManual) {
+        this.userManual = userManual;
     }
 
     public URL getTermsOfUse() {
@@ -984,6 +964,54 @@ public class Service implements Identifiable {
         this.accessPolicy = accessPolicy;
     }
 
+    public URL getServiceLevel() {
+        return serviceLevel;
+    }
+
+    public void setServiceLevel(URL serviceLevel) {
+        this.serviceLevel = serviceLevel;
+    }
+
+    public URL getTrainingInformation() {
+        return trainingInformation;
+    }
+
+    public void setTrainingInformation(URL trainingInformation) {
+        this.trainingInformation = trainingInformation;
+    }
+
+    public URL getStatusMonitoring() {
+        return statusMonitoring;
+    }
+
+    public void setStatusMonitoring(URL statusMonitoring) {
+        this.statusMonitoring = statusMonitoring;
+    }
+
+    public URL getMaintenance() {
+        return maintenance;
+    }
+
+    public void setMaintenance(URL maintenance) {
+        this.maintenance = maintenance;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
+
+    public URL getOrder() {
+        return order;
+    }
+
+    public void setOrder(URL order) {
+        this.order = order;
+    }
+
     public URL getPaymentModel() {
         return paymentModel;
     }
@@ -998,117 +1026,5 @@ public class Service implements Identifiable {
 
     public void setPricing(URL pricing) {
         this.pricing = pricing;
-    }
-
-    public URL getUserManual() {
-        return userManual;
-    }
-
-    public void setUserManual(URL userManual) {
-        this.userManual = userManual;
-    }
-
-    public URL getAdminManual() {
-        return adminManual;
-    }
-
-    public void setAdminManual(URL adminManual) {
-        this.adminManual = adminManual;
-    }
-
-    public URL getTraining() {
-        return training;
-    }
-
-    public void setTraining(URL training) {
-        this.training = training;
-    }
-
-    public URL getHelpdesk() {
-        return helpdesk;
-    }
-
-    public void setHelpdesk(URL helpdesk) {
-        this.helpdesk = helpdesk;
-    }
-
-    public URL getMonitoring() {
-        return monitoring;
-    }
-
-    public void setMonitoring(URL monitoring) {
-        this.monitoring = monitoring;
-    }
-
-    public URL getMaintenance() {
-        return maintenance;
-    }
-
-    public void setMaintenance(URL maintenance) {
-        this.maintenance = maintenance;
-    }
-
-    public List<Contact> getContacts() {
-        return contacts;
-    }
-
-    public void setContacts(List<Contact> contacts) {
-        this.contacts = contacts;
-    }
-
-    public List<String> getRelatedPlatforms() {
-        return relatedPlatforms;
-    }
-
-    public void setRelatedPlatforms(List<String> relatedPlatforms) {
-        this.relatedPlatforms = relatedPlatforms;
-    }
-
-    public Integer getAggregatedServices() {
-        return aggregatedServices;
-    }
-
-    public void setAggregatedServices(Integer aggregatedServices) {
-        this.aggregatedServices = aggregatedServices;
-    }
-
-    public Integer getPublications() {
-        return publications;
-    }
-
-    public void setPublications(Integer publications) {
-        this.publications = publications;
-    }
-
-    public Integer getDatasets() {
-        return datasets;
-    }
-
-    public void setDatasets(Integer datasets) {
-        this.datasets = datasets;
-    }
-
-    public Integer getSoftware() {
-        return software;
-    }
-
-    public void setSoftware(Integer software) {
-        this.software = software;
-    }
-
-    public Integer getApplications() {
-        return applications;
-    }
-
-    public void setApplications(Integer applications) {
-        this.applications = applications;
-    }
-
-    public Integer getOtherProducts() {
-        return otherProducts;
-    }
-
-    public void setOtherProducts(Integer otherProducts) {
-        this.otherProducts = otherProducts;
     }
 }

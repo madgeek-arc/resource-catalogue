@@ -56,9 +56,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    private FunderService funderService;
-
-    @Autowired
     private EventService eventService;
 
     @Autowired
@@ -485,11 +482,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth) {
         for (RichService richService : richServices) {
             List<ProviderInfo> providerInfoList = new ArrayList<>();
-            for (String provider : richService.getService().getProviders()) {
+            List<String> allProviders = richService.getService().getResourceProviders();
+            allProviders.add(richService.getService().getResourceOrganisation());
+            for (String provider : allProviders) {
                 ProviderInfo providerInfo = new ProviderInfo();
                 providerInfo.setProviderId(providerService.get(provider, auth).getId());
                 providerInfo.setProviderName(providerService.get(provider, auth).getProvider().getName());
-                providerInfo.setProviderAcronym(providerService.get(provider, auth).getProvider().getAcronym());
+                providerInfo.setProviderAcronym(providerService.get(provider, auth).getProvider().getAbbreviation());
                 providerInfoList.add(providerInfo);
             }
             richService.setProviderInfo(providerInfoList);
@@ -507,8 +506,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
         infraService.getService().setDescription(TextUtils.prettifyText(infraService.getService().getDescription(), specialCharacters));
-        infraService.getService().setUserValue(TextUtils.prettifyText(infraService.getService().getUserValue(), specialCharacters));
-        infraService.getService().setChangeLog(TextUtils.prettifyText(infraService.getService().getChangeLog(), specialCharacters));
         return infraService;
     }
 
@@ -519,20 +516,23 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (!services.getResults().isEmpty() && !services.getFacets().isEmpty()) {
             services.setFacets(facetLabelService.createLabels(services.getFacets()));
         }
+        for (InfraService service : services.getResults()){
+            service.getService().setMainContact(null);
+            service.getService().setSecurityContactEmail(null);
+        }
         return services;
     }
 
     private List<RichService> createRichVocabularies(List<InfraService> infraServices) {
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
-        Map<String, Funder> allFunders = funderService.getFundersMap();
         List<RichService> richServices = new ArrayList<>();
 
         for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
 
             // Language Names
-            if (infraService.getService().getLanguages() != null) {
-                richService.setLanguageNames(infraService.getService().getLanguages()
+            if (infraService.getService().getLanguageAvailabilities() != null) {
+                richService.setLanguageNames(infraService.getService().getLanguageAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(l -> allVocabularies.get(l).getName())
@@ -541,8 +541,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             }
 
             // Place Names
-            if (infraService.getService().getPlaces() != null) {
-                richService.setPlaceNames(infraService.getService().getPlaces()
+            if (infraService.getService().getGeographicalAvailabilities() != null) {
+                richService.setPlaceNames(infraService.getService().getGeographicalAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -553,11 +553,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             // TRL Name
             if (infraService.getService().getTrl() != null && !infraService.getService().getTrl().equals("")) {
                 richService.setTrlName(allVocabularies.get(infraService.getService().getTrl()).getName());
-            }
-
-            // Phase Name
-            if (infraService.getService().getPhase() != null && !infraService.getService().getPhase().equals("")) {
-                richService.setPhaseName(allVocabularies.get(infraService.getService().getPhase()).getName());
             }
 
             // TargetUsers Names
@@ -591,18 +586,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             }
 
             // Funders Names
-            if (infraService.getService().getFunders() != null) {
-                richService.setFundedByNames(infraService.getService().getFunders()
+            if (infraService.getService().getFundingBody() != null) {
+                richService.setFundedByNames(infraService.getService().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
-                        .map(p -> allFunders.get(p).getFundingOrganisation())
+                        .map(p -> allVocabularies.get(p).getName())
                         .collect(Collectors.toList())
                 );
-            }
-
-            // OrderType Name
-            if (infraService.getService().getOrderType() != null && !infraService.getService().getOrderType().equals("")) {
-                richService.setOrderTypeName(allVocabularies.get(infraService.getService().getOrderType()).getName());
             }
 
             // Domain Tree
