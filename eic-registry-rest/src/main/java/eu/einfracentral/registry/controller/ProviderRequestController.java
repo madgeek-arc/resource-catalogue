@@ -25,7 +25,7 @@ import java.util.List;
 public class ProviderRequestController extends ResourceController<ProviderRequest, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestController.class);
-    private ProviderRequestService<Authentication> providerRequestService;
+    private final ProviderRequestService<Authentication> providerRequestService;
 
     @Autowired
     public ProviderRequestController(ProviderRequestService<Authentication> service) {
@@ -33,15 +33,17 @@ public class ProviderRequestController extends ResourceController<ProviderReques
         this.providerRequestService = service;
     }
 
+    // TODO: fix authorization for all methods
+
     @Override
-    @ApiOperation(value = "Returns the request with the given id.")
+//    @ApiOperation(value = "Returns the request with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<ProviderRequest> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @Override
-    @ApiOperation(value = "Adds the given request.")
+//    @ApiOperation(value = "Adds the given request.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> add(@RequestBody ProviderRequest providerRequest, @ApiIgnore Authentication auth) {
@@ -68,7 +70,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
         return new ResponseEntity<>(providerRequest, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns a list with all the requests made on a specific Provider.")
+//    @ApiOperation(value = "Returns a list with all the requests made on a specific Provider.")
     @GetMapping(path = "allProviderRequests", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<ProviderRequest> getAllProviderRequests(@RequestParam String providerId, @ApiIgnore Authentication auth) {
@@ -76,7 +78,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
 
     }
 
-    @ApiOperation(value = "Send mails to all providers and creates the Provider Requests.")
+//    @ApiOperation(value = "Send mails to all providers and creates the Provider Requests.")
     @PostMapping("{serviceIds}/sendMailsToProviders")
     public void sendMailsToProviders(@PathVariable("serviceIds") List<String> serviceIds,
                                      @RequestBody EmailMessage message,
