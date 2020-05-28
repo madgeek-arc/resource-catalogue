@@ -16,8 +16,8 @@ public class SimpleIdCreator implements IdCreator {
     public String createProviderId(Provider provider) {
         String providerId;
         if (provider.getId() == null || "".equals(provider.getId())) {
-            if (provider.getAcronym() != null && !"".equals(provider.getAcronym())) {
-                providerId = provider.getAcronym();
+            if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation())) {
+                providerId = provider.getAbbreviation();
             } else if (provider.getName() != null && !"".equals(provider.getName())) {
                 providerId = provider.getName();
             } else {
@@ -38,13 +38,13 @@ public class SimpleIdCreator implements IdCreator {
 
     @Override
     public String createServiceId(eu.einfracentral.domain.Service service) {
-        if (service.getProviders() == null || service.getProviders().isEmpty() || service.getProviders().get(0).equals("")) {
-            throw new ValidationException("Service must have at least 1 Provider.");
+        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
+            throw new ValidationException("Service must have a Service Organisation.");
         }
         if (service.getName() == null || service.getName().equals("")) {
             throw new ValidationException("Service must have a Name.");
         }
-        String provider = service.getProviders().get(0);
+        String provider = service.getResourceOrganisation();
         return String.format("%s.%s", provider, StringUtils
                 .stripAccents(service.getName())
                 .replaceAll("[\n\t\\s]+", " ")

@@ -120,4 +120,15 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     public void deleteAll(@ApiIgnore Authentication auth) {
         vocabularyService.deleteAll(auth);
     }
+
+    @ApiOperation(value = "Delete all Vocs of a specific type")
+    @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        List<Vocabulary> toBeDeleted = vocabularyService.getByType(type);
+        for (Vocabulary vocabulary : toBeDeleted){
+            delete(vocabulary, auth);
+        }
+
+    }
 }

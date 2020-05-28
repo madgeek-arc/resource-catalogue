@@ -94,11 +94,12 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         for (String serviceId : serviceIds) {
             InfraService service = infraServiceService.get(serviceId);
             serviceNames.add(service.getService().getName());
-            List<String> providerIds = service.getService().getProviders();
+            List<String> providerIds = service.getService().getResourceProviders();
+            providerIds.add(service.getService().getResourceOrganisation());
             for (String providerId : providerIds) {
                 ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
-                providerContactNames.put(providerBundle.getProvider().getContacts().get(0).getLastName(), providerBundle.getProvider().getContacts().get(0).getFirstName());
-                providersToBeMailed.put(providerBundle.getProvider().getId(), providerBundle.getProvider().getContacts().get(0).getEmail());
+                providerContactNames.put(providerBundle.getProvider().getMainContact().getLastName(), providerBundle.getProvider().getMainContact().getFirstName());
+                providersToBeMailed.put(providerBundle.getProvider().getId(), providerBundle.getProvider().getMainContact().getEmail());
             }
         }
 

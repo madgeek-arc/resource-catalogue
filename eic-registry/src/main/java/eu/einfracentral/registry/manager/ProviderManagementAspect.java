@@ -77,18 +77,16 @@ public class ProviderManagementAspect {
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(InfraService infraService) {
-        for (String providerId : infraService.getService().getProviders()) {
-            try {
-                ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
-                if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
-                        || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
-                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                            providerId, providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
-                    providerService.verifyProvider(providerId, Provider.States.PENDING_2, false, null);
-                }
-            } catch (RuntimeException e) {
-                logger.error(e);
+        try {
+            ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), (Authentication) null);
+            if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
+                    || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
+                logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
+                        infraService.getService().getResourceOrganisation(), providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
+                providerService.verifyProvider(infraService.getService().getResourceOrganisation(), Provider.States.PENDING_2, false, null);
             }
+        } catch (RuntimeException e) {
+            logger.error(e);
         }
     }
 }

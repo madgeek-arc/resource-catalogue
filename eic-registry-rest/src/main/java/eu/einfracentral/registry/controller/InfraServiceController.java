@@ -32,7 +32,7 @@ import java.util.Optional;
 public class InfraServiceController {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
-    private InfraServiceService<InfraService, InfraService> infraService;
+    private final InfraServiceService<InfraService, InfraService> infraService;
 
     @Autowired
     InfraServiceController(InfraServiceService<InfraService, InfraService> service) {
@@ -92,7 +92,7 @@ public class InfraServiceController {
     public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
         logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
-        logger.info(" Service Providers: {}", service.getService().getProviders());
+        logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
         return ret;
     }
 
