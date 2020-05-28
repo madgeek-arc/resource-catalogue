@@ -528,7 +528,9 @@ public class StatisticsManager implements StatisticsService {
             Value value = new Value(infraService.getId(), infraService.getService().getName());
 
             Set<String> countries = new HashSet<>();
-            for (String providerId : infraService.getService().getProviders()) {
+            List<String> providers = new ArrayList<>(infraService.getService().getResourceProviders());
+            providers.add(infraService.getService().getResourceOrganisation());
+            for (String providerId : providers) {
                 countries.addAll(providerCountries.get(providerId));
             }
 
@@ -601,7 +603,7 @@ public class StatisticsManager implements StatisticsService {
 
         for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
             Set<String> countries = new HashSet<>();
-            String country = providerBundle.getProvider().getCoordinatingCountry();
+            String country = providerBundle.getProvider().getLocation().getCountry();
             if (country.equalsIgnoreCase("WW")) {
                 countries.addAll(Arrays.asList(world));
             } else if (country.equalsIgnoreCase("EU")) {
