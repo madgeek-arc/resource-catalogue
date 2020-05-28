@@ -112,7 +112,7 @@ public class ProviderController {
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
@@ -138,7 +138,7 @@ public class ProviderController {
         return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
 
-    @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(providerManager.get(id, auth), HttpStatus.OK);
     }
@@ -151,7 +151,7 @@ public class ProviderController {
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
@@ -171,19 +171,19 @@ public class ProviderController {
     }
 
     @ApiOperation(value = "Get a list of services offered by a Provider.")
-    @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(providerManager.getServices(id), HttpStatus.OK);
     }
 
     // Get a featured InfraService offered by a Provider. // TODO enable in a future release
-    @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
     }
 
     // Get a list of Providers in which the given user is admin.
-    @GetMapping(path = "getServiceProviders", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
         List<Provider> providers = providerManager.getServiceProviders(email, auth)
                 .stream()
@@ -193,20 +193,20 @@ public class ProviderController {
     }
 
     // Get a list of Providers in which you are admin.
-    @GetMapping(path = "getMyServiceProviders", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getMyServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@ApiIgnore Authentication auth) {
         return new ResponseEntity<>(providerManager.getMyServiceProviders(auth), HttpStatus.OK);
     }
 
     // Get the pending services of the given Provider.
-    @GetMapping(path = "services/pending/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "services/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         List<Service> ret = providerManager.getInactiveServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     // Get all inactive Providers.
-    @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
         List<Provider> ret = providerManager.getInactive()
                 .stream()
@@ -216,7 +216,7 @@ public class ProviderController {
     }
 
     // Accept/Reject a Provider.
-    @PatchMapping(path = "verifyProvider/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PatchMapping(path = "verifyProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                          @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
@@ -226,7 +226,7 @@ public class ProviderController {
     }
 
     // Publish all Provider services.
-    @PatchMapping(path = "publishServices", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PatchMapping(path = "publishServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -252,7 +252,7 @@ public class ProviderController {
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void deleteUserInfo (Authentication authentication){
         providerManager.deleteUserInfo(authentication);
     }

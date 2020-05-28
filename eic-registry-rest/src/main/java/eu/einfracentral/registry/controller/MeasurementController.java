@@ -47,14 +47,14 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     @ApiOperation(value = "Returns the latest Measurements for the specific service.")
-    @GetMapping(path = "latest/service/{id}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "latest/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Measurement>> getLatestServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
 
     @Override
     @ApiOperation(value = "Creates a new Measurement.")
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) {
         ResponseEntity<Measurement> ret = super.add(measurement, auth);
@@ -65,7 +65,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
 
     @Override
     @ApiOperation(value = "Updates the Measurement assigned the given id with the given Measurement, keeping version of revisions.")
-    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Measurement> ret = super.update(measurement, auth);
@@ -75,7 +75,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     // Updates existing Measurements of a specific Service, or/and adds new ones.
-    @PostMapping(path = "updateAll", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "updateAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
         List<Measurement> ret = measurementManager.updateAll(serviceId, allMeasurements, auth);
@@ -84,7 +84,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     // Updates existing Measurements of a specific Service, or/and adds new ones.
-    @PostMapping(path = "updateAllPending", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "updateAllPending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestParam String newServiceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
         List<Measurement> ret = measurementManager.updateAll(serviceId, newServiceId, allMeasurements, auth);
@@ -93,7 +93,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     // Deletes the Measurement with the given id.
-    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Measurement> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Measurement measurement = measurementManager.get(id);
