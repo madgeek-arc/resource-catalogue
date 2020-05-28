@@ -5,8 +5,11 @@ import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.registry.service.IndicatorService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,8 +33,8 @@ import java.util.stream.Collectors;
 public class IndicatorController extends ResourceController<Indicator, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(IndicatorController.class);
-    private IndicatorService<Indicator, Authentication> indicatorService;
-    private MeasurementService<Measurement, Authentication> measurementService;
+    private final IndicatorService<Indicator, Authentication> indicatorService;
+    private final MeasurementService<Measurement, Authentication> measurementService;
 
     @Autowired
     IndicatorController(IndicatorService<Indicator, Authentication> service,
@@ -47,6 +50,20 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
+    }
+
+    @Override
+    @ApiOperation(value = "Filter a list of Indicators based on a set of filters.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<Indicator>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        return super.getAll(allRequestParams, auth);
     }
 
     @Override
