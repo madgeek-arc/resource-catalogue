@@ -87,7 +87,7 @@ public class InfraServiceController {
         return new ResponseEntity<>(ret, ret != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
@@ -96,7 +96,7 @@ public class InfraServiceController {
         return ret;
     }
 
-    @PutMapping(produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
@@ -104,7 +104,7 @@ public class InfraServiceController {
         return ret;
     }
 
-    @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(service));
         logger.info("Validating InfraService: {}", service.getService().getName());
@@ -118,18 +118,18 @@ public class InfraServiceController {
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<InfraService>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         return ResponseEntity.ok(infraService.getAll(ff, authentication));
     }
 
-    @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field));
     }
 
-    @PatchMapping(path = "publish/{id}/{version}", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PatchMapping(path = "publish/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
                                                   @RequestParam boolean active, @RequestParam Boolean latest,
