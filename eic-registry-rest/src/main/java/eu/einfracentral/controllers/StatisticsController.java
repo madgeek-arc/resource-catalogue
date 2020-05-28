@@ -29,43 +29,43 @@ public class StatisticsController {
         this.statisticsService = statisticsService;
     }
 
-    @ApiOperation(value = "Get visits per interval for a service.")
+//    @ApiOperation(value = "Get visits per interval for a service.")
     @GetMapping(path = "service/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> visits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get favourites per interval for a service.")
+//    @ApiOperation(value = "Get favourites per interval for a service.")
     @GetMapping(path = "service/favourites/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> favourites(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.favourites(id, by), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get average ratings per interval for a service.")
+//    @ApiOperation(value = "Get average ratings per interval for a service.")
     @GetMapping(path = "service/ratings/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Float>> ratings(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.ratings(id, by), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get aggregate visits per interval for all services offered by a provider.")
+//    @ApiOperation(value = "Get aggregate visits per interval for all services offered by a provider.")
     @GetMapping(path = "provider/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> pVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.providerVisits(id, by), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get aggregate 'favourites per interval for all services offered by a provider.")
+//    @ApiOperation(value = "Get aggregate 'favourites per interval for all services offered by a provider.")
     @GetMapping(path = "provider/favourites/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> pFavourites(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.providerFavourites(id, by), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get average ratings per interval for all services offered by a provider.")
+//    @ApiOperation(value = "Get average ratings per interval for all services offered by a provider.")
     @GetMapping(path = "provider/ratings/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Float>> pRatings(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.providerRatings(id, by), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get percentage of visits for all services offered by a provider.")
+//    @ApiOperation(value = "Get percentage of visits for all services offered by a provider.")
     @GetMapping(path = "provider/visitation/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Float>> pVisitation(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.providerVisitation(id, by), HttpStatus.OK);
@@ -77,32 +77,32 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.events(type, from, to, by), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and their respective countries.")
+//    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and their respective countries.")
     @GetMapping(path = "provider/mapServicesToGeographicalAvailability", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MapValues>> mapServicesToGeographicalAvailability(@RequestParam(required = false) String providerId) {
         return new ResponseEntity<>(statisticsService.mapServicesToGeographicalAvailability(providerId), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get a relation between all Services and their Coordinating Country")
+//    @ApiOperation(value = "Get a relation between all Services and their Coordinating Country")
     @GetMapping(path = "provider/mapServicesToCoordinatingCountry", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MapValues>> mapServicesToCoordinatingCountry() {
         return new ResponseEntity<>(statisticsService.mapServicesToCoordinatingCountry(), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and a specific Vocabulary")
+//    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and a specific Vocabulary")
     @GetMapping(path = "provider/mapServicesToVocabulary", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MapValues>> mapServicesToVocabulary(@RequestParam(required = false) String providerId,
                                                                    @RequestParam StatisticsService.Vocabulary vocabulary) {
         return new ResponseEntity<>(statisticsService.mapServicesToVocabulary(providerId, vocabulary), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get a list of places and their corresponding number of Services offered by the specified provider.")
+//    @ApiOperation(value = "Get a list of places and their corresponding number of Services offered by the specified provider.")
     @GetMapping(path = "provider/servicesPerPlace", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PlaceCount>> servicesPerPlace(@RequestParam(required = false) String providerId) {
         return new ResponseEntity<>(statisticsService.servicesPerPlace(providerId), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get a list of places and their corresponding Services offered by the specified provider.")
+//    @ApiOperation(value = "Get a list of places and their corresponding Services offered by the specified provider.")
     @GetMapping(path = "provider/servicesByPlace", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Value>> servicesByPlace(@RequestParam(required = false) String providerId,
                                                        @RequestParam(required = false) String place) {
