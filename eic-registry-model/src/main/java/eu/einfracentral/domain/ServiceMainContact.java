@@ -18,7 +18,7 @@ public class ServiceMainContact {
      * First Name of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, example = "String (required)", required = true)
+    @ApiModelProperty(position = 1, required = true)
     @FieldValidation
     private String firstName;
 
@@ -26,7 +26,7 @@ public class ServiceMainContact {
      * Last Name of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "String (required)", required = true)
+    @ApiModelProperty(position = 2, required = true)
     @FieldValidation
     private String lastName;
 
@@ -34,7 +34,7 @@ public class ServiceMainContact {
      * Email of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    @ApiModelProperty(position = 3, required = true)
     @FieldValidation
     private String email;
 
@@ -42,7 +42,7 @@ public class ServiceMainContact {
      * Telephone of the Resource's main contact person/manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 4, example = "String (optional)")
+    @ApiModelProperty(position = 4)
     @FieldValidation(nullable = true)
     private String phone;
 
@@ -50,7 +50,7 @@ public class ServiceMainContact {
      * Position of the Resource's main contact person/manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 5, example = "String (optional)")
+    @ApiModelProperty(position = 5)
     @FieldValidation(nullable = true)
     private String position;
 
@@ -58,7 +58,7 @@ public class ServiceMainContact {
      * The organisation to which the contact is affiliated.
      */
     @XmlElement
-    @ApiModelProperty(position = 6, example = "String (optional)")
+    @ApiModelProperty(position = 6)
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String organisation;
 

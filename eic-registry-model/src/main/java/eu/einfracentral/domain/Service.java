@@ -31,7 +31,7 @@ public class Service implements Identifiable {
      * Brief and descriptive name of Resource as assigned by the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "String (required)", required = true)
+    @ApiModelProperty(position = 2, required = true)
     @FieldValidation
     private String name;
 
@@ -39,7 +39,7 @@ public class Service implements Identifiable {
      * The name (or abbreviation) of the organisation that manages or delivers the resource, or that coordinates resource delivery in a federated scenario.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    @ApiModelProperty(position = 3, required = true)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String resourceOrganisation;
 
@@ -48,7 +48,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "resourceProviders")
     @XmlElement(name = "resourceProvider")
-    @ApiModelProperty(position = 4, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 4, reference = "Vocabulary")
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private List<String> resourceProviders;
 
@@ -56,7 +56,7 @@ public class Service implements Identifiable {
      * Webpage with information about the Resource usually hosted and maintained by the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 5, example = "https://example.com", required = true)
     @FieldValidation
     private URL webpage;
 
@@ -69,7 +69,7 @@ public class Service implements Identifiable {
      * c) list of customers, communities, users, etc. using the Resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "String (required)", required = true)
+    @ApiModelProperty(position = 6, required = true)
     @FieldValidation
     private String description;
 
@@ -77,7 +77,7 @@ public class Service implements Identifiable {
      * Short catch-phrase for marketing and advertising purposes. It will be usually displayed close to the Resource name and should refer to the main value or purpose of the Resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 7, example = "String (required)", required = true)
+    @ApiModelProperty(position = 7, required = true)
     @FieldValidation
     private String tagline;
 
@@ -85,7 +85,7 @@ public class Service implements Identifiable {
      * Link to the logo/visual identity of the Resource. The logo will be visible at the Portal.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, example = "URL (required)", required = true)
+    @ApiModelProperty(position = 8, example = "https://example.com", required = true)
     @FieldValidation
     private URL logo;
 
@@ -93,7 +93,7 @@ public class Service implements Identifiable {
      * Link to video, screenshots or slides showing details of the Resource.
      */
     @XmlElementWrapper(name = "multimedia")
-    @ApiModelProperty(position = 9, dataType = "List", example = "URL[] (optional)")
+    @ApiModelProperty(position = 9)
     @FieldValidation(nullable = true)
     private List<URL> multimedia;
 
@@ -102,7 +102,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "useCases")
     @XmlElement(name = "useCase")
-    @ApiModelProperty(position = 10, dataType = "List", example = "URL[] (optional)")
+    @ApiModelProperty(position = 10)
     @FieldValidation(nullable = true)
     private List<URL> useCases;
 
@@ -113,7 +113,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificSubdomains", required = true)
     @XmlElement(name = "scientificSubdomain")
-    @ApiModelProperty(position = 11, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 11, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
     private List<String> scientificSubdomains;
@@ -123,7 +123,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "subcategories", required = true)
     @XmlElement(name = "subcategory")
-    @ApiModelProperty(position = 12, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 12, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SUBCATEGORY)
     private List<String> subcategories;
@@ -133,7 +133,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "targetUsers", required = true)
     @XmlElement(name = "targetUser")
-    @ApiModelProperty(position = 13, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 13, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TARGET_USER)
     private List<String> targetUsers;
@@ -143,7 +143,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "accessTypes")
     @XmlElement(name = "accessType")
-    @ApiModelProperty(position = 14, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 14, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ACCESS_TYPE)
     private List<String> accessTypes;
@@ -153,7 +153,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "accessModes")
     @XmlElement(name = "accessMode")
-    @ApiModelProperty(position = 15, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 15, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ACCESS_MODE)
     private List<String> accessModes;
@@ -163,7 +163,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 16, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 16)
     @FieldValidation(nullable = true)
     private List<String> tags;
 
@@ -174,7 +174,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "geographicalAvailabilities", required = true)
     @XmlElement(name = "geographicalAvailability")
-    @ApiModelProperty(position = 17, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 17, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.GEOGRAPHICAL_AVAILABILITY)
     private List<String> geographicalAvailabilities;
@@ -184,7 +184,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "languageAvailabilities", required = true)
     @XmlElement(name = "languageAvailability")
-    @ApiModelProperty(position = 18, dataType = "List", example = "String[] (required)", required = true)
+    @ApiModelProperty(position = 18, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
     private List<String> languageAvailabilities;
@@ -196,7 +196,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "resourceGeographicLocations")
     @XmlElement(name = "resourceGeographicLocation")
-    @ApiModelProperty(position = 19, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> resourceGeographicLocations;
@@ -216,7 +216,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @ApiModelProperty(position = 21, dataType = "List")
+    @ApiModelProperty(position = 21)
     @FieldValidation(nullable = true)
     private List<ServicePublicContact> publicContacts;
 
@@ -224,7 +224,7 @@ public class Service implements Identifiable {
      * The email to ask more information from the Provider about this Resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 22, example = "String (required)", required = true)
+    @ApiModelProperty(position = 22, required = true)
     @FieldValidation
     private String helpdeskEmail;
 
@@ -232,7 +232,7 @@ public class Service implements Identifiable {
      * The email to contact the Provider for critical security issues about this Resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 23, example = "String (required)", required = true)
+    @ApiModelProperty(position = 23, required = true)
     @FieldValidation
     private String securityContactEmail;
 
@@ -242,7 +242,7 @@ public class Service implements Identifiable {
      * The Technology Readiness Level of the Resource updated in the context of the EOSC.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 24, example = "String (required)", required = true)
+    @ApiModelProperty(position = 24, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TRL)
     private String trl;
@@ -251,7 +251,7 @@ public class Service implements Identifiable {
      * Phase of the Resource life-cycle.
      */
     @XmlElement
-    @ApiModelProperty(position = 25, example = "String (optional)")
+    @ApiModelProperty(position = 25, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.LIFE_CYCLE_STATUS)
     private String lifeCycleStatus;
@@ -261,7 +261,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
-    @ApiModelProperty(position = 26, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 26)
     @FieldValidation(nullable = true)
     private List<String> certifications;
 
@@ -270,7 +270,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "standards")
     @XmlElement(name = "standard")
-    @ApiModelProperty(position = 27, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 27)
     @FieldValidation(nullable = true)
     private List<String> standards;
 
@@ -279,7 +279,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "openSourceTechnologies")
     @XmlElement(name = "openSourceTechnology")
-    @ApiModelProperty(position = 28, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 28)
     @FieldValidation(nullable = true)
     private List<String> openSourceTechnologies;
 
@@ -287,7 +287,7 @@ public class Service implements Identifiable {
      * Version of the Resource that is in force.
      */
     @XmlElement
-    @ApiModelProperty(position = 29, example = "String (optional)")
+    @ApiModelProperty(position = 29)
     @FieldValidation(nullable = true)
     private String version;
 
@@ -295,7 +295,7 @@ public class Service implements Identifiable {
      * Date of the latest update of the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 30, example = "XMLGregorianCalendar (optional)")
+    @ApiModelProperty(position = 30, example = "2020-01-01")
     @FieldValidation(nullable = true)
     private XMLGregorianCalendar lastUpdate;
 
@@ -303,7 +303,7 @@ public class Service implements Identifiable {
      * Summary of the Resource features updated from the previous version.
      */
     @XmlElementWrapper(name = "changeLog")
-    @ApiModelProperty(position = 31, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 31)
     @FieldValidation(nullable = true)
     private List<String> changeLog;
 
@@ -314,7 +314,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "requiredResources")
     @XmlElement(name = "requiredResource")
-    @ApiModelProperty(position = 32, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 32)
     @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
     private List<String> requiredResources;
 
@@ -323,7 +323,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedResources")
     @XmlElement(name = "relatedResource")
-    @ApiModelProperty(position = 33, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 33)
     @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
     private List<String> relatedResources;
 
@@ -332,7 +332,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedPlatforms")
     @XmlElement(name = "relatedPlatform")
-    @ApiModelProperty(position = 34, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 34)
     @FieldValidation(nullable = true)
     private List<String> relatedPlatforms;
 
@@ -342,7 +342,7 @@ public class Service implements Identifiable {
      * Name of the funding body that supported the development and/or operation of the Resource.
      */
     @XmlElementWrapper(name = "fundingBody")
-    @ApiModelProperty(position = 35, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 35, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.FUNDING_BODY)
     private List<String> fundingBody;
@@ -352,7 +352,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "fundingPrograms")
     @XmlElement(name = "fundingProgram")
-    @ApiModelProperty(position = 36, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 36, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.FUNDING_PROGRAM)
     private List<String> fundingPrograms;
@@ -362,7 +362,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "grantProjectNames")
     @XmlElement(name = "grantProjectName")
-    @ApiModelProperty(position = 37, dataType = "List", example = "String[] (optional)")
+    @ApiModelProperty(position = 37)
     @FieldValidation(nullable = true)
     private List<String> grantProjectNames;
 
@@ -372,7 +372,7 @@ public class Service implements Identifiable {
      * The URL to a webpage to ask more information from the Provider about this Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 38, example = "URL (optional)")
+    @ApiModelProperty(position = 38, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL helpdeskPage;
 
@@ -380,7 +380,7 @@ public class Service implements Identifiable {
      * Link to the Resource user manual and documentation.
      */
     @XmlElement
-    @ApiModelProperty(position = 39, example = "URL (optional)")
+    @ApiModelProperty(position = 39, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL userManual;
 
@@ -388,7 +388,7 @@ public class Service implements Identifiable {
      * Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 40, example = "URL (optional)")
+    @ApiModelProperty(position = 40, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL termsOfUse;
 
@@ -396,7 +396,7 @@ public class Service implements Identifiable {
      * Link to the privacy policy applicable to the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 41, example = "URL (optional)")
+    @ApiModelProperty(position = 41, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL privacyPolicy;
 
@@ -404,7 +404,7 @@ public class Service implements Identifiable {
      * Information about the access policies that apply.
      */
     @XmlElement
-    @ApiModelProperty(position = 42, example = "URL (optional)")
+    @ApiModelProperty(position = 42, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL accessPolicy;
 
@@ -412,7 +412,7 @@ public class Service implements Identifiable {
      * Webpage with the information about the levels of performance that a Provider is expected to deliver.
      */
     @XmlElement
-    @ApiModelProperty(position = 43, example = "URL (optional)")
+    @ApiModelProperty(position = 43, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL serviceLevel;
 
@@ -420,7 +420,7 @@ public class Service implements Identifiable {
      * Webpage to training information on the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 44, example = "URL (optional)")
+    @ApiModelProperty(position = 44, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL trainingInformation;
 
@@ -428,7 +428,7 @@ public class Service implements Identifiable {
      * Webpage with monitoring information about this Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 45, example = "URL (optional)")
+    @ApiModelProperty(position = 45, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL statusMonitoring;
 
@@ -436,7 +436,7 @@ public class Service implements Identifiable {
      * Webpage with information about planned maintenance windows for this Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 46, example = "URL (optional)")
+    @ApiModelProperty(position = 46, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL maintenance;
 
@@ -446,7 +446,7 @@ public class Service implements Identifiable {
      * Information on the order type (requires an ordering procedure, or no ordering and if fully open or requires authentication).
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 47, example = "String (required)", required = true)
+    @ApiModelProperty(position = 47, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ORDER_TYPE)
     private String orderType;
@@ -455,7 +455,7 @@ public class Service implements Identifiable {
      * Webpage through which an order for the Resource can be placed.
      */
     @XmlElement
-    @ApiModelProperty(position = 48, example = "URL (optional)")
+    @ApiModelProperty(position = 48, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL order;
 
@@ -465,7 +465,7 @@ public class Service implements Identifiable {
      * Webpage with the supported payment models and restrictions that apply to each of them.
      */
     @XmlElement
-    @ApiModelProperty(position = 49, example = "URL (optional)")
+    @ApiModelProperty(position = 49, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL paymentModel;
 
@@ -473,7 +473,7 @@ public class Service implements Identifiable {
      * Webpage with the information on the price scheme for this Resource in case the customer is charged for.
      */
     @XmlElement
-    @ApiModelProperty(position = 50, example = "URL (optional)")
+    @ApiModelProperty(position = 50, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL pricing;
 
