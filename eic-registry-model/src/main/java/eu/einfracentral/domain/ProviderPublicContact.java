@@ -15,7 +15,7 @@ public class ProviderPublicContact {
      * First Name of the Provider's main contact person/Provider manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 1, example = "String (optional)")
+    @ApiModelProperty(position = 1)
     @FieldValidation(nullable = true)
     private String firstName;
 
@@ -23,7 +23,7 @@ public class ProviderPublicContact {
      * Last Name of the Provider's main contact person/Provider manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 2, example = "String (optional)")
+    @ApiModelProperty(position = 2)
     @FieldValidation(nullable = true)
     private String lastName;
 
@@ -31,7 +31,7 @@ public class ProviderPublicContact {
      * Email of the Provider's main contact person/Provider manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    @ApiModelProperty(position = 3, required = true)
     @FieldValidation
     private String email;
 
@@ -39,7 +39,7 @@ public class ProviderPublicContact {
      * Phone of the Provider's main contact person/Provider manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 4, example = "String (optional)")
+    @ApiModelProperty(position = 4)
     @FieldValidation(nullable = true)
     private String phone;
 
@@ -47,7 +47,7 @@ public class ProviderPublicContact {
      * Position of the Provider's main contact person/Provider manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 5, example = "String (optional)")
+    @ApiModelProperty(position = 5)
     @FieldValidation(nullable = true)
     private String position;
 

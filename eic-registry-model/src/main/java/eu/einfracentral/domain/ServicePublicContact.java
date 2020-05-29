@@ -19,7 +19,7 @@ public class ServicePublicContact {
      * First Name of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 1, example = "String (optional)")
+    @ApiModelProperty(position = 1)
     @FieldValidation(nullable = true)
     private String firstName;
 
@@ -27,7 +27,7 @@ public class ServicePublicContact {
      * Last Name of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 2, example = "String (optional)")
+    @ApiModelProperty(position = 2)
     @FieldValidation(nullable = true)
     private String lastName;
 
@@ -35,7 +35,7 @@ public class ServicePublicContact {
      * Email of the Resource's contact person or a generic email of the Provider to be displayed at the portal.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    @ApiModelProperty(position = 3, required = true)
     @FieldValidation
     private String email;
 
@@ -43,7 +43,7 @@ public class ServicePublicContact {
      * Telephone of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 4, example = "String (optional)")
+    @ApiModelProperty(position = 4)
     @FieldValidation(nullable = true)
     private String phone;
 
@@ -51,7 +51,7 @@ public class ServicePublicContact {
      * Position of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 5, example = "String (optional)")
+    @ApiModelProperty(position = 5)
     @FieldValidation(nullable = true)
     private String position;
 
@@ -59,7 +59,7 @@ public class ServicePublicContact {
      * The organisation to which the contact is affiliated.
      */
     @XmlElement
-    @ApiModelProperty(position = 6, example = "String (optional)")
+    @ApiModelProperty(position = 6)
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String organisation;
 

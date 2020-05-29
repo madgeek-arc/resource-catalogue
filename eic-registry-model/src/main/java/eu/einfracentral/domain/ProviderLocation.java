@@ -18,7 +18,7 @@ public class ProviderLocation {
      * Street and Number of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, example = "String (required)", required = true)
+    @ApiModelProperty(position = 1, required = true)
     @FieldValidation
     private String streetNameAndNumber;
 
@@ -26,7 +26,7 @@ public class ProviderLocation {
      * Postal code of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, example = "String (required)", required = true)
+    @ApiModelProperty(position = 2, required = true)
     @FieldValidation
     private String postalCode;
 
@@ -34,7 +34,7 @@ public class ProviderLocation {
      * City of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, example = "String (required)", required = true)
+    @ApiModelProperty(position = 3, required = true)
     @FieldValidation
     private String city;
 
@@ -42,7 +42,7 @@ public class ProviderLocation {
      * 	Region of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
      */
     @XmlElement
-    @ApiModelProperty(position = 4, example = "String (optional)")
+    @ApiModelProperty(position = 4)
     @FieldValidation(nullable = true)
     private String region;
 
@@ -50,7 +50,7 @@ public class ProviderLocation {
      * Country of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "String (required)", required = true)
+    @ApiModelProperty(position = 5, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private String country;
