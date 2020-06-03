@@ -26,7 +26,7 @@
       "name": "legal_entity",
       "label": "Legal Entity",
       "path": "//*[local-name()='legalEntity']/text()",
-      "type": "java.lang.String"
+      "type": "java.lang.Boolean"
     },
     {
       "multivalued": false,
@@ -166,5 +166,5 @@
   "name": "pending_provider",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/feature/catris_v2.11/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/eInfraCentral/eic/RDT/v3.00/eic-registry-model/src/main/resources/schema1.xsd"
 }
