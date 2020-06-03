@@ -22,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("measurement")
 @Api(value = "Get information about a Measurement")
+@Deprecated
 public class MeasurementController extends ResourceController<Measurement, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MeasurementController.class);
