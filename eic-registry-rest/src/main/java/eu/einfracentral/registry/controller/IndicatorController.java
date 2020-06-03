@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("indicator")
 @Api(value = "Get information about an Indicator.")
+@Deprecated
 public class IndicatorController extends ResourceController<Indicator, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(IndicatorController.class);

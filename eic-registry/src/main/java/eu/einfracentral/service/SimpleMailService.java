@@ -1,5 +1,6 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.registry.service.MailService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +18,9 @@ import java.util.stream.Collectors;
 
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-public class MailService {
+public class SimpleMailService implements MailService {
 
-    private static final Logger logger = LogManager.getLogger(MailService.class);
+    private static final Logger logger = LogManager.getLogger(SimpleMailService.class);
     private Session session;
 
     @Value("${mail.smtp.auth}")
@@ -65,6 +66,7 @@ public class MailService {
     }
 
     @Async
+    @Override
     public void sendMail(List<String> to, List<String> cc, String subject, String text) throws MessagingException {
         if (enableEmails) {
             Transport transport = null;
@@ -94,12 +96,12 @@ public class MailService {
         }
     }
 
-    @Async
+    @Override
     public void sendMail(List<String> to, String subject, String text) throws MessagingException {
         sendMail(to, null, subject, text);
     }
 
-    @Async
+    @Override
     public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
         List<String> addrTo = new ArrayList<>();
         List<String> addrCc = new ArrayList<>();
@@ -112,7 +114,7 @@ public class MailService {
         sendMail(addrTo, addrCc, subject, text);
     }
 
-    @Async
+    @Override
     public void sendMail(String to, String subject, String text) throws MessagingException {
         sendMail(to, null, subject, text);
     }

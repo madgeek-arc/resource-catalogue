@@ -34,7 +34,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
 
     private BlockingQueue<Pair<T, String>> queue;
 
-    abstract protected String getController();
+    protected abstract String getController();
 
     @Autowired
     public AbstractSyncService(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename) {

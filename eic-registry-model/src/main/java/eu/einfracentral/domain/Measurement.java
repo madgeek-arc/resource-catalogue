@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.List;
 
+@Deprecated
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Measurement implements Identifiable {

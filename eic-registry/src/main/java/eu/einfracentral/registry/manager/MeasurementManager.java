@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Deprecated
 @Component
 public class MeasurementManager extends ResourceManager<Measurement> implements MeasurementService<Measurement, Authentication> {
 

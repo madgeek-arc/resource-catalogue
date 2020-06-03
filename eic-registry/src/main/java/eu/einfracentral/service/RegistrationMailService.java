@@ -6,6 +6,7 @@ import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.PendingServiceManager;
 import eu.einfracentral.registry.manager.ProviderManager;
+import eu.einfracentral.registry.service.MailService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -28,6 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+//@Async
 @Component
 public class RegistrationMailService {
 

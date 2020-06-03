@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
+@Deprecated
 public interface MeasurementService<T, U extends Authentication> extends ResourceService<Measurement, Authentication> {
 
     /**
