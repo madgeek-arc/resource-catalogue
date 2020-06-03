@@ -45,7 +45,6 @@
       <xs:enumeration value="SUBCATEGORY"/>
       <xs:enumeration value="LANGUAGE"/>
       <xs:enumeration value="COUNTRY"/>
-      <xs:enumeration value="GEOGRAPHICAL_AVAILABILITY"/>
       <xs:enumeration value="TRL"/>
       <xs:enumeration value="SCIENTIFIC_DOMAIN"/>
       <xs:enumeration value="SCIENTIFIC_SUBDOMAIN"/>

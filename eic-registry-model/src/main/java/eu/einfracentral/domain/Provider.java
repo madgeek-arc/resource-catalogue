@@ -54,9 +54,9 @@ public class Provider implements Identifiable {
      * 	A Y/N question to define whether the Provider is a Legal Entity or not.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "Yes or No (required)", required = true)
+    @ApiModelProperty(position = 5, required = true)
     @FieldValidation
-    private String legalEntity;
+    private boolean legalEntity;
 
     /**
      * Legal status of the Provider. The legal status is usually noted in the registration act/statutes. For independent legal entities (1) - legal status of the Provider.
@@ -386,11 +386,11 @@ public class Provider implements Identifiable {
         this.website = website;
     }
 
-    public String getLegalEntity() {
+    public boolean isLegalEntity() {
         return legalEntity;
     }
 
-    public void setLegalEntity(String legalEntity) {
+    public void setLegalEntity(boolean legalEntity) {
         this.legalEntity = legalEntity;
     }
 

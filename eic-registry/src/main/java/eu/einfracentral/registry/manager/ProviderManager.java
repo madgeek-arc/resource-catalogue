@@ -385,11 +385,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             logger.error("", e);
         }
 
-        // Validate Provider's legalEntity
-        if (!"yes".equalsIgnoreCase(provider.getProvider().getLegalEntity()) && !"no".equalsIgnoreCase(provider.getProvider().getLegalEntity())) {
-            throw new ValidationException("legalEntity's value should be Yes or No");
-        }
-
         return provider;
     }
 

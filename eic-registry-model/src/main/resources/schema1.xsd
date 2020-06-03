@@ -671,7 +671,7 @@ If (1) - name of the research infrastructure, If (2) - name of the hosting organ
           <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="legalEntity" type="xs:string">
+      <xs:element name="legalEntity" type="xs:boolean">
         <xs:annotation>
           <xs:documentation><![CDATA[A Y/N question to define whether the Provider is a Legal Entity or not.]]></xs:documentation>
         </xs:annotation>
