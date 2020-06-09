@@ -53,8 +53,6 @@ public class RegistrationMailService {
     @Value("${emails.send.notifications:true}")
     private boolean enableEmailNotifications;
 
-    private final List<String> projectAdmins;
-
 
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
@@ -62,8 +60,7 @@ public class RegistrationMailService {
                                    @Lazy PendingProviderManager pendingProviderManager,
                                    InfraServiceManager infraServiceManager,
                                    PendingServiceManager pendingServiceManager,
-                                   SecurityService securityService,
-                                   @Value("${project.admins}") String admins) {
+                                   SecurityService securityService) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
@@ -71,7 +68,6 @@ public class RegistrationMailService {
         this.infraServiceManager = infraServiceManager;
         this.pendingServiceManager = pendingServiceManager;
         this.securityService = securityService;
-        this.projectAdmins = Arrays.asList(admins.split("\\s*\\,\\s*"));
     }
 
     @Async
@@ -193,9 +189,7 @@ public class RegistrationMailService {
 
         String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
         if (!providersWaitingForInitialApproval.isEmpty() || !providersWaitingForSTApproval.isEmpty()) {
-            List<String> recipients = new ArrayList<>(projectAdmins);
-            recipients.add(registrationEmail);
-            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, recipients);
+            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail);
         }
     }
 
@@ -271,9 +265,7 @@ public class RegistrationMailService {
         root.put("updatedServices", updatedServices);
 
         String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
-        List<String> recipients = new ArrayList<>(projectAdmins);
-        recipients.add(registrationEmail);
-        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, recipients);
+        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail);
     }
 
     private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email) {
