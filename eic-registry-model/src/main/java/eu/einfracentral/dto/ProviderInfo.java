@@ -7,15 +7,17 @@ public class ProviderInfo {
 
     private String providerId;
     private String providerName;
-    private String providerAcronym;
+    private String providerAbbreviation;
+    private boolean resourceOrganisation;
 
     public ProviderInfo() {
     }
 
-    public ProviderInfo(String providerId, String providerName, String providerAcronym) {
+    public ProviderInfo(String providerId, String providerName, String providerAbbreviation, boolean resourceOrganisation) {
         this.providerId = providerId;
         this.providerName = providerName;
-        this.providerAcronym = providerAcronym;
+        this.providerAbbreviation = providerAbbreviation;
+        this.resourceOrganisation = resourceOrganisation;
     }
 
     public String getProviderId() {
@@ -34,11 +36,19 @@ public class ProviderInfo {
         this.providerName = providerName;
     }
 
-    public String getProviderAcronym() {
-        return providerAcronym;
+    public String getProviderAbbreviation() {
+        return providerAbbreviation;
     }
 
-    public void setProviderAcronym(String providerAcronym) {
-        this.providerAcronym = providerAcronym;
+    public void setProviderAbbreviation(String providerAbbreviation) {
+        this.providerAbbreviation = providerAbbreviation;
+    }
+
+    public boolean isResourceOrganisation() {
+        return resourceOrganisation;
+    }
+
+    public void setResourceOrganisation(boolean resourceOrganisation) {
+        this.resourceOrganisation = resourceOrganisation;
     }
 }
