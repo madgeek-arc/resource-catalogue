@@ -483,14 +483,22 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         for (RichService richService : richServices) {
             List<ProviderInfo> providerInfoList = new ArrayList<>();
             List<String> allProviders = richService.getService().getResourceProviders();
-            allProviders.add(richService.getService().getResourceOrganisation());
+            if (!allProviders.contains(richService.getService().getResourceOrganisation())){
+                allProviders.add(richService.getService().getResourceOrganisation());
+            }
             for (String provider : allProviders) {
                 ProviderInfo providerInfo = new ProviderInfo();
                 providerInfo.setProviderId(providerService.get(provider, auth).getId());
                 providerInfo.setProviderName(providerService.get(provider, auth).getProvider().getName());
-                providerInfo.setProviderAcronym(providerService.get(provider, auth).getProvider().getAbbreviation());
+                providerInfo.setProviderAbbreviation(providerService.get(provider, auth).getProvider().getAbbreviation());
+                if (!provider.equals(richService.getService().getResourceOrganisation())){
+                    providerInfo.setResourceOrganisation(false);
+                } else {
+                    providerInfo.setResourceOrganisation(true);
+                }
                 providerInfoList.add(providerInfo);
             }
+
             richService.setProviderInfo(providerInfoList);
         }
         return richServices;

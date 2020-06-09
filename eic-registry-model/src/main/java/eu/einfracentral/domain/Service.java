@@ -49,7 +49,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "resourceProviders")
     @XmlElement(name = "resourceProvider")
     @ApiModelProperty(position = 4, reference = "Vocabulary")
-    @FieldValidation(nullable = true/*, containsId = true, idClass = Provider.class*/) //TODO: decide the importance of resourceProviders
+    @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private List<String> resourceProviders;
 
     /**
