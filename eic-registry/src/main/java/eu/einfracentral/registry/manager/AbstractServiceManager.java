@@ -538,9 +538,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         for (InfraService infraService : infraServices) {
             RichService richService = new RichService(infraService);
 
-            // Language Names
+            // LanguageAvailabilities Names
             if (infraService.getService().getLanguageAvailabilities() != null) {
-                richService.setLanguageNames(infraService.getService().getLanguageAvailabilities()
+                richService.setLanguageAvailabilityNames(infraService.getService().getLanguageAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(l -> allVocabularies.get(l).getName())
@@ -548,9 +548,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 );
             }
 
-            // Place Names
+            // GeographicAvailabilities Names
             if (infraService.getService().getGeographicalAvailabilities() != null) {
-                richService.setPlaceNames(infraService.getService().getGeographicalAvailabilities()
+                richService.setGeographicAvailabilityNames(infraService.getService().getGeographicalAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -563,6 +563,16 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 richService.setTrlName(allVocabularies.get(infraService.getService().getTrl()).getName());
             }
 
+            // LifeCycleStatus Name
+            if (infraService.getService().getLifeCycleStatus() != null && !infraService.getService().getLifeCycleStatus().equals("")) {
+                richService.setLifeCycleStatusName(allVocabularies.get(infraService.getService().getLifeCycleStatus()).getName());
+            }
+
+            // OrderType Name
+            if (infraService.getService().getOrderType() != null && !infraService.getService().getOrderType().equals("")) {
+                richService.setOrderTypeName(allVocabularies.get(infraService.getService().getOrderType()).getName());
+            }
+
             // TargetUsers Names
             if (infraService.getService().getTargetUsers() != null) {
                 richService.setTargetUsersNames(infraService.getService().getTargetUsers()
@@ -573,7 +583,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 );
             }
 
-            // AccessType Names
+            // AccessTypes Names
             if (infraService.getService().getAccessTypes() != null) {
                 richService.setAccessTypeNames(infraService.getService().getAccessTypes()
                         .stream()
@@ -583,7 +593,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 );
             }
 
-            // AccessMode Names
+            // AccessModes Names
             if (infraService.getService().getAccessModes() != null) {
                 richService.setAccessModeNames(infraService.getService().getAccessModes()
                         .stream()
@@ -593,9 +603,19 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 );
             }
 
-            // Funders Names
+            // FundingBodies Names
             if (infraService.getService().getFundingBody() != null) {
-                richService.setFundedByNames(infraService.getService().getFundingBody()
+                richService.setFundingBodyNames(infraService.getService().getFundingBody()
+                        .stream()
+                        .filter(v -> !v.equals(""))
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // FundingPrograms Names
+            if (infraService.getService().getFundingPrograms() != null) {
+                richService.setFundingProgramNames(infraService.getService().getFundingPrograms()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
