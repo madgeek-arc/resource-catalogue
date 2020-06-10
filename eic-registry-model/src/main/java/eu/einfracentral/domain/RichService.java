@@ -14,14 +14,16 @@ public class RichService {
     private Service service;
     private Metadata metadata;
 
-    private List<String> languageNames;
-    private List<String> placeNames;
+    private List<String> languageAvailabilityNames;
+    private List<String> geographicAvailabilityNames;
     private String trlName;
     private String phaseName;
+    private String lifeCycleStatusName;
     private List<String> targetUsersNames;
     private List<String> accessTypeNames;
     private List<String> accessModeNames;
-    private List<String> fundedByNames;
+    private List<String> fundingBodyNames;
+    private List<String> fundingProgramNames;
     private String orderTypeName;
 
     private int views;
@@ -67,20 +69,21 @@ public class RichService {
 
 
     // Getters/Setters for VocabularyNames
-    public List<String> getLanguageNames() {
-        return languageNames;
+
+    public List<String> getLanguageAvailabilityNames() {
+        return languageAvailabilityNames;
     }
 
-    public void setLanguageNames(List<String> languageNames) {
-        this.languageNames = languageNames;
+    public void setLanguageAvailabilityNames(List<String> languageAvailabilityNames) {
+        this.languageAvailabilityNames = languageAvailabilityNames;
     }
 
-    public List<String> getPlaceNames() {
-        return placeNames;
+    public List<String> getGeographicAvailabilityNames() {
+        return geographicAvailabilityNames;
     }
 
-    public void setPlaceNames(List<String> placeNames) {
-        this.placeNames = placeNames;
+    public void setGeographicAvailabilityNames(List<String> geographicAvailabilityNames) {
+        this.geographicAvailabilityNames = geographicAvailabilityNames;
     }
 
     public String getTrlName() {
@@ -97,6 +100,14 @@ public class RichService {
 
     public void setPhaseName(String phaseName) {
         this.phaseName = phaseName;
+    }
+
+    public String getLifeCycleStatusName() {
+        return lifeCycleStatusName;
+    }
+
+    public void setLifeCycleStatusName(String lifeCycleStatusName) {
+        this.lifeCycleStatusName = lifeCycleStatusName;
     }
 
     public List<String> getTargetUsersNames() {
@@ -123,12 +134,20 @@ public class RichService {
         this.accessModeNames = accessModeNames;
     }
 
-    public List<String> getFundedByNames() {
-        return fundedByNames;
+    public List<String> getFundingBodyNames() {
+        return fundingBodyNames;
     }
 
-    public void setFundedByNames(List<String> fundedByNames) {
-        this.fundedByNames = fundedByNames;
+    public void setFundingBodyNames(List<String> fundingBodyNames) {
+        this.fundingBodyNames = fundingBodyNames;
+    }
+
+    public List<String> getFundingProgramNames() {
+        return fundingProgramNames;
+    }
+
+    public void setFundingProgramNames(List<String> fundingProgramNames) {
+        this.fundingProgramNames = fundingProgramNames;
     }
 
     public String getOrderTypeName() {
@@ -139,8 +158,6 @@ public class RichService {
         this.orderTypeName = orderTypeName;
     }
 
-
-    // Getters/Setters for Statistics
     public int getViews() {
         return views;
     }
@@ -155,6 +172,14 @@ public class RichService {
 
     public void setRatings(int ratings) {
         this.ratings = ratings;
+    }
+
+    public float getUserRate() {
+        return userRate;
+    }
+
+    public void setUserRate(float userRate) {
+        this.userRate = userRate;
     }
 
     public float getHasRate() {
@@ -173,28 +198,12 @@ public class RichService {
         this.favourites = favourites;
     }
 
-    public boolean getIsFavourite() {
+    public boolean isFavourite() {
         return isFavourite;
     }
 
     public void setFavourite(boolean favourite) {
         isFavourite = favourite;
-    }
-
-    public float getUserRate() {
-        return userRate;
-    }
-
-    public void setUserRate(float userRate) {
-        this.userRate = userRate;
-    }
-
-    public List<ScientificDomain> getDomains() {
-        return domains;
-    }
-
-    public void setDomains(List<ScientificDomain> domains) {
-        this.domains = domains;
     }
 
     public List<Category> getCategories() {
@@ -205,7 +214,14 @@ public class RichService {
         this.categories = categories;
     }
 
-    // Getter/Setter for ProviderInfo
+    public List<ScientificDomain> getDomains() {
+        return domains;
+    }
+
+    public void setDomains(List<ScientificDomain> domains) {
+        this.domains = domains;
+    }
+
     public List<ProviderInfo> getProviderInfo() {
         return providerInfo;
     }
