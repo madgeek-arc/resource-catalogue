@@ -207,7 +207,7 @@ public class SecurityService {
                     }
                 } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
                     FacetFilter ff = new FacetFilter();
-                    ff.addFilter("providers", provider.getId());
+                    ff.addFilter("resource_organisation", provider.getId());
                     if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                         return true;
                     }
@@ -243,7 +243,7 @@ public class SecurityService {
                     }
                 } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
                     FacetFilter ff = new FacetFilter();
-                    ff.addFilter("providers", provider.getId());
+                    ff.addFilter("resource_organisation", provider.getId());
                     if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                         return true;
                     }
