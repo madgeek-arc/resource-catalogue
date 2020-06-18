@@ -302,7 +302,7 @@ public class ServiceController {
     public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", "true");
-        ff.addFilter("providers", id);
+        ff.addFilter("resource_organisation", id);
         return ResponseEntity.ok(infraService.getAll(ff, null));
     }
 

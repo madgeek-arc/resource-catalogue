@@ -1,6 +1,5 @@
 package eu.einfracentral.utils;
 
-import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.ProviderService;
@@ -22,8 +21,8 @@ import java.util.stream.Collectors;
 public class FacetLabelService {
 
     private static final Logger logger = LogManager.getLogger(FacetLabelService.class);
-    private ProviderService<ProviderBundle, Authentication> providerService;
-    private VocabularyService vocabularyService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final VocabularyService vocabularyService;
 
     @Autowired
     FacetLabelService(ProviderService<ProviderBundle, Authentication> providerService, VocabularyService vocabularyService) {
@@ -66,6 +65,7 @@ public class FacetLabelService {
 
                 switch (facet.getField()) {
                     case "providers":
+                    case "resource_organisation": // TODO: check if it works as intended
                         value.setLabel(providerNames.get(value.getValue()));
                         break;
 

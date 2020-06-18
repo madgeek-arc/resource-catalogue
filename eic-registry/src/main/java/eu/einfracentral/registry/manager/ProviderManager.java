@@ -283,7 +283,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     public List<InfraService> getInfraServices(String providerId) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("providers", providerId);
+        ff.addFilter("resource_organisation", providerId);
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults();
@@ -292,7 +292,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("providers", providerId);
+        ff.addFilter("resource_organisation", providerId);
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -302,7 +302,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     public List<Service> getActiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("providers", providerId);
+        ff.addFilter("resource_organisation", providerId);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
         ff.setQuantity(10000);
@@ -335,7 +335,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     public List<InfraService> getInactiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("providers", providerId);
+        ff.addFilter("resource_organisation", providerId);
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(10000);

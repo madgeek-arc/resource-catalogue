@@ -2,7 +2,6 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -23,7 +22,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,17 +34,14 @@ import java.util.stream.Collectors;
 public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
-    private ProviderService<ProviderBundle, Authentication> providerManager;
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
-    private EventService eventService;
+    private final ProviderService<ProviderBundle, Authentication> providerManager;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
-                       InfraServiceService<InfraService, InfraService> infraServiceService,
-                       EventService eventService) {
+                       InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.providerManager = service;
         this.infraServiceService = infraServiceService;
-        this.eventService = eventService;
     }
 
     // Deletes the Provider with the given id.
@@ -236,7 +235,7 @@ public class ProviderController {
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
-        ff.addFilter("providers", id);
+        ff.addFilter("resource_organisation", id);
         List<InfraService> services = infraServiceService.getAll(ff, auth).getResults();
         for (InfraService service : services) {
             service.setActive(active);
@@ -253,7 +252,7 @@ public class ProviderController {
     }
 
     @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void deleteUserInfo (Authentication authentication){
+    public void deleteUserInfo(Authentication authentication) {
         providerManager.deleteUserInfo(authentication);
     }
 
