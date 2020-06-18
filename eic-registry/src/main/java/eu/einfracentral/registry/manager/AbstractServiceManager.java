@@ -131,22 +131,23 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
         //TODO: Rearrange depending on front-end's needs
         //Order Service's facets as we like (+removed Service Name - no4)
-//        List<String> orderedBrowseBy = new ArrayList<>();
-//        orderedBrowseBy.add(browseBy.get(11));   //no11 - Subcategories
-//        orderedBrowseBy.add(browseBy.get(8));    // no8 - Providers
-//        orderedBrowseBy.add(browseBy.get(10));   //no10 - Scientific Subdomains
-//        orderedBrowseBy.add(browseBy.get(6));    // no6 - Phase
-//        orderedBrowseBy.add(browseBy.get(13));   //no13 - TRL
-//        orderedBrowseBy.add(browseBy.get(7));    // no7 - Places
-//        orderedBrowseBy.add(browseBy.get(3));    // no3 - Languages
-//        orderedBrowseBy.add(browseBy.get(1));    // no1 - Access Types
-//        orderedBrowseBy.add(browseBy.get(0));    // no0 - Access Modes
-//        orderedBrowseBy.add(browseBy.get(5));    // no5 - Order Type
-//        orderedBrowseBy.add(browseBy.get(12));   //no12 - Target Users
-//        orderedBrowseBy.add(browseBy.get(2));    // no2 - Funders
-//        orderedBrowseBy.add(browseBy.get(9));    // no9 - Resource Type
-//
-//        filter.setBrowseBy(orderedBrowseBy);
+        List<String> orderedBrowseBy = new ArrayList<>();
+
+        orderedBrowseBy.add(browseBy.get(15));     //no11 - Subcategories
+        orderedBrowseBy.add(browseBy.get(12));    // no12 - Resource Organisation
+        orderedBrowseBy.add(browseBy.get(14));     //no14 - Scientific Subdomains
+        orderedBrowseBy.add(browseBy.get(7));      // no7 - LifeCycleStatus
+        orderedBrowseBy.add(browseBy.get(19));     //no19 - TRL
+        orderedBrowseBy.add(browseBy.get(5));      // no5 - Geographical Availabilities
+        orderedBrowseBy.add(browseBy.get(11));    // no11 - Geographic Locations
+        orderedBrowseBy.add(browseBy.get(6));      // no6 - Language Availabilities
+        orderedBrowseBy.add(browseBy.get(1));      // no1 - Access Types
+        orderedBrowseBy.add(browseBy.get(0));      // no0 - Access Modes
+        orderedBrowseBy.add(browseBy.get(18));     //no18 - Target Users
+        orderedBrowseBy.add(browseBy.get(3));      // no3 - Funding Body
+        orderedBrowseBy.add(browseBy.get(10));    // no10 - Resource Type
+
+        filter.setBrowseBy(orderedBrowseBy);
 
         filter.setResourceType(getResourceType());
         return getMatchingServices(filter);
