@@ -64,7 +64,8 @@ public class FacetLabelService {
             for (Value value : facet.getValues()) {
 
                 switch (facet.getField()) {
-                    case "resource_organisation": // TODO: check if it works as intended
+                    case "resource_providers":
+                    case "resource_organisation":
                         value.setLabel(providerNames.get(value.getValue()));
                         break;
 
