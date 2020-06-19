@@ -135,6 +135,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
         orderedBrowseBy.add(browseBy.get(15));     //no11 - Subcategories
         orderedBrowseBy.add(browseBy.get(12));    // no12 - Resource Organisation
+        orderedBrowseBy.add(browseBy.get(13));    // no12 - Resource Providers //FIXME: resource providers aren't visible
         orderedBrowseBy.add(browseBy.get(14));     //no14 - Scientific Subdomains
         orderedBrowseBy.add(browseBy.get(7));      // no7 - LifeCycleStatus
         orderedBrowseBy.add(browseBy.get(19));     //no19 - TRL

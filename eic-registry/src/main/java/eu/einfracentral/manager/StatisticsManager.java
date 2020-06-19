@@ -48,6 +48,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -383,11 +384,11 @@ public class StatisticsManager implements StatisticsService {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
-        in.addValue("providerId", providerId);
+        in.addValue("resource_organisation", providerId);
         String query = "SELECT unnest(places) AS place, count(unnest(places)) AS count FROM infra_service_view WHERE latest=true AND active = true ";
 
         if (providerId != null) {
-            query += " AND :providerId=ANY(providers) ";
+            query += " AND :resource_organisation=resource_organisation";
         }
         query += " GROUP BY unnest(places);";
 
@@ -396,7 +397,7 @@ public class StatisticsManager implements StatisticsService {
         List<PlaceCount> placeCounts = new ArrayList<>();
 
         for (Map<String, Object> record : records) {
-            if (record.get("place").toString().equalsIgnoreCase("EU")) {
+            if (record.get("geographical_availabilities").toString().equalsIgnoreCase("EU")) {
                 for (String place : vocabularyService.getRegion("EU")) {
                     int count = Integer.parseInt(record.get("count").toString());
                     if (mapCounts.containsKey(place)) {
@@ -404,7 +405,7 @@ public class StatisticsManager implements StatisticsService {
                     }
                     mapCounts.put(place, count);
                 }
-            } else if (record.get("place").toString().equalsIgnoreCase("WW")) {
+            } else if (record.get("geographical_availabilities").toString().equalsIgnoreCase("WW")) {
                 for (String place : vocabularyService.getRegion("WW")) {
                     int count = Integer.parseInt(record.get("count").toString());
                     if (mapCounts.containsKey(place)) {
@@ -413,7 +414,7 @@ public class StatisticsManager implements StatisticsService {
                     mapCounts.put(place, count);
                 }
             } else {
-                mapCounts.put(record.get("place").toString(), Integer.parseInt(record.get("count").toString()));
+                mapCounts.put(record.get("geographical_availabilities").toString(), Integer.parseInt(record.get("count").toString()));
             }
         }
 
@@ -429,26 +430,26 @@ public class StatisticsManager implements StatisticsService {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
-        in.addValue("providerId", providerId);
-        in.addValue("place", place);
+        in.addValue("resource_organisation", providerId);
+        in.addValue("geographical_availabilities", place);
         String query = "SELECT infra_service_id, name FROM infra_service_view WHERE latest=true AND active=true ";
 
         if (providerId != null) {
-            query += " AND :providerId=ANY(providers) ";
+            query += " AND :resource_organisation=resource_organisation";
         }
 
         if (place != null) {
-            Set<String> places = new HashSet<>(Arrays.asList(vocabularyService.getRegion("EU")));
+            Set<String> geographical_availabilities = new HashSet<>(Arrays.asList(vocabularyService.getRegion("EU")));
 
             if (!place.equalsIgnoreCase("WW")) {
-                query += " AND ( :place=ANY(places) ";
+                query += " AND ( :geographical_availabilities=ANY(geographical_availabilities) ";
 
                 // if Place belongs to EU then search for EU as well
-                if (places.contains(place) || place.equalsIgnoreCase("EU")) {
-                    query += " OR 'EU'=ANY(places) ";
+                if (geographical_availabilities.contains(place) || place.equalsIgnoreCase("EU")) {
+                    query += " OR 'EU'=ANY(geographical_availabilities) ";
                 }
                 // always search for WW (because every Place belongs to WW)
-                query += " OR 'WW'=ANY(places) )";
+                query += " OR 'WW'=ANY(geographical_availabilities) )";
             }
         }
 
@@ -470,14 +471,15 @@ public class StatisticsManager implements StatisticsService {
         for (String place : world) {
             placeServices.put(place, new HashSet<>());
         }
+        placeServices.put("OT", new HashSet<>());
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
-        in.addValue("providerId", providerId);
+        in.addValue("resource_organisation", providerId);
 
-        String query = "SELECT infra_service_id, name, places FROM infra_service_view WHERE latest=true AND active=true ";
+        String query = "SELECT infra_service_id, name, geographical_availabilities FROM infra_service_view WHERE latest=true AND active=true ";
         if (providerId != null) {
-            query += " AND :providerId=ANY(providers) ";
+            query += " AND :resource_organisation=resource_organisation";
         }
 
         List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
@@ -487,7 +489,7 @@ public class StatisticsManager implements StatisticsService {
                 Value value = new Value();
                 value.setId(entry.get("infra_service_id").toString());
                 value.setName(entry.get("name").toString());
-                PgArray pgArray = ((PgArray) entry.get("places"));
+                PgArray pgArray = ((PgArray) entry.get("geographical_availabilities"));
 
                 for (String place : ((String[]) pgArray.getArray())) {
                     String[] expandedPlaces;
@@ -499,9 +501,13 @@ public class StatisticsManager implements StatisticsService {
                         expandedPlaces = new String[]{place};
                     }
                     for (String p : expandedPlaces) {
-                        Set<Value> values = placeServices.get(p);
-                        values.add(value);
-                        placeServices.put(p, values);
+                        try{
+                            Set<Value> values = placeServices.get(p);
+                            values.add(value);
+                            placeServices.put(p, values);
+                        } catch(NullPointerException e){
+                            logger.info(p);
+                        }
                     }
                 }
             }
@@ -518,6 +524,7 @@ public class StatisticsManager implements StatisticsService {
         for (String place : vocabularyService.getRegion("WW")) {
             mapValues.put(place, new HashSet<>());
         }
+        mapValues.put("OT", new HashSet<>());
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
 
@@ -528,14 +535,15 @@ public class StatisticsManager implements StatisticsService {
             Value value = new Value(infraService.getId(), infraService.getService().getName());
 
             Set<String> countries = new HashSet<>();
-            List<String> providers = new ArrayList<>(infraService.getService().getResourceProviders());
+            List<String> providers = new ArrayList<>();
+            providers = infraService.getService().getResourceProviders();
             providers.add(infraService.getService().getResourceOrganisation());
             for (String providerId : providers) {
                 countries.addAll(providerCountries.get(providerId));
             }
 
             for (String country : countries) {
-                Set<Value> values = mapValues.get(country);
+                 Set<Value> values = mapValues.get(country);
                 values.add(value);
                 mapValues.put(country, values);
             }
@@ -550,12 +558,12 @@ public class StatisticsManager implements StatisticsService {
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
-        in.addValue("providerId", providerId);
+        in.addValue("resource_organisation", providerId);
 
         String query = "SELECT infra_service_id, name, " + vocabulary.getKey()
                 + " FROM infra_service_view WHERE latest=true AND active=true ";
         if (providerId != null) {
-            query += " AND :providerId=ANY(providers)";
+            query += " AND :resource_organisation=resource_organisation";
         }
 
         List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
