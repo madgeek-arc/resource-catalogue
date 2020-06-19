@@ -162,11 +162,11 @@ public interface StatisticsService {
 
     enum Vocabulary {
         SUBCATEGORY("subcategories"),
-        SUBDOMAIN("scientific_subdomains"),
+        SCIENTIFIC_SUBDOMAIN("scientific_subdomains"),
         TARGET_USERS("target_users"),
         ACCESS_MODES("access_modes"),
         ACCESS_TYPES("access_types"),
-        ORDER_TYPE("ordertype");
+        ORDER_TYPE("order_type"); //TODO: PUT order_type in infraService.json
 
         private final String vocabulary;
 
