@@ -156,6 +156,13 @@
     },
     {
       "multivalued": false,
+      "name": "orderType",
+      "label": "Order Type",
+      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "registeredBy",
       "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
       "type": "java.lang.String"
