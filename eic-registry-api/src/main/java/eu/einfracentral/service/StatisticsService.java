@@ -166,7 +166,7 @@ public interface StatisticsService {
         TARGET_USERS("target_users"),
         ACCESS_MODES("access_modes"),
         ACCESS_TYPES("access_types"),
-        ORDER_TYPE("order_type"); //TODO: PUT order_type in infraService.json
+        ORDER_TYPE("order_type");
 
         private final String vocabulary;
 
