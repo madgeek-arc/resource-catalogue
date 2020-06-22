@@ -156,7 +156,7 @@
     },
     {
       "multivalued": false,
-      "name": "orderType",
+      "name": "order_type",
       "label": "Order Type",
       "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
       "type": "java.lang.String"
