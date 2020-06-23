@@ -84,9 +84,9 @@ public class StatisticsController {
     }
 
 //    @ApiOperation(value = "Get a relation between all Services and their Coordinating Country")
-    @GetMapping(path = "provider/mapServicesToCoordinatingCountry", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<MapValues>> mapServicesToCoordinatingCountry() {
-        return new ResponseEntity<>(statisticsService.mapServicesToCoordinatingCountry(), HttpStatus.OK);
+    @GetMapping(path = "provider/mapServicesToProviderCountry", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<MapValues>> mapServicesToProviderCountry() {
+        return new ResponseEntity<>(statisticsService.mapServicesToProviderCountry(), HttpStatus.OK);
     }
 
 //    @ApiOperation(value = "Providing the Provider's id, get the relation between all his services and a specific Vocabulary")
