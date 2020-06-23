@@ -473,7 +473,7 @@ public class StatisticsManager implements StatisticsService {
         }
         placeServices.put("OT", new HashSet<>());
         placeServices.put("EL", new HashSet<>());
-        placeServices.put("GB", new HashSet<>());
+        placeServices.put("UK", new HashSet<>());
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
@@ -521,14 +521,14 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public List<MapValues> mapServicesToCoordinatingCountry() { //TODO: Rename method
+    public List<MapValues> mapServicesToProviderCountry() {
         Map<String, Set<Value>> mapValues = new HashMap<>();
         for (String place : vocabularyService.getRegion("WW")) {
             mapValues.put(place, new HashSet<>());
         }
         mapValues.put("OT", new HashSet<>());
         mapValues.put("EL", new HashSet<>());
-        mapValues.put("GB", new HashSet<>());
+        mapValues.put("UK", new HashSet<>());
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
 
@@ -538,16 +538,10 @@ public class StatisticsManager implements StatisticsService {
         for (InfraService infraService : allServices) {
             Value value = new Value(infraService.getId(), infraService.getService().getName());
 
-            Set<String> countries = new HashSet<>();
-            List<String> providers = new ArrayList<>();
-//            providers = infraService.getService().getResourceProviders(); //TODO: Check if we need this
-            providers.add(infraService.getService().getResourceOrganisation());
-            for (String providerId : providers) {
-                countries.addAll(providerCountries.get(providerId));
-            }
+            Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
 
             for (String country : countries) {
-                 Set<Value> values = mapValues.get(country);
+                Set<Value> values = mapValues.get(country);
                 values.add(value);
                 mapValues.put(country, values);
             }

@@ -149,7 +149,7 @@ public interface StatisticsService {
      *
      * @return
      */
-    List<MapValues> mapServicesToCoordinatingCountry();
+    List<MapValues> mapServicesToProviderCountry();
 
     /**
      * Providing the Provider's id, get the relation between all his services and a specific Vocabulary (e.g. subcategories).
