@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Service("securityService")
-public class SecurityService {
+public class OIDCSecurityService implements SecurityService {
 
     private final ProviderManager providerManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
@@ -43,7 +43,7 @@ public class SecurityService {
     private String projectEmail;
 
     @Autowired
-    SecurityService(ProviderManager providerManager,
+    OIDCSecurityService(ProviderManager providerManager,
                     InfraServiceService<InfraService, InfraService> infraServiceService,
                     PendingResourceService<InfraService> pendingServiceManager) {
         this.providerManager = providerManager;
