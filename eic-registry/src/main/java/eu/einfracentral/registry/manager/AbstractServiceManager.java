@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import javax.annotation.PostConstruct;
@@ -73,6 +74,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Autowired
     private IdCreator idCreator;
+
+    @Autowired
+    private JmsTemplate jmsTopicTemplate;
 
     private List<String> browseBy;
     private Map<String, String> labels;
@@ -183,6 +187,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         created.setPayload(serialized);
         created.setResourceType(resourceType);
         resourceService.addResource(created);
+
+        jmsTopicTemplate.convertAndSend("resource.create", infraService);
+
         return infraService;
     }
 
@@ -206,6 +213,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
+
+        jmsTopicTemplate.convertAndSend("resource.update", infraService);
+
         return infraService;
     }
 
@@ -218,6 +228,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         }
         synchronizerService.syncDelete(infraService);
         resourceService.deleteResource(getResource(infraService.getService().getId(), infraService.getService().getVersion()).getId());
+
+        jmsTopicTemplate.convertAndSend("resource.delete", infraService);
     }
 
     @Override
