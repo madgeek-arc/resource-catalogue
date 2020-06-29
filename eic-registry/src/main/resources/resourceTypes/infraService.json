@@ -32,7 +32,7 @@
       "multivalued": true,
       "name": "resource_providers",
       "label": "Resource Providers",
-      "path": "//*[local-name()='service']//*[local-name()='resourceProviders']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='resourceProvider']/text()",
       "type": "java.lang.String"
     },
     {
