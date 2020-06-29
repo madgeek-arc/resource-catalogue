@@ -5,6 +5,7 @@ import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import org.apache.logging.log4j.LogManager;
@@ -30,13 +31,16 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
     private final PendingResourceService<ProviderBundle> pendingProviderService;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
+    private final IdCreator idCreator;
 
     @Autowired
     PendingProviderController(PendingResourceService<ProviderBundle> pendingProviderService,
-                              ProviderService<ProviderBundle, Authentication> providerManager) {
+                              ProviderService<ProviderBundle, Authentication> providerManager,
+                              IdCreator idCreator) {
         super(pendingProviderService);
         this.pendingProviderService = pendingProviderService;
         this.providerManager = providerManager;
+        this.idCreator = idCreator;
     }
 
     @GetMapping(path = "/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -86,6 +90,9 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
+        if (provider.getId() == null) {
+            provider.setId(idCreator.createProviderId(provider));
+        }
         try {
             bundle = pendingProviderService.get(provider.getId());
             bundle.setProvider(provider);
