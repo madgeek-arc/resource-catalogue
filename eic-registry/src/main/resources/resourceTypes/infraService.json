@@ -31,7 +31,7 @@
     {
       "multivalued": true,
       "name": "resource_providers",
-      "label": "Resource Providers",
+      "label": "Resource Provider",
       "path": "//*[local-name()='service']//*[local-name()='resourceProvider']/text()",
       "type": "java.lang.String"
     },
