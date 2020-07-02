@@ -11,7 +11,7 @@
 * Maven
 * Tomcat 8.5
 * ActiveMQ 5.14.0
-* Elasticsearch 5.6.9
+* Elasticsearch 7.4.2
 * PostgreSQL 9.5 or greater
 
 #### Clone
@@ -93,9 +93,11 @@ oidc.scopes=openid, profile, email
 ## Optional Properties ##
 #########################
 
-## eic Properties ##
-eic.admins=test@email.com, test2@email.com
-einfracentral.debug=false
+## Project Properties ##
+project.admins=test@email.com, test2@email.com
+project.debug=false
+project.name=My Catalogue
+project.registration.email=no-reply@my-catalogue.org
 
 ## sync ##
 sync.host=
@@ -109,6 +111,11 @@ mail.smtp.password=
 mail.smtp.port=
 mail.smtp.protocol=
 mail.smtp.ssl.enable=
+
+## Enable/Disable Emails ##
+emails.send=false
+emails.send.notifications=false
+
 
 ## Matomo Properties ##
 matomoHost=
