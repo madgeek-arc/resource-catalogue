@@ -501,15 +501,12 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 allProviders.add(richService.getService().getResourceOrganisation());
             }
             for (String provider : allProviders) {
-                ProviderInfo providerInfo = new ProviderInfo();
-                providerInfo.setProviderId(providerService.get(provider, auth).getId());
-                providerInfo.setProviderName(providerService.get(provider, auth).getProvider().getName());
-                providerInfo.setProviderAbbreviation(providerService.get(provider, auth).getProvider().getAbbreviation());
-                if (!provider.equals(richService.getService().getResourceOrganisation())){
-                    providerInfo.setResourceOrganisation(false);
-                } else {
-                    providerInfo.setResourceOrganisation(true);
+                ProviderBundle providerBundle = providerService.get(provider, auth);
+                boolean isResourceOrganisation = false;
+                if (provider.equals(richService.getService().getResourceOrganisation())){
+                    isResourceOrganisation = true;
                 }
+                ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
                 providerInfoList.add(providerInfo);
             }
 

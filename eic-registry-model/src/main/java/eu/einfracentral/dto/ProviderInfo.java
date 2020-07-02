@@ -1,5 +1,7 @@
 package eu.einfracentral.dto;
 
+import eu.einfracentral.domain.Provider;
+
 import javax.xml.bind.annotation.XmlTransient;
 
 @XmlTransient
@@ -11,6 +13,13 @@ public class ProviderInfo {
     private boolean resourceOrganisation;
 
     public ProviderInfo() {
+    }
+
+    public ProviderInfo(Provider provider, boolean isResourceOrganisation) {
+        this.providerId = provider.getId();
+        this.providerName = provider.getName();
+        this.providerAbbreviation = provider.getAbbreviation();
+        this.resourceOrganisation = isResourceOrganisation;
     }
 
     public ProviderInfo(String providerId, String providerName, String providerAbbreviation, boolean resourceOrganisation) {
