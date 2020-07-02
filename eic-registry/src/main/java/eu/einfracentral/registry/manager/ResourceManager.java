@@ -10,8 +10,10 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.AbstractGenericService;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -50,7 +52,13 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
         ff.setBrowseBy(getBrowseBy());
-        return getResults(ff);
+        Browsing<T> browsing;
+        try {
+            browsing = getResults(ff);
+        } catch (ElasticsearchStatusException e) {
+            throw new ServiceException("Search error, check search parameters");
+        }
+        return browsing;
     }
 
     @Override
