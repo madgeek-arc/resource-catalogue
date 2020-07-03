@@ -151,7 +151,9 @@ public class ProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
+                                                                        @RequestParam(required = false) List<String> status) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -165,7 +167,13 @@ public class ProviderController {
             sort.put(orderField, order);
             ff.setOrderBy(sort);
         }
+        allRequestParams.remove("status");
         ff.setFilter(allRequestParams);
+        if (status != null) {
+            for (String state : status) {
+                ff.addFilter("status", state);
+            }
+        }
         return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
 
