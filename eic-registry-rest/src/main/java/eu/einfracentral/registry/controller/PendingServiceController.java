@@ -162,12 +162,8 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
 
     @PutMapping(path = "/transform/service", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #json)")
-    public ResponseEntity<Service> pendingToInfra(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
-        Pair<Service, List<Measurement>> serviceAndMeasurementsPair = getServiceAndMeasurements(json);
-        Service service = serviceAndMeasurementsPair.getValue0();
-        List<Measurement> measurements = serviceAndMeasurementsPair.getValue1();
-
+    @PreAuthorize("@securityService.providerCanAddServices(#auth, #service)")
+    public ResponseEntity<Service> pendingToInfra(@RequestBody Service service, @ApiIgnore Authentication auth) {
         if (service == null) {
             throw new ServiceException("Cannot add a null service");
         }
@@ -193,8 +189,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
             // transform to active
             infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
         }
-
-        measurementService.updateAll(infraService.getId(), measurements, auth);
 
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }

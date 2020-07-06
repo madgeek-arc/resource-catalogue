@@ -191,10 +191,14 @@ public class OIDCSecurityService implements SecurityService {
         return providerCanAddServices(auth, infraServiceService.get(serviceId));
     }
 
-    public boolean providerCanAddServices(Authentication auth, InfraService service) {
+    public boolean providerCanAddServices(Authentication auth, InfraService infraService) {
+        return providerCanAddServices(auth, infraService.getService());
+    }
+
+    public boolean providerCanAddServices(Authentication auth, eu.einfracentral.domain.Service service) {
 //        List<String> providerIds = service.getService().getResourceProviders();
 //        providerIds.add((service.getService().getResourceOrganisation()));
-        List<String> providerIds = Collections.singletonList(service.getService().getResourceOrganisation());
+        List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (userIsProviderAdmin(auth, provider.getId())) {
@@ -228,30 +232,8 @@ public class OIDCSecurityService implements SecurityService {
         if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
             throw new ValidationException("Service has no Service Organisation");
         }
-//        List<String> providerIds = service.getResourceProviders();
-//        providerIds.add(service.getResourceOrganisation());
-        List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
-        for (String providerId : providerIds) {
-            ProviderBundle provider = providerManager.get(providerId);
-            if (userIsProviderAdmin(auth, provider.getId())) {
-                if (provider.getStatus() == null) {
-                    throw new ServiceException("Provider status field is null");
-                }
-                if (provider.isActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
-                    if (userIsProviderAdmin(auth, provider.getId())) {
-                        return true;
-                    }
-                } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
-                    FacetFilter ff = new FacetFilter();
-                    ff.addFilter("resource_organisation", provider.getId());
-                    if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
-                        return true;
-                    }
-                    throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
-                }
-            }
-        }
-        return false;
+
+        return providerCanAddServices(auth, service);
     }
 
     @Deprecated
