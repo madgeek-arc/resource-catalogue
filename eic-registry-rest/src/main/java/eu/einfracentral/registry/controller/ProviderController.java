@@ -22,10 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -153,7 +150,7 @@ public class ProviderController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
-                                                                        @RequestParam(required = false) List<String> status) {
+                                                                        @RequestParam(required = false) Set<String> status) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -170,9 +167,7 @@ public class ProviderController {
         allRequestParams.remove("status");
         ff.setFilter(allRequestParams);
         if (status != null) {
-            for (String state : status) {
-                ff.addFilter("status", state);
-            }
+            ff.addFilter("status", status);
         }
         return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
