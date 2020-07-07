@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MailService;
 import eu.einfracentral.registry.service.ProviderRequestService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -32,6 +33,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     private final MailService mailService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final SecurityService securityService;
     private final Configuration cfg;
 
     @Value("${project.name:CatRIS}")
@@ -40,11 +42,13 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     @Autowired
     public ProviderRequestManager(MailService mailService, Configuration cfg,
                                   InfraServiceService<InfraService, InfraService> infraServiceService,
-                                  ProviderService<ProviderBundle, Authentication> providerService) {
+                                  ProviderService<ProviderBundle, Authentication> providerService,
+                                  SecurityService securityService) {
         super(ProviderRequest.class);
         this.mailService = mailService;
         this.infraServiceService = infraServiceService;
         this.providerService = providerService;
+        this.securityService = securityService;
         this.cfg = cfg;
     }
 
@@ -57,7 +61,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     public ProviderRequest add(ProviderRequest providerRequest, Authentication auth) {
         providerRequest.setId(UUID.randomUUID().toString());
         validate(providerRequest);
-        super.add(providerRequest, null);
+        super.add(providerRequest, auth);
         logger.debug("Adding ProviderRequest {}", providerRequest);
         return providerRequest;
     }
@@ -97,7 +101,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
             List<String> providerIds = service.getService().getResourceProviders();
             providerIds.add(service.getService().getResourceOrganisation());
             for (String providerId : providerIds) {
-                ProviderBundle providerBundle = providerService.get(providerId, (Authentication) null);
+                ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
                 providerContactNames.put(providerBundle.getProvider().getMainContact().getLastName(), providerBundle.getProvider().getMainContact().getFirstName());
                 providersToBeMailed.put(providerBundle.getProvider().getId(), providerBundle.getProvider().getMainContact().getEmail());
             }
