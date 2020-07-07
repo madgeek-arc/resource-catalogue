@@ -37,7 +37,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     @Override
     public T beforeBodyWrite(T t, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+        if (t != null && !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             if (t instanceof ProviderBundle
                     && !this.securityService.userIsProviderAdmin(auth, ((ProviderBundle) t).getId())) {
                 ((ProviderBundle) t).getProvider().setMainContact(null);
