@@ -17,17 +17,25 @@ public interface SecurityService {
 
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
 
+    boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow);
+
     boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId);
 
-    boolean userIsServiceProviderAdmin(Authentication auth, Map<String, JsonNode> json) throws JsonProcessingException;
+    boolean isServiceProviderAdmin(Authentication auth, String serviceId);
 
-    boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service);
+    boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow);
 
-    boolean userIsServiceProviderAdmin(Authentication auth, InfraService infraService);
+    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service);
 
-    boolean userIsServiceProviderAdmin(Authentication auth, String serviceId);
+    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow);
 
-    boolean providerCanAddServices(Authentication auth, String serviceId);
+    boolean userIsServiceProviderAdmin(User user, Map<String, JsonNode> json) throws JsonProcessingException;
+
+    boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service);
+
+    boolean userIsServiceProviderAdmin(User user, InfraService infraService);
+
+    boolean userIsServiceProviderAdmin(User user, String serviceId);
 
     boolean providerCanAddServices(Authentication auth, InfraService service);
 

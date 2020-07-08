@@ -74,6 +74,14 @@ public class OIDCSecurityService implements SecurityService {
         return userIsProviderAdmin(user, providerId);
     }
 
+    public boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow) {
+        if (auth == null && noThrow) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsProviderAdmin(user, providerId);
+    }
+
     public boolean userIsProviderAdmin(User user, @NotNull String providerId) {
         ProviderBundle registeredProvider = providerManager.get(providerId);
         if (registeredProvider == null) {
@@ -97,7 +105,38 @@ public class OIDCSecurityService implements SecurityService {
                 });
     }
 
-    public boolean userIsServiceProviderAdmin(Authentication auth, Map<String, JsonNode> json) throws JsonProcessingException {
+    @Override
+    public boolean isServiceProviderAdmin(Authentication auth, String serviceId) {
+        User user = User.of(auth);
+        return userIsServiceProviderAdmin(user, serviceId);
+    }
+
+    @Override
+    public boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow) {
+        if (auth == null && noThrow) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsServiceProviderAdmin(user, serviceId);
+    }
+
+    @Override
+    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
+        User user = User.of(auth);
+        return userIsServiceProviderAdmin(user, service);
+    }
+
+    @Override
+    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow) {
+        if (auth == null && noThrow) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsServiceProviderAdmin(user, service);
+    }
+
+    @Override
+    public boolean userIsServiceProviderAdmin(User user, Map<String, JsonNode> json) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         eu.einfracentral.domain.Service service = null;
         service = mapper.readValue(json.get("service").toString(), eu.einfracentral.domain.Service.class);
@@ -105,7 +144,6 @@ public class OIDCSecurityService implements SecurityService {
             throw new ServiceException("Service is null");
         }
 
-        User user = User.of(auth);
         if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
             throw new ValidationException("Service has no Resource Organisation");
         }
@@ -120,11 +158,11 @@ public class OIDCSecurityService implements SecurityService {
                 .anyMatch(id -> userIsProviderAdmin(user, id));
     }
 
-    public boolean userIsServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
+    @Override
+    public boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service) {
         if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
             throw new ValidationException("Service has no Service Organisation");
         }
-        User user = User.of(auth);
 //        List<String> allProviders = service.getResourceProviders();
 //        allProviders.add(service.getResourceOrganisation());
         List<String> allProviders = Collections.singletonList(service.getResourceOrganisation());
@@ -136,11 +174,13 @@ public class OIDCSecurityService implements SecurityService {
                 .anyMatch(id -> userIsProviderAdmin(user, id));
     }
 
-    public boolean userIsServiceProviderAdmin(Authentication auth, InfraService infraService) {
-        return userIsServiceProviderAdmin(auth, infraService.getService());
+    @Override
+    public boolean userIsServiceProviderAdmin(User user, InfraService infraService) {
+        return userIsServiceProviderAdmin(user, infraService.getService());
     }
 
-    public boolean userIsServiceProviderAdmin(Authentication auth, String serviceId) {
+    @Override
+    public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId) {
         InfraService service;
         try {
             service = infraServiceService.get(serviceId);
@@ -156,7 +196,6 @@ public class OIDCSecurityService implements SecurityService {
         if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
             throw new ValidationException("Service has no Service Organisation");
         }
-        User user = User.of(auth);
 //        List<String> allProviders = service.getService().getResourceProviders();
 //        allProviders.add(service.getService().getResourceOrganisation());
         List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
