@@ -39,11 +39,11 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (t != null && !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             if (t instanceof ProviderBundle
-                    && !this.securityService.userIsProviderAdmin(auth, ((ProviderBundle) t).getId())) {
+                    && !this.securityService.isProviderAdmin(auth, ((ProviderBundle) t).getId())) {
                 ((ProviderBundle) t).getProvider().setMainContact(null);
                 ((ProviderBundle) t).getProvider().setUsers(null);
             } else if (t instanceof Provider
-                    && !this.securityService.userIsProviderAdmin(auth, ((Provider) t).getId())) {
+                    && !this.securityService.isProviderAdmin(auth, ((Provider) t).getId())) {
                 ((Provider) t).setMainContact(null);
                 ((Provider) t).setUsers(null);
             } else if (t instanceof InfraService
