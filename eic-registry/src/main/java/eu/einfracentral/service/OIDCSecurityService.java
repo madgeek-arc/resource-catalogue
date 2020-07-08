@@ -69,31 +69,12 @@ public class OIDCSecurityService implements SecurityService {
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
-    public boolean userIsProviderAdmin(Authentication auth, @NotNull String providerId) {
-        ProviderBundle registeredProvider = providerManager.get(providerId);
+    public boolean isProviderAdmin(Authentication auth, @NotNull String providerId) {
         User user = User.of(auth);
-        if (registeredProvider == null) {
-            throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
-        }
-        if (registeredProvider.getProvider().getUsers() == null) {
-            return false;
-        }
-        return registeredProvider.getProvider().getUsers()
-                .parallelStream()
-                .filter(Objects::nonNull)
-                .anyMatch(u -> {
-                    if (u.getId() != null) {
-                        if (u.getEmail() != null) {
-                            return u.getId().equals(user.getId())
-                                    || u.getEmail().equals(user.getEmail());
-                        }
-                        return u.getId().equals(user.getId());
-                    }
-                    return u.getEmail().equals(user.getEmail());
-                });
+        return userIsProviderAdmin(user, providerId);
     }
 
-    public boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId) {
+    public boolean userIsProviderAdmin(User user, @NotNull String providerId) {
         ProviderBundle registeredProvider = providerManager.get(providerId);
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
@@ -201,12 +182,12 @@ public class OIDCSecurityService implements SecurityService {
         List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
-            if (userIsProviderAdmin(auth, provider.getId())) {
+            if (isProviderAdmin(auth, provider.getId())) {
                 if (provider.getStatus() == null) {
                     throw new ServiceException("Provider status field is null");
                 }
                 if (provider.isActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
-                    if (userIsProviderAdmin(auth, provider.getId())) {
+                    if (isProviderAdmin(auth, provider.getId())) {
                         return true;
                     }
                 } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
@@ -257,7 +238,7 @@ public class OIDCSecurityService implements SecurityService {
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (provider != null && provider.isActive()) {
-                if (userIsProviderAdmin(auth, providerId)) {
+                if (isProviderAdmin(auth, providerId)) {
                     return true;
                 }
             }

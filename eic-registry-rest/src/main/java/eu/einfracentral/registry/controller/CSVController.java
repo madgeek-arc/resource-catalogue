@@ -44,7 +44,7 @@ public class CSVController {
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("latest", "true");
+        ff.addFilter("latest", true);
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
         String csvData = listToCSV(infraServices.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
