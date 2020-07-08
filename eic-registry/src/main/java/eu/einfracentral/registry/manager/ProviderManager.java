@@ -293,7 +293,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("latest", "true");
+        ff.addFilter("latest", true);
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
@@ -303,8 +303,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<Service> getActiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("active", "true");
-        ff.addFilter("latest", "true");
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
         ff.setQuantity(10000);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
