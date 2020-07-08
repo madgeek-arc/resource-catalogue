@@ -129,19 +129,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle get(String id, Authentication auth) {
-        ProviderBundle provider = get(id);
-        if (auth == null) {
-            provider.getProvider().setUsers(null);
-            provider.getProvider().setMainContact(null);
-        } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
-            return provider;
-        } else if (securityService.hasRole(auth, "ROLE_PROVIDER")
-                && securityService.userIsProviderAdmin(auth, provider.getId())) {
-            return provider;
-        }
-        provider.getProvider().setUsers(null);
-        provider.getProvider().setMainContact(null);
-        return provider;
+        return get(id);
     }
 
     @Override
@@ -159,24 +147,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // retrieve providers
         Browsing<ProviderBundle> providers = super.getAll(ff, auth);
 
-        // create a list of providers without their users
-        List<ProviderBundle> modified = providers.getResults()
-                .stream()
-                .map(p -> {
-                    p.getProvider().setUsers(null);
-                    p.getProvider().setMainContact(null);
-                    return p;
-                })
-                .collect(Collectors.toList());
-
         if (userProviders != null) {
             // replace user providers having null users with complete provider entries
             userProviders.forEach(x -> {
-                modified.removeIf(provider -> provider.getId().equals(x.getId()));
-                modified.add(x);
+                providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
+                providers.getResults().add(x);
             });
         }
-        providers.setResults(modified);
         return providers;
     }
 

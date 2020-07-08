@@ -3,6 +3,8 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Paging;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -26,6 +28,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     public SecureResponseAdvice(SecurityService securityService) {
         this.securityService = securityService;
     }
+    private static final Logger logger = LogManager.getLogger(SecureResponseAdvice.class);
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
@@ -55,9 +58,41 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                 ((Service) t).setMainContact(null);
                 ((Service) t).setSecurityContactEmail(null);
             } else if (Collection.class.isAssignableFrom(t.getClass())) {
-                // TODO
+                if (t instanceof Service){
+                    ((Service) t).setMainContact(null);
+                    ((Service) t).setSecurityContactEmail(null);
+                } else if (t instanceof Provider){
+                    ((Provider) t).setMainContact(null);
+                    ((Provider) t).setUsers(null);
+                } else if (t instanceof InfraService){
+                    ((InfraService) t).getService().setMainContact(null);
+                    ((InfraService) t).getService().setSecurityContactEmail(null);
+                } else if (t instanceof ProviderBundle){
+                    ((ProviderBundle) t).getProvider().setMainContact(null);
+                    ((ProviderBundle) t).getProvider().setUsers(null);
+                } else if (t instanceof RichService){
+                    ((RichService) t).getService().setMainContact(null);
+                    ((RichService) t).getService().setSecurityContactEmail(null);
+                }
             } else if (Paging.class.isAssignableFrom(t.getClass())) {
-                // TODO
+                for (Object object : ((Paging) t).getResults()){
+                    if (object instanceof Service){
+                        ((Service) object).setMainContact(null);
+                        ((Service) object).setSecurityContactEmail(null);
+                    } else if (object instanceof Provider){
+                        ((Provider) object).setMainContact(null);
+                        ((Provider) object).setUsers(null);
+                    } else if (object instanceof InfraService){
+                        ((InfraService) object).getService().setMainContact(null);
+                        ((InfraService) object).getService().setSecurityContactEmail(null);
+                    } else if (object instanceof ProviderBundle){
+                        ((ProviderBundle) object).getProvider().setMainContact(null);
+                        ((ProviderBundle) object).getProvider().setUsers(null);
+                    } else if (object instanceof RichService){
+                        ((RichService) object).getService().setMainContact(null);
+                        ((RichService) object).getService().setSecurityContactEmail(null);
+                    }
+                }
             }
         }
 
