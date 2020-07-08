@@ -41,9 +41,9 @@ public class InfoController {
     public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@ApiIgnore Authentication authentication) {
         Map<Object, Object> servicesInfo = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", "true");
+        ff.addFilter("active", true);
         servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
-        ff.addFilter("latest", "true");
+        ff.addFilter("latest", true);
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
         servicesInfo.put("services", (long) infraServices.getTotal());
         for (Facet f : infraServices.getFacets()) {

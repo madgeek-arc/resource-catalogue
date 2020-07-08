@@ -183,8 +183,8 @@ public class ServiceController {
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("active", "true");
-        ff.addFilter("latest", "true");
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
         Paging<InfraService> infraServices = infraService.getAll(ff, null);
         List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
@@ -201,8 +201,8 @@ public class ServiceController {
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("active", "true");
-        ff.addFilter("latest", "true");
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
         Paging<RichService> services = infraService.getRichServices(ff, auth);
         return ResponseEntity.ok(services);
     }
@@ -212,8 +212,8 @@ public class ServiceController {
 
         List<String> childIds = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", "true");
-        ff.addFilter("latest", "true");
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
         ff.setQuantity(1000);
         List<RichService> services = infraService.getRichServices(ff, auth).getResults();
         for (RichService service : services) {
@@ -295,14 +295,13 @@ public class ServiceController {
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "active", value = "Active", dataType = "string", paramType = "query")
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
-    public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("latest", "true");
+        ff.addFilter("latest", true);
         ff.addFilter("resource_organisation", id);
         return ResponseEntity.ok(infraService.getAll(ff, null));
     }
@@ -338,7 +337,7 @@ public class ServiceController {
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Service>> getInactiveServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("active", "false");
+        ff.addFilter("active", false);
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
 //        Paging<InfraService> infraServices = infraService.getInactiveServices();
         List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
