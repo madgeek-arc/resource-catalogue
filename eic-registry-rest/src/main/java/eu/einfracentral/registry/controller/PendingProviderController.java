@@ -106,7 +106,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsProviderAdmin(#auth, #provider)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth, #provider)")
     public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         pendingProviderService.transformToPending(provider.getId(), auth);
         ProviderBundle bundle = pendingProviderService.get(provider.getId());

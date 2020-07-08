@@ -136,7 +136,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             return provider;
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")
-                && securityService.userIsProviderAdmin(auth, provider.getId())) {
+                && securityService.isProviderAdmin(auth, provider.getId())) {
             return provider;
         }
         provider.getProvider().setUsers(null);
