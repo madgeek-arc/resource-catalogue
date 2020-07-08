@@ -60,7 +60,7 @@ public class ServiceController {
     }
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service;
         if (version.isPresent()) {
@@ -75,7 +75,7 @@ public class ServiceController {
 
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
     }
@@ -83,7 +83,7 @@ public class ServiceController {
     @ApiOperation(value = "Get the specified version of a Service, providing the Service id and version.")
     @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or " +
-            "(@securityService.userIsServiceProviderAdmin(#auth, #id) or @securityService.userIsServiceProviderAdmin(#auth, #version))")
+            "(@securityService.userIsServiceProviderAdmin(#auth, #id) or @securityService.isServiceProviderAdmin(#auth, #version))")
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
                                         @ApiIgnore Authentication auth) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
@@ -96,7 +96,7 @@ public class ServiceController {
 
     // Get the specified version of a RichService providing the Service id and version.
     @GetMapping(path = "rich/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
                                                       @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.getRichService(id, version, auth), HttpStatus.OK);
@@ -112,7 +112,7 @@ public class ServiceController {
     }
 
     @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #json)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #json)")
     @Deprecated
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
@@ -156,7 +156,7 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret = this.infraService.updateService(new InfraService(service), auth);
@@ -298,7 +298,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);

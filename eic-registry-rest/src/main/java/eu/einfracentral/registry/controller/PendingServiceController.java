@@ -66,7 +66,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
@@ -112,7 +112,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
 
     @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = pendingServiceManager.get(service.getId());
         infraService.setService(service);
@@ -121,7 +121,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
 
     @PostMapping("/transform/pending")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #serviceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #serviceId)")
     public void transformServiceToPending(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToPending(serviceId, auth);
     }
@@ -135,7 +135,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService();
         try {
@@ -152,7 +152,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
 
     @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToPending(service.getId(), auth);
         InfraService infraService = pendingServiceManager.get(service.getId());

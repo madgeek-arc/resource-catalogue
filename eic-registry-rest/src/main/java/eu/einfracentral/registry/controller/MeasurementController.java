@@ -56,7 +56,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @Override
     @ApiOperation(value = "Creates a new Measurement.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) {
         ResponseEntity<Measurement> ret = super.add(measurement, auth);
         logger.info("User '{}' created a new Measurement with id '{}'\n -Indicator id: {}\n -Service id: {}",
@@ -67,7 +67,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     @Override
     @ApiOperation(value = "Updates the Measurement assigned the given id with the given Measurement, keeping version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#measurement.serviceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<Measurement> ret = super.update(measurement, auth);
         logger.info("User '{}' updated Measurement with id '{}':\n -Indicator id: {}\n -Service id: {}",
@@ -77,7 +77,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
 
     // Updates existing Measurements of a specific Service, or/and adds new ones.
     @PostMapping(path = "updateAll", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
         List<Measurement> ret = measurementManager.updateAll(serviceId, allMeasurements, auth);
         logger.info("User '{}' updated a list of Measurements {}", auth.getName(), ret);
@@ -86,7 +86,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
 
     // Updates existing Measurements of a specific Service, or/and adds new ones.
     @PostMapping(path = "updateAllPending", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userIsServiceProviderAdmin(#auth,#serviceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#serviceId)")
     public List<Measurement> updateAll(@RequestParam String serviceId, @RequestParam String newServiceId, @RequestBody List<Measurement> allMeasurements, @ApiIgnore Authentication auth) {
         List<Measurement> ret = measurementManager.updateAll(serviceId, newServiceId, allMeasurements, auth);
         logger.info("User '{}' updated a list of Measurements {}", auth.getName(), ret);
