@@ -15,7 +15,7 @@ public interface SecurityService {
 
     boolean hasRole(Authentication auth, String role);
 
-    boolean userIsProviderAdmin(Authentication auth, @NotNull String providerId);
+    boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
 
     boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId);
 
