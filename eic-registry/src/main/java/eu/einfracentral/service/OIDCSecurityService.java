@@ -10,6 +10,7 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
@@ -32,6 +33,7 @@ import java.util.*;
 public class OIDCSecurityService implements SecurityService {
 
     private final ProviderManager providerManager;
+    private final PendingProviderManager pendingProviderManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingResourceService<InfraService> pendingServiceManager;
     private OIDCAuthenticationToken adminAccess;
@@ -45,9 +47,10 @@ public class OIDCSecurityService implements SecurityService {
     @Autowired
     OIDCSecurityService(ProviderManager providerManager,
                     InfraServiceService<InfraService, InfraService> infraServiceService,
-                    PendingResourceService<InfraService> pendingServiceManager) {
+                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
         this.providerManager = providerManager;
         this.infraServiceService = infraServiceService;
+        this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
 
         // create admin access
@@ -83,7 +86,18 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean userIsProviderAdmin(User user, @NotNull String providerId) {
-        ProviderBundle registeredProvider = providerManager.get(providerId);
+        ProviderBundle registeredProvider;
+        try {
+            registeredProvider = providerManager.get(providerId);
+        } catch (ResourceException e) {
+            try {
+                registeredProvider = pendingProviderManager.get(providerId);
+            } catch (RuntimeException re) {
+                return false;
+            }
+        } catch (RuntimeException e) {
+            return false;
+        }
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");
         }
