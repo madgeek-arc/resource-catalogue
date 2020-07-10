@@ -1,4 +1,4 @@
-# Provider Catalogue #
+# Resource Catalogue #
 ###### What is this project about?
 
 - - -
