@@ -15,7 +15,7 @@
 * PostgreSQL 9.5 or greater
 
 #### Clone
-`git clone https://github.com/eInfraCentral/eic.git`
+`git clone https://github.com/madgeek-arc/resource-catalogue.git`
 
 #### Build
 `mvn clean package`
