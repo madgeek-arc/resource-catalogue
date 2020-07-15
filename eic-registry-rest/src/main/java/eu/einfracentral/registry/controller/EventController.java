@@ -165,7 +165,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @PostMapping(path = "addEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> add(@RequestBody Event event, @ApiIgnore Authentication authentication) {
-        logger.info("User '{}' attempting to add a new Event '{}' with type '{}'", authentication, event, event.getType());
+        logger.info("User '{}' attempting to add a new Event '{}' with type '{}'", authentication.getName(), event, event.getType());
         return new ResponseEntity<>(eventService.add(event, authentication), HttpStatus.CREATED);
     }
 
@@ -173,7 +173,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @PutMapping(path = "updateEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> update(@RequestBody Event event, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        logger.info("User '{}' attempting to update Event '{}' ", authentication, event);
+        logger.info("User '{}' attempting to update Event '{}' ", authentication.getName(), event);
         return new ResponseEntity<>(eventService.update(event, authentication), HttpStatus.OK);
     }
 
@@ -181,7 +181,8 @@ public class EventController extends ResourceController<Event, Authentication> {
     @DeleteMapping(path = "deleteEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Event> delete(@RequestBody Event event, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        logger.info("User '{}' attempting to delete Event '{}' ", authentication, event);
+        logger.info("User '{}' attempting to delete Event '{}' ", authentication.getName(), event);
+        eventService.delete(event);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -189,7 +190,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addVisitsOnDay(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date date, @RequestParam String serviceId,
                                @RequestParam int noOfVisits, Authentication auth) {
-        logger.info("User '{}' attempting to add '{}' visits on date '{}' for service '{}'", auth, noOfVisits, date, serviceId);
+        logger.info("User '{}' attempting to add '{}' visits on date '{}' for service '{}'", auth.getName(), noOfVisits, date, serviceId);
         eventService.addVisitsOnDay(date, serviceId, noOfVisits, auth);
     }
 }
