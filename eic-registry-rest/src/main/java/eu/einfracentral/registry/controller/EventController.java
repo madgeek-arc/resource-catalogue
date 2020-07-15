@@ -3,9 +3,11 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -158,4 +161,35 @@ public class EventController extends ResourceController<Event, Authentication> {
     }
     // <---------- RATINGS
 
+    @Override
+    @PostMapping(path = "addEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Event> add(@RequestBody Event event, @ApiIgnore Authentication authentication) {
+        logger.info("User '{}' attempting to add a new Event '{}' with type '{}'", authentication, event, event.getType());
+        return new ResponseEntity<>(eventService.add(event, authentication), HttpStatus.CREATED);
+    }
+
+    @Override
+    @PutMapping(path = "updateEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Event> update(@RequestBody Event event, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        logger.info("User '{}' attempting to update Event '{}' ", authentication, event);
+        return new ResponseEntity<>(eventService.update(event, authentication), HttpStatus.OK);
+    }
+
+    @Override
+    @DeleteMapping(path = "deleteEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Event> delete(@RequestBody Event event, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        logger.info("User '{}' attempting to delete Event '{}' ", authentication, event);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping(path = "addVisitsOnDay", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addVisitsOnDay(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date date, @RequestParam String serviceId,
+                               @RequestParam int noOfVisits, Authentication auth) {
+        logger.info("User '{}' attempting to add '{}' visits on date '{}' for service '{}'", auth, noOfVisits, date, serviceId);
+        eventService.addVisitsOnDay(date, serviceId, noOfVisits, auth);
+    }
 }

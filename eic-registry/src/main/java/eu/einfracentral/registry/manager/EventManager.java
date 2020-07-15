@@ -62,6 +62,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
+        event.setUser(AuthenticationInfo.getSub(auth));
         Event ret = super.add(event, auth);
         logger.debug("Adding Event: {}", event);
         return ret;
@@ -220,5 +221,18 @@ public class EventManager extends ResourceManager<Event> implements EventService
         Calendar midnight = new GregorianCalendar();
         midnight.set(Calendar.HOUR_OF_DAY, 0);
         return midnight.getTimeInMillis() < instant;
+    }
+
+    public void addVisitsOnDay(Date date, String serviceId, int noOfVisits, Authentication authentication){
+        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.AGGREGATED_VISITS.toString(), serviceId);
+        for (Event event : serviceEvents){
+            long millisecs = date.getTime();
+            if (event.getType().equals("AGGREGATED_VISITS") && millisecs == event.getInstant()) {
+                int oldVisits = Integer.parseInt(event.getValue());
+                String newVisits = Integer.toString(oldVisits+noOfVisits);
+                event.setValue(newVisits);
+                update(event, authentication);
+            }
+        }
     }
 }
