@@ -35,26 +35,26 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     @Override
-    @ApiOperation(value = "Returns the Measurement with the given id.")
+//    @ApiOperation(value = "Returns the Measurement with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Measurement> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
-    @ApiOperation(value = "Returns all Measurements for the specific service.")
+//    @ApiOperation(value = "Returns all Measurements for the specific service.")
     @GetMapping(path = "service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Measurement>> getServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(measurementManager.getAll(id, auth));
     }
 
-    @ApiOperation(value = "Returns the latest Measurements for the specific service.")
+//    @ApiOperation(value = "Returns the latest Measurements for the specific service.")
     @GetMapping(path = "latest/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Measurement>> getLatestServiceMeasurements(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(measurementManager.getLatestServiceMeasurements(id, auth));
     }
 
     @Override
-    @ApiOperation(value = "Creates a new Measurement.")
+//    @ApiOperation(value = "Creates a new Measurement.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> add(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) {
@@ -65,7 +65,7 @@ public class MeasurementController extends ResourceController<Measurement, Authe
     }
 
     @Override
-    @ApiOperation(value = "Updates the Measurement assigned the given id with the given Measurement, keeping version of revisions.")
+//    @ApiOperation(value = "Updates the Measurement assigned the given id with the given Measurement, keeping version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#measurement.serviceId)")
     public ResponseEntity<Measurement> update(@RequestBody Measurement measurement, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
