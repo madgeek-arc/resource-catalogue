@@ -47,14 +47,14 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
 
 
     @Override
-    @ApiOperation(value = "Returns the Indicator with the given id.")
+//    @ApiOperation(value = "Returns the Indicator with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Indicator> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return super.get(id, auth);
     }
 
     @Override
-    @ApiOperation(value = "Filter a list of Indicators based on a set of filters.")
+//    @ApiOperation(value = "Filter a list of Indicators based on a set of filters.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -68,7 +68,7 @@ public class IndicatorController extends ResourceController<Indicator, Authentic
     }
 
     @Override
-    @ApiOperation(value = "Creates a new Indicator.")
+//    @ApiOperation(value = "Creates a new Indicator.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROVIDER')")
     public ResponseEntity<Indicator> add(@RequestBody Indicator indicator, @ApiIgnore Authentication auth) {
