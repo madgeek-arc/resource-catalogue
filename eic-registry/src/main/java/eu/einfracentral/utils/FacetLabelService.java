@@ -79,6 +79,9 @@ public class FacetLabelService {
             }
         }
         enrichedFacets.addAll(facets);
+
+        // Swap position according to front-ends needs
+        Collections.swap(enrichedFacets, 4, 5);
         return enrichedFacets;
     }
 

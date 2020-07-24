@@ -137,20 +137,20 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         //Order Service's facets as we like (+removed Service Name - no4)
         List<String> orderedBrowseBy = new ArrayList<>();
 
-        orderedBrowseBy.add(browseBy.get(15));     //no11 - Subcategories
-        orderedBrowseBy.add(browseBy.get(12));    // no12 - Resource Organisation
-        orderedBrowseBy.add(browseBy.get(13));    // no12 - Resource Providers //FIXME: resource providers aren't visible
-        orderedBrowseBy.add(browseBy.get(14));     //no14 - Scientific Subdomains
+        orderedBrowseBy.add(browseBy.get(16));     //no11 - Subcategories
+        orderedBrowseBy.add(browseBy.get(15));     //no14 - Scientific Subdomains
+        orderedBrowseBy.add(browseBy.get(14));    // no12 - Resource Providers
+        orderedBrowseBy.add(browseBy.get(13));    // no12 - Resource Organisation
         orderedBrowseBy.add(browseBy.get(7));      // no7 - LifeCycleStatus
-        orderedBrowseBy.add(browseBy.get(19));     //no19 - TRL
-        orderedBrowseBy.add(browseBy.get(5));      // no5 - Geographical Availabilities
-        orderedBrowseBy.add(browseBy.get(11));    // no11 - Geographic Locations
-        orderedBrowseBy.add(browseBy.get(6));      // no6 - Language Availabilities
+        orderedBrowseBy.add(browseBy.get(20));     //no19 - TRL
+        orderedBrowseBy.add(browseBy.get(6));      // no5 - Geographical Availabilities
+        orderedBrowseBy.add(browseBy.get(12));    // no11 - Geographic Locations
+        orderedBrowseBy.add(browseBy.get(8));      // no6 - Language Availabilities
         orderedBrowseBy.add(browseBy.get(1));      // no1 - Access Types
         orderedBrowseBy.add(browseBy.get(0));      // no0 - Access Modes
-        orderedBrowseBy.add(browseBy.get(18));     //no18 - Target Users
+        orderedBrowseBy.add(browseBy.get(19));     //no18 - Target Users
         orderedBrowseBy.add(browseBy.get(3));      // no3 - Funding Body
-        orderedBrowseBy.add(browseBy.get(10));    // no10 - Resource Type
+        orderedBrowseBy.add(browseBy.get(11));    // no10 - Resource Type
 
         filter.setBrowseBy(orderedBrowseBy);
 
@@ -779,5 +779,34 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
         return new Browsing<>(paging, results, labels);
+    }
+
+    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec){
+        List<String> finalResults = new ArrayList<>();
+        List<String> allSub = new ArrayList<>();
+        for (Map<String, Object> map : rec) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String trimmed = entry.getValue().toString().replace("{", "").replace("}", "");
+                if (!allSub.contains(trimmed)) {
+                    allSub.add((trimmed));
+                }
+            }
+        }
+        if (type.equalsIgnoreCase("SUPERCATEGORY") || type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")){
+            String[] parts = parent.split("-"); //supercategory-natural_sciences
+            for (String id : allSub){
+                if (id.contains(parts[1])){
+                    finalResults.add(id);
+                }
+            }
+        } else {
+            String[] parts = parent.split("-"); //category-natural_sciences-math
+            for (String id : allSub){
+                if (id.contains(parts[2])){
+                    finalResults.add(id);
+                }
+            }
+        }
+        return finalResults;
     }
 }
