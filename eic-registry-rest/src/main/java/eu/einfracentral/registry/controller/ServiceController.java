@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.dto.Category;
-import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -27,12 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,16 +48,18 @@ public class ServiceController {
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final MeasurementService<Measurement, Authentication> measurementService;
     private final IdCreator idCreator;
+    private final DataSource dataSource;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<ProviderBundle, Authentication> provider,
                       MeasurementService<Measurement, Authentication> measurementService,
-                      IdCreator idCreator) {
+                      IdCreator idCreator, DataSource dataSource) {
         this.infraService = service;
         this.providerService = provider;
         this.measurementService = measurementService;
         this.idCreator = idCreator;
+        this.dataSource = dataSource;
     }
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -209,40 +212,20 @@ public class ServiceController {
 
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
-
-        List<String> childIds = new ArrayList<>();
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
-        ff.setQuantity(1000);
-        List<RichService> services = infraService.getRichServices(ff, auth).getResults();
-        for (RichService service : services) {
-            switch (type) {
-                case "SUPERCATEGORY":
-                    for (Category category : service.getCategories()) {
-                        if (category.getSuperCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())) {
-                            childIds.add(category.getSubCategory().getId());
-                        }
-                    }
-                    break;
-                case "CATEGORY":
-                    for (Category category : service.getCategories()) {
-                        if (category.getCategory().getId().equals(parent) && !childIds.contains(category.getSubCategory().getId())) {
-                            childIds.add(category.getSubCategory().getId());
-                        }
-                    }
-                    break;
-                case "SCIENTIFIC_DOMAIN":
-                    for (ScientificDomain domain : service.getDomains()) {
-                        if (domain.getDomain().getId().equals(parent) && !childIds.contains(domain.getSubdomain().getId())) {
-                            childIds.add(domain.getSubdomain().getId());
-                        }
-                    }
-                    break;
-            }
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+        String query = "";
+        switch (type) {
+            case "SUPERCATEGORY":
+            case "CATEGORY":
+                query = "SELECT subcategories FROM infra_service_view";
+                break;
+            case "SCIENTIFIC_DOMAIN":
+                query = "SELECT scientific_subdomains FROM infra_service_view";
+                break;
         }
-
-        return childIds;
+        List<Map<String, Object>> rec = namedParameterJdbcTemplate.queryForList(query, in);
+        return infraService.getChildrenFromParent(type, parent, rec);
     }
 
 

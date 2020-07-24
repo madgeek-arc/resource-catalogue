@@ -177,6 +177,16 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     InfraService publish(String serviceId, String version, boolean active, Authentication auth);
 
+    /**
+     * Return children vocabularies from parent vocabularies
+     *
+     * @param type
+     * @param parent
+     * @param rec
+     * @return
+     */
+    List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
+
 //
 //    /**
 //     * Migrates Service's fields for Catris.
