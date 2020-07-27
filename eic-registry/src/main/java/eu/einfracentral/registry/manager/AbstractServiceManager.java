@@ -782,6 +782,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec){
+        //TODO: Refactor to a more proper way (sql JOIN OR elastic)
         List<String> finalResults = new ArrayList<>();
         List<String> allSub = new ArrayList<>();
         for (Map<String, Object> map : rec) {
