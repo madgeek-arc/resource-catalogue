@@ -158,9 +158,19 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="categories">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resources.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="category" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element minOccurs="0" name="certifications">
         <xs:annotation>
-          <xs:documentation><![CDATA[List of certifications obtained for the Resource (including the certification body).]]></xs:documentation>
+          <xs:documentation><![CDATA[List of certifications obtained for the Resource (including the certification body or URL if available).]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -238,7 +248,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       </xs:element>
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Resource in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="languageAvailabilities">
@@ -288,7 +298,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       </xs:element>
       <xs:element name="name" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Brief and descriptive name of Resource as assigned by the Provider.]]></xs:documentation>
+          <xs:documentation><![CDATA[Brief and descriptive name of the Resource as assigned by the Provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="openSourceTechnologies">
@@ -326,7 +336,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           <xs:documentation><![CDATA[Link to the privacy policy applicable to the Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="publicContacts">
+      <xs:element name="publicContacts">
         <xs:annotation>
           <xs:documentation><![CDATA[List of the Service's Public Contacts info.]]></xs:documentation>
         </xs:annotation>
@@ -388,6 +398,16 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="resourceProvider" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="scientificDomains">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The branch of science, scientific discipline that is related to the Resource.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -473,7 +493,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       </xs:element>
       <xs:element name="trl" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[The Technology Readiness Level of the Resource updated in the context of the EOSC.]]></xs:documentation>
+          <xs:documentation><![CDATA[The Technology Readiness Level of the Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="useCases">
@@ -609,7 +629,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       </xs:element>
       <xs:element minOccurs="0" name="affiliations">
         <xs:annotation>
-          <xs:documentation><![CDATA[Providers that are members or, affiliated or associated with other organisations should list those organisations here]]></xs:documentation>
+          <xs:documentation><![CDATA[Providers that are members or affiliated or associated with other organisations should list those organisations here.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -629,7 +649,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       </xs:element>
       <xs:element minOccurs="0" name="certifications">
         <xs:annotation>
-          <xs:documentation><![CDATA[List of certifications obtained for the Provider (including the certification body and any certificate number).]]></xs:documentation>
+          <xs:documentation><![CDATA[List of certifications obtained for the Provider (including the certification body, the certificate number or URL if available).]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -639,7 +659,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       </xs:element>
       <xs:element name="description" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[The description of the Provider.]]></xs:documentation>
+          <xs:documentation><![CDATA[A high-level description of the Provider in fairly non-technical terms, with the vision, mission, objectives, background, experience.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="esfriDomains">
@@ -668,7 +688,7 @@ If (1) - name of the research infrastructure, If (2) - name of the hosting organ
       </xs:element>
       <xs:element name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="legalEntity" type="xs:boolean">
@@ -684,7 +704,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="lifeCycleStatus" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Current status of the Provider/Research infrastucture life-cycle.]]></xs:documentation>
+          <xs:documentation><![CDATA[Current status of the Provider life-cycle.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="location" type="tns:providerLocation">
@@ -701,6 +721,16 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         <xs:annotation>
           <xs:documentation><![CDATA[Provider's main contact info.]]></xs:documentation>
         </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="merilScientificDomains">
+        <xs:annotation>
+          <xs:documentation><![CDATA[MERIL scientific domain classification.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="merilScientificDomain" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="merilScientificSubdomains">
         <xs:annotation>
@@ -724,12 +754,12 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element name="name" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Full Name of the Provider offering the resource and acting as main contact point.]]></xs:documentation>
+          <xs:documentation><![CDATA[Full Name of the Provider/Organisation offering Resources and acting as main contact point for the Resources.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="nationalRoadmaps">
         <xs:annotation>
-          <xs:documentation><![CDATA[Provider being part of a national roadmap for research infrastructures]]></xs:documentation>
+          <xs:documentation><![CDATA[Roadmaps	Provider's participation in a national roadmap.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -739,7 +769,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="networks">
         <xs:annotation>
-          <xs:documentation><![CDATA[Select the networks the Provider is participating in.]]></xs:documentation>
+          <xs:documentation><![CDATA[Providers that are members of networks should list those networks here.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -749,7 +779,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="participatingCountries">
         <xs:annotation>
-          <xs:documentation><![CDATA[Providers/Research Infrastructures that are funded by several countries should list here all supporting countries (including the Coordinating country).]]></xs:documentation>
+          <xs:documentation><![CDATA[Providers that are funded by several countries should list here all supporting countries (including the coordinating country first).]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -757,13 +787,23 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="publicContacts">
+      <xs:element name="publicContacts">
         <xs:annotation>
           <xs:documentation><![CDATA[List of the Provider's public contacts info.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:providerPublicContact"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="scientificDomains">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of Providers that offer access to the same type of Resources.]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -779,7 +819,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="societalGrandChallenges">
         <xs:annotation>
-          <xs:documentation><![CDATA[Provider’s participation in the grand societal challenges as defined by the European Commission]]></xs:documentation>
+          <xs:documentation><![CDATA[Provider’s participation in the Grand Societal Challenges defined by the European Commission.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -789,7 +829,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="structureTypes">
         <xs:annotation>
-          <xs:documentation><![CDATA[Defines the Provider structure type (single-sited, distributed, mobile, virtual, etc.)]]></xs:documentation>
+          <xs:documentation><![CDATA[Defines the Provider structure type (single-sited, distributed, mobile, virtual, etc.).]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -816,7 +856,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element name="website" type="xs:anyURI">
         <xs:annotation>
-          <xs:documentation><![CDATA[Webpage with information about the Provider.]]></xs:documentation>
+          <xs:documentation><![CDATA[Webpage of the Provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
