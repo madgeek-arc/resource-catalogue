@@ -37,9 +37,23 @@
     },
     {
       "multivalued": true,
+      "name": "scientific_domains",
+      "label": "Scientific Domain",
+      "path": "//*[local-name()='service']//*[local-name()='scientificDomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
       "name": "scientific_subdomains",
       "label": "Scientific Subdomain",
       "path": "//*[local-name()='service']//*[local-name()='scientificSubdomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "categories",
+      "label": "Category",
+      "path": "//*[local-name()='service']//*[local-name()='category']/text()",
       "type": "java.lang.String"
     },
     {
@@ -215,5 +229,5 @@
   "name": "infra_service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/RDT/v3.00/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/rdt_v3/new_model/eic-registry-model/src/main/resources/schema1.xsd"
 }
