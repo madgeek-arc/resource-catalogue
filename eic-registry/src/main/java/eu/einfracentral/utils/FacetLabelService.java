@@ -31,6 +31,9 @@ public class FacetLabelService {
     }
 
     String toProperCase(String str, String delimiter, String newDelimiter) {
+        if (str.equals("")){
+            str = "-";
+        }
         return Arrays.stream(str.split(delimiter)).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
                 .collect(Collectors.joining(newDelimiter));
     }
@@ -40,6 +43,7 @@ public class FacetLabelService {
         List<Facet> enrichedFacets = new TreeList(); // unchecked warning here
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+        ff.addFilter("active", "true");
         Map<String, String> providerNames = providerService.getAll(ff, null)
                 .getResults()
                 .stream().collect(Collectors.toMap(ProviderBundle::getId, p -> p.getProvider().getName()));
