@@ -10,6 +10,7 @@ import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,12 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.setMetadata(
                 Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
         infraService.setActive(existingService.isActive());
+
+        // if a user updates a service with version to a service with null version then while searching for the service
+        // you get a "Service already exists" error.
+        if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null){
+            throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
+        }
 
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
                 || infraService.getService().getVersion() != null
