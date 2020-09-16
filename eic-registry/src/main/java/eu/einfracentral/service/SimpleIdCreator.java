@@ -31,7 +31,8 @@ public class SimpleIdCreator implements IdCreator {
                 .replaceAll("[\\n\\t\\s]+", " ")
                 .replaceAll("\\s+$", "")
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_");
+                .replace(" ", "_")
+                .toLowerCase();
 
     }
 
