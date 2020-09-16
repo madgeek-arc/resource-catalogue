@@ -21,10 +21,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -83,7 +80,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("type", type.getKey());
-        return getAll(ff, null).getResults();
+        List<Vocabulary> vocList = getAll(ff, null).getResults();
+        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getId)).collect(Collectors.toList());
     }
 
     @Override
