@@ -68,7 +68,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.setLatest(true);
 
         if (infraService.getMetadata() == null) {
-            infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), null));
+            infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
         logger.info("Adding Service: {}", infraService);
@@ -99,7 +99,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         // update existing service serviceMetadata
-        infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName(), null));
+        infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
         infraService.setActive(existingService.isActive());
 
         // if a user updates a service with version to a service with null version then while searching for the service
@@ -186,7 +186,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
-                infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), projectName, null));
+                infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), projectName));
 
                 super.update(infraService, null);
                 logger.info("Updating Service through merging: {}", infraService);
