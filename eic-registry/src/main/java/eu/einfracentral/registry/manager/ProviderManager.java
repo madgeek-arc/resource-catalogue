@@ -76,7 +76,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
 
-        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), provider.getProvider().getUsers()));
+        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
@@ -94,7 +94,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
         validate(provider);
-        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), provider.getProvider().getUsers()));
+        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName()));
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());

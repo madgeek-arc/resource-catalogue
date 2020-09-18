@@ -49,7 +49,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
 
         if (service.getMetadata() == null) {
-            service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(),null));
+            service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
         service.setActive(true);
         service.setLatest(true);
@@ -63,7 +63,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, infraService.getId());
-        infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName(), null));
+        infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
         Resource existing = this.whereID(infraService.getId(), true);
         // save existing resource with new payload

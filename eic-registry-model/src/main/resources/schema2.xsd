@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0">
 
-  <xs:complexType name="simpleEntry">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="value" type="xs:anyType"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType abstract="true" name="xmlAdapter">
     <xs:sequence/>
   </xs:complexType>
