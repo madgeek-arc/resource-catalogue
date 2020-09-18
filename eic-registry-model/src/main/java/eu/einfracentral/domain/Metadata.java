@@ -3,6 +3,9 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -26,6 +29,9 @@ public class Metadata {
     @XmlElement(defaultValue = "null")
     private String originalId;
 
+    @XmlElement(defaultValue = "null")
+    private List<AbstractMap.SimpleEntry<String, Boolean>> terms;
+
     public Metadata() {
     }
 
@@ -36,30 +42,32 @@ public class Metadata {
         this.modifiedAt = metadata.getModifiedAt();
         this.source = metadata.getSource();
         this.originalId = metadata.getOriginalId();
+        this.terms = metadata.getTerms();
     }
 
-    public static Metadata updateMetadata(Metadata metadata, String modifiedBy) {
+    public static Metadata updateMetadata(Metadata metadata, String modifiedBy, List<User> users) {
         Metadata ret;
         if (metadata != null) {
             ret = new Metadata(metadata);
             ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             ret.setModifiedBy(modifiedBy);
         } else {
-            ret = createMetadata(modifiedBy);
+            ret = createMetadata(modifiedBy, users);
         }
         return ret;
     }
 
-    public static Metadata createMetadata(String registeredBy) {
+    public static Metadata createMetadata(String registeredBy, List<User> users) {
         Metadata ret = new Metadata();
         ret.setRegisteredBy(registeredBy);
         ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
         ret.setModifiedBy(registeredBy);
         ret.setModifiedAt(ret.getRegisteredAt());
+        ret.setTerms(adminAcceptedTerms(users));
         return ret;
     }
 
-    public static Metadata createMetadata(String registeredBy, String originalId, String source) {
+    public static Metadata createMetadata(String registeredBy, String originalId, String source, List<AbstractMap.SimpleEntry<String, Boolean>> terms) {
         Metadata metadata = new Metadata();
         metadata.setRegisteredBy(registeredBy);
         metadata.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
@@ -67,7 +75,24 @@ public class Metadata {
         metadata.setModifiedAt(metadata.getRegisteredAt());
         metadata.setOriginalId(originalId);
         metadata.setSource(source);
+        metadata.setTerms(terms);
         return metadata;
+    }
+
+    public static List<AbstractMap.SimpleEntry<String, Boolean>> adminAcceptedTerms(List<User> users){
+        List<AbstractMap.SimpleEntry<String, Boolean>> termsList = new ArrayList<>();
+        boolean firstTime = true;
+        for (User user : users){
+            if (firstTime){
+                AbstractMap.SimpleEntry<String, Boolean> entry = new AbstractMap.SimpleEntry<>(user.getEmail(), true);
+                termsList.add(entry);
+                firstTime = false;
+            } else {
+                AbstractMap.SimpleEntry<String, Boolean> entry = new AbstractMap.SimpleEntry<>(user.getEmail(), false);
+                termsList.add(entry);
+            }
+        }
+        return termsList;
     }
 
     @Override
@@ -79,6 +104,7 @@ public class Metadata {
                 ", modifiedAt='" + modifiedAt + '\'' +
                 ", source='" + source + '\'' +
                 ", originalId='" + originalId + '\'' +
+                ", terms=" + terms +
                 '}';
     }
 
@@ -128,5 +154,13 @@ public class Metadata {
 
     public void setOriginalId(String originalId) {
         this.originalId = originalId;
+    }
+
+    public List<AbstractMap.SimpleEntry<String, Boolean>> getTerms() {
+        return terms;
+    }
+
+    public void setTerms(List<AbstractMap.SimpleEntry<String, Boolean>> terms) {
+        this.terms = terms;
     }
 }
