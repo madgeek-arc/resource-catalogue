@@ -259,7 +259,7 @@ public class ServiceController {
             logger.error(e);
             throw e;
         }
-        Map<String, List<Service>> serviceResults = new HashMap<>();
+        Map<String, List<Service>> serviceResults = new TreeMap<>();
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
             List<Service> items = services.getValue()
                     .stream()
