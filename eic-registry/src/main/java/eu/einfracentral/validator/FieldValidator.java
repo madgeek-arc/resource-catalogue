@@ -13,9 +13,13 @@ import eu.einfracentral.registry.service.VocabularyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -92,6 +96,7 @@ public class FieldValidator {
             }
 
             validateMaxLength(field, fieldValue, validationAnnotation);
+            validateUrlValidity(field, fieldValue);
 
             if (validationAnnotation.containsId()) {
                 validateIds(field, fieldValue, validationAnnotation);
@@ -133,6 +138,46 @@ public class FieldValidator {
                     validateMaxLength(field, entry, annotation);
                 }
             }
+        }
+    }
+
+    public void validateUrlValidity(Field field, Object o) {
+        if (o != null) {
+            Class clazz = o.getClass();
+            if (URL.class.equals(clazz)) {
+                URL url = (URL) o;
+                validateUrl(field, url);
+              //FIXME: List<URL> with a single empty String value never enters.
+            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())){
+                for (int i=0; i<((ArrayList) o).size(); i++) {
+                    URL url = (URL) ((ArrayList) o).get(i);
+                    validateUrl(field, url);
+                }
+            }
+        }
+    }
+
+    public void validateUrl(Field field, URL urlForValidation){
+        HttpURLConnection huc = null;
+        try {
+            huc = (HttpURLConnection) urlForValidation.openConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            huc.setRequestMethod("HEAD");
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        }
+
+        int responseCode = 0;
+        try {
+            responseCode = huc.getResponseCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (responseCode != 200 && responseCode != 301){
+            throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation ,field.getName()));
         }
     }
 
