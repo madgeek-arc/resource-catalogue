@@ -41,24 +41,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Deprecated
 @RestController
-@RequestMapping("pendingService")
-@Api(value = "Get information about a Pending Service", description = "Deprecated")
-public class PendingServiceController extends ResourceController<InfraService, Authentication> {
+@RequestMapping("pendingResource")
+@Api(value = "Get information about a Pending Resource")
+public class PendingResourcesController extends ResourceController<InfraService, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
+    private static final Logger logger = LogManager.getLogger(PendingResourcesController.class);
     private final PendingResourceService<InfraService> pendingServiceManager;
     private final MeasurementService<Measurement, Authentication> measurementService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IdCreator idCreator;
 
-    @Deprecated
     @Autowired
-    PendingServiceController(PendingResourceService<InfraService> pendingServiceManager,
-                             MeasurementService<Measurement, Authentication> measurementService,
-                             InfraServiceService<InfraService, InfraService> infraServiceService,
-                             IdCreator idCreator) {
+    PendingResourcesController(PendingResourceService<InfraService> pendingServiceManager,
+                               MeasurementService<Measurement, Authentication> measurementService,
+                               InfraServiceService<InfraService, InfraService> infraServiceService,
+                               IdCreator idCreator) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
         this.measurementService = measurementService;
@@ -67,32 +65,28 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @Deprecated
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
-        logger.info("User '{}' deleted PendingService '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' deleted PendingResource '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 
-    @Deprecated
-    @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> getService(@PathVariable String id) {
+    @GetMapping(path = "/Resource/id", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Service> getResource(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
 
 
-    @Deprecated
     @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
 
-    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -102,49 +96,44 @@ public class PendingServiceController extends ResourceController<InfraService, A
     })
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
-    public ResponseEntity<Paging<InfraService>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<InfraService>> getProviderPendingResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", id);
         return new ResponseEntity<>(pendingServiceManager.getAll(ff, null), HttpStatus.OK);
     }
 
 
-    @Deprecated
-    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/addResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
-        InfraService infraService = new InfraService(service);
+    public ResponseEntity<Service> addResource(@RequestBody Service resource, @ApiIgnore Authentication auth) {
+        InfraService infraService = new InfraService(resource);
         return new ResponseEntity<>(pendingServiceManager.add(infraService, auth).getService(), HttpStatus.CREATED);
     }
 
 
-    @Deprecated
-    @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/updateResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
-    public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
-        InfraService infraService = pendingServiceManager.get(service.getId());
-        infraService.setService(service);
+    public ResponseEntity<Service> updateResource(@RequestBody Service resource, @ApiIgnore Authentication auth) {
+        InfraService infraService = pendingServiceManager.get(resource.getId());
+        infraService.setService(resource);
         return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);
     }
 
 
-    @Deprecated
     @PostMapping("/transform/pending")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #serviceId)")
-    public void transformServiceToPending(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
-        pendingServiceManager.transformToPending(serviceId, auth);
+    public void transformResourceToPending(@RequestParam String resourceId, @ApiIgnore Authentication auth) {
+        pendingServiceManager.transformToPending(resourceId, auth);
     }
 
 
-    @Deprecated
-    @PostMapping("/transform/service")
+    @PostMapping("/transform/resource")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #serviceId)")
-    public void transformServiceToInfra(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
-        pendingServiceManager.transformToActive(serviceId, auth);
+    public void transformResourceToInfra(@RequestParam String resourceId, @ApiIgnore Authentication auth) {
+        pendingServiceManager.transformToActive(resourceId, auth);
     }
 
 
-    @Deprecated
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
@@ -154,7 +143,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
             infraService.setService(service);
             infraService = pendingServiceManager.update(infraService, auth);
         } catch (ResourceException e) {
-            logger.debug("Pending Service with id '{}' does not exist. Creating it...", service.getId());
+            logger.debug("Pending Resource with id '{}' does not exist. Creating it...", service.getId());
             infraService.setService(service);
             infraService = pendingServiceManager.add(infraService, auth);
         }
@@ -162,42 +151,40 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @Deprecated
-    @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
-    public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) {
-        pendingServiceManager.transformToPending(service.getId(), auth);
-        InfraService infraService = pendingServiceManager.get(service.getId());
-        infraService.setService(service);
+    public ResponseEntity<Service> temporarySaveResource(@RequestBody Service resource, @ApiIgnore Authentication auth) {
+        pendingServiceManager.transformToPending(resource.getId(), auth);
+        InfraService infraService = pendingServiceManager.get(resource.getId());
+        infraService.setService(resource);
         return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);
     }
 
 
-    @Deprecated
-    @PutMapping(path = "/transform/service", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "/transform/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> pendingToInfra(@RequestBody Service service, @ApiIgnore Authentication auth) {
         if (service == null) {
-            throw new ServiceException("Cannot add a null service");
+            throw new ServiceException("Cannot add a null resource");
         }
         InfraService infraService = null;
 
-        try { // check if service already exists
-            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
+        try { // check if resource already exists
+            if (service.getId() == null || "".equals(service.getId())) { // if resource id is not given, create it
                 service.setId(idCreator.createServiceId(service));
             }
             infraService = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
-            // continue with the creation of the service
+            // continue with the creation of the resource
         }
 
-        if (infraService == null) { // if existing Pending Service is null, create a new Active Service
+        if (infraService == null) { // if existing Pending Resource is null, create a new Active Resource
             infraService = infraServiceService.addService(new InfraService(service), auth);
-            logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
-        } else { // else update Pending Service and transform it to Active Service
+            logger.info("User '{}' added Resource:\n{}", auth.getName(), infraService);
+        } else { // else update Pending Resource and transform it to Active Service
             infraService.setService(service); // important to keep other fields of InfraService
             infraService = pendingServiceManager.update(infraService, auth);
-            logger.info("User '{}' updated Pending Service:\n{}", auth.getName(), infraService);
+            logger.info("User '{}' updated Pending Resource:\n{}", auth.getName(), infraService);
 
             // transform to active
             infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
@@ -207,28 +194,27 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @Deprecated
-    @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "resourceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #json)")
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
-        Pair<Service, List<Measurement>> serviceAndMeasurementsPair = getServiceAndMeasurements(json);
+        Pair<Service, List<Measurement>> serviceAndMeasurementsPair = getResourceAndMeasurements(json);
         Service service = serviceAndMeasurementsPair.getValue0();
         List<Measurement> measurements = serviceAndMeasurementsPair.getValue1();
 
         if (service == null) {
-            throw new ServiceException("Cannot add a null service");
+            throw new ServiceException("Cannot add a null resource");
         }
         InfraService infraService = null;
-        try { // check if service already exists
+        try { // check if resource already exists
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
                 service.setId(idCreator.createServiceId(service));
             }
             infraService = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
-            // continue with the creation of the service
+            // continue with the creation of the resource
         }
 
-        if (infraService == null) { // if existing service is null, create it, else update it
+        if (infraService == null) { // if existing resource is null, create it, else update it
             infraService = pendingServiceManager.add(new InfraService(service), auth);
             logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
         } else {
@@ -242,8 +228,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
 
-    @Deprecated
-    private Pair<Service, List<Measurement>> getServiceAndMeasurements(Map<String, JsonNode> json) {
+    private Pair<Service, List<Measurement>> getResourceAndMeasurements(Map<String, JsonNode> json) {
         ObjectMapper mapper = new ObjectMapper();
         Service service = null;
         List<Measurement> measurements = new ArrayList<>();
