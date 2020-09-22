@@ -94,6 +94,8 @@ public class SwaggerConfig {
             props.load(in);
             ret = props.getProperty("version");
         } catch (Throwable ignored) {
+            // Create your own version
+            ret = "3.0.0";
         }
         return ret == null ? "" : ret;
     }
