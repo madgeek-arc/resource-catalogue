@@ -63,6 +63,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
+        validateCategories(infraService.getService().getCategories(), infraService.getService().getSubcategories());
+        validateScientificDomains(infraService.getService().getScientificDomains(), infraService.getService().getScientificSubdomains());
         infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
@@ -84,6 +86,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraService updateService(InfraService infraService, Authentication auth) {
         InfraService ret;
         validate(infraService);
+        validateCategories(infraService.getService().getCategories(), infraService.getService().getSubcategories());
+        validateScientificDomains(infraService.getService().getScientificDomains(), infraService.getService().getScientificSubdomains());
         InfraService existingService;
 
         // if service version is empty set it null
@@ -183,6 +187,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 //                migrate(infraService); // use this to make custom changes
                 ObjectUtils.merge(infraService, service); // use this to make bulk changes FIXME: this method does not work as expected
                 validate(infraService);
+                validateCategories(infraService.getService().getCategories(), infraService.getService().getSubcategories());
+                validateScientificDomains(infraService.getService().getScientificDomains(), infraService.getService().getScientificSubdomains());
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
@@ -235,6 +241,28 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         service.setActive(active);
         this.update(service, auth);
         return service;
+    }
+
+    private void validateCategories(List<String> categories, List<String> subcategories){
+        for (String subcategory : subcategories){
+            String[] parts = subcategory.split("-");
+            String category = "category-" + parts[1] + "-" + parts[2];
+            if (!categories.contains(category)){
+                throw new ValidationException("Subcategory '" + subcategory + "' should have as Category the value '"
+                        + category +"'");
+            }
+        }
+    }
+
+    private void validateScientificDomains(List<String> scientificDomains, List<String> scientificSubdomains){
+        for (String scientificSubdomain : scientificSubdomains){
+            String[] parts = scientificSubdomain.split("-");
+            String scientificDomain = "scientific_domain-" + parts[1];
+            if (!scientificDomains.contains(scientificDomain)){
+                throw new ValidationException("Scientific Subdomain '" + scientificSubdomain + "' should have as Scientific Domain the value '"
+                        + scientificDomain +"'");
+            }
+        }
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
