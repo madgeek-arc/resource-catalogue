@@ -34,8 +34,13 @@ public class FacetLabelService {
         if (str.equals("")){
             str = "-";
         }
-        return Arrays.stream(str.split(delimiter)).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
-                .collect(Collectors.joining(newDelimiter));
+        StringJoiner joiner = new StringJoiner(newDelimiter);
+        for (String s : str.split(delimiter)) {
+            String s1;
+            s1 = s.substring(0, 1).toUpperCase() + s.substring(1);
+            joiner.add(s1);
+        }
+        return joiner.toString();
     }
 
     @SuppressWarnings("unchecked")
@@ -76,8 +81,13 @@ public class FacetLabelService {
                     default:
                         if (allVocabularies.containsKey(value.getValue())) {
                             value.setLabel(allVocabularies.get(value.getValue()).getName());
-                        } else {
-                            value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
+                        }
+                        else {
+                            try {
+                                value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
+                            } catch (StringIndexOutOfBoundsException e){
+                                logger.info(e);
+                            }
                         }
                 }
             }
