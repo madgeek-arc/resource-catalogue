@@ -82,7 +82,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
 
-        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), provider.getProvider().getUsers()));
+        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
@@ -106,7 +106,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (provider.getProvider().getMerilScientificDomains() != null || !provider.getProvider().getMerilScientificDomains().isEmpty()){
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
-        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), provider.getProvider().getUsers()));
+        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());

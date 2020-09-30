@@ -3,9 +3,10 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -30,7 +31,7 @@ public class Metadata {
     private String originalId;
 
     @XmlElement(defaultValue = "null")
-    private List<AbstractMap.SimpleEntry<String, Boolean>> terms;
+    private List<String> terms;
 
 
     public Metadata() {
@@ -58,14 +59,15 @@ public class Metadata {
         return ret;
     }
 
-    public static Metadata updateMetadata(Metadata metadata, String modifiedBy, List<User> users) {
+    public static Metadata updateMetadata(Metadata metadata, String modifiedBy, String userEmail) {
         Metadata ret;
         if (metadata != null) {
             ret = new Metadata(metadata);
             ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             ret.setModifiedBy(modifiedBy);
+            ret.setTerms(updateAcceptedTermsList(metadata.getTerms(), userEmail));
         } else {
-            ret = createMetadata(modifiedBy, users);
+            ret = createMetadata(modifiedBy, userEmail);
         }
         return ret;
     }
@@ -79,17 +81,17 @@ public class Metadata {
         return ret;
     }
 
-    public static Metadata createMetadata(String registeredBy, List<User> users) {
+    public static Metadata createMetadata(String registeredBy, String userEmail) {
         Metadata ret = new Metadata();
         ret.setRegisteredBy(registeredBy);
         ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
         ret.setModifiedBy(registeredBy);
         ret.setModifiedAt(ret.getRegisteredAt());
-        ret.setTerms(adminAcceptedTerms(users));
+        ret.setTerms(adminAcceptedTerms(userEmail));
         return ret;
     }
 
-    public static Metadata createMetadata(String registeredBy, String originalId, String source, List<AbstractMap.SimpleEntry<String, Boolean>> terms) {
+    public static Metadata createMetadata(String registeredBy, String originalId, String source, List<String> terms) {
         Metadata metadata = new Metadata();
         metadata.setRegisteredBy(registeredBy);
         metadata.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
@@ -101,20 +103,17 @@ public class Metadata {
         return metadata;
     }
 
-    public static List<AbstractMap.SimpleEntry<String, Boolean>> adminAcceptedTerms(List<User> users){
-        List<AbstractMap.SimpleEntry<String, Boolean>> termsList = new ArrayList<>();
-        boolean firstTime = true;
-        for (User user : users){
-            if (firstTime){
-                AbstractMap.SimpleEntry<String, Boolean> entry = new AbstractMap.SimpleEntry<>(user.getEmail(), true);
-                termsList.add(entry);
-                firstTime = false;
-            } else {
-                AbstractMap.SimpleEntry<String, Boolean> entry = new AbstractMap.SimpleEntry<>(user.getEmail(), false);
-                termsList.add(entry);
-            }
+    public static List<String> adminAcceptedTerms(String userEmail){
+        List<String> acceptedList = new ArrayList<>();
+        acceptedList.add(userEmail);
+        return acceptedList;
+    }
+
+    public static List<String> updateAcceptedTermsList(List<String> terms, String userEmail){
+        if (!terms.contains(userEmail)){
+            terms.add(userEmail);
         }
-        return termsList;
+        return terms;
     }
 
 
@@ -179,11 +178,11 @@ public class Metadata {
         this.originalId = originalId;
     }
 
-    public List<AbstractMap.SimpleEntry<String, Boolean>> getTerms() {
+    public List<String> getTerms() {
         return terms;
     }
 
-    public void setTerms(List<AbstractMap.SimpleEntry<String, Boolean>> terms) {
+    public void setTerms(List<String> terms) {
         this.terms = terms;
     }
 }
