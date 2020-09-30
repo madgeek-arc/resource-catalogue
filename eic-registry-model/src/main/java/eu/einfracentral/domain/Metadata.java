@@ -1,12 +1,11 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -30,7 +29,8 @@ public class Metadata {
     @XmlElement(defaultValue = "null")
     private String originalId;
 
-    @XmlElement(defaultValue = "null")
+    @XmlElementWrapper(name = "terms")
+    @XmlElement(name = "term")
     private List<String> terms;
 
 
