@@ -200,4 +200,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
                 .collect(Collectors.toList());
     }
 
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+        ProviderBundle providerBundle = get(providerId);
+        return providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail());
+    }
+
 }

@@ -100,4 +100,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
 
     List<T> getMy(Authentication authentication);
 
+    boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
+
 }

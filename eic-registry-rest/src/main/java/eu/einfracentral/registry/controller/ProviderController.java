@@ -254,6 +254,11 @@ public class ProviderController {
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
 
+    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+       return providerManager.hasAdminAcceptedTerms(providerId, authentication);
+    }
+
     @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void deleteUserInfo(Authentication authentication) {
         providerManager.deleteUserInfo(authentication);
