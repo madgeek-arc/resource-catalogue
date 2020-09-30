@@ -114,19 +114,8 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "scientificDomains", required = true)
     @XmlElement(name = "scientificDomain")
     @ApiModelProperty(position = 11, notes = "Vocabulary ID", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
-    private List<String> scientificDomains;
-
-    /**
-     * The subbranch of science, scientific subdicipline that is related to the Resource.
-     */
-    @XmlElementWrapper(name = "scientificSubdomains", required = true)
-    @XmlElement(name = "scientificSubdomain")
-    @ApiModelProperty(position = 12, notes = "Vocabulary ID", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
-    private List<String> scientificSubdomains;
+    @FieldValidation
+    private List<ServiceProviderDomain> scientificDomains;
 
     /**
      * A named group of Resources that offer access to the same type of Resources.
@@ -134,19 +123,8 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "categories", required = true)
     @XmlElement(name = "category")
     @ApiModelProperty(position = 13, notes = "Vocabulary ID", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.CATEGORY)
-    private List<String> categories;
-
-    /**
-     * A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.
-     */
-    @XmlElementWrapper(name = "subcategories", required = true)
-    @XmlElement(name = "subcategory")
-    @ApiModelProperty(position = 14, notes = "Vocabulary ID", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.SUBCATEGORY)
-    private List<String> subcategories;
+    @FieldValidation
+    private List<ServiceCategory> categories;
 
     /**
      * Type of users/customers that commissions a Provider to deliver a Resource.
@@ -502,7 +480,7 @@ public class Service implements Identifiable {
         // No arg constructor
     }
 
-    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<String> scientificDomains, List<String> scientificSubdomains, List<String> categories, List<String> subcategories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
+    public Service(String id, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<URL> useCases, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL serviceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
         this.id = id;
         this.name = name;
         this.resourceOrganisation = resourceOrganisation;
@@ -514,9 +492,7 @@ public class Service implements Identifiable {
         this.multimedia = multimedia;
         this.useCases = useCases;
         this.scientificDomains = scientificDomains;
-        this.scientificSubdomains = scientificSubdomains;
         this.categories = categories;
-        this.subcategories = subcategories;
         this.targetUsers = targetUsers;
         this.accessTypes = accessTypes;
         this.accessModes = accessModes;
@@ -573,9 +549,7 @@ public class Service implements Identifiable {
                 Objects.equals(multimedia, service.multimedia) &&
                 Objects.equals(useCases, service.useCases) &&
                 Objects.equals(scientificDomains, service.scientificDomains) &&
-                Objects.equals(scientificSubdomains, service.scientificSubdomains) &&
                 Objects.equals(categories, service.categories) &&
-                Objects.equals(subcategories, service.subcategories) &&
                 Objects.equals(targetUsers, service.targetUsers) &&
                 Objects.equals(accessTypes, service.accessTypes) &&
                 Objects.equals(accessModes, service.accessModes) &&
@@ -618,7 +592,7 @@ public class Service implements Identifiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificDomains, scientificSubdomains, categories, subcategories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
+        return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -732,36 +706,20 @@ public class Service implements Identifiable {
         this.useCases = useCases;
     }
 
-    public List<String> getScientificDomains() {
+    public List<ServiceProviderDomain> getScientificDomains() {
         return scientificDomains;
     }
 
-    public void setScientificDomains(List<String> scientificDomains) {
+    public void setScientificDomains(List<ServiceProviderDomain> scientificDomains) {
         this.scientificDomains = scientificDomains;
     }
 
-    public List<String> getScientificSubdomains() {
-        return scientificSubdomains;
-    }
-
-    public void setScientificSubdomains(List<String> scientificSubdomains) {
-        this.scientificSubdomains = scientificSubdomains;
-    }
-
-    public List<String> getCategories() {
+    public List<ServiceCategory> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<String> categories) {
+    public void setCategories(List<ServiceCategory> categories) {
         this.categories = categories;
-    }
-
-    public List<String> getSubcategories() {
-        return subcategories;
-    }
-
-    public void setSubcategories(List<String> subcategories) {
-        this.subcategories = subcategories;
     }
 
     public List<String> getTargetUsers() {

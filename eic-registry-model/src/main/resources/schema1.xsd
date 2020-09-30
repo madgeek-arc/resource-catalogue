@@ -25,6 +25,8 @@
 
   <xs:element name="providerMainContact" type="tns:providerMainContact"/>
 
+  <xs:element name="providerMerilDomain" type="tns:providerMerilDomain"/>
+
   <xs:element name="providerPublicContact" type="tns:providerPublicContact"/>
 
   <xs:element name="providerRequest" type="tns:providerRequest"/>
@@ -33,7 +35,11 @@
 
   <xs:element name="service" type="tns:service"/>
 
+  <xs:element name="serviceCategory" type="tns:serviceCategory"/>
+
   <xs:element name="serviceMainContact" type="tns:serviceMainContact"/>
+
+  <xs:element name="serviceProviderDomain" type="tns:serviceProviderDomain"/>
 
   <xs:element name="servicePublicContact" type="tns:servicePublicContact"/>
 
@@ -57,6 +63,7 @@
       <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="source" type="xs:string"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="terms" type="simpleEntry"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -164,7 +171,7 @@
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="category" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="category" type="tns:serviceCategory"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -407,17 +414,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="scientificSubdomains">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The subbranch of science, scientific subdicipline that is related to the Resource.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubdomain" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="tns:serviceProviderDomain"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -445,16 +442,6 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         <xs:annotation>
           <xs:documentation><![CDATA[Webpage with monitoring information about this Resource.]]></xs:documentation>
         </xs:annotation>
-      </xs:element>
-      <xs:element name="subcategories">
-        <xs:annotation>
-          <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="subcategory" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
       </xs:element>
       <xs:element name="tagline" type="xs:string">
         <xs:annotation>
@@ -519,6 +506,21 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       <xs:element name="webpage" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Webpage with information about the Resource usually hosted and maintained by the Provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="serviceCategory">
+    <xs:sequence>
+      <xs:element name="category" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resources]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="subcategory" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -589,6 +591,21 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       <xs:element minOccurs="0" name="position" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Position of the Resource's contact person to be displayed at the portal.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="serviceProviderDomain">
+    <xs:sequence>
+      <xs:element name="scientificDomain" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The branch of science, scientific discipline that is related to the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="scientificSubdomain" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The subbranch of science, scientific subdicipline that is related to the Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -724,21 +741,11 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="merilScientificDomains">
         <xs:annotation>
-          <xs:documentation><![CDATA[MERIL scientific domain classification.]]></xs:documentation>
+          <xs:documentation><![CDATA[MERIL scientific domain / subdomain classification.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="merilScientificDomain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="merilScientificSubdomains">
-        <xs:annotation>
-          <xs:documentation><![CDATA[MERIL scientific subdomain classification.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="merilScientificSubdomain" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="merilScientificDomain" type="tns:providerMerilDomain"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -799,21 +806,11 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       </xs:element>
       <xs:element minOccurs="0" name="scientificDomains">
         <xs:annotation>
-          <xs:documentation><![CDATA[A named group of Providers that offer access to the same type of Resources.]]></xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="scientificSubdomains">
-        <xs:annotation>
           <xs:documentation><![CDATA[A named group of providers that offer access to the same type of resource or capabilities, within the defined domain.]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificSubdomain" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="tns:serviceProviderDomain"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -917,6 +914,21 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element minOccurs="0" name="position" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Position of the Provider's main contact person/Provider manager.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="providerMerilDomain">
+    <xs:sequence>
+      <xs:element name="merilScientificDomain" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[MERIL scientific domain classification.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="merilScientificSubdomain" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[MERIL scientific subdomain classification.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

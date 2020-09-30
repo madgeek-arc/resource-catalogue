@@ -75,14 +75,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("User '{}' is attempting to add a new Provider: {}", auth, provider);
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
-        if (provider.getProvider().getScientificDomains() != null || provider.getProvider().getScientificSubdomains() != null) {
-            validateScientificDomains(provider.getProvider().getScientificDomains(), provider.getProvider().getScientificSubdomains());
+        if (provider.getProvider().getScientificDomains() != null || !provider.getProvider().getScientificDomains().isEmpty()) {
+            validateScientificDomains(provider.getProvider().getScientificDomains());
         }
-        if (provider.getProvider().getMerilScientificDomains() != null || provider.getProvider().getMerilScientificSubdomains() != null){
-            validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains(), provider.getProvider().getMerilScientificSubdomains());
+        if (provider.getProvider().getMerilScientificDomains() != null || !provider.getProvider().getMerilScientificDomains().isEmpty()){
+            validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
 
-        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), provider.getProvider().getUsers()));
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
@@ -100,13 +100,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
         validate(provider);
-        if (provider.getProvider().getScientificDomains() != null || provider.getProvider().getScientificSubdomains() != null) {
-            validateScientificDomains(provider.getProvider().getScientificDomains(), provider.getProvider().getScientificSubdomains());
+        if (provider.getProvider().getScientificDomains() != null || !provider.getProvider().getScientificDomains().isEmpty()) {
+            validateScientificDomains(provider.getProvider().getScientificDomains());
         }
-        if (provider.getProvider().getMerilScientificDomains() != null || provider.getProvider().getMerilScientificSubdomains() != null){
-            validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains(), provider.getProvider().getMerilScientificSubdomains());
+        if (provider.getProvider().getMerilScientificDomains() != null || !provider.getProvider().getMerilScientificDomains().isEmpty()){
+            validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
-        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName()));
+        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), provider.getProvider().getUsers()));
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());
@@ -426,56 +426,26 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    private boolean validateScientificDomains(List<String> scientificDomains, List<String> scientificSubdomains){
-        if (scientificDomains != null && scientificDomains.isEmpty()){
-            scientificDomains = null;
-        }
-        if (scientificSubdomains != null && scientificSubdomains.isEmpty()){
-            scientificSubdomains = null;
-        }
-        if (scientificDomains == null && scientificSubdomains == null){
-            return true;
-        } else if (scientificDomains == null){
-            throw new ValidationException("Field scientificDomains cannot be null or empty from the moment you provided the field scientificSubdomains");
-        } else if (scientificSubdomains == null){
-            throw new ValidationException("Field scientificSubdomains cannot be null or empty from the moment you provided the field scientificDomains");
-        } else {
-            for (String scientificSubdomain : scientificSubdomains){
-                String[] parts = scientificSubdomain.split("-");
-                String scientificDomain = "scientific_domain-" + parts[1];
-                if (!scientificDomains.contains(scientificDomain)){
-                    throw new ValidationException("Scientific Subdomain '" + scientificSubdomain + "' should have as Scientific Domain the value '"
-                            + scientificDomain +"'");
-                }
+    private void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
+        for (ServiceProviderDomain providerScientificDomain : scientificDomains){
+            String[] parts = providerScientificDomain.getScientificSubdomain().split("-");
+            String scientificDomain = "scientific_domain-" + parts[1];
+            if (!providerScientificDomain.getScientificDomain().equals(scientificDomain)){
+                throw new ValidationException("Scientific Subdomain '" + providerScientificDomain.getScientificSubdomain() +
+                        "' should have as Scientific Domain the value '" + scientificDomain +"'");
             }
         }
-        return true;
     }
 
-    private boolean validateMerilScientificDomains(List<String> merilScientificDomains, List<String> merilScientificSubdomains){
-        if (merilScientificDomains != null && merilScientificDomains.isEmpty()){
-            merilScientificDomains = null;
-        }
-        if (merilScientificSubdomains != null && merilScientificSubdomains.isEmpty()){
-            merilScientificSubdomains = null;
-        }
-        if (merilScientificDomains == null && merilScientificSubdomains == null){
-            return true;
-        } else if (merilScientificDomains == null){
-            throw new ValidationException("Field merilScientificDomains cannot be null or empty from the moment you provided the field merilScientificSubdomains");
-        } else if (merilScientificSubdomains == null){
-            throw new ValidationException("Field merilScientificSubdomains cannot be null or empty from the moment you provided the field merilScientificDomains");
-        } else {
-            for (String merilScientificSubdomain : merilScientificSubdomains){
-                String[] parts = merilScientificSubdomain.split("-");
-                String merilScientificDomain = "provider_meril_scientific_domain-" + parts[1];
-                if (!merilScientificDomains.contains(merilScientificDomain)){
-                    throw new ValidationException("Meril Scientific Subdomain '" + merilScientificSubdomain + "' should have as Meril Scientific Domain the value '"
-                            + merilScientificDomain +"'");
-                }
+    private void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains){
+        for (ProviderMerilDomain providerMerilScientificDomain : merilScientificDomains){
+            String[] parts = providerMerilScientificDomain.getMerilScientificSubdomain().split("-");
+            String merilScientificDomain = "provider_meril_scientific_domain-" + parts[1];
+            if (!providerMerilScientificDomain.getMerilScientificDomain().equals(merilScientificDomain)){
+                throw new ValidationException("Meril Scientific Subdomain '" + providerMerilScientificDomain.getMerilScientificSubdomain() +
+                        "' should have as Meril Scientific Domain the value '" + merilScientificDomain +"'");
             }
         }
-        return true;
     }
 
 }
