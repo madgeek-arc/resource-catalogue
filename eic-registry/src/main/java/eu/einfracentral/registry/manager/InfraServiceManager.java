@@ -63,8 +63,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
-        validateCategories(infraService.getService().getCategories(), infraService.getService().getSubcategories());
-        validateScientificDomains(infraService.getService().getScientificDomains(), infraService.getService().getScientificSubdomains());
+        validateCategories(infraService.getService().getCategories());
+        validateScientificDomains(infraService.getService().getScientificDomains());
         infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
@@ -86,8 +86,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraService updateService(InfraService infraService, Authentication auth) {
         InfraService ret;
         validate(infraService);
-        validateCategories(infraService.getService().getCategories(), infraService.getService().getSubcategories());
-        validateScientificDomains(infraService.getService().getScientificDomains(), infraService.getService().getScientificSubdomains());
+        validateCategories(infraService.getService().getCategories());
+        validateScientificDomains(infraService.getService().getScientificDomains());
         InfraService existingService;
 
         // if service version is empty set it null
@@ -187,8 +187,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 //                migrate(infraService); // use this to make custom changes
                 ObjectUtils.merge(infraService, service); // use this to make bulk changes FIXME: this method does not work as expected
                 validate(infraService);
-                validateCategories(infraService.getService().getCategories(), infraService.getService().getSubcategories());
-                validateScientificDomains(infraService.getService().getScientificDomains(), infraService.getService().getScientificSubdomains());
+                validateCategories(infraService.getService().getCategories());
+                validateScientificDomains(infraService.getService().getScientificDomains());
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
@@ -243,24 +243,24 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return service;
     }
 
-    private void validateCategories(List<String> categories, List<String> subcategories){
-        for (String subcategory : subcategories){
-            String[] parts = subcategory.split("-");
+    private void validateCategories(List<ServiceCategory> categories){
+        for (ServiceCategory serviceCategory : categories){
+            String[] parts = serviceCategory.getSubcategory().split("-");
             String category = "category-" + parts[1] + "-" + parts[2];
-            if (!categories.contains(category)){
-                throw new ValidationException("Subcategory '" + subcategory + "' should have as Category the value '"
+            if (!serviceCategory.getCategory().equals(category)){
+                throw new ValidationException("Subcategory '" + serviceCategory.getSubcategory() + "' should have as Category the value '"
                         + category +"'");
             }
         }
     }
 
-    private void validateScientificDomains(List<String> scientificDomains, List<String> scientificSubdomains){
-        for (String scientificSubdomain : scientificSubdomains){
-            String[] parts = scientificSubdomain.split("-");
+    private void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
+        for (ServiceProviderDomain serviceScientificDomain : scientificDomains){
+            String[] parts = serviceScientificDomain.getScientificSubdomain().split("-");
             String scientificDomain = "scientific_domain-" + parts[1];
-            if (!scientificDomains.contains(scientificDomain)){
-                throw new ValidationException("Scientific Subdomain '" + scientificSubdomain + "' should have as Scientific Domain the value '"
-                        + scientificDomain +"'");
+            if (!serviceScientificDomain.getScientificDomain().equals(scientificDomain)){
+                throw new ValidationException("Scientific Subdomain '" + serviceScientificDomain.getScientificSubdomain() +
+                        "' should have as Scientific Domain the value '" + scientificDomain +"'");
             }
         }
     }

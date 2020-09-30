@@ -98,24 +98,13 @@ public class Provider implements Identifiable {
 
     // Provider Classification Information
     /**
-     * A named group of Providers that offer access to the same type of Resources.
+     * A named group of providers that offer access to the same type of resource or capabilities, within the defined domain.
      */
     @XmlElementWrapper(name = "scientificDomains")
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 10, notes = "Vocabulary ID")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
-    private List<String> scientificDomains;
-
-    /**
-     * A named group of providers that offer access to the same type of resource or capabilities, within the defined domain.
-     */
-    @XmlElementWrapper(name = "scientificSubdomains")
-    @XmlElement(name = "scientificSubdomain")
     @ApiModelProperty(position = 11, notes = "Vocabulary ID")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
-    private List<String> scientificSubdomains;
+    @FieldValidation(nullable = true)
+    private List<ServiceProviderDomain> scientificDomains;
 
     /**
      * Keywords associated to the Provider to simplify search by relevant keywords.
@@ -248,24 +237,13 @@ public class Provider implements Identifiable {
     private String esfriType;
 
     /**
-     * MERIL scientific domain classification.
+     * MERIL scientific domain / subdomain classification.
      */
     @XmlElementWrapper(name = "merilScientificDomains")
     @XmlElement(name = "merilScientificDomain")
     @ApiModelProperty(position = 25, notes = "Vocabulary ID")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN)
-    private List<String> merilScientificDomains;
-
-    /**
-     * MERIL scientific subdomain classification.
-     */
-    @XmlElementWrapper(name = "merilScientificSubdomains")
-    @XmlElement(name = "merilScientificSubdomain")
-    @ApiModelProperty(position = 26, notes = "Vocabulary ID")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN)
-    private List<String> merilScientificSubdomains;
+    @FieldValidation(nullable = true)
+    private List<ProviderMerilDomain> merilScientificDomains;
 
     /**
      * Basic research, Applied research or Technological development.
@@ -351,7 +329,6 @@ public class Provider implements Identifiable {
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
                 ", scientificDomains=" + scientificDomains +
-                ", scientificSubdomains=" + scientificSubdomains +
                 ", tags=" + tags +
                 ", location=" + location +
                 ", mainContact=" + mainContact +
@@ -366,7 +343,6 @@ public class Provider implements Identifiable {
                 ", esfriDomains=" + esfriDomains +
                 ", esfriType='" + esfriType + '\'' +
                 ", merilScientificDomains=" + merilScientificDomains +
-                ", merilScientificSubdomains=" + merilScientificSubdomains +
                 ", areasOfActivity=" + areasOfActivity +
                 ", societalGrandChallenges=" + societalGrandChallenges +
                 ", nationalRoadmaps=" + nationalRoadmaps +
@@ -448,20 +424,12 @@ public class Provider implements Identifiable {
         this.multimedia = multimedia;
     }
 
-    public List<String> getScientificDomains() {
+    public List<ServiceProviderDomain> getScientificDomains() {
         return scientificDomains;
     }
 
-    public void setScientificDomains(List<String> scientificDomains) {
+    public void setScientificDomains(List<ServiceProviderDomain> scientificDomains) {
         this.scientificDomains = scientificDomains;
-    }
-
-    public List<String> getScientificSubdomains() {
-        return scientificSubdomains;
-    }
-
-    public void setScientificSubdomains(List<String> scientificSubdomains) {
-        this.scientificSubdomains = scientificSubdomains;
     }
 
     public List<String> getTags() {
@@ -568,20 +536,12 @@ public class Provider implements Identifiable {
         this.esfriType = esfriType;
     }
 
-    public List<String> getMerilScientificDomains() {
+    public List<ProviderMerilDomain> getMerilScientificDomains() {
         return merilScientificDomains;
     }
 
-    public void setMerilScientificDomains(List<String> merilScientificDomains) {
+    public void setMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains) {
         this.merilScientificDomains = merilScientificDomains;
-    }
-
-    public List<String> getMerilScientificSubdomains() {
-        return merilScientificSubdomains;
-    }
-
-    public void setMerilScientificSubdomains(List<String> merilScientificSubdomains) {
-        this.merilScientificSubdomains = merilScientificSubdomains;
     }
 
     public List<String> getAreasOfActivity() {

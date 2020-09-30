@@ -106,9 +106,11 @@ public class ServiceProviderRegistrationIT {
         providerTypes.add("provider_type-single_sited");
         providerTypes.add("provider_type-distributed");
 
-        List<String> providerScientificSubdomains = new ArrayList<>();
-        providerScientificSubdomains.add("pprovider_scientific_subdomain-agronomy_forestry_plant_breeding_centres");
-        providerScientificSubdomains.add("provider_scientific_subdomain-animal_facilities");
+        List<ServiceProviderDomain> providerScientificSubdomains = new ArrayList<>();
+        ServiceProviderDomain serviceProviderDomain = new ServiceProviderDomain();
+        serviceProviderDomain.setScientificDomain("provider_scientific_subdomain-agronomy_forestry_plant_breeding_centres");
+        serviceProviderDomain.setScientificSubdomain("provider_scientific_subdomain-animal_facilities");
+        providerScientificSubdomains.add(serviceProviderDomain);
 
         ProviderLocation providerLocation = new ProviderLocation();
         providerLocation.setCity("Athens");
@@ -153,7 +155,7 @@ public class ServiceProviderRegistrationIT {
         provider.setDescription("Jtest for PDT WP4 v2.00 01/10/19");
         provider.setLogo(new URL("https://wp4.testprovider.logo.com"));
         provider.setStructureTypes(providerTypes);
-        provider.setScientificSubdomains(providerScientificSubdomains);
+        provider.setScientificDomains(providerScientificSubdomains);
         provider.setLifeCycleStatus("provider_life_cycle_status-under_construction");
         provider.setLocation(providerLocation);
         provider.setMainContact(mainContact);
@@ -181,13 +183,17 @@ public class ServiceProviderRegistrationIT {
 
 
     public Service createService(String serviceName, Provider provider) throws MalformedURLException {
-        List<String> scientificSubdomains = new ArrayList<>();
-        scientificSubdomains.add("scientific_subdomain-natural_sciences-mathematics");
-        scientificSubdomains.add("scientific_subdomain-natural_sciences-computer_sciences");
+        List<ServiceProviderDomain> scientificSubdomains = new ArrayList<>();
+        ServiceProviderDomain serviceProviderDomain = new ServiceProviderDomain();
+        serviceProviderDomain.setScientificDomain("scientific_subdomain-natural_sciences-mathematics");
+        serviceProviderDomain.setScientificSubdomain("scientific_subdomain-natural_sciences-computer_sciences");
+        scientificSubdomains.add(serviceProviderDomain);
 
-        List<String> subcategories = new ArrayList<>();
-        subcategories.add("subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer");
-        subcategories.add("subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-radiation");
+        List<ServiceCategory> subcategories = new ArrayList<>();
+        ServiceCategory serviceCategory = new ServiceCategory();
+        serviceCategory.setCategory("category-access_physical_and_eInfrastructures-instrument_and_equipment");
+        serviceCategory.setSubcategory("subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer");
+        subcategories.add(serviceCategory);
 
         List<String> targetUsers = new ArrayList<>();
         targetUsers.add("target_users-researchers");
@@ -221,8 +227,8 @@ public class ServiceProviderRegistrationIT {
         service.setDescription("Jtest for SDT WP4 v2.00 01/10/19");
         service.setLogo(new URL("https:wp4.testservice.logo.com"));
         service.setResourceOrganisation(provider.getId());
-        service.setScientificSubdomains(scientificSubdomains);
-        service.setSubcategories(subcategories);
+        service.setScientificDomains(scientificSubdomains);
+        service.setCategories(subcategories);
         service.setTargetUsers(targetUsers);
         service.setLanguageAvailabilities(languages);
         service.setGeographicalAvailabilities(places);
