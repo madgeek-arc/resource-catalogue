@@ -44,13 +44,6 @@
     },
     {
       "multivalued": true,
-      "name": "scientific_subdomains",
-      "label": "Scientific Subdomain",
-      "path": "//*[local-name()='service']//*[local-name()='scientificSubdomain']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "categories",
       "label": "Category",
       "path": "//*[local-name()='service']//*[local-name()='category']/text()",
@@ -61,13 +54,6 @@
       "name": "subcategories",
       "label": "Subcategory",
       "path": "//*[local-name()='service']//*[local-name()='subcategory']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "target_users",
-      "label": "Target User",
-      "path": "//*[local-name()='service']//*[local-name()='targetUser']/text()",
       "type": "java.lang.String"
     },
     {
