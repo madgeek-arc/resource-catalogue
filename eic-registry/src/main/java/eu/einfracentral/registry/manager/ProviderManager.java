@@ -448,4 +448,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+        ProviderBundle providerBundle = get(providerId);
+        return providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail());
+    }
+
 }

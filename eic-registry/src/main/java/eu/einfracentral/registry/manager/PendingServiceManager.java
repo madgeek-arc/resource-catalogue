@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
@@ -124,6 +125,10 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public List<InfraService> getMy(Authentication auth) {
         List<InfraService> re = new ArrayList<>();
         return re;
+    }
+
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+        return true;
     }
 
 }

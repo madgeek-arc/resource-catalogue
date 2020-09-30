@@ -30,6 +30,10 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     List<T> getMyServiceProviders(U authentication);
 
+
+    boolean hasAdminAcceptedTerms(String providerId, U authentication);
+
+
     // TODO: move to Infra
     List<InfraService> getInfraServices(String providerId);
 

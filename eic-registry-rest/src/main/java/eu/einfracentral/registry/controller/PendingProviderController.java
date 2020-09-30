@@ -120,4 +120,9 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         return new ResponseEntity<>(pendingProviderService.getMy(auth), HttpStatus.OK);
     }
 
+    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        return providerManager.hasAdminAcceptedTerms(providerId, authentication);
+    }
+
 }
