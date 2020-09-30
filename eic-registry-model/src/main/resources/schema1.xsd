@@ -63,7 +63,7 @@
       <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="source" type="xs:string"/>
-      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="terms" type="simpleEntry"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="terms" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
