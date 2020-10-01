@@ -75,10 +75,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("User '{}' is attempting to add a new Provider: {}", auth, provider);
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
-        if (provider.getProvider().getScientificDomains() != null || !provider.getProvider().getScientificDomains().isEmpty()) {
+        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
             validateScientificDomains(provider.getProvider().getScientificDomains());
         }
-        if (provider.getProvider().getMerilScientificDomains() != null || !provider.getProvider().getMerilScientificDomains().isEmpty()){
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()){
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
 
@@ -100,10 +100,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
         validate(provider);
-        if (provider.getProvider().getScientificDomains() != null || !provider.getProvider().getScientificDomains().isEmpty()) {
+        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
             validateScientificDomains(provider.getProvider().getScientificDomains());
         }
-        if (provider.getProvider().getMerilScientificDomains() != null || !provider.getProvider().getMerilScientificDomains().isEmpty()){
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()){
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
