@@ -37,16 +37,16 @@
     },
     {
       "multivalued": true,
-      "name": "scientific_domains",
-      "label": "Scientific Domain",
-      "path": "//*[local-name()='service']//*[local-name()='scientificDomain']/text()",
+      "name": "subcategories",
+      "label": "Subcategory",
+      "path": "//*[local-name()='category']/*[local-name()='subcategory']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "categories",
-      "label": "Category",
-      "path": "//*[local-name()='service']//*[local-name()='category']/text()",
+      "name": "scientific_subdomains",
+      "label": "Scientific Subdomain",
+      "path": "//*[local-name()='scientificDomain']/*[local-name()='scientificSubdomain']/text()",
       "type": "java.lang.String"
     },
     {

@@ -37,16 +37,16 @@
     },
     {
       "multivalued": true,
-      "name": "scientific_domains",
-      "label": "Scientific Domain",
-      "path": "//*[local-name()='scientificDomain']/text()",
+      "name": "scientific_subdomains",
+      "label": "Scientific Subdomain",
+      "path": "//*[local-name()='scientificDomain']/*[local-name()='scientificSubdomain']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
-      "name": "meril_scientific_domains",
-      "label": "Meril Scientific Domain",
-      "path": "//*[local-name()='merilScientificDomain']/text()",
+      "name": "meril_scientific_subdomains",
+      "label": "Meril Scientific Subdomain",
+      "path": "//*[local-name()='merilScientificDomain']/*[local-name()='merilScientificSubdomain']/text()",
       "type": "java.lang.String"
     },
     {
