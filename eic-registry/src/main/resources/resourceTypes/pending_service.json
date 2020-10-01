@@ -31,29 +31,29 @@
     {
       "multivalued": true,
       "name": "resource_providers",
-      "label": "Resource Providers",
+      "label": "Resource Provider",
       "path": "//*[local-name()='service']//*[local-name()='resourceProviders']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "scientific_domains",
-      "label": "Scientific Domain",
-      "path": "//*[local-name()='service']//*[local-name()='scientificDomain']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "categories",
-      "label": "Category",
-      "path": "//*[local-name()='service']//*[local-name()='category']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "subcategories",
       "label": "Subcategory",
-      "path": "//*[local-name()='service']//*[local-name()='subcategory']/text()",
+      "path": "//*[local-name()='category']/*[local-name()='subcategory']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "label": "Scientific Subdomain",
+      "path": "//*[local-name()='scientificDomain']/*[local-name()='scientificSubdomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "target_users",
+      "label": "Target User",
+      "path": "//*[local-name()='service']//*[local-name()='targetUser']/text()",
       "type": "java.lang.String"
     },
     {
@@ -152,6 +152,13 @@
       "name": "tags",
       "label": "Tag",
       "path": "//*[local-name()='service']//*[local-name()='tag']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "order_type",
+      "label": "Order Type",
+      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
       "type": "java.lang.String"
     },
     {
