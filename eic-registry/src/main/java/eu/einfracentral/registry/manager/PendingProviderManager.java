@@ -85,6 +85,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
+        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         // get existing resource
         Resource existing = whereID(providerBundle.getId(), true);
         // save existing resource with new payload
@@ -126,6 +127,8 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Provider with id '{}' to Active", auth, providerBundle.getId());
         providerManager.validate(providerBundle);
+        providerManager.validateScientificDomains(providerBundle.getProvider().getScientificDomains());
+        providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
         if (providerManager.exists(providerBundle)) {
             throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
         }
@@ -148,6 +151,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
             throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
         }
         providerManager.validate(providerBundle);
+        providerManager.validateScientificDomains(providerBundle.getProvider().getScientificDomains());
+        providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
+        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerId);
         resource.setResourceType(resourceType);

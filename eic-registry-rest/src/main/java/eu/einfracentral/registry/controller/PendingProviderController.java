@@ -78,6 +78,8 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
         // validate the Provider and update afterwards ( update may change provider id and all of its services ids )
         providerManager.validate(providerBundle);
+        providerManager.validateScientificDomains(providerBundle.getProvider().getScientificDomains());
+        providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
         update(providerBundle, auth);
 
         // transform to active

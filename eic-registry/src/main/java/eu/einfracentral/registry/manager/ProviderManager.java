@@ -426,7 +426,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    private void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
+    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
         for (ServiceProviderDomain providerScientificDomain : scientificDomains){
             String[] parts = providerScientificDomain.getScientificSubdomain().split("-");
             String scientificDomain = "scientific_domain-" + parts[1];
@@ -437,7 +437,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    private void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains){
+    public void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains){
         for (ProviderMerilDomain providerMerilScientificDomain : merilScientificDomains){
             String[] parts = providerMerilScientificDomain.getMerilScientificSubdomain().split("-");
             String merilScientificDomain = "provider_meril_scientific_domain-" + parts[1];

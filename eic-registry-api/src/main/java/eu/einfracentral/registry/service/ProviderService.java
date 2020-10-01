@@ -1,8 +1,6 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.*;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -29,6 +27,12 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
 
     List<T> getMyServiceProviders(U authentication);
+
+
+    void validateScientificDomains(List<ServiceProviderDomain> scientificDomains);
+
+
+    void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains);
 
 
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
