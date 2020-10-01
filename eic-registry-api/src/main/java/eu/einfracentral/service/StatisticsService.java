@@ -161,8 +161,8 @@ public interface StatisticsService {
     List<MapValues> mapServicesToVocabulary(String id, Vocabulary vocabulary);
 
     enum Vocabulary {
-        SUBCATEGORY("subcategories"),
-        SCIENTIFIC_SUBDOMAIN("scientific_subdomains"),
+        CATEGORY("categories"),
+        SCIENTIFIC_DOMAIN("scientific_domains"),
         TARGET_USERS("target_users"),
         ACCESS_MODES("access_modes"),
         ACCESS_TYPES("access_types"),

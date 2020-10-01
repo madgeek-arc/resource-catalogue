@@ -538,12 +538,15 @@ public class StatisticsManager implements StatisticsService {
         for (InfraService infraService : allServices) {
             Value value = new Value(infraService.getId(), infraService.getService().getName());
 
-            Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
-
-            for (String country : countries) {
-                Set<Value> values = mapValues.get(country);
-                values.add(value);
-                mapValues.put(country, values);
+            try {
+                Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
+                for (String country : countries) {
+                    Set<Value> values = mapValues.get(country);
+                    values.add(value);
+                    mapValues.put(country, values);
+                }
+            } catch (NullPointerException e){
+                logger.info(e);
             }
         }
 
