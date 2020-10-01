@@ -45,6 +45,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                     && !this.securityService.isProviderAdmin(auth, ((ProviderBundle) t).getId(), true)) {
                 ((ProviderBundle) t).getProvider().setMainContact(null);
                 ((ProviderBundle) t).getProvider().setUsers(null);
+                ((ProviderBundle) t).getMetadata().setTerms(null);
             } else if (t instanceof Provider
                     && !this.securityService.isProviderAdmin(auth, ((Provider) t).getId(), true)) {
                 ((Provider) t).setMainContact(null);
@@ -53,6 +54,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                     && !this.securityService.isServiceProviderAdmin(auth, ((InfraService) t).getService().getId(), true)) {
                 ((InfraService) t).getService().setMainContact(null);
                 ((InfraService) t).getService().setSecurityContactEmail(null);
+                ((InfraService) t).getMetadata().setTerms(null);
             } else if (t instanceof Service
                     && !this.securityService.isServiceProviderAdmin(auth, ((Service) t), true)) {
                 ((Service) t).setMainContact(null);
@@ -68,12 +70,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                     } else if (object instanceof InfraService) {
                         ((InfraService) object).getService().setMainContact(null);
                         ((InfraService) object).getService().setSecurityContactEmail(null);
+                        ((InfraService) object).getMetadata().setTerms(null);
                     } else if (object instanceof ProviderBundle) {
                         ((ProviderBundle) object).getProvider().setMainContact(null);
                         ((ProviderBundle) object).getProvider().setUsers(null);
+                        ((ProviderBundle) object).getMetadata().setTerms(null);
                     } else if (object instanceof RichService) {
                         ((RichService) object).getService().setMainContact(null);
                         ((RichService) object).getService().setSecurityContactEmail(null);
+                        ((RichService) object).getMetadata().setTerms(null);
                     }
                 }
             } else if (Paging.class.isAssignableFrom(t.getClass())) {
@@ -87,12 +92,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                     } else if (object instanceof InfraService) {
                         ((InfraService) object).getService().setMainContact(null);
                         ((InfraService) object).getService().setSecurityContactEmail(null);
+                        ((InfraService) object).getMetadata().setTerms(null);
                     } else if (object instanceof ProviderBundle) {
                         ((ProviderBundle) object).getProvider().setMainContact(null);
                         ((ProviderBundle) object).getProvider().setUsers(null);
+                        ((ProviderBundle) object).getMetadata().setTerms(null);
                     } else if (object instanceof RichService) {
                         ((RichService) object).getService().setMainContact(null);
                         ((RichService) object).getService().setSecurityContactEmail(null);
+                        ((RichService) object).getMetadata().setTerms(null);
                     }
                 }
             }
