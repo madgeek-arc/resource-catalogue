@@ -97,6 +97,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService transformToActive(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, infraService.getId());
         infraServiceService.validate(infraService);
+        infraServiceService.validateCategories(infraService.getService().getCategories());
+        infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
         infraService = this.update(infraService, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = this.getResource(infraService.getId());
@@ -111,6 +113,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
         InfraService infraService = this.get(serviceId);
         infraServiceService.validate(infraService);
+        infraServiceService.validateCategories(infraService.getService().getCategories());
+        infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = this.getResource(serviceId);
         resource.setResourceType(resourceType);

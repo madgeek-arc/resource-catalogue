@@ -243,7 +243,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return service;
     }
 
-    private void validateCategories(List<ServiceCategory> categories){
+    public void validateCategories(List<ServiceCategory> categories){
         for (ServiceCategory serviceCategory : categories){
             String[] parts = serviceCategory.getSubcategory().split("-");
             String category = "category-" + parts[1] + "-" + parts[2];
@@ -254,7 +254,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
     }
 
-    private void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
+    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
         for (ServiceProviderDomain serviceScientificDomain : scientificDomains){
             String[] parts = serviceScientificDomain.getScientificSubdomain().split("-");
             String scientificDomain = "scientific_domain-" + parts[1];
