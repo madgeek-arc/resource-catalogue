@@ -259,6 +259,11 @@ public class ProviderController {
        return providerManager.hasAdminAcceptedTerms(providerId, authentication);
     }
 
+    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        providerManager.adminAcceptedTerms(providerId, authentication);
+    }
+
     @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void deleteUserInfo(Authentication authentication) {
         providerManager.deleteUserInfo(authentication);

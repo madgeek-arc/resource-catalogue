@@ -216,7 +216,25 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
         ProviderBundle providerBundle = get(providerId);
-        return providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail());
+        List<String> userList = new ArrayList<>();
+        for (User user : providerBundle.getProvider().getUsers()){
+            userList.add(user.getEmail());
+        }
+        if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
+            if (userList.contains(User.of(auth).getEmail())) {
+                return false; //pop-up modal
+            } else {
+                return true; //no modal
+            }
+        }
+        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail()) && userList.contains(User.of(auth).getEmail())) {
+            return false; // pop-up modal
+        }
+        return true; // no modal
+    }
+
+    public void adminAcceptedTerms(String providerId, Authentication auth){
+        update(get(providerId), auth);
     }
 
 }

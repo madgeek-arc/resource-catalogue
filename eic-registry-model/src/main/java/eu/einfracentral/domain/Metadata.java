@@ -110,6 +110,10 @@ public class Metadata {
     }
 
     public static List<String> updateAcceptedTermsList(List<String> terms, String userEmail){
+        if (terms == null || terms.isEmpty()){
+            terms = new ArrayList<>();
+            terms.add(userEmail);
+        }
         if (!terms.contains(userEmail)){
             terms.add(userEmail);
         }
