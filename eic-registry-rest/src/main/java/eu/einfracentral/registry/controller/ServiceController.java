@@ -38,10 +38,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Deprecated
 @RestController
 @RequestMapping("service")
-@Api(value = "Get Information about a Service", description = "Deprecated")
+@Api(value = "Get Information about a Service")
 public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
@@ -51,7 +50,6 @@ public class ServiceController {
     private final IdCreator idCreator;
     private final DataSource dataSource;
 
-    @Deprecated
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<ProviderBundle, Authentication> provider,
@@ -64,7 +62,6 @@ public class ServiceController {
         this.dataSource = dataSource;
     }
 
-    @Deprecated
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -79,7 +76,6 @@ public class ServiceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Deprecated
     @ApiOperation(value = "Get the most current version of a specific Service, providing the Service id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
@@ -87,7 +83,6 @@ public class ServiceController {
         return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
     }
 
-    @Deprecated
     @ApiOperation(value = "Get the specified version of a Service, providing the Service id and version.")
     @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or " +
@@ -103,7 +98,6 @@ public class ServiceController {
     }
 
     // Get the specified version of a RichService providing the Service id and version.
-    @Deprecated
     @GetMapping(path = "rich/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
@@ -111,7 +105,6 @@ public class ServiceController {
         return new ResponseEntity<>(infraService.getRichService(id, version, auth), HttpStatus.OK);
     }
 
-    @Deprecated
     @ApiOperation(value = "Creates a new Service.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #service)")
@@ -165,7 +158,6 @@ public class ServiceController {
         return new ResponseEntity<>(s.getService(), HttpStatus.OK);
     }
 
-    @Deprecated
     @ApiOperation(value = "Updates the Service assigned the given id with the given Service, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -175,7 +167,6 @@ public class ServiceController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 
-    @Deprecated
     @ApiOperation(value = "Validates the Service without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Service service) {
@@ -184,7 +175,6 @@ public class ServiceController {
         return ret;
     }
 
-    @Deprecated
     @ApiOperation(value = "Filter a list of Services based on a set of filters or get a list of all Services in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -204,7 +194,6 @@ public class ServiceController {
     }
 
     // Filter a list of Services based on a set of filters or get a list of all Services in the Catalogue.
-    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -221,7 +210,6 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-    @Deprecated
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -240,8 +228,6 @@ public class ServiceController {
         return infraService.getChildrenFromParent(type, parent, rec);
     }
 
-
-    @Deprecated
     @ApiOperation(value = "Get a list of Services based on a set of ids.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
@@ -254,7 +240,6 @@ public class ServiceController {
     }
 
     // Get a list of RichServices based on a set of ids.
-    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of service ids", dataType = "string", paramType = "path")
     })
@@ -263,7 +248,6 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.getByIds(auth, ids));
     }
 
-    @Deprecated
     @ApiOperation(value = "Get all Services in the catalogue organized by an attribute, e.g. get Services organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
@@ -288,7 +272,6 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
-    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -306,7 +289,6 @@ public class ServiceController {
     }
 
     // Get all modification details of a specific Service, providing the Service id.
-    @Deprecated
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
         Paging<ServiceHistory> history = infraService.getHistory(id);
@@ -314,7 +296,6 @@ public class ServiceController {
     }
 
     // Get all modifications of a specific Service, providing the Service id and the resource Version id.
-    @Deprecated
     @GetMapping(path = {"history/{serviceId}/{versionId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> getVersionHistory(@PathVariable String serviceId, @PathVariable String versionId, @ApiIgnore Authentication auth) {
         Service service = infraService.getVersionHistory(serviceId, versionId);
@@ -322,14 +303,12 @@ public class ServiceController {
     }
 
     // Get all featured Services.
-    @Deprecated
     @GetMapping(path = "featured/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getFeaturedServices() {
         return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
     }
 
     // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.
-    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -351,7 +330,6 @@ public class ServiceController {
     }
 
     // Providing the Service id and version, set the Service to active or inactive.
-    @Deprecated
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
@@ -361,7 +339,6 @@ public class ServiceController {
     }
 
     // Get all pending Service Templates.
-    @Deprecated
     @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {

@@ -41,10 +41,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Deprecated
 @RestController
 @RequestMapping("pendingService")
-@Api(value = "Get information about a Pending Service", description = "Deprecated")
+@Api(value = "Get information about a Pending Service")
 public class PendingServiceController extends ResourceController<InfraService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
@@ -53,7 +52,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IdCreator idCreator;
 
-    @Deprecated
     @Autowired
     PendingServiceController(PendingResourceService<InfraService> pendingServiceManager,
                              MeasurementService<Measurement, Authentication> measurementService,
@@ -66,8 +64,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
         this.idCreator = idCreator;
     }
 
-
-    @Deprecated
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -77,22 +73,16 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
-    @Deprecated
     @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> getService(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
 
-
-    @Deprecated
     @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
         return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
-
-    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -108,8 +98,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(pendingServiceManager.getAll(ff, null), HttpStatus.OK);
     }
 
-
-    @Deprecated
     @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
@@ -117,8 +105,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(pendingServiceManager.add(infraService, auth).getService(), HttpStatus.CREATED);
     }
 
-
-    @Deprecated
     @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
@@ -127,24 +113,18 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);
     }
 
-
-    @Deprecated
     @PostMapping("/transform/pending")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #serviceId)")
     public void transformServiceToPending(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToPending(serviceId, auth);
     }
 
-
-    @Deprecated
     @PostMapping("/transform/service")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #serviceId)")
     public void transformServiceToInfra(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToActive(serviceId, auth);
     }
 
-
-    @Deprecated
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
@@ -161,8 +141,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 
-
-    @Deprecated
     @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) {
@@ -172,8 +150,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);
     }
 
-
-    @Deprecated
     @PutMapping(path = "/transform/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> pendingToInfra(@RequestBody Service service, @ApiIgnore Authentication auth) {
@@ -206,8 +182,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 
-
-    @Deprecated
     @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #json)")
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
@@ -241,8 +215,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 
-
-    @Deprecated
     private Pair<Service, List<Measurement>> getServiceAndMeasurements(Map<String, JsonNode> json) {
         ObjectMapper mapper = new ObjectMapper();
         Service service = null;
