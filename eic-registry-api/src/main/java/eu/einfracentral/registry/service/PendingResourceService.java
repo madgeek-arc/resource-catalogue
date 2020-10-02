@@ -102,4 +102,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
 
     boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
 
+    void adminAcceptedTerms(String providerId, Authentication authentication);
+
 }

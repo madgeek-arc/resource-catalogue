@@ -80,7 +80,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title(projectName)
                 .description("External APIs for the " + projectName + " registry")
-                .version(getVersion())
+                .version("3.0.0")
                 .termsOfServiceUrl(String.format("%s/tos", platform))
 //                .license("NAME")
                 .licenseUrl(String.format("%s/license", platform))

@@ -135,4 +135,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         return true;
     }
 
+    public void adminAcceptedTerms(String providerId, Authentication auth){
+        // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
+    }
 }

@@ -37,6 +37,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
 
+    void adminAcceptedTerms(String providerId, U authentication);
+
 
     // TODO: move to Infra
     List<InfraService> getInfraServices(String providerId);

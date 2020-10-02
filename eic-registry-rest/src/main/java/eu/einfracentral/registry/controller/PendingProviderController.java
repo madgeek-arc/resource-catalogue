@@ -131,4 +131,9 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         return pendingProviderService.hasAdminAcceptedTerms(providerId, authentication);
     }
 
+    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        pendingProviderService.adminAcceptedTerms(providerId, authentication);
+    }
+
 }
