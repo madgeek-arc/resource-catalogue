@@ -96,7 +96,7 @@ public class FieldValidator {
             }
 
             validateMaxLength(field, fieldValue, validationAnnotation);
-            validateUrlValidity(field, fieldValue);
+//            validateUrlValidity(field, fieldValue);
 
             if (validationAnnotation.containsId()) {
                 validateIds(field, fieldValue, validationAnnotation);
