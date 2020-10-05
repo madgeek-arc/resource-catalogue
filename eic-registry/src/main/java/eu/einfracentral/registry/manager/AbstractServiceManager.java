@@ -638,8 +638,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getScientificDomains() != null) {
                 for (ServiceProviderDomain serviceProviderDomain : infraService.getService().getScientificDomains()) {
                     ScientificDomain domain = new ScientificDomain();
-                    domain.setDomain(vocabularyService.get(serviceProviderDomain.getScientificDomain()));
-                    domain.setSubdomain(vocabularyService.get(serviceProviderDomain.getScientificSubdomain()));
+                    if (serviceProviderDomain.getScientificDomain() != null && !serviceProviderDomain.getScientificDomain().equals("")) {
+                        domain.setDomain(vocabularyService.get(serviceProviderDomain.getScientificDomain()));
+                        domain.setSubdomain(vocabularyService.get(serviceProviderDomain.getScientificSubdomain()));
+                    } else {
+                        domain.setDomain(null);
+                        domain.setSubdomain(null);
+                    }
                     domains.add(domain);
                 }
             }
@@ -650,11 +655,17 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             if (infraService.getService().getCategories() != null) {
                 for (ServiceCategory serviceCategory : infraService.getService().getCategories()) {
                     Category category = new Category();
-                    String[] parts = serviceCategory.getSubcategory().split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
-                    String supercategoryId = "supercategory-" + parts[1];
-                    category.setSuperCategory(vocabularyService.get(supercategoryId));
-                    category.setCategory(vocabularyService.get(serviceCategory.getCategory()));
-                    category.setSubCategory(vocabularyService.get(serviceCategory.getSubcategory()));
+                    if (serviceCategory.getCategory() != null && !serviceCategory.getCategory().equals("")) {
+                        String[] parts = serviceCategory.getSubcategory().split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
+                        String supercategoryId = "supercategory-" + parts[1];
+                        category.setSuperCategory(vocabularyService.get(supercategoryId));
+                        category.setCategory(vocabularyService.get(serviceCategory.getCategory()));
+                        category.setSubCategory(vocabularyService.get(serviceCategory.getSubcategory()));
+                    } else {
+                        category.setSuperCategory(null);
+                        category.setCategory(null);
+                        category.setSubCategory(null);
+                    }
                     categories.add(category);
                 }
             }
