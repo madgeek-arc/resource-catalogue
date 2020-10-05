@@ -128,12 +128,16 @@ public class AnalyticsService implements Analytics {
     private String getMatomoResponse(String url) {
         try {
             HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-            if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
-                        responseEntity.getStatusCode().toString(), responseEntity.getBody());
+            try{
+                ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+                if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                    logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
+                            responseEntity.getStatusCode().toString(), responseEntity.getBody());
+                }
+                return responseEntity.getBody();
+            } catch (IllegalArgumentException e) {
+                logger.info ("URI is not absolute");
             }
-            return responseEntity.getBody();
         } catch (RuntimeException e) {
             logger.error("Could not retrieve analytics from matomo", e);
         }
