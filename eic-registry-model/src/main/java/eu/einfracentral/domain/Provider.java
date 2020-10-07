@@ -288,9 +288,9 @@ public class Provider implements Identifiable {
 
     public enum States {
         PENDING_1("pending initial approval"),
-        ST_SUBMISSION("pending service template submission"),
-        PENDING_2("pending service template approval"),
-        REJECTED_ST("rejected service template"),
+        ST_SUBMISSION("pending template submission"),
+        PENDING_2("pending template approval"),
+        REJECTED_ST("rejected template"),
         APPROVED("approved"),
         REJECTED("rejected");
 
