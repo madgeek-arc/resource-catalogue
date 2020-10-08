@@ -177,7 +177,11 @@ public class FieldValidator {
             e.printStackTrace();
         }
         if (responseCode != 200 && responseCode != 301 && responseCode != 302 && responseCode != 403){
-            throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation ,field.getName()));
+            if (field == null){
+                throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
+            } else {
+                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation ,field.getName()));
+            }
         }
     }
 

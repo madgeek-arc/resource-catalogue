@@ -24,6 +24,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -446,6 +447,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         "' should have as Meril Scientific Domain the value '" + merilScientificDomain +"'");
             }
         }
+    }
+
+    // For front-end use
+    public boolean validateUrl(URL urlForValidation) {
+        try {
+            fieldValidator.validateUrl(null, urlForValidation);
+        } catch (Throwable e){
+            return false;
+        }
+        return true;
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){

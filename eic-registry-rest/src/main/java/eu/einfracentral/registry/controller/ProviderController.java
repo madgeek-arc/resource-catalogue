@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -262,6 +263,11 @@ public class ProviderController {
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
         providerManager.adminAcceptedTerms(providerId, authentication);
+    }
+
+    @GetMapping(path = "validateUrl", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public boolean validateUrl(@RequestParam URL urlForValidation) throws Throwable {
+        return providerManager.validateUrl(urlForValidation);
     }
 
     @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_VALUE})
