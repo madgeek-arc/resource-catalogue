@@ -3,6 +3,7 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.*;
 import org.springframework.security.core.Authentication;
 
+import java.net.URL;
 import java.util.List;
 
 public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
@@ -38,6 +39,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
 
     void adminAcceptedTerms(String providerId, U authentication);
+
+    boolean validateUrl(URL urlForValidation) throws Throwable;
 
 
     // TODO: move to Infra
