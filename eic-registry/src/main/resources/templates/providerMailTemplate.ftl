@@ -9,7 +9,7 @@ Thank you for your interest in becoming a member of the ${project} Portal.
 You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a new ${project} Provider in the ${project} Portal.
 Your application has been approved and you may proceed with providing one of your ${serviceOrResource}s ${endpoint}/provider/my, which can help us assess the type of ${serviceOrResource}s you want to offer.
 The ${serviceOrResource} should be described according to the ${project} ${serviceOrResource} Description Template; the specification according to which the ${project} portal is populated.
-The latest version of the ${project} ${serviceOrResource} Description Template […]. The ${serviceOrResource} Description Template offers guidance, recommendations, best practices and classifications to facilitate the ${serviceOrResource} description.
+The ${serviceOrResource} Description Template offers guidance, recommendations, best practices and classifications to facilitate the ${serviceOrResource} description.
 For any clarifications, please contact us at ${registrationEmail}.
 </#if>
 <#if providerBundle.status == "pending template approval">
@@ -32,7 +32,7 @@ For any further clarifications please contact ${registrationEmail}.
 </#if>
 <#if providerBundle.status == "rejected template">
 You have applied for registering [${service.name}] - [${service.id}] as a new ${serviceOrResource} in the ${project} Portal.
-Your application has been rejected, as your ${serviceOrResource} description does not comply with the Rules of Participation of the ${project} Portal (...).
+Your application has been rejected, as your ${serviceOrResource} description does not comply with the Rules of Participation of the ${project} Portal.
 [Attached you may find a ${serviceOrResource} Description Recommendations Report].
 [Option 1: We would like to offer an information webinar or training session to improve your application. If you agree or for any other clarifications, please contact us at ${registrationEmail}]
 [Option 2: For any clarifications, please contact us at ${registrationEmail}].
@@ -40,7 +40,7 @@ Thank you for your interest in becoming a member of the ${project} Portal.
 </#if>
 <#if providerBundle.status == "rejected">
 You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a new ${project} Provider in the ${project} Portal.
-Your application has been rejected, as your organization does not comply with the Rules of Participation of the EOSC Portal (...).
+Your application has been rejected, as your organization does not comply with the Rules of Participation of the EOSC Portal.
 [Option 1: We would like to offer an information webinar or training session to improve your application. If you agree or for any other clarifications, please contact us at ${registrationEmail}].
 [Option 2: For any clarifications, please contact us at ${registrationEmail}].
 Thank you for your interest in becoming a member of the ${project} Portal.
