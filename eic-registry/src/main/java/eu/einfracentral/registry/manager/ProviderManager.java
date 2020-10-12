@@ -6,6 +6,7 @@ import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
@@ -44,11 +45,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final IdCreator idCreator;
     private final EventService eventService;
     private final JmsTemplate jmsTopicTemplate;
+    private final RegistrationMailService registrationMailService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           @Lazy FieldValidator fieldValidator,
+                           @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
                            IdCreator idCreator,
                            EventService eventService,
                            JmsTemplate jmsTopicTemplate) {
@@ -59,6 +61,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
+        this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
@@ -91,6 +94,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
 
+        registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
+
         jmsTopicTemplate.convertAndSend("provider.create", provider);
 
         return ret;
@@ -116,6 +121,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {}", provider);
+
+        // Send emails to newly added or deleted Admins
+        adminDifferences(provider, ex);
 
         jmsTopicTemplate.convertAndSend("provider.update", provider);
 
@@ -480,6 +488,27 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public void adminAcceptedTerms(String providerId, Authentication auth){
         update(get(providerId), auth);
+    }
+
+    public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
+        List<String> existingAdmins = new ArrayList<>();
+        List<String> newAdmins = new ArrayList<>();
+        for (User user : existingProvider.getProvider().getUsers()){
+            existingAdmins.add(user.getEmail());
+        }
+        for (User user : updatedProvider.getProvider().getUsers()){
+            newAdmins.add(user.getEmail());
+        }
+        List<String> adminsAdded = new ArrayList<>(newAdmins);
+        adminsAdded.removeAll(existingAdmins);
+        if (!adminsAdded.isEmpty()){
+            registrationMailService.sendEmailsToNewlyAddedAdmins(updatedProvider, adminsAdded);
+        }
+        List<String> adminsDeleted = new ArrayList<>(existingAdmins);
+        adminsDeleted.removeAll(newAdmins);
+        if (!adminsDeleted.isEmpty()){
+            registrationMailService.sendEmailsToNewlyDeletedAdmins(existingProvider, adminsDeleted);
+        }
     }
 
 }
