@@ -427,4 +427,46 @@ public class RegistrationMailService {
 
         return subject;
     }
+
+    public void sendEmailsToNewlyAddedAdmins(ProviderBundle providerBundle, List<String> admins) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("providerBundle", providerBundle);
+
+        String subject = String.format("[%s Portal] Your email has been added as an Administrator for the Provider '%s'", projectName, providerBundle.getProvider().getName());
+
+        if (admins == null){
+            for (User user : providerBundle.getProvider().getUsers()) {
+                root.put("user", user);
+                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail());
+            }
+        } else {
+            for (User user : providerBundle.getProvider().getUsers()) {
+                if (admins.contains(user.getEmail())){
+                    root.put("user", user);
+                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail());
+                }
+            }
+        }
+    }
+
+    public void sendEmailsToNewlyDeletedAdmins(ProviderBundle providerBundle, List<String> admins) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("providerBundle", providerBundle);
+
+        String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Provider '%s'", projectName, providerBundle.getProvider().getName());
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            if (admins.contains(user.getEmail())){
+                root.put("user", user);
+                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail());
+            }
+        }
+    }
+
 }
