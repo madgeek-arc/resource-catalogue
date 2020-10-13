@@ -42,8 +42,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("pendingService")
-@Api(value = "Get information about a Pending Service")
+@RequestMapping("pendingResource")
+@Api(description = "Operations for Pending Resources", tags = {"Pending Resource"})
 public class PendingServiceController extends ResourceController<InfraService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
@@ -69,11 +69,11 @@ public class PendingServiceController extends ResourceController<InfraService, A
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
-        logger.info("User '{}' deleted PendingService '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' deleted Pending Resource '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(path = "/service/id", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "/resource/id", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> getService(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
@@ -98,14 +98,14 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(pendingServiceManager.getAll(ff, null), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/addService", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/addResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService(service);
         return new ResponseEntity<>(pendingServiceManager.add(infraService, auth).getService(), HttpStatus.CREATED);
     }
 
-    @PostMapping(path = "/updateService", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/updateResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = pendingServiceManager.get(service.getId());
@@ -119,7 +119,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         pendingServiceManager.transformToPending(serviceId, auth);
     }
 
-    @PostMapping("/transform/service")
+    @PostMapping("/transform/resource")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #serviceId)")
     public void transformServiceToInfra(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToActive(serviceId, auth);
@@ -134,14 +134,14 @@ public class PendingServiceController extends ResourceController<InfraService, A
             infraService.setService(service);
             infraService = pendingServiceManager.update(infraService, auth);
         } catch (ResourceException e) {
-            logger.debug("Pending Service with id '{}' does not exist. Creating it...", service.getId());
+            logger.debug("Pending Resource with id '{}' does not exist. Creating it...", service.getId());
             infraService.setService(service);
             infraService = pendingServiceManager.add(infraService, auth);
         }
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 
-    @PutMapping(path = "/service", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToPending(service.getId(), auth);
@@ -150,11 +150,11 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(pendingServiceManager.update(infraService, auth).getService(), HttpStatus.OK);
     }
 
-    @PutMapping(path = "/transform/service", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "/transform/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> pendingToInfra(@RequestBody Service service, @ApiIgnore Authentication auth) {
         if (service == null) {
-            throw new ServiceException("Cannot add a null service");
+            throw new ServiceException("Cannot add a null Resource");
         }
         InfraService infraService = null;
 
@@ -169,11 +169,11 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
         if (infraService == null) { // if existing Pending Service is null, create a new Active Service
             infraService = infraServiceService.addService(new InfraService(service), auth);
-            logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
+            logger.info("User '{}' added Resource:\n{}", auth.getName(), infraService);
         } else { // else update Pending Service and transform it to Active Service
             infraService.setService(service); // important to keep other fields of InfraService
             infraService = pendingServiceManager.update(infraService, auth);
-            logger.info("User '{}' updated Pending Service:\n{}", auth.getName(), infraService);
+            logger.info("User '{}' updated Pending Resource:\n{}", auth.getName(), infraService);
 
             // transform to active
             infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
@@ -182,7 +182,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 
-    @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "resourceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #json)")
     public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
         Pair<Service, List<Measurement>> serviceAndMeasurementsPair = getServiceAndMeasurements(json);
@@ -190,7 +190,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         List<Measurement> measurements = serviceAndMeasurementsPair.getValue1();
 
         if (service == null) {
-            throw new ServiceException("Cannot add a null service");
+            throw new ServiceException("Cannot add a null Resource");
         }
         InfraService infraService = null;
         try { // check if service already exists
@@ -204,11 +204,11 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
         if (infraService == null) { // if existing service is null, create it, else update it
             infraService = pendingServiceManager.add(new InfraService(service), auth);
-            logger.info("User '{}' added Service:\n{}", auth.getName(), infraService);
+            logger.info("User '{}' added Resource:\n{}", auth.getName(), infraService);
         } else {
             infraService.setService(service); // important to keep other fields of InfraService
             infraService = pendingServiceManager.update(infraService, auth);
-            logger.info("User '{}' updated Service:\n{}", auth.getName(), infraService);
+            logger.info("User '{}' updated Resource:\n{}", auth.getName(), infraService);
         }
         measurementService.updateAll(infraService.getId(), measurements, auth);
 
