@@ -5,7 +5,6 @@ import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.registry.service.ProviderRequestService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

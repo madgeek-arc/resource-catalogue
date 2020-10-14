@@ -110,7 +110,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                         AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
                 .regexMatchers("/resourcesync/.*").permitAll()
-                .regexMatchers("/restore/", "/resource.*", "/resourceType.*", "/search.*")
+                .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
                 .hasAnyRole("ADMIN")
                 .and()
                 .logout()
