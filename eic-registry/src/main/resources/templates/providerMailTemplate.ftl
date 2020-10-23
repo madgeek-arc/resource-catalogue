@@ -40,7 +40,7 @@ Thank you for your interest in becoming a member of the ${project} Portal.
 </#if>
 <#if providerBundle.status == "rejected">
 You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a new ${project} Provider in the ${project} Portal.
-Your application has been rejected, as your organization does not comply with the Rules of Participation of the EOSC Portal.
+Your application has been rejected, as your organization does not comply with the Rules of Participation of the ${project} Portal.
 [Option 1: We would like to offer an information webinar or training session to improve your application. If you agree or for any other clarifications, please contact us at ${registrationEmail}].
 [Option 2: For any clarifications, please contact us at ${registrationEmail}].
 Thank you for your interest in becoming a member of the ${project} Portal.
