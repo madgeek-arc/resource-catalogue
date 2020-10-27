@@ -137,20 +137,20 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         //Order Service's facets as we like (+removed Service Name - no4)
         List<String> orderedBrowseBy = new ArrayList<>();
 
-        orderedBrowseBy.add(browseBy.get(2));     // Categories
-        orderedBrowseBy.add(browseBy.get(16));    // Scientific Domains
-        orderedBrowseBy.add(browseBy.get(15));    // Resource Providers
-        orderedBrowseBy.add(browseBy.get(14));    // Resource Organisation
-        orderedBrowseBy.add(browseBy.get(8));     // LifeCycleStatus
+        orderedBrowseBy.add(browseBy.get(16));    // Categories
+        orderedBrowseBy.add(browseBy.get(15));    // Scientific Domains
+        orderedBrowseBy.add(browseBy.get(14));    // Resource Providers
+        orderedBrowseBy.add(browseBy.get(13));    // Resource Organisation
+        orderedBrowseBy.add(browseBy.get(7));     // LifeCycleStatus
         orderedBrowseBy.add(browseBy.get(20));    // TRL
-        orderedBrowseBy.add(browseBy.get(6));     // Geographical Availabilities
-        orderedBrowseBy.add(browseBy.get(13));    // Geographic Locations
-        orderedBrowseBy.add(browseBy.get(7));     // Language Availabilities
+        orderedBrowseBy.add(browseBy.get(5));     // Geographical Availabilities
+        orderedBrowseBy.add(browseBy.get(12));    // Geographic Locations
+        orderedBrowseBy.add(browseBy.get(6));     // Language Availabilities
         orderedBrowseBy.add(browseBy.get(1));     // Access Types
         orderedBrowseBy.add(browseBy.get(0));     // Access Modes
         orderedBrowseBy.add(browseBy.get(19));    // Target Users
-        orderedBrowseBy.add(browseBy.get(4));     // Funding Body
-        orderedBrowseBy.add(browseBy.get(12));    // Resource Type
+        orderedBrowseBy.add(browseBy.get(3));     // Funding Body
+        orderedBrowseBy.add(browseBy.get(11));    // Resource Type
 
         filter.setBrowseBy(orderedBrowseBy);
 
