@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -467,6 +468,16 @@ public class RegistrationMailService {
                 sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail());
             }
         }
+    }
+
+    public void informPortalAdminsForProviderDeletion(ProviderBundle provider, Authentication auth){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("user", auth.getName());
+        root.put("providerBundle", provider);
+
+        String subject = String.format("[%s] Provider Deletion Request", projectName);
+        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail);
     }
 
 }
