@@ -25,6 +25,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -61,7 +62,7 @@ import static eu.einfracentral.config.CacheConfig.CACHE_VISITS;
 public class StatisticsManager implements StatisticsService {
 
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
-    private final ElasticConfiguration elastic;
+    private final RestHighLevelClient client;
     private final AnalyticsService analyticsService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final SearchService searchService;
@@ -74,12 +75,12 @@ public class StatisticsManager implements StatisticsService {
     String url;
 
     @Autowired
-    StatisticsManager(ElasticConfiguration elastic, AnalyticsService analyticsService,
+    StatisticsManager(RestHighLevelClient client, AnalyticsService analyticsService,
                       ProviderService<ProviderBundle, Authentication> providerService,
                       SearchService searchService, ParserService parserService,
                       InfraServiceManager infraServiceManager, VocabularyService vocabularyService,
                       DataSource dataSource) {
-        this.elastic = elastic;
+        this.client = client;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
         this.searchService = searchService;
@@ -136,7 +137,7 @@ public class StatisticsManager implements StatisticsService {
 
         SearchResponse response = null;
         try {
-            response = elastic.client().search(search, RequestOptions.DEFAULT);
+            response = client.search(search, RequestOptions.DEFAULT);
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -222,7 +223,7 @@ public class StatisticsManager implements StatisticsService {
 
         SearchResponse response = null;
         try {
-            response = elastic.client().search(search, RequestOptions.DEFAULT);
+            response = client.search(search, RequestOptions.DEFAULT);
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }
