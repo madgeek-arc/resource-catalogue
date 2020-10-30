@@ -42,6 +42,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     boolean validateUrl(URL urlForValidation) throws Throwable;
 
+    void requestProviderDeletion(String providerId, Authentication auth);
+
 
     // TODO: move to Infra
     List<InfraService> getInfraServices(String providerId);
