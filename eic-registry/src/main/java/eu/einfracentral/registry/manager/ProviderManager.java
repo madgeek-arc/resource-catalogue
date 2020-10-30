@@ -195,6 +195,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         jmsTopicTemplate.convertAndSend("provider.delete", provider);
 
         super.delete(provider);
+        registrationMailService.notifyProviderAdmins(provider);
     }
 
     @Override
@@ -508,6 +509,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         adminsDeleted.removeAll(newAdmins);
         if (!adminsDeleted.isEmpty()){
             registrationMailService.sendEmailsToNewlyDeletedAdmins(existingProvider, adminsDeleted);
+        }
+    }
+
+    public void requestProviderDeletion(String providerId, Authentication auth) {
+        ProviderBundle provider = get(providerId);
+        for (User user : provider.getProvider().getUsers()){
+            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())){
+                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
+            }
         }
     }
 

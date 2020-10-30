@@ -470,14 +470,26 @@ public class RegistrationMailService {
         }
     }
 
-    public void informPortalAdminsForProviderDeletion(ProviderBundle provider, Authentication auth){
+    public void informPortalAdminsForProviderDeletion(ProviderBundle provider, User user){
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
-        root.put("user", auth.getName());
+        root.put("user", user);
         root.put("providerBundle", provider);
 
         String subject = String.format("[%s] Provider Deletion Request", projectName);
         sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail);
     }
 
+    public void notifyProviderAdmins(ProviderBundle provider){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("providerBundle", provider);
+
+        String subject = String.format("[%s] Your Provider [%s]-[%s] has been Deleted", projectName,
+                provider.getProvider().getId(), provider.getProvider().getName());
+        for (User user : provider.getProvider().getUsers()){
+            root.put("user", user);
+            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail());
+        }
+    }
 }

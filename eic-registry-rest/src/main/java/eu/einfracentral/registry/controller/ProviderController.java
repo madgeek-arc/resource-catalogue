@@ -270,6 +270,11 @@ public class ProviderController {
         return providerManager.validateUrl(urlForValidation);
     }
 
+    @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void requestProviderDeletion(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        providerManager.requestProviderDeletion(providerId, authentication);
+    }
+
     @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void deleteUserInfo(Authentication authentication) {
         providerManager.deleteUserInfo(authentication);
