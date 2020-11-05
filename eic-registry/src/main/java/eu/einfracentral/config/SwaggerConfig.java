@@ -29,7 +29,7 @@ import java.util.Properties;
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SwaggerConfig {
 
-    @Value("${platform.root:}")
+    @Value("${swagger.url}")
     String platform;
 
     @Value("${project.name:}")
