@@ -57,7 +57,7 @@ public class SwaggerConfig {
     @Bean
     public Docket getDocket() throws MalformedURLException {
 
-        URL hostURL = new URL(platform + "api");
+        URL hostURL = new URL(platform);
         return new Docket(DocumentationType.SWAGGER_2)
                 .directModelSubstitute(URL.class, String.class)
                 .directModelSubstitute(XMLGregorianCalendar.class, String.class)
