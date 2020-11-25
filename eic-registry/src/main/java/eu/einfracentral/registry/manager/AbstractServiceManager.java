@@ -805,6 +805,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         //TODO: Refactor to a more proper way (sql JOIN OR elastic)
         List<String> finalResults = new ArrayList<>();
         List<String> allSub = new ArrayList<>();
+        List<String> correctedSubs = new ArrayList<>();
         for (Map<String, Object> map : rec) {
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String trimmed = entry.getValue().toString().replace("{", "").replace("}", "");
@@ -813,16 +814,25 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 }
             }
         }
+        // Required step to fix joint subcategories (sub1,sub2,sub3) who passed as 1 value
+        for (String item : allSub){
+            if (item.contains(",")){
+                String [] itemParts = item.split(",");
+                correctedSubs.addAll(Arrays.asList(itemParts));
+            } else{
+                correctedSubs.add(item);
+            }
+        }
         if (type.equalsIgnoreCase("SUPERCATEGORY") || type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")){
             String[] parts = parent.split("-"); //supercategory-natural_sciences
-            for (String id : allSub){
+            for (String id : correctedSubs){
                 if (id.contains(parts[1])){
                     finalResults.add(id);
                 }
             }
         } else {
             String[] parts = parent.split("-"); //category-natural_sciences-math
-            for (String id : allSub){
+            for (String id : correctedSubs){
                 if (id.contains(parts[2])){
                     finalResults.add(id);
                 }
