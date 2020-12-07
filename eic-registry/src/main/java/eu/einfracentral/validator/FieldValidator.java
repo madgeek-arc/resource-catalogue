@@ -10,18 +10,19 @@ import eu.einfracentral.registry.manager.IndicatorManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 @Service
 public class FieldValidator {
@@ -31,6 +32,8 @@ public class FieldValidator {
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IndicatorManager indicatorService;
 
+    // url validation connection timeout
+    final RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(10 * 1000).build();
 
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
@@ -158,25 +161,15 @@ public class FieldValidator {
     }
 
     public void validateUrl(Field field, URL urlForValidation){
-        HttpURLConnection huc = null;
+        HttpClient huc = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+        int statusCode = 0;
         try {
-            huc = (HttpURLConnection) urlForValidation.openConnection();
+            HttpResponse response = huc.execute(new HttpGet(String.valueOf(urlForValidation)));
+            statusCode = response.getStatusLine().getStatusCode();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try {
-            huc.setRequestMethod("HEAD");
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        }
-
-        int responseCode = 0;
-        try {
-            responseCode = huc.getResponseCode();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (responseCode != 200 && responseCode != 301 && responseCode != 302 && responseCode != 403){
+        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403){
             if (field == null){
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
             } else {
