@@ -2,6 +2,7 @@ package eu.einfracentral.registry.service;
 
 
 import eu.einfracentral.domain.*;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -197,6 +198,14 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param scientificDomains
      */
     void validateScientificDomains(List<ServiceProviderDomain> scientificDomains);
+
+    /**
+     * Gets all Services for Admins Page
+     *
+     * @param filter
+     * @param auth
+     */
+    Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth);
 
 //
 //    /**
