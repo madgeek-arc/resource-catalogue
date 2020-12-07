@@ -840,4 +840,17 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         }
         return finalResults;
     }
+
+    public Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth) {
+        List<String> orderedBrowseBy = new ArrayList<>();
+
+        browseBy.add("active");
+        orderedBrowseBy.add(browseBy.get(13));    // resource_organisation
+        orderedBrowseBy.add(browseBy.get(23));    // active
+
+        filter.setBrowseBy(orderedBrowseBy);
+
+        filter.setResourceType(getResourceType());
+        return getMatchingServices(filter);
+    }
 }
