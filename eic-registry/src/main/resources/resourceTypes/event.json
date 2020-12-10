@@ -11,7 +11,7 @@
       "multivalued": false,
       "name": "value",
       "path": "//*[local-name()='value']/text()",
-      "type": "java.lang.Integer",
+      "type": "java.lang.Float",
       "primaryKey": false
     },
     {
@@ -47,5 +47,5 @@
   "name": "event",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/RDT/v3.00/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/eosc/events/eic-registry-model/src/main/resources/schema1.xsd"
 }

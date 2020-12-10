@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.AuthenticationInfo;
@@ -79,11 +80,13 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setFavourite(String serviceId, boolean value, Authentication authentication) throws ResourceNotFoundException {
+    public Event setFavourite(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
-        String favouriteValue = value ? "1" : "0";
+        if (value != 1 && value != 0) {
+            throw new ValidationException("Values of Favoring range between 0 - Unfavorite and 1 - Favorite");
+        }
         List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, authentication);
         Event event;
         if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
@@ -95,7 +98,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setService(serviceId);
             event.setUser(AuthenticationInfo.getSub(authentication));
             event.setType(Event.UserActionType.FAVOURITE.getKey());
-            event.setValue(favouriteValue);
+            event.setValue(value);
             event = add(event, null);
             logger.debug("Adding a new FAVORITE Event: {}", event);
         }
@@ -104,12 +107,12 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
+    public Event setRating(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
-        if (Long.parseLong(value) <= 0 || Long.parseLong(value) > 5) {
-            throw new NumberParseException(NumberParseException.ErrorType.valueOf(value), "Rating value must be between [1,5]");
+        if (value <= 0 || value > 5) {
+            throw new ValidationException("Values of Rating range between 0 and 5");
         }
         List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, authentication);
         Event event;
@@ -202,7 +205,6 @@ public class EventManager extends ResourceManager<Event> implements EventService
             List<Float> eventsValues = userEventsMap.values()
                     .stream()
                     .map(Event::getValue)
-                    .map(Float::parseFloat)
                     .collect(Collectors.toList());
             allServiceEvents.put(service, eventsValues);
         }
@@ -223,8 +225,8 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return midnight.getTimeInMillis() < instant;
     }
 
-    public void addVisitsOnDay(Date date, String serviceId, int noOfVisits, Authentication authentication) {
-        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.AGGREGATED_VISITS.toString(), serviceId);
+    public void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication) {
+        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.INTERNAL_VIEW.toString(), serviceId);
         for (Event event : serviceEvents){
 
             // Compare the event.getInstant(long) to user's give date
@@ -237,8 +239,8 @@ public class EventManager extends ResourceManager<Event> implements EventService
                     cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
 
             if (event.getType().equals("AGGREGATED_VISITS") && sameDay) {
-                int oldVisits = Integer.parseInt(event.getValue());
-                String newVisits = Integer.toString(oldVisits+noOfVisits);
+                Float oldVisits = event.getValue();
+                Float newVisits =oldVisits+noOfVisits;
                 event.setValue(newVisits);
                 update(event, authentication);
             } else{
