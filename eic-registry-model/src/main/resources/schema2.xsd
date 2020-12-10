@@ -9,7 +9,9 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="FAVOURITE"/>
       <xs:enumeration value="RATING"/>
-      <xs:enumeration value="AGGREGATED_VISITS"/>
+      <xs:enumeration value="INTERNAL_VIEW"/>
+      <xs:enumeration value="ORDER"/>
+      <xs:enumeration value="EXTERNAL_VIEW"/>
     </xs:restriction>
   </xs:simpleType>
 

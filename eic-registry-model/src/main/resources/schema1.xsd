@@ -90,7 +90,7 @@
       <xs:element name="service" type="xs:string"/>
       <xs:element name="type" type="xs:string"/>
       <xs:element name="user" type="xs:string"/>
-      <xs:element minOccurs="0" name="value" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:float"/>
     </xs:sequence>
   </xs:complexType>
 
