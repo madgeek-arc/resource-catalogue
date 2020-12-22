@@ -26,7 +26,7 @@ The ${serviceOrResource}: [${service.id}] provided by [${user.fullName}] – [${
 You can view the application status ${endpoint}/provider/all.
 </#if>
 <#if providerBundle.status == "rejected">
-The application by [${user.fullName}] – [${user.email}] for registering [${service.name}] - ([${service.id}]) of [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been rejected.
+The application by [${user.fullName}] – [${user.email}] for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been rejected.
 You can view the application status here ${endpoint}/provider/all.
 </#if>
 
