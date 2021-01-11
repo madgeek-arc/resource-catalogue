@@ -48,7 +48,7 @@ public class FacetLabelService {
         List<Facet> enrichedFacets = new TreeList(); // unchecked warning here
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("active", "true");
+//        ff.addFilter("active", "true");
         Map<String, String> providerNames = providerService.getAll(ff, null)
                 .getResults()
                 .stream().collect(Collectors.toMap(ProviderBundle::getId, p -> p.getProvider().getName()));
