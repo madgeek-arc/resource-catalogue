@@ -86,4 +86,34 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param authentication
      */
     void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication);
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
+     * @param authentication
+     * @param value
+     * @return
+     */
+    Event setInternal(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
+     * @param authentication
+     * @param value
+     * @return
+     */
+    Event setExternal(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
+     * @param authentication
+     * @param value
+     * @return
+     */
+    Event setOrder(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
 }

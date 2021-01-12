@@ -193,4 +193,76 @@ public class EventController extends ResourceController<Event, Authentication> {
         logger.info("User '{}' attempting to add '{}' visits on date '{}' for service '{}'", auth.getName(), noOfVisits, date, serviceId);
         eventService.addVisitsOnDay(date, serviceId, noOfVisits, auth);
     }
+
+    @PostMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Event> setInternal(@PathVariable String id, @RequestParam("internal") Float internal, @ApiIgnore Authentication authentication) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setInternal(id, internal, authentication), HttpStatus.OK);
+        logger.info("User '{}' Internal Viewed Service with id '{}'", authentication, id);
+        return ret;
+    }
+
+    @PostMapping(path = "external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Event> setExternal(@PathVariable String id, @RequestParam("external") Float external, @ApiIgnore Authentication authentication) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setExternal(id, external, authentication), HttpStatus.OK);
+        logger.info("User '{}' External Viewed Service with id '{}'", authentication, id);
+        return ret;
+    }
+
+    @PostMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Event> setOrder(@PathVariable String id, @RequestParam("order") Float order, @ApiIgnore Authentication authentication) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setOrder(id, order, authentication), HttpStatus.OK);
+        logger.info("User '{}' External Viewed Service with id '{}'", authentication, id);
+        return ret;
+    }
+
+    @GetMapping(path = "internal/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getInternalViews() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.INTERNAL_VIEW.getKey()), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "external/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getExternalViews() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.EXTERNAL_VIEW.getKey()), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "order/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getOrders() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.ORDER.getKey()), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceInternals(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceExternals(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceOrders(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.ORDER.getKey(), id), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "aggregate/internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedInternals(@PathVariable String id) {
+        List<Event> serviceAggregatedInternals = eventService.getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id);
+        return serviceAggregatedInternals.size();
+    }
+
+    @GetMapping(path = "aggregate/external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedExternals(@PathVariable String id) {
+        List<Event> serviceAggregatedExternals = eventService.getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id);
+        return serviceAggregatedExternals.size();
+    }
+
+    @GetMapping(path = "aggregate/order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedOrders(@PathVariable String id) {
+        List<Event> serviceAggregatedOrders = eventService.getServiceEvents(Event.UserActionType.ORDER.getKey(), id);
+        return serviceAggregatedOrders.size();
+    }
 }
