@@ -28,13 +28,17 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -106,23 +110,20 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
                 .and()
-                .addFilterBefore(openIdConnectAuthenticationFilter(),
+                    .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
-                .authorizeRequests()
-                .regexMatchers("/resourcesync/.*").permitAll()
-                .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
-                .hasAnyRole("ADMIN")
-                .and()
-                .logout()
-                .deleteCookies("SESSION")
-                .invalidateHttpSession(true)
-                .logoutUrl("/openid_logout")
-                .logoutSuccessUrl(webappFrontUrl)
-                .and()
-                .exceptionHandling()
-                .and()
-                .csrf()
-                .disable()
+                    .authorizeRequests()
+                    .regexMatchers("/resourcesync/.*").permitAll()
+                    .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
+                    .hasAnyRole("ADMIN")
+                .and().logout()
+                    .deleteCookies("SESSION")
+                    .invalidateHttpSession(true)
+                    .logoutUrl("/openid_logout")
+                    .logoutSuccessUrl(webappFrontUrl)
+                    .deleteCookies("info")
+                .and().exceptionHandling()
+                .and().csrf().disable()
         ;
 
         //authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/openid_connect_login"))
@@ -210,6 +211,10 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
         ret.setAuthRequestUrlBuilder(new PlainAuthRequestUrlBuilder());
         ret.setAuthenticationSuccessHandler((httpServletRequest, response, authentication) -> {
             OIDCAuthenticationToken authOIDC = (OIDCAuthenticationToken) authentication;
+            int expireSec = 4 * 3600;
+
+            httpServletRequest.getSession(false).setMaxInactiveInterval(expireSec);
+
             JsonObject info = authOIDC.getUserInfo().toJson();
             logger.info("UserInfo: {}\nAuthorities: {}", info, authentication.getAuthorities()
                     .stream()
@@ -222,7 +227,6 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
             Gson gson = new Gson();
             JsonElement jsonRoles = new JsonParser().parse(gson.toJson(roles));
             info.add("roles", jsonRoles);
-            int expireSec = 4 * 3600;
             info.add("expireSec", new JsonParser().parse(gson.toJson(expireSec)));
 
             Cookie sessionCookie = new Cookie("info", Base64.encode(info.toString()).toString());
@@ -231,6 +235,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
             response.addCookie(sessionCookie);
             response.sendRedirect(webappFrontUrl);
         });
+
         return ret;
     }
 
