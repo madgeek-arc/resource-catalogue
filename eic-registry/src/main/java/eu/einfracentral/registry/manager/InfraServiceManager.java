@@ -101,6 +101,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             // if a service with version = infraService.getVersion() does not exist, get the latest service
             existingService = get(infraService.getService().getId());
         }
+        if ("".equals(existingService.getService().getVersion())) {
+            existingService.getService().setVersion(null);
+        }
 
         // update existing service serviceMetadata
         infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
