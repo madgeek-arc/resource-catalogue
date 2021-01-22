@@ -1,10 +1,8 @@
 package eu.einfracentral.registry.service;
 
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.RichService;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.ServiceHistory;
+import eu.einfracentral.domain.*;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -176,6 +174,38 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     InfraService publish(String serviceId, String version, boolean active, Authentication auth);
+
+    /**
+     * Return children vocabularies from parent vocabularies
+     *
+     * @param type
+     * @param parent
+     * @param rec
+     * @return
+     */
+    List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
+
+    /**
+     * Validates Service's categories/subcategories
+     *
+     * @param categories
+     */
+    void validateCategories(List<ServiceCategory> categories);
+
+    /**
+     * Validates Service's scientificDomains/scientificSubdomains
+     *
+     * @param scientificDomains
+     */
+    void validateScientificDomains(List<ServiceProviderDomain> scientificDomains);
+
+    /**
+     * Gets all Services for Admins Page
+     *
+     * @param filter
+     * @param auth
+     */
+    Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth);
 
 //
 //    /**

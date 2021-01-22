@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
@@ -40,11 +41,12 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     @Override
     public T beforeBodyWrite(T t, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (t != null) {// && !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+        if (t != null && !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             if (t instanceof ProviderBundle
                     && !this.securityService.isProviderAdmin(auth, ((ProviderBundle) t).getId(), true)) {
                 ((ProviderBundle) t).getProvider().setMainContact(null);
                 ((ProviderBundle) t).getProvider().setUsers(null);
+                ((ProviderBundle) t).getMetadata().setTerms(null);
             } else if (t instanceof Provider
                     && !this.securityService.isProviderAdmin(auth, ((Provider) t).getId(), true)) {
                 ((Provider) t).setMainContact(null);
@@ -53,6 +55,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                     && !this.securityService.isServiceProviderAdmin(auth, ((InfraService) t).getService().getId(), true)) {
                 ((InfraService) t).getService().setMainContact(null);
                 ((InfraService) t).getService().setSecurityContactEmail(null);
+                ((InfraService) t).getMetadata().setTerms(null);
             } else if (t instanceof Service
                     && !this.securityService.isServiceProviderAdmin(auth, ((Service) t), true)) {
                 ((Service) t).setMainContact(null);
@@ -68,12 +71,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                     } else if (object instanceof InfraService) {
                         ((InfraService) object).getService().setMainContact(null);
                         ((InfraService) object).getService().setSecurityContactEmail(null);
+                        ((InfraService) object).getMetadata().setTerms(null);
                     } else if (object instanceof ProviderBundle) {
                         ((ProviderBundle) object).getProvider().setMainContact(null);
                         ((ProviderBundle) object).getProvider().setUsers(null);
+                        ((ProviderBundle) object).getMetadata().setTerms(null);
                     } else if (object instanceof RichService) {
                         ((RichService) object).getService().setMainContact(null);
                         ((RichService) object).getService().setSecurityContactEmail(null);
+                        ((RichService) object).getMetadata().setTerms(null);
                     }
                 }
             } else if (Paging.class.isAssignableFrom(t.getClass())) {
@@ -87,12 +93,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                     } else if (object instanceof InfraService) {
                         ((InfraService) object).getService().setMainContact(null);
                         ((InfraService) object).getService().setSecurityContactEmail(null);
+                        ((InfraService) object).getMetadata().setTerms(null);
                     } else if (object instanceof ProviderBundle) {
                         ((ProviderBundle) object).getProvider().setMainContact(null);
                         ((ProviderBundle) object).getProvider().setUsers(null);
+                        ((ProviderBundle) object).getMetadata().setTerms(null);
                     } else if (object instanceof RichService) {
                         ((RichService) object).getService().setMainContact(null);
                         ((RichService) object).getService().setSecurityContactEmail(null);
+                        ((RichService) object).getMetadata().setTerms(null);
                     }
                 }
             }

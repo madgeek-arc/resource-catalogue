@@ -10,6 +10,7 @@ import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
+        validateCategories(infraService.getService().getCategories());
+        validateScientificDomains(infraService.getService().getScientificDomains());
         infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
@@ -83,6 +86,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraService updateService(InfraService infraService, Authentication auth) {
         InfraService ret;
         validate(infraService);
+        validateCategories(infraService.getService().getCategories());
+        validateScientificDomains(infraService.getService().getScientificDomains());
         InfraService existingService;
 
         // if service version is empty set it null
@@ -96,11 +101,19 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             // if a service with version = infraService.getVersion() does not exist, get the latest service
             existingService = get(infraService.getService().getId());
         }
+        if ("".equals(existingService.getService().getVersion())) {
+            existingService.getService().setVersion(null);
+        }
 
         // update existing service serviceMetadata
-        infraService.setMetadata(
-                Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
+        infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
         infraService.setActive(existingService.isActive());
+
+        // if a user updates a service with version to a service with null version then while searching for the service
+        // you get a "Service already exists" error.
+        if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null){
+            throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
+        }
 
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
                 || infraService.getService().getVersion() != null
@@ -177,6 +190,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 //                migrate(infraService); // use this to make custom changes
                 ObjectUtils.merge(infraService, service); // use this to make bulk changes FIXME: this method does not work as expected
                 validate(infraService);
+                validateCategories(infraService.getService().getCategories());
+                validateScientificDomains(infraService.getService().getScientificDomains());
                 InfraService existingService = get(infraService.getService().getId());
 
                 // update existing service serviceMetadata
@@ -229,6 +244,28 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         service.setActive(active);
         this.update(service, auth);
         return service;
+    }
+
+    public void validateCategories(List<ServiceCategory> categories){
+        for (ServiceCategory serviceCategory : categories){
+            String[] parts = serviceCategory.getSubcategory().split("-");
+            String category = "category-" + parts[1] + "-" + parts[2];
+            if (!serviceCategory.getCategory().equals(category)){
+                throw new ValidationException("Subcategory '" + serviceCategory.getSubcategory() + "' should have as Category the value '"
+                        + category +"'");
+            }
+        }
+    }
+
+    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
+        for (ServiceProviderDomain serviceScientificDomain : scientificDomains){
+            String[] parts = serviceScientificDomain.getScientificSubdomain().split("-");
+            String scientificDomain = "scientific_domain-" + parts[1];
+            if (!serviceScientificDomain.getScientificDomain().equals(scientificDomain)){
+                throw new ValidationException("Scientific Subdomain '" + serviceScientificDomain.getScientificSubdomain() +
+                        "' should have as Scientific Domain the value '" + scientificDomain +"'");
+            }
+        }
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

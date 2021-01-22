@@ -6,6 +6,7 @@ import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
@@ -24,6 +25,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,11 +45,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final IdCreator idCreator;
     private final EventService eventService;
     private final JmsTemplate jmsTopicTemplate;
+    private final RegistrationMailService registrationMailService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           @Lazy FieldValidator fieldValidator,
+                           @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
                            IdCreator idCreator,
                            EventService eventService,
                            JmsTemplate jmsTopicTemplate) {
@@ -58,6 +61,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
+        this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
@@ -75,14 +79,22 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("User '{}' is attempting to add a new Provider: {}", auth, provider);
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
+        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
+            validateScientificDomains(provider.getProvider().getScientificDomains());
+        }
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()){
+            validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
+        }
 
-        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
         ProviderBundle ret;
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
+
+        registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
         jmsTopicTemplate.convertAndSend("provider.create", provider);
 
@@ -94,7 +106,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
         validate(provider);
-        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName()));
+        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
+            validateScientificDomains(provider.getProvider().getScientificDomains());
+        }
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()){
+            validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
+        }
+        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());
@@ -103,6 +121,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {}", provider);
+
+        // Send emails to newly added or deleted Admins
+        adminDifferences(provider, ex);
 
         jmsTopicTemplate.convertAndSend("provider.update", provider);
 
@@ -174,6 +195,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         jmsTopicTemplate.convertAndSend("provider.delete", provider);
 
         super.delete(provider);
+        registrationMailService.notifyProviderAdmins(provider);
     }
 
     @Override
@@ -411,6 +433,91 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (users.stream().noneMatch(u -> u.getEmail().equals(authUser.getEmail()))) {
             users.add(authUser);
             provider.setUsers(users);
+        }
+    }
+
+    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
+        for (ServiceProviderDomain providerScientificDomain : scientificDomains){
+            String[] parts = providerScientificDomain.getScientificSubdomain().split("-");
+            String scientificDomain = "scientific_domain-" + parts[1];
+            if (!providerScientificDomain.getScientificDomain().equals(scientificDomain)){
+                throw new ValidationException("Scientific Subdomain '" + providerScientificDomain.getScientificSubdomain() +
+                        "' should have as Scientific Domain the value '" + scientificDomain +"'");
+            }
+        }
+    }
+
+    public void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains){
+        for (ProviderMerilDomain providerMerilScientificDomain : merilScientificDomains){
+            String[] parts = providerMerilScientificDomain.getMerilScientificSubdomain().split("-");
+            String merilScientificDomain = "provider_meril_scientific_domain-" + parts[1];
+            if (!providerMerilScientificDomain.getMerilScientificDomain().equals(merilScientificDomain)){
+                throw new ValidationException("Meril Scientific Subdomain '" + providerMerilScientificDomain.getMerilScientificSubdomain() +
+                        "' should have as Meril Scientific Domain the value '" + merilScientificDomain +"'");
+            }
+        }
+    }
+
+    // For front-end use
+    public boolean validateUrl(URL urlForValidation) {
+        try {
+            fieldValidator.validateUrl(null, urlForValidation);
+        } catch (Throwable e){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+        ProviderBundle providerBundle = get(providerId);
+        List<String> userList = new ArrayList<>();
+        for (User user : providerBundle.getProvider().getUsers()){
+            userList.add(user.getEmail());
+        }
+        if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
+            if (userList.contains(User.of(auth).getEmail())) {
+                return false; //pop-up modal
+            } else {
+                return true; //no modal
+            }
+        }
+        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail()) && userList.contains(User.of(auth).getEmail())) {
+            return false; // pop-up modal
+        }
+        return true; // no modal
+    }
+
+    public void adminAcceptedTerms(String providerId, Authentication auth){
+        update(get(providerId), auth);
+    }
+
+    public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
+        List<String> existingAdmins = new ArrayList<>();
+        List<String> newAdmins = new ArrayList<>();
+        for (User user : existingProvider.getProvider().getUsers()){
+            existingAdmins.add(user.getEmail());
+        }
+        for (User user : updatedProvider.getProvider().getUsers()){
+            newAdmins.add(user.getEmail());
+        }
+        List<String> adminsAdded = new ArrayList<>(newAdmins);
+        adminsAdded.removeAll(existingAdmins);
+        if (!adminsAdded.isEmpty()){
+            registrationMailService.sendEmailsToNewlyAddedAdmins(updatedProvider, adminsAdded);
+        }
+        List<String> adminsDeleted = new ArrayList<>(existingAdmins);
+        adminsDeleted.removeAll(newAdmins);
+        if (!adminsDeleted.isEmpty()){
+            registrationMailService.sendEmailsToNewlyDeletedAdmins(existingProvider, adminsDeleted);
+        }
+    }
+
+    public void requestProviderDeletion(String providerId, Authentication auth) {
+        ProviderBundle provider = get(providerId);
+        for (User user : provider.getProvider().getUsers()){
+            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())){
+                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
+            }
         }
     }
 

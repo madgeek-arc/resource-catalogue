@@ -29,6 +29,10 @@ public interface SecurityService {
 
     boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow);
 
+    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService);
+
+    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow);
+
     boolean userIsServiceProviderAdmin(User user, Map<String, JsonNode> json) throws JsonProcessingException;
 
     boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service);

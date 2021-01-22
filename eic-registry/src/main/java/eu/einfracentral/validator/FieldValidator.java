@@ -13,11 +13,13 @@ import eu.einfracentral.registry.service.VocabularyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 @Service
 public class FieldValidator {
@@ -92,6 +94,7 @@ public class FieldValidator {
             }
 
             validateMaxLength(field, fieldValue, validationAnnotation);
+            validateUrlValidity(field, fieldValue);
 
             if (validationAnnotation.containsId()) {
                 validateIds(field, fieldValue, validationAnnotation);
@@ -132,6 +135,51 @@ public class FieldValidator {
                 for (Object entry : ((Collection) o)) {
                     validateMaxLength(field, entry, annotation);
                 }
+            }
+        }
+    }
+
+    public void validateUrlValidity(Field field, Object o) {
+        if (o != null) {
+            Class clazz = o.getClass();
+            if (URL.class.equals(clazz)) {
+                URL url = (URL) o;
+                validateUrl(field, url);
+              //FIXME: List<URL> with a single empty String value never enters.
+            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())){
+                for (int i=0; i<((ArrayList) o).size(); i++) {
+                    URL url = (URL) ((ArrayList) o).get(i);
+                    validateUrl(field, url);
+                }
+            }
+        }
+    }
+
+    public void validateUrl(Field field, URL urlForValidation){
+        HttpsTrustManager.allowAllSSL();
+        HttpURLConnection huc = null;
+        int statusCode = 0;
+        try {
+            huc = (HttpURLConnection) urlForValidation.openConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            assert huc != null;
+            huc.setRequestMethod("HEAD");
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        }
+        try {
+            statusCode = huc.getResponseCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403){
+            if (field == null){
+                throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
+            } else {
+                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation ,field.getName()));
             }
         }
     }

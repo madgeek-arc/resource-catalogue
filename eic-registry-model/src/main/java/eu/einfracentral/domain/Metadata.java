@@ -1,8 +1,11 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -26,6 +29,11 @@ public class Metadata {
     @XmlElement(defaultValue = "null")
     private String originalId;
 
+    @XmlElementWrapper(name = "terms")
+    @XmlElement(name = "term")
+    private List<String> terms;
+
+
     public Metadata() {
     }
 
@@ -36,6 +44,7 @@ public class Metadata {
         this.modifiedAt = metadata.getModifiedAt();
         this.source = metadata.getSource();
         this.originalId = metadata.getOriginalId();
+        this.terms = metadata.getTerms();
     }
 
     public static Metadata updateMetadata(Metadata metadata, String modifiedBy) {
@@ -50,6 +59,19 @@ public class Metadata {
         return ret;
     }
 
+    public static Metadata updateMetadata(Metadata metadata, String modifiedBy, String userEmail) {
+        Metadata ret;
+        if (metadata != null) {
+            ret = new Metadata(metadata);
+            ret.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            ret.setModifiedBy(modifiedBy);
+            ret.setTerms(updateAcceptedTermsList(metadata.getTerms(), userEmail));
+        } else {
+            ret = createMetadata(modifiedBy, userEmail);
+        }
+        return ret;
+    }
+
     public static Metadata createMetadata(String registeredBy) {
         Metadata ret = new Metadata();
         ret.setRegisteredBy(registeredBy);
@@ -59,7 +81,17 @@ public class Metadata {
         return ret;
     }
 
-    public static Metadata createMetadata(String registeredBy, String originalId, String source) {
+    public static Metadata createMetadata(String registeredBy, String userEmail) {
+        Metadata ret = new Metadata();
+        ret.setRegisteredBy(registeredBy);
+        ret.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
+        ret.setModifiedBy(registeredBy);
+        ret.setModifiedAt(ret.getRegisteredAt());
+        ret.setTerms(adminAcceptedTerms(userEmail));
+        return ret;
+    }
+
+    public static Metadata createMetadata(String registeredBy, String originalId, String source, List<String> terms) {
         Metadata metadata = new Metadata();
         metadata.setRegisteredBy(registeredBy);
         metadata.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
@@ -67,8 +99,27 @@ public class Metadata {
         metadata.setModifiedAt(metadata.getRegisteredAt());
         metadata.setOriginalId(originalId);
         metadata.setSource(source);
+        metadata.setTerms(terms);
         return metadata;
     }
+
+    public static List<String> adminAcceptedTerms(String userEmail){
+        List<String> acceptedList = new ArrayList<>();
+        acceptedList.add(userEmail);
+        return acceptedList;
+    }
+
+    public static List<String> updateAcceptedTermsList(List<String> terms, String userEmail){
+        if (terms == null || terms.isEmpty()){
+            terms = new ArrayList<>();
+            terms.add(userEmail);
+        }
+        if (!terms.contains(userEmail)){
+            terms.add(userEmail);
+        }
+        return terms;
+    }
+
 
     @Override
     public String toString() {
@@ -79,6 +130,7 @@ public class Metadata {
                 ", modifiedAt='" + modifiedAt + '\'' +
                 ", source='" + source + '\'' +
                 ", originalId='" + originalId + '\'' +
+                ", terms=" + terms +
                 '}';
     }
 
@@ -128,5 +180,13 @@ public class Metadata {
 
     public void setOriginalId(String originalId) {
         this.originalId = originalId;
+    }
+
+    public List<String> getTerms() {
+        return terms;
+    }
+
+    public void setTerms(List<String> terms) {
+        this.terms = terms;
     }
 }

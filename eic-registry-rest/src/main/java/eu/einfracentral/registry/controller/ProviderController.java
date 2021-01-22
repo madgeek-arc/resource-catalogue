@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -252,6 +253,26 @@ public class ProviderController {
                     auth.getName(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+       return providerManager.hasAdminAcceptedTerms(providerId, authentication);
+    }
+
+    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        providerManager.adminAcceptedTerms(providerId, authentication);
+    }
+
+    @GetMapping(path = "validateUrl", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public boolean validateUrl(@RequestParam URL urlForValidation) throws Throwable {
+        return providerManager.validateUrl(urlForValidation);
+    }
+
+    @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void requestProviderDeletion(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        providerManager.requestProviderDeletion(providerId, authentication);
     }
 
     @DeleteMapping(path = "/delete/userInfo", produces = {MediaType.APPLICATION_JSON_VALUE})

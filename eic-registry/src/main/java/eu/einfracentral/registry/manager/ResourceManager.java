@@ -56,7 +56,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         try {
             browsing = getResults(ff);
         } catch (ElasticsearchStatusException e) {
-            throw new ServiceException("Search error, check search parameters");
+            throw new ServiceException("Search error, check search parameters"); // check elastic status
         }
         return browsing;
     }
