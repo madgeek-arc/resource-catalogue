@@ -62,6 +62,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
+        event.setUser(AuthenticationInfo.getSub(auth));
         Event ret = super.add(event, auth);
         logger.debug("Adding Event: {}", event);
         return ret;
@@ -220,5 +221,29 @@ public class EventManager extends ResourceManager<Event> implements EventService
         Calendar midnight = new GregorianCalendar();
         midnight.set(Calendar.HOUR_OF_DAY, 0);
         return midnight.getTimeInMillis() < instant;
+    }
+
+    public void addVisitsOnDay(Date date, String serviceId, int noOfVisits, Authentication authentication) {
+        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.AGGREGATED_VISITS.toString(), serviceId);
+        for (Event event : serviceEvents){
+
+            // Compare the event.getInstant(long) to user's give date
+            Date eventDate = new Date(event.getInstant());
+            Calendar cal1 = Calendar.getInstance();
+            Calendar cal2 = Calendar.getInstance();
+            cal1.setTime(date);
+            cal2.setTime(eventDate);
+            boolean sameDay = cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR) &&
+                    cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
+
+            if (event.getType().equals("AGGREGATED_VISITS") && sameDay) {
+                int oldVisits = Integer.parseInt(event.getValue());
+                String newVisits = Integer.toString(oldVisits+noOfVisits);
+                event.setValue(newVisits);
+                update(event, authentication);
+            } else{
+                logger.info("Event isn't of type {AGGREGATED_VISITS} and/or didn't happen on the given date.");
+            }
+        }
     }
 }

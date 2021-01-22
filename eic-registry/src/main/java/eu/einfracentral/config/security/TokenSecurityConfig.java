@@ -44,7 +44,7 @@ public class TokenSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(filter,
                         AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
-                .regexMatchers("/restore/", "/resource.*", "/resourceType.*", "/search.*")
+                .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
                 .hasAnyRole("ADMIN")
                 .anyRequest()
                 .permitAll();

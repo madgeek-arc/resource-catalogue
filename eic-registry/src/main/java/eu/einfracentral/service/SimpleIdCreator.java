@@ -16,9 +16,9 @@ public class SimpleIdCreator implements IdCreator {
     public String createProviderId(Provider provider) {
         String providerId;
         if (provider.getId() == null || "".equals(provider.getId())) {
-            if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation())) {
+            if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation()) && !"null".equals(provider.getAbbreviation())) {
                 providerId = provider.getAbbreviation();
-            } else if (provider.getName() != null && !"".equals(provider.getName())) {
+            } else if (provider.getName() != null && !"".equals(provider.getName()) && !"null".equals(provider.getName())) {
                 providerId = provider.getName();
             } else {
                 throw new ValidationException("Provider must have an acronym or name.");
@@ -31,7 +31,8 @@ public class SimpleIdCreator implements IdCreator {
                 .replaceAll("[\\n\\t\\s]+", " ")
                 .replaceAll("\\s+$", "")
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_");
+                .replace(" ", "_")
+                .toLowerCase();
 
     }
 

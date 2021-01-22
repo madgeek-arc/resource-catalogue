@@ -1,4 +1,4 @@
-There are Providers and Service Templates waiting to be approved.
+There are Providers and Templates waiting to be approved.
 
 <#if iaProviders?? && iaProviders?size &gt; 0>
 Providers waiting for Initial Approval:
@@ -9,7 +9,7 @@ Providers waiting for Initial Approval:
 </#if>
 
 <#if stProviders?? && stProviders?size &gt; 0>
-Providers waiting for Service Template Approval:
+Providers waiting for Template Approval:
     <#list stProviders as provider>
     ${provider}
     </#list>

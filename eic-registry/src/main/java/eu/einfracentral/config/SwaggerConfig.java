@@ -29,7 +29,7 @@ import java.util.Properties;
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SwaggerConfig {
 
-    @Value("${platform.root:}")
+    @Value("${swagger.url}")
     String platform;
 
     @Value("${project.name:}")
@@ -57,7 +57,7 @@ public class SwaggerConfig {
     @Bean
     public Docket getDocket() throws MalformedURLException {
 
-        URL hostURL = new URL(platform + "api");
+        URL hostURL = new URL(platform);
         return new Docket(DocumentationType.SWAGGER_2)
                 .directModelSubstitute(URL.class, String.class)
                 .directModelSubstitute(XMLGregorianCalendar.class, String.class)
@@ -80,7 +80,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title(projectName)
                 .description("External APIs for the " + projectName + " registry")
-                .version(getVersion())
+                .version("3.0.0")
                 .termsOfServiceUrl(String.format("%s/tos", platform))
 //                .license("NAME")
                 .licenseUrl(String.format("%s/license", platform))
@@ -94,6 +94,8 @@ public class SwaggerConfig {
             props.load(in);
             ret = props.getProperty("version");
         } catch (Throwable ignored) {
+            // Create your own version
+            ret = "3.0.0";
         }
         return ret == null ? "" : ret;
     }

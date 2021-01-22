@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
@@ -96,6 +97,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService transformToActive(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, infraService.getId());
         infraServiceService.validate(infraService);
+        infraServiceService.validateCategories(infraService.getService().getCategories());
+        infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
         infraService = this.update(infraService, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = this.getResource(infraService.getId());
@@ -110,6 +113,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
         InfraService infraService = this.get(serviceId);
         infraServiceService.validate(infraService);
+        infraServiceService.validateCategories(infraService.getService().getCategories());
+        infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = this.getResource(serviceId);
         resource.setResourceType(resourceType);
@@ -126,4 +131,11 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         return re;
     }
 
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+        return true;
+    }
+
+    public void adminAcceptedTerms(String providerId, Authentication auth){
+        // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
+    }
 }

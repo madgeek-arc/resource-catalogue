@@ -150,6 +150,22 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
+    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService) {
+        User user = User.of(auth);
+        return userIsServiceProviderAdmin(user, infraService);
+    }
+
+    @Override
+    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow) {
+        if (auth == null && noThrow) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsServiceProviderAdmin(user, infraService);
+    }
+
+
+    @Override
     public boolean userIsServiceProviderAdmin(User user, Map<String, JsonNode> json) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         eu.einfracentral.domain.Service service = null;

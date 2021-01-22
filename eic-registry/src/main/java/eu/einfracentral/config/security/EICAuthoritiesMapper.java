@@ -64,12 +64,12 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         out.add(new SimpleGrantedAuthority("ROLE_USER"));
         if (userRolesMap.get(userInfo.getSub()) != null) {
             if (userRolesMap.get(userInfo.getEmail()) != null) { // if there is also an email entry then user must be admin
-                authority = userRolesMap.get(userInfo.getEmail());
+                authority = userRolesMap.get(userInfo.getEmail().toLowerCase());
             } else {
                 authority = userRolesMap.get(userInfo.getSub());
             }
         } else {
-            authority = userRolesMap.get(userInfo.getEmail());
+            authority = userRolesMap.get(userInfo.getEmail().toLowerCase());
         }
         if (authority != null) {
             out.add(authority);

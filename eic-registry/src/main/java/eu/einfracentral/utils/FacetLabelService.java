@@ -31,8 +31,16 @@ public class FacetLabelService {
     }
 
     String toProperCase(String str, String delimiter, String newDelimiter) {
-        return Arrays.stream(str.split(delimiter)).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
-                .collect(Collectors.joining(newDelimiter));
+        if (str.equals("")){
+            str = "-";
+        }
+        StringJoiner joiner = new StringJoiner(newDelimiter);
+        for (String s : str.split(delimiter)) {
+            String s1;
+            s1 = s.substring(0, 1).toUpperCase() + s.substring(1);
+            joiner.add(s1);
+        }
+        return joiner.toString();
     }
 
     @SuppressWarnings("unchecked")
@@ -40,6 +48,7 @@ public class FacetLabelService {
         List<Facet> enrichedFacets = new TreeList(); // unchecked warning here
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+//        ff.addFilter("active", "true");
         Map<String, String> providerNames = providerService.getAll(ff, null)
                 .getResults()
                 .stream().collect(Collectors.toMap(ProviderBundle::getId, p -> p.getProvider().getName()));
@@ -72,13 +81,25 @@ public class FacetLabelService {
                     default:
                         if (allVocabularies.containsKey(value.getValue())) {
                             value.setLabel(allVocabularies.get(value.getValue()).getName());
-                        } else {
-                            value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
+                        }
+                        else {
+                            try {
+                                value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
+                            } catch (StringIndexOutOfBoundsException e){
+                                logger.info(e);
+                            }
                         }
                 }
             }
         }
         enrichedFacets.addAll(facets);
+
+        // Swap position according to front-ends needs
+        try{
+            Collections.swap(enrichedFacets, 4, 5);
+        } catch(IndexOutOfBoundsException e) {
+            logger.info(e);
+        }
         return enrichedFacets;
     }
 

@@ -1,10 +1,9 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.*;
 import org.springframework.security.core.Authentication;
 
+import java.net.URL;
 import java.util.List;
 
 public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
@@ -29,6 +28,22 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
 
     List<T> getMyServiceProviders(U authentication);
+
+
+    void validateScientificDomains(List<ServiceProviderDomain> scientificDomains);
+
+
+    void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains);
+
+
+    boolean hasAdminAcceptedTerms(String providerId, U authentication);
+
+    void adminAcceptedTerms(String providerId, U authentication);
+
+    boolean validateUrl(URL urlForValidation) throws Throwable;
+
+    void requestProviderDeletion(String providerId, Authentication auth);
+
 
     // TODO: move to Infra
     List<InfraService> getInfraServices(String providerId);

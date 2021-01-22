@@ -1,34 +1,50 @@
-Dear ${user.name},
+Dear ${user.fullName},
 
 <#if providerBundle.status == "pending initial approval">
-You have applied for registering your organization [${providerBundle.provider.id}] - [${providerBundle.provider.name}] as a new service provider in ${project}.
-Your application will be reviewed by the administration team and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your organization.
+You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a new ${project} provider in the ${project} Portal.
+Your application will be reviewed and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your organization and its services.
+Thank you for your interest in becoming a member of the ${project} Portal.
 </#if>
-<#if providerBundle.status == "pending service template submission">
-You have applied for registering your organization [${providerBundle.provider.id}] - [${providerBundle.provider.name}] as a new service provider in ${project}.
-Your application has been approved and you may proceed with providing one of your services ${endpoint}/myServiceProviders to complete the registration process.
-The service should be described according to the ${project}’s Service Description Template (SDT), which has been adopted by flagship initiatives such as the EOSC-hub (EGI, EUDAT), GÉANT, OpenAIRE(-Advance) and PRACE, as the standard with which EOSC portal will be populated.
+<#if providerBundle.status == "pending template submission">
+You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a new ${project} Provider in the ${project} Portal.
+Your application has been approved and you may proceed with providing one of your ${serviceOrResource}s ${endpoint}/provider/my, which can help us assess the type of ${serviceOrResource}s you want to offer.
+The ${serviceOrResource} should be described according to the ${project} ${serviceOrResource} Description Template; the specification according to which the ${project} portal is populated.
+The ${serviceOrResource} Description Template offers guidance, recommendations, best practices and classifications to facilitate the ${serviceOrResource} description.
+For any clarifications, please contact us at ${registrationEmail}.
 </#if>
-<#if providerBundle.status == "pending service template approval">
-You have provided a new service [${service.id}] – [${service.name}] in ${project}.
-The information provided will be reviewed by the administration team and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your services.
+<#if providerBundle.status == "pending template approval">
+You have applied for registering [${service.name}] - [${service.id}] as a new ${serviceOrResource} in the ${project} Portal.
+The ${serviceOrResource} description will be reviewed and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your ${serviceOrResource}s.
+Thank you for your interest in becoming a member of the ${project} Portal.
 </#if>
 <#if providerBundle.status == "approved">
     <#if providerBundle.active == true>
-The information for the service [${service.id}] – [${service.name}] has been reviewed and has been successfully added to the ${project} Catalogue. You can view the new service ${endpoint}/service/${service.id}. You may now login and proceed with providing more services for [${providerBundle.provider.id}].
+You have applied for registering [${service.name}] - [${service.id}] as a new ${serviceOrResource} in the ${project} Portal.
+Your application has been approved and the ${serviceOrResource} has been successfully listed in the ${project} Portal. You can view the published ${serviceOrResource} here ${endpoint}/service/${service.id}.
+[Attached you may find a ${serviceOrResource} Description Recommendations Report to further improve your ${serviceOrResource} description.]
+You may now proceed with registering more ${serviceOrResource}s for [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]). You can register all other ${serviceOrResource}s either manually (via the same web interface) or via the ${project} Portal API ${endpoint}/developers.
+For any clarifications, please contact us at ${registrationEmail}.
+Thank you for your interest in becoming a member of the ${project} Portal.
     <#else>
-Your service provider [${providerBundle.provider.name}] has been set to inactive. For any further clarifications please contact registration office of ${project} at ${registrationEmail}.
+Your ${serviceOrResource} Provider [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been set to inactive.
+For any further clarifications please contact ${registrationEmail}.
     </#if>
 </#if>
-<#if providerBundle.status == "rejected service template">
-The information for the service [${service.id}] – [${service.name}] has been reviewed and unfortunately does not comply with the SDT and the type of services being published in ${project} Catalogue. For any further clarifications please contact registration office of ${project} at ${registrationEmail}.
+<#if providerBundle.status == "rejected template">
+You have applied for registering [${service.name}] - [${service.id}] as a new ${serviceOrResource} in the ${project} Portal.
+Your application has been rejected, as your ${serviceOrResource} description does not comply with the Rules of Participation of the ${project} Portal.
+[Attached you may find a ${serviceOrResource} Description Recommendations Report].
+[Option 1: We would like to offer an information webinar or training session to improve your application. If you agree or for any other clarifications, please contact us at ${registrationEmail}]
+[Option 2: For any clarifications, please contact us at ${registrationEmail}].
+Thank you for your interest in becoming a member of the ${project} Portal.
 </#if>
 <#if providerBundle.status == "rejected">
-You have applied for registering your organization [${providerBundle.provider.id}] - [${providerBundle.provider.name}] as a new service provider in ${project}.
-Your application has been rejected as your organization does not comply with the rules of participations in ${project}. For any further clarifications please contact registration office of ${project} at ${registrationEmail}.
+You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a new ${project} Provider in the ${project} Portal.
+Your application has been rejected, as your organization does not comply with the Rules of Participation of the ${project} Portal.
+[Option 1: We would like to offer an information webinar or training session to improve your application. If you agree or for any other clarifications, please contact us at ${registrationEmail}].
+[Option 2: For any clarifications, please contact us at ${registrationEmail}].
+Thank you for your interest in becoming a member of the ${project} Portal.
 </#if>
 
-Thank you for your interest in becoming a member of ${project}.
-
 Best Regards,
-the ${project} Team
+the ${project} Portal Onboarding Team

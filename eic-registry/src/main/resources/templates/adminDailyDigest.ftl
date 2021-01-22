@@ -1,7 +1,7 @@
 <#if changes == false>
 There are no changes to ${project} Resources today.
 <#else>
-There are new changes to CatRIS Resources!
+There are new changes to ${project} Resources!
 
     <#if newProviders?? && newProviders?size &gt; 0>
 New Providers:

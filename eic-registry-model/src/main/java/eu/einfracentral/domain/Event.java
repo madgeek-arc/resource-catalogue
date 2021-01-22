@@ -94,7 +94,8 @@ public class Event implements Identifiable {
 
     public enum UserActionType {
         FAVOURITE("FAVOURITE"),
-        RATING("RATING");
+        RATING("RATING"),
+        AGGREGATED_VISITS("AGGREGATED_VISITS");
 
         private final String type;
 

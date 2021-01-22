@@ -5,6 +5,7 @@ import eu.einfracentral.domain.Event;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -75,4 +76,14 @@ public interface EventService extends ResourceService<Event, Authentication> {
     Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication);
 
     void deleteEvents(List<Event> events);
+
+    /**
+     * Add visits on a Service on a specific day.
+     *
+     * @param date
+     * @param serviceId
+     * @param noOfVisits
+     * @param authentication
+     */
+    void addVisitsOnDay(Date date, String serviceId, int noOfVisits, Authentication authentication);
 }

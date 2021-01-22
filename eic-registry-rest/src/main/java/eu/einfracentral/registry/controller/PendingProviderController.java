@@ -78,6 +78,12 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
         // validate the Provider and update afterwards ( update may change provider id and all of its services ids )
         providerManager.validate(providerBundle);
+        if (providerBundle.getProvider().getScientificDomains() != null && !providerBundle.getProvider().getScientificDomains().isEmpty()) {
+            providerManager.validateScientificDomains(providerBundle.getProvider().getScientificDomains());
+        }
+        if (providerBundle.getProvider().getMerilScientificDomains() != null && !providerBundle.getProvider().getMerilScientificDomains().isEmpty()){
+            providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
+        }
         update(providerBundle, auth);
 
         // transform to active
@@ -118,6 +124,16 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     @GetMapping(path = "getMyPendingProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyPendingProviders(@ApiIgnore Authentication auth) {
         return new ResponseEntity<>(pendingProviderService.getMy(auth), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        return pendingProviderService.hasAdminAcceptedTerms(providerId, authentication);
+    }
+
+    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+        pendingProviderService.adminAcceptedTerms(providerId, authentication);
     }
 
 }
