@@ -19,6 +19,9 @@
         <module>
             eic-registry
         </module>
+        <module>
+            matomo-data-parser
+        </module>
     </modules>
 
     <licenses>

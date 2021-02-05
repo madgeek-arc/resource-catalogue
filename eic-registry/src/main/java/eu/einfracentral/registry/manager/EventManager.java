@@ -63,7 +63,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
-        event.setUser(AuthenticationInfo.getSub(auth));
+        if (auth != null){
+            event.setUser(AuthenticationInfo.getSub(auth));
+        } else {
+            event.setUser("-");
+        }
         Event ret = super.add(event, auth);
         logger.debug("Adding Event: {}", event);
         return ret;
@@ -250,21 +254,17 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setInternal(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException {
+    public Event setInternal(String serviceId, Float value) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
-        if (value != 1) {
-            throw new ValidationException("Value for Internal View Event must be always 1");
-        }
-        List<Event> events = getEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), serviceId, authentication);
         Event event;
         event = new Event();
         event.setService(serviceId);
-        event.setUser(AuthenticationInfo.getSub(authentication));
+//        event.setUser(AuthenticationInfo.getSub(authentication));
         event.setType(Event.UserActionType.INTERNAL_VIEW.getKey());
         event.setValue(value);
-        event = add(event, authentication); // remove auth
+        event = add(event, null); // remove auth
         logger.debug("Adding a new INTERNAL_VIEW Event: {}", event);
         return event;
     }
