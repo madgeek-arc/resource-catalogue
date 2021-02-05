@@ -1,4 +1,6 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
@@ -7,40 +9,31 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>eic-registry</artifactId>
+    <artifactId>matomo-data-parser</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
-    <scm>
-        <connection>scm:git:git://github.com/eInfraCentral/eic-registry.git</connection>
-        <developerConnection>scm:git:ssh://github.com/eInfraCentral/eic-registry.git</developerConnection>
-        <url>https://github.com/eInfraCentral/eic-registry</url>
-    </scm>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <logging.version>2.13.3</logging.version>
+        <jackson.version.core>2.10.0</jackson.version.core>
+        <registry-core.version>2.1.7-SNAPSHOT</registry-core.version>
+        <springfox.version>2.7.0</springfox.version>
+        <javax.mail-version>1.4.3</javax.mail-version>
+        <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <junit.version>4.12</junit.version>
+        <spring.version>5.2.4.RELEASE</spring.version>
+        <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.1.0</maven-dependency-plugin.version>
+        <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
+        <org.apache.commons.version>3.9</org.apache.commons.version>
         <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
     </properties>
-
-    <profiles>
-        <profile>
-            <id>eosc</id>
-            <dependencies>
-                <dependency>
-                    <groupId>eu.einfracentral</groupId>
-                    <artifactId>matomo-data-parser</artifactId>
-                    <version>0.0.1-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 
     <dependencies>
         <dependency>
@@ -133,18 +126,6 @@
             <artifactId>spring-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -232,11 +213,12 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>${maven-war-plugin.version}</version>
                 <configuration>
-                    <warName>eic-registry</warName>
+                    <warName>matomo-data-parser</warName>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>eic-registry</finalName>
+        <finalName>matomo-data-parser</finalName>
     </build>
+
 </project>

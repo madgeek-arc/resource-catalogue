@@ -197,8 +197,8 @@ public class EventController extends ResourceController<Event, Authentication> {
     @PostMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Event> setInternal(@PathVariable String id, @RequestParam("internal") Float internal, @ApiIgnore Authentication authentication) throws Exception {
-        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setInternal(id, internal, authentication), HttpStatus.OK);
-        logger.info("User '{}' Internal Viewed Service with id '{}'", authentication, id);
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setInternal(id, internal), HttpStatus.OK);
+        logger.info("Someone Internal Viewed Service with id '{}'", id);
         return ret;
     }
 

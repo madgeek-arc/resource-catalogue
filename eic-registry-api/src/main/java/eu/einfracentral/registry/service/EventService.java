@@ -91,11 +91,10 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * Set a rating on a service from the given user.
      *
      * @param serviceId
-     * @param authentication
      * @param value
      * @return
      */
-    Event setInternal(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
+    Event setInternal(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
 
     /**
      * Set a rating on a service from the given user.
