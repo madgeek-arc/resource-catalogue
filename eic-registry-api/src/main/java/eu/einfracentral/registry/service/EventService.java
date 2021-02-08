@@ -100,19 +100,41 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * Set a rating on a service from the given user.
      *
      * @param serviceId
-     * @param authentication
      * @param value
      * @return
      */
-    Event setExternal(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
+    Event setExternal(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
 
     /**
      * Set a rating on a service from the given user.
      *
      * @param serviceId
-     * @param authentication
      * @param value
      * @return
      */
-    Event setOrder(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
+    Event setOrder(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
+     * @return
+     */
+    int getServiceAggregatedInternals(String serviceId);
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
+     * @return
+     */
+    int getServiceAggregatedExternals(String serviceId);
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
+     * @return
+     */
+    int getServiceAggregatedOrders(String serviceId);
 }

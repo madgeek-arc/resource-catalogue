@@ -196,7 +196,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     @PostMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setInternal(@PathVariable String id, @RequestParam("internal") Float internal, @ApiIgnore Authentication authentication) throws Exception {
+    public ResponseEntity<Event> setInternal(@PathVariable String id, @RequestParam("internal") Float internal) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setInternal(id, internal), HttpStatus.OK);
         logger.info("Someone Internal Viewed Service with id '{}'", id);
         return ret;
@@ -204,17 +204,17 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     @PostMapping(path = "external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setExternal(@PathVariable String id, @RequestParam("external") Float external, @ApiIgnore Authentication authentication) throws Exception {
-        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setExternal(id, external, authentication), HttpStatus.OK);
-        logger.info("User '{}' External Viewed Service with id '{}'", authentication, id);
+    public ResponseEntity<Event> setExternal(@PathVariable String id, @RequestParam("external") Float external) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setExternal(id, external), HttpStatus.OK);
+        logger.info("Someone External Viewed Service with id '{}'", id);
         return ret;
     }
 
     @PostMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setOrder(@PathVariable String id, @RequestParam("order") Float order, @ApiIgnore Authentication authentication) throws Exception {
-        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setOrder(id, order, authentication), HttpStatus.OK);
-        logger.info("User '{}' External Viewed Service with id '{}'", authentication, id);
+    public ResponseEntity<Event> setOrder(@PathVariable String id, @RequestParam("order") Float order) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setOrder(id, order), HttpStatus.OK);
+        logger.info("Someone Ordered Service with id '{}'", id);
         return ret;
     }
 
@@ -250,19 +250,16 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     @GetMapping(path = "aggregate/internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public int getServiceAggregatedInternals(@PathVariable String id) {
-        List<Event> serviceAggregatedInternals = eventService.getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id);
-        return serviceAggregatedInternals.size();
+        return eventService.getServiceAggregatedInternals(id);
     }
 
     @GetMapping(path = "aggregate/external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public int getServiceAggregatedExternals(@PathVariable String id) {
-        List<Event> serviceAggregatedExternals = eventService.getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id);
-        return serviceAggregatedExternals.size();
+        return eventService.getServiceAggregatedExternals(id);
     }
 
     @GetMapping(path = "aggregate/order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public int getServiceAggregatedOrders(@PathVariable String id) {
-        List<Event> serviceAggregatedOrders = eventService.getServiceEvents(Event.UserActionType.ORDER.getKey(), id);
-        return serviceAggregatedOrders.size();
+        return eventService.getServiceAggregatedOrders(id);
     }
 }
