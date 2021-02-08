@@ -53,8 +53,8 @@ public class DataParser {
         serviceVisits = String.format(serviceVisitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
     }
 
-//    @Scheduled(fixedDelay = (5 * 60 * 1000))
-    @Scheduled(fixedDelay = (60 * 1000))
+//    @Scheduled(fixedDelay = (60 * 1000))
+    @Scheduled(cron = "0 50 1 * * *")
     public void getServiceVisits() {
         JsonNode json = parse(getMatomoResponse(serviceVisits));
         Map<String, Float> results = new HashMap<>();
@@ -111,14 +111,14 @@ public class DataParser {
     }
 
     public void postEventsToDatabase(Map<String, Float> events) throws ResourceNotFoundException, NumberParseException {
-//        for (Map.Entry<String, Float> entry : events.entrySet()){
-//            logger.info("Posting Internal Event for Service {} with value {}", entry.getKey(), entry.getValue());
-//            if (eventService != null){
-//                eventService.setInternal(entry.getKey(), entry.getValue());
-//            } else {
-//                logger.info("Empty Internal View");
-//            }
-//        }
+        for (Map.Entry<String, Float> entry : events.entrySet()){
+            logger.info("Posting Internal Event for Service {} with value {}", entry.getKey(), entry.getValue());
+            if (eventService != null){
+                eventService.setInternal(entry.getKey(), entry.getValue());
+            } else {
+                logger.info("Empty Internal View");
+            }
+        }
         logger.info("Check Check Check");
     }
 }

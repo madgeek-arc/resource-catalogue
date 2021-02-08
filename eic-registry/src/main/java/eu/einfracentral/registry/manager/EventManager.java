@@ -261,7 +261,6 @@ public class EventManager extends ResourceManager<Event> implements EventService
         Event event;
         event = new Event();
         event.setService(serviceId);
-//        event.setUser(AuthenticationInfo.getSub(authentication));
         event.setType(Event.UserActionType.INTERNAL_VIEW.getKey());
         event.setValue(value);
         event = add(event, null); // remove auth
@@ -270,43 +269,60 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setExternal(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException {
+    public Event setExternal(String serviceId, Float value) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
-        if (value != 1) {
-            throw new ValidationException("Value for External View Event must be always 1");
-        }
-        List<Event> events = getEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), serviceId, authentication);
         Event event;
         event = new Event();
         event.setService(serviceId);
-        event.setUser(AuthenticationInfo.getSub(authentication));
         event.setType(Event.UserActionType.EXTERNAL_VIEW.getKey());
         event.setValue(value);
-        event = add(event, authentication); // remove auth
-        logger.debug("Adding a new INTERNAL_VIEW Event: {}", event);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new EXTERNAL_VIEW Event: {}", event);
         return event;
     }
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setOrder(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException {
+    public Event setOrder(String serviceId, Float value) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
-        if (value != 1) {
-            throw new ValidationException("Value for Order Event must be always 1");
-        }
-        List<Event> events = getEvents(Event.UserActionType.ORDER.getKey(), serviceId, authentication);
         Event event;
         event = new Event();
         event.setService(serviceId);
-        event.setUser(AuthenticationInfo.getSub(authentication));
         event.setType(Event.UserActionType.ORDER.getKey());
         event.setValue(value);
-        event = add(event, authentication); // remove auth
-        logger.debug("Adding a new INTERNAL_VIEW Event: {}", event);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new ORDER Event: {}", event);
         return event;
+    }
+
+    public int getServiceAggregatedInternals(String id){
+        int result = 0;
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id);
+        for (Event event : serviceAggregatedInternals){
+            result += event.getValue();
+        }
+        return result;
+    }
+
+    public int getServiceAggregatedExternals(String id){
+        int result = 0;
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id);
+        for (Event event : serviceAggregatedInternals){
+            result += event.getValue();
+        }
+        return result;
+    }
+
+    public int getServiceAggregatedOrders(String id){
+        int result = 0;
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.ORDER.getKey(), id);
+        for (Event event : serviceAggregatedInternals){
+            result += event.getValue();
+        }
+        return result;
     }
 
 }
