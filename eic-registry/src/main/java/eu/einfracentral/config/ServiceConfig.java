@@ -30,7 +30,8 @@ import java.util.Random;
         "eu.einfracentral.utils",
         "eu.einfracentral.validator",
         "eu.einfracentral.service",
-        "eu.einfracentral.matomo"})
+        "eu.einfracentral.matomo",
+        "eu.einfracentral.recdb"})
 @Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession

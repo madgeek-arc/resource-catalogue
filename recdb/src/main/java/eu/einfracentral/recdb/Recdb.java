@@ -40,7 +40,7 @@ public class Recdb {
     public String getMatomoResponse(String url) {
 
         try {
-            HttpEntity<String> request = new HttpEntity<>(headers);
+            HttpEntity<String> request = new HttpEntity<String>(headers);
             try {
                 ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
                 if (responseEntity.getStatusCode() != HttpStatus.OK) {
