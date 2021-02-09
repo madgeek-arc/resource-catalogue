@@ -327,6 +327,19 @@
         </repository>
     </repositories>
 
+    <profiles>
+        <profile>
+            <id>catris</id>
+            <dependencies>
+                <dependency>
+                    <groupId>eu.einfracentral</groupId>
+                    <artifactId>catris-recdb</artifactId>
+                    <version>0.0.1-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <build>
         <pluginManagement>
             <plugins>
