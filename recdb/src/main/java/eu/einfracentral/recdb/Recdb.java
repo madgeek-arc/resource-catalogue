@@ -40,7 +40,7 @@ public class Recdb {
     public String getMatomoResponse(String url) {
 
         try {
-            HttpEntity<String> request = new HttpEntity<String>(headers);
+            HttpEntity<String> request = new HttpEntity<>(headers);
             try {
                 ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
                 if (responseEntity.getStatusCode() != HttpStatus.OK) {
@@ -64,6 +64,7 @@ public class Recdb {
         String str = getMatomoResponse(serviceEvents);
         ObjectMapper mapper = new ObjectMapper();
 
+        logger.info("Display views \n");
         EventsModel[] day = mapper.readValue(str, EventsModel[].class);
         for (EventsModel event : day) {
             System.out.println(event.label);
