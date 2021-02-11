@@ -79,6 +79,9 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${oidc.clientSecret}")
     private String oidcClientSecret;
 
+    @Value("${oidc.logout:https://aai.eosc-portal.eu/oidc/saml/logout}")
+    private String oidcLogoutURL;
+
     @Value("#{'${oidc.scopes}'.split(',')}")
     private List<String> scopes;
 
@@ -120,7 +123,7 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                     .deleteCookies("SESSION")
                     .invalidateHttpSession(true)
                     .logoutUrl("/openid_logout")
-                    .logoutSuccessUrl(webappFrontUrl)
+                    .logoutSuccessUrl(oidcLogoutURL + "?redirect=" + webappFrontUrl)
                     .deleteCookies("info")
                 .and().exceptionHandling()
                 .and().csrf().disable()
