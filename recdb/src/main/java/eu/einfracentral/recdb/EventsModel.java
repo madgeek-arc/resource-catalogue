@@ -21,8 +21,8 @@ public class EventsModel {
     public int max_event_value;
     @JsonProperty("avg_event_value")
     public int avg_event_value;
-    @JsonProperty("Events_EventName")
-    public String Events_EventName;
+    @JsonProperty("Events_EventCategory")
+    public String Events_EventCategory;
     @JsonProperty("Events_EventAction")
     public String Events_EventAction;
 }
