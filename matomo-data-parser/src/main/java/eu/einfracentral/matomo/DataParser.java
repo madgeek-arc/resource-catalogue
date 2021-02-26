@@ -67,7 +67,7 @@ public class DataParser {
                     results.putIfAbsent(serviceId, Float.parseFloat(visits));
                 }
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+                    logger.info(entry.getKey() + ":" + entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve visits for all Services\nMatomo response: {}\n", json, e);
