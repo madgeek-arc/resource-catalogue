@@ -1,0 +1,16 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "curation_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "vocabulary_entry",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/vocabularyEntryRequest/eic-registry-model/src/main/resources/schema1.xsd"
+}
