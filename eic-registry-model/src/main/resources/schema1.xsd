@@ -47,6 +47,10 @@
 
   <xs:element name="vocabulary" type="tns:vocabulary"/>
 
+  <xs:element name="vocabularyCuration" type="tns:vocabularyCuration"/>
+
+  <xs:element name="vocabularyEntryRequest" type="tns:vocabularyEntryRequest"/>
+
   <xs:complexType abstract="true" name="bundle">
     <xs:sequence>
       <xs:element name="active" type="xs:boolean"/>
@@ -1007,6 +1011,29 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element name="name" type="xs:string"/>
       <xs:element minOccurs="0" name="parentId" type="xs:string"/>
       <xs:element name="type" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="vocabularyCuration">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="entryValueName" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element minOccurs="0" name="parent" type="xs:string"/>
+      <xs:element minOccurs="0" name="rejectionReason" type="xs:string"/>
+      <xs:element minOccurs="0" name="resolutionDate" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="resolutionUser" type="xs:string"/>
+      <xs:element minOccurs="0" name="status" type="xs:string"/>
+      <xs:element minOccurs="0" name="vocabulary" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="vocabularyEntryRequests" type="tns:vocabularyEntryRequest"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="vocabularyEntryRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="dateOfRequest" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
+      <xs:element minOccurs="0" name="resourceType" type="xs:string"/>
+      <xs:element minOccurs="0" name="userId" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>
