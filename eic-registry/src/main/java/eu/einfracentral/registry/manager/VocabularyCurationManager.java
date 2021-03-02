@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class VocabularyCurationManager extends ResourceManager<VocabularyCuration> implements VocabularyCurationService<VocabularyCuration, Authentication> {
 
@@ -20,12 +22,15 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Override
     public String getResourceType() {
-        return "vocabulary_curation";
+        return "vocabulary_entry";
     }
 
 
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, Authentication auth) {
+        if ((vocabularyCuration.getId() == null) || vocabularyCuration.getId().equals("")) {
+            vocabularyCuration.setId(UUID.randomUUID().toString());
+        }
         super.add(vocabularyCuration, auth);
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
         return vocabularyCuration;
