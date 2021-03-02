@@ -1031,6 +1031,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
   <xs:complexType name="vocabularyEntryRequest">
     <xs:sequence>
       <xs:element minOccurs="0" name="dateOfRequest" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="providerId" type="xs:string"/>
       <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
       <xs:element minOccurs="0" name="resourceType" type="xs:string"/>
       <xs:element minOccurs="0" name="userId" type="xs:string"/>
