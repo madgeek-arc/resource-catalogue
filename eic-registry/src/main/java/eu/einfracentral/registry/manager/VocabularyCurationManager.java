@@ -22,7 +22,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Override
     public String getResourceType() {
-        return "vocabulary_entry";
+        return "vocabulary_curation";
     }
 
 
