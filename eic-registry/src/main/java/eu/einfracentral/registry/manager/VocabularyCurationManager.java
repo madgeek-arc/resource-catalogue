@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -45,9 +47,12 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Override
     public VocabularyCuration validate(VocabularyCuration vocabularyCuration){
-        Object[] possibleValues = Arrays.stream(VocabularyCuration.Vocab.class.getDeclaringClass().getEnumConstants()).toArray();
+        List<String> possibleValues = new ArrayList<>();
+        for (VocabularyCuration.Vocab vocab : VocabularyCuration.Vocab.values()){
+            possibleValues.add(vocab.getKey());
+        }
         String voc = vocabularyCuration.getVocabulary();
-        if (!Arrays.asList(possibleValues).contains(voc)){
+        if (!possibleValues.contains(voc)){
             throw new ValidationException("Vocabulary " + voc + "' does not exist.");
         }
         return vocabularyCuration;
