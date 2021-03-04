@@ -1024,7 +1024,13 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element minOccurs="0" name="resolutionUser" type="xs:string"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
       <xs:element minOccurs="0" name="vocabulary" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="vocabularyEntryRequests" type="tns:vocabularyEntryRequest"/>
+      <xs:element minOccurs="0" name="vocabularyEntryRequests">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:vocabularyEntryRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
 
