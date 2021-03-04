@@ -6,6 +6,72 @@
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "userId",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='userId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "resourceId",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='resourceId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "providerId",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='providerId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "dateOfRequest",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='dateOfRequest']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "resourceType",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='resourceType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "entryValueName",
+      "path": "//*[local-name()='entryValueName']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "vocabulary",
+      "path": "//*[local-name()='vocabulary']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "parent",
+      "path": "//*[local-name()='parent']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "status",
+      "path": "//*[local-name()='status']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "resolutionDate",
+      "path": "//*[local-name()='resolutionDate']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "resolutionUser",
+      "path": "//*[local-name()='resolutionUser']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",

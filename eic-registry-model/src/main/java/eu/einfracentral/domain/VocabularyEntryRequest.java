@@ -39,9 +39,10 @@ public class VocabularyEntryRequest {
     public VocabularyEntryRequest() {
     }
 
-    public VocabularyEntryRequest(String userId, String resourceId, Date dateOfRequest, String resourceType) {
+    public VocabularyEntryRequest(String userId, String resourceId, String providerId, Date dateOfRequest, String resourceType) {
         this.userId = userId;
         this.resourceId = resourceId;
+        this.providerId = providerId;
         this.dateOfRequest = dateOfRequest;
         this.resourceType = resourceType;
     }
@@ -51,6 +52,7 @@ public class VocabularyEntryRequest {
         return "VocabularyEntryRequest{" +
                 "userId='" + userId + '\'' +
                 ", resourceId='" + resourceId + '\'' +
+                ", providerId='" + providerId + '\'' +
                 ", dateOfRequest=" + dateOfRequest +
                 ", resourceType='" + resourceType + '\'' +
                 '}';
@@ -70,6 +72,14 @@ public class VocabularyEntryRequest {
 
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 
     public Date getDateOfRequest() {
