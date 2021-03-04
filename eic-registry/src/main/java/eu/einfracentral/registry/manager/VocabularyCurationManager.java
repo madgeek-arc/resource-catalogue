@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.VocabularyCuration;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +32,9 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         if ((vocabularyCuration.getId() == null) || vocabularyCuration.getId().equals("")) {
             vocabularyCuration.setId(UUID.randomUUID().toString());
         }
+        vocabularyCuration.setStatus(Provider.States.PENDING_1.getKey());
+        // check if parent exists
+
         super.add(vocabularyCuration, auth);
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
         return vocabularyCuration;

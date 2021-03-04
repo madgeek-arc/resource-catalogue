@@ -10,31 +10,31 @@
     {
       "multivalued": false,
       "name": "userId",
-      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='userId']/text()",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='vocabularyEntryRequest']/*[local-name()='userId']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "resourceId",
-      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='resourceId']/text()",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='vocabularyEntryRequest']/*[local-name()='resourceId']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "providerId",
-      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='providerId']/text()",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='vocabularyEntryRequest']/*[local-name()='providerId']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "dateOfRequest",
-      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='dateOfRequest']/text()",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='vocabularyEntryRequest']/*[local-name()='dateOfRequest']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "resourceType",
-      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='resourceType']/text()",
+      "path": "//*[local-name()='vocabularyEntryRequests']/*[local-name()='vocabularyEntryRequest']/*[local-name()='resourceType']/text()",
       "type": "java.lang.String"
     },
     {
