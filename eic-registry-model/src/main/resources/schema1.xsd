@@ -1016,15 +1016,15 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
 
   <xs:complexType name="vocabularyCuration">
     <xs:sequence>
-      <xs:element minOccurs="0" name="entryValueName" type="xs:string"/>
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
+      <xs:element name="entryValueName" type="xs:string"/>
+      <xs:element name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="parent" type="xs:string"/>
       <xs:element minOccurs="0" name="rejectionReason" type="xs:string"/>
-      <xs:element minOccurs="0" name="resolutionDate" type="xs:dateTime"/>
-      <xs:element minOccurs="0" name="resolutionUser" type="xs:string"/>
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
-      <xs:element minOccurs="0" name="vocabulary" type="xs:string"/>
-      <xs:element minOccurs="0" name="vocabularyEntryRequests">
+      <xs:element name="resolutionDate" type="xs:dateTime"/>
+      <xs:element name="resolutionUser" type="xs:string"/>
+      <xs:element name="status" type="xs:string"/>
+      <xs:element name="vocabulary" type="xs:string"/>
+      <xs:element name="vocabularyEntryRequests">
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:vocabularyEntryRequest"/>
@@ -1036,11 +1036,11 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
 
   <xs:complexType name="vocabularyEntryRequest">
     <xs:sequence>
-      <xs:element minOccurs="0" name="dateOfRequest" type="xs:dateTime"/>
+      <xs:element name="dateOfRequest" type="xs:dateTime"/>
       <xs:element minOccurs="0" name="providerId" type="xs:string"/>
       <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
-      <xs:element minOccurs="0" name="resourceType" type="xs:string"/>
-      <xs:element minOccurs="0" name="userId" type="xs:string"/>
+      <xs:element name="resourceType" type="xs:string"/>
+      <xs:element name="userId" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

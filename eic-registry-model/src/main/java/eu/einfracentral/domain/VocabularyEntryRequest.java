@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,24 +16,29 @@ public class VocabularyEntryRequest {
 
     private static final Logger logger = LogManager.getLogger(User.class);
 
-    @XmlElement
-    @ApiModelProperty(position = 1)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 1, required = true)
+    @FieldValidation
     private String userId;
 
     @XmlElement
     @ApiModelProperty(position = 2)
+    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
     private String resourceId;
 
     @XmlElement
     @ApiModelProperty(position = 3)
+    @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String providerId;
 
-    @XmlElement
-    @ApiModelProperty(position = 4)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 4, required = true)
+    @FieldValidation
     private Date dateOfRequest;
 
-    @XmlElement
-    @ApiModelProperty(position = 5)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 5, required = true)
+    @FieldValidation
     private String resourceType;
 
 
