@@ -492,4 +492,31 @@ public class RegistrationMailService {
             sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail());
         }
     }
+
+    public void sendVocabularyCurationEmails(VocabularyCuration vocabularyCuration, Map<String, String> userNamesAndEmails){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("vocabularyCuration", vocabularyCuration);
+
+        // send emails to Users
+        String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been submitted", projectName,
+                vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+        List<String> userEmails = new ArrayList<>();
+        for (Map.Entry<String, String> entry : userNamesAndEmails.entrySet()){
+            userEmails.add(entry.getValue());
+        }
+        for (Map.Entry<String, String> user : userNamesAndEmails.entrySet()){
+            root.put("user", user);
+            root.put("vocabularyCuration", vocabularyCuration);
+            sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, userEmails);
+        }
+
+        // send emails to Admins
+        String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
+                vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+        root.put("userEmail", Collections.singletonList(userEmails));
+        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, userEmails);
+    }
+
+
 }
