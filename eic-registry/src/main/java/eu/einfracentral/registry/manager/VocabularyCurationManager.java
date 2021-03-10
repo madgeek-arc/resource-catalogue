@@ -7,12 +7,14 @@ import eu.einfracentral.domain.VocabularyEntryRequest;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -22,14 +24,17 @@ import java.util.*;
 public class VocabularyCurationManager extends ResourceManager<VocabularyCuration> implements VocabularyCurationService<VocabularyCuration, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(VocabularyCurationManager.class);
+    private final RegistrationMailService registrationMailService;
 
     @Autowired
     private VocabularyService vocabularyService;
 
     @Autowired
-    public VocabularyCurationManager() {
+    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService) {
         super(VocabularyCuration.class);
+        this.registrationMailService = registrationMailService;
     }
+
 
     @Override
     public String getResourceType() {
@@ -46,14 +51,18 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(Provider.States.PENDING_1.getKey());
+        Map<String, String> userNamesAndEmails = new HashMap<>();
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()){
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
+            userNamesAndEmails.put(((OIDCAuthenticationToken) auth).getUserInfo().getName(), (((OIDCAuthenticationToken) auth).getUserInfo().getEmail()));
         }
         validate(vocabularyCuration);
 
         super.add(vocabularyCuration, auth);
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
+
+        registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, userNamesAndEmails);
         return vocabularyCuration;
     }
 
