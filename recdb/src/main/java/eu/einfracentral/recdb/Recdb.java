@@ -15,6 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Array;
+import java.util.List;
+import java.util.Objects;
 
 @Configuration
 @EnableScheduling
@@ -37,8 +40,9 @@ public class Recdb {
         String method= "Events.getCategory";
 //        String method= "Events.getName&secondaryDimension=eventAction";
         String matomoSiteId = "2";
-//        String matomoDate = "yesterday";
-        String matomoDate = "12-02-2021";
+        String matomoDate = "yesterday";
+//        String matomoDate = "today";
+//        String matomoDate = "12-02-2021";
         String matomoToken = "d532d295158f72d9eca31823aa58750e";
         serviceEvents = String.format(serviceVisitsTemplate, matomoHost, method, matomoSiteId, matomoDate, matomoToken);
     }
@@ -67,7 +71,8 @@ public class Recdb {
     @Qualifier("recdb.datasource")
     private DataSource datasource;
 
-    @Scheduled(fixedDelay = 60 * 1000)
+//    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Scheduled(cron = "0 0 1 * * *", zone = "Europe/Athens")
     public void getViews() throws IOException {
         urlConstruct();
 
@@ -78,21 +83,52 @@ public class Recdb {
         EventsModel[] day = mapper.readValue(str, EventsModel[].class);
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        int user_id = -1;
+        int service_id = -1;
+        String query = "";
 
         for (EventsModel event : day) {
-            if(event.Events_EventCategory.equals("landing page visit")){
+            if (event.Events_EventCategory.equals("Recommendations")) {
 
                 String[] data = event.Events_EventAction.split(" ");
-                if (data.length > 1){
-//                    System.out.println("email " + data[0] + " service id " + data[1]);
-                    jdbcTemplate.update("UPDATE recommendationTable set visits = visits + ? WHERE user_email = ? " +
-                                            "AND service_id = ?; INSERT INTO recommendationTable (user_email, service_id, visits)" +
-                                            "SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM recommendationTable WHERE" +
-                                            " user_email = ? AND service_id = ?);",
-                            event.sum_event_value, data[0], data[1], data[0], data[1], event.sum_event_value, data[0], data[1]);
-                }
+                /* Add user email if it is not in the table */
+                query = "INSERT INTO users (user_email) SELECT ? WHERE NOT EXISTS (SELECT 1 FROM users WHERE  user_email = ?)";
+                jdbcTemplate.update(query, data[0], data[0]);
+                /* Get user id */
+                query = "SELECT user_pk FROM users WHERE user_email = ?;";
+                user_id = jdbcTemplate.queryForObject(query, new Object[]{data[0]}, int.class);
+
+                System.out.println(user_id);
+
+                /* Add service name if it is not in the table */
+                query = "INSERT INTO services (service_name) SELECT ? WHERE NOT EXISTS (SELECT 1 FROM services WHERE  service_name = ?)";
+                jdbcTemplate.update(query, data[1], data[1]);
+                /* Get service id */
+                query = "SELECT service_pk FROM services WHERE service_name = ?;";
+                service_id = jdbcTemplate.queryForObject(query, new Object[]{data[1]}, int.class);
+
+                System.out.println(service_id);
+
+
+                System.out.println("email " + data[0] + " service id " + data[1]);
+                jdbcTemplate.update("UPDATE view_count set visits = visits + ? WHERE user_id = ? " +
+                                "AND service_id = ?; INSERT INTO view_count (user_id, service_id, visits)" +
+                                "SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM view_count WHERE" +
+                                " user_id = ? AND service_id = ?);",
+                        event.sum_event_value, user_id, service_id, user_id, service_id, event.sum_event_value, user_id, service_id);
             }
         }
+        query = "CREATE RECOMMENDER serviceRec ON view_count USERS FROM user_id ITEMS FROM service_id EVENTS FROM visits USING ItemCosCF ";
 
+        query = "SELECT service_name " +
+                "FROM services " +
+                "WHERE service_pk IN " +
+                "(SELECT service_id FROM view_count R RECOMMEND R.service_id TO R.user_id ON R.visits USING ItemCosCF WHERE R.user_id = ? ORDER BY R.visits LIMIT 3 )";
+
+        List<java.lang.String> serviceIds;
+        serviceIds = jdbcTemplate.queryForList(query, new Object[] { user_id }, java.lang.String.class);
+        for (int i = 0; i < Objects.requireNonNull(serviceIds).size(); i++) {
+            System.out.println(serviceIds.get(i));
+        }
     }
 }
