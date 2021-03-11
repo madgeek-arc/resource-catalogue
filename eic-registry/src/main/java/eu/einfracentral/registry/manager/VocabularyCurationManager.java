@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.openminted.registry.core.domain.FacetFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,6 +142,20 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 break;
             default:
                 vocabularyCuration.setParent(null);
+        }
+
+        // validate resourceType/vocabulary combo
+        String resourceType = vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceType();
+        if (resourceType.equalsIgnoreCase("provider")){
+            if (!StringUtils.containsIgnoreCase(vocabularyCuration.getVocabulary(), "provider")){
+                throw new ValidationException("Resource Type " +resourceType.toLowerCase()+ " can't have as a Vocabulary the value " +vocabularyCuration.getVocabulary());
+            }
+        } else if (resourceType.equalsIgnoreCase("resource") || resourceType.equalsIgnoreCase("service")){
+            if (StringUtils.containsIgnoreCase(vocabularyCuration.getVocabulary(), "provider")){
+                throw new ValidationException("Resource Type " +resourceType.toLowerCase()+ " can't have as a Vocabulary the value " +vocabularyCuration.getVocabulary());
+            }
+        } else {
+            throw new ValidationException("The resourceType you submitted is not supported. Possible resourceType values are 'provider', 'resource'");
         }
 
         return vocabularyCuration;
