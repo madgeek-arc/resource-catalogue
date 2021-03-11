@@ -51,18 +51,16 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(Provider.States.PENDING_1.getKey());
-        Map<String, String> userNamesAndEmails = new HashMap<>();
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()){
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
-            userNamesAndEmails.put(((OIDCAuthenticationToken) auth).getUserInfo().getName(), (((OIDCAuthenticationToken) auth).getUserInfo().getEmail()));
         }
         validate(vocabularyCuration);
 
         super.add(vocabularyCuration, auth);
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
 
-        registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, userNamesAndEmails);
+        registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
         return vocabularyCuration;
     }
 
@@ -91,13 +89,17 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         // check if parent exists
         List<Vocabulary> specificVocs;
+        List<String> specificVocsIds = new ArrayList<>();
         switch(vocabularyCuration.getVocabulary()){
             case "category":
                 if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")){
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.SUPERCATEGORY);
-                    if (!specificVocs.contains(vocabularyCuration.getParent())){
+                    for (Vocabulary vocabulary : specificVocs){
+                        specificVocsIds.add(vocabulary.getId());
+                    }
+                    if (!specificVocsIds.contains(vocabularyCuration.getParent())){
                         throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
