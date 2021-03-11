@@ -68,8 +68,13 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     public VocabularyCuration validate(VocabularyCuration vocabularyCuration){
         // check if vocabulary already exists
         FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
         List<Vocabulary> allVocs = vocabularyService.getAll(ff, null).getResults();
-        if (allVocs.contains(vocabularyCuration.getEntryValueName())){
+        List<String> allVocsIds = new ArrayList<>();
+        for (Vocabulary vocabulary : allVocs){
+            allVocsIds.add(vocabulary.getName());
+        }
+        if (allVocsIds.contains(vocabularyCuration.getEntryValueName())){
             throw new ValidationException("Vocabulary with name " + vocabularyCuration.getEntryValueName() + " already exists.");
         }
         // validate vocabulary

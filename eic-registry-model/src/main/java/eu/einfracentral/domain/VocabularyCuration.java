@@ -25,7 +25,7 @@ public class VocabularyCuration implements Identifiable {
     private String id;
 
     @XmlElementWrapper(required = true, name = "vocabularyEntryRequests")
-    @XmlElement(required = true, name = "vocabularyEntryRequest")
+    @XmlElement(name = "vocabularyEntryRequest")
     @ApiModelProperty(position = 2, required = true)
     @FieldValidation
     private List<VocabularyEntryRequest> vocabularyEntryRequests;
