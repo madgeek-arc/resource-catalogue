@@ -13,6 +13,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -493,29 +494,22 @@ public class RegistrationMailService {
         }
     }
 
-    public void sendVocabularyCurationEmails(VocabularyCuration vocabularyCuration, Map<String, String> userNamesAndEmails){
+    public void sendVocabularyCurationEmails(VocabularyCuration vocabularyCuration, String userName){
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("vocabularyCuration", vocabularyCuration);
+        root.put("userName", userName);
+        root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
 
-        // send emails to Users
+        // send email to User
         String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        List<String> userEmails = new ArrayList<>();
-        for (Map.Entry<String, String> entry : userNamesAndEmails.entrySet()){
-            userEmails.add(entry.getValue());
-        }
-        for (Map.Entry<String, String> user : userNamesAndEmails.entrySet()){
-            root.put("user", user);
-            root.put("vocabularyCuration", vocabularyCuration);
-            sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, userEmails);
-        }
+        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
 
-        // send emails to Admins
+        // send email to Admins
         String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        root.put("userEmail", Collections.singletonList(userEmails));
-        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, userEmails);
+        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail);
     }
 
 
