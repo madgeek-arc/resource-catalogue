@@ -1,13 +1,13 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Vocabulary;
-import eu.einfracentral.domain.VocabularyCuration;
-import eu.einfracentral.domain.VocabularyEntryRequest;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.RegistrationMailService;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -15,25 +15,33 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+
 @Component
 public class VocabularyCurationManager extends ResourceManager<VocabularyCuration> implements VocabularyCurationService<VocabularyCuration, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(VocabularyCurationManager.class);
     private final RegistrationMailService registrationMailService;
+    private final ProviderService providerService;
+    private final InfraServiceService infraServiceService;
 
     @Autowired
     private VocabularyService vocabularyService;
 
     @Autowired
-    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService) {
+    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
+                                     InfraServiceService infraServiceService) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
+        this.providerService = providerService;
+        this.infraServiceService = infraServiceService;
     }
 
 
@@ -51,12 +59,15 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             throw new ValidationException("You must not provide a VocabularyCuration id");
         }
         // set status, dateOfRequest, userId
-        vocabularyCuration.setStatus(Provider.States.PENDING_1.getKey());
+        vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
+        vocabularyCuration.setRejectionReason(null);
+        vocabularyCuration.setResolutionDate(null);
+        vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()){
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
         }
-        validate(vocabularyCuration);
+        validate(vocabularyCuration, auth);
 
         super.add(vocabularyCuration, auth);
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
@@ -65,8 +76,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         return vocabularyCuration;
     }
 
-    @Override
-    public VocabularyCuration validate(VocabularyCuration vocabularyCuration){
+    public VocabularyCuration validate(VocabularyCuration vocabularyCuration, Authentication auth){
         // check if vocabulary already exists
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -158,6 +168,28 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             throw new ValidationException("The resourceType you submitted is not supported. Possible resourceType values are 'provider', 'resource'");
         }
 
+        // validate if providerId/resourceId exists
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setQuantity(10000);
+        List<ProviderBundle> allProviders = providerService.getAll(facetFilter, auth).getResults();
+        List<InfraService> allResources = infraServiceService.getAll(facetFilter, auth).getResults();
+        List<String> providerIds = new ArrayList<>();
+        List<String> resourceIds = new ArrayList<>();
+        for (ProviderBundle provider : allProviders){
+            providerIds.add(provider.getId());
+        }
+        for (InfraService resource : allResources){
+            resourceIds.add(resource.getId());
+        }
+        String providerId = vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId();
+        String resourceId = vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId();
+        if (providerId != null && !providerIds.contains(providerId)){
+            throw new ValidationException("Provider with id " +vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId()+ " does not exist.");
+        }
+        if (resourceId != null && !resourceIds.contains(resourceId)){
+            throw new ValidationException("Resource with id " +vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId()+ " does not exist.");
+        }
+
         return vocabularyCuration;
     }
 
@@ -181,4 +213,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         return DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
     }
 
+    public Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth) {
+        Browsing<VocabularyCuration> vocabularyCurationBrowsing = super.getAll(ff, auth);
+        return vocabularyCurationBrowsing;
+    }
 }
