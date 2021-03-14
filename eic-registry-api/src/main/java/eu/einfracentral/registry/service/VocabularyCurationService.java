@@ -19,4 +19,6 @@ public interface VocabularyCurationService <T, U extends Authentication> extends
     void addFront(String resourceId, String providerId, String resourceType, String entryValueName, String vocabulary, String parent, Authentication auth);
 
     Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth);
+
+    void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication);
 }

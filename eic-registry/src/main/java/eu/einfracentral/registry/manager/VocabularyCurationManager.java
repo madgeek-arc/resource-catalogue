@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.naming.AuthenticationNotSupportedException;
 import java.util.*;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
@@ -90,7 +91,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         // validate vocabulary
         List<String> possibleValues = new ArrayList<>();
-        for (VocabularyCuration.Vocab vocab : VocabularyCuration.Vocab.values()){
+        for (Vocabulary.Type vocab : Vocabulary.Type.values()){
             possibleValues.add(vocab.getKey().toLowerCase());
         }
         String voc = vocabularyCuration.getVocabulary();
@@ -216,5 +217,36 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     public Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth) {
         Browsing<VocabularyCuration> vocabularyCurationBrowsing = super.getAll(ff, auth);
         return vocabularyCurationBrowsing;
+    }
+
+    public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication){
+        vocabularyCuration.setResolutionUser(User.of(authentication).getEmail());
+        vocabularyCuration.setResolutionDate(now());
+        if (approved){
+            vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());
+            createNewVocabulary(vocabularyCuration, authentication);
+            // send emails
+        } else{
+            vocabularyCuration.setStatus(VocabularyCuration.Status.REJECTED.getKey());
+            vocabularyCuration.setRejectionReason(rejectionReason);
+            // send emails
+        }
+        update(vocabularyCuration, authentication);
+    }
+
+    public void createNewVocabulary(VocabularyCuration vocabularyCuration, Authentication authentication){
+        Vocabulary vocabulary = new Vocabulary();
+        String valueNameFormed = vocabularyCuration.getEntryValueName().replaceAll(" ", "_").toLowerCase();
+        String vocabularyFormed = vocabularyCuration.getVocabulary().replaceAll(" ", "_").toLowerCase();
+        String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
+        vocabulary.setId(vocabularyFormed+"-"+valueNameFormed);
+        vocabulary.setDescription("Vocabulary submitted by " +vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        vocabulary.setName(vocabularyCuration.getEntryValueName());
+        vocabulary.setType(Vocabulary.Type.valueOf(vocabularyFormed.toUpperCase()));
+        if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().equals("")){
+            vocabulary.setParentId(parentFormed);
+        }
+        logger.info("User " +User.of(authentication).getEmail()+ " is adding a new Vocabulary by resolving the vocabulary request " +vocabularyCuration.getId());
+        vocabularyService.add(vocabulary, authentication);
     }
 }
