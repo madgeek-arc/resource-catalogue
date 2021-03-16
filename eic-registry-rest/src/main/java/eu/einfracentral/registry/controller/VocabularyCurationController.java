@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.VocabularyCuration;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -13,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,11 +39,11 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         this.vocabularyCurationService = service;
     }
 
-    @Override
-    @ApiOperation(value = "Returns the Vocabulary Curation with the given id.")
+    @ApiOperation(value = "Get Vocabulary Curation by ID")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<VocabularyCuration> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return super.get(id, auth);
+    @Override
+    public ResponseEntity<VocabularyCuration> get(@PathVariable("id") String id, @ApiIgnore Authentication authentication) {
+        return new ResponseEntity<>(vocabularyCurationService.get(id), HttpStatus.OK);
     }
 
     @Override
@@ -51,16 +51,17 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<VocabularyCuration> add(@RequestBody VocabularyCuration vocabularyCuration, @ApiIgnore Authentication auth) {
         ResponseEntity<VocabularyCuration> ret = super.add(vocabularyCuration, auth);
-        logger.info("asdf");
+        logger.info("Adding new Vocabulary Curation");
         return ret;
     }
 
     @ApiOperation(value = "Creates a new Vocabulary Curation Request (front-end use).")
     @PostMapping(path = "addFront", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void addFront(@RequestParam(required = false) String resourceId, @RequestParam(required = false) String providerId,
+    public VocabularyCuration addFront(@RequestParam(required = false) String resourceId, @RequestParam(required = false) String providerId,
                          @RequestParam String resourceType, @RequestParam String entryValueName, @RequestParam String vocabulary,
                          @RequestParam(required = false) String parent, @ApiIgnore Authentication auth) {
-        vocabularyCurationService.addFront(resourceId, providerId, resourceType, entryValueName, vocabulary, parent, auth);
+        logger.info("Adding new Vocabulary Curation (UI)");
+        return vocabularyCurationService.addFront(resourceId, providerId, resourceType, entryValueName, vocabulary, parent, auth);
     }
 
     @ApiOperation(value = "Filter a list of Vocabulary Curation Requests based on a set of filters or get a list of all Vocabulary Curation Requests in the Catalogue.")

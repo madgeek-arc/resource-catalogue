@@ -292,6 +292,11 @@ public class RegistrationMailService {
             temp.process(root, out);
             String mailBody = out.getBuffer().toString();
 
+            // enable vocabularyCuration emails
+            if (templateName.equalsIgnoreCase("vocabularyCurationUser.ftl") || templateName.equalsIgnoreCase("vocabularyCurationAdmin.ftl")){
+                mailService.sendMail(emails, subject, mailBody);
+            }
+
             if (enableEmailNotifications) {
                 mailService.sendMail(emails, subject, mailBody);
             }
