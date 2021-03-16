@@ -55,14 +55,14 @@ public class VocabularyCuration implements Identifiable {
     @FieldValidation(nullable = true)
     private String rejectionReason;
 
-    @XmlElement(required = true)
+    @XmlElement
     @ApiModelProperty(position = 8, required = true)
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private Date resolutionDate;
 
-    @XmlElement(required = true)
+    @XmlElement
     @ApiModelProperty(position = 9, required = true)
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private String resolutionUser;
 
     public VocabularyCuration() {

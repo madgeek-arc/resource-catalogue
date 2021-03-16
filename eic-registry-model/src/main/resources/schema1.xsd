@@ -1020,8 +1020,8 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="parent" type="xs:string"/>
       <xs:element minOccurs="0" name="rejectionReason" type="xs:string"/>
-      <xs:element name="resolutionDate" type="xs:dateTime"/>
-      <xs:element name="resolutionUser" type="xs:string"/>
+      <xs:element minOccurs="0" name="resolutionDate" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="resolutionUser" type="xs:string"/>
       <xs:element name="status" type="xs:string"/>
       <xs:element name="vocabulary" type="xs:string"/>
       <xs:element name="vocabularyEntryRequests">
