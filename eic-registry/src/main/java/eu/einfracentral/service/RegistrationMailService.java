@@ -512,5 +512,23 @@ public class RegistrationMailService {
         sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail);
     }
 
+    public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("vocabularyCuration", vocabularyCuration);
+        root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+
+        if (vocabularyCuration.getStatus().equals(VocabularyCuration.Status.APPROVED.getKey())){
+            // send email of Approval
+            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
+                    vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        } else{
+            // send email of Rejection
+            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
+                    vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        }
+    }
 
 }
