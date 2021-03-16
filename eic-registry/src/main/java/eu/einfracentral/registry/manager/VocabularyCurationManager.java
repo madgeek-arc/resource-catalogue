@@ -61,9 +61,9 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
-        vocabularyCuration.setRejectionReason(null);
-        vocabularyCuration.setResolutionDate(null);
-        vocabularyCuration.setResolutionUser(null);
+//        vocabularyCuration.setRejectionReason(null);
+//        vocabularyCuration.setResolutionDate(null);
+//        vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()){
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
