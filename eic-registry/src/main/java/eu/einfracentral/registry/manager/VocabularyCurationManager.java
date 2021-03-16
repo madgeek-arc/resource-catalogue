@@ -51,7 +51,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         return "vocabulary_curation";
     }
 
-
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, Authentication auth) {
         if ((vocabularyCuration.getId() == null) || vocabularyCuration.getId().equals("")) {
@@ -74,6 +73,14 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
 
         registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
+        return vocabularyCuration;
+    }
+
+    @Override
+    public VocabularyCuration update(VocabularyCuration vocabularyCuration, Authentication auth) {
+        validate(vocabularyCuration);
+        super.update(vocabularyCuration, auth);
+        logger.debug("Updating Vocabulary Curation {}", vocabularyCuration);
         return vocabularyCuration;
     }
 
@@ -163,7 +170,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         // validate resourceType/vocabulary combo
         String resourceType = vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceType();
         if (resourceType.equalsIgnoreCase("provider")){
-            if (!vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_DOMAIN.getKey()) && !vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN.getKey())){
+            if (!vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_DOMAIN.getKey()) && !vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN.getKey())
+                && !vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.COUNTRY.getKey())){
                 if (!StringUtils.containsIgnoreCase(vocabularyCuration.getVocabulary(), "provider")){
                     throw new ValidationException("Resource Type " +resourceType.toLowerCase()+ " can't have as a Vocabulary the value " +vocabularyCuration.getVocabulary());
                 }
@@ -201,7 +209,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         return vocabularyCuration;
     }
 
-    public void addFront(String resourceId, String providerId, String resourceType,
+    public VocabularyCuration addFront(String resourceId, String providerId, String resourceType,
                                         String entryValueName, String vocabulary, String parent, Authentication auth){
         List<VocabularyEntryRequest> vocabularyEntryRequests = new ArrayList<>();
         VocabularyEntryRequest vocabularyEntryRequest = new VocabularyEntryRequest();
@@ -215,6 +223,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabularyCuration.setVocabulary(vocabulary);
         vocabularyCuration.setParent(parent);
         add(vocabularyCuration, auth);
+        return vocabularyCuration;
     }
 
     public Date now(){
@@ -229,6 +238,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication){
         vocabularyCuration.setResolutionUser(User.of(authentication).getEmail());
         vocabularyCuration.setResolutionDate(now());
+        logger.info("Updating VocabularyRequest " +vocabularyCuration.getEntryValueName());
         if (approved){
             vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());
             createNewVocabulary(vocabularyCuration, authentication);
