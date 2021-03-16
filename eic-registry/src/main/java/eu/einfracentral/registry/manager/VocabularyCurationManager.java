@@ -68,7 +68,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
         }
-        validate(vocabularyCuration, auth);
+//        validate(vocabularyCuration, auth);
 
         super.add(vocabularyCuration, auth);
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
