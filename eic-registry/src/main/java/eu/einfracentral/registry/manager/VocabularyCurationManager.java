@@ -61,14 +61,14 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
-//        vocabularyCuration.setRejectionReason(null);
-//        vocabularyCuration.setResolutionDate(null);
-//        vocabularyCuration.setResolutionUser(null);
+        vocabularyCuration.setRejectionReason(null);
+        vocabularyCuration.setResolutionDate(null);
+        vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()){
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
         }
-//        validate(vocabularyCuration, auth);
+        validate(vocabularyCuration, auth);
 
         super.add(vocabularyCuration, auth);
         logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
@@ -163,7 +163,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         // validate resourceType/vocabulary combo
         String resourceType = vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceType();
         if (resourceType.equalsIgnoreCase("provider")){
-            if (!vocabularyCuration.getVocabulary().equals(Vocabulary.Type.SCIENTIFIC_DOMAIN.getKey()) && !vocabularyCuration.getVocabulary().equals(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN.getKey())){
+            if (!vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_DOMAIN.getKey()) && !vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN.getKey())){
                 if (!StringUtils.containsIgnoreCase(vocabularyCuration.getVocabulary(), "provider")){
                     throw new ValidationException("Resource Type " +resourceType.toLowerCase()+ " can't have as a Vocabulary the value " +vocabularyCuration.getVocabulary());
                 }
