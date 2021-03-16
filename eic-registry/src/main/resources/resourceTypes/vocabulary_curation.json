@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "curation_id",
+      "name": "vocabulary_curation_id",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
