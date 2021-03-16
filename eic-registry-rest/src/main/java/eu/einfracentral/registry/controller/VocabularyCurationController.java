@@ -57,8 +57,9 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
 
     @ApiOperation(value = "Creates a new Vocabulary Curation Request (front-end use).")
     @PostMapping(path = "addFront", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void addFront(@RequestParam String resourceId, @RequestParam String providerId, @RequestParam String resourceType,
-                                                       @RequestParam String entryValueName, @RequestParam String vocabulary, @RequestParam String parent, @ApiIgnore Authentication auth) {
+    public void addFront(@RequestParam(required = false) String resourceId, @RequestParam(required = false) String providerId,
+                         @RequestParam String resourceType, @RequestParam String entryValueName, @RequestParam String vocabulary,
+                         @RequestParam(required = false) String parent, @ApiIgnore Authentication auth) {
         vocabularyCurationService.addFront(resourceId, providerId, resourceType, entryValueName, vocabulary, parent, auth);
     }
 
