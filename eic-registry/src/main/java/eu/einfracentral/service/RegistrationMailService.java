@@ -13,6 +13,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -291,6 +292,11 @@ public class RegistrationMailService {
             temp.process(root, out);
             String mailBody = out.getBuffer().toString();
 
+            // enable vocabularyCuration emails
+            if (templateName.equalsIgnoreCase("vocabularyCurationUser.ftl") || templateName.equalsIgnoreCase("vocabularyCurationAdmin.ftl")){
+                mailService.sendMail(emails, subject, mailBody);
+            }
+
             if (enableEmailNotifications) {
                 mailService.sendMail(emails, subject, mailBody);
             }
@@ -492,4 +498,42 @@ public class RegistrationMailService {
             sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail());
         }
     }
+
+    public void sendVocabularyCurationEmails(VocabularyCuration vocabularyCuration, String userName){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("vocabularyCuration", vocabularyCuration);
+        root.put("userName", userName);
+        root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+
+        // send email to User
+        String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been submitted", projectName,
+                vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+
+        // send email to Admins
+        String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
+                vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail);
+    }
+
+    public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("vocabularyCuration", vocabularyCuration);
+        root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+
+        if (vocabularyCuration.getStatus().equals(VocabularyCuration.Status.APPROVED.getKey())){
+            // send email of Approval
+            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
+                    vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        } else{
+            // send email of Rejection
+            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
+                    vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
+            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        }
+    }
+
 }
