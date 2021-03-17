@@ -255,12 +255,12 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         Vocabulary vocabulary = new Vocabulary();
         String valueNameFormed = vocabularyCuration.getEntryValueName().replaceAll(" ", "_").toLowerCase();
         String vocabularyFormed = vocabularyCuration.getVocabulary().replaceAll(" ", "_").toLowerCase();
-        String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
         vocabulary.setId(vocabularyFormed+"-"+valueNameFormed);
         vocabulary.setDescription("Vocabulary submitted by " +vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
         vocabulary.setName(vocabularyCuration.getEntryValueName());
         vocabulary.setType(Vocabulary.Type.valueOf(vocabularyFormed.toUpperCase()));
         if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().equals("")){
+            String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
             vocabulary.setParentId(parentFormed);
         }
         logger.info("User " +User.of(authentication).getEmail()+ " is adding a new Vocabulary by resolving the vocabulary request " +vocabularyCuration.getId());

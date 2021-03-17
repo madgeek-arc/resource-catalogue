@@ -74,8 +74,8 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     })
     @GetMapping(path = "vocabularyCurationRequests/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Paging<VocabularyCuration>> getAllVocabularyCurationRequests(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                       @RequestParam(required = false) Set<String> status, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Paging<VocabularyCuration>> getAllVocabularyCurationRequests(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @RequestParam(required = false) Set<String> status,
+                                                                                       @RequestParam(required = false) Set<String> vocabulary, @ApiIgnore Authentication authentication) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -94,13 +94,16 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         if (status != null) {
             ff.addFilter("status", status);
         }
+        if (vocabulary != null) {
+            ff.addFilter("vocabulary", vocabulary);
+        }
         return ResponseEntity.ok(vocabularyCurationService.getAllVocabularyCurationRequests(ff, authentication));
     }
 
     @PutMapping(path = "approveOrRejectVocabularyCuration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void approveOrRejectVocabularyCuration(@RequestBody VocabularyCuration vocabularyCuration, @RequestParam boolean approved,
-                                                  @RequestParam String rejectionReason, @ApiIgnore Authentication authentication){
+                                                  @RequestParam(required = false) String rejectionReason, @ApiIgnore Authentication authentication){
         vocabularyCurationService.approveOrRejectVocabularyCuration(vocabularyCuration, approved, rejectionReason, authentication);
     }
 
