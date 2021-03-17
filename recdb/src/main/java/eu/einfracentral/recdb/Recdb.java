@@ -71,8 +71,8 @@ public class Recdb {
     @Qualifier("recdb.datasource")
     private DataSource datasource;
 
-//    @Scheduled(fixedDelay = 5 * 60 * 1000)
-    @Scheduled(cron = "0 0 1 * * *", zone = "Europe/Athens")
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
+//    @Scheduled(cron = "0 0 1 * * *", zone = "Europe/Athens")
     public void getViews() throws IOException {
         urlConstruct();
 
@@ -110,7 +110,7 @@ public class Recdb {
                 System.out.println(service_id);
 
 
-                System.out.println("email " + data[0] + " service id " + data[1]);
+                System.out.println("email: " + data[0] + " service id: " + data[1] + " value: " + event.sum_event_value);
                 jdbcTemplate.update("UPDATE view_count set visits = visits + ? WHERE user_id = ? " +
                                 "AND service_id = ?; INSERT INTO view_count (user_id, service_id, visits)" +
                                 "SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM view_count WHERE" +
@@ -118,7 +118,6 @@ public class Recdb {
                         event.sum_event_value, user_id, service_id, user_id, service_id, event.sum_event_value, user_id, service_id);
             }
         }
-        query = "CREATE RECOMMENDER serviceRec ON view_count USERS FROM user_id ITEMS FROM service_id EVENTS FROM visits USING ItemCosCF ";
 
         query = "SELECT service_name " +
                 "FROM services " +
