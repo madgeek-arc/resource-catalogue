@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
@@ -31,7 +30,7 @@ public class RecommendationController {
 
     @ApiOperation(value = "Given a specific user email, returns all Service Recommendations.")
     @GetMapping(path = "getRecommendationServices", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public List<String> getRecommendationServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public List<String> getRecommendationServices(@ApiIgnore Authentication auth) {
         return recommendationService.getRecommendationServices(auth);
     }
 }
