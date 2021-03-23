@@ -3,6 +3,7 @@ package eu.einfracentral.utils;
 import org.piwik.java.tracking.PiwikRequest;
 import org.piwik.java.tracking.PiwikTracker;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -34,6 +35,13 @@ public class MatomoInterceptor extends HandlerInterceptorAdapter {
 
         if (piwikTracker != null) {
             PiwikRequest piwikRequest = new PiwikRequest(siteId, new URL(request.getRequestURL().toString()));
+
+            piwikRequest.setActionName(request.getRequestURI());
+            piwikRequest.setUserId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+            try {
+                piwikRequest.setReferrerUrl(new URL(request.getHeader("Referer")));
+            } catch (Exception e) {}
+
 
             piwikTracker.sendRequestAsync(piwikRequest);
         }
