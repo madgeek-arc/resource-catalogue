@@ -33,7 +33,7 @@ public class MatomoInterceptor extends HandlerInterceptorAdapter {
         super.afterCompletion(request, response, handler, ex);
 
         if (piwikTracker != null) {
-            PiwikRequest piwikRequest = new PiwikRequest(siteId, new URL(request.getRequestURI()));
+            PiwikRequest piwikRequest = new PiwikRequest(siteId, new URL(request.getRequestURL().toString()));
 
             piwikTracker.sendRequestAsync(piwikRequest);
         }
