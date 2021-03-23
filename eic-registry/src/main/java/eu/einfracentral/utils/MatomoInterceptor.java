@@ -14,10 +14,10 @@ import java.net.URL;
 @Component
 public class MatomoInterceptor extends HandlerInterceptorAdapter {
 
-    @Value("apitracking.matomo.site")
+    @Value("${apitracking.matomo.site}")
     private Integer siteId;
 
-    @Value("apitracking.matomo.host")
+    @Value("${apitracking.matomo.host}")
     private String matomoUrl;
 
     private PiwikTracker piwikTracker = null;
