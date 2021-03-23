@@ -7,9 +7,13 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.RegistrationMailService;
+import eu.einfracentral.service.SearchServiceEIC;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.index.IndexField;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +24,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -30,6 +37,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
     private final InfraServiceService infraServiceService;
+    private List<String> browseBy;
+    private Map<String, String> labels;
 
     @Autowired
     private VocabularyService vocabularyService;
@@ -38,12 +47,50 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private FacetLabelService facetLabelService;
 
     @Autowired
+    private AbstractServiceManager abstractServiceManager;
+
+    @Autowired
+    private SearchServiceEIC searchServiceEIC;
+
+    @PostConstruct
+    void initLabels() {
+        resourceType = resourceTypeService.getResourceType(getResourceType());
+        Set<String> browseSet = new HashSet<>();
+        Map<String, Set<String>> sets = new HashMap<>();
+        labels = new HashMap<>();
+        labels.put("resourceType", "Resource Type");
+        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
+            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
+            labels.put(f.getName(), f.getLabel());
+            if (f.getLabel() != null) {
+                sets.get(f.getResourceType().getName()).add(f.getName());
+            }
+        }
+        boolean flag = true;
+        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
+            if (flag) {
+                browseSet.addAll(entry.getValue());
+                flag = false;
+            } else {
+                browseSet.retainAll(entry.getValue());
+            }
+        }
+        browseBy = new ArrayList<>();
+        browseBy.addAll(browseSet);
+        browseBy.add("resourceType");
+        java.util.Collections.sort(browseBy);
+        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
+    }
+
+
+    @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
-                                     InfraServiceService infraServiceService) {
+                                     InfraServiceService infraServiceService, AbstractServiceManager abstractServiceManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.infraServiceService = infraServiceService;
+        this.abstractServiceManager = abstractServiceManager;
     }
 
 
@@ -241,12 +288,14 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     public Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth) {
-        List<String> browseBy = new ArrayList<>();
-        browseBy.add("resourceType");
+        List<String> orderedBrowseBy = new ArrayList<>();
         browseBy.add("vocabulary");
         browseBy.add("status");
-        ff.setBrowseBy(browseBy);
-        ff.setResourceType(getResourceType());
+        orderedBrowseBy.add(browseBy.get(1));    // vocabulary
+        orderedBrowseBy.add(browseBy.get(2));    // status
+
+        ff.setBrowseBy(orderedBrowseBy);
+
         Browsing<VocabularyCuration> vocabularyCurationBrowsing;
 
         vocabularyCurationBrowsing = getResults(ff);
@@ -289,4 +338,23 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         logger.info("User " +User.of(authentication).getEmail()+ " is adding a new Vocabulary by resolving the vocabulary request " +vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
     }
+
+    @Override
+    protected Browsing<VocabularyCuration> getResults(FacetFilter filter) {
+        Browsing<VocabularyCuration> browsing;
+        filter.setResourceType(getResourceType());
+        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+
+        browsing.setFacets(abstractServiceManager.createCorrectFacets(browsing.getFacets(), filter));
+        return browsing;
+    }
+
+    private Browsing<VocabularyCuration> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
+        List<VocabularyCuration> results = paging.getResults()
+                .parallelStream()
+                .map(res -> parserPool.deserialize(res, typeParameterClass))
+                .collect(Collectors.toList());
+        return new Browsing<>(paging, results, labels);
+    }
+
 }
