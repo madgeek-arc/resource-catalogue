@@ -755,7 +755,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return browsing;
     }
 
-    private List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
+    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
         ff.setQuantity(0);
 
         Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
