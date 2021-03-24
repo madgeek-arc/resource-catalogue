@@ -290,9 +290,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     public Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth) {
         List<String> orderedBrowseBy = new ArrayList<>();
         browseBy.add("vocabulary");
-        browseBy.add("status");
+        orderedBrowseBy.add(browseBy.get(0));    // resourceType
         orderedBrowseBy.add(browseBy.get(1));    // vocabulary
-        orderedBrowseBy.add(browseBy.get(2));    // status
 
         ff.setBrowseBy(orderedBrowseBy);
 
