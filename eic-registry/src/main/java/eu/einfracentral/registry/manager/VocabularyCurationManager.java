@@ -115,20 +115,24 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
         }
+        // if vocabularyCuration doesn't exist
         validate(vocabularyCuration, auth);
-
-        super.add(vocabularyCuration, auth);
-        logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-
-        registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
+        if (vocabularyCuration.getVocabularyEntryRequests().size() == 1){
+            super.add(vocabularyCuration, auth);
+            logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
+            registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
+        // if vocabularyCuration already exists in "pending"
+        } else {
+            update(vocabularyCuration, auth);
+        }
         return vocabularyCuration;
     }
 
     @Override
     public VocabularyCuration update(VocabularyCuration vocabularyCuration, Authentication auth) {
-        validate(vocabularyCuration);
         super.update(vocabularyCuration, auth);
         logger.debug("Updating Vocabulary Curation {}", vocabularyCuration);
+        registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
         return vocabularyCuration;
     }
 
@@ -148,9 +152,11 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         // check if vocabularyCuration already exists in "pending"
         List<VocabularyCuration> allVocabularyCurations = getAll(ff, auth).getResults();
         for (VocabularyCuration vocCuration : allVocabularyCurations){
-            if (vocCuration.getEntryValueName().equals(vocabularyCuration.getEntryValueName()) &&
+            if (vocCuration.getEntryValueName().equalsIgnoreCase(vocabularyCuration.getEntryValueName()) &&
+                    vocCuration.getVocabulary().equalsIgnoreCase(vocabularyCuration.getVocabulary()) &&
                     vocCuration.getStatus().equals(VocabularyCuration.Status.PENDING.getKey())){
-                throw new ValidationException("Vocabulary Curation with name " + vocabularyCuration.getEntryValueName() + " already exists");
+                vocabularyCuration.setVocabularyEntryRequests(updateVocabularyRequestsList(vocCuration, vocabularyCuration));
+                vocabularyCuration.setId(vocCuration.getId());
             }
         }
 
@@ -336,6 +342,13 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         logger.info("User " +User.of(authentication).getEmail()+ " is adding a new Vocabulary by resolving the vocabulary request " +vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
+    }
+
+    List<VocabularyEntryRequest> updateVocabularyRequestsList(VocabularyCuration existingVocabularyCuration, VocabularyCuration newVocabularyCuration){
+        List<VocabularyEntryRequest> updatedEntryRequests = new ArrayList<>();
+        updatedEntryRequests.addAll(newVocabularyCuration.getVocabularyEntryRequests());
+        updatedEntryRequests.addAll(existingVocabularyCuration.getVocabularyEntryRequests());
+        return updatedEntryRequests;
     }
 
     @Override
