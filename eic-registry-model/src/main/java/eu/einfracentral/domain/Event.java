@@ -95,7 +95,7 @@ public class Event implements Identifiable {
     public enum UserActionType {
         FAVOURITE("FAVOURITE"),
         RATING("RATING"),
-        INTERNAL_VIEW("INTERNAL_VIEW"),
+        INTERNAL_VIEW("INTERNAL_VIEW"), // visits
         ORDER("ORDER"),
         EXTERNAL_VIEW("EXTERNAL_VIEW");
 
