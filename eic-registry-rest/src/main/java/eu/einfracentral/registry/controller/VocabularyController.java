@@ -54,13 +54,13 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns a tree structure of Categories")
+//    @ApiOperation(value = "Returns a tree structure of Categories")
     @GetMapping(path = "vocabularyTree/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns a map structure of vocabularies")
+//    @ApiOperation(value = "Returns a map structure of vocabularies")
     @GetMapping(path = "vocabularyMap", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
         return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
@@ -121,7 +121,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         vocabularyService.deleteAll(auth);
     }
 
-    @ApiOperation(value = "Delete all Vocs of a specific type")
+//    @ApiOperation(value = "Delete all Vocs of a specific type")
     @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @ApiIgnore Authentication auth) throws ResourceNotFoundException {

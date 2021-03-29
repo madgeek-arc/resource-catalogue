@@ -47,8 +47,9 @@ public class CSVController {
         ff.addFilter("latest", true);
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
         String csvData = listToCSV(infraServices.getResults());
+        String changeDelimeter = csvData.replaceAll(",", ";");
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
-        return ResponseEntity.ok(csvData);
+        return ResponseEntity.ok(changeDelimeter);
     }
 
     // Downloads a csv file with Provider entries
@@ -59,8 +60,9 @@ public class CSVController {
         ff.setQuantity(10000);
         Paging<ProviderBundle> providers = providerService.getAll(ff, auth);
         String csvData = listToCSV(providers.getResults());
+        String changeDelimeter = csvData.replaceAll(",", ";");
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
-        return ResponseEntity.ok(csvData);
+        return ResponseEntity.ok(changeDelimeter);
     }
 
     private static String listToCSV(List<?> list) {

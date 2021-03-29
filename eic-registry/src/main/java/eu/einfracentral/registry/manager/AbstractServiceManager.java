@@ -496,9 +496,14 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private List<RichService> createProviderInfo(List<RichService> richServices, Authentication auth) {
         for (RichService richService : richServices) {
             List<ProviderInfo> providerInfoList = new ArrayList<>();
-            List<String> allProviders = richService.getService().getResourceProviders();
-            if (!allProviders.contains(richService.getService().getResourceOrganisation())){
-                allProviders.add(richService.getService().getResourceOrganisation());
+            List<String> allProviders = new ArrayList<>();
+            allProviders.add(richService.getService().getResourceOrganisation());
+            if (richService.getService().getResourceProviders() != null && !richService.getService().getResourceProviders().isEmpty()){
+                for (String provider : richService.getService().getResourceProviders()){
+                    if (!provider.equals(richService.getService().getResourceOrganisation())){
+                        allProviders.add(provider);
+                    }
+                }
             }
             for (String provider : allProviders) {
                 if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
