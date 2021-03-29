@@ -88,25 +88,25 @@ public interface EventService extends ResourceService<Event, Authentication> {
     void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication);
 
     /**
-     * Set a rating on a service from the given user.
+     * Set a Visit Event on a Service.
      *
      * @param serviceId
      * @param value
      * @return
      */
-    Event setInternal(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setVisit(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
 
     /**
-     * Set a rating on a service from the given user.
+     * Set an AddToProject Event on a Service.
      *
      * @param serviceId
      * @param value
      * @return
      */
-    Event setExternal(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
 
     /**
-     * Set a rating on a service from the given user.
+     * Set an Order Event on a Service.
      *
      * @param serviceId
      * @param value
@@ -115,7 +115,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
     Event setOrder(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
 
     /**
-     * Set a rating on a service from the given user.
+     * Set a scheduled Rating on a Service.
      *
      * @param serviceId
      * @param value
@@ -124,7 +124,7 @@ public interface EventService extends ResourceService<Event, Authentication> {
     Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
 
     /**
-     * Set a rating on a service from the given user.
+     * Set a scheduled Favourite on a Service.
      *
      * @param serviceId
      * @param value
@@ -133,23 +133,23 @@ public interface EventService extends ResourceService<Event, Authentication> {
     Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
 
     /**
-     * Set a rating on a service from the given user.
+     * Get an aggregate of Visits on a specific Service.
      *
      * @param serviceId
      * @return
      */
-    int getServiceAggregatedInternals(String serviceId);
+    int getServiceAggregatedVisits(String serviceId);
 
     /**
-     * Set a rating on a service from the given user.
+     * Get an aggregate of AddToProject on a specific Service.
      *
      * @param serviceId
      * @return
      */
-    int getServiceAggregatedExternals(String serviceId);
+    int getServiceAggregatedAddToProject(String serviceId);
 
     /**
-     * Set a rating on a service from the given user.
+     * Get an aggregate of Orders on a specific Service.
      *
      * @param serviceId
      * @return

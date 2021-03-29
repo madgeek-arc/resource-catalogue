@@ -194,19 +194,19 @@ public class EventController extends ResourceController<Event, Authentication> {
         eventService.addVisitsOnDay(date, serviceId, noOfVisits, auth);
     }
 
-    @PostMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "visits/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setInternal(@PathVariable String id, @RequestParam("internal") Float internal) throws Exception {
-        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setInternal(id, internal), HttpStatus.OK);
-        logger.info("Someone Internal Viewed Service with id '{}'", id);
+    public ResponseEntity<Event> setVisit(@PathVariable String id, @RequestParam("visit") Float visit) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setVisit(id, visit), HttpStatus.OK);
+        logger.info("Someone Visited Service with id '{}'", id);
         return ret;
     }
 
-    @PostMapping(path = "external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "addToProject/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setExternal(@PathVariable String id, @RequestParam("external") Float external) throws Exception {
-        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setExternal(id, external), HttpStatus.OK);
-        logger.info("Someone External Viewed Service with id '{}'", id);
+    public ResponseEntity<Event> setAddToProject(@PathVariable String id, @RequestParam("addToProject") Float addToProject) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setAddToProject(id, addToProject), HttpStatus.OK);
+        logger.info("Someone Added To Project Service with id '{}'", id);
         return ret;
     }
 
@@ -218,14 +218,14 @@ public class EventController extends ResourceController<Event, Authentication> {
         return ret;
     }
 
-    @GetMapping(path = "internal/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Event>> getInternalViews() {
-        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.INTERNAL_VIEW.getKey()), HttpStatus.OK);
+    @GetMapping(path = "visits/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getAllVisits() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.VISIT.getKey()), HttpStatus.OK);
     }
 
-    @GetMapping(path = "external/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Event>> getExternalViews() {
-        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.EXTERNAL_VIEW.getKey()), HttpStatus.OK);
+    @GetMapping(path = "addToProject/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getAllAddToProject() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.ADD_TO_PROJECT.getKey()), HttpStatus.OK);
     }
 
     @GetMapping(path = "order/all", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -233,14 +233,14 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.ORDER.getKey()), HttpStatus.OK);
     }
 
-    @GetMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Event>> getServiceInternals(@PathVariable String id) {
-        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id), HttpStatus.OK);
+    @GetMapping(path = "visit/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceVisits(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.VISIT.getKey(), id), HttpStatus.OK);
     }
 
-    @GetMapping(path = "external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Event>> getServiceExternals(@PathVariable String id) {
-        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id), HttpStatus.OK);
+    @GetMapping(path = "addToProject/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceAddToProject(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.ADD_TO_PROJECT.getKey(), id), HttpStatus.OK);
     }
 
     @GetMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -248,14 +248,14 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.ORDER.getKey(), id), HttpStatus.OK);
     }
 
-    @GetMapping(path = "aggregate/internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public int getServiceAggregatedInternals(@PathVariable String id) {
-        return eventService.getServiceAggregatedInternals(id);
+    @GetMapping(path = "aggregate/visits/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedVisits(@PathVariable String id) {
+        return eventService.getServiceAggregatedVisits(id);
     }
 
-    @GetMapping(path = "aggregate/external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public int getServiceAggregatedExternals(@PathVariable String id) {
-        return eventService.getServiceAggregatedExternals(id);
+    @GetMapping(path = "aggregate/addToProject/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedAddToProject(@PathVariable String id) {
+        return eventService.getServiceAggregatedAddToProject(id);
     }
 
     @GetMapping(path = "aggregate/order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
