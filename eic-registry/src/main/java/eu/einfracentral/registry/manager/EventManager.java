@@ -298,6 +298,36 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
+    public Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
+        }
+        Event event;
+        event = new Event();
+        event.setService(serviceId);
+        event.setType(Event.UserActionType.FAVOURITE.getKey());
+        event.setValue(value);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new FAVOURITE Event: {}", event);
+        return event;
+    }
+
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
+    public Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
+        }
+        Event event;
+        event = new Event();
+        event.setService(serviceId);
+        event.setType(Event.UserActionType.RATING.getKey());
+        event.setValue(value);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new RATING Event: {}", event);
+        return event;
+    }
+
     public int getServiceAggregatedInternals(String id){
         int result = 0;
         List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id);
