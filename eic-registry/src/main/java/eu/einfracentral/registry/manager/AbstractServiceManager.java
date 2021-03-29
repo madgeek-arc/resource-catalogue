@@ -531,7 +531,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
      */
     private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
-        infraService.getService().setDescription(TextUtils.prettifyText(infraService.getService().getDescription(), specialCharacters));
         return infraService;
     }
 
@@ -755,7 +754,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return browsing;
     }
 
-    private List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
+    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
         ff.setQuantity(0);
 
         Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);

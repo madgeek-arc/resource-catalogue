@@ -7,23 +7,28 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.RegistrationMailService;
+import eu.einfracentral.service.SearchServiceEIC;
+import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.index.IndexField;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.naming.AuthenticationNotSupportedException;
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @Component
 public class VocabularyCurationManager extends ResourceManager<VocabularyCuration> implements VocabularyCurationService<VocabularyCuration, Authentication> {
@@ -32,17 +37,60 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
     private final InfraServiceService infraServiceService;
+    private List<String> browseBy;
+    private Map<String, String> labels;
 
     @Autowired
     private VocabularyService vocabularyService;
 
     @Autowired
+    private FacetLabelService facetLabelService;
+
+    @Autowired
+    private AbstractServiceManager abstractServiceManager;
+
+    @Autowired
+    private SearchServiceEIC searchServiceEIC;
+
+    @PostConstruct
+    void initLabels() {
+        resourceType = resourceTypeService.getResourceType(getResourceType());
+        Set<String> browseSet = new HashSet<>();
+        Map<String, Set<String>> sets = new HashMap<>();
+        labels = new HashMap<>();
+        labels.put("resourceType", "Resource Type");
+        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
+            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
+            labels.put(f.getName(), f.getLabel());
+            if (f.getLabel() != null) {
+                sets.get(f.getResourceType().getName()).add(f.getName());
+            }
+        }
+        boolean flag = true;
+        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
+            if (flag) {
+                browseSet.addAll(entry.getValue());
+                flag = false;
+            } else {
+                browseSet.retainAll(entry.getValue());
+            }
+        }
+        browseBy = new ArrayList<>();
+        browseBy.addAll(browseSet);
+        browseBy.add("resourceType");
+        java.util.Collections.sort(browseBy);
+        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
+    }
+
+
+    @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
-                                     InfraServiceService infraServiceService) {
+                                     InfraServiceService infraServiceService, AbstractServiceManager abstractServiceManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.infraServiceService = infraServiceService;
+        this.abstractServiceManager = abstractServiceManager;
     }
 
 
@@ -67,20 +115,24 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             vocEntryRequest.setDateOfRequest(now());
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
         }
+        // if vocabularyCuration doesn't exist
         validate(vocabularyCuration, auth);
-
-        super.add(vocabularyCuration, auth);
-        logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-
-        registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
+        if (vocabularyCuration.getVocabularyEntryRequests().size() == 1){
+            super.add(vocabularyCuration, auth);
+            logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
+            registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
+        // if vocabularyCuration already exists in "pending"
+        } else {
+            update(vocabularyCuration, auth);
+        }
         return vocabularyCuration;
     }
 
     @Override
     public VocabularyCuration update(VocabularyCuration vocabularyCuration, Authentication auth) {
-        validate(vocabularyCuration);
         super.update(vocabularyCuration, auth);
         logger.debug("Updating Vocabulary Curation {}", vocabularyCuration);
+        registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
         return vocabularyCuration;
     }
 
@@ -100,9 +152,11 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         // check if vocabularyCuration already exists in "pending"
         List<VocabularyCuration> allVocabularyCurations = getAll(ff, auth).getResults();
         for (VocabularyCuration vocCuration : allVocabularyCurations){
-            if (vocCuration.getEntryValueName().equals(vocabularyCuration.getEntryValueName()) &&
+            if (vocCuration.getEntryValueName().equalsIgnoreCase(vocabularyCuration.getEntryValueName()) &&
+                    vocCuration.getVocabulary().equalsIgnoreCase(vocabularyCuration.getVocabulary()) &&
                     vocCuration.getStatus().equals(VocabularyCuration.Status.PENDING.getKey())){
-                throw new ValidationException("Vocabulary Curation with name " + vocabularyCuration.getEntryValueName() + " already exists");
+                vocabularyCuration.setVocabularyEntryRequests(updateVocabularyRequestsList(vocCuration, vocabularyCuration));
+                vocabularyCuration.setId(vocCuration.getId());
             }
         }
 
@@ -120,7 +174,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         List<Vocabulary> specificVocs;
         List<String> specificVocsIds = new ArrayList<>();
         switch(vocabularyCuration.getVocabulary()){
-            case "category":
+            case "CATEGORY":
                 if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")){
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
@@ -133,32 +187,41 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                     }
                 }
                 break;
-            case "subcategory":
+            case "SUBCATEGORY":
                 if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")){
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.CATEGORY);
-                    if (!specificVocs.contains(vocabularyCuration.getParent())) {
+                    for (Vocabulary vocabulary : specificVocs){
+                        specificVocsIds.add(vocabulary.getId());
+                    }
+                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
                         throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
-            case "provider meril scientific subdomain":
+            case "PROVIDER MERIL SCIENTIFIC SUBDOMAIN":
                 if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")){
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN);
-                    if (!specificVocs.contains(vocabularyCuration.getParent())) {
+                    for (Vocabulary vocabulary : specificVocs){
+                        specificVocsIds.add(vocabulary.getId());
+                    }
+                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
                         throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
-            case "scientific subdomain":
+            case "SCIENTIFIC SUBDOMAIN":
                 if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")){
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.SCIENTIFIC_DOMAIN);
-                    if (!specificVocs.contains(vocabularyCuration.getParent())) {
+                    for (Vocabulary vocabulary : specificVocs){
+                        specificVocsIds.add(vocabulary.getId());
+                    }
+                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
                         throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
@@ -231,7 +294,19 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     public Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth) {
-        Browsing<VocabularyCuration> vocabularyCurationBrowsing = super.getAll(ff, auth);
+        List<String> orderedBrowseBy = new ArrayList<>();
+        browseBy.add("vocabulary");
+        orderedBrowseBy.add(browseBy.get(0));    // resourceType
+        orderedBrowseBy.add(browseBy.get(1));    // vocabulary
+
+        ff.setBrowseBy(orderedBrowseBy);
+
+        Browsing<VocabularyCuration> vocabularyCurationBrowsing;
+
+        vocabularyCurationBrowsing = getResults(ff);
+        if (!vocabularyCurationBrowsing.getResults().isEmpty() && !vocabularyCurationBrowsing.getFacets().isEmpty()) {
+            vocabularyCurationBrowsing.setFacets(facetLabelService.createLabels(vocabularyCurationBrowsing.getFacets()));
+        }
         return vocabularyCurationBrowsing;
     }
 
@@ -253,12 +328,14 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     public void createNewVocabulary(VocabularyCuration vocabularyCuration, Authentication authentication){
         Vocabulary vocabulary = new Vocabulary();
+        Map<String, String> extras = new HashMap<>();
         String valueNameFormed = vocabularyCuration.getEntryValueName().replaceAll(" ", "_").toLowerCase();
         String vocabularyFormed = vocabularyCuration.getVocabulary().replaceAll(" ", "_").toLowerCase();
         vocabulary.setId(vocabularyFormed+"-"+valueNameFormed);
         vocabulary.setDescription("Vocabulary submitted by " +vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
         vocabulary.setName(vocabularyCuration.getEntryValueName());
         vocabulary.setType(Vocabulary.Type.valueOf(vocabularyFormed.toUpperCase()));
+        vocabulary.setExtras(extras);
         if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().equals("")){
             String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
             vocabulary.setParentId(parentFormed);
@@ -266,4 +343,30 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         logger.info("User " +User.of(authentication).getEmail()+ " is adding a new Vocabulary by resolving the vocabulary request " +vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
     }
+
+    List<VocabularyEntryRequest> updateVocabularyRequestsList(VocabularyCuration existingVocabularyCuration, VocabularyCuration newVocabularyCuration){
+        List<VocabularyEntryRequest> updatedEntryRequests = new ArrayList<>();
+        updatedEntryRequests.addAll(newVocabularyCuration.getVocabularyEntryRequests());
+        updatedEntryRequests.addAll(existingVocabularyCuration.getVocabularyEntryRequests());
+        return updatedEntryRequests;
+    }
+
+    @Override
+    protected Browsing<VocabularyCuration> getResults(FacetFilter filter) {
+        Browsing<VocabularyCuration> browsing;
+        filter.setResourceType(getResourceType());
+        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+
+        browsing.setFacets(abstractServiceManager.createCorrectFacets(browsing.getFacets(), filter));
+        return browsing;
+    }
+
+    private Browsing<VocabularyCuration> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
+        List<VocabularyCuration> results = paging.getResults()
+                .parallelStream()
+                .map(res -> parserPool.deserialize(res, typeParameterClass))
+                .collect(Collectors.toList());
+        return new Browsing<>(paging, results, labels);
+    }
+
 }
