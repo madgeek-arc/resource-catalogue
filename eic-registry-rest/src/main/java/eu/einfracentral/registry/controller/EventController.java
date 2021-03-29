@@ -67,9 +67,9 @@ public class EventController extends ResourceController<Event, Authentication> {
     // Set a Service as favorite for a user.
     @PostMapping(path = "favourite/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam boolean value, @ApiIgnore Authentication authentication) throws Exception {
+    public ResponseEntity<Event> setFavourite(@PathVariable String id, @RequestParam Float value, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setFavourite(id, value, authentication), HttpStatus.OK);
-        if (value) {
+        if (value == 1) {
             logger.info("User '{}' set Service with id '{}' as FAVORITE", authentication, id);
         } else {
             logger.info("User '{}' set Service with id '{}' as UNFAVORITE", authentication, id);
@@ -79,7 +79,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     // Check if a Service is favourited by the authenticated user.
     @GetMapping(path = "favourite/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<String> getFavourite(@PathVariable String id, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Float> getFavourite(@PathVariable String id, @ApiIgnore Authentication authentication) {
         List<Event> events;
         try {
             events = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), id, authentication);
@@ -87,9 +87,9 @@ public class EventController extends ResourceController<Event, Authentication> {
                 return new ResponseEntity<>(events.get(0).getValue(), HttpStatus.OK);
             }
         } catch (Exception e) {
-            logger.info(e + "\nReturning favourite = 0");
+            logger.info(String.format("%s\nReturning favourite = 0", e));
         }
-        return new ResponseEntity<>("0", HttpStatus.OK);
+        return new ResponseEntity<>(Float.parseFloat("0"), HttpStatus.OK);
     }
 
     // Retrieve all the favourited events.
@@ -116,7 +116,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     // Set a rating to a Service from the authenticated user.
     @PostMapping(path = "rating/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") String rating, @ApiIgnore Authentication authentication) throws Exception {
+    public ResponseEntity<Event> setUserRating(@PathVariable String id, @RequestParam("rating") Float rating, @ApiIgnore Authentication authentication) throws Exception {
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setRating(id, rating, authentication), HttpStatus.OK);
         logger.info("User '{}' rated Service with id '{}', rating value: {}", authentication, id, rating);
         return ret;
@@ -124,7 +124,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     // Get the rating of the authenticated user.
     @GetMapping(path = "rating/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<String> getRating(@PathVariable String id, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Float> getRating(@PathVariable String id, @ApiIgnore Authentication authentication) {
         List<Event> events;
         try {
             events = eventService.getEvents(Event.UserActionType.RATING.getKey(), id, authentication);
@@ -134,7 +134,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         } catch (Exception e) {
             logger.info(e + "\nReturning rate = null");
         }
-        return new ResponseEntity<>("null", HttpStatus.OK);
+        return new ResponseEntity<>(Float.parseFloat("null"), HttpStatus.OK);
     }
 
     // Retrieve all rating events.
@@ -149,7 +149,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         try {
             return new ResponseEntity<>(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication), HttpStatus.OK);
         } catch (Exception e) {
-            logger.info(e + "\nReturning ratings = null");
+            logger.info(String.format("%s\nReturning ratings = null", e));
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -189,8 +189,77 @@ public class EventController extends ResourceController<Event, Authentication> {
     @PutMapping(path = "addVisitsOnDay", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addVisitsOnDay(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date date, @RequestParam String serviceId,
-                               @RequestParam int noOfVisits, Authentication auth) {
+                               @RequestParam Float noOfVisits, Authentication auth) {
         logger.info("User '{}' attempting to add '{}' visits on date '{}' for service '{}'", auth.getName(), noOfVisits, date, serviceId);
         eventService.addVisitsOnDay(date, serviceId, noOfVisits, auth);
+    }
+
+    @PostMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Event> setInternal(@PathVariable String id, @RequestParam("internal") Float internal) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setInternal(id, internal), HttpStatus.OK);
+        logger.info("Someone Internal Viewed Service with id '{}'", id);
+        return ret;
+    }
+
+    @PostMapping(path = "external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Event> setExternal(@PathVariable String id, @RequestParam("external") Float external) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setExternal(id, external), HttpStatus.OK);
+        logger.info("Someone External Viewed Service with id '{}'", id);
+        return ret;
+    }
+
+    @PostMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Event> setOrder(@PathVariable String id, @RequestParam("order") Float order) throws Exception {
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setOrder(id, order), HttpStatus.OK);
+        logger.info("Someone Ordered Service with id '{}'", id);
+        return ret;
+    }
+
+    @GetMapping(path = "internal/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getInternalViews() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.INTERNAL_VIEW.getKey()), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "external/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getExternalViews() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.EXTERNAL_VIEW.getKey()), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "order/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getOrders() {
+        return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.ORDER.getKey()), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceInternals(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceExternals(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceOrders(@PathVariable String id) {
+        return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.ORDER.getKey(), id), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "aggregate/internal/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedInternals(@PathVariable String id) {
+        return eventService.getServiceAggregatedInternals(id);
+    }
+
+    @GetMapping(path = "aggregate/external/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedExternals(@PathVariable String id) {
+        return eventService.getServiceAggregatedExternals(id);
+    }
+
+    @GetMapping(path = "aggregate/order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedOrders(@PathVariable String id) {
+        return eventService.getServiceAggregatedOrders(id);
     }
 }

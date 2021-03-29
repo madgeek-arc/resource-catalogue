@@ -43,7 +43,7 @@ public class UserEventsController {
     @GetMapping(path = "favourites", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RichService>> favourites(Authentication auth) {
 
-        Map<String, String> favouriteServices = new HashMap<>();
+            Map<String, Float> favouriteServices = new HashMap<>();
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), auth);
         List<RichService> services = new ArrayList<>();
 
@@ -60,8 +60,8 @@ public class UserEventsController {
                 favouriteServices.putIfAbsent(userEvent.getService(), userEvent.getValue());
             }
         }
-        for (Map.Entry<String, String> favouriteService : favouriteServices.entrySet()) {
-            if ("1".equals(favouriteService.getValue())) { // "1" is true
+        for (Map.Entry<String, Float> favouriteService : favouriteServices.entrySet()) {
+            if (favouriteService.getValue() == 1) { // "1" is true
                 services.add(infraServiceService.getRichService(favouriteService.getKey(), "latest", auth));
             }
         }
@@ -81,7 +81,7 @@ public class UserEventsController {
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.RATING.getKey(), auth);
         List<RichService> services = new ArrayList<>();
         for (Event userEvent : userEvents) {
-            serviceRatings.putIfAbsent(userEvent.getService(), Float.parseFloat(userEvent.getValue()));
+            serviceRatings.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
             services.add(infraServiceService.getRichService(serviceRating.getKey(), "latest", auth));

@@ -19,6 +19,12 @@
         <module>
             eic-registry
         </module>
+        <module>
+            matomo-data-parser
+        </module>
+        <module>
+            recdb
+        </module>
     </modules>
 
     <licenses>
@@ -322,6 +328,7 @@
             </snapshots>
         </repository>
     </repositories>
+
 
     <build>
         <pluginManagement>

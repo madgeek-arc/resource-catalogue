@@ -29,7 +29,6 @@ public class FieldValidator {
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IndicatorManager indicatorService;
 
-
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,

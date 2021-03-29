@@ -26,12 +26,12 @@ public class RichService {
     private List<String> fundingProgramNames;
     private String orderTypeName;
 
-    private int views;
-    private int ratings;
+    private float views;
+    private float ratings;
     private float userRate;
     private float hasRate;
-    private int favourites;
-    private boolean isFavourite;
+    private float favourites;
+    private float isFavourite;
 
     private List<Category> categories;
     private List<ScientificDomain> domains;
@@ -158,19 +158,19 @@ public class RichService {
         this.orderTypeName = orderTypeName;
     }
 
-    public int getViews() {
+    public float getViews() {
         return views;
     }
 
-    public void setViews(int views) {
+    public void setViews(float views) {
         this.views = views;
     }
 
-    public int getRatings() {
+    public float getRatings() {
         return ratings;
     }
 
-    public void setRatings(int ratings) {
+    public void setRatings(float ratings) {
         this.ratings = ratings;
     }
 
@@ -190,19 +190,19 @@ public class RichService {
         this.hasRate = hasRate;
     }
 
-    public int getFavourites() {
+    public float getFavourites() {
         return favourites;
     }
 
-    public void setFavourites(int favourites) {
+    public void setFavourites(float favourites) {
         this.favourites = favourites;
     }
 
-    public boolean isFavourite() {
+    public float isFavourite() {
         return isFavourite;
     }
 
-    public void setFavourite(boolean favourite) {
+    public void setFavourite(float favourite) {
         isFavourite = favourite;
     }
 
