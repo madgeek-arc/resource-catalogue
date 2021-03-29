@@ -118,6 +118,24 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * Set a rating on a service from the given user.
      *
      * @param serviceId
+     * @param value
+     * @return
+     */
+    Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
+     * @param value
+     * @return
+     */
+    Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+
+    /**
+     * Set a rating on a service from the given user.
+     *
+     * @param serviceId
      * @return
      */
     int getServiceAggregatedInternals(String serviceId);
