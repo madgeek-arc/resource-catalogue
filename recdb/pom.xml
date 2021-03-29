@@ -127,6 +127,18 @@
             <version>1.3.3</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.einfracentral</groupId>
+            <artifactId>eic-registry-model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.einfracentral</groupId>
+            <artifactId>eic-registry-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
