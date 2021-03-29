@@ -12,7 +12,8 @@ import org.springframework.web.servlet.config.annotation.*;
 @ComponentScan({
         "eu.openminted.registry.core.controllers",
         "eu.einfracentral.controllers",
-        "eu.einfracentral.registry.controller"})
+        "eu.einfracentral.registry.controller",
+        "eu.einfracentral.recdb.controllers"})
 @EnableWebMvc
 @EnableAspectJAutoProxy
 public class WebMvcConfig implements WebMvcConfigurer {

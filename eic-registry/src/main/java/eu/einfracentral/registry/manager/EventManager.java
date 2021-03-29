@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.AuthenticationInfo;
@@ -62,7 +63,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
-        event.setUser(AuthenticationInfo.getSub(auth));
+        if (auth != null){
+            event.setUser(AuthenticationInfo.getSub(auth));
+        } else {
+            event.setUser("-");
+        }
         Event ret = super.add(event, auth);
         logger.debug("Adding Event: {}", event);
         return ret;
@@ -79,52 +84,54 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @Override
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setFavourite(String serviceId, boolean value, Authentication authentication) throws ResourceNotFoundException {
+    public Event setFavourite(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
-        String favouriteValue = value ? "1" : "0";
+        if (value != 1 && value != 0) {
+            throw new ValidationException("Values of Favoring range between 0 - Unfavorite and 1 - Favorite");
+        }
         List<Event> events = getEvents(Event.UserActionType.FAVOURITE.getKey(), serviceId, authentication);
         Event event;
         if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
             event = events.get(0);
             delete(event);
             logger.debug("Deleting previous FAVORITE Event '{}' because it happened more than once in the same day.", event);
-        } else {
-            event = new Event();
-            event.setService(serviceId);
-            event.setUser(AuthenticationInfo.getSub(authentication));
-            event.setType(Event.UserActionType.FAVOURITE.getKey());
-            event.setValue(favouriteValue);
-            event = add(event, null);
-            logger.debug("Adding a new FAVORITE Event: {}", event);
         }
+        event = new Event();
+        event.setService(serviceId);
+        event.setUser(AuthenticationInfo.getSub(authentication));
+        event.setType(Event.UserActionType.FAVOURITE.getKey());
+        event.setValue(value);
+        event = add(event, authentication); // remove auth
+        logger.debug("Adding a new FAVORITE Event: {}", event);
         return event;
     }
 
     @Override
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setRating(String serviceId, String value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
+    public Event setRating(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
-        if (Long.parseLong(value) <= 0 || Long.parseLong(value) > 5) {
-            throw new NumberParseException(NumberParseException.ErrorType.valueOf(value), "Rating value must be between [1,5]");
+        if (value <= 0 || value > 5) {
+            throw new ValidationException("Values of Rating range between 0 and 5");
         }
         List<Event> events = getEvents(Event.UserActionType.RATING.getKey(), serviceId, authentication);
         Event event;
         if (!events.isEmpty() && sameDay(events.get(0).getInstant())) {
             event = events.get(0);
             event.setValue(value);
-            event = update(event, null);
+            event = update(event, authentication);
             logger.debug("Updating RATING Event: {}", event);
+         //
         } else {
             event = new Event();
             event.setService(serviceId);
             event.setUser(AuthenticationInfo.getSub(authentication));
             event.setType(Event.UserActionType.RATING.getKey());
             event.setValue(value);
-            event = add(event, null);
+            event = add(event, authentication); //remove auth
             logger.debug("Adding a new RATING Event: {}", event);
         }
         return event;
@@ -202,7 +209,6 @@ public class EventManager extends ResourceManager<Event> implements EventService
             List<Float> eventsValues = userEventsMap.values()
                     .stream()
                     .map(Event::getValue)
-                    .map(Float::parseFloat)
                     .collect(Collectors.toList());
             allServiceEvents.put(service, eventsValues);
         }
@@ -223,8 +229,8 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return midnight.getTimeInMillis() < instant;
     }
 
-    public void addVisitsOnDay(Date date, String serviceId, int noOfVisits, Authentication authentication) {
-        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.AGGREGATED_VISITS.toString(), serviceId);
+    public void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication) {
+        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.INTERNAL_VIEW.toString(), serviceId);
         for (Event event : serviceEvents){
 
             // Compare the event.getInstant(long) to user's give date
@@ -237,8 +243,8 @@ public class EventManager extends ResourceManager<Event> implements EventService
                     cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
 
             if (event.getType().equals("AGGREGATED_VISITS") && sameDay) {
-                int oldVisits = Integer.parseInt(event.getValue());
-                String newVisits = Integer.toString(oldVisits+noOfVisits);
+                Float oldVisits = event.getValue();
+                Float newVisits =oldVisits+noOfVisits;
                 event.setValue(newVisits);
                 update(event, authentication);
             } else{
@@ -246,4 +252,107 @@ public class EventManager extends ResourceManager<Event> implements EventService
             }
         }
     }
+
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
+    public Event setInternal(String serviceId, Float value) throws ResourceNotFoundException {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
+        }
+        Event event;
+        event = new Event();
+        event.setService(serviceId);
+        event.setType(Event.UserActionType.INTERNAL_VIEW.getKey());
+        event.setValue(value);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new INTERNAL_VIEW Event: {}", event);
+        return event;
+    }
+
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
+    public Event setExternal(String serviceId, Float value) throws ResourceNotFoundException {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
+        }
+        Event event;
+        event = new Event();
+        event.setService(serviceId);
+        event.setType(Event.UserActionType.EXTERNAL_VIEW.getKey());
+        event.setValue(value);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new EXTERNAL_VIEW Event: {}", event);
+        return event;
+    }
+
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
+    public Event setOrder(String serviceId, Float value) throws ResourceNotFoundException {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
+        }
+        Event event;
+        event = new Event();
+        event.setService(serviceId);
+        event.setType(Event.UserActionType.ORDER.getKey());
+        event.setValue(value);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new ORDER Event: {}", event);
+        return event;
+    }
+
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
+    public Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
+        }
+        Event event;
+        event = new Event();
+        event.setService(serviceId);
+        event.setType(Event.UserActionType.FAVOURITE.getKey());
+        event.setValue(value);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new FAVOURITE Event: {}", event);
+        return event;
+    }
+
+    @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
+    public Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException {
+        if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
+            throw new ResourceNotFoundException("infra_service", serviceId);
+        }
+        Event event;
+        event = new Event();
+        event.setService(serviceId);
+        event.setType(Event.UserActionType.RATING.getKey());
+        event.setValue(value);
+        event = add(event, null); // remove auth
+        logger.debug("Adding a new RATING Event: {}", event);
+        return event;
+    }
+
+    public int getServiceAggregatedInternals(String id){
+        int result = 0;
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id);
+        for (Event event : serviceAggregatedInternals){
+            result += event.getValue();
+        }
+        return result;
+    }
+
+    public int getServiceAggregatedExternals(String id){
+        int result = 0;
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id);
+        for (Event event : serviceAggregatedInternals){
+            result += event.getValue();
+        }
+        return result;
+    }
+
+    public int getServiceAggregatedOrders(String id){
+        int result = 0;
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.ORDER.getKey(), id);
+        for (Event event : serviceAggregatedInternals){
+            result += event.getValue();
+        }
+        return result;
+    }
+
 }
