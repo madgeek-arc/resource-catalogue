@@ -59,8 +59,8 @@ public class DataParser {
         serviceFavourites = String.format(serviceFavouritesTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
     }
 
-    @Scheduled(fixedDelay = (20000))
-//    @Scheduled(cron = "0 50 1 * * *")
+//    @Scheduled(fixedDelay = (20000))
+    @Scheduled(cron = "0 50 1 * * *")
     public void getServiceVisits() {
         JsonNode json = parse(getMatomoResponse(serviceVisits));
         Map<String, Float> results = new HashMap<>();
@@ -89,8 +89,8 @@ public class DataParser {
         }
     }
 
-        @Scheduled(fixedDelay = (20000))
-//    @Scheduled(cron = "0 50 1 * * *")
+//        @Scheduled(fixedDelay = (20000))
+    @Scheduled(cron = "0 50 1 * * *")
     public void getServiceRatings() {
         JsonNode json = parse(getMatomoResponse(serviceRatings));
         Map<String, Float> results = new HashMap<>();
@@ -119,8 +119,8 @@ public class DataParser {
         }
     }
 
-    @Scheduled(fixedDelay = (20000))
-//    @Scheduled(cron = "0 50 1 * * *")
+//    @Scheduled(fixedDelay = (20000))
+    @Scheduled(cron = "0 50 1 * * *")
     public void getServiceFavourites() {
         JsonNode json = parse(getMatomoResponse(serviceFavourites));
         Map<String, Float> results = new HashMap<>();
