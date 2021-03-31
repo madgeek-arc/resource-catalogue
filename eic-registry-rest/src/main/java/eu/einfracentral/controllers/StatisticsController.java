@@ -55,7 +55,7 @@ public class StatisticsController {
 
 //    @ApiOperation(value = "Get aggregate visits per interval for all services offered by a provider.")
     @GetMapping(path = "provider/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Map<String, Integer>>> pVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    public ResponseEntity<Map<String, Integer>> pVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.providerVisits(id, by), HttpStatus.OK);
     }
 

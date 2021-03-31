@@ -334,14 +334,19 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    public Map<String, Map<String, Integer>> providerVisits(String id, Interval by) {
-        Map<String, Integer> innerMap = new HashMap<>();
-        Map<String, Map<String, Integer>> outterMap = new HashMap<>();
+    public Map<String, Integer> providerVisits(String id, Interval by) {
+        Map<String, Integer> results = new HashMap<>();
         for (Service service : providerService.getServices(id)){
-            innerMap = visits(service.getId(),by);
-            outterMap.put(service.getId(), innerMap);
+            Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(),by).entrySet();
+            for (Map.Entry<String, Integer> entry : entrySet){
+                if (!results.containsKey(entry.getKey())){
+                    results.put(entry.getKey(), entry.getValue());
+                } else {
+                    results.put(entry.getKey(), results.get(entry.getKey())+entry.getValue());
+                }
+            }
         }
-        return outterMap;
+        return results;
     }
 
     @Override
