@@ -12,7 +12,6 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
-import eu.openminted.registry.core.configuration.ElasticConfiguration;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -49,7 +48,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -271,25 +269,79 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
-    public Map<String, Integer> visits(String id, Interval by) {
-        try {
-            return analyticsService.getVisitsForLabel("/service/" + id, by);
-        } catch (Exception e) {
-            logger.error("Could not find Matomo analytics", e);
-        }
-        return new HashMap<>();
+    public Map<String, Integer> addToProject(String id, Interval by) {
+        final long[] totalDocCounts = new long[2]; //0 - not added, 1 - added
+        List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.ADD_TO_PROJECT.getKey(), by).getBuckets();
+        return new TreeMap<>(buckets.stream().collect(
+                Collectors.toMap(
+                        MultiBucketsAggregation.Bucket::getKeyAsString,
+                        bucket -> {
+                            Terms subTerm = bucket.getAggregations().get("value");
+                            if (subTerm.getBuckets() != null) {
+                                totalDocCounts[0] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 0 ? subBucket.getDocCount() : 0
+                                ).sum();
+                                totalDocCounts[1] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
+                                ).sum();
+                            }
+                            return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
+                        }
+                )
+        ));
     }
 
     @Override
-    public Map<String, Integer> providerVisits(String id, Interval by) {
-        Map<String, Integer> results = providerService.getServices(id)
+    public Map<String, Integer> providerAddToProject(String id, Interval by) {
+        Map<String, Integer> providerAddToProject = providerService.getServices(id)
                 .stream()
-                .flatMap(s -> visits(s.getId(), by).entrySet().stream())
+                .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
 
-        Map<String, Integer> sortedResults = new TreeMap<>(results);
-        return sortedResults;
+        return new TreeMap<>(providerAddToProject);
+    }
+
+    @Override
+    @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
+    public Map<String, Integer> visits(String id, Interval by) {
+        final long[] totalDocCounts = new long[1];
+        List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.VISIT.getKey(), by).getBuckets();
+        return new TreeMap<>(buckets.stream().collect(
+                Collectors.toMap(
+                        MultiBucketsAggregation.Bucket::getKeyAsString,
+                        bucket -> {
+                            Terms subTerm = bucket.getAggregations().get("value");
+                            if (subTerm.getBuckets() != null) {
+                                for (int i=0; i<subTerm.getBuckets().size(); i++){
+                                    Double key = (Double)subTerm.getBuckets().get(i).getKey();
+                                    Integer keyToInt = key.intValue();
+                                    int totalVistisOnBucket = keyToInt * Integer.parseInt(String.valueOf(subTerm.getBuckets().get(i).getDocCount()));
+                                    totalDocCounts[0] += totalVistisOnBucket;
+                                }
+                            }
+                            return (int) Math.max(totalDocCounts[0], 0);
+                        }
+                )
+        ));
+
+        // alternatively - fetching data from matomo
+//        try {
+//            return analyticsService.getVisitsForLabel("/service/" + id, by);
+//        } catch (Exception e) {
+//            logger.error("Could not find Matomo analytics", e);
+//        }
+//        return new HashMap<>();
+    }
+
+    @Override
+    public Map<String, Map<String, Integer>> providerVisits(String id, Interval by) {
+        Map<String, Integer> innerMap = new HashMap<>();
+        Map<String, Map<String, Integer>> outterMap = new HashMap<>();
+        for (Service service : providerService.getServices(id)){
+            innerMap = visits(service.getId(),by);
+            outterMap.put(service.getId(), innerMap);
+        }
+        return outterMap;
     }
 
     @Override
