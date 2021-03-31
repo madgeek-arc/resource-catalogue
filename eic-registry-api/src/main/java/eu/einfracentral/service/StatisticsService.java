@@ -84,7 +84,7 @@ public interface StatisticsService {
      * @param by
      * @return
      */
-    Map<String, Map<String, Integer>> providerVisits(String providerId, Interval by);
+    Map<String, Integer> providerVisits(String providerId, Interval by);
 
     /**
      * Get visitation percentages of a provider's services for the specified interval.
