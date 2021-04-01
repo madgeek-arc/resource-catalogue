@@ -9,6 +9,7 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -30,15 +31,24 @@ import java.util.Spliterators;
 public class DataParser {
 
     private static final Logger logger = LogManager.getLogger(DataParser.class);
-    private static final String serviceVisitsTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=today";
-    private static final String serviceRatingsTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=today";
-    private static final String serviceFavouritesTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=today";
+    private static final String serviceVisitsTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String serviceRatingsTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String serviceAddToProjectTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=yesterday";
     private String serviceVisits;
     private String serviceRatings;
-    private String serviceFavourites;
+    private String serviceAddToProject;
     private RestTemplate restTemplate;
     private HttpHeaders headers;
     private EventService eventService;
+
+    @Value("${matomoHost:localhost}")
+    private String matomoHost;
+
+    @Value("${matomoToken:}")
+    private String matomoToken;
+
+    @Value("${matomoSiteId:1}")
+    private String matomoSiteId;
 
     @Autowired
     DataParser(EventService eventService) {
@@ -51,16 +61,13 @@ public class DataParser {
         headers = new HttpHeaders();
         String authorizationHeader = "";
         headers.add("Authorization", authorizationHeader);
-        String matomoHost = "https://providers.eosc-portal.eu/matomo";
-        String matomoToken = "c30102091f049bc3dceff09abafeb76c";
-        String matomoSiteId = "1";
         serviceVisits = String.format(serviceVisitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
         serviceRatings = String.format(serviceRatingsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
-        serviceFavourites = String.format(serviceFavouritesTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
+        serviceAddToProject = String.format(serviceAddToProjectTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
     }
 
-//    @Scheduled(fixedDelay = (20000))
-    @Scheduled(cron = "0 50 1 * * *")
+    //    @Scheduled(fixedDelay = (20000))
+    @Scheduled(cron = "0 30 2 * * *")
     public void getServiceVisits() {
         JsonNode json = parse(getMatomoResponse(serviceVisits));
         Map<String, Float> results = new HashMap<>();
@@ -89,8 +96,8 @@ public class DataParser {
         }
     }
 
-//        @Scheduled(fixedDelay = (20000))
-    @Scheduled(cron = "0 50 1 * * *")
+    //        @Scheduled(fixedDelay = (20000))
+    @Scheduled(cron = "0 30 2 * * *")
     public void getServiceRatings() {
         JsonNode json = parse(getMatomoResponse(serviceRatings));
         Map<String, Float> results = new HashMap<>();
@@ -119,18 +126,18 @@ public class DataParser {
         }
     }
 
-//    @Scheduled(fixedDelay = (20000))
-    @Scheduled(cron = "0 50 1 * * *")
-    public void getServiceFavourites() {
-        JsonNode json = parse(getMatomoResponse(serviceFavourites));
+    //    @Scheduled(fixedDelay = (20000))
+    @Scheduled(cron = "0 30 2 * * *")
+    public void getServiceAddToProject() {
+        JsonNode json = parse(getMatomoResponse(serviceAddToProject));
         Map<String, Float> results = new HashMap<>();
         if (json != null) {
             try {
                 Spliterators.spliteratorUnknownSize(json.iterator(), Spliterator.NONNULL);
                 for (JsonNode node : json) {
                     String serviceId = node.path("label").textValue();
-                    String favourite = "1";
-                    results.putIfAbsent(serviceId, Float.parseFloat(favourite));
+                    String addToProject = "1";
+                    results.putIfAbsent(serviceId, Float.parseFloat(addToProject));
                 }
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
                     logger.info(entry.getKey() + ":" + entry.getValue().toString());
@@ -139,7 +146,7 @@ public class DataParser {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
             }
         }
-        int eventType = 2; // favourites
+        int eventType = 2; // addToProject
         try {
             postEventsToDatabase(results, eventType);
         } catch (ResourceNotFoundException e) {
@@ -180,20 +187,20 @@ public class DataParser {
     public void postEventsToDatabase(Map<String, Float> events, int eventType) throws ResourceNotFoundException, NumberParseException {
         if (eventType == 1){
             for (Map.Entry<String, Float> entry : events.entrySet()){
-                logger.info("Posting Internal Event for Service {} with value {}", entry.getKey(), entry.getValue());
+                logger.info("Posting Visit Event for Service {} with value {}", entry.getKey(), entry.getValue());
                 if (eventService != null){
-                    eventService.setInternal(entry.getKey(), entry.getValue());
+                    eventService.setVisit(entry.getKey(), entry.getValue());
                 } else {
-                    logger.info("Empty Internal View");
+                    logger.info("Empty Visit View");
                 }
             }
         } else if (eventType == 2){
             for (Map.Entry<String, Float> entry : events.entrySet()){
-                logger.info("Posting Favourite Event for Service {} with value {}", entry.getKey(), entry.getValue());
+                logger.info("Posting AddToProject Event for Service {} with value {}", entry.getKey(), entry.getValue());
                 if (eventService != null){
-                    eventService.setScheduledFavourite(entry.getKey(), entry.getValue());
+                    eventService.setAddToProject(entry.getKey(), entry.getValue());
                 } else {
-                    logger.info("Empty Favourite View");
+                    logger.info("Empty AddToProject View");
                 }
             }
         } else if (eventType == 3) {
@@ -210,4 +217,3 @@ public class DataParser {
         }
     }
 }
-
