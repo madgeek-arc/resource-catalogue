@@ -41,6 +41,12 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.favourites(id, by), HttpStatus.OK);
     }
 
+    //    @ApiOperation(value = "Get addToProject per interval for a service.")
+    @GetMapping(path = "service/addToProject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> addToProject(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        return new ResponseEntity<>(statisticsService.addToProject(id, by), HttpStatus.OK);
+    }
+
 //    @ApiOperation(value = "Get average ratings per interval for a service.")
     @GetMapping(path = "service/ratings/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Float>> ratings(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
@@ -57,6 +63,12 @@ public class StatisticsController {
     @GetMapping(path = "provider/favourites/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> pFavourites(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.providerFavourites(id, by), HttpStatus.OK);
+    }
+
+    //    @ApiOperation(value = "Get aggregate 'addToProject per interval for all services offered by a provider.")
+    @GetMapping(path = "provider/addToProject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> pAddToProject(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        return new ResponseEntity<>(statisticsService.providerAddToProject(id, by), HttpStatus.OK);
     }
 
 //    @ApiOperation(value = "Get average ratings per interval for all services offered by a provider.")

@@ -124,7 +124,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             event.setValue(value);
             event = update(event, authentication);
             logger.debug("Updating RATING Event: {}", event);
-         //
+            //
         } else {
             event = new Event();
             event.setService(serviceId);
@@ -230,7 +230,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     public void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication) {
-        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.INTERNAL_VIEW.toString(), serviceId);
+        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.VISIT.toString(), serviceId);
         for (Event event : serviceEvents){
 
             // Compare the event.getInstant(long) to user's give date
@@ -254,32 +254,32 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setInternal(String serviceId, Float value) throws ResourceNotFoundException {
+    public Event setVisit(String serviceId, Float value) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
         Event event;
         event = new Event();
         event.setService(serviceId);
-        event.setType(Event.UserActionType.INTERNAL_VIEW.getKey());
+        event.setType(Event.UserActionType.VISIT.getKey());
         event.setValue(value);
         event = add(event, null); // remove auth
-        logger.debug("Adding a new INTERNAL_VIEW Event: {}", event);
+        logger.debug("Adding a new VISIT Event: {}", event);
         return event;
     }
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setExternal(String serviceId, Float value) throws ResourceNotFoundException {
+    public Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException {
         if (!infraServiceService.exists(new SearchService.KeyValue("infra_service_id", serviceId))) {
             throw new ResourceNotFoundException("infra_service", serviceId);
         }
         Event event;
         event = new Event();
         event.setService(serviceId);
-        event.setType(Event.UserActionType.EXTERNAL_VIEW.getKey());
+        event.setType(Event.UserActionType.ADD_TO_PROJECT.getKey());
         event.setValue(value);
         event = add(event, null); // remove auth
-        logger.debug("Adding a new EXTERNAL_VIEW Event: {}", event);
+        logger.debug("Adding a new ADD_TO_PROJECT Event: {}", event);
         return event;
     }
 
@@ -328,18 +328,18 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    public int getServiceAggregatedInternals(String id){
+    public int getServiceAggregatedVisits(String id){
         int result = 0;
-        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.INTERNAL_VIEW.getKey(), id);
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.VISIT.getKey(), id);
         for (Event event : serviceAggregatedInternals){
             result += event.getValue();
         }
         return result;
     }
 
-    public int getServiceAggregatedExternals(String id){
+    public int getServiceAggregatedAddToProject(String id){
         int result = 0;
-        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.EXTERNAL_VIEW.getKey(), id);
+        List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.ADD_TO_PROJECT.getKey(), id);
         for (Event event : serviceAggregatedInternals){
             result += event.getValue();
         }
