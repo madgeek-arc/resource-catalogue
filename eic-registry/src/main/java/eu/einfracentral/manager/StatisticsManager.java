@@ -304,22 +304,24 @@ public class StatisticsManager implements StatisticsService {
     @Override
     @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
-        final long[] totalDocCounts = new long[1];
         List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.VISIT.getKey(), by).getBuckets();
+        final long[] totalDocCounts = new long[buckets.size()];
+        final int[] j = {-1}; // bucket counter
         return new TreeMap<>(buckets.stream().collect(
                 Collectors.toMap(
                         MultiBucketsAggregation.Bucket::getKeyAsString,
                         bucket -> {
+                            j[0]++;
                             Terms subTerm = bucket.getAggregations().get("value");
                             if (subTerm.getBuckets() != null) {
                                 for (int i=0; i<subTerm.getBuckets().size(); i++){
                                     Double key = (Double)subTerm.getBuckets().get(i).getKey();
                                     Integer keyToInt = key.intValue();
                                     int totalVistisOnBucket = keyToInt * Integer.parseInt(String.valueOf(subTerm.getBuckets().get(i).getDocCount()));
-                                    totalDocCounts[0] += totalVistisOnBucket;
+                                    totalDocCounts[j[0]] += totalVistisOnBucket;
                                 }
                             }
-                            return (int) Math.max(totalDocCounts[0], 0);
+                            return (int) Math.max(totalDocCounts[j[0]], 0);
                         }
                 )
         ));
