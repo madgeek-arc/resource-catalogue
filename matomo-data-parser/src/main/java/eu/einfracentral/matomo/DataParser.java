@@ -67,7 +67,7 @@ public class DataParser {
     }
 
     //    @Scheduled(fixedDelay = (20000))
-    @Scheduled(cron = "0 30 2 * * *")
+    @Scheduled(cron = "0 10 0 * * *")
     public void getServiceVisits() {
         JsonNode json = parse(getMatomoResponse(serviceVisits));
         Map<String, Float> results = new HashMap<>();
@@ -97,7 +97,7 @@ public class DataParser {
     }
 
     //        @Scheduled(fixedDelay = (20000))
-    @Scheduled(cron = "0 30 2 * * *")
+    @Scheduled(cron = "0 15 0 * * *")
     public void getServiceRatings() {
         JsonNode json = parse(getMatomoResponse(serviceRatings));
         Map<String, Float> results = new HashMap<>();
@@ -127,7 +127,7 @@ public class DataParser {
     }
 
     //    @Scheduled(fixedDelay = (20000))
-    @Scheduled(cron = "0 30 2 * * *")
+    @Scheduled(cron = "0 20 0 * * *")
     public void getServiceAddToProject() {
         JsonNode json = parse(getMatomoResponse(serviceAddToProject));
         Map<String, Float> results = new HashMap<>();
