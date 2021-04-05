@@ -203,11 +203,11 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
                     if (u.getId() != null) {
                         if (u.getEmail() != null) {
                             return u.getId().equals(user.getId())
-                                    || u.getEmail().equals(user.getEmail());
+                                    || u.getEmail().equalsIgnoreCase(user.getEmail());
                         }
                         return u.getId().equals(user.getId());
                     }
-                    return u.getEmail().equals(user.getEmail());
+                    return u.getEmail().equalsIgnoreCase(user.getEmail());
                 });
     }
 

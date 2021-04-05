@@ -26,10 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.*;
@@ -248,7 +245,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 .map(p -> {
                     if (p.getProvider().getUsers() != null && p.getProvider().getUsers().stream().filter(Objects::nonNull).anyMatch(u -> {
                         if (u.getEmail() != null) {
-                            return u.getEmail().equals(email);
+                            return u.getEmail().equalsIgnoreCase(email);
                         }
                         return false;
                     })) {
@@ -413,7 +410,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         updatedUsers.add(user);
                     }
                 } else {
-                    if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)) {
+                    if (!user.getEmail().equals("") && !user.getEmail().equalsIgnoreCase(userEmail)) {
                         updatedUsers.add(user);
                     }
                 }
@@ -430,7 +427,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (users == null) {
             users = new ArrayList<>();
         }
-        if (users.stream().noneMatch(u -> u.getEmail().equals(authUser.getEmail()))) {
+        if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
             users.add(authUser);
             provider.setUsers(users);
         }
@@ -472,16 +469,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle providerBundle = get(providerId);
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()){
-            userList.add(user.getEmail());
+            userList.add(user.getEmail().toLowerCase());
         }
         if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(User.of(auth).getEmail())) {
+            if (userList.contains(User.of(auth).getEmail().toLowerCase())) {
                 return false; //pop-up modal
             } else {
                 return true; //no modal
             }
         }
-        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail()) && userList.contains(User.of(auth).getEmail())) {
+        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail().toLowerCase()) && userList.contains(User.of(auth).getEmail().toLowerCase())) {
             return false; // pop-up modal
         }
         return true; // no modal
@@ -495,10 +492,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<String> existingAdmins = new ArrayList<>();
         List<String> newAdmins = new ArrayList<>();
         for (User user : existingProvider.getProvider().getUsers()){
-            existingAdmins.add(user.getEmail());
+            existingAdmins.add(user.getEmail().toLowerCase());
         }
         for (User user : updatedProvider.getProvider().getUsers()){
-            newAdmins.add(user.getEmail());
+            newAdmins.add(user.getEmail().toLowerCase());
         }
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
