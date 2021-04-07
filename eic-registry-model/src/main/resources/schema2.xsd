@@ -30,6 +30,19 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="types">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="REGISTERED"/>
+      <xs:enumeration value="UPDATED"/>
+      <xs:enumeration value="DELETED"/>
+      <xs:enumeration value="ACTIVATED"/>
+      <xs:enumeration value="DEACTIVATED"/>
+      <xs:enumeration value="APPROVED"/>
+      <xs:enumeration value="VALIDATED"/>
+      <xs:enumeration value="REJECTED"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="states">
     <xs:restriction base="xs:string">
       <xs:enumeration value="PENDING_1"/>

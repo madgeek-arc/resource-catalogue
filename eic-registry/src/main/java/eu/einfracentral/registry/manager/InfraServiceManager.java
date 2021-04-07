@@ -6,6 +6,7 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -36,18 +37,20 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private final Random randomNumberGenerator;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
+    private final SecurityService securityService;
 
     @Value("${project.name:}")
     private String projectName;
 
     @Autowired
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
-                               @Lazy FieldValidator fieldValidator, IdCreator idCreator) {
+                               @Lazy FieldValidator fieldValidator, IdCreator idCreator, SecurityService securityService) {
         super(InfraService.class);
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
+        this.securityService = securityService;
     }
 
     @Override
@@ -72,6 +75,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         if (infraService.getMetadata() == null) {
             infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
+
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        loggingInfoList.add((loggingInfo));
+        infraService.setLoggingInfo(loggingInfoList);
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
@@ -107,6 +115,10 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // update existing service serviceMetadata
         infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
+        LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+        List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
+        loggingInfoList.add((loggingInfo));
+        infraService.setLoggingInfo(loggingInfoList);
         infraService.setActive(existingService.isActive());
 
         // if a user updates a service with version to a service with null version then while searching for the service
@@ -266,6 +278,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                         "' should have as Scientific Domain the value '" + scientificDomain +"'");
             }
         }
+    }
+
+    public String determineRole(Authentication authentication) {
+        String role;
+        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
+            role = "admin";
+        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
+            role = "provider";
+        } else {
+            role = "user";
+        }
+        return role;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

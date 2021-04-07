@@ -46,14 +46,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final EventService eventService;
     private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
+    private final AbstractServiceManager abstractServiceManager;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator,
-                           EventService eventService,
-                           JmsTemplate jmsTopicTemplate) {
+                           IdCreator idCreator, EventService eventService, JmsTemplate jmsTopicTemplate,
+                           AbstractServiceManager abstractServiceManager) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -63,6 +63,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
+        this.abstractServiceManager = abstractServiceManager;
     }
 
 
@@ -87,6 +88,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        loggingInfoList.add((loggingInfo));
+        provider.setLoggingInfo(loggingInfoList);
         provider.setActive(false);
         provider.setStatus(Provider.States.PENDING_1.getKey());
 
@@ -113,6 +118,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+        List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
+        loggingInfoList.add((loggingInfo));
+        provider.setLoggingInfo(loggingInfoList);
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());
@@ -178,9 +187,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providers;
     }
 
-    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(ProviderBundle provider) {
+    public void delete(Authentication authentication, ProviderBundle provider) {
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<InfraService> services = this.getInfraServices(provider.getId());
         services.forEach(s -> {
@@ -191,6 +199,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         });
         logger.debug("Deleting Provider: {}", provider);
+
+        List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
+        LoggingInfo loggingInfo = new LoggingInfo();
+        loggingInfo.setUserRole(determineRole(authentication));
+        loggingInfo.setType(LoggingInfo.Types.DELETED.getKey());
+        loggingInfo.setUserEmail(User.of(authentication).getEmail());
+        loggingInfoList.add(loggingInfo);
+        provider.setLoggingInfo(loggingInfoList);
 
         jmsTopicTemplate.convertAndSend("provider.delete", provider);
 
@@ -204,24 +220,65 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         ProviderBundle provider = get(id);
         provider.setStatus(status.getKey());
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
+        InfraService serviceTemplate;
         switch (status) {
             case APPROVED:
                 if (active == null) {
                     active = true;
                 }
                 provider.setActive(active);
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.APPROVED.getKey());
+                loggingInfoList.add((loggingInfo));
+                provider.setLoggingInfo(loggingInfoList);
+
+                // update Service Template ProviderInfo
+                serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.APPROVED.getKey(), auth);
+                try {
+                    infraServiceService.update(serviceTemplate, auth);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Could not update service with id '{}' (verifyProvider)", serviceTemplate.getService().getId());
+                }
                 break;
 
             default:
+                switch(status) {
+                    case REJECTED:
+                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.REJECTED.getKey());
+                        loggingInfoList.add((loggingInfo));
+                        provider.setLoggingInfo(loggingInfoList);
+                        break;
+                    case ST_SUBMISSION:
+                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.VALIDATED.getKey());
+                        loggingInfoList.add((loggingInfo));
+                        provider.setLoggingInfo(loggingInfoList);
+                        break;
+                    case REJECTED_ST:
+                        // update Service Template ProviderInfo
+                        serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.REJECTED.getKey(), auth);
+                        try {
+                            infraServiceService.update(serviceTemplate, auth);
+                        } catch (ResourceNotFoundException e) {
+                            logger.error("Could not update service with id '{}' (verifyProvider)", serviceTemplate.getService().getId());
+                        }
+                        break;
+                }
                 provider.setActive(false);
         }
 
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                deactivateServices(provider.getId());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+                loggingInfoList.add((loggingInfo));
+                provider.setLoggingInfo(loggingInfoList);
+                deactivateServices(provider.getId(), auth);
             } else {
-                activateServices(provider.getId());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+                loggingInfoList.add((loggingInfo));
+                provider.setLoggingInfo(loggingInfoList);
+                activateServices(provider.getId(), auth);
             }
         }
         logger.info("Verifying Provider: {}", provider);
@@ -342,13 +399,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return infraServiceService.getAll(ff, null).getResults();
     }
 
-    public void activateServices(String providerId) { // TODO: decide how to use service.status variable
+    public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
         logger.info("Activating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
 //            service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
 //            service.setStatus(null);
             service.setActive(true);
+            // update LoggingInfo
+            List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
+            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+            loggingInfoList.add(loggingInfo);
+            service.setLoggingInfo(loggingInfoList);
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
                 infraServiceService.update(service, null);
@@ -358,13 +420,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public void deactivateServices(String providerId) { // TODO: decide how to use service.status variable
+    public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
         List<InfraService> services = this.getInfraServices(providerId);
         logger.info("Deactivating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
 //            service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
 //            service.setStatus(null);
             service.setActive(false);
+            List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
+            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+            loggingInfoList.add(loggingInfo);
+            service.setLoggingInfo(loggingInfoList);
             try {
                 logger.debug("Setting Service with id '{}' as inactive", service.getService().getId());
                 infraServiceService.update(service, null);
@@ -521,4 +587,35 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
+    public String determineRole(Authentication authentication){
+        String role;
+        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
+            role = "admin";
+        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")){
+            role = "provider";
+        } else {
+            role = "user";
+        }
+        return role;
+    }
+
+    public InfraService updateInfraServiceLoggingInfo(String providerId, String type, Authentication authentication){
+        List<Service> providerServices = getServices(providerId);
+        List<InfraService> infraServices = new ArrayList<>();
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        for (Service service : providerServices){
+            infraServices.add(infraServiceService.get(service.getId()));
+        }
+        // find the Service Template
+        InfraService serviceTemplate = infraServices.get(0);
+        for (InfraService infraService : infraServices){
+            if (Integer.parseInt(infraService.getMetadata().getRegisteredAt()) < Integer.parseInt(serviceTemplate.getMetadata().getRegisteredAt())){
+                serviceTemplate = infraService;
+            }
+        }
+        LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
+        loggingInfoList.add((loggingInfo));
+        serviceTemplate.setLoggingInfo(loggingInfoList);
+        return serviceTemplate;
+    }
 }
