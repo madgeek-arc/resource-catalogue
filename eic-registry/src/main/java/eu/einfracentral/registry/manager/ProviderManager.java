@@ -46,14 +46,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final EventService eventService;
     private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
-    private final AbstractServiceManager abstractServiceManager;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator, EventService eventService, JmsTemplate jmsTopicTemplate,
-                           AbstractServiceManager abstractServiceManager) {
+                           IdCreator idCreator, EventService eventService, JmsTemplate jmsTopicTemplate) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -63,7 +61,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
-        this.abstractServiceManager = abstractServiceManager;
     }
 
 
