@@ -5,6 +5,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -96,7 +97,7 @@ public class LoggingInfo {
     }
 
     public static String now(){
-        return DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH).toString();
+        return String.valueOf(System.currentTimeMillis());
     }
 
     public String getDate() {
