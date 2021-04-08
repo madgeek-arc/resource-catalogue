@@ -152,7 +152,7 @@
       "multivalued": false,
       "name": "date",
       "path": "//*[local-name()='loggingInfo']/*[local-name()='date']/text()",
-      "type": "java.lang.String"
+      "type": "java.util.Date"
     },
     {
       "multivalued": false,
@@ -170,7 +170,7 @@
       "multivalued": false,
       "name": "type",
       "path": "//*[local-name()='loggingInfo']/*[local-name()='type']/text()",
-      "type": "java.util.Date"
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
