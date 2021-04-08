@@ -14,7 +14,7 @@ import java.util.Date;
 public class LoggingInfo {
 
     @XmlElement(defaultValue = "null")
-    private Date date;
+    private String date;
 
     @XmlElement(defaultValue = "null")
     private String userEmail;
@@ -95,15 +95,15 @@ public class LoggingInfo {
                 '}';
     }
 
-    public static Date now(){
-        return DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+    public static String now(){
+        return DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH).toString();
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
