@@ -44,7 +44,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     @Autowired
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
-                               @Lazy FieldValidator fieldValidator, IdCreator idCreator, SecurityService securityService) {
+                               @Lazy FieldValidator fieldValidator, IdCreator idCreator, @Lazy SecurityService securityService) {
         super(InfraService.class);
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
@@ -115,9 +115,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // update existing service serviceMetadata
         infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
-        LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
-        List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
-        loggingInfoList.add((loggingInfo));
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList;
+        if (infraService.getLoggingInfo() != null){
+            loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+            loggingInfoList = infraService.getLoggingInfo();
+            loggingInfoList.add((loggingInfo));
+        } else{
+            loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+            loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
+            loggingInfoList = new ArrayList<>();
+            loggingInfoList.add((loggingInfo));
+        }
         infraService.setLoggingInfo(loggingInfoList);
         infraService.setActive(existingService.isActive());
 
