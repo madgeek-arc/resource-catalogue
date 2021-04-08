@@ -115,9 +115,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
-        List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
-        loggingInfoList.add((loggingInfo));
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList;
+        if (provider.getLoggingInfo() != null){
+            loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+            loggingInfoList = provider.getLoggingInfo();
+            loggingInfoList.add((loggingInfo));
+        } else{
+            loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+            loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
+            loggingInfoList = new ArrayList<>();
+            loggingInfoList.add((loggingInfo));
+        }
         provider.setLoggingInfo(loggingInfoList);
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
