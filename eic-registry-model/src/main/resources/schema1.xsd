@@ -13,6 +13,8 @@
 
   <xs:element name="infraService" type="tns:infraService"/>
 
+  <xs:element name="loggingInfo" type="tns:loggingInfo"/>
+
   <xs:element name="measurement" type="tns:measurement"/>
 
   <xs:element name="metadata" type="tns:metadata"/>
@@ -54,7 +56,7 @@
   <xs:complexType abstract="true" name="bundle">
     <xs:sequence>
       <xs:element name="active" type="xs:boolean"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="loggingInfo" type="tns:loggingInfo"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
       <xs:element minOccurs="0" ref="tns:metadata"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
     </xs:sequence>

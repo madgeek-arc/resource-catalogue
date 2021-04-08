@@ -1,14 +1,16 @@
 package eu.einfracentral.domain;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.springframework.security.core.Authentication;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
-
+@XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class LoggingInfo {
 
     @XmlElement(defaultValue = "null")
@@ -81,6 +83,16 @@ public class LoggingInfo {
         ret.setUserEmail(userEmail);
         ret.setUserRole(role);
         return ret;
+    }
+
+    @Override
+    public String toString() {
+        return "LoggingInfo{" +
+                "date=" + date +
+                ", userEmail='" + userEmail + '\'' +
+                ", userRole='" + userRole + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
 
     public static Date now(){
