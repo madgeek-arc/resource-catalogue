@@ -10,10 +10,9 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -43,6 +42,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final EventService eventService;
     private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
+    private final VersionService versionService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -50,7 +50,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
                            IdCreator idCreator,
                            EventService eventService,
-                           JmsTemplate jmsTopicTemplate) {
+                           JmsTemplate jmsTopicTemplate,
+                           VersionService versionService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -60,6 +61,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
+        this.versionService = versionService;
     }
 
 
@@ -148,6 +150,52 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle get(String id, Authentication auth) {
         return get(id);
+    }
+
+    @Override
+    public Paging<ResourceHistory> getHistory(String id) {
+        Map<String, ResourceHistory> historyMap = new TreeMap<>();
+
+        Resource resource = getResource(id);
+        List<Version> versions = versionService.getVersionsByResource(resource.getId());
+        versions.sort((version, t1) -> {
+            if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
+                return -1;
+            }
+            return 1;
+        });
+
+        // create the first entry from the current resource
+        ProviderBundle providerBundle;
+        providerBundle = deserialize(resource);
+        if (providerBundle != null && providerBundle.getMetadata() != null) {
+            historyMap.put(providerBundle.getMetadata().getModifiedAt(), new ResourceHistory(providerBundle, resource.getId()));
+        }
+
+        // create version entries
+        for (Version version : versions) {
+            resource = (version.getResource() == null ? getResource(version.getParentId()) : version.getResource());
+            resource.setPayload(version.getPayload());
+            providerBundle = deserialize(resource);
+            if (providerBundle != null) {
+                try {
+                    historyMap.putIfAbsent(providerBundle.getMetadata().getModifiedAt(), new ResourceHistory(providerBundle, version.getId()));
+                } catch (NullPointerException e) {
+                    logger.warn("Provider with id '{}' does not have Metadata", providerBundle.getId());
+                }
+            }
+        }
+
+        // sort list by modification date
+        List<ResourceHistory> history = new ArrayList<>(historyMap.values());
+        history.sort((resourceHistory, t1) -> {
+            if (Long.parseLong(resourceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
+                return 1;
+            }
+            return -1;
+        });
+
+        return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
     @Override

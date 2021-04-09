@@ -307,8 +307,8 @@ public class ServiceController {
     // Get all modification details of a specific Service, providing the Service id.
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @Deprecated
-    public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Paging<ServiceHistory> history = infraService.getHistory(id);
+    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Paging<ResourceHistory> history = infraService.getHistory(id);
         return ResponseEntity.ok(history);
     }
 
