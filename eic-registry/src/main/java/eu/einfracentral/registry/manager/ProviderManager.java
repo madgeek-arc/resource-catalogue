@@ -615,7 +615,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // find the Service Template
         InfraService serviceTemplate = infraServices.get(0);
         for (InfraService infraService : infraServices){
-            if (Integer.parseInt(infraService.getMetadata().getRegisteredAt()) < Integer.parseInt(serviceTemplate.getMetadata().getRegisteredAt())){
+            if (Double.parseDouble(infraService.getMetadata().getRegisteredAt()) < Double.parseDouble(serviceTemplate.getMetadata().getRegisteredAt())){
                 serviceTemplate = infraService;
             }
         }
