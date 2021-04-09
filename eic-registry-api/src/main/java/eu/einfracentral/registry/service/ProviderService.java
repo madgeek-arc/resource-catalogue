@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.*;
+import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
@@ -68,4 +69,12 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
 
     void deleteUserInfo(Authentication authentication);
+
+    /**
+     * Get the History of the Provider with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<ResourceHistory> getHistory(String id);
 }
