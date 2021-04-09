@@ -1,12 +1,17 @@
 ### Build using Maven ###
 FROM maven:3.6.0-jdk-8-alpine AS maven
+ARG profile
 
 COPY pom.xml /tmp/
 COPY . /tmp/
 
 WORKDIR /tmp/
 
-RUN mvn package -U
+## For debugging reasons  ##
+RUN if [[ -z "$profile" ]] ; then echo "Building without profile"; sleep 2 ; else echo "Building using profile: '$profile'"; sleep 2 ; fi
+
+## run maven based of profile given ##
+RUN if [[ -z "$profile" ]] ; then mvn package -U ; else mvn package -U -P $profile ; fi
 
 
 ### Deploy to Tomcat ###
