@@ -81,6 +81,7 @@
       <xs:enumeration value="PROVIDER_STRUCTURE_TYPE"/>
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
+      <xs:enumeration value="PROVIDER_STATE"/>
     </xs:restriction>
   </xs:simpleType>
 
