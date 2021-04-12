@@ -118,16 +118,5 @@ public class Recdb {
                         event.sum_event_value, user_id, service_id, user_id, service_id, event.sum_event_value, user_id, service_id);
             }
         }
-
-//        query = "SELECT service_name " +
-//                "FROM services " +
-//                "WHERE service_pk IN " +
-//                "(SELECT service_id FROM view_count R RECOMMEND R.service_id TO R.user_id ON R.visits USING ItemCosCF WHERE R.user_id = ? ORDER BY R.visits LIMIT 3 )";
-//
-//        List<java.lang.String> serviceIds;
-//        serviceIds = jdbcTemplate.queryForList(query, new Object[] { user_id }, java.lang.String.class);
-//        for (int i = 0; i < Objects.requireNonNull(serviceIds).size(); i++) {
-//            System.out.println(serviceIds.get(i));
-//        }
     }
 }

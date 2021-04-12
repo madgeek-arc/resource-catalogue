@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.core.Authentication;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -34,20 +35,26 @@ public class RecommendationManager implements RecommendationService{
 
     public ResponseEntity<List<RichService>> getRecommendationServices(int limit, Authentication authentication){
         JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        List<RichService> services = new ArrayList<>();
 
         /* Get user id */
+        int user_id = -1;
         String query = "SELECT user_pk FROM users WHERE user_email = ?;";
-        int user_id = jdbcTemplate.queryForObject(query, new Object[]{ ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail() }, int.class);
+        try {
+            user_id = jdbcTemplate.queryForObject(query, new Object[]{ ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail() }, int.class);
+            query = "SELECT service_name " +
+                    "FROM services " +
+                    "WHERE service_pk IN " +
+                    "(SELECT service_id FROM view_count R RECOMMEND R.service_id TO R.user_id ON R.visits USING ItemCosCF WHERE R.user_id = ? ORDER BY R.visits LIMIT ? )";
 
-        query = "SELECT service_name " +
-                "FROM services " +
-                "WHERE service_pk IN " +
-                "(SELECT service_id FROM view_count R RECOMMEND R.service_id TO R.user_id ON R.visits USING ItemCosCF WHERE R.user_id = ? ORDER BY R.visits LIMIT ? )";
+            List<String> serviceIds = jdbcTemplate.queryForList(query, new Object[] {user_id, limit}, java.lang.String.class);
 
-        List<String> serviceIds = jdbcTemplate.queryForList(query, new Object[] {user_id, limit}, java.lang.String.class);
-
-        String[] ids = serviceIds.toArray(new String[0]);
-        return ResponseEntity.ok(infraService.getByIds(authentication, ids));
+            String[] ids = serviceIds.toArray(new String[0]);
+            services = infraService.getByIds(authentication, ids);
+        } catch (RuntimeException e) {
+            logger.warn("Could not find user {} in recommendation database.", ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail());
+        }
+        return ResponseEntity.ok(services);
     }
 
 }
