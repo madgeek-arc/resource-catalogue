@@ -1,77 +1,80 @@
 package eu.einfracentral.recdb;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.Array;
-import java.util.List;
-import java.util.Objects;
 
-@Configuration
-@EnableScheduling
+@Component
 public class Recdb {
 
     private static final Logger logger = LogManager.getLogger(Recdb.class);
-    private static final String serviceVisitsTemplate = "%s/index.php?module=API&method=%s&flat=1&idSite=%s&period=day&date=%s&format=JSON&token_auth=%s";
+    private static final String SERVICE_VISITS_TEMPLATE = "%s/index.php?module=API&method=%s&flat=1&idSite=%s&period=day&date=%s&format=JSON&token_auth=%s";
     private String serviceEvents;
 
     private RestTemplate restTemplate;
     private HttpHeaders headers;
 
+    @Value("${matomoHost:localhost}")
+    private String matomoHost;
+
+    @Value("${matomoToken:}")
+    private String matomoToken;
+
+    @Value("${matomoSiteId:1}")
+    private String matomoSiteId;
+
+    @Value("${matomoAuthorizationHeader:}")
+    private String authorizationHeader;
+
     @PostConstruct
     void urlConstruct() {
         restTemplate = new RestTemplate();
         headers = new HttpHeaders();
-        String authorizationHeader = "";
         headers.add("Authorization", authorizationHeader);
-        String matomoHost = "https://www.portal.catris.eu/matomo";
-        String method= "Events.getCategory";
+
+        String method = "Events.getCategory";
 //        String method= "Events.getName&secondaryDimension=eventAction";
-        String matomoSiteId = "2";
         String matomoDate = "yesterday";
 //        String matomoDate = "today";
-//        String matomoDate = "12-02-2021";
-        String matomoToken = "d532d295158f72d9eca31823aa58750e";
-        serviceEvents = String.format(serviceVisitsTemplate, matomoHost, method, matomoSiteId, matomoDate, matomoToken);
+        serviceEvents = String.format(SERVICE_VISITS_TEMPLATE, matomoHost, method, matomoSiteId, matomoDate, matomoToken);
     }
 
     public String getMatomoResponse(String url) {
 
         try {
             HttpEntity<String> request = new HttpEntity<>(headers);
-            try {
-                ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-                if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                    logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
-                            responseEntity.getStatusCode().toString(), responseEntity.getBody());
-                }
-                return responseEntity.getBody();
-            } catch (IllegalArgumentException e) {
-                logger.info("URI is not absolute");
+            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
+                        responseEntity.getStatusCode(), responseEntity.getBody());
             }
+            return responseEntity.getBody();
+        } catch (IllegalArgumentException e) {
+            logger.info("URI is not absolute");
         } catch (RuntimeException e) {
             logger.error("Could not retrieve analytics from matomo", e);
         }
+
         return "";
     }
 
-    @Autowired(required = true)
+    @Autowired()
     @Qualifier("recdb.datasource")
     private DataSource datasource;
 
-//    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    //    @Scheduled(fixedDelay = 5 * 60 * 1000)
     @Scheduled(cron = "0 0 1 * * *", zone = "Europe/Athens")
     public void getViews() throws IOException {
         urlConstruct();
@@ -98,7 +101,7 @@ public class Recdb {
                 query = "SELECT user_pk FROM users WHERE user_email = ?;";
                 user_id = jdbcTemplate.queryForObject(query, new Object[]{data[0]}, int.class);
 
-                System.out.println(user_id);
+                logger.trace("User id: {}", user_id);
 
                 /* Add service name if it is not in the table */
                 query = "INSERT INTO services (service_name) SELECT ? WHERE NOT EXISTS (SELECT 1 FROM services WHERE  service_name = ?)";
@@ -107,10 +110,9 @@ public class Recdb {
                 query = "SELECT service_pk FROM services WHERE service_name = ?;";
                 service_id = jdbcTemplate.queryForObject(query, new Object[]{data[1]}, int.class);
 
-                System.out.println(service_id);
+                logger.trace("Service id: {}", service_id);
+                logger.trace("email: {} service id: {} value: {}", data[0], data[1], event.sum_event_value);
 
-
-                System.out.println("email: " + data[0] + " service id: " + data[1] + " value: " + event.sum_event_value);
                 jdbcTemplate.update("UPDATE view_count set visits = visits + ? WHERE user_id = ? " +
                                 "AND service_id = ?; INSERT INTO view_count (user_id, service_id, visits)" +
                                 "SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM view_count WHERE" +
@@ -118,16 +120,5 @@ public class Recdb {
                         event.sum_event_value, user_id, service_id, user_id, service_id, event.sum_event_value, user_id, service_id);
             }
         }
-
-//        query = "SELECT service_name " +
-//                "FROM services " +
-//                "WHERE service_pk IN " +
-//                "(SELECT service_id FROM view_count R RECOMMEND R.service_id TO R.user_id ON R.visits USING ItemCosCF WHERE R.user_id = ? ORDER BY R.visits LIMIT 3 )";
-//
-//        List<java.lang.String> serviceIds;
-//        serviceIds = jdbcTemplate.queryForList(query, new Object[] { user_id }, java.lang.String.class);
-//        for (int i = 0; i < Objects.requireNonNull(serviceIds).size(); i++) {
-//            System.out.println(serviceIds.get(i));
-//        }
     }
 }
