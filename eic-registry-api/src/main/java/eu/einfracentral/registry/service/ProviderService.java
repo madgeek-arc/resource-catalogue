@@ -64,7 +64,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     List<T> getInactive();
 
 
-    T verifyProvider(String id, Provider.States status, Boolean active, U auth);
+    T verifyProvider(String id, String status, Boolean active, U auth);
 
 
     void deleteUserInfo(Authentication authentication);

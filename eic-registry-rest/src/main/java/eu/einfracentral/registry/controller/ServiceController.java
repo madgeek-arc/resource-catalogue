@@ -367,7 +367,7 @@ public class ServiceController {
         List<ProviderBundle> pendingProviders = providerService.getInactive();
         List<Service> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
-            if (Provider.States.fromString(provider.getStatus()) == Provider.States.PENDING_2) {
+            if (provider.getStatus().equals("pending template approval")) {
                 serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
             }
         }

@@ -53,7 +53,7 @@ public class ProviderManagementAspect {
 
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String," +
-            " eu.einfracentral.domain.Provider.States, Boolean, org.springframework.security.core.Authentication)) ||" +
+            "org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
             "org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
@@ -79,11 +79,10 @@ public class ProviderManagementAspect {
     public void updateServiceProviderStates(InfraService infraService) {
         try {
             ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), (Authentication) null);
-            if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
-                    || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
+            if (providerBundle.getStatus().equals("pending template submission") || providerBundle.getStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        infraService.getService().getResourceOrganisation(), providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
-                providerService.verifyProvider(infraService.getService().getResourceOrganisation(), Provider.States.PENDING_2, false, null);
+                        infraService.getService().getResourceOrganisation(), providerBundle.getStatus(), "pending template approval");
+                providerService.verifyProvider(infraService.getService().getResourceOrganisation(), "pending template approval", false, null);
             }
         } catch (RuntimeException e) {
             logger.error(e);
