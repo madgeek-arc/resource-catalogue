@@ -256,7 +256,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         ProviderBundle providerBundle = providerManager.get(service.getService().getResourceOrganisation());
-        if (providerBundle.getStatus().equals(Provider.States.APPROVED.getKey()) && providerBundle.isActive()) {
+        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
         if (active && activeProvider.equals("")) {

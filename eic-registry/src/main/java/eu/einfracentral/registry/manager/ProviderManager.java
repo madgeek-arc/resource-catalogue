@@ -1,10 +1,12 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
@@ -46,12 +49,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final EventService eventService;
     private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
+    private final VocabularyService vocabularyService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator, EventService eventService, JmsTemplate jmsTopicTemplate) {
+                           IdCreator idCreator, EventService eventService, JmsTemplate jmsTopicTemplate,
+                           VocabularyService vocabularyService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -61,6 +66,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
+        this.vocabularyService = vocabularyService;
     }
 
 
@@ -90,7 +96,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add((loggingInfo));
         provider.setLoggingInfo(loggingInfoList);
         provider.setActive(false);
-        provider.setStatus(Provider.States.PENDING_1.getKey());
+        provider.setStatus(vocabularyService.get("pending initial approval").getId());
 
         ProviderBundle ret;
         ret = super.add(provider, null);
@@ -222,15 +228,23 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle verifyProvider(String id, Provider.States status, Boolean active, Authentication auth) {
+    public ProviderBundle verifyProvider(String id, String status, Boolean active, Authentication auth) {
+        try {
+            vocabularyService.get(status);
+        } catch(ResourceException e){
+            throw new ResourceException(String.format("Vocabulary %s does not exist!", status), HttpStatus.NOT_FOUND);
+        }
+        if (!vocabularyService.get(status).getType().equals("Provider state")){
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
+        }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         ProviderBundle provider = get(id);
-        provider.setStatus(status.getKey());
+        provider.setStatus(vocabularyService.get(status).getName());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
         InfraService serviceTemplate;
         switch (status) {
-            case APPROVED:
+            case "approved":
                 if (active == null) {
                     active = true;
                 }
@@ -250,17 +264,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
             default:
                 switch(status) {
-                    case REJECTED:
+                    case "rejected":
                         loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.REJECTED.getKey());
                         loggingInfoList.add((loggingInfo));
                         provider.setLoggingInfo(loggingInfoList);
                         break;
-                    case ST_SUBMISSION:
+                    case "pending template submission":
                         loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.VALIDATED.getKey());
                         loggingInfoList.add((loggingInfo));
                         provider.setLoggingInfo(loggingInfoList);
                         break;
-                    case REJECTED_ST:
+                    case "rejected template":
                         // update Service Template ProviderInfo
                         serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.REJECTED.getKey(), auth);
                         try {
@@ -276,9 +290,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
-                loggingInfoList.add((loggingInfo));
-                provider.setLoggingInfo(loggingInfoList);
+                if (!status.equals("pending template submission")){
+                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+                    loggingInfoList.add((loggingInfo));
+                    provider.setLoggingInfo(loggingInfoList);
+                }
                 deactivateServices(provider.getId(), auth);
             } else {
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());

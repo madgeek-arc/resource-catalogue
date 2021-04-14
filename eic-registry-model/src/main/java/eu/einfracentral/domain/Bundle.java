@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
+import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -26,6 +27,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private boolean active;
 
     @XmlElement
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
     private String status;
 
     @XmlElement
