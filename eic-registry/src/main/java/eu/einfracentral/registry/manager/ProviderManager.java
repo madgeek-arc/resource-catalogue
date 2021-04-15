@@ -239,7 +239,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         ProviderBundle provider = get(id);
-        provider.setStatus(vocabularyService.get(status).getName());
+        provider.setStatus(vocabularyService.get(status).getId());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
         InfraService serviceTemplate;
