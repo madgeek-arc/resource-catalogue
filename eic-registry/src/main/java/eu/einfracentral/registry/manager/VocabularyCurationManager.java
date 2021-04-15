@@ -139,7 +139,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     public VocabularyCuration validate(VocabularyCuration vocabularyCuration, Authentication auth){
         // check if vocabulary already exists
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<Vocabulary> allVocs = vocabularyService.getAll(ff, null).getResults();
         List<String> allVocsIds = new ArrayList<>();
         for (Vocabulary vocabulary : allVocs){
@@ -249,7 +249,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
         // validate if providerId/resourceId exists
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(10000);
+        facetFilter.setQuantity(maxQuantity);
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, auth).getResults();
         List<InfraService> allResources = infraServiceService.getAll(facetFilter, auth).getResults();
         List<String> providerIds = new ArrayList<>();
