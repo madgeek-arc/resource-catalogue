@@ -1,5 +1,6 @@
 package eu.einfracentral.utils;
 
+import org.apache.log4j.Logger;
 import org.piwik.java.tracking.PiwikRequest;
 import org.piwik.java.tracking.PiwikTracker;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,8 @@ import java.net.URL;
 
 @Component
 public class MatomoInterceptor extends HandlerInterceptorAdapter {
+
+    private static Logger logger = Logger.getLogger(MatomoInterceptor.class);
 
     @Value("${apitracking.matomo.site}")
     private Integer siteId;
@@ -34,16 +37,25 @@ public class MatomoInterceptor extends HandlerInterceptorAdapter {
         super.afterCompletion(request, response, handler, ex);
 
         if (piwikTracker != null) {
-            PiwikRequest piwikRequest = new PiwikRequest(siteId, new URL(request.getRequestURL().toString()));
 
-            piwikRequest.setActionName(request.getRequestURI());
-            piwikRequest.setUserId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-            try {
-                piwikRequest.setReferrerUrl(new URL(request.getHeader("Referer")));
-            } catch (Exception e) {}
+            if (request.getHeader("Referer") == null) {
+                logger.debug("Referer is null. That probably means that the call did not come from the portal. Logging!");
+
+                PiwikRequest piwikRequest = new PiwikRequest(siteId, new URL(request.getRequestURL().toString()));
+
+                piwikRequest.setActionName(request.getRequestURI());
+                piwikRequest.setUserId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+                try {
+                    piwikRequest.setReferrerUrl(new URL(request.getHeader("Referer")));
+                } catch (Exception e) {
+                    logger.error("Error setting referer", e);
+                }
 
 
-            piwikTracker.sendRequestAsync(piwikRequest);
+                piwikTracker.sendRequestAsync(piwikRequest);
+            } else {
+                logger.debug("Referer is not null. Ignoring!");
+            }
         }
     }
 }
