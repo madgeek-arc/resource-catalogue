@@ -141,7 +141,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public List<Event> getEvents(String eventType) {
         Paging<Resource> eventResources = searchService
                 .cqlQuery(String.format("type=\"%s\"", eventType), getResourceType(),
-                        10000, 0, "creation_date", "DESC");
+                        maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -154,7 +154,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
                         eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceType(),
-                10000, 0, "creation_date", "DESC");
+                maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -162,7 +162,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Cacheable(value = CACHE_EVENTS)
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
-                eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
+                eventType, serviceId), getResourceType(), maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -174,7 +174,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         }
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
                 eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
-                10000, 0, "creation_date", "DESC");
+                maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -183,7 +183,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication) {
         Map<String, List<Float>> allServiceEvents = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("type", eventType);
         Map<String, Object> order = new HashMap<>();
         Map<String, Object> sort = new HashMap<>();
