@@ -39,7 +39,8 @@ public class LoggingInfo {
         DEACTIVATED("deactivated"),
         APPROVED("approved"), // approved Provider (APPROVED) or approved Service (APPROVED)
         VALIDATED("validated"), // validated Provider (ST_SUBMISSION)
-        REJECTED("rejected"); // rejected Provider (REJECTED) or rejected Service (REJECTED_ST)
+        REJECTED("rejected"), // rejected Provider (REJECTED) or rejected Service (REJECTED_ST)
+        INITIALIZATION("initialization");
 
         private final String type;
 
@@ -76,6 +77,16 @@ public class LoggingInfo {
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(now());
         ret.setType(type);
+        ret.setUserEmail(userEmail);
+        ret.setUserRole(role);
+        return ret;
+    }
+
+    // already registered Providers / Resources
+    public static LoggingInfo createLoggingInfoForExistingEntry(String userEmail, String role){
+        LoggingInfo ret = new LoggingInfo();
+        ret.setDate("1609491600");
+        ret.setType(Types.INITIALIZATION.getKey());
         ret.setUserEmail(userEmail);
         ret.setUserRole(role);
         return ret;

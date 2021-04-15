@@ -28,6 +28,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
+import javax.validation.constraints.Null;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -241,7 +242,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle provider = get(id);
         provider.setStatus(vocabularyService.get(status).getId());
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        if (provider.getLoggingInfo() != null){
+            loggingInfoList = provider.getLoggingInfo();
+        } else{
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry(User.of(auth).getEmail(), determineRole(auth));
+            loggingInfoList.add(oldProviderRegistration);
+        }
         InfraService serviceTemplate;
         switch (status) {
             case "approved":

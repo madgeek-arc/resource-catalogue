@@ -40,6 +40,7 @@
       <xs:enumeration value="APPROVED"/>
       <xs:enumeration value="VALIDATED"/>
       <xs:enumeration value="REJECTED"/>
+      <xs:enumeration value="INITIALIZATION"/>
     </xs:restriction>
   </xs:simpleType>
 
