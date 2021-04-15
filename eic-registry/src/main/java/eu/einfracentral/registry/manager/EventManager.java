@@ -49,7 +49,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     private void deleteNullEvents() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<Event> events = getAll(ff, null).getResults();`
+        List<Event> events = getAll(ff, null).getResults();
         List<Event> toDelete = new ArrayList<>();
         for (Event event : events) {
             if (event.getValue() == null) {
