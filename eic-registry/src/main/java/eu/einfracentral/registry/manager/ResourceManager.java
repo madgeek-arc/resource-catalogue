@@ -32,9 +32,6 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     private static final Logger logger = LogManager.getLogger(ResourceManager.class);
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     @Lazy
     @Autowired
     private FieldValidator fieldValidator;
@@ -123,7 +120,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<T> delAll() {
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(10000);
+        facetFilter.setQuantity(maxQuantity);
         logger.info("Deleting all Resources");
         List<T> results = getAll(facetFilter, null).getResults();
         results.forEach(this::delete);

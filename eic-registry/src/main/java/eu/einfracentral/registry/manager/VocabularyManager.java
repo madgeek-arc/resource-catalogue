@@ -78,7 +78,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Cacheable(value = CACHE_VOCABULARIES)
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
         return vocList.stream().sorted(Comparator.comparing(Vocabulary::getId)).collect(Collectors.toList());
@@ -88,7 +88,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Cacheable(value = CACHE_VOCABULARY_MAP)
     public Map<String, Vocabulary> getVocabulariesMap() {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         return getAll(ff, null)
                 .getResults()
                 .stream()
@@ -118,7 +118,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
             delete(vocabulary);

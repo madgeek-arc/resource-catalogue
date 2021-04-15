@@ -138,14 +138,14 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public Paging<Measurement> getAll(String serviceId, Authentication authentication) {
         Paging<Resource> measurementResources = searchService.cqlQuery(String.format("service=\"%s\"", serviceId), getResourceType(),
-                10000, 0, "creation_date", "DESC");
+                maxQuantity, 0, "creation_date", "DESC");
         return pagingResourceToMeasurement(measurementResources);
     }
 
     @Override
     public Paging<Measurement> getAll(String indicatorId, String serviceId, Authentication authentication) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("indicator", indicatorId);
         ff.addFilter("service", serviceId);
         return getAll(ff, authentication);
@@ -155,7 +155,7 @@ public class MeasurementManager extends ResourceManager<Measurement> implements 
     @Override
     public Paging<Measurement> getLatestServiceMeasurements(String serviceId, Authentication authentication) {
         Paging<Resource> measurementResources = searchService.cqlQuery(String.format("service=\"%s\"", serviceId), getResourceType(),
-                10000, 0, "creation_date", "DESC");
+                maxQuantity, 0, "creation_date", "DESC");
         List<Measurement> measurements = measurementResources
                 .getResults()
                 .stream()
