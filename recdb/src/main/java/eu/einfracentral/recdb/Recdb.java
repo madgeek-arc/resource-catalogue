@@ -75,7 +75,7 @@ public class Recdb {
     private DataSource datasource;
 
     //    @Scheduled(fixedDelay = 5 * 60 * 1000)
-    @Scheduled(cron = "0 0 1 * * *", zone = "Europe/Athens")
+    @Scheduled(cron = "0 0 * * * *")
     public void getViews() throws IOException {
         urlConstruct();
 
