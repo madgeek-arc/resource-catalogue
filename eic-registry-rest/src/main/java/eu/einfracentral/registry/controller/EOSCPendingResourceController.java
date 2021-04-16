@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Measurement;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
@@ -176,23 +175,5 @@ public class EOSCPendingResourceController extends ResourceController<InfraServi
         }
 
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
-    }
-
-    private Pair<Service, List<Measurement>> getServiceAndMeasurements(Map<String, JsonNode> json) {
-        ObjectMapper mapper = new ObjectMapper();
-        Service service = null;
-        List<Measurement> measurements = new ArrayList<>();
-        try {
-            service = mapper.readValue(json.get("service").toString(), Service.class);
-            measurements = Arrays.stream(mapper.readValue(json.get("measurements").toString(), Measurement[].class)).collect(Collectors.toList());
-
-        } catch (JsonParseException e) {
-            logger.error("JsonParseException", e);
-        } catch (JsonMappingException e) {
-            logger.error("JsonMappingException", e);
-        } catch (IOException e) {
-            logger.error("IOException", e);
-        }
-        return new Pair<>(service, measurements);
     }
 }
