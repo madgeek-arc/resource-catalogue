@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
@@ -290,6 +291,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                             logger.error("Could not update service with id '{}' (verifyProvider)", serviceTemplate.getService().getId());
                         }
                         break;
+                    default:
+                        break;
                 }
                 provider.setActive(false);
         }
@@ -297,16 +300,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                if (!status.equals("pending template submission")){
+                if (!status.equals("pending template submission") && !status.equals("pending template approval")){
                     loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
                     loggingInfoList.add((loggingInfo));
                     provider.setLoggingInfo(loggingInfoList);
                 }
                 deactivateServices(provider.getId(), auth);
             } else {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
-                loggingInfoList.add((loggingInfo));
-                provider.setLoggingInfo(loggingInfoList);
+                if (!status.equals("approved")){
+                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+                    loggingInfoList.add((loggingInfo));
+                    provider.setLoggingInfo(loggingInfoList);
+                }
                 activateServices(provider.getId(), auth);
             }
         }
@@ -437,7 +442,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             service.setActive(true);
             // update LoggingInfo
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
-            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+            LoggingInfo loggingInfo;
+            try{
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+            } catch(InsufficientAuthenticationException e){
+                loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.ACTIVATED.getKey());
+            }
             loggingInfoList.add(loggingInfo);
             service.setLoggingInfo(loggingInfoList);
             try {
@@ -457,7 +467,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 //            service.setStatus(null);
             service.setActive(false);
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
-            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+            LoggingInfo loggingInfo;
+            try{
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+            } catch(InsufficientAuthenticationException e){
+                loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.DEACTIVATED.getKey());
+            }
             loggingInfoList.add(loggingInfo);
             service.setLoggingInfo(loggingInfoList);
             try {
@@ -642,6 +657,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 serviceTemplate = infraService;
             }
         }
+        loggingInfoList = serviceTemplate.getLoggingInfo();
         LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
         loggingInfoList.add((loggingInfo));
         serviceTemplate.setLoggingInfo(loggingInfoList);
