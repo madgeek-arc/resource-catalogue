@@ -82,6 +82,15 @@ public class LoggingInfo {
         return ret;
     }
 
+    public static LoggingInfo updateLoggingInfo(String type){
+        LoggingInfo ret = new LoggingInfo();
+        ret.setDate(now());
+        ret.setType(type);
+        ret.setUserEmail("-");
+        ret.setUserRole("system");
+        return ret;
+    }
+
     // already registered Providers / Resources
     public static LoggingInfo createLoggingInfoForExistingEntry(String userEmail, String role){
         LoggingInfo ret = new LoggingInfo();
