@@ -31,10 +31,7 @@ import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserExc
 
 import javax.validation.constraints.Null;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.*;
@@ -247,7 +244,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (provider.getLoggingInfo() != null){
             loggingInfoList = provider.getLoggingInfo();
         } else{
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry(User.of(auth).getEmail(), determineRole(auth));
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
             loggingInfoList.add(oldProviderRegistration);
         }
         InfraService serviceTemplate;
@@ -259,6 +256,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 provider.setActive(active);
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.APPROVED.getKey());
                 loggingInfoList.add((loggingInfo));
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                 provider.setLoggingInfo(loggingInfoList);
 
                 // update Service Template ProviderInfo
@@ -275,11 +273,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     case "rejected":
                         loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.REJECTED.getKey());
                         loggingInfoList.add((loggingInfo));
+                        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                         provider.setLoggingInfo(loggingInfoList);
                         break;
                     case "pending template submission":
                         loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.VALIDATED.getKey());
                         loggingInfoList.add((loggingInfo));
+                        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                         provider.setLoggingInfo(loggingInfoList);
                         break;
                     case "rejected template":
@@ -468,10 +468,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             service.setActive(false);
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
             LoggingInfo loggingInfo;
-            try{
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
-            } catch(InsufficientAuthenticationException e){
+            if (auth == null){
                 loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.DEACTIVATED.getKey());
+            } else{
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(loggingInfo);
             service.setLoggingInfo(loggingInfoList);
@@ -657,9 +657,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 serviceTemplate = infraService;
             }
         }
-        loggingInfoList = serviceTemplate.getLoggingInfo();
-        LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
-        loggingInfoList.add((loggingInfo));
+        if (serviceTemplate.getLoggingInfo() != null){
+            loggingInfoList = serviceTemplate.getLoggingInfo();
+            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
+            loggingInfoList.add((loggingInfo));
+        } else{
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
+            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
+            loggingInfoList.add(oldProviderRegistration);
+            loggingInfoList.add(loggingInfo);
+        }
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         serviceTemplate.setLoggingInfo(loggingInfoList);
         return serviceTemplate;
     }
