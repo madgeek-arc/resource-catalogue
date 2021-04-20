@@ -92,12 +92,12 @@ public class LoggingInfo {
     }
 
     // already registered Providers / Resources
-    public static LoggingInfo createLoggingInfoForExistingEntry(String userEmail, String role){
+    public static LoggingInfo createLoggingInfoForExistingEntry(){
         LoggingInfo ret = new LoggingInfo();
         ret.setDate("1609491600");
         ret.setType(Types.INITIALIZATION.getKey());
-        ret.setUserEmail(userEmail);
-        ret.setUserRole(role);
+        ret.setUserEmail("-");
+        ret.setUserRole("system");
         return ret;
     }
 

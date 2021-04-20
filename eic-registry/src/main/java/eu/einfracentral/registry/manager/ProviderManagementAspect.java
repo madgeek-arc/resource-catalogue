@@ -52,8 +52,8 @@ public class ProviderManagementAspect {
     }
 
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String," +
-            "org.springframework.security.core.Authentication)) ||" +
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String, " +
+            "String, Boolean, org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
             "org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +

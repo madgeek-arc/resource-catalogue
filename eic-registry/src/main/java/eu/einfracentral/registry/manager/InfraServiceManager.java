@@ -22,9 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
@@ -117,10 +115,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList;
-        if (infraService.getLoggingInfo() != null){
+        if (existingService.getLoggingInfo() != null){
             loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
-            loggingInfoList = infraService.getLoggingInfo();
+            loggingInfoList = existingService.getLoggingInfo();
             loggingInfoList.add((loggingInfo));
+            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         } else{
             loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
@@ -263,6 +262,29 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
         }
         service.setActive(active);
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo;
+        if (service.getLoggingInfo() != null){
+            loggingInfoList = service.getLoggingInfo();
+            if (active){
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+            } else{
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+            }
+            loggingInfoList.add(loggingInfo);
+        }
+        else{
+            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
+            if (active){
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+            } else{
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+            }
+            loggingInfoList.add(oldServiceRegistration);
+            loggingInfoList.add(loggingInfo);
+        }
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+        service.setLoggingInfo(loggingInfoList);
         this.update(service, auth);
         return service;
     }

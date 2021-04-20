@@ -54,8 +54,11 @@ public class RegistrationMailService {
     @Value("${project.registration.email:registration@catris.eu}")
     private String registrationEmail;
 
-    @Value("${emails.send.notifications:true}")
-    private boolean enableEmailNotifications;
+    @Value("${emails.send.admin.notifications}")
+    private boolean enableEmailAdminNotifications;
+
+    @Value("${emails.send.provider.notifications}")
+    private boolean enableEmailProviderNotifications;
 
 
     @Autowired
@@ -168,7 +171,8 @@ public class RegistrationMailService {
                 root.put("providerBundle", providerBundle);
                 for (User user : providerBundle.getProvider().getUsers()) {
                     root.put("user", user);
-                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail());
+                    String recipient = "provider";
+                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), recipient);
                 }
             }
         }
@@ -199,7 +203,8 @@ public class RegistrationMailService {
 
         String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
         if (!providersWaitingForInitialApproval.isEmpty() || !providersWaitingForSTApproval.isEmpty()) {
-            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail);
+            String recipient = "admin";
+            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail, recipient);
         }
     }
 
@@ -275,14 +280,15 @@ public class RegistrationMailService {
         root.put("updatedServices", updatedServices);
 
         String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
-        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail);
+        String recipient = "provider";
+        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail, recipient);
     }
 
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email) {
-        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email));
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, String recipient) {
+        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), recipient);
     }
 
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails) {
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails, String recipient) {
         if (emails == null || emails.isEmpty()) {
             logger.error("emails empty or null");
             return;
@@ -292,12 +298,10 @@ public class RegistrationMailService {
             temp.process(root, out);
             String mailBody = out.getBuffer().toString();
 
-            // enable vocabularyCuration emails
-            if (templateName.equalsIgnoreCase("vocabularyCurationUser.ftl") || templateName.equalsIgnoreCase("vocabularyCurationAdmin.ftl")){
+            if (enableEmailAdminNotifications && recipient.equals("admin")) {
                 mailService.sendMail(emails, subject, mailBody);
             }
-
-            if (enableEmailNotifications) {
+            if (enableEmailProviderNotifications && recipient.equals("provider")) {
                 mailService.sendMail(emails, subject, mailBody);
             }
             logger.info("\nRecipients: {}\nTitle: {}\nMail body: \n{}", String.join(", ", emails), subject, mailBody);
@@ -447,13 +451,15 @@ public class RegistrationMailService {
         if (admins == null){
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
-                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail());
+                String recipient = "provider";
+                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), recipient);
             }
         } else {
             for (User user : providerBundle.getProvider().getUsers()) {
                 if (admins.contains(user.getEmail())){
                     root.put("user", user);
-                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail());
+                    String recipient = "provider";
+                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), recipient);
                 }
             }
         }
@@ -471,7 +477,8 @@ public class RegistrationMailService {
         for (User user : providerBundle.getProvider().getUsers()) {
             if (admins.contains(user.getEmail())){
                 root.put("user", user);
-                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail());
+                String recipient = "provider";
+                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail(), recipient);
             }
         }
     }
@@ -483,7 +490,8 @@ public class RegistrationMailService {
         root.put("providerBundle", provider);
 
         String subject = String.format("[%s] Provider Deletion Request", projectName);
-        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail);
+        String recipient = "admin";
+        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail, recipient);
     }
 
     public void notifyProviderAdmins(ProviderBundle provider){
@@ -495,7 +503,8 @@ public class RegistrationMailService {
                 provider.getProvider().getId(), provider.getProvider().getName());
         for (User user : provider.getProvider().getUsers()){
             root.put("user", user);
-            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail());
+            String recipient = "provider";
+            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail(), recipient);
         }
     }
 
@@ -509,12 +518,14 @@ public class RegistrationMailService {
         // send email to User
         String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        String recipient = "provider";
+        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
 
         // send email to Admins
         String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail);
+        recipient = "admin";
+        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail, recipient);
     }
 
     public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration){
@@ -527,12 +538,14 @@ public class RegistrationMailService {
             // send email of Approval
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+            String recipient = "provider";
+            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
         } else{
             // send email of Rejection
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+            String recipient = "provider";
+            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
         }
     }
 
