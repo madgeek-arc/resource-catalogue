@@ -109,7 +109,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                                 if (u.getId() != null && !"".equals(u.getId())) {
                                     return u.getId();
                                 }
-                                return u.getEmail();
+                                return u.getEmail().toLowerCase();
                             }))
                     .filter(Objects::nonNull)
                     .distinct()
@@ -120,6 +120,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         }
 
         userRolesMap.putAll(Arrays.stream(admins.replace(" ", "").split(","))
+                .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))

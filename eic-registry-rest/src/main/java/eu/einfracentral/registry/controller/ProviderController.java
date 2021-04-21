@@ -256,12 +256,12 @@ public class ProviderController {
     }
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
-       return providerManager.hasAdminAcceptedTerms(providerId, authentication);
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
+        return providerManager.hasAdminAcceptedTerms(providerId, authentication);
     }
 
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
         providerManager.adminAcceptedTerms(providerId, authentication);
     }
 
@@ -271,7 +271,7 @@ public class ProviderController {
     }
 
     @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void requestProviderDeletion(@RequestParam String providerId, @ApiIgnore Authentication authentication){
+    public void requestProviderDeletion(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
         providerManager.requestProviderDeletion(providerId, authentication);
     }
 
@@ -280,5 +280,10 @@ public class ProviderController {
         providerManager.deleteUserInfo(authentication);
     }
 
-
+    // Get all modification details of a specific Provider based on id.
+    @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Paging<ResourceHistory> history = this.providerManager.getHistory(id);
+        return ResponseEntity.ok(history);
+    }
 }

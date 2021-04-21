@@ -12,10 +12,9 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -48,13 +47,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final EventService eventService;
     private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
+    private final VersionService versionService;
     private final VocabularyService vocabularyService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService, Random randomNumberGenerator,
                            @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator, EventService eventService, JmsTemplate jmsTopicTemplate,
+                           IdCreator idCreator,
+                           EventService eventService,
+                           JmsTemplate jmsTopicTemplate,
+                           VersionService versionService,
                            VocabularyService vocabularyService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
@@ -65,6 +68,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
         this.jmsTopicTemplate = jmsTopicTemplate;
+        this.versionService = versionService;
         this.vocabularyService = vocabularyService;
     }
 
@@ -171,6 +175,52 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle get(String id, Authentication auth) {
         return get(id);
+    }
+
+    @Override
+    public Paging<ResourceHistory> getHistory(String id) {
+        Map<String, ResourceHistory> historyMap = new TreeMap<>();
+
+        Resource resource = getResource(id);
+        List<Version> versions = versionService.getVersionsByResource(resource.getId());
+        versions.sort((version, t1) -> {
+            if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
+                return -1;
+            }
+            return 1;
+        });
+
+        // create the first entry from the current resource
+        ProviderBundle providerBundle;
+        providerBundle = deserialize(resource);
+        if (providerBundle != null && providerBundle.getMetadata() != null) {
+            historyMap.put(providerBundle.getMetadata().getModifiedAt(), new ResourceHistory(providerBundle, resource.getId()));
+        }
+
+        // create version entries
+        for (Version version : versions) {
+            resource = (version.getResource() == null ? getResource(version.getParentId()) : version.getResource());
+            resource.setPayload(version.getPayload());
+            providerBundle = deserialize(resource);
+            if (providerBundle != null) {
+                try {
+                    historyMap.putIfAbsent(providerBundle.getMetadata().getModifiedAt(), new ResourceHistory(providerBundle, version.getId()));
+                } catch (NullPointerException e) {
+                    logger.warn("Provider with id '{}' does not have Metadata", providerBundle.getId());
+                }
+            }
+        }
+
+        // sort list by modification date
+        List<ResourceHistory> history = new ArrayList<>(historyMap.values());
+        history.sort((resourceHistory, t1) -> {
+            if (Long.parseLong(resourceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
+                return 1;
+            }
+            return -1;
+        });
+
+        return new Browsing<>(history.size(), 0, history.size(), history, null);
     }
 
     @Override
@@ -339,7 +389,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 .map(p -> {
                     if (p.getProvider().getUsers() != null && p.getProvider().getUsers().stream().filter(Objects::nonNull).anyMatch(u -> {
                         if (u.getEmail() != null) {
-                            return u.getEmail().equals(email);
+                            return u.getEmail().equalsIgnoreCase(email);
                         }
                         return false;
                     })) {
@@ -523,7 +573,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         updatedUsers.add(user);
                     }
                 } else {
-                    if (!user.getEmail().equals("") && !user.getEmail().equals(userEmail)) {
+                    if (!user.getEmail().equals("") && !user.getEmail().equalsIgnoreCase(userEmail)) {
                         updatedUsers.add(user);
                     }
                 }
@@ -540,7 +590,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (users == null) {
             users = new ArrayList<>();
         }
-        if (users.stream().noneMatch(u -> u.getEmail().equals(authUser.getEmail()))) {
+        if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
             users.add(authUser);
             provider.setUsers(users);
         }
@@ -582,16 +632,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle providerBundle = get(providerId);
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()){
-            userList.add(user.getEmail());
+            userList.add(user.getEmail().toLowerCase());
         }
         if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(User.of(auth).getEmail())) {
+            if (userList.contains(User.of(auth).getEmail().toLowerCase())) {
                 return false; //pop-up modal
             } else {
                 return true; //no modal
             }
         }
-        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail()) && userList.contains(User.of(auth).getEmail())) {
+        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail().toLowerCase()) && userList.contains(User.of(auth).getEmail().toLowerCase())) {
             return false; // pop-up modal
         }
         return true; // no modal
@@ -605,10 +655,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<String> existingAdmins = new ArrayList<>();
         List<String> newAdmins = new ArrayList<>();
         for (User user : existingProvider.getProvider().getUsers()){
-            existingAdmins.add(user.getEmail());
+            existingAdmins.add(user.getEmail().toLowerCase());
         }
         for (User user : updatedProvider.getProvider().getUsers()){
-            newAdmins.add(user.getEmail());
+            newAdmins.add(user.getEmail().toLowerCase());
         }
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
