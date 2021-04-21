@@ -150,6 +150,30 @@
     },
     {
       "multivalued": false,
+      "name": "date",
+      "path": "//*[local-name()='loggingInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "userEmail",
+      "path": "//*[local-name()='loggingInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "userRole",
+      "path": "//*[local-name()='loggingInfo']/*[local-name()='userRole']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "type",
+      "path": "//*[local-name()='loggingInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "active",
       "path": "//*[local-name()='active']/text()",
       "defaultValue": false,
@@ -166,5 +190,5 @@
   "name": "provider",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/eosc/modal/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/logging/eic-registry-model/src/main/resources/schema1.xsd"
 }

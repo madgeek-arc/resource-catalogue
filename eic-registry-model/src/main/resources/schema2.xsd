@@ -30,14 +30,17 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="states">
+  <xs:simpleType name="types">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="PENDING_1"/>
-      <xs:enumeration value="ST_SUBMISSION"/>
-      <xs:enumeration value="PENDING_2"/>
-      <xs:enumeration value="REJECTED_ST"/>
+      <xs:enumeration value="REGISTERED"/>
+      <xs:enumeration value="UPDATED"/>
+      <xs:enumeration value="DELETED"/>
+      <xs:enumeration value="ACTIVATED"/>
+      <xs:enumeration value="DEACTIVATED"/>
       <xs:enumeration value="APPROVED"/>
+      <xs:enumeration value="VALIDATED"/>
       <xs:enumeration value="REJECTED"/>
+      <xs:enumeration value="INITIALIZATION"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -68,6 +71,7 @@
       <xs:enumeration value="PROVIDER_STRUCTURE_TYPE"/>
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
+      <xs:enumeration value="PROVIDER_STATE"/>
     </xs:restriction>
   </xs:simpleType>
 

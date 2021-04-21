@@ -25,8 +25,11 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,8 +57,11 @@ public class RegistrationMailService {
     @Value("${project.registration.email:registration@catris.eu}")
     private String registrationEmail;
 
-    @Value("${emails.send.notifications:true}")
-    private boolean enableEmailNotifications;
+    @Value("${emails.send.admin.notifications}")
+    private boolean enableEmailAdminNotifications;
+
+    @Value("${emails.send.provider.notifications}")
+    private boolean enableEmailProviderNotifications;
 
 
     @Autowired
@@ -160,7 +166,7 @@ public class RegistrationMailService {
         root.put("endpoint", endpoint);
 
         for (ProviderBundle providerBundle : allProviders) {
-            if (providerBundle.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+            if (providerBundle.getStatus().equals("pending template submission")) {
                 if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
                     continue;
                 }
@@ -168,7 +174,8 @@ public class RegistrationMailService {
                 root.put("providerBundle", providerBundle);
                 for (User user : providerBundle.getProvider().getUsers()) {
                     root.put("user", user);
-                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail());
+                    String recipient = "provider";
+                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), recipient);
                 }
             }
         }
@@ -183,10 +190,10 @@ public class RegistrationMailService {
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
         List<String> providersWaitingForSTApproval = new ArrayList<>();
         for (ProviderBundle providerBundle : allProviders) {
-            if (providerBundle.getStatus().equals(Provider.States.PENDING_1.getKey())) {
+            if (providerBundle.getStatus().equals("pending initial approval")) {
                 providersWaitingForInitialApproval.add(providerBundle.getProvider().getName());
             }
-            if (providerBundle.getStatus().equals(Provider.States.PENDING_2.getKey())) {
+            if (providerBundle.getStatus().equals("pending template approval")) {
                 providersWaitingForSTApproval.add(providerBundle.getProvider().getName());
             }
         }
@@ -199,7 +206,8 @@ public class RegistrationMailService {
 
         String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
         if (!providersWaitingForInitialApproval.isEmpty() || !providersWaitingForSTApproval.isEmpty()) {
-            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail);
+            String recipient = "admin";
+            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail, recipient);
         }
     }
 
@@ -227,6 +235,7 @@ public class RegistrationMailService {
         List<InfraService> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
         List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
 
+        // New & Updated Providers, Resources
         for (Bundle bundle : allResources) {
             Timestamp modified;
             Timestamp registered;
@@ -261,8 +270,42 @@ public class RegistrationMailService {
             }
         }
 
+        // Provider & Resource Activities
+        Map<String, List<LoggingInfo>> loggingInfoProviderMap = new HashMap<>();
+        Map<String, List<LoggingInfo>> loggingInfoServiceMap = new HashMap<>();
+        List<LoggingInfo> loggingInfoProviderList = new ArrayList<>();
+        List<LoggingInfo> loggingInfoServiceList = new ArrayList<>();
+        Timestamp timestamp;
+        for (ProviderBundle providerBundle : activeProviders) {
+            if (providerBundle.getLoggingInfo() != null) {
+                for (LoggingInfo loggingInfo : providerBundle.getLoggingInfo()){
+                    timestamp = new Timestamp(Long.parseLong(loggingInfo.getDate()));
+                    if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)){
+                        loggingInfoProviderList.add(loggingInfo);
+                    }
+                }
+            } else {
+                continue;
+            }
+            loggingInfoProviderMap.put(providerBundle.getId(), loggingInfoProviderList);
+        }
+        for (InfraService infraService : activeServices) {
+            if (infraService.getLoggingInfo() != null) {
+                for (LoggingInfo loggingInfo : infraService.getLoggingInfo()){
+                    timestamp = new Timestamp(Long.parseLong(loggingInfo.getDate()));
+                    if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)){
+                        loggingInfoServiceList.add(loggingInfo);
+                    }
+                }
+            } else {
+                continue;
+            }
+            loggingInfoServiceMap.put(infraService.getId(), loggingInfoServiceList);
+        }
+
         boolean changes = true;
-        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()) {
+        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()
+                && loggingInfoProviderList.isEmpty() && loggingInfoServiceList.isEmpty()) {
             changes = false;
         }
 
@@ -273,16 +316,19 @@ public class RegistrationMailService {
         root.put("updatedProviders", updatedProviders);
         root.put("newServices", newServices);
         root.put("updatedServices", updatedServices);
+        root.put("loggingInfoProviderMap", loggingInfoProviderMap);
+        root.put("loggingInfoServiceMap", loggingInfoServiceMap);
 
         String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
-        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail);
+        String recipient = "provider";
+        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail, recipient);
     }
 
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email) {
-        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email));
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, String recipient) {
+        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), recipient);
     }
 
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails) {
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails, String recipient) {
         if (emails == null || emails.isEmpty()) {
             logger.error("emails empty or null");
             return;
@@ -292,12 +338,10 @@ public class RegistrationMailService {
             temp.process(root, out);
             String mailBody = out.getBuffer().toString();
 
-            // enable vocabularyCuration emails
-            if (templateName.equalsIgnoreCase("vocabularyCurationUser.ftl") || templateName.equalsIgnoreCase("vocabularyCurationAdmin.ftl")){
+            if (enableEmailAdminNotifications && recipient.equals("admin")) {
                 mailService.sendMail(emails, subject, mailBody);
             }
-
-            if (enableEmailNotifications) {
+            if (enableEmailProviderNotifications && recipient.equals("provider")) {
                 mailService.sendMail(emails, subject, mailBody);
             }
             logger.info("\nRecipients: {}\nTitle: {}\nMail body: \n{}", String.join(", ", emails), subject, mailBody);
@@ -324,29 +368,29 @@ public class RegistrationMailService {
         String subject;
         String providerName = providerBundle.getProvider().getName();
 
-        switch (Provider.States.fromString(providerBundle.getStatus())) {
-            case PENDING_1:
+        switch (providerBundle.getStatus()) {
+            case "pending initial approval":
                 subject = String.format("[%s Portal] Your application for registering [%s] " +
                         "as a new %s Provider to the %s Portal has been received and is under review",
                         this.projectName, providerName, this.projectName, this.projectName);
                 break;
-            case ST_SUBMISSION:
+            case "pending template submission":
                 subject = String.format("[%s Portal] Your application for registering [%s] " +
                         "as a new %s Provider to the %s Portal has been approved",
                         this.projectName, providerName, this.projectName, this.projectName);
                 break;
-            case REJECTED:
+            case "rejected":
                 subject = String.format("[%s Portal] Your application for registering [%s] " +
                         "as a new %s Provider to the %s Portal has been rejected",
                         this.projectName, providerName, this.projectName, this.projectName);
                 break;
-            case PENDING_2:
+            case "pending template approval":
                 assert serviceTemplate != null;
                 subject = String.format("[%s Portal] Your application for registering [%s] " +
                         "as a new %s to the %s Portal has been received and is under review",
                         this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
                 break;
-            case APPROVED:
+            case "approved":
                 if (providerBundle.isActive()) {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
@@ -359,7 +403,7 @@ public class RegistrationMailService {
                             projectName, serviceOrResource, providerName);
                     break;
                 }
-            case REJECTED_ST:
+            case "rejected template":
                 assert serviceTemplate != null;
                 subject = String.format("[%s Portal] Your application for registering [%s] " +
                         "as a new %s to the %s Portal has been rejected",
@@ -387,29 +431,29 @@ public class RegistrationMailService {
         String providerName = providerBundle.getProvider().getName();
         String providerId = providerBundle.getProvider().getId();
 
-        switch (Provider.States.fromString(providerBundle.getStatus())) {
-            case PENDING_1:
+        switch (providerBundle.getStatus()) {
+            case "pending initial approval":
                 subject = String.format("[%s Portal] A new application for registering [%s] - ([%s]) " +
                         "as a new %s Provider to the %s Portal has been received and should be reviewed",
                         this.projectName, providerName, providerId, this.projectName, this.projectName);
                 break;
-            case ST_SUBMISSION:
+            case "pending template submission":
                 subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
                         "as a new %s Provider has been approved",
                         this.projectName, providerName, providerId, this.projectName);
                 break;
-            case REJECTED:
+            case "rejected":
                 subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
                         "as a new %s Provider has been rejected",
                         this.projectName, providerName, providerId, this.projectName);
                 break;
-            case PENDING_2:
+            case "pending template approval":
                 assert serviceTemplate != null;
                 subject = String.format("[%s Portal] A new application for registering [%s] " +
                         "as a new %s to the %s Portal has been received and should be reviewed",
                         this.projectName, serviceTemplate.getId(), serviceOrResource, this.projectName);
                 break;
-            case APPROVED:
+            case "approved":
                 if (providerBundle.isActive()) {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
@@ -422,7 +466,7 @@ public class RegistrationMailService {
                             this.projectName, serviceOrResource, providerName);
                     break;
                 }
-            case REJECTED_ST:
+            case "rejected template":
                 assert serviceTemplate != null;
                 subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
                         "for registering as a %s %s has been rejected",
@@ -447,13 +491,15 @@ public class RegistrationMailService {
         if (admins == null){
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
-                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail());
+                String recipient = "provider";
+                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), recipient);
             }
         } else {
             for (User user : providerBundle.getProvider().getUsers()) {
                 if (admins.contains(user.getEmail())){
                     root.put("user", user);
-                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail());
+                    String recipient = "provider";
+                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), recipient);
                 }
             }
         }
@@ -471,7 +517,8 @@ public class RegistrationMailService {
         for (User user : providerBundle.getProvider().getUsers()) {
             if (admins.contains(user.getEmail())){
                 root.put("user", user);
-                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail());
+                String recipient = "provider";
+                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail(), recipient);
             }
         }
     }
@@ -483,7 +530,8 @@ public class RegistrationMailService {
         root.put("providerBundle", provider);
 
         String subject = String.format("[%s] Provider Deletion Request", projectName);
-        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail);
+        String recipient = "admin";
+        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail, recipient);
     }
 
     public void notifyProviderAdmins(ProviderBundle provider){
@@ -495,7 +543,8 @@ public class RegistrationMailService {
                 provider.getProvider().getId(), provider.getProvider().getName());
         for (User user : provider.getProvider().getUsers()){
             root.put("user", user);
-            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail());
+            String recipient = "provider";
+            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail(), recipient);
         }
     }
 
@@ -509,12 +558,14 @@ public class RegistrationMailService {
         // send email to User
         String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        String recipient = "provider";
+        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
 
         // send email to Admins
         String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail);
+        recipient = "admin";
+        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail, recipient);
     }
 
     public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration){
@@ -527,12 +578,14 @@ public class RegistrationMailService {
             // send email of Approval
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+            String recipient = "provider";
+            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
         } else{
             // send email of Rejection
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+            String recipient = "provider";
+            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
         }
     }
 

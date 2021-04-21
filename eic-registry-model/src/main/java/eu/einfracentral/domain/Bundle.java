@@ -1,12 +1,14 @@
 package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
+import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -25,7 +27,11 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private boolean active;
 
     @XmlElement
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
     private String status;
+
+    @XmlElement
+    private List<LoggingInfo> loggingInfo;
 
     public Bundle() {
     }
@@ -72,6 +78,14 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.status = status;
     }
 
+    public List<LoggingInfo> getLoggingInfo() {
+        return loggingInfo;
+    }
+
+    public void setLoggingInfo(List<LoggingInfo> loggingInfo) {
+        this.loggingInfo = loggingInfo;
+    }
+
     @Override
     public String toString() {
         return "Bundle{" +
@@ -79,6 +93,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", metadata=" + metadata +
                 ", active=" + active +
                 ", status='" + status + '\'' +
+                ", loggingInfo=" + loggingInfo +
                 '}';
     }
 }
