@@ -28,7 +28,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
-import javax.validation.constraints.Null;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,7 +88,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
             validateScientificDomains(provider.getProvider().getScientificDomains());
         }
-        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()){
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
 
@@ -120,17 +119,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
             validateScientificDomains(provider.getProvider().getScientificDomains());
         }
-        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()){
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList;
-        if (provider.getLoggingInfo() != null){
+        if (provider.getLoggingInfo() != null) {
             loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
             loggingInfoList = provider.getLoggingInfo();
             loggingInfoList.add((loggingInfo));
-        } else{
+        } else {
             loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
             loggingInfoList = new ArrayList<>();
@@ -280,10 +279,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle verifyProvider(String id, String status, Boolean active, Authentication auth) {
         try {
             vocabularyService.get(status);
-        } catch(ResourceException e){
+        } catch (ResourceException e) {
             throw new ResourceException(String.format("Vocabulary %s does not exist!", status), HttpStatus.NOT_FOUND);
         }
-        if (!vocabularyService.get(status).getType().equals("Provider state")){
+        if (!vocabularyService.get(status).getType().equals("Provider state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
@@ -291,9 +290,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setStatus(vocabularyService.get(status).getId());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (provider.getLoggingInfo() != null){
+        if (provider.getLoggingInfo() != null) {
             loggingInfoList = provider.getLoggingInfo();
-        } else{
+        } else {
             LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
             loggingInfoList.add(oldProviderRegistration);
         }
@@ -319,7 +318,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 break;
 
             default:
-                switch(status) {
+                switch (status) {
                     case "rejected":
                         loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.REJECTED.getKey());
                         loggingInfoList.add((loggingInfo));
@@ -350,14 +349,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                if (!status.equals("pending template submission") && !status.equals("pending template approval")){
+                if (!status.equals("pending template submission") && !status.equals("pending template approval")) {
                     loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
                     loggingInfoList.add((loggingInfo));
                     provider.setLoggingInfo(loggingInfoList);
                 }
                 deactivateServices(provider.getId(), auth);
             } else {
-                if (!status.equals("approved")){
+                if (!status.equals("approved")) {
                     loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
                     loggingInfoList.add((loggingInfo));
                     provider.setLoggingInfo(loggingInfoList);
@@ -493,9 +492,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             // update LoggingInfo
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
             LoggingInfo loggingInfo;
-            try{
+            try {
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
-            } catch(InsufficientAuthenticationException e){
+            } catch (InsufficientAuthenticationException e) {
                 loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.ACTIVATED.getKey());
             }
             loggingInfoList.add(loggingInfo);
@@ -518,9 +517,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             service.setActive(false);
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
             LoggingInfo loggingInfo;
-            if (auth == null){
+            if (auth == null) {
                 loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.DEACTIVATED.getKey());
-            } else{
+            } else {
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(loggingInfo);
@@ -596,24 +595,24 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
-        for (ServiceProviderDomain providerScientificDomain : scientificDomains){
+    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains) {
+        for (ServiceProviderDomain providerScientificDomain : scientificDomains) {
             String[] parts = providerScientificDomain.getScientificSubdomain().split("-");
             String scientificDomain = "scientific_domain-" + parts[1];
-            if (!providerScientificDomain.getScientificDomain().equals(scientificDomain)){
+            if (!providerScientificDomain.getScientificDomain().equals(scientificDomain)) {
                 throw new ValidationException("Scientific Subdomain '" + providerScientificDomain.getScientificSubdomain() +
-                        "' should have as Scientific Domain the value '" + scientificDomain +"'");
+                        "' should have as Scientific Domain the value '" + scientificDomain + "'");
             }
         }
     }
 
-    public void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains){
-        for (ProviderMerilDomain providerMerilScientificDomain : merilScientificDomains){
+    public void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains) {
+        for (ProviderMerilDomain providerMerilScientificDomain : merilScientificDomains) {
             String[] parts = providerMerilScientificDomain.getMerilScientificSubdomain().split("-");
             String merilScientificDomain = "provider_meril_scientific_domain-" + parts[1];
-            if (!providerMerilScientificDomain.getMerilScientificDomain().equals(merilScientificDomain)){
+            if (!providerMerilScientificDomain.getMerilScientificDomain().equals(merilScientificDomain)) {
                 throw new ValidationException("Meril Scientific Subdomain '" + providerMerilScientificDomain.getMerilScientificSubdomain() +
-                        "' should have as Meril Scientific Domain the value '" + merilScientificDomain +"'");
+                        "' should have as Meril Scientific Domain the value '" + merilScientificDomain + "'");
             }
         }
     }
@@ -622,16 +621,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public boolean validateUrl(URL urlForValidation) {
         try {
             fieldValidator.validateUrl(null, urlForValidation);
-        } catch (Throwable e){
+        } catch (Throwable e) {
             return false;
         }
         return true;
     }
 
-    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
         ProviderBundle providerBundle = get(providerId);
         List<String> userList = new ArrayList<>();
-        for (User user : providerBundle.getProvider().getUsers()){
+        for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
         }
         if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
@@ -647,45 +646,45 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return true; // no modal
     }
 
-    public void adminAcceptedTerms(String providerId, Authentication auth){
+    public void adminAcceptedTerms(String providerId, Authentication auth) {
         update(get(providerId), auth);
     }
 
     public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
         List<String> existingAdmins = new ArrayList<>();
         List<String> newAdmins = new ArrayList<>();
-        for (User user : existingProvider.getProvider().getUsers()){
+        for (User user : existingProvider.getProvider().getUsers()) {
             existingAdmins.add(user.getEmail().toLowerCase());
         }
-        for (User user : updatedProvider.getProvider().getUsers()){
+        for (User user : updatedProvider.getProvider().getUsers()) {
             newAdmins.add(user.getEmail().toLowerCase());
         }
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
-        if (!adminsAdded.isEmpty()){
+        if (!adminsAdded.isEmpty()) {
             registrationMailService.sendEmailsToNewlyAddedAdmins(updatedProvider, adminsAdded);
         }
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
-        if (!adminsDeleted.isEmpty()){
+        if (!adminsDeleted.isEmpty()) {
             registrationMailService.sendEmailsToNewlyDeletedAdmins(existingProvider, adminsDeleted);
         }
     }
 
     public void requestProviderDeletion(String providerId, Authentication auth) {
         ProviderBundle provider = get(providerId);
-        for (User user : provider.getProvider().getUsers()){
-            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())){
+        for (User user : provider.getProvider().getUsers()) {
+            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }
     }
 
-    public String determineRole(Authentication authentication){
+    public String determineRole(Authentication authentication) {
         String role;
         if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
             role = "admin";
-        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")){
+        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
             role = "provider";
         } else {
             role = "user";
@@ -693,25 +692,25 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return role;
     }
 
-    public InfraService updateInfraServiceLoggingInfo(String providerId, String type, Authentication authentication){
+    public InfraService updateInfraServiceLoggingInfo(String providerId, String type, Authentication authentication) {
         List<Service> providerServices = getServices(providerId);
         List<InfraService> infraServices = new ArrayList<>();
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        for (Service service : providerServices){
+        for (Service service : providerServices) {
             infraServices.add(infraServiceService.get(service.getId()));
         }
         // find the Service Template
         InfraService serviceTemplate = infraServices.get(0);
-        for (InfraService infraService : infraServices){
-            if (Double.parseDouble(infraService.getMetadata().getRegisteredAt()) < Double.parseDouble(serviceTemplate.getMetadata().getRegisteredAt())){
+        for (InfraService infraService : infraServices) {
+            if (Double.parseDouble(infraService.getMetadata().getRegisteredAt()) < Double.parseDouble(serviceTemplate.getMetadata().getRegisteredAt())) {
                 serviceTemplate = infraService;
             }
         }
-        if (serviceTemplate.getLoggingInfo() != null){
+        if (serviceTemplate.getLoggingInfo() != null) {
             loggingInfoList = serviceTemplate.getLoggingInfo();
             LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
             loggingInfoList.add((loggingInfo));
-        } else{
+        } else {
             LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
             LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
             loggingInfoList.add(oldProviderRegistration);
