@@ -25,8 +25,11 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -232,6 +235,7 @@ public class RegistrationMailService {
         List<InfraService> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
         List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
 
+        // New & Updated Providers, Resources
         for (Bundle bundle : allResources) {
             Timestamp modified;
             Timestamp registered;
@@ -266,8 +270,42 @@ public class RegistrationMailService {
             }
         }
 
+        // Provider & Resource Activities
+        Map<String, List<LoggingInfo>> loggingInfoProviderMap = new HashMap<>();
+        Map<String, List<LoggingInfo>> loggingInfoServiceMap = new HashMap<>();
+        List<LoggingInfo> loggingInfoProviderList = new ArrayList<>();
+        List<LoggingInfo> loggingInfoServiceList = new ArrayList<>();
+        Timestamp timestamp;
+        for (ProviderBundle providerBundle : activeProviders) {
+            if (providerBundle.getLoggingInfo() != null) {
+                for (LoggingInfo loggingInfo : providerBundle.getLoggingInfo()){
+                    timestamp = new Timestamp(Long.parseLong(loggingInfo.getDate()));
+                    if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)){
+                        loggingInfoProviderList.add(loggingInfo);
+                    }
+                }
+            } else {
+                continue;
+            }
+            loggingInfoProviderMap.put(providerBundle.getId(), loggingInfoProviderList);
+        }
+        for (InfraService infraService : activeServices) {
+            if (infraService.getLoggingInfo() != null) {
+                for (LoggingInfo loggingInfo : infraService.getLoggingInfo()){
+                    timestamp = new Timestamp(Long.parseLong(loggingInfo.getDate()));
+                    if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)){
+                        loggingInfoServiceList.add(loggingInfo);
+                    }
+                }
+            } else {
+                continue;
+            }
+            loggingInfoServiceMap.put(infraService.getId(), loggingInfoServiceList);
+        }
+
         boolean changes = true;
-        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()) {
+        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()
+                && loggingInfoProviderList.isEmpty() && loggingInfoServiceList.isEmpty()) {
             changes = false;
         }
 
@@ -278,6 +316,8 @@ public class RegistrationMailService {
         root.put("updatedProviders", updatedProviders);
         root.put("newServices", newServices);
         root.put("updatedServices", updatedServices);
+        root.put("loggingInfoProviderMap", loggingInfoProviderMap);
+        root.put("loggingInfoServiceMap", loggingInfoServiceMap);
 
         String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
         String recipient = "provider";
