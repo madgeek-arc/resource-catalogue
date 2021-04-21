@@ -46,7 +46,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Scheduled(cron = "0 0 1 * * *")
-    private void deleteNullEvents() {
+    void deleteNullEvents() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<Event> events = getAll(ff, null).getResults();

@@ -9,6 +9,8 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ import java.util.*;
 
 @Service
 public class FieldValidator {
+
+    private static final Logger logger = LogManager.getLogger(FieldValidator.class);
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
@@ -157,18 +161,18 @@ public class FieldValidator {
         try {
             huc = (HttpURLConnection) urlForValidation.openConnection();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.trace(e.getMessage());
         }
         try {
             assert huc != null;
             huc.setRequestMethod("HEAD");
         } catch (ProtocolException e) {
-            e.printStackTrace();
+            logger.trace(e.getMessage());
         }
         try {
             statusCode = huc.getResponseCode();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.trace(e.getMessage());
         }
         if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405){
             if (field == null){
