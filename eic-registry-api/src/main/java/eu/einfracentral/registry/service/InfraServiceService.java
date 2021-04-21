@@ -116,7 +116,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param id
      * @return
      */
-    Paging<ServiceHistory> getHistory(String id);
+    Paging<ResourceHistory> getHistory(String id);
 
     /**
      * Get the History of a specific resource version of the InfraService with the specified id.
