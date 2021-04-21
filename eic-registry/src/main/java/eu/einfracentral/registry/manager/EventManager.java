@@ -21,12 +21,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_EVENTS;
 import static eu.einfracentral.config.CacheConfig.CACHE_SERVICE_EVENTS;
+
 
 @Component
 public class EventManager extends ResourceManager<Event> implements EventService {
@@ -41,6 +43,23 @@ public class EventManager extends ResourceManager<Event> implements EventService
         super(Event.class);
         this.parserService = parserService;
         this.infraServiceService = infraServiceService;
+    }
+
+    @Scheduled(cron = "0 0 1 * * *")
+    private void deleteNullEvents() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        List<Event> events = getAll(ff, null).getResults();
+        List<Event> toDelete = new ArrayList<>();
+        for (Event event : events) {
+            if (event.getValue() == null) {
+                toDelete.add(event);
+                logger.debug("Null event to delete: {}", event);
+            }
+        }
+        int size = toDelete.size();
+        deleteEvents(toDelete);
+        logger.info("Deleted {} null events", size);
     }
 
     @Override
@@ -63,7 +82,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
-        if (auth != null){
+        if (auth != null) {
             event.setUser(AuthenticationInfo.getSub(auth));
         } else {
             event.setUser("-");
@@ -141,7 +160,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public List<Event> getEvents(String eventType) {
         Paging<Resource> eventResources = searchService
                 .cqlQuery(String.format("type=\"%s\"", eventType), getResourceType(),
-                        10000, 0, "creation_date", "DESC");
+                        maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -154,7 +173,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
                         eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceType(),
-                10000, 0, "creation_date", "DESC");
+                maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -162,7 +181,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Cacheable(value = CACHE_EVENTS)
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
-                eventType, serviceId), getResourceType(), 10000, 0, "creation_date", "DESC");
+                eventType, serviceId), getResourceType(), maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -174,7 +193,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         }
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
                 eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
-                10000, 0, "creation_date", "DESC");
+                maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -183,7 +202,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     public Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication) {
         Map<String, List<Float>> allServiceEvents = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("type", eventType);
         Map<String, Object> order = new HashMap<>();
         Map<String, Object> sort = new HashMap<>();
@@ -231,7 +250,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     public void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication) {
         List<Event> serviceEvents = getServiceEvents(Event.UserActionType.VISIT.toString(), serviceId);
-        for (Event event : serviceEvents){
+        for (Event event : serviceEvents) {
 
             // Compare the event.getInstant(long) to user's give date
             Date eventDate = new Date(event.getInstant());
@@ -244,10 +263,10 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
             if (event.getType().equals("AGGREGATED_VISITS") && sameDay) {
                 Float oldVisits = event.getValue();
-                Float newVisits =oldVisits+noOfVisits;
+                Float newVisits = oldVisits + noOfVisits;
                 event.setValue(newVisits);
                 update(event, authentication);
-            } else{
+            } else {
                 logger.info("Event isn't of type {AGGREGATED_VISITS} and/or didn't happen on the given date.");
             }
         }
@@ -328,28 +347,28 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    public int getServiceAggregatedVisits(String id){
+    public int getServiceAggregatedVisits(String id) {
         int result = 0;
         List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.VISIT.getKey(), id);
-        for (Event event : serviceAggregatedInternals){
+        for (Event event : serviceAggregatedInternals) {
             result += event.getValue();
         }
         return result;
     }
 
-    public int getServiceAggregatedAddToProject(String id){
+    public int getServiceAggregatedAddToProject(String id) {
         int result = 0;
         List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.ADD_TO_PROJECT.getKey(), id);
-        for (Event event : serviceAggregatedInternals){
+        for (Event event : serviceAggregatedInternals) {
             result += event.getValue();
         }
         return result;
     }
 
-    public int getServiceAggregatedOrders(String id){
+    public int getServiceAggregatedOrders(String id) {
         int result = 0;
         List<Event> serviceAggregatedInternals = getServiceEvents(Event.UserActionType.ORDER.getKey(), id);
-        for (Event event : serviceAggregatedInternals){
+        for (Event event : serviceAggregatedInternals) {
             result += event.getValue();
         }
         return result;

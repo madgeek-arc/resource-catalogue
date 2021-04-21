@@ -247,7 +247,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         serviceField.setAccessible(true);
 
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         Browsing<InfraService> services = getAll(ff, null);
 
         final Field f = serviceField;
@@ -433,7 +433,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
-                            resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
             // return the latest modified resource that does not contain a version attribute
             for (Resource resource : resources.getResults()) {
                 if (!resource.getPayload().contains("<tns:version>")) {
@@ -460,7 +460,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
-                        resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
+                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();

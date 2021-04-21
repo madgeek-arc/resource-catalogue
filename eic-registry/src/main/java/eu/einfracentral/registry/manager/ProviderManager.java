@@ -376,7 +376,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new UnauthorizedUserException("Please log in.");
         } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
             FacetFilter ff = new FacetFilter();
-            ff.setQuantity(10000);
+            ff.setQuantity(maxQuantity);
             providers = super.getAll(ff, null).getResults();
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
             providers = getMyServiceProviders(auth);
@@ -407,7 +407,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
@@ -423,7 +423,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<InfraService> getInfraServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults();
     }
@@ -433,7 +433,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("latest", true);
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
@@ -444,7 +444,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
@@ -466,7 +466,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
         ff.setFrom(0);
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return getAll(ff, null).getResults();
     }
@@ -477,7 +477,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("active", false);
         ff.setFrom(0);
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return infraServiceService.getAll(ff, null).getResults();
     }

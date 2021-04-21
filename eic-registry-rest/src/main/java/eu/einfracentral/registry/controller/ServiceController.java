@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -47,7 +46,6 @@ public class ServiceController {
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final InfraServiceService<InfraService, InfraService> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final MeasurementService<Measurement, Authentication> measurementService;
     private final IdCreator idCreator;
     private final DataSource dataSource;
 
@@ -55,11 +53,9 @@ public class ServiceController {
     @Deprecated
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<ProviderBundle, Authentication> provider,
-                      MeasurementService<Measurement, Authentication> measurementService,
                       IdCreator idCreator, DataSource dataSource) {
         this.infraService = service;
         this.providerService = provider;
-        this.measurementService = measurementService;
         this.idCreator = idCreator;
         this.dataSource = dataSource;
     }
@@ -119,50 +115,6 @@ public class ServiceController {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
         logger.info("User '{}' created a new Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
-    }
-
-    @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #json)")
-    @Deprecated
-    public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ObjectMapper mapper = new ObjectMapper();
-        Service service = null;
-        List<Measurement> measurements = new ArrayList<>();
-        try {
-            service = mapper.readValue(json.get("service").toString(), Service.class);
-            measurements = Arrays.stream(mapper.readValue(json.get("measurements").toString(), Measurement[].class)).collect(Collectors.toList());
-
-        } catch (JsonParseException e) {
-            logger.error("JsonParseException", e);
-        } catch (JsonMappingException e) {
-            logger.error("JsonMappingException", e);
-        } catch (IOException e) {
-            logger.error("IOException", e);
-        }
-        if (service == null) {
-            throw new ServiceException("Cannot add a null Resource");
-        }
-        InfraService s = null;
-        try { // check if service already exists
-            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(idCreator.createServiceId(service));
-            }
-            s = this.infraService.get(service.getId());
-        } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {
-            // continue with the creation of the service
-        }
-
-        if (s == null) { // if existing service is null, create it, else update it
-            s = this.infraService.addService(new InfraService(service), auth);
-            logger.info("User '{}' added Resource:\n{}", auth.getName(), infraService);
-        } else {
-            s.setService(service); // replace with given Service
-            s = this.infraService.updateService(s, auth);
-            logger.info("User '{}' updated Resource:\n{}", auth.getName(), infraService);
-        }
-        this.measurementService.updateAll(s.getId(), measurements, auth);
-
-        return new ResponseEntity<>(s.getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")

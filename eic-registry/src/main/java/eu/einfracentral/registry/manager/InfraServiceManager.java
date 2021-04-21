@@ -174,7 +174,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
         ff.setFrom(0);
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         return getAll(ff, null);
     }
 
@@ -184,7 +184,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         logger.info("Creating and caching 'featuredServices'");
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<ProviderBundle> providers = providerManager.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
@@ -202,7 +202,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @Override
     public List<InfraService> eInfraCentralUpdate(InfraService service) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<InfraService> services = getAll(ff, null).getResults();
         List<InfraService> ret = new ArrayList<>();
         for (InfraService infraService : services) {
