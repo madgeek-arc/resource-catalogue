@@ -51,10 +51,10 @@ public class RegistrationMailService {
     @Value("${webapp.homepage}")
     private String endpoint;
 
-    @Value("${project.name:CatRIS}")
+    @Value("${project.name:Resource Catalogue}")
     private String projectName;
 
-    @Value("${project.registration.email:registration@catris.eu}")
+    @Value("${project.registration.email:registration@catalogue.eu}")
     private String registrationEmail;
 
     @Value("${emails.send.admin.notifications}")
@@ -62,6 +62,9 @@ public class RegistrationMailService {
 
     @Value("${emails.send.provider.notifications}")
     private boolean enableEmailProviderNotifications;
+
+    @Value("${elastic.index.max_result_window:10000}")
+    private int maxQuantity;
 
 
     @Autowired
@@ -156,7 +159,7 @@ public class RegistrationMailService {
     @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void sendEmailNotificationsToProviders() {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
@@ -184,7 +187,7 @@ public class RegistrationMailService {
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
     public void sendEmailNotificationsToAdmins() {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
 
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
@@ -226,7 +229,7 @@ public class RegistrationMailService {
 
         // Fetch Active/Pending Services and Active/Pending Providers
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<InfraService> activeServices = infraServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();

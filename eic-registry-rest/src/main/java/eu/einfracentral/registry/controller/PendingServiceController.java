@@ -10,7 +10,6 @@ import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -49,19 +48,16 @@ public class PendingServiceController extends ResourceController<InfraService, A
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<InfraService> pendingServiceManager;
-    private final MeasurementService<Measurement, Authentication> measurementService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IdCreator idCreator;
 
     @Autowired
     @Deprecated
     PendingServiceController(PendingResourceService<InfraService> pendingServiceManager,
-                             MeasurementService<Measurement, Authentication> measurementService,
                              InfraServiceService<InfraService, InfraService> infraServiceService,
                              IdCreator idCreator) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
-        this.measurementService = measurementService;
         this.infraServiceService = infraServiceService;
         this.idCreator = idCreator;
     }
@@ -190,40 +186,6 @@ public class PendingServiceController extends ResourceController<InfraService, A
             // transform to active
             infraService = pendingServiceManager.transformToActive(infraService.getId(), auth);
         }
-
-        return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
-    }
-
-    @PutMapping(path = "resourceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #json)")
-    @Deprecated
-    public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) {
-        Pair<Service, List<Measurement>> serviceAndMeasurementsPair = getServiceAndMeasurements(json);
-        Service service = serviceAndMeasurementsPair.getValue0();
-        List<Measurement> measurements = serviceAndMeasurementsPair.getValue1();
-
-        if (service == null) {
-            throw new ServiceException("Cannot add a null Resource");
-        }
-        InfraService infraService = null;
-        try { // check if service already exists
-            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(idCreator.createServiceId(service));
-            }
-            infraService = this.pendingServiceManager.get(service.getId());
-        } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
-            // continue with the creation of the service
-        }
-
-        if (infraService == null) { // if existing service is null, create it, else update it
-            infraService = pendingServiceManager.add(new InfraService(service), auth);
-            logger.info("User '{}' added Resource:\n{}", auth.getName(), infraService);
-        } else {
-            infraService.setService(service); // important to keep other fields of InfraService
-            infraService = pendingServiceManager.update(infraService, auth);
-            logger.info("User '{}' updated Resource:\n{}", auth.getName(), infraService);
-        }
-        measurementService.updateAll(infraService.getId(), measurements, auth);
 
         return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }

@@ -33,19 +33,22 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
     private Map<String, SimpleGrantedAuthority> userRolesMap;
     private String admins;
+    private final int maxQuantity;
 
-    private ProviderService<ProviderBundle, Authentication> providerService;
-    private PendingResourceService<ProviderBundle> pendingProviderService;
-    private SecurityService securityService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final PendingResourceService<ProviderBundle> pendingProviderService;
+    private final SecurityService securityService;
 
     @Autowired
     public EICAuthoritiesMapper(@Value("${project.admins}") String admins,
+                                @Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                 ProviderService<ProviderBundle, Authentication> manager,
                                 PendingResourceService<ProviderBundle> pendingProviderService,
                                 SecurityService securityService) {
         this.providerService = manager;
         this.pendingProviderService = pendingProviderService;
         this.securityService = securityService;
+        this.maxQuantity = maxQuantity;
         if (admins == null) {
             throw new ServiceException("No Admins Provided");
         }
@@ -88,7 +91,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     private void mapAuthorities(String admins) {
         userRolesMap = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         try {
             List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
             providers.addAll(pendingProviderService.getAll(ff, null).getResults());

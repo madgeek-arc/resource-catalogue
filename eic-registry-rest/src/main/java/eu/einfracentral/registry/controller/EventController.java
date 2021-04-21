@@ -42,26 +42,6 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>(eventService.get(id), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping(path = "deleteNull/{type}/", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<String> deleteNullEvents(@PathVariable String type) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("type", type);
-        List<Event> events = eventService.getAll(ff, null).getResults();
-        List<Event> toDelete = new ArrayList<>();
-        for (Event event : events) {
-            if (event.getValue() == null) {
-                toDelete.add(event);
-                logger.info("Attempting delete of null event: {}", event);
-            }
-        }
-        int size = toDelete.size();
-        eventService.deleteEvents(toDelete);
-        logger.info("Admin deleting null events");
-        return new ResponseEntity<>("deleted " + size, HttpStatus.NO_CONTENT);
-    }
-
 
     // FAVORITES -------->
     // Set a Service as favorite for a user.

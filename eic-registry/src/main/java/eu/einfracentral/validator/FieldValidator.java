@@ -6,7 +6,6 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.IndicatorManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -27,17 +26,14 @@ public class FieldValidator {
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final IndicatorManager indicatorService;
 
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          InfraServiceService<InfraService, InfraService> infraServiceService,
-                          IndicatorManager indicatorService) {
+                          InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.infraServiceService = infraServiceService;
-        this.indicatorService = indicatorService;
     }
 
     public void validateFields(Object o) throws IllegalAccessException {
@@ -210,11 +206,6 @@ public class FieldValidator {
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
                             || InfraService.class.equals(annotation.idClass()))
                             && infraServiceService.get(o.toString()) == null) {
-                        throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Service",
-                                        field.getName()));
-                    } else if (Indicator.class.equals(annotation.idClass())
-                            && indicatorService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
                                         field.getName()));
