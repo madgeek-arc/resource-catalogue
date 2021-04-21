@@ -25,32 +25,6 @@
       
   </xs:simpleType>
     
-  <xs:simpleType name="unitType">
-        
-    <xs:restriction base="xs:string">
-            
-      <xs:enumeration value="PCT"/>
-            
-      <xs:enumeration value="NUM"/>
-            
-      <xs:enumeration value="BOOL"/>
-          
-    </xs:restriction>
-      
-  </xs:simpleType>
-    
-  <xs:simpleType name="dimensionType">
-        
-    <xs:restriction base="xs:string">
-            
-      <xs:enumeration value="TIME"/>
-            
-      <xs:enumeration value="LOCATIONS"/>
-          
-    </xs:restriction>
-      
-  </xs:simpleType>
-    
   <xs:simpleType name="types">
         
     <xs:restriction base="xs:string">

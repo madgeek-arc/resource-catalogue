@@ -9,13 +9,9 @@
     
   <xs:element name="event" type="tns:event"/>
     
-  <xs:element name="indicator" type="tns:indicator"/>
-    
   <xs:element name="infraService" type="tns:infraService"/>
     
   <xs:element name="loggingInfo" type="tns:loggingInfo"/>
-    
-  <xs:element name="measurement" type="tns:measurement"/>
     
   <xs:element name="metadata" type="tns:metadata"/>
     
@@ -192,38 +188,6 @@
       </xs:extension>
           
     </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="indicator">
-        
-    <xs:sequence>
-            
-      <xs:element name="description" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="dimensions">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" name="dimension" type="xs:string"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element name="id" type="xs:string"/>
-            
-      <xs:element name="name" type="xs:string"/>
-            
-      <xs:element name="unit" type="xs:string"/>
-            
-      <xs:element name="unitName" type="xs:string"/>
-          
-    </xs:sequence>
       
   </xs:complexType>
     
@@ -1071,54 +1035,6 @@ c) list of customers, communities, users, etc. using the Resource.]]>
       
   </xs:complexType>
     
-  <xs:complexType name="measurement">
-        
-    <xs:sequence>
-            
-      <xs:element name="id" type="xs:string"/>
-            
-      <xs:element name="indicatorId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="locations">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="location" type="xs:string"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" ref="tns:rangeValue"/>
-            
-      <xs:element name="serviceId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="time" type="xs:anySimpleType"/>
-            
-      <xs:element minOccurs="0" name="value" type="xs:string"/>
-            
-      <xs:element name="valueIsRange" type="xs:boolean"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="rangeValue">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="fromValue" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="toValue" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:complexType name="provider">
         
     <xs:sequence>
@@ -1731,6 +1647,18 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element minOccurs="0" name="message" type="tns:emailMessage"/>
             
       <xs:element minOccurs="0" name="providerId" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="rangeValue">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="fromValue" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="toValue" type="xs:string"/>
           
     </xs:sequence>
       
