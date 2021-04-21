@@ -286,35 +286,35 @@ public class Provider implements Identifiable {
     public Provider() {
     }
 
-    public enum States {
-        PENDING_1("pending initial approval"),
-        ST_SUBMISSION("pending template submission"),
-        PENDING_2("pending template approval"),
-        REJECTED_ST("rejected template"),
-        APPROVED("approved"),
-        REJECTED("rejected");
-
-        private final String type;
-
-        States(final String type) {
-            this.type = type;
-        }
-
-        public String getKey() {
-            return type;
-        }
-
-        /**
-         * @return the Enum representation for the given string.
-         * @throws IllegalArgumentException if unknown string.
-         */
-        public static States fromString(String s) throws IllegalArgumentException {
-            return Arrays.stream(States.values())
-                    .filter(v -> v.type.equals(s))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
-        }
-    }
+//    public enum States {
+//        PENDING_1("pending initial approval"),
+//        ST_SUBMISSION("pending template submission"),
+//        PENDING_2("pending template approval"),
+//        REJECTED_ST("rejected template"),
+//        APPROVED("approved"),
+//        REJECTED("rejected");
+//
+//        private final String type;
+//
+//        States(final String type) {
+//            this.type = type;
+//        }
+//
+//        public String getKey() {
+//            return type;
+//        }
+//
+//        /**
+//         * @return the Enum representation for the given string.
+//         * @throws IllegalArgumentException if unknown string.
+//         */
+//        public static States fromString(String s) throws IllegalArgumentException {
+//            return Arrays.stream(States.values())
+//                    .filter(v -> v.type.equals(s))
+//                    .findFirst()
+//                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+//        }
+//    }
 
     @Override
     public String toString() {

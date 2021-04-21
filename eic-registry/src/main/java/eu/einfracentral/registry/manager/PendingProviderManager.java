@@ -84,7 +84,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         if (providerBundle.getStatus() == null) {
-            providerBundle.setStatus(Provider.States.PENDING_1.getKey());
+            providerBundle.setStatus("pending initial approval");
         }
 
         super.add(providerBundle, auth);

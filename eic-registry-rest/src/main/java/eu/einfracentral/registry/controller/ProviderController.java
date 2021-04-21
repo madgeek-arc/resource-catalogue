@@ -222,7 +222,7 @@ public class ProviderController {
     @PatchMapping(path = "verifyProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                         @RequestParam(required = false) Provider.States status, @ApiIgnore Authentication auth) {
+                                                         @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.verifyProvider(id, status, active, auth);
         logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getProvider().getName(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
