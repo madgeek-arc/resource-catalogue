@@ -71,8 +71,8 @@ public class Recdb {
     }
 
     @Autowired()
-    @Qualifier("recdb.datasource")
-    private DataSource datasource;
+    @Qualifier("recdbDataSource")
+    private DataSource recdbDataSource;
 
     //    @Scheduled(fixedDelay = 5 * 60 * 1000)
     @Scheduled(cron = "0 0 * * * *")
@@ -85,7 +85,7 @@ public class Recdb {
         logger.info("Display views \n");
         EventsModel[] day = mapper.readValue(str, EventsModel[].class);
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(recdbDataSource);
         int user_id = -1;
         int service_id = -1;
         String query = "";
