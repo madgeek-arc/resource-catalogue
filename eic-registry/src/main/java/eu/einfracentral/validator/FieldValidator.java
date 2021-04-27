@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.*;
@@ -156,24 +157,24 @@ public class FieldValidator {
 
     public void validateUrl(Field field, URL urlForValidation){
         HttpsTrustManager.allowAllSSL();
-        HttpURLConnection huc = null;
+        HttpURLConnection huc;
         int statusCode = 0;
+
         try {
+            // replace spaces with %20
+            if (urlForValidation.toString().contains(" ")) {
+                urlForValidation = new URL(urlForValidation.toString().replaceAll("\\s", "%20"));
+            }
+
+            // open connection and get response code
             huc = (HttpURLConnection) urlForValidation.openConnection();
-        } catch (IOException e) {
-            logger.trace(e.getMessage());
-        }
-        try {
             assert huc != null;
             huc.setRequestMethod("HEAD");
-        } catch (ProtocolException e) {
-            logger.trace(e.getMessage());
-        }
-        try {
             statusCode = huc.getResponseCode();
         } catch (IOException e) {
             logger.trace(e.getMessage());
         }
+
         if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405){
             if (field == null){
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
