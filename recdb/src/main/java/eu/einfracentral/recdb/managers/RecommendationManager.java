@@ -24,17 +24,17 @@ public class RecommendationManager implements RecommendationService<RichService,
 
     private static final Logger logger = LogManager.getLogger(RecommendationManager.class);
     private final InfraServiceService<InfraService, InfraService> infraService;
-    private final DataSource dataSource;
+    private final DataSource recdbDataSource;
 
     @Autowired
     public RecommendationManager(InfraServiceService<InfraService, InfraService> infraService,
-                                 @Qualifier("recdb.datasource") DataSource dataSource) {
+                                 @Qualifier("recdbDataSource") DataSource recdbDataSource) {
         this.infraService = infraService;
-        this.dataSource = dataSource;
+        this.recdbDataSource = recdbDataSource;
     }
 
     public ResponseEntity<List<RichService>> getRecommendedResources(int limit, Authentication authentication) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(recdbDataSource);
         List<RichService> services = new ArrayList<>();
 
         /* Get user id */

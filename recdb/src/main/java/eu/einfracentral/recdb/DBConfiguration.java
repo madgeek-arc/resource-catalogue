@@ -15,8 +15,8 @@ public class DBConfiguration {
 
     private static final Logger logger = LogManager.getLogger(DBConfiguration.class);
 
-    @Bean(name = "recdb.datasource")
-    public DataSource dataSource() {
+    @Bean(name = "recdbDataSource")
+    public DataSource recdbDataSource() {
         return new HikariDataSource(hikariConfig());
     }
 
