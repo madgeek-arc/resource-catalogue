@@ -1,20 +1,13 @@
 package eu.einfracentral.registry.controller;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.MeasurementService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -34,39 +27,30 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("service")
-@Api(description = "DEPRECATED")
-@Deprecated
+@RequestMapping({"service", "resource"})
+@Api(description = "Operations for Resources/Services", tags = {"resource-controller"})
 public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final InfraServiceService<InfraService, InfraService> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final MeasurementService<Measurement, Authentication> measurementService;
-    private final IdCreator idCreator;
     private final DataSource dataSource;
 
     @Autowired
-    @Deprecated
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<ProviderBundle, Authentication> provider,
-                      MeasurementService<Measurement, Authentication> measurementService,
-                      IdCreator idCreator, DataSource dataSource) {
+                      DataSource dataSource) {
         this.infraService = service;
         this.providerService = provider;
-        this.measurementService = measurementService;
-        this.idCreator = idCreator;
         this.dataSource = dataSource;
     }
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    @Deprecated
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service;
         if (version.isPresent()) {
@@ -82,7 +66,6 @@ public class ServiceController {
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    @Deprecated
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
     }
@@ -91,7 +74,6 @@ public class ServiceController {
     @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or " +
             "(@securityService.userIsServiceProviderAdmin(#auth, #id) or @securityService.isServiceProviderAdmin(#auth, #version))")
-    @Deprecated
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
                                         @ApiIgnore Authentication auth) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
@@ -105,7 +87,6 @@ public class ServiceController {
     // Get the specified version of a RichService providing the Service id and version.
     @GetMapping(path = "rich/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    @Deprecated
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
                                                       @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.getRichService(id, version, auth), HttpStatus.OK);
@@ -114,61 +95,15 @@ public class ServiceController {
     @ApiOperation(value = "Creates a new Resource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #service)")
-    @Deprecated
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
         logger.info("User '{}' created a new Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
-    @PutMapping(path = "serviceWithMeasurements", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #json)")
-    @Deprecated
-    public ResponseEntity<Service> serviceWithKPIs(@RequestBody Map<String, JsonNode> json, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ObjectMapper mapper = new ObjectMapper();
-        Service service = null;
-        List<Measurement> measurements = new ArrayList<>();
-        try {
-            service = mapper.readValue(json.get("service").toString(), Service.class);
-            measurements = Arrays.stream(mapper.readValue(json.get("measurements").toString(), Measurement[].class)).collect(Collectors.toList());
-
-        } catch (JsonParseException e) {
-            logger.error("JsonParseException", e);
-        } catch (JsonMappingException e) {
-            logger.error("JsonMappingException", e);
-        } catch (IOException e) {
-            logger.error("IOException", e);
-        }
-        if (service == null) {
-            throw new ServiceException("Cannot add a null Resource");
-        }
-        InfraService s = null;
-        try { // check if service already exists
-            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(idCreator.createServiceId(service));
-            }
-            s = this.infraService.get(service.getId());
-        } catch (ServiceException | eu.einfracentral.exception.ResourceNotFoundException e) {
-            // continue with the creation of the service
-        }
-
-        if (s == null) { // if existing service is null, create it, else update it
-            s = this.infraService.addService(new InfraService(service), auth);
-            logger.info("User '{}' added Resource:\n{}", auth.getName(), infraService);
-        } else {
-            s.setService(service); // replace with given Service
-            s = this.infraService.updateService(s, auth);
-            logger.info("User '{}' updated Resource:\n{}", auth.getName(), infraService);
-        }
-        this.measurementService.updateAll(s.getId(), measurements, auth);
-
-        return new ResponseEntity<>(s.getService(), HttpStatus.OK);
-    }
-
     @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret = this.infraService.updateService(new InfraService(service), auth);
         logger.info("User '{}' updated Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
@@ -177,7 +112,6 @@ public class ServiceController {
 
     @ApiOperation(value = "Validates the Resource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<Boolean> validate(@RequestBody Service service) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(new InfraService(service)));
         logger.info("Validated Resource with name '{}' and id '{}'", service.getName(), service.getId());
@@ -193,7 +127,6 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @Deprecated
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", true);
@@ -212,7 +145,6 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", true);
@@ -222,7 +154,6 @@ public class ServiceController {
     }
 
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
@@ -245,7 +176,6 @@ public class ServiceController {
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
     @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(
                 infraService.getByIds(auth, ids) // FIXME: create method that returns Services instead of RichServices
@@ -257,14 +187,12 @@ public class ServiceController {
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
     @GetMapping(path = "rich/byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<List<RichService>> getSomeRichServices(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.getByIds(auth, ids));
     }
 
     @ApiOperation(value = "Get all Resources in the catalogue organized by an attribute, e.g. get Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         Map<String, List<InfraService>> results;
         try {
@@ -296,7 +224,6 @@ public class ServiceController {
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
-    @Deprecated
     public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
@@ -306,15 +233,13 @@ public class ServiceController {
 
     // Get all modification details of a specific Service, providing the Service id.
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
-    public ResponseEntity<Paging<ServiceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Paging<ServiceHistory> history = infraService.getHistory(id);
+    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Paging<ResourceHistory> history = infraService.getHistory(id);
         return ResponseEntity.ok(history);
     }
 
     // Get all modifications of a specific Service, providing the Service id and the resource Version id.
     @GetMapping(path = {"history/{resourceId}/{versionId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<Service> getVersionHistory(@PathVariable String serviceId, @PathVariable String versionId, @ApiIgnore Authentication auth) {
         Service service = infraService.getVersionHistory(serviceId, versionId);
         return ResponseEntity.ok(service);
@@ -322,7 +247,6 @@ public class ServiceController {
 
     // Get all featured Services.
     @GetMapping(path = "featured/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<List<Service>> getFeaturedServices() {
         return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
     }
@@ -336,7 +260,6 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Deprecated
     public ResponseEntity<Paging<Service>> getInactiveServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", false);
@@ -352,7 +275,6 @@ public class ServiceController {
     // Providing the Service id and version, set the Service to active or inactive.
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
-    @Deprecated
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         logger.info("User '{}' attempts to save Resource with id '{}' and version '{}' as '{}'", auth, id, version, active);
@@ -362,12 +284,11 @@ public class ServiceController {
     // Get all pending Service Templates.
     @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @Deprecated
     public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
         List<ProviderBundle> pendingProviders = providerService.getInactive();
         List<Service> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
-            if (Provider.States.fromString(provider.getStatus()) == Provider.States.PENDING_2) {
+            if (provider.getStatus().equals("pending template approval")) {
                 serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
             }
         }
@@ -375,7 +296,7 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-//    @ApiOperation(value = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
+    //    @ApiOperation(value = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -384,9 +305,8 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @Deprecated
     public ResponseEntity<Paging<InfraService>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                      @RequestParam(required = false) Boolean active, @ApiIgnore Authentication authentication) {
+                                                                           @RequestParam(required = false) Boolean active, @ApiIgnore Authentication authentication) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
         return ResponseEntity.ok(infraService.getAllForAdmin(ff, null));

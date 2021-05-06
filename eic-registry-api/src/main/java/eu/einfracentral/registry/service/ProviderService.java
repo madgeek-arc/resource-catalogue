@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.*;
+import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
@@ -64,8 +65,16 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     List<T> getInactive();
 
 
-    T verifyProvider(String id, Provider.States status, Boolean active, U auth);
+    T verifyProvider(String id, String status, Boolean active, U auth);
 
 
     void deleteUserInfo(Authentication authentication);
+
+    /**
+     * Get the History of the Provider with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<ResourceHistory> getHistory(String id);
 }

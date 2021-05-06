@@ -8,7 +8,10 @@ import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.*;
+import eu.einfracentral.registry.service.EventService;
+import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SearchServiceEIC;
@@ -244,7 +247,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         serviceField.setAccessible(true);
 
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         Browsing<InfraService> services = getAll(ff, null);
 
         final Field f = serviceField;
@@ -295,8 +298,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Browsing<ServiceHistory> getHistory(String serviceId) {
-        Map<String, ServiceHistory> historyMap = new TreeMap<>();
+    public Browsing<ResourceHistory> getHistory(String serviceId) {
+        Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(serviceId);
@@ -319,13 +322,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     tempResource.setPayload(versions.get(0).getPayload());
                     service = deserialize(tempResource);
                     if (service != null && service.getMetadata() != null) {
-                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ResourceHistory(service, versions.get(0).getId(), true));
                     }
                     versions.remove(0);
                 } else {
                     service = deserialize(tempResource);
                     if (service != null && service.getMetadata() != null) {
-                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, true));
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ResourceHistory(service, true));
                     }
                 }
 
@@ -336,7 +339,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
+                            historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ResourceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
                             logger.warn("InfraService with id '{}' does not have Metadata", service.getService().getId());
                         }
@@ -344,12 +347,12 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 }
                 service = deserialize(resource);
                 if (service != null && service.getMetadata() != null) {
-                    historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, false));
+                    historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ResourceHistory(service, false));
                 }
             }
         }
 
-        List<ServiceHistory> history = new ArrayList<>(historyMap.values());
+        List<ResourceHistory> history = new ArrayList<>(historyMap.values());
         history.sort((serviceHistory, t1) -> {
             if (Long.parseLong(serviceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
                 return 1;
@@ -430,7 +433,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
-                            resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
             // return the latest modified resource that does not contain a version attribute
             for (Resource resource : resources.getResults()) {
                 if (!resource.getPayload().contains("<tns:version>")) {
@@ -457,7 +460,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
-                        resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
+                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();
