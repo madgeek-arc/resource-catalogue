@@ -1,10 +1,6 @@
 package eu.einfracentral.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
@@ -46,7 +42,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Autowired
     OIDCSecurityService(ProviderManager providerManager,
-                    InfraServiceService<InfraService, InfraService> infraServiceService,
+                        InfraServiceService<InfraService, InfraService> infraServiceService,
                         PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
         this.providerManager = providerManager;
         this.infraServiceService = infraServiceService;
@@ -164,30 +160,6 @@ public class OIDCSecurityService implements SecurityService {
         return userIsServiceProviderAdmin(user, infraService);
     }
 
-
-    @Override
-    public boolean userIsServiceProviderAdmin(User user, Map<String, JsonNode> json) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        eu.einfracentral.domain.Service service = null;
-        service = mapper.readValue(json.get("service").toString(), eu.einfracentral.domain.Service.class);
-        if (service == null) {
-            throw new ServiceException("Service is null");
-        }
-
-        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Resource Organisation");
-        }
-//        List<String> allProviders = service.getResourceProviders();
-//        allProviders.add(service.getResourceOrganisation());
-        List<String> allProviders = Collections.singletonList(service.getResourceOrganisation());
-        Optional<List<String>> providers = Optional.of(allProviders);
-        return providers
-                .get()
-                .stream()
-                .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(user, id));
-    }
-
     @Override
     public boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service) {
         if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
@@ -270,33 +242,6 @@ public class OIDCSecurityService implements SecurityService {
             }
         }
         return false;
-    }
-
-    public boolean providerCanAddServices(Authentication auth, Map<String, JsonNode> json) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        eu.einfracentral.domain.Service service = null;
-        service = mapper.readValue(json.get("service").toString(), eu.einfracentral.domain.Service.class);
-        if (service == null) {
-            throw new ServiceException("Service is null");
-        }
-        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
-        }
-
-        return providerCanAddServices(auth, service);
-    }
-
-    @Deprecated
-    public boolean providerIsActive(String providerId) {
-        ProviderBundle provider = providerManager.get(providerId);
-        if (provider != null) {
-            if (!provider.isActive()) {
-                throw new ServiceException(String.format("Provider '%s' is not active.", provider.getProvider().getName()));
-            }
-            return true;
-        } else {
-            throw new ResourceNotFoundException(String.format("Provider with id '%s' does not exist.", providerId));
-        }
     }
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
