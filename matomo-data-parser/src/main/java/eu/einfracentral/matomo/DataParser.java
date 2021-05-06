@@ -10,9 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -25,21 +23,19 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 
 
-@Configuration
-@EnableScheduling
 @Component
 public class DataParser {
 
     private static final Logger logger = LogManager.getLogger(DataParser.class);
-    private static final String serviceVisitsTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=yesterday";
-    private static final String serviceRatingsTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=yesterday";
-    private static final String serviceAddToProjectTemplate = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String SERVICE_VISITS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String SERVICE_RATINGS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String SERVICE_ADD_TO_PROJECT_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=yesterday";
     private String serviceVisits;
     private String serviceRatings;
     private String serviceAddToProject;
     private RestTemplate restTemplate;
     private HttpHeaders headers;
-    private EventService eventService;
+    private final EventService eventService;
 
     @Value("${matomoHost:localhost}")
     private String matomoHost;
@@ -61,9 +57,9 @@ public class DataParser {
         headers = new HttpHeaders();
         String authorizationHeader = "";
         headers.add("Authorization", authorizationHeader);
-        serviceVisits = String.format(serviceVisitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
-        serviceRatings = String.format(serviceRatingsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
-        serviceAddToProject = String.format(serviceAddToProjectTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
+        serviceVisits = String.format(SERVICE_VISITS_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
+        serviceRatings = String.format(SERVICE_RATINGS_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
+        serviceAddToProject = String.format(SERVICE_ADD_TO_PROJECT_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
     }
 
     //    @Scheduled(fixedDelay = (20000))
@@ -90,9 +86,9 @@ public class DataParser {
         try {
             postEventsToDatabase(results, eventType);
         } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
+            logger.error(e);
         } catch (NumberParseException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -120,9 +116,9 @@ public class DataParser {
         try {
             postEventsToDatabase(results, eventType);
         } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
+            logger.error(e);
         } catch (NumberParseException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -150,9 +146,9 @@ public class DataParser {
         try {
             postEventsToDatabase(results, eventType);
         } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
+            logger.error(e);
         } catch (NumberParseException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -168,7 +164,7 @@ public class DataParser {
     public String getMatomoResponse(String url) {
         try {
             HttpEntity<String> request = new HttpEntity<>(headers);
-            try{
+            try {
                 ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
                 if (responseEntity.getStatusCode() != HttpStatus.OK) {
                     logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
@@ -176,7 +172,7 @@ public class DataParser {
                 }
                 return responseEntity.getBody();
             } catch (IllegalArgumentException e) {
-                logger.info ("URI is not absolute");
+                logger.info("URI is not absolute");
             }
         } catch (RuntimeException e) {
             logger.error("Could not retrieve analytics from matomo", e);
@@ -185,28 +181,28 @@ public class DataParser {
     }
 
     public void postEventsToDatabase(Map<String, Float> events, int eventType) throws ResourceNotFoundException, NumberParseException {
-        if (eventType == 1){
-            for (Map.Entry<String, Float> entry : events.entrySet()){
+        if (eventType == 1) {
+            for (Map.Entry<String, Float> entry : events.entrySet()) {
                 logger.info("Posting Visit Event for Service {} with value {}", entry.getKey(), entry.getValue());
-                if (eventService != null){
+                if (eventService != null) {
                     eventService.setVisit(entry.getKey(), entry.getValue());
                 } else {
                     logger.info("Empty Visit View");
                 }
             }
-        } else if (eventType == 2){
-            for (Map.Entry<String, Float> entry : events.entrySet()){
+        } else if (eventType == 2) {
+            for (Map.Entry<String, Float> entry : events.entrySet()) {
                 logger.info("Posting AddToProject Event for Service {} with value {}", entry.getKey(), entry.getValue());
-                if (eventService != null){
+                if (eventService != null) {
                     eventService.setAddToProject(entry.getKey(), entry.getValue());
                 } else {
                     logger.info("Empty AddToProject View");
                 }
             }
         } else if (eventType == 3) {
-            for (Map.Entry<String, Float> entry : events.entrySet()){
+            for (Map.Entry<String, Float> entry : events.entrySet()) {
                 logger.info("Posting Rating Event for Service {} with value {}", entry.getKey(), entry.getValue());
-                if (eventService != null){
+                if (eventService != null) {
                     eventService.setScheduledRating(entry.getKey(), entry.getValue());
                 } else {
                     logger.info("Empty Rating View");

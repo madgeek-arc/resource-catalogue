@@ -24,6 +24,9 @@ public class FacetLabelService {
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final VocabularyService vocabularyService;
 
+    @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
+    private int maxQuantity;
+
     @Autowired
     FacetLabelService(ProviderService<ProviderBundle, Authentication> providerService, VocabularyService vocabularyService) {
         this.providerService = providerService;
@@ -47,7 +50,7 @@ public class FacetLabelService {
     public List<Facet> createLabels(List<Facet> facets) {
         List<Facet> enrichedFacets = new TreeList(); // unchecked warning here
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
 //        ff.addFilter("active", "true");
         Map<String, String> providerNames = providerService.getAll(ff, null)
                 .getResults()

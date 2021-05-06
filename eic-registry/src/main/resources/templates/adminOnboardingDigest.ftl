@@ -16,7 +16,7 @@ Providers waiting for Template Approval:
 
 </#if>
 
-You can review them at: ${endpoint}/serviceProvidersList
+You can review them at: ${endpoint}/provider/all
 
 Best Regards,
 the ${project} Team

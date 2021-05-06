@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
+import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -37,14 +38,17 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final IdCreator idCreator;
     private final RegistrationMailService registrationMailService;
+    private final SecurityService securityService;
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
-                                  IdCreator idCreator, @Lazy RegistrationMailService registrationMailService) {
+                                  IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
+                                  @Lazy SecurityService securityService) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
         this.registrationMailService = registrationMailService;
+        this.securityService = securityService;
     }
 
 
@@ -84,8 +88,13 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         if (providerBundle.getStatus() == null) {
-            providerBundle.setStatus(Provider.States.PENDING_1.getKey());
+            providerBundle.setStatus("pending initial approval");
         }
+
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        loggingInfoList.add((loggingInfo));
+        providerBundle.setLoggingInfo(loggingInfoList);
 
         super.add(providerBundle, auth);
 
@@ -218,7 +227,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         }
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
@@ -251,6 +260,18 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     public void adminAcceptedTerms(String providerId, Authentication auth){
         update(get(providerId), auth);
+    }
+
+    public String determineRole(Authentication authentication) {
+        String role;
+        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
+            role = "admin";
+        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
+            role = "provider";
+        } else {
+            role = "user";
+        }
+        return role;
     }
 
 }
