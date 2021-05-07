@@ -73,7 +73,7 @@ public class ServiceController {
     @ApiOperation(value = "Get the specified version of a Resource, providing the Resource id and version.")
     @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or " +
-            "(@securityService.userIsServiceProviderAdmin(#auth, #id) or @securityService.isServiceProviderAdmin(#auth, #version))")
+            "(@securityService.isServiceProviderAdmin(#auth, #id) or @securityService.isServiceProviderAdmin(#auth, #version))")
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
                                         @ApiIgnore Authentication auth) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
