@@ -1,186 +1,100 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0">
-    
+
   <xs:complexType abstract="true" name="xmlAdapter">
-        
     <xs:sequence/>
-      
   </xs:complexType>
-    
+
   <xs:simpleType name="userActionType">
-        
     <xs:restriction base="xs:string">
-            
       <xs:enumeration value="FAVOURITE"/>
-            
       <xs:enumeration value="RATING"/>
-            
       <xs:enumeration value="VISIT"/>
-            
       <xs:enumeration value="ORDER"/>
-            
       <xs:enumeration value="ADD_TO_PROJECT"/>
-          
     </xs:restriction>
-      
   </xs:simpleType>
-    
+
   <xs:simpleType name="types">
-        
     <xs:restriction base="xs:string">
-            
       <xs:enumeration value="REGISTERED"/>
-            
       <xs:enumeration value="UPDATED"/>
-            
       <xs:enumeration value="DELETED"/>
-            
       <xs:enumeration value="ACTIVATED"/>
-            
       <xs:enumeration value="DEACTIVATED"/>
-            
       <xs:enumeration value="APPROVED"/>
-            
       <xs:enumeration value="VALIDATED"/>
-            
       <xs:enumeration value="REJECTED"/>
-            
       <xs:enumeration value="INITIALIZATION"/>
-          
     </xs:restriction>
-      
   </xs:simpleType>
-    
+
   <xs:simpleType name="type">
-        
     <xs:restriction base="xs:string">
-            
       <xs:enumeration value="SUPERCATEGORY"/>
-            
       <xs:enumeration value="CATEGORY"/>
-            
       <xs:enumeration value="SUBCATEGORY"/>
-            
       <xs:enumeration value="LANGUAGE"/>
-            
       <xs:enumeration value="COUNTRY"/>
-            
       <xs:enumeration value="TRL"/>
-            
       <xs:enumeration value="SCIENTIFIC_DOMAIN"/>
-            
       <xs:enumeration value="SCIENTIFIC_SUBDOMAIN"/>
-            
       <xs:enumeration value="TARGET_USER"/>
-            
       <xs:enumeration value="ACCESS_TYPE"/>
-            
       <xs:enumeration value="ACCESS_MODE"/>
-            
       <xs:enumeration value="ORDER_TYPE"/>
-            
       <xs:enumeration value="FUNDING_BODY"/>
-            
       <xs:enumeration value="FUNDING_PROGRAM"/>
-            
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
-            
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
-            
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
-            
       <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
-            
       <xs:enumeration value="PROVIDER_LEGAL_STATUS"/>
-            
       <xs:enumeration value="PROVIDER_LIFE_CYCLE_STATUS"/>
-            
       <xs:enumeration value="PROVIDER_NETWORK"/>
-            
       <xs:enumeration value="PROVIDER_SOCIETAL_GRAND_CHALLENGE"/>
-            
       <xs:enumeration value="PROVIDER_STRUCTURE_TYPE"/>
-            
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
-            
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
-            
       <xs:enumeration value="PROVIDER_STATE"/>
-          
     </xs:restriction>
-      
   </xs:simpleType>
-    
+
   <xs:simpleType name="vocab">
-        
     <xs:restriction base="xs:string">
-            
       <xs:enumeration value="SUPERCATEGORY"/>
-            
       <xs:enumeration value="CATEGORY"/>
-            
       <xs:enumeration value="SUBCATEGORY"/>
-            
       <xs:enumeration value="LANGUAGE"/>
-            
       <xs:enumeration value="COUNTRY"/>
-            
       <xs:enumeration value="TRL"/>
-            
       <xs:enumeration value="SCIENTIFIC_DOMAIN"/>
-            
       <xs:enumeration value="SCIENTIFIC_SUBDOMAIN"/>
-            
       <xs:enumeration value="TARGET_USER"/>
-            
       <xs:enumeration value="ACCESS_TYPE"/>
-            
       <xs:enumeration value="ACCESS_MODE"/>
-            
       <xs:enumeration value="ORDER_TYPE"/>
-            
       <xs:enumeration value="FUNDING_BODY"/>
-            
       <xs:enumeration value="FUNDING_PROGRAM"/>
-            
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
-            
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
-            
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
-            
       <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
-            
       <xs:enumeration value="PROVIDER_LEGAL_STATUS"/>
-            
       <xs:enumeration value="PROVIDER_LIFE_CYCLE_STATUS"/>
-            
       <xs:enumeration value="PROVIDER_NETWORK"/>
-            
       <xs:enumeration value="PROVIDER_SOCIETAL_GRAND_CHALLENGE"/>
-            
       <xs:enumeration value="PROVIDER_STRUCTURE_TYPE"/>
-            
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
-            
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
-          
     </xs:restriction>
-      
   </xs:simpleType>
-    
+
   <xs:simpleType name="status">
-        
     <xs:restriction base="xs:string">
-            
       <xs:enumeration value="PENDING"/>
-            
       <xs:enumeration value="APPROVED"/>
-            
       <xs:enumeration value="REJECTED"/>
-          
     </xs:restriction>
-      
   </xs:simpleType>
-  
 </xs:schema>
