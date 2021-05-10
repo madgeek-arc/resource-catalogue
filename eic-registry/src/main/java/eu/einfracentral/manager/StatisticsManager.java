@@ -72,6 +72,9 @@ public class StatisticsManager implements StatisticsService {
     @org.springframework.beans.factory.annotation.Value("${platform.root:}")
     String url;
 
+    @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
+    private int maxQuantity;
+
     @Autowired
     StatisticsManager(RestHighLevelClient client, AnalyticsService analyticsService,
                       ProviderService<ProviderBundle, Authentication> providerService,
@@ -366,7 +369,7 @@ public class StatisticsManager implements StatisticsService {
         Paging<Resource> resources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND creation_date > %s AND creation_date < %s",
                         type, from.toInstant().toEpochMilli(), to.toInstant().toEpochMilli()), "event",
-                10000, 0, "creation_date", "ASC");
+                maxQuantity, 0, "creation_date", "ASC");
         List<Event> events = resources
                 .getResults()
                 .stream()
@@ -590,7 +593,7 @@ public class StatisticsManager implements StatisticsService {
         mapValues.put("EL", new HashSet<>());
         mapValues.put("UK", new HashSet<>());
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
 
         Map<String, Set<String>> providerCountries = providerCountriesMap();
 
@@ -668,7 +671,7 @@ public class StatisticsManager implements StatisticsService {
         String[] eu = vocabularyService.getRegion("EU");
 
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
 
         for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
             Set<String> countries = new HashSet<>();

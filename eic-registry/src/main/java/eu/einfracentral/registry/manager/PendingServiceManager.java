@@ -1,18 +1,17 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Metadata;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +27,15 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IdCreator idCreator;
+    private final SecurityService securityService;
 
     @Autowired
     public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService,
-                                 IdCreator idCreator) {
+                                 IdCreator idCreator, @Lazy SecurityService securityService) {
         super(InfraService.class);
         this.infraServiceService = infraServiceService;
         this.idCreator = idCreator;
+        this.securityService = securityService;
     }
 
     @Override
@@ -52,6 +53,13 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         if (service.getMetadata() == null) {
             service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
+        if (service.getLoggingInfo() == null){
+            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+            List<LoggingInfo> loggingInfoList = new ArrayList<>();
+            loggingInfoList.add(loggingInfo);
+            service.setLoggingInfo(loggingInfoList);
+        }
+
         service.setActive(true);
         service.setLatest(true);
 
@@ -137,5 +145,17 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     public void adminAcceptedTerms(String providerId, Authentication auth){
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
+    }
+
+    public String determineRole(Authentication authentication) {
+        String role;
+        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
+            role = "admin";
+        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
+            role = "provider";
+        } else {
+            role = "user";
+        }
+        return role;
     }
 }

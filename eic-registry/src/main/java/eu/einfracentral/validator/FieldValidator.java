@@ -6,10 +6,11 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.IndicatorManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.*;
@@ -24,20 +26,19 @@ import java.util.*;
 @Service
 public class FieldValidator {
 
+    private static final Logger logger = LogManager.getLogger(FieldValidator.class);
+
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final IndicatorManager indicatorService;
 
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          InfraServiceService<InfraService, InfraService> infraServiceService,
-                          IndicatorManager indicatorService) {
+                          InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.infraServiceService = infraServiceService;
-        this.indicatorService = indicatorService;
     }
 
     public void validateFields(Object o) throws IllegalAccessException {
@@ -156,24 +157,24 @@ public class FieldValidator {
 
     public void validateUrl(Field field, URL urlForValidation){
         HttpsTrustManager.allowAllSSL();
-        HttpURLConnection huc = null;
+        HttpURLConnection huc;
         int statusCode = 0;
+
         try {
+            // replace spaces with %20
+            if (urlForValidation.toString().contains(" ")) {
+                urlForValidation = new URL(urlForValidation.toString().replaceAll("\\s", "%20"));
+            }
+
+            // open connection and get response code
             huc = (HttpURLConnection) urlForValidation.openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             assert huc != null;
             huc.setRequestMethod("HEAD");
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        }
-        try {
             statusCode = huc.getResponseCode();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.trace(e.getMessage());
         }
+
         if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405){
             if (field == null){
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
@@ -210,11 +211,6 @@ public class FieldValidator {
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
                             || InfraService.class.equals(annotation.idClass()))
                             && infraServiceService.get(o.toString()) == null) {
-                        throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Service",
-                                        field.getName()));
-                    } else if (Indicator.class.equals(annotation.idClass())
-                            && indicatorService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
                                         field.getName()));

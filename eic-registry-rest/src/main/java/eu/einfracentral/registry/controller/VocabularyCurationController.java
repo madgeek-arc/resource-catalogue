@@ -39,7 +39,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         this.vocabularyCurationService = service;
     }
 
-    @ApiOperation(value = "Get Vocabulary Curation by ID")
+//    @ApiOperation(value = "Get Vocabulary Curation by ID")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @Override
     public ResponseEntity<VocabularyCuration> get(@PathVariable("id") String id, @ApiIgnore Authentication authentication) {
@@ -47,7 +47,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     }
 
     @Override
-    @ApiOperation(value = "Creates a new Vocabulary Curation Request.")
+//    @ApiOperation(value = "Creates a new Vocabulary Curation Request.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<VocabularyCuration> add(@RequestBody VocabularyCuration vocabularyCuration, @ApiIgnore Authentication auth) {
         ResponseEntity<VocabularyCuration> ret = super.add(vocabularyCuration, auth);
@@ -55,7 +55,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         return ret;
     }
 
-    @ApiOperation(value = "Creates a new Vocabulary Curation Request (front-end use).")
+//    @ApiOperation(value = "Creates a new Vocabulary Curation Request (front-end use).")
     @PostMapping(path = "addFront", produces = {MediaType.APPLICATION_JSON_VALUE})
     public VocabularyCuration addFront(@RequestParam(required = false) String resourceId, @RequestParam(required = false) String providerId,
                          @RequestParam String resourceType, @RequestParam String entryValueName, @RequestParam String vocabulary,
@@ -64,7 +64,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         return vocabularyCurationService.addFront(resourceId, providerId, resourceType, entryValueName, vocabulary, parent, auth);
     }
 
-    @ApiOperation(value = "Filter a list of Vocabulary Curation Requests based on a set of filters or get a list of all Vocabulary Curation Requests in the Catalogue.")
+//    @ApiOperation(value = "Filter a list of Vocabulary Curation Requests based on a set of filters or get a list of all Vocabulary Curation Requests in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),

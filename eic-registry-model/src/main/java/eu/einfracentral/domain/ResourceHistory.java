@@ -3,7 +3,7 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlTransient;
 
 @XmlTransient
-public class ServiceHistory extends Metadata {
+public class ResourceHistory extends Metadata {
 
     private String version;
 
@@ -11,33 +11,40 @@ public class ServiceHistory extends Metadata {
 
     private String coreVersionId = null;
 
-    public ServiceHistory() {
+    public ResourceHistory() {
     }
 
-    public ServiceHistory(Metadata metadata, String version, boolean versionChange) {
+    public ResourceHistory(Metadata metadata, String version, boolean versionChange) {
         super(metadata);
         this.version = version;
         this.versionChange = versionChange;
     }
 
-    public ServiceHistory(Metadata metadata, String version, String coreVersionId, boolean versionChange) {
+    public ResourceHistory(Metadata metadata, String version, String coreVersionId, boolean versionChange) {
         super(metadata);
         this.version = version;
         this.coreVersionId = coreVersionId;
         this.versionChange = versionChange;
     }
 
-    public ServiceHistory(InfraService service, boolean versionChange) {
+    public ResourceHistory(InfraService service, boolean versionChange) {
         super(service.getMetadata());
         this.version = service.getService().getVersion();
         this.versionChange = versionChange;
     }
 
-    public ServiceHistory(InfraService service, String coreVersionId, boolean versionChange) {
+    public ResourceHistory(InfraService service, String coreVersionId, boolean versionChange) {
         super(service.getMetadata());
         this.version = service.getService().getVersion();
         this.coreVersionId = coreVersionId;
         this.versionChange = versionChange;
+    }
+
+    public ResourceHistory(ProviderBundle providerBundle, String coreVersionId) {
+        super(providerBundle.getMetadata());
+        this.version = null;
+        this.coreVersionId = coreVersionId;
+        this.versionChange = false;
     }
 
     public void setVersion(String version) {
