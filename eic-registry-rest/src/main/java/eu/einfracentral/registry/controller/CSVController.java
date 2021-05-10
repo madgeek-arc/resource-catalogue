@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.CDL;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +36,9 @@ public class CSVController {
     private final InfraServiceService<InfraService, InfraService> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
+    @Value("${elastic.index.max_result_window:10000}")
+    private int maxQuantity;
+
     @Autowired
     CSVController(InfraServiceService<InfraService, InfraService> service, ProviderService<ProviderBundle, Authentication> provider) {
         this.infraService = service;
@@ -46,7 +50,7 @@ public class CSVController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("latest", true);
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
         String csvData = listServicesToCSV(infraServices.getResults());
@@ -59,7 +63,7 @@ public class CSVController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> providersToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         Paging<ProviderBundle> providers = providerService.getAll(ff, auth);
         String csvData = listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
