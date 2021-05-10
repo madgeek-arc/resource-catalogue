@@ -709,7 +709,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 try {
                     userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richService.getService().getId(), auth);
                     if (!userEvents.isEmpty()) {
-                        richService.setFavourite(userEvents.get(0).getValue());
+                        richService.setIsFavourite(userEvents.get(0).getValue());
                     }
                     userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richService.getService().getId(), auth);
                     if (!userEvents.isEmpty()) {

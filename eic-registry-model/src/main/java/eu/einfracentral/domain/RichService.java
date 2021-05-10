@@ -198,12 +198,12 @@ public class RichService {
         this.favourites = favourites;
     }
 
-    public float isFavourite() {
+    public float getIsFavourite() {
         return isFavourite;
     }
 
-    public void setFavourite(float favourite) {
-        isFavourite = favourite;
+    public void setIsFavourite(float isFavourite) {
+        this.isFavourite = isFavourite;
     }
 
     public List<Category> getCategories() {
