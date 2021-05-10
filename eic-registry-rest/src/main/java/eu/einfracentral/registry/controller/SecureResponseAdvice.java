@@ -12,7 +12,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
@@ -36,12 +35,11 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         return true;
     }
 
-    // TODO: this method works only with ProviderBundle, Provider, Service and InfraService
-    //       make it work for Lists and Paging of these classes as well.
+    // this method works only with ProviderBundle, Provider, Service and InfraService + List and Paging of these classes as well.
     @Override
     public T beforeBodyWrite(T t, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (t != null && !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+        if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN")) {
             if (t instanceof ProviderBundle
                     && !this.securityService.isProviderAdmin(auth, ((ProviderBundle) t).getId(), true)) {
                 ((ProviderBundle) t).getProvider().setMainContact(null);
