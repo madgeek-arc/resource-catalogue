@@ -33,6 +33,15 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @XmlElement
     private List<LoggingInfo> loggingInfo;
 
+//    @XmlElement
+//    private Status auditStatus;
+//
+////?    @XmlElement
+////?    private Status onboardingStatus;
+////?
+////?    @XmlElement
+////?    private Status updateStatus;
+
     public Bundle() {
     }
 
