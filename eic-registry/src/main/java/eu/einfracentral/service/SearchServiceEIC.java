@@ -62,13 +62,17 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
             // split search phrase to keywords using delimiters
             List<String> longKeywords = new ArrayList<>();
             List<String> shortKeywords = new ArrayList<>();
-            for (char delimiter : " -_,./;:'[]".toCharArray()) {
-                if (keyword.contains("" + delimiter)) {
-                    for (String word : keyword.split(String.format("\\%s", delimiter))) {
-                        if (word.length() > 3) {
-                            longKeywords.add(word);
-                        } else {
-                            shortKeywords.add(word);
+            if (keyword.split("[\\s-_,./;:'\\[\\]]").length == 1) {
+                qBuilder.should(createMatchQuery(searchFields, Collections.singletonList(keyword), 1f, 0.5f));
+            } else {
+                for (char delimiter : " -_,./;:'[]".toCharArray()) {
+                    if (keyword.contains("" + delimiter)) {
+                        for (String word : keyword.split(String.format("\\%s", delimiter))) {
+                            if (word.length() > 4) {
+                                longKeywords.add(word);
+                            } else {
+                                shortKeywords.add(word);
+                            }
                         }
                     }
                 }
@@ -130,6 +134,14 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
                     String possibleInput = keyword.replace(nextLetter, "[^\\s\\p{L}\\p{N}]");
                     qb.add(regexpQuery((String) field, ".*" + possibleInput + ".*"));
                 }*/
+                qb.add(matchQuery((String) field, keyword.toLowerCase()));
+                qb.add(matchQuery((String) field, keyword.toUpperCase()));
+                qb.add(regexpQuery((String) field, ".*" + keyword + ".*"));
+                qb.add(regexpQuery((String) field, ".*" + keyword.toLowerCase() + ".*"));
+                qb.add(regexpQuery((String) field, ".*" + keyword.toUpperCase() + ".*"));
+
+                // Create Camel Case query
+                keyword = keyword.substring(0, 1).toUpperCase() + keyword.substring(1).toLowerCase();
                 qb.add(matchQuery((String) field, keyword));
                 qb.add(regexpQuery((String) field, ".*" + keyword + ".*"));
             }
