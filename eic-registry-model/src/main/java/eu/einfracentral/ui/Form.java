@@ -1,8 +1,10 @@
 package eu.einfracentral.ui;
 
+import java.util.Arrays;
+
 public class Form {
 
-    Type type;
+    String type;
     String vocabulary; //(will have value if type==vocabulary)
     String group;
     String subgroup;
@@ -15,16 +17,19 @@ public class Form {
     public Form() {
     }
 
-    public Type getType() {
+    public String getType() {
         return type;
     }
 
     public void setType(Type type) {
-        this.type = type;
+        this.type = type.getKey();
     }
 
     public void setType(String type) {
-        this.type = Type.valueOf(type);
+        if (Type.exists(type)) {
+            this.type = Type.fromString(type).getKey();
+        }
+        this.type = Type.valueOf(type.toUpperCase()).getKey();
     }
 
     public String getVocabulary() {
@@ -98,6 +103,7 @@ public class Form {
         INT                     ("int"),
         BOOLEAN                 ("boolean"),
         LIST                    ("array"),
+        METADATA                ("Metadata"),
         VOCABULARY              ("vocabulary"),
         SERVICEPROVIDERDOMAIN   ("ServiceProviderDomain"),
         SERVICECATEGORY         ("ServiceCategory"),
@@ -109,6 +115,30 @@ public class Form {
 
         Type(final String type) {
             this.typeValue = type;
+        }
+
+        public String getKey() {
+            return typeValue;
+        }
+
+        /**
+         * @return the Enum representation for the given string.
+         * @throws IllegalArgumentException if unknown string.
+         */
+        public static Type fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(Type.values())
+                    .filter(v -> v.typeValue.equalsIgnoreCase(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
+
+        /**
+         * Checks if the given {@link String} exists in the values of the enum.
+         * @return boolean
+         */
+        public static boolean exists(String s) {
+            return Arrays.stream(Type.values())
+                    .anyMatch(v -> v.typeValue.equalsIgnoreCase(s));
         }
     }
 }

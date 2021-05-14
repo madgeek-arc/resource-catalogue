@@ -81,7 +81,21 @@ public class UiElementsManager implements UiElementsService {
         List<Field> fields = new LinkedList<>();
         Class<?> clazz = Class.forName("eu.einfracentral.domain." + className);
 
-        java.lang.reflect.Field classFields[] = clazz.getDeclaredFields();
+
+        if (clazz.getSuperclass().getName().startsWith("eu.einfracentral.domain.Bundle")) {
+            String name = clazz.getGenericSuperclass().getTypeName();
+            name = name.replaceFirst(".*\\.", "").replace(">", "");
+            List<Field> subfields = createFields(name, name);
+            fields.addAll(subfields);
+        }
+
+        if (clazz.getSuperclass().getName().startsWith("eu.einfracentral.domain")) {
+            String name = clazz.getSuperclass().getName().replaceFirst(".*\\.", "");
+            List<Field> subfields = createFields(name, name);
+            fields.addAll(subfields);
+        }
+
+        java.lang.reflect.Field[] classFields = clazz.getDeclaredFields();
         for (java.lang.reflect.Field field : classFields) {
             Field uiField = new Field();
 
@@ -93,11 +107,6 @@ public class UiElementsManager implements UiElementsService {
 
             if (annotation != null) {
                 uiField.getForm().setMandatory(!annotation.nullable());
-                if (Collection.class.isAssignableFrom(field.getType())) {
-                    uiField.getForm().setMultiplicity(true);
-                }
-
-
 
                 if (annotation.containsId() && Vocabulary.class.equals(annotation.idClass())) {
                     VocabularyValidation vvAnnotation = field.getAnnotation(VocabularyValidation.class);
@@ -105,10 +114,15 @@ public class UiElementsManager implements UiElementsService {
                         uiField.getForm().setVocabulary(vvAnnotation.type().getKey());
                     }
                     uiField.getForm().setType("VOCABULARY");
-                } else {
+                } else if (!field.getType().getName().contains("eu.einfracentral.domain.Identifiable")) {
                     String type = field.getType().getName();
-                    String typeName = type.replaceFirst(".*\\.", "");
-                    uiField.getForm().setType(typeName.toUpperCase());
+
+                    if (Collection.class.isAssignableFrom(field.getType())) {
+                        uiField.getForm().setMultiplicity(true);
+                        type = field.getGenericType().getTypeName();
+                    }
+                    String typeName = type.replaceFirst(".*\\.", "").replaceAll("[<>]", "");
+                    uiField.getForm().setType(typeName);
 
                     if (type.startsWith("eu.einfracentral.domain")) {
                         uiField.getForm().setSubgroup(typeName);
