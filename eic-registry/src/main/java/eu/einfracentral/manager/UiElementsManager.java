@@ -1,10 +1,12 @@
 package eu.einfracentral.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.Field;
+import eu.einfracentral.ui.Group;
 import eu.einfracentral.ui.GroupedFields;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +17,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
 public class UiElementsManager implements UiElementsService {
 
     private static final Logger logger = Logger.getLogger(UiElementsManager.class);
+
+    private static final String FILENAME_GROUPS = "groups.json";
+    private static final String FILENAME_FIELDS = "fields.json";
 
     private final String directory;
     private String jsonObject;
@@ -63,6 +67,34 @@ public class UiElementsManager implements UiElementsService {
         }
     }
 
+    protected List<Group> readGroups(String filepath) {
+        List<Group> groups = null;
+        try {
+            jsonObject = readFile(filepath);
+            ObjectMapper objectMapper = new ObjectMapper();
+            Group[] groupsArray = objectMapper.readValue(jsonObject, Group[].class);
+            groups = new ArrayList<>(Arrays.asList(groupsArray));
+        } catch (IOException e) {
+            logger.error(e);
+        }
+
+        return groups;
+    }
+
+    protected List<Field> readFields(String filepath) {
+        List<Field> fields = null;
+        try {
+            jsonObject = readFile(filepath);
+            ObjectMapper objectMapper = new ObjectMapper();
+            Field[] fieldsArray = objectMapper.readValue(jsonObject, Field[].class);
+            fields = new ArrayList<>(Arrays.asList(fieldsArray));
+        } catch (IOException e) {
+            logger.error(e);
+        }
+
+        return fields;
+    }
+
     @Override
     public List<Object> getElements() {
         return null;
@@ -75,14 +107,46 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     public List<GroupedFields> getModel() {
-        return null;
+        List<Group> groups = getGroups();
+        List<GroupedFields> groupedFieldsList = new ArrayList<>();
+
+        if (groups != null) {
+            for (Group group : groups) {
+                GroupedFields groupedFields = new GroupedFields();
+
+                groupedFields.setGroup(group);
+                groupedFields.setFields(getFieldsByGroup(group.getId()));
+
+                groupedFieldsList.add(groupedFields);
+            }
+        }
+
+        return groupedFieldsList;
+    }
+
+    @Override
+    public List<Group> getGroups() {
+        return readGroups(directory + "/" + FILENAME_GROUPS);
     }
 
     @Override
     public List<Field> getFields() {
-        return null;
+        return readFields(directory + "/" + FILENAME_FIELDS);
     }
 
+
+    public List<Field> getFieldsByGroup(String groupId) {
+        List<Field> allFields = getFields();
+
+        return allFields
+                .stream()
+                .filter(field -> field.getForm() != null)
+                .filter(field -> field.getForm().getGroup() != null)
+                .filter(field -> field.getForm().getGroup().equals(groupId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Field> createFields(String className, String parent) throws ClassNotFoundException {
         List<Field> fields = new LinkedList<>();
         Class<?> clazz = Class.forName("eu.einfracentral.domain." + className);

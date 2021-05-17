@@ -6,7 +6,8 @@ public class Group {
     String name;
     int order;
 
-    public Group() {}
+    public Group() {
+    }
 
     public String getId() {
         return id;
@@ -22,5 +23,13 @@ public class Group {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

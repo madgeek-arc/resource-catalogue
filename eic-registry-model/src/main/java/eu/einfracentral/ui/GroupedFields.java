@@ -4,16 +4,17 @@ import java.util.List;
 
 public class GroupedFields {
 
-    private String group;
+    private Group group;
     private List<Field> fields;
 
-    public GroupedFields() {}
+    public GroupedFields() {
+    }
 
-    public String getGroup() {
+    public Group getGroup() {
         return group;
     }
 
-    public void setGroup(String group) {
+    public void setGroup(Group group) {
         this.group = group;
     }
 
