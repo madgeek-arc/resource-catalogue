@@ -4,6 +4,7 @@ public class Group {
 
     String id;
     String name;
+    int order;
 
     public Group() {}
 
