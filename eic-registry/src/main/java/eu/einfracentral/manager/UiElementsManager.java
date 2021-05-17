@@ -5,6 +5,7 @@ import eu.einfracentral.annotation.VocabularyValidation;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.Field;
+import eu.einfracentral.ui.GroupedFields;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,11 +74,16 @@ public class UiElementsManager implements UiElementsService {
     }
 
     @Override
+    public List<GroupedFields> getModel() {
+        return null;
+    }
+
+    @Override
     public List<Field> getFields() {
         return null;
     }
 
-    public List<Field> createFields(String className, String group) throws ClassNotFoundException {
+    public List<Field> createFields(String className, String parent) throws ClassNotFoundException {
         List<Field> fields = new LinkedList<>();
         Class<?> clazz = Class.forName("eu.einfracentral.domain." + className);
 
@@ -100,8 +106,8 @@ public class UiElementsManager implements UiElementsService {
             Field uiField = new Field();
 
 //            field.setAccessible(true);
-            uiField.setId(field.getName());
-            uiField.getForm().setGroup(group);
+            uiField.setName(field.getName());
+            uiField.setParent(parent);
 
             FieldValidation annotation = field.getAnnotation(FieldValidation.class);
 
@@ -113,20 +119,22 @@ public class UiElementsManager implements UiElementsService {
                     if (vvAnnotation != null) {
                         uiField.getForm().setVocabulary(vvAnnotation.type().getKey());
                     }
-                    uiField.getForm().setType("VOCABULARY");
+                    uiField.setType("VOCABULARY");
                 } else if (!field.getType().getName().contains("eu.einfracentral.domain.Identifiable")) {
                     String type = field.getType().getName();
 
                     if (Collection.class.isAssignableFrom(field.getType())) {
-                        uiField.getForm().setMultiplicity(true);
+                        uiField.setMultiplicity(true);
                         type = field.getGenericType().getTypeName();
+                        type = type.replaceFirst(".*<", "");
+                        type = type.substring(0, type.length() - 1);
                     }
                     String typeName = type.replaceFirst(".*\\.", "").replaceAll("[<>]", "");
-                    uiField.getForm().setType(typeName);
+                    uiField.setType(typeName);
 
                     if (type.startsWith("eu.einfracentral.domain")) {
-                        uiField.getForm().setSubgroup(typeName);
-                        List<Field> subfields = createFields(typeName, typeName);
+//                        uiField.getForm().setSubgroup(typeName);
+                        List<Field> subfields = createFields(typeName, field.getName());
                         fields.addAll(subfields);
                     }
                 }

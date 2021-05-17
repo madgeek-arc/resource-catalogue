@@ -1,35 +1,29 @@
 package eu.einfracentral.ui;
 
-import java.util.Arrays;
 
 public class Form {
 
-    String type;
-    String vocabulary; //(will have value if type==vocabulary)
+    String dependsOn;
+    String vocabulary;
     String group;
-    String subgroup;
     String description;
     String suggestion;
     String placeholder;
-    boolean mandatory = false;
-    boolean multiplicity = false;
+    Boolean mandatory;
+    Boolean immutable;
+    Boolean isVisible;
+    int order;
+
 
     public Form() {
     }
 
-    public String getType() {
-        return type;
+    public String getDependsOn() {
+        return dependsOn;
     }
 
-    public void setType(Type type) {
-        this.type = type.getKey();
-    }
-
-    public void setType(String type) {
-        if (Type.exists(type)) {
-            this.type = Type.fromString(type).getKey();
-        }
-        this.type = Type.valueOf(type.toUpperCase()).getKey();
+    public void setDependsOn(String dependsOn) {
+        this.dependsOn = dependsOn;
     }
 
     public String getVocabulary() {
@@ -46,14 +40,6 @@ public class Form {
 
     public void setGroup(String group) {
         this.group = group;
-    }
-
-    public String getSubgroup() {
-        return subgroup;
-    }
-
-    public void setSubgroup(String subgroup) {
-        this.subgroup = subgroup;
     }
 
     public String getDescription() {
@@ -88,57 +74,27 @@ public class Form {
         this.mandatory = mandatory;
     }
 
-    public Boolean getMultiplicity() {
-        return multiplicity;
+    public Boolean getImmutable() {
+        return immutable;
     }
 
-    public void setMultiplicity(Boolean multiplicity) {
-        this.multiplicity = multiplicity;
+    public void setImmutable(Boolean immutable) {
+        this.immutable = immutable;
     }
 
+    public Boolean getVisible() {
+        return isVisible;
+    }
 
-    public enum Type {
-        STRING                  ("string"),
-        URL                     ("string"),
-        INT                     ("int"),
-        BOOLEAN                 ("boolean"),
-        LIST                    ("array"),
-        METADATA                ("Metadata"),
-        VOCABULARY              ("vocabulary"),
-        SERVICEPROVIDERDOMAIN   ("ServiceProviderDomain"),
-        SERVICECATEGORY         ("ServiceCategory"),
-        SERVICEMAINCONTACT      ("ServiceMainContact"),
-        SERVICEPUBLICCONTACT    ("ServicePublicContact"),
-        XMLGREGORIANCALENDAR    ("date");
+    public void setVisible(Boolean visible) {
+        isVisible = visible;
+    }
 
-        private final String typeValue;
+    public int getOrder() {
+        return order;
+    }
 
-        Type(final String type) {
-            this.typeValue = type;
-        }
-
-        public String getKey() {
-            return typeValue;
-        }
-
-        /**
-         * @return the Enum representation for the given string.
-         * @throws IllegalArgumentException if unknown string.
-         */
-        public static Type fromString(String s) throws IllegalArgumentException {
-            return Arrays.stream(Type.values())
-                    .filter(v -> v.typeValue.equalsIgnoreCase(s))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
-        }
-
-        /**
-         * Checks if the given {@link String} exists in the values of the enum.
-         * @return boolean
-         */
-        public static boolean exists(String s) {
-            return Arrays.stream(Type.values())
-                    .anyMatch(v -> v.typeValue.equalsIgnoreCase(s));
-        }
+    public void setOrder(int order) {
+        this.order = order;
     }
 }
