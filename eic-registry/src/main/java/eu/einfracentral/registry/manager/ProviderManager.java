@@ -113,9 +113,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return ret;
     }
 
-    @Override
+//    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle update(ProviderBundle provider, Authentication auth) {
+    public ProviderBundle update(ProviderBundle provider, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
         validate(provider);
         if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
@@ -129,10 +129,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<LoggingInfo> loggingInfoList;
         if (provider.getLoggingInfo() != null) {
             loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+            loggingInfo.setUpdate(updateAuditInfo(loggingInfo, comment, User.of(auth).getEmail()));
             loggingInfoList = provider.getLoggingInfo();
             loggingInfoList.add((loggingInfo));
         } else {
             loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+            loggingInfo.setUpdate(updateAuditInfo(loggingInfo, comment, User.of(auth).getEmail()));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
             loggingInfoList = new ArrayList<>();
             loggingInfoList.add((loggingInfo));
@@ -727,5 +729,21 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<String> sortCountries(List<String> countries){
         Collections.sort(countries);
         return countries;
+    }
+
+    public List<AuditingInfo> updateAuditInfo(LoggingInfo loggingInfo, String comment, String user){
+        List<AuditingInfo> newUpdateList = new ArrayList<>();
+        AuditingInfo auditingInfo = new AuditingInfo();
+        auditingInfo.setDate(String.valueOf(System.currentTimeMillis()));
+        auditingInfo.setUser(user);
+        auditingInfo.setComment(comment);
+        if (loggingInfo.getUpdate() != null){
+            List<AuditingInfo> currentUpdateList = loggingInfo.getUpdate();
+            newUpdateList = currentUpdateList;
+            newUpdateList.add(auditingInfo);
+        } else{
+            newUpdateList.add(auditingInfo);
+        }
+        return newUpdateList;
     }
 }

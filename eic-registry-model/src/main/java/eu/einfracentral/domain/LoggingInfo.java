@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -21,6 +22,15 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
+    @XmlElement(defaultValue = "null")
+    private List<AuditingInfo> audit;
+
+    @XmlElement(defaultValue = "null")
+    private List<AuditingInfo> update;
+
+    @XmlElement(defaultValue = "null")
+    private List<AuditingInfo> onboarding;
+
     public LoggingInfo() {
     }
 
@@ -29,6 +39,9 @@ public class LoggingInfo {
         this.userEmail = loggingInfo.getUserEmail();
         this.userRole = loggingInfo.getUserRole();
         this.type = loggingInfo.getType();
+        this.audit = loggingInfo.getAudit();
+        this.update = loggingInfo.getUpdate();
+        this.onboarding = loggingInfo.getOnboarding();
     }
 
     public enum Types {
@@ -39,7 +52,8 @@ public class LoggingInfo {
         DEACTIVATED("deactivated"),
         APPROVED("approved"), // approved Provider (APPROVED) or approved Service (APPROVED)
         VALIDATED("validated"), // validated Provider (ST_SUBMISSION)
-        REJECTED("rejected"), // rejected Provider (REJECTED) or rejected Service (REJECTED_ST)
+        REJECTED("rejected"), // rejected Provider (REJECTED) or rejected Service (REJECTED_ST),
+        AUDITED("audited"),
         INITIALIZATION("initialization");
 
         private final String type;
@@ -104,10 +118,13 @@ public class LoggingInfo {
     @Override
     public String toString() {
         return "LoggingInfo{" +
-                "date=" + date +
+                "date='" + date + '\'' +
                 ", userEmail='" + userEmail + '\'' +
                 ", userRole='" + userRole + '\'' +
                 ", type='" + type + '\'' +
+                ", audit=" + audit +
+                ", update=" + update +
+                ", onboarding=" + onboarding +
                 '}';
     }
 
@@ -145,5 +162,29 @@ public class LoggingInfo {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<AuditingInfo> getAudit() {
+        return audit;
+    }
+
+    public void setAudit(List<AuditingInfo> audit) {
+        this.audit = audit;
+    }
+
+    public List<AuditingInfo> getUpdate() {
+        return update;
+    }
+
+    public void setUpdate(List<AuditingInfo> update) {
+        this.update = update;
+    }
+
+    public List<AuditingInfo> getOnboarding() {
+        return onboarding;
+    }
+
+    public void setOnboarding(List<AuditingInfo> onboarding) {
+        this.onboarding = onboarding;
     }
 }

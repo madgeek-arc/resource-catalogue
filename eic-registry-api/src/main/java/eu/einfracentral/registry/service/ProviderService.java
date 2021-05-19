@@ -77,4 +77,12 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     Paging<ResourceHistory> getHistory(String id);
+
+    /**
+     * @param provider
+     * @param comment
+     * @param auth
+     * @return
+     */
+    ProviderBundle update(ProviderBundle provider, String comment, Authentication auth);
 }
