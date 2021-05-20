@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -22,7 +24,8 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
-//    @XmlElement(defaultValue = "null")
+    @XmlElement(defaultValue = "null")
+    @FieldValidation(nullable = true)
     private List<AuditingInfo> audit;
 
 //    @XmlElement(defaultValue = "null")
