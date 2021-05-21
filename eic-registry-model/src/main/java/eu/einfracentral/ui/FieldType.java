@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum FieldType {
     STRING                  ("string"),
-    URL                     ("string"),
+    URL                     ("url"),
     INT                     ("int"),
     BOOLEAN                 ("boolean"),
     LIST                    ("array"),
