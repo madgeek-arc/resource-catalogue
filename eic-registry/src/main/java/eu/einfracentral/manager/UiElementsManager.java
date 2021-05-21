@@ -5,9 +5,7 @@ import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.service.UiElementsService;
-import eu.einfracentral.ui.Field;
-import eu.einfracentral.ui.Group;
-import eu.einfracentral.ui.GroupedFields;
+import eu.einfracentral.ui.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -105,14 +103,82 @@ public class UiElementsManager implements UiElementsService {
         return null;
     }
 
+    @Override // TODO: refactoring
+    public List<GroupedFields<FieldGroup>> getModel() {
+        List<GroupedFields<FieldGroup>> groupedFieldGroups = new ArrayList<>();
+        List<GroupedFields<Field>> groupedFieldsList = getFlatModel();
+
+        for (GroupedFields<Field> groupedFields : groupedFieldsList) {
+            GroupedFields<FieldGroup> groupedFieldGroup = new GroupedFields<>();
+
+            groupedFieldGroup.setGroup(groupedFields.getGroup());
+            List<FieldGroup> fieldGroups = createFieldGroups(groupedFields.getFields());
+            groupedFieldGroup.setFields(fieldGroups);
+
+            int total = 0;
+            for (Field f : groupedFields.getFields()) {
+                if (f.getForm().getMandatory() != null && f.getForm().getMandatory()) {
+                    total += 1;
+                }
+            }
+
+            int topLevel = 0;
+            for (FieldGroup fg : fieldGroups) {
+                if (fg.getField().getForm().getMandatory() != null && fg.getField().getForm().getMandatory()) {
+                    topLevel += 1;
+                }
+            }
+            RequiredFields requiredFields = new RequiredFields(topLevel, total);
+            groupedFieldGroup.setRequired(requiredFields);
+
+            groupedFieldGroups.add(groupedFieldGroup);
+        }
+
+
+        return groupedFieldGroups;
+    }
+
+    // TODO: recurse until starting list length == returned list length
+    List<FieldGroup> createFieldGroups(List<Field> fields) {
+        Map<Integer, FieldGroup> fieldGroupMap = new HashMap<>();
+        Map<Integer, List<FieldGroup>> groups = new HashMap<>();
+        Set<Integer> ids = fields
+                .stream()
+                .map(Field::getParentId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        for (Integer id : ids) {
+            groups.put(id, new ArrayList<>());
+        }
+
+        for (Iterator<Field> it = fields.iterator(); it.hasNext();) {
+            Field field = it.next();
+            FieldGroup fieldGroup = new FieldGroup(field);
+            if (ids.contains(field.getParentId())) {
+                groups.get(field.getParentId()).add(fieldGroup);
+            } else {
+                fieldGroupMap.put(field.getId(), fieldGroup);
+            }
+        }
+
+        for (Map.Entry<Integer, List<FieldGroup>> entry : groups.entrySet()) {
+            fieldGroupMap.get(entry.getKey()).setSubFieldGroups(entry.getValue());
+        }
+
+
+        return new ArrayList<>(fieldGroupMap.values());
+
+    }
+
     @Override
-    public List<GroupedFields> getModel() {
+    public List<GroupedFields<Field>> getFlatModel() {
         List<Group> groups = getGroups();
-        List<GroupedFields> groupedFieldsList = new ArrayList<>();
+        List<GroupedFields<Field>> groupedFieldsList = new ArrayList<>();
 
         if (groups != null) {
             for (Group group : groups) {
-                GroupedFields groupedFields = new GroupedFields();
+                GroupedFields<Field> groupedFields = new GroupedFields<>();
 
                 groupedFields.setGroup(group);
                 groupedFields.setFields(getFieldsByGroup(group.getId()));
