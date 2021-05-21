@@ -9,16 +9,16 @@ import java.util.Arrays;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class AuditingInfo {
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private String actionType;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private String date;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private String comment;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private String user;
 
     public AuditingInfo() {
