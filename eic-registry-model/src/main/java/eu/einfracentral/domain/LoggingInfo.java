@@ -24,14 +24,14 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
-    @XmlElement(defaultValue = "null")
-    private List<AuditingInfo> audit;
-
-    @XmlElement(defaultValue = "null")
-    private List<AuditingInfo> update;
-
-    @XmlElement(defaultValue = "null")
-    private List<AuditingInfo> onboarding;
+//    @XmlElement(defaultValue = "null")
+//    private List<AuditingInfo> audit;
+//
+//    @XmlElement(defaultValue = "null")
+//    private List<AuditingInfo> update;
+//
+//    @XmlElement(defaultValue = "null")
+//    private List<AuditingInfo> onboarding;
 
     public LoggingInfo() {
     }
@@ -41,9 +41,9 @@ public class LoggingInfo {
         this.userEmail = loggingInfo.getUserEmail();
         this.userRole = loggingInfo.getUserRole();
         this.type = loggingInfo.getType();
-        this.audit = loggingInfo.getAudit();
-        this.update = loggingInfo.getUpdate();
-        this.onboarding = loggingInfo.getOnboarding();
+//        this.audit = loggingInfo.getAudit();
+//        this.update = loggingInfo.getUpdate();
+//        this.onboarding = loggingInfo.getOnboarding();
     }
 
     public enum Types {
@@ -124,9 +124,9 @@ public class LoggingInfo {
                 ", userEmail='" + userEmail + '\'' +
                 ", userRole='" + userRole + '\'' +
                 ", type='" + type + '\'' +
-                ", audit=" + audit +
-                ", update=" + update +
-                ", onboarding=" + onboarding +
+//                ", audit=" + audit +
+//                ", update=" + update +
+//                ", onboarding=" + onboarding +
                 '}';
     }
 
@@ -166,27 +166,27 @@ public class LoggingInfo {
         this.type = type;
     }
 
-    public List<AuditingInfo> getAudit() {
-        return audit;
-    }
-
-    public void setAudit(List<AuditingInfo> audit) {
-        this.audit = audit;
-    }
-
-    public List<AuditingInfo> getUpdate() {
-        return update;
-    }
-
-    public void setUpdate(List<AuditingInfo> update) {
-        this.update = update;
-    }
-
-    public List<AuditingInfo> getOnboarding() {
-        return onboarding;
-    }
-
-    public void setOnboarding(List<AuditingInfo> onboarding) {
-        this.onboarding = onboarding;
-    }
+//    public List<AuditingInfo> getAudit() {
+//        return audit;
+//    }
+//
+//    public void setAudit(List<AuditingInfo> audit) {
+//        this.audit = audit;
+//    }
+//
+//    public List<AuditingInfo> getUpdate() {
+//        return update;
+//    }
+//
+//    public void setUpdate(List<AuditingInfo> update) {
+//        this.update = update;
+//    }
+//
+//    public List<AuditingInfo> getOnboarding() {
+//        return onboarding;
+//    }
+//
+//    public void setOnboarding(List<AuditingInfo> onboarding) {
+//        this.onboarding = onboarding;
+//    }
 }

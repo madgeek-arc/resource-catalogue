@@ -34,13 +34,13 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private List<LoggingInfo> loggingInfo;
 
 //    @XmlElement
-//    private Status auditStatus;
+//    private List<AuditingInfo> auditStatus;
 //
-////?    @XmlElement
-////?    private Status onboardingStatus;
-////?
-////?    @XmlElement
-////?    private Status updateStatus;
+//    @XmlElement
+//    private List<AuditingInfo> onboardingStatus;
+
+    @XmlElement
+    private List<AuditingInfo> updateStatus;
 
     public Bundle() {
     }
@@ -95,6 +95,30 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.loggingInfo = loggingInfo;
     }
 
+//    public List<AuditingInfo> getAuditStatus() {
+//        return auditStatus;
+//    }
+//
+//    public void setAuditStatus(List<AuditingInfo> auditStatus) {
+//        this.auditStatus = auditStatus;
+//    }
+//
+//    public List<AuditingInfo> getOnboardingStatus() {
+//        return onboardingStatus;
+//    }
+//
+//    public void setOnboardingStatus(List<AuditingInfo> onboardingStatus) {
+//        this.onboardingStatus = onboardingStatus;
+//    }
+
+    public List<AuditingInfo> getUpdateStatus() {
+        return updateStatus;
+    }
+
+    public void setUpdateStatus(List<AuditingInfo> updateStatus) {
+        this.updateStatus = updateStatus;
+    }
+
     @Override
     public String toString() {
         return "Bundle{" +
@@ -103,6 +127,9 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", active=" + active +
                 ", status='" + status + '\'' +
                 ", loggingInfo=" + loggingInfo +
+//                ", auditStatus=" + auditStatus +
+//                ", onboardingStatus=" + onboardingStatus +
+                ", updateStatus=" + updateStatus +
                 '}';
     }
 }
