@@ -129,18 +129,22 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<LoggingInfo> loggingInfoList;
         if (provider.getLoggingInfo() != null) {
             loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
-            loggingInfo.setUpdate(updateAuditInfo(loggingInfo, comment, User.of(auth).getEmail()));
+//            loggingInfo.setUpdate(updateAuditInfo(loggingInfo, comment, User.of(auth).getEmail()));
             loggingInfoList = provider.getLoggingInfo();
             loggingInfoList.add((loggingInfo));
         } else {
             loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
-            loggingInfo.setUpdate(updateAuditInfo(loggingInfo, comment, User.of(auth).getEmail()));
+//            loggingInfo.setUpdate(updateAuditInfo(loggingInfo, comment, User.of(auth).getEmail()));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
             loggingInfoList = new ArrayList<>();
             loggingInfoList.add((loggingInfo));
         }
         provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
         provider.setLoggingInfo(loggingInfoList);
+
+        // AuditInfo updateStatus
+        provider.setUpdateStatus(updateAuditStatus(provider, comment, User.of(auth).getEmail()));
+
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
         provider.setActive(ex.isActive());
@@ -731,19 +735,36 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return countries;
     }
 
-    public List<AuditingInfo> updateAuditInfo(LoggingInfo loggingInfo, String comment, String user){
-        List<AuditingInfo> newUpdateList = new ArrayList<>();
+//    public List<AuditingInfo> updateAuditInfo(LoggingInfo loggingInfo, String comment, String user){
+//        List<AuditingInfo> newUpdateList = new ArrayList<>();
+//        AuditingInfo auditingInfo = new AuditingInfo();
+//        auditingInfo.setDate(String.valueOf(System.currentTimeMillis()));
+//        auditingInfo.setUser(user);
+//        auditingInfo.setComment(comment);
+//        if (loggingInfo.getUpdate() != null){
+//            List<AuditingInfo> currentUpdateList = loggingInfo.getUpdate();
+//            newUpdateList = currentUpdateList;
+//            newUpdateList.add(auditingInfo);
+//        } else{
+//            newUpdateList.add(auditingInfo);
+//        }
+//        return newUpdateList;
+//    }
+
+    public List<AuditingInfo> updateAuditStatus(ProviderBundle provider, String comment, String email){
+        List<AuditingInfo> updateStatusList;
         AuditingInfo auditingInfo = new AuditingInfo();
         auditingInfo.setDate(String.valueOf(System.currentTimeMillis()));
-        auditingInfo.setUser(user);
         auditingInfo.setComment(comment);
-        if (loggingInfo.getUpdate() != null){
-            List<AuditingInfo> currentUpdateList = loggingInfo.getUpdate();
-            newUpdateList = currentUpdateList;
-            newUpdateList.add(auditingInfo);
+        auditingInfo.setUser(email);
+        auditingInfo.setActionType(null);
+        if (provider.getUpdateStatus() != null) {
+            updateStatusList = provider.getUpdateStatus();
         } else{
-            newUpdateList.add(auditingInfo);
+            updateStatusList = new ArrayList<>();
         }
-        return newUpdateList;
+        updateStatusList.add(auditingInfo);
+
+        return updateStatusList;
     }
 }
