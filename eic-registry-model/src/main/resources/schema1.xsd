@@ -53,10 +53,10 @@
 
   <xs:complexType name="auditingInfo">
     <xs:sequence>
-      <xs:element minOccurs="0" name="actionType" type="xs:string"/>
-      <xs:element minOccurs="0" name="comment" type="xs:string"/>
-      <xs:element minOccurs="0" name="date" type="xs:string"/>
-      <xs:element minOccurs="0" name="user" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="actionType" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="comment" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="user" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -71,11 +71,11 @@
 
   <xs:complexType name="loggingInfo">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:auditingInfo"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="onboarding" type="tns:auditingInfo"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="onboarding" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="type" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="update" type="tns:auditingInfo"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="update" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="userEmail" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="userRole" type="xs:string"/>
     </xs:sequence>

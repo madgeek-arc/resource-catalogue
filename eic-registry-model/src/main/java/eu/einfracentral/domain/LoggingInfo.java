@@ -24,13 +24,13 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private List<AuditingInfo> audit;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private List<AuditingInfo> update;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private List<AuditingInfo> onboarding;
 
     public LoggingInfo() {
