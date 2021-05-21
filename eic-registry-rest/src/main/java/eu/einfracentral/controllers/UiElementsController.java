@@ -2,6 +2,7 @@ package eu.einfracentral.controllers;
 
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.Field;
+import eu.einfracentral.ui.FieldGroup;
 import eu.einfracentral.ui.GroupedFields;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,13 @@ public class UiElementsController {
         return uiElementsService.getFields();
     }
 
+    @GetMapping(value = "form/model/flat", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<GroupedFields<Field>> getFlatModel() {
+        return uiElementsService.getFlatModel();
+    }
+
     @GetMapping(value = "form/model", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<GroupedFields> getModel() {
+    public List<GroupedFields<FieldGroup>> getModel() {
         return uiElementsService.getModel();
     }
 }

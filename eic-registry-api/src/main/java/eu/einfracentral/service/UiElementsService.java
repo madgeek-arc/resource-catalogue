@@ -1,6 +1,7 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.ui.Field;
+import eu.einfracentral.ui.FieldGroup;
 import eu.einfracentral.ui.Group;
 import eu.einfracentral.ui.GroupedFields;
 
@@ -12,7 +13,9 @@ public interface UiElementsService {
 
     List<String> getElementNames();
 
-    List<GroupedFields> getModel();
+    List<GroupedFields<FieldGroup>> getModel();
+
+    List<GroupedFields<Field>> getFlatModel();
 
     List<Group> getGroups();
 

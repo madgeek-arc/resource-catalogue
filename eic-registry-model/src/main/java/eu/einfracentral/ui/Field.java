@@ -6,6 +6,7 @@ public class Field {
 
     int id;
     String name;
+    Integer parentId;
     String parent;
     String label;
     String accessPath;
@@ -54,6 +55,14 @@ public class Field {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
     }
 
     public String getParent() {
