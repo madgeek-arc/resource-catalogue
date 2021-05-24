@@ -63,17 +63,22 @@
   <xs:complexType abstract="true" name="bundle">
     <xs:sequence>
       <xs:element name="active" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="auditStatus" type="tns:auditingInfo"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
       <xs:element minOccurs="0" ref="tns:metadata"/>
+      <xs:element minOccurs="0" name="onboardingStatus" type="tns:auditingInfo"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="updateStatus" type="tns:auditingInfo"/>
+      <xs:element minOccurs="0" name="updateStatus" type="tns:auditingInfo"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="loggingInfo">
     <xs:sequence>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="onboarding" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="type" type="xs:string"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="update" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="userEmail" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="userRole" type="xs:string"/>
     </xs:sequence>

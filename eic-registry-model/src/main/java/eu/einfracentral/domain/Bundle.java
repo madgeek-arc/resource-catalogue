@@ -33,14 +33,14 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @XmlElement
     private List<LoggingInfo> loggingInfo;
 
-//    @XmlElement
-//    private List<AuditingInfo> auditStatus;
-//
-//    @XmlElement
-//    private List<AuditingInfo> onboardingStatus;
+    @XmlElement
+    private AuditingInfo auditStatus;
 
     @XmlElement
-    private List<AuditingInfo> updateStatus;
+    private AuditingInfo onboardingStatus;
+
+    @XmlElement
+    private AuditingInfo updateStatus;
 
     public Bundle() {
     }
@@ -95,27 +95,27 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.loggingInfo = loggingInfo;
     }
 
-//    public List<AuditingInfo> getAuditStatus() {
-//        return auditStatus;
-//    }
-//
-//    public void setAuditStatus(List<AuditingInfo> auditStatus) {
-//        this.auditStatus = auditStatus;
-//    }
-//
-//    public List<AuditingInfo> getOnboardingStatus() {
-//        return onboardingStatus;
-//    }
-//
-//    public void setOnboardingStatus(List<AuditingInfo> onboardingStatus) {
-//        this.onboardingStatus = onboardingStatus;
-//    }
+    public AuditingInfo getAuditStatus() {
+        return auditStatus;
+    }
 
-    public List<AuditingInfo> getUpdateStatus() {
+    public void setAuditStatus(AuditingInfo auditStatus) {
+        this.auditStatus = auditStatus;
+    }
+
+    public AuditingInfo getOnboardingStatus() {
+        return onboardingStatus;
+    }
+
+    public void setOnboardingStatus(AuditingInfo onboardingStatus) {
+        this.onboardingStatus = onboardingStatus;
+    }
+
+    public AuditingInfo getUpdateStatus() {
         return updateStatus;
     }
 
-    public void setUpdateStatus(List<AuditingInfo> updateStatus) {
+    public void setUpdateStatus(AuditingInfo updateStatus) {
         this.updateStatus = updateStatus;
     }
 
@@ -127,8 +127,8 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", active=" + active +
                 ", status='" + status + '\'' +
                 ", loggingInfo=" + loggingInfo +
-//                ", auditStatus=" + auditStatus +
-//                ", onboardingStatus=" + onboardingStatus +
+                ", auditStatus=" + auditStatus +
+                ", onboardingStatus=" + onboardingStatus +
                 ", updateStatus=" + updateStatus +
                 '}';
     }

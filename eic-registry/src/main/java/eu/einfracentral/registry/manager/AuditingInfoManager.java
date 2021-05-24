@@ -52,20 +52,15 @@ public class AuditingInfoManager implements AuditingInfoService<AuditingInfo, Au
     }
 
     public ProviderBundle auditProvider (String providerId, String actionType, String comment, Authentication auth) throws ResourceNotFoundException {
-        List<AuditingInfo> auditingInfoList = new ArrayList<>();
         AuditingInfo auditingInfo = new AuditingInfo();
         ProviderBundle provider = (ProviderBundle) providerService.get(providerId);
         auditingInfo.setUser(User.of(auth).getEmail());
         auditingInfo.setComment(comment);
         auditingInfo.setActionType(actionType);
-        auditingInfo.setDate(now());
-        auditingInfoList.add(auditingInfo);
-        providerService.update(provider, auth);
+        auditingInfo.setDate(String.valueOf(System.currentTimeMillis()));
+        provider.setAuditStatus(auditingInfo);
+        providerService.update(provider, "audit", auth);
         return provider;
-    }
-
-    public static String now(){
-        return String.valueOf(System.currentTimeMillis());
     }
 
 }
