@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.AuditingInfo;
+import eu.einfracentral.domain.BundleStatus;
 import eu.einfracentral.registry.service.AuditingInfoService;
 import io.swagger.annotations.Api;
 import org.apache.logging.log4j.LogManager;
@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @Api(value = "Get information about a Auditing")
 public class AuditingInfoController {
 
-    private static final Logger logger = LogManager.getLogger(AuditingInfo.class);
-    private AuditingInfoService<AuditingInfo, Authentication> auditingInfoService;
+    private static final Logger logger = LogManager.getLogger(BundleStatus.class);
+    private AuditingInfoService<BundleStatus, Authentication> auditingInfoService;
 
 
     @Autowired
-    AuditingInfoController(AuditingInfoService<AuditingInfo, Authentication> auditingInfoService) {
+    AuditingInfoController(AuditingInfoService<BundleStatus, Authentication> auditingInfoService) {
         this.auditingInfoService = auditingInfoService;
     }
 
