@@ -23,7 +23,7 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
-    @XmlElement(defaultValue = "null")
+    @XmlElement
     private List<AuditingInfo> audit;
 
     @XmlElement(defaultValue = "null")
