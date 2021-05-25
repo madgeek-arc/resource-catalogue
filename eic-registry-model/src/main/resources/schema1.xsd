@@ -74,7 +74,7 @@
 
   <xs:complexType name="loggingInfo">
     <xs:sequence>
-      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:auditingInfo"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
       <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="onboarding" type="tns:auditingInfo"/>
       <xs:element default="null" minOccurs="0" name="type" type="xs:string"/>
