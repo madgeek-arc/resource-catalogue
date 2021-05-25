@@ -212,7 +212,7 @@ public class UiElementsManager implements UiElementsService {
                     }
                 }
             }
-            if (counter > allFields.size()) {
+            if (counter >= allFields.size()) {
                 throw new RuntimeException("The json model located at '" + directory + "/" + FILENAME_FIELDS +
                         "' contains errors in the 'parent' fields...\nPlease fix it and try again.");
             }
