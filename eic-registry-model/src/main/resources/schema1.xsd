@@ -3,9 +3,9 @@
 
   <xs:import schemaLocation="schema2.xsd"/>
 
-  <xs:element name="auditingInfo" type="tns:auditingInfo"/>
-
   <xs:element name="bundle" type="tns:bundle"/>
+
+  <xs:element name="bundleStatus" type="tns:bundleStatus"/>
 
   <xs:element name="emailMessage" type="tns:emailMessage"/>
 
@@ -51,7 +51,19 @@
 
   <xs:element name="vocabularyEntryRequest" type="tns:vocabularyEntryRequest"/>
 
-  <xs:complexType name="auditingInfo">
+  <xs:complexType abstract="true" name="bundle">
+    <xs:sequence>
+      <xs:element name="active" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="auditStatus" type="tns:bundleStatus"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
+      <xs:element minOccurs="0" ref="tns:metadata"/>
+      <xs:element minOccurs="0" name="onboardingStatus" type="tns:bundleStatus"/>
+      <xs:element minOccurs="0" name="status" type="xs:string"/>
+      <xs:element minOccurs="0" name="updateStatus" type="tns:bundleStatus"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="bundleStatus">
     <xs:sequence>
       <xs:element default="null" minOccurs="0" name="actionType" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="comment" type="xs:string"/>
@@ -60,25 +72,13 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType abstract="true" name="bundle">
-    <xs:sequence>
-      <xs:element name="active" type="xs:boolean"/>
-      <xs:element minOccurs="0" name="auditStatus" type="tns:auditingInfo"/>
-      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="loggingInfo" type="tns:loggingInfo"/>
-      <xs:element minOccurs="0" ref="tns:metadata"/>
-      <xs:element minOccurs="0" name="onboardingStatus" type="tns:auditingInfo"/>
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
-      <xs:element minOccurs="0" name="updateStatus" type="tns:auditingInfo"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="loggingInfo">
     <xs:sequence>
-      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:auditingInfo"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:bundleStatus"/>
       <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
-      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="onboarding" type="tns:auditingInfo"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="onboarding" type="tns:bundleStatus"/>
       <xs:element default="null" minOccurs="0" name="type" type="xs:string"/>
-      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="update" type="tns:auditingInfo"/>
+      <xs:element default="null" maxOccurs="unbounded" minOccurs="0" name="update" type="tns:bundleStatus"/>
       <xs:element default="null" minOccurs="0" name="userEmail" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="userRole" type="xs:string"/>
     </xs:sequence>
