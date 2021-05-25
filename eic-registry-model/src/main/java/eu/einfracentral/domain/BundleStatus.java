@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class AuditingInfo {
+public class BundleStatus {
 
     @XmlElement(defaultValue = "null")
     private String actionType;
@@ -21,10 +21,10 @@ public class AuditingInfo {
     @XmlElement(defaultValue = "null")
     private String user;
 
-    public AuditingInfo() {
+    public BundleStatus() {
     }
 
-    public AuditingInfo(String actionType, String date, String comment, String user) {
+    public BundleStatus(String actionType, String date, String comment, String user) {
         this.actionType = actionType;
         this.date = date;
         this.comment = comment;
@@ -50,8 +50,8 @@ public class AuditingInfo {
          * @return the Enum representation for the given string.
          * @throws IllegalArgumentException if unknown string.
          */
-        public static AuditingInfo.ActionTypes fromString(String s) throws IllegalArgumentException {
-            return Arrays.stream(AuditingInfo.ActionTypes.values())
+        public static BundleStatus.ActionTypes fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(BundleStatus.ActionTypes.values())
                     .filter(v -> v.actionType.equals(s))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));

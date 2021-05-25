@@ -4,6 +4,7 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,37 +24,26 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
-    @XmlElement(defaultValue = "null")
-    private List<AuditingInfo> audit;
+    @XmlElement
+    private List<BundleStatus> audit = new ArrayList<>();
 
-    @XmlElement(defaultValue = "null")
-    private List<AuditingInfo> update;
+    @XmlElement
+    private List<BundleStatus> update = new ArrayList<>();
 
-    @XmlElement(defaultValue = "null")
-    private List<AuditingInfo> onboarding;
+    @XmlElement
+    private List<BundleStatus> onboarding = new ArrayList<>();
 
     public LoggingInfo() {
     }
 
-//    public LoggingInfo(LoggingInfo loggingInfo) {
-//        this.date = loggingInfo.getDate();
-//        this.userEmail = loggingInfo.getUserEmail();
-//        this.userRole = loggingInfo.getUserRole();
-//        this.type = loggingInfo.getType();
-//        this.audit = loggingInfo.getAudit();
-//        this.update = loggingInfo.getUpdate();
-//        this.onboarding = loggingInfo.getOnboarding();
-//    }
-
-
-    public LoggingInfo(String date, String userEmail, String userRole, String type, List<AuditingInfo> audit, List<AuditingInfo> update, List<AuditingInfo> onboarding) {
-        this.date = date;
-        this.userEmail = userEmail;
-        this.userRole = userRole;
-        this.type = type;
-        this.audit = audit;
-        this.update = update;
-        this.onboarding = onboarding;
+    public LoggingInfo(LoggingInfo loggingInfo) {
+        this.date = loggingInfo.getDate();
+        this.userEmail = loggingInfo.getUserEmail();
+        this.userRole = loggingInfo.getUserRole();
+        this.type = loggingInfo.getType();
+        this.audit = loggingInfo.getAudit();
+        this.update = loggingInfo.getUpdate();
+        this.onboarding = loggingInfo.getOnboarding();
     }
 
     public enum Types {
@@ -176,27 +166,27 @@ public class LoggingInfo {
         this.type = type;
     }
 
-    public List<AuditingInfo> getAudit() {
+    public List<BundleStatus> getAudit() {
         return audit;
     }
 
-    public void setAudit(List<AuditingInfo> audit) {
+    public void setAudit(List<BundleStatus> audit) {
         this.audit = audit;
     }
 
-    public List<AuditingInfo> getUpdate() {
+    public List<BundleStatus> getUpdate() {
         return update;
     }
 
-    public void setUpdate(List<AuditingInfo> update) {
+    public void setUpdate(List<BundleStatus> update) {
         this.update = update;
     }
 
-    public List<AuditingInfo> getOnboarding() {
+    public List<BundleStatus> getOnboarding() {
         return onboarding;
     }
 
-    public void setOnboarding(List<AuditingInfo> onboarding) {
+    public void setOnboarding(List<BundleStatus> onboarding) {
         this.onboarding = onboarding;
     }
 }

@@ -30,17 +30,17 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
     private String status;
 
-    @XmlElement(defaultValue = "null")
+    @XmlElement
     private List<LoggingInfo> loggingInfo;
 
     @XmlElement
-    private AuditingInfo auditStatus;
+    private BundleStatus auditStatus;
 
     @XmlElement
-    private AuditingInfo onboardingStatus;
+    private BundleStatus onboardingStatus;
 
     @XmlElement
-    private AuditingInfo updateStatus;
+    private BundleStatus updateStatus;
 
     public Bundle() {
     }
@@ -95,27 +95,27 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.loggingInfo = loggingInfo;
     }
 
-    public AuditingInfo getAuditStatus() {
+    public BundleStatus getAuditStatus() {
         return auditStatus;
     }
 
-    public void setAuditStatus(AuditingInfo auditStatus) {
+    public void setAuditStatus(BundleStatus auditStatus) {
         this.auditStatus = auditStatus;
     }
 
-    public AuditingInfo getOnboardingStatus() {
+    public BundleStatus getOnboardingStatus() {
         return onboardingStatus;
     }
 
-    public void setOnboardingStatus(AuditingInfo onboardingStatus) {
+    public void setOnboardingStatus(BundleStatus onboardingStatus) {
         this.onboardingStatus = onboardingStatus;
     }
 
-    public AuditingInfo getUpdateStatus() {
+    public BundleStatus getUpdateStatus() {
         return updateStatus;
     }
 
-    public void setUpdateStatus(AuditingInfo updateStatus) {
+    public void setUpdateStatus(BundleStatus updateStatus) {
         this.updateStatus = updateStatus;
     }
 

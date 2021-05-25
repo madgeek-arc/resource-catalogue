@@ -154,11 +154,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setLoggingInfo(loggingInfoList);
 
         // AuditInfo updateStatus
-        AuditingInfo auditingInfo = new AuditingInfo();
-        auditingInfo.setDate(String.valueOf(System.currentTimeMillis()));
-        auditingInfo.setUser(User.of(auth).getEmail());
-        auditingInfo.setComment(comment);
-        provider.setUpdateStatus(auditingInfo);
+        BundleStatus bundleStatus = new BundleStatus();
+        bundleStatus.setDate(String.valueOf(System.currentTimeMillis()));
+        bundleStatus.setUser(User.of(auth).getEmail());
+        bundleStatus.setComment(comment);
+        provider.setUpdateStatus(bundleStatus);
 
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
@@ -750,31 +750,31 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return countries;
     }
 
-    public List<AuditingInfo> updateAuditInfo(LoggingInfo loggingInfo, String comment, String user){
-        List<AuditingInfo> newUpdateList = new ArrayList<>();
-        AuditingInfo auditingInfo = new AuditingInfo();
-        auditingInfo.setDate(String.valueOf(System.currentTimeMillis()));
-        auditingInfo.setUser(user);
-        auditingInfo.setComment(comment);
+    public List<BundleStatus> updateAuditInfo(LoggingInfo loggingInfo, String comment, String user){
+        List<BundleStatus> newUpdateList = new ArrayList<>();
+        BundleStatus bundleStatus = new BundleStatus();
+        bundleStatus.setDate(String.valueOf(System.currentTimeMillis()));
+        bundleStatus.setUser(user);
+        bundleStatus.setComment(comment);
         if (loggingInfo.getUpdate() != null){
-            List<AuditingInfo> currentUpdateList = loggingInfo.getUpdate();
+            List<BundleStatus> currentUpdateList = loggingInfo.getUpdate();
             newUpdateList = currentUpdateList;
-            newUpdateList.add(auditingInfo);
+            newUpdateList.add(bundleStatus);
         } else{
-            newUpdateList.add(auditingInfo);
+            newUpdateList.add(bundleStatus);
         }
         return newUpdateList;
     }
 
-    public List<AuditingInfo> auditAuditInfo(ProviderBundle provider, LoggingInfo loggingInfo, String user){
-        List<AuditingInfo> newAuditList = new ArrayList<>();
-        AuditingInfo auditingInfo = provider.getAuditStatus();
+    public List<BundleStatus> auditAuditInfo(ProviderBundle provider, LoggingInfo loggingInfo, String user){
+        List<BundleStatus> newAuditList = new ArrayList<>();
+        BundleStatus bundleStatus = provider.getAuditStatus();
         if (loggingInfo.getAudit() != null){
-            List<AuditingInfo> currentAuditList = loggingInfo.getAudit();
+            List<BundleStatus> currentAuditList = loggingInfo.getAudit();
             newAuditList = currentAuditList;
-            newAuditList.add(auditingInfo);
+            newAuditList.add(bundleStatus);
         } else{
-            newAuditList.add(auditingInfo);
+            newAuditList.add(bundleStatus);
         }
         return newAuditList;
     }

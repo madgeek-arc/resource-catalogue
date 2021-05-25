@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class AuditingInfoManager implements AuditingInfoService<AuditingInfo, Authentication> {
+public class AuditingInfoManager implements AuditingInfoService<BundleStatus, Authentication> {
 
     private final ProviderService providerService;
     private final InfraServiceService infraServiceService;
@@ -29,7 +29,7 @@ public class AuditingInfoManager implements AuditingInfoService<AuditingInfo, Au
         List<ProviderBundle> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("actionType", AuditingInfo.ActionTypes.INVALID);
+        ff.addFilter("actionType", BundleStatus.ActionTypes.INVALID);
         List<ProviderBundle> allProviders = providerService.getAll(ff, auth).getResults();
         Collections.shuffle(allProviders);
         for (int i=0; i<10; i++){
@@ -42,7 +42,7 @@ public class AuditingInfoManager implements AuditingInfoService<AuditingInfo, Au
         List<InfraService> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("actionType", AuditingInfo.ActionTypes.INVALID);
+        ff.addFilter("actionType", BundleStatus.ActionTypes.INVALID);
         List<InfraService> allServices = infraServiceService.getAll(ff, auth).getResults();
         Collections.shuffle(allServices);
         for (int i=0; i<10; i++){
@@ -52,13 +52,13 @@ public class AuditingInfoManager implements AuditingInfoService<AuditingInfo, Au
     }
 
     public ProviderBundle auditProvider (String providerId, String actionType, String comment, Authentication auth) throws ResourceNotFoundException {
-        AuditingInfo auditingInfo = new AuditingInfo();
+        BundleStatus bundleStatus = new BundleStatus();
         ProviderBundle provider = (ProviderBundle) providerService.get(providerId);
-        auditingInfo.setUser(User.of(auth).getEmail());
-        auditingInfo.setComment(comment);
-        auditingInfo.setActionType(actionType);
-        auditingInfo.setDate(String.valueOf(System.currentTimeMillis()));
-        provider.setAuditStatus(auditingInfo);
+        bundleStatus.setUser(User.of(auth).getEmail());
+        bundleStatus.setComment(comment);
+        bundleStatus.setActionType(actionType);
+        bundleStatus.setDate(String.valueOf(System.currentTimeMillis()));
+        provider.setAuditStatus(bundleStatus);
         providerService.update(provider, "audit", auth);
         return provider;
     }
