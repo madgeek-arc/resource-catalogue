@@ -30,7 +30,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
     private String status;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private List<LoggingInfo> loggingInfo;
 
     @XmlElement
