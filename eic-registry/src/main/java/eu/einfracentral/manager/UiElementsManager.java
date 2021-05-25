@@ -197,7 +197,32 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     public List<Field> getFields() {
-        return readFields(directory + "/" + FILENAME_FIELDS);
+        List<Field> allFields = readFields(directory + "/" + FILENAME_FIELDS);
+        for (Field field : allFields) {
+            String accessPath = field.getName();
+            Field parentField = field;
+            int counter = 0;
+            while (parentField.getParent() != null && counter < allFields.size()) {
+                counter++;
+                accessPath = String.join(".", parentField.getParent(), accessPath);
+                for (Field temp : allFields) {
+                    if (temp.getName().equals(parentField.getParent())) {
+                        parentField = temp;
+                        break;
+                    }
+                }
+            }
+            if (counter > allFields.size()) {
+                throw new RuntimeException("The json model located at '" + directory + "/" + FILENAME_FIELDS +
+                        "' contains errors in the 'parent' fields...\nPlease fix it and try again.");
+            }
+
+            // FIXME: implement this properly. Check if infraService is needed or not and decide what to do.
+            accessPath = accessPath.replaceFirst("\\w+\\.", ""); // used to remove infraService entry
+
+            field.setAccessPath(accessPath);
+        }
+        return allFields;
     }
 
 
