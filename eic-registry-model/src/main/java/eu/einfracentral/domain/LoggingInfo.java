@@ -23,7 +23,7 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
-    @XmlElement
+    @XmlElement(defaultValue = "null")
     private List<AuditingInfo> audit;
 
     @XmlElement(defaultValue = "null")
@@ -35,14 +35,25 @@ public class LoggingInfo {
     public LoggingInfo() {
     }
 
-    public LoggingInfo(LoggingInfo loggingInfo) {
-        this.date = loggingInfo.getDate();
-        this.userEmail = loggingInfo.getUserEmail();
-        this.userRole = loggingInfo.getUserRole();
-        this.type = loggingInfo.getType();
-        this.audit = loggingInfo.getAudit();
-        this.update = loggingInfo.getUpdate();
-        this.onboarding = loggingInfo.getOnboarding();
+//    public LoggingInfo(LoggingInfo loggingInfo) {
+//        this.date = loggingInfo.getDate();
+//        this.userEmail = loggingInfo.getUserEmail();
+//        this.userRole = loggingInfo.getUserRole();
+//        this.type = loggingInfo.getType();
+//        this.audit = loggingInfo.getAudit();
+//        this.update = loggingInfo.getUpdate();
+//        this.onboarding = loggingInfo.getOnboarding();
+//    }
+
+
+    public LoggingInfo(String date, String userEmail, String userRole, String type, List<AuditingInfo> audit, List<AuditingInfo> update, List<AuditingInfo> onboarding) {
+        this.date = date;
+        this.userEmail = userEmail;
+        this.userRole = userRole;
+        this.type = type;
+        this.audit = audit;
+        this.update = update;
+        this.onboarding = onboarding;
     }
 
     public enum Types {
