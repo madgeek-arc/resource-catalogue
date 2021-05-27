@@ -104,8 +104,8 @@ public class ServiceController {
     @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService ret = this.infraService.updateService(new InfraService(service), auth);
+    public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService ret = this.infraService.updateService(new InfraService(service), comment, auth);
         logger.info("User '{}' updated Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
@@ -310,6 +310,15 @@ public class ServiceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
         return ResponseEntity.ok(infraService.getAllForAdmin(ff, null));
+    }
+
+    @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<InfraService> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+                                                        @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+        InfraService service = infraService.auditResource(id, comment, actionType, auth);
+        logger.info("User '{}' updated Provider with name '{}' [actionType: {}]", auth, service.getService().getName(), actionType);
+        return new ResponseEntity<>(service, HttpStatus.OK);
     }
 
 }

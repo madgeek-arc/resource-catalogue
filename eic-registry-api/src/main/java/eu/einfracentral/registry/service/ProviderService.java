@@ -2,6 +2,7 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.*;
 import eu.openminted.registry.core.domain.Paging;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
@@ -85,4 +86,12 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     ProviderBundle update(ProviderBundle provider, String comment, Authentication auth);
+
+    /**
+     * @param providerId
+     * @param actionType
+     * @param auth
+     * @return
+     */
+    ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 }

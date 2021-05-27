@@ -4,9 +4,7 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -24,14 +22,11 @@ public class LoggingInfo {
     @XmlElement(defaultValue = "null")
     private String type;
 
-    @XmlElement
-    private List<BundleStatus> audit = new ArrayList<>();
+    @XmlElement(defaultValue = "null")
+    private String comment;
 
-    @XmlElement
-    private List<BundleStatus> update = new ArrayList<>();
-
-    @XmlElement
-    private List<BundleStatus> onboarding = new ArrayList<>();
+    @XmlElement(defaultValue = "null")
+    private String actionType;
 
     public LoggingInfo() {
     }
@@ -41,9 +36,8 @@ public class LoggingInfo {
         this.userEmail = loggingInfo.getUserEmail();
         this.userRole = loggingInfo.getUserRole();
         this.type = loggingInfo.getType();
-        this.audit = loggingInfo.getAudit();
-        this.update = loggingInfo.getUpdate();
-        this.onboarding = loggingInfo.getOnboarding();
+        this.comment = loggingInfo.getComment();
+        this.actionType = loggingInfo.getActionType();
     }
 
     public enum Types {
@@ -80,9 +74,36 @@ public class LoggingInfo {
         }
     }
 
+    public enum ActionType {
+        VALID("valid"),
+        INVALID("invalid"),
+        UPDATED_INVALID("updated invalid");
+
+        private final String actionType;
+
+        ActionType(final String actionType) {
+            this.actionType = actionType;
+        }
+
+        public String getKey() {
+            return actionType;
+        }
+
+        /**
+         * @return the Enum representation for the given string.
+         * @throws IllegalArgumentException if unknown string.
+         */
+        public static ActionType fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(ActionType.values())
+                    .filter(v -> v.actionType.equals(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
+    }
+
     public static LoggingInfo createLoggingInfo(String userEmail, String role){
         LoggingInfo ret = new LoggingInfo();
-        ret.setDate(now());
+        ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(Types.REGISTERED.getKey());
         ret.setUserEmail(userEmail);
         ret.setUserRole(role);
@@ -91,7 +112,7 @@ public class LoggingInfo {
 
     public static LoggingInfo updateLoggingInfo(String userEmail, String role, String type){
         LoggingInfo ret = new LoggingInfo();
-        ret.setDate(now());
+        ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setUserEmail(userEmail);
         ret.setUserRole(role);
@@ -100,7 +121,7 @@ public class LoggingInfo {
 
     public static LoggingInfo updateLoggingInfo(String type){
         LoggingInfo ret = new LoggingInfo();
-        ret.setDate(now());
+        ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setUserEmail("-");
         ret.setUserRole("system");
@@ -124,14 +145,9 @@ public class LoggingInfo {
                 ", userEmail='" + userEmail + '\'' +
                 ", userRole='" + userRole + '\'' +
                 ", type='" + type + '\'' +
-                ", audit=" + audit +
-                ", update=" + update +
-                ", onboarding=" + onboarding +
+                ", comment='" + comment + '\'' +
+                ", actionType='" + actionType + '\'' +
                 '}';
-    }
-
-    public static String now(){
-        return String.valueOf(System.currentTimeMillis());
     }
 
     public String getDate() {
@@ -166,27 +182,19 @@ public class LoggingInfo {
         this.type = type;
     }
 
-    public List<BundleStatus> getAudit() {
-        return audit;
+    public String getComment() {
+        return comment;
     }
 
-    public void setAudit(List<BundleStatus> audit) {
-        this.audit = audit;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
-    public List<BundleStatus> getUpdate() {
-        return update;
+    public String getActionType() {
+        return actionType;
     }
 
-    public void setUpdate(List<BundleStatus> update) {
-        this.update = update;
-    }
-
-    public List<BundleStatus> getOnboarding() {
-        return onboarding;
-    }
-
-    public void setOnboarding(List<BundleStatus> onboarding) {
-        this.onboarding = onboarding;
+    public void setActionType(ActionType actionType) {
+        this.actionType = actionType.getKey();
     }
 }
