@@ -196,18 +196,32 @@ public class UiElementsManager implements UiElementsService {
     }
 
     @Override
-    public List<Field> getFields() {
+    public List<Field> getFields() { // TODO: refactor
         List<Field> allFields = readFields(directory + "/" + FILENAME_FIELDS);
+
         Map<Integer, Field> fieldMap = new HashMap<>();
         for (Field field : allFields) {
             fieldMap.put(field.getId(), field);
         }
-        for (Field field : allFields) {
-            if (field.getForm().getDependsOn() != null) {
-                FieldIdName dependsOn = field.getForm().getDependsOn();
-                dependsOn.setName(fieldMap.get(dependsOn.getId()).getName());
+        for (Field f : allFields) {
+            if (f.getForm().getDependsOn() != null) {
+                // f -> dependsOn
+                FieldIdName dependsOn = f.getForm().getDependsOn();
+
+                // affectingField is the field that 'f' dependsOn
+                // meaning the field that affects 'f'
+                Field affectingField = fieldMap.get(dependsOn.getId());
+                dependsOn.setName(affectingField.getName());
+
+                FieldIdName affects = new FieldIdName(f.getId(), f.getName());
+                if (affectingField.getForm().getAffects() == null) {
+                    affectingField.getForm().setAffects(new ArrayList<>());
+                }
+                affectingField.getForm().getAffects().add(affects);
+
             }
         }
+
         for (Field field : allFields) {
             String accessPath = field.getName();
             Field parentField = field;
