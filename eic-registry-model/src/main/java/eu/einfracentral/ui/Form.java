@@ -1,9 +1,12 @@
 package eu.einfracentral.ui;
 
 
+import java.util.List;
+
 public class Form {
 
-    String dependsOn;
+    FieldIdName dependsOn;
+    List<FieldIdName> affects = null;
     String vocabulary;
     String group;
     String description;
@@ -18,12 +21,20 @@ public class Form {
     public Form() {
     }
 
-    public String getDependsOn() {
+    public FieldIdName getDependsOn() {
         return dependsOn;
     }
 
-    public void setDependsOn(String dependsOn) {
+    public void setDependsOn(FieldIdName dependsOn) {
         this.dependsOn = dependsOn;
+    }
+
+    public List<FieldIdName> getAffects() {
+        return affects;
+    }
+
+    public void setAffects(List<FieldIdName> affects) {
+        this.affects = affects;
     }
 
     public String getVocabulary() {
