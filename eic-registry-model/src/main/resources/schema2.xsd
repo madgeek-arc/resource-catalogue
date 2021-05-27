@@ -38,6 +38,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="actionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="VALID"/>
+      <xs:enumeration value="INVALID"/>
+      <xs:enumeration value="UPDATED_INVALID"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="type">
     <xs:restriction base="xs:string">
       <xs:enumeration value="SUPERCATEGORY"/>

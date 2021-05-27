@@ -54,31 +54,21 @@
   <xs:complexType abstract="true" name="bundle">
     <xs:sequence>
       <xs:element name="active" type="xs:boolean"/>
-      <xs:element minOccurs="0" name="auditStatus" type="tns:bundleStatus"/>
+      <xs:element minOccurs="0" name="latestAuditInfo" type="tns:loggingInfo"/>
+      <xs:element minOccurs="0" name="latestOnboardingInfo" type="tns:loggingInfo"/>
+      <xs:element minOccurs="0" name="latestUpdateInfo" type="tns:loggingInfo"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
       <xs:element minOccurs="0" ref="tns:metadata"/>
-      <xs:element minOccurs="0" name="onboardingStatus" type="tns:bundleStatus"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
-      <xs:element minOccurs="0" name="updateStatus" type="tns:bundleStatus"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="bundleStatus">
-    <xs:sequence>
-      <xs:element default="null" minOccurs="0" name="actionType" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="comment" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="user" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="loggingInfo">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="audit" type="tns:bundleStatus"/>
+      <xs:element default="null" minOccurs="0" name="actionType" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="comment" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="onboarding" type="tns:bundleStatus"/>
       <xs:element default="null" minOccurs="0" name="type" type="xs:string"/>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="update" type="tns:bundleStatus"/>
       <xs:element default="null" minOccurs="0" name="userEmail" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="userRole" type="xs:string"/>
     </xs:sequence>
@@ -99,6 +89,15 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="bundleStatus">
+    <xs:sequence>
+      <xs:element default="null" minOccurs="0" name="actionType" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="comment" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="user" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
