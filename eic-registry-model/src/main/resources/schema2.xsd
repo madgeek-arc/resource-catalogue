@@ -5,14 +5,6 @@
     <xs:sequence/>
   </xs:complexType>
 
-  <xs:simpleType name="actionTypes">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="VALID"/>
-      <xs:enumeration value="INVALID"/>
-      <xs:enumeration value="UPDATED_INVALID"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:simpleType name="userActionType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="FAVOURITE"/>
