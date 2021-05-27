@@ -5,8 +5,6 @@
 
   <xs:element name="bundle" type="tns:bundle"/>
 
-  <xs:element name="bundleStatus" type="tns:bundleStatus"/>
-
   <xs:element name="emailMessage" type="tns:emailMessage"/>
 
   <xs:element name="event" type="tns:event"/>
@@ -89,15 +87,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="bundleStatus">
-    <xs:sequence>
-      <xs:element default="null" minOccurs="0" name="actionType" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="comment" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
-      <xs:element default="null" minOccurs="0" name="user" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
