@@ -78,6 +78,10 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add((loggingInfo));
         infraService.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardingInfo
+        infraService.setLatestOnboardingInfo(loggingInfo);
+
         infraService.getService().setGeographicalAvailabilities(sortCountries(infraService.getService().getGeographicalAvailabilities()));
         infraService.getService().setResourceGeographicLocations(sortCountries(infraService.getService().getResourceGeographicLocations()));
 
@@ -88,10 +92,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return ret;
     }
 
-    @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or " +
-            "@securityService.isServiceProviderAdmin(#auth, #infraService)")
-    public InfraService updateService(InfraService infraService, Authentication auth) {
+//    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
+    public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
         validateCategories(infraService.getService().getCategories());
@@ -119,16 +122,21 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         List<LoggingInfo> loggingInfoList;
         if (existingService.getLoggingInfo() != null){
             loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+            loggingInfo.setComment(comment);
             loggingInfoList = existingService.getLoggingInfo();
-            loggingInfoList.add((loggingInfo));
+            loggingInfoList.add(loggingInfo);
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         } else{
             loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
+            loggingInfo.setComment(comment);
             loggingInfoList = new ArrayList<>();
-            loggingInfoList.add((loggingInfo));
+            loggingInfoList.add(loggingInfo);
         }
         infraService.setLoggingInfo(loggingInfoList);
+
+        // latestUpdateInfo
+        infraService.setLatestUpdateInfo(loggingInfo);
         infraService.setActive(existingService.isActive());
         infraService.getService().setGeographicalAvailabilities(sortCountries(infraService.getService().getGeographicalAvailabilities()));
         infraService.getService().setResourceGeographicLocations(sortCountries(infraService.getService().getResourceGeographicLocations()));
@@ -276,6 +284,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(loggingInfo);
+
+            // latestOnboardingInfo
+            service.setLatestOnboardingInfo(loggingInfo);
         }
         else{
             LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
@@ -286,6 +297,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             }
             loggingInfoList.add(oldServiceRegistration);
             loggingInfoList.add(loggingInfo);
+
+            // latestOnboardingInfo
+            service.setLatestOnboardingInfo(loggingInfo);
         }
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         service.setLoggingInfo(loggingInfoList);
@@ -330,6 +344,43 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<String> sortCountries(List<String> countries){
         Collections.sort(countries);
         return countries;
+    }
+
+    public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        InfraService service = get(serviceId);
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        if (service.getLoggingInfo() != null) {
+            loggingInfoList = service.getLoggingInfo();
+        } else {
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
+            loggingInfoList.add(oldProviderRegistration);
+        }
+
+        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.AUDITED.getKey());
+        loggingInfo.setComment(comment);
+        loggingInfo.setActionType(actionType);
+        loggingInfoList.add(loggingInfo);
+        service.setLoggingInfo(loggingInfoList);
+
+        // latestAuditInfo
+        service.setLatestAuditInfo(loggingInfo);
+
+        logger.info("Auditing Resource: {}", service);
+        return super.update(service, auth);
+    }
+
+    public List<InfraService> getRandomResources(Authentication auth){
+        List<InfraService> ret = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("actionType", LoggingInfo.ActionType.INVALID);
+        List<InfraService> allResources = getAll(ff, auth).getResults();
+        Collections.shuffle(allResources);
+        for (int i=0; i<10; i++){
+            ret.add(allResources.get(i));
+        }
+        return ret;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

@@ -34,13 +34,13 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private List<LoggingInfo> loggingInfo;
 
     @XmlElement
-    private BundleStatus auditStatus;
+    private LoggingInfo latestAuditInfo;
 
     @XmlElement
-    private BundleStatus onboardingStatus;
+    private LoggingInfo latestOnboardingInfo;
 
     @XmlElement
-    private BundleStatus updateStatus;
+    private LoggingInfo latestUpdateInfo;
 
     public Bundle() {
     }
@@ -95,28 +95,28 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.loggingInfo = loggingInfo;
     }
 
-    public BundleStatus getAuditStatus() {
-        return auditStatus;
+    public LoggingInfo getLatestAuditInfo() {
+        return latestAuditInfo;
     }
 
-    public void setAuditStatus(BundleStatus auditStatus) {
-        this.auditStatus = auditStatus;
+    public void setLatestAuditInfo(LoggingInfo latestAuditInfo) {
+        this.latestAuditInfo = latestAuditInfo;
     }
 
-    public BundleStatus getOnboardingStatus() {
-        return onboardingStatus;
+    public LoggingInfo getLatestOnboardingInfo() {
+        return latestOnboardingInfo;
     }
 
-    public void setOnboardingStatus(BundleStatus onboardingStatus) {
-        this.onboardingStatus = onboardingStatus;
+    public void setLatestOnboardingInfo(LoggingInfo latestOnboardingInfo) {
+        this.latestOnboardingInfo = latestOnboardingInfo;
     }
 
-    public BundleStatus getUpdateStatus() {
-        return updateStatus;
+    public LoggingInfo getLatestUpdateInfo() {
+        return latestUpdateInfo;
     }
 
-    public void setUpdateStatus(BundleStatus updateStatus) {
-        this.updateStatus = updateStatus;
+    public void setLatestUpdateInfo(LoggingInfo latestUpdateInfo) {
+        this.latestUpdateInfo = latestUpdateInfo;
     }
 
     @Override
@@ -127,9 +127,9 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", active=" + active +
                 ", status='" + status + '\'' +
                 ", loggingInfo=" + loggingInfo +
-                ", auditStatus=" + auditStatus +
-                ", onboardingStatus=" + onboardingStatus +
-                ", updateStatus=" + updateStatus +
+                ", latestAuditInfo=" + latestAuditInfo +
+                ", latestOnboardingInfo=" + latestOnboardingInfo +
+                ", latestUpdateInfo=" + latestUpdateInfo +
                 '}';
     }
 }

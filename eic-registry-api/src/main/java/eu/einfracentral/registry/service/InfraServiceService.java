@@ -29,11 +29,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Method to update a service.
      *
      * @param service
+     * @param comment
      * @param auth
      * @return
      * @throws ResourceNotFoundException
      */
-    T updateService(T service, Authentication auth) throws ResourceNotFoundException;
+    T updateService(T service, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
      * Returns the Service with the specified id and version.
@@ -206,6 +207,14 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auth
      */
     Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth);
+
+    /**
+     * @param serviceId
+     * @param actionType
+     * @param auth
+     * @return
+     */
+    InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
 //
 //    /**

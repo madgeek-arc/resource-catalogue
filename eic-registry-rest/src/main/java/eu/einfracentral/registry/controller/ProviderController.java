@@ -289,4 +289,13 @@ public class ProviderController {
         Paging<ResourceHistory> history = this.providerManager.getHistory(id);
         return ResponseEntity.ok(history);
     }
+
+    @PatchMapping(path = "auditProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+                                                        @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+        ProviderBundle provider = providerManager.auditProvider(id, comment, actionType, auth);
+        logger.info("User '{}' updated Provider with name '{}' [actionType: {}]", auth, provider.getProvider().getName(), actionType);
+        return new ResponseEntity<>(provider, HttpStatus.OK);
+    }
 }
