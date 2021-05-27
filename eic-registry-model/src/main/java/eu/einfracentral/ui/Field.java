@@ -34,7 +34,7 @@ public class Field {
             if (FieldType.exists(type)) {
                 this.type = FieldType.fromString(type).getKey();
             } else {
-                this.type = FieldType.valueOf(type.toUpperCase()).getKey();
+                this.type = type;
             }
         } catch (IllegalArgumentException e) {
             this.type = FieldType.COMPOSITE.getKey();
