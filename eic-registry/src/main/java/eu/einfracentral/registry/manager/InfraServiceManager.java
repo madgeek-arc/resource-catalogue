@@ -6,6 +6,7 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
@@ -36,19 +37,23 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final SecurityService securityService;
+    private final RegistrationMailService registrationMailService;
+
 
     @Value("${project.name:}")
     private String projectName;
 
     @Autowired
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
-                               @Lazy FieldValidator fieldValidator, IdCreator idCreator, @Lazy SecurityService securityService) {
+                               @Lazy FieldValidator fieldValidator, IdCreator idCreator, @Lazy SecurityService securityService,
+                               @Lazy RegistrationMailService registrationMailService) {
         super(InfraService.class);
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.securityService = securityService;
+        this.registrationMailService = registrationMailService;
     }
 
     @Override
@@ -170,6 +175,15 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.setLatest(true);
             ret = super.add(infraService, auth);
             logger.info("Updating Service with version change (super.add): {}", infraService);
+        }
+
+        // send notification emails to Portal Admins
+        if (infraService.getLatestAuditInfo() != null && infraService.getLatestUpdateInfo() != null){
+            Long latestAudit = Long.parseLong(infraService.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(infraService.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && infraService.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
+                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(infraService);
+            }
         }
 
         return ret;
@@ -365,6 +379,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // latestAuditInfo
         service.setLatestAuditInfo(loggingInfo);
+
+        // send notification emails to Provider Admins
+        registrationMailService.notifyProviderAdminsForResourceAuditing(service);
 
         logger.info("Auditing Resource: {}", service);
         return super.update(service, auth);

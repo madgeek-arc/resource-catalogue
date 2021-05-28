@@ -160,6 +160,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // Send emails to newly added or deleted Admins
         adminDifferences(provider, ex);
 
+        // send notification emails to Portal Admins
+        if (provider.getLatestAuditInfo() != null && provider.getLatestUpdateInfo() != null){
+            Long latestAudit = Long.parseLong(provider.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(provider.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && provider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
+                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
+            }
+        }
+
         jmsTopicTemplate.convertAndSend("provider.update", provider);
 
         return provider;
@@ -784,6 +793,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         // latestAuditInfo
         provider.setLatestAuditInfo(loggingInfo);
+
+        // send notification emails to Provider Admins
+        registrationMailService.notifyProviderAdminsForProviderAuditing(provider);
 
         logger.info("Auditing Provider: {}", provider);
         return super.update(provider, auth);
