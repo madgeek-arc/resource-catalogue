@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -52,5 +53,10 @@ public class UiElementsController {
     @GetMapping(value = "vocabulary/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Value> getControlValuesByType(@PathVariable("type") String type) {
         return uiElementsService.getControlValuesByType(type);
+    }
+
+    @GetMapping(value = "vocabularies", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, List<Value>> getControlValuesByType() {
+        return uiElementsService.getControlValuesByType();
     }
 }

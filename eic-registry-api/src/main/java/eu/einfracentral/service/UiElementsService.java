@@ -7,6 +7,7 @@ import eu.einfracentral.ui.Group;
 import eu.einfracentral.ui.GroupedFields;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UiElementsService {
 
@@ -23,6 +24,8 @@ public interface UiElementsService {
     List<Field> getFields();
 
     List<Field> createFields(String className, String group) throws ClassNotFoundException;
+
+    Map<String, List<Value>> getControlValuesByType();
 
     List<Value> getControlValuesByType(String type);
 }
