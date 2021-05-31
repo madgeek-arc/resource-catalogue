@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -170,7 +169,7 @@ public class UiElementsManager implements UiElementsService {
             groups.put(id, new ArrayList<>());
         }
 
-        for (Iterator<Field> it = fields.iterator(); it.hasNext();) {
+        for (Iterator<Field> it = fields.iterator(); it.hasNext(); ) {
             Field field = it.next();
             FieldGroup fieldGroup = new FieldGroup(field);
             if (ids.contains(field.getParentId())) {
@@ -340,6 +339,34 @@ public class UiElementsManager implements UiElementsService {
             fields.add(uiField);
         }
         return fields;
+    }
+
+    @Override
+    public Map<String, List<eu.einfracentral.dto.Value>> getControlValuesByType() {
+        Map<String, List<eu.einfracentral.dto.Value>> controlValues = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+
+        // add providers
+        controlValues.put("Provider", new ArrayList<>());
+        this.providerService.getAll(ff, null).getResults()
+                .forEach(item -> controlValues.get("Provider")
+                        .add(new eu.einfracentral.dto.Value(item.getId(), item.getProvider().getName())));
+
+        // add services
+        controlValues.put("Service", new ArrayList<>());
+        this.infraServiceService.getAll(ff, null).getResults()
+                .forEach(item -> controlValues.get("Service")
+                        .add(new eu.einfracentral.dto.Value(item.getId(), item.getService().getName())));
+
+        // add all vocabularies
+        for (Map.Entry<String, List<Vocabulary>> entry : vocabularyService.getBy("type").entrySet()) {
+            List<eu.einfracentral.dto.Value> values = new ArrayList<>();
+            entry.getValue().forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getName())));
+            controlValues.put(entry.getKey(), values);
+        }
+
+        return controlValues;
     }
 
     @Override
