@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.ui.FieldType;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -89,6 +91,15 @@ public class Vocabulary implements Identifiable {
                     .filter(v -> v.type.equals(s))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
+
+        /**
+         * Checks if the given {@link String} exists in the values of the enum.
+         * @return boolean
+         */
+        public static boolean exists(String s) {
+            return Arrays.stream(Type.values())
+                    .anyMatch(v -> v.type.equalsIgnoreCase(s));
         }
     }
 
