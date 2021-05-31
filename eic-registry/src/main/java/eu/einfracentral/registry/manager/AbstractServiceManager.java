@@ -167,7 +167,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Service: {}", auth, infraService);
         if (infraService.getService().getId() == null) {
@@ -197,7 +197,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Service: {}", auth, infraService);
         // if service version is empty set it null
@@ -223,7 +223,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
     public void delete(InfraService infraService) {
         logger.trace("User is attempting to delete the Service: {}", infraService);
         if (infraService == null || infraService.getService().getId() == null) {
@@ -501,9 +501,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             List<ProviderInfo> providerInfoList = new ArrayList<>();
             List<String> allProviders = new ArrayList<>();
             allProviders.add(richService.getService().getResourceOrganisation());
-            if (richService.getService().getResourceProviders() != null && !richService.getService().getResourceProviders().isEmpty()){
-                for (String provider : richService.getService().getResourceProviders()){
-                    if (!provider.equals(richService.getService().getResourceOrganisation())){
+            if (richService.getService().getResourceProviders() != null && !richService.getService().getResourceProviders().isEmpty()) {
+                for (String provider : richService.getService().getResourceProviders()) {
+                    if (!provider.equals(richService.getService().getResourceOrganisation())) {
                         allProviders.add(provider);
                     }
                 }
@@ -512,7 +512,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
                     ProviderBundle providerBundle = providerService.get(provider, auth);
                     boolean isResourceOrganisation = false;
-                    if (provider.equals(richService.getService().getResourceOrganisation())){
+                    if (provider.equals(richService.getService().getResourceOrganisation())) {
                         isResourceOrganisation = true;
                     }
                     ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
@@ -680,7 +680,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                         category.setSuperCategory(vocabularyService.get(supercategoryId));
                         category.setSubCategory(vocabularyService.get(serviceCategory.getSubcategory()));
                     } else {
-                        if (category.getSuperCategory() == null){
+                        if (category.getSuperCategory() == null) {
                             category.setSuperCategory(null);
                         }
                         category.setSubCategory(null);
@@ -808,7 +808,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return new Browsing<>(paging, results, labels);
     }
 
-    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec){
+    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec) {
         //TODO: Refactor to a more proper way (sql JOIN OR elastic)
         List<String> finalResults = new ArrayList<>();
         List<String> allSub = new ArrayList<>();
@@ -822,25 +822,25 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             }
         }
         // Required step to fix joint subcategories (sub1,sub2,sub3) who passed as 1 value
-        for (String item : allSub){
-            if (item.contains(",")){
-                String [] itemParts = item.split(",");
+        for (String item : allSub) {
+            if (item.contains(",")) {
+                String[] itemParts = item.split(",");
                 correctedSubs.addAll(Arrays.asList(itemParts));
-            } else{
+            } else {
                 correctedSubs.add(item);
             }
         }
-        if (type.equalsIgnoreCase("SUPERCATEGORY") || type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")){
+        if (type.equalsIgnoreCase("SUPERCATEGORY") || type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")) {
             String[] parts = parent.split("-"); //supercategory-natural_sciences
-            for (String id : correctedSubs){
-                if (id.contains(parts[1])){
+            for (String id : correctedSubs) {
+                if (id.contains(parts[1])) {
                     finalResults.add(id);
                 }
             }
         } else {
             String[] parts = parent.split("-"); //category-natural_sciences-math
-            for (String id : correctedSubs){
-                if (id.contains(parts[2])){
+            for (String id : correctedSubs) {
+                if (id.contains(parts[2])) {
                     finalResults.add(id);
                 }
             }
