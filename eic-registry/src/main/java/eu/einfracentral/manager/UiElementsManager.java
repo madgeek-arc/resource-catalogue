@@ -3,12 +3,20 @@ package eu.einfracentral.manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.*;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -30,8 +38,18 @@ public class UiElementsManager implements UiElementsService {
     private final String directory;
     private String jsonObject;
 
+    private final VocabularyService vocabularyService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+
     @Autowired
-    public UiElementsManager(@Value("${ui.elements.json.dir}") String directory) {
+    public UiElementsManager(@Value("${ui.elements.json.dir}") String directory,
+                             VocabularyService vocabularyService,
+                             ProviderService<ProviderBundle, Authentication> providerService,
+                             InfraServiceService<InfraService, InfraService> infraServiceService) {
+        this.vocabularyService = vocabularyService;
+        this.providerService = providerService;
+        this.infraServiceService = infraServiceService;
         if ("".equals(directory)) {
             directory = "catalogue/uiElements";
             logger.warn("'ui.elements.json.dir' was not set. Using default: " + directory);
@@ -322,5 +340,23 @@ public class UiElementsManager implements UiElementsService {
             fields.add(uiField);
         }
         return fields;
+    }
+
+    @Override
+    public List<eu.einfracentral.dto.Value> getControlValuesByType(String type) {
+        List<eu.einfracentral.dto.Value> values = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        if (Vocabulary.Type.exists(type)) {
+            List<Vocabulary> vocabularies = this.vocabularyService.getByType(Vocabulary.Type.fromString(type));
+            vocabularies.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getName())));
+        } else if (type.equalsIgnoreCase("provider")) {
+            List<ProviderBundle> providers = this.providerService.getAll(ff, null).getResults();
+            providers.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getProvider().getName())));
+        } else if (type.equalsIgnoreCase("service") || type.equalsIgnoreCase("resource")) {
+            List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
+            services.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getService().getName())));
+        }
+        return values;
     }
 }

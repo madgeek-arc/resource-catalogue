@@ -1,5 +1,6 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.dto.Value;
 import eu.einfracentral.ui.Field;
 import eu.einfracentral.ui.FieldGroup;
 import eu.einfracentral.ui.Group;
@@ -22,4 +23,6 @@ public interface UiElementsService {
     List<Field> getFields();
 
     List<Field> createFields(String className, String group) throws ClassNotFoundException;
+
+    List<Value> getControlValuesByType(String type);
 }

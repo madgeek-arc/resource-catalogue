@@ -1,5 +1,6 @@
 package eu.einfracentral.controllers;
 
+import eu.einfracentral.dto.Value;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.Field;
 import eu.einfracentral.ui.FieldGroup;
@@ -46,5 +47,10 @@ public class UiElementsController {
     @GetMapping(value = "form/model", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<GroupedFields<FieldGroup>> getModel() {
         return uiElementsService.getModel();
+    }
+
+    @GetMapping(value = "vocabulary/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Value> getControlValuesByType(@PathVariable("type") String type) {
+        return uiElementsService.getControlValuesByType(type);
     }
 }
