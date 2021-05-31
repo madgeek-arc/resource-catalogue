@@ -15,15 +15,23 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static eu.einfracentral.config.CacheConfig.CACHE_FOR_UI;
+import static eu.einfracentral.config.CacheConfig.CACHE_VISITS;
 
 
 @Component
@@ -36,6 +44,9 @@ public class UiElementsManager implements UiElementsService {
 
     private final String directory;
     private String jsonObject;
+
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
 
     private final VocabularyService vocabularyService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
@@ -60,13 +71,10 @@ public class UiElementsManager implements UiElementsService {
         }
     }
 
-    //    @PostConstruct
-    void readJsonFile(String filepath) {
-        try {
-            jsonObject = readFile(filepath);
-        } catch (IOException e) {
-            logger.error("Could not read UiElements Json File", e);
-        }
+    @Scheduled(fixedRate = 3600000)
+    @CachePut(value = CACHE_FOR_UI)
+    public Map<String, List<eu.einfracentral.dto.Value>> cacheVocabularies() {
+        return getControlValuesByType();
     }
 
     protected String readFile(String filename) throws IOException {
@@ -342,27 +350,36 @@ public class UiElementsManager implements UiElementsService {
     }
 
     @Override
+    @Cacheable(value = CACHE_FOR_UI)
     public Map<String, List<eu.einfracentral.dto.Value>> getControlValuesByType() {
         Map<String, List<eu.einfracentral.dto.Value>> controlValues = new HashMap<>();
+        List<eu.einfracentral.dto.Value> values;
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
 
         // add providers
-        controlValues.put("Provider", new ArrayList<>());
-        this.providerService.getAll(ff, null).getResults()
-                .forEach(item -> controlValues.get("Provider")
-                        .add(new eu.einfracentral.dto.Value(item.getId(), item.getProvider().getName())));
+        values = this.providerService.getAll(ff, null).getResults()
+                .parallelStream()
+                .map(value -> new eu.einfracentral.dto.Value(value.getId(), value.getProvider().getName()))
+                .collect(Collectors.toList());
+        controlValues.put("Provider", values);
 
         // add services
-        controlValues.put("Service", new ArrayList<>());
-        this.infraServiceService.getAll(ff, null).getResults()
-                .forEach(item -> controlValues.get("Service")
-                        .add(new eu.einfracentral.dto.Value(item.getId(), item.getService().getName())));
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
+        values = this.infraServiceService.getAll(ff, null).getResults()
+                .parallelStream()
+                .map(value -> new eu.einfracentral.dto.Value(value.getId(), value.getService().getName()))
+                .collect(Collectors.toList());
+        controlValues.put("Service", values);
+
 
         // add all vocabularies
         for (Map.Entry<String, List<Vocabulary>> entry : vocabularyService.getBy("type").entrySet()) {
-            List<eu.einfracentral.dto.Value> values = new ArrayList<>();
-            entry.getValue().forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getName())));
+            values = entry.getValue()
+                    .parallelStream()
+                    .map(v -> new eu.einfracentral.dto.Value(v.getId(), v.getName()))
+                    .collect(Collectors.toList());
             controlValues.put(entry.getKey(), values);
         }
 
@@ -370,10 +387,11 @@ public class UiElementsManager implements UiElementsService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_FOR_UI, key = "#type")
     public List<eu.einfracentral.dto.Value> getControlValuesByType(String type) {
         List<eu.einfracentral.dto.Value> values = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         if (Vocabulary.Type.exists(type)) {
             List<Vocabulary> vocabularies = this.vocabularyService.getByType(Vocabulary.Type.fromString(type));
             vocabularies.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getName())));
