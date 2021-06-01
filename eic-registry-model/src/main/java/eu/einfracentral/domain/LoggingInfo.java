@@ -76,8 +76,7 @@ public class LoggingInfo {
 
     public enum ActionType {
         VALID("valid"),
-        INVALID("invalid"),
-        UPDATED_INVALID("updated invalid");
+        INVALID("invalid");
 
         private final String actionType;
 

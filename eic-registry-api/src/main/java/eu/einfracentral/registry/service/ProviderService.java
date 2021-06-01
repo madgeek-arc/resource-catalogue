@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.*;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -94,4 +95,11 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+
+    /**
+     * @param ff
+     * @param auth
+     * @return
+     */
+    List<ProviderBundle> getRandomProviders(FacetFilter ff, Authentication auth);
 }

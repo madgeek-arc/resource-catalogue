@@ -295,7 +295,20 @@ public class ProviderController {
     public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam(required = false) String comment,
                                                         @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.auditProvider(id, comment, actionType, auth);
-        logger.info("User '{}' updated Provider with name '{}' [actionType: {}]", auth, provider.getProvider().getName(), actionType);
+        logger.info("User '{}' audited Provider with name '{}' [actionType: {}]", auth, provider.getProvider().getName(), actionType);
         return new ResponseEntity<>(provider, HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ProviderBundle>> getRandomProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        ff.addFilter("actionType", LoggingInfo.ActionType.INVALID);
+        ff.setFilter(allRequestParams);
+        List<ProviderBundle> providers = providerManager.getRandomProviders(ff, auth);
+        return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 }

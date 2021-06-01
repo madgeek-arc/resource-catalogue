@@ -216,6 +216,13 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
+    /**
+     * @param ff
+     * @param auth
+     * @return
+     */
+    List<InfraService> getRandomResources(FacetFilter ff, Authentication auth);
+
 //
 //    /**
 //     * Migrates Service's fields for Catris.
