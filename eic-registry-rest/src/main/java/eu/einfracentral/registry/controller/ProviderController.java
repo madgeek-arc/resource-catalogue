@@ -306,7 +306,6 @@ public class ProviderController {
     public ResponseEntity<List<ProviderBundle>> getRandomProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        ff.addFilter("actionType", LoggingInfo.ActionType.INVALID);
         ff.setFilter(allRequestParams);
         List<ProviderBundle> providers = providerManager.getRandomProviders(ff, auth);
         return new ResponseEntity<>(providers, HttpStatus.OK);

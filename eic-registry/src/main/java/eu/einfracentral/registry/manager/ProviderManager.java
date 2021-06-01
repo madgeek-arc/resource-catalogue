@@ -802,17 +802,27 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return super.update(provider, auth);
     }
 
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public List<ProviderBundle> getRandomProviders(FacetFilter ff, Authentication auth){
-        List<ProviderBundle> ret = new ArrayList<>();
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setResourceType(getResourceType());
         facetFilter.setQuantity(10000);
-        facetFilter.addFilter("actionType", LoggingInfo.ActionType.INVALID);
+        List<ProviderBundle> ret = new ArrayList<>();
+        List<ProviderBundle> invalidProviders = new ArrayList<>();
         List<ProviderBundle> allProviders = getAll(facetFilter, auth).getResults();
-        Collections.shuffle(allProviders);
-        int retQuantity = ff.getQuantity();
-        for (int i=0; i<retQuantity; i++){
-            ret.add(allProviders.get(i));
+        for (ProviderBundle providerBundle : allProviders){
+            if (providerBundle.getLatestAuditInfo() != null){
+                if(providerBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
+                    invalidProviders.add(providerBundle);
+                }
+            }
+        }
+        Collections.shuffle(invalidProviders);
+        if (invalidProviders.size() >= ff.getQuantity()){
+            for (int i=0; i<ff.getQuantity(); i++){
+                ret.add(invalidProviders.get(i));
+            }
+        } else{
+            ret.addAll(invalidProviders);
         }
         return ret;
     }
