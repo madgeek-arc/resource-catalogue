@@ -34,7 +34,6 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="VALID"/>
       <xs:enumeration value="INVALID"/>
-      <xs:enumeration value="UPDATED_INVALID"/>
     </xs:restriction>
   </xs:simpleType>
 

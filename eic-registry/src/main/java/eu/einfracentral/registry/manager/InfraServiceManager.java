@@ -387,14 +387,16 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return super.update(service, auth);
     }
 
-    public List<InfraService> getRandomResources(Authentication auth){
+    public List<InfraService> getRandomResources(FacetFilter ff, Authentication auth){
         List<InfraService> ret = new ArrayList<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("actionType", LoggingInfo.ActionType.INVALID);
-        List<InfraService> allResources = getAll(ff, auth).getResults();
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setResourceType(getResourceType());
+        facetFilter.setQuantity(10000);
+        facetFilter.addFilter("actionType", LoggingInfo.ActionType.INVALID);
+        List<InfraService> allResources = getAll(facetFilter, auth).getResults();
         Collections.shuffle(allResources);
-        for (int i=0; i<10; i++){
+        int retQuantity = ff.getQuantity();
+        for (int i=0; i<retQuantity; i++){
             ret.add(allResources.get(i));
         }
         return ret;

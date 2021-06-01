@@ -774,6 +774,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return countries;
     }
 
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = get(providerId);
         LoggingInfo loggingInfo;
@@ -801,14 +802,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return super.update(provider, auth);
     }
 
-    public List<ProviderBundle> getRandomProviders(Authentication auth){
+    public List<ProviderBundle> getRandomProviders(FacetFilter ff, Authentication auth){
         List<ProviderBundle> ret = new ArrayList<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("actionType", LoggingInfo.ActionType.INVALID);
-        List<ProviderBundle> allProviders = getAll(ff, auth).getResults();
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setResourceType(getResourceType());
+        facetFilter.setQuantity(10000);
+        facetFilter.addFilter("actionType", LoggingInfo.ActionType.INVALID);
+        List<ProviderBundle> allProviders = getAll(facetFilter, auth).getResults();
         Collections.shuffle(allProviders);
-        for (int i=0; i<10; i++){
+        int retQuantity = ff.getQuantity();
+        for (int i=0; i<retQuantity; i++){
             ret.add(allProviders.get(i));
         }
         return ret;

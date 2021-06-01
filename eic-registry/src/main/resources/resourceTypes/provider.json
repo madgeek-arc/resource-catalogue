@@ -150,6 +150,78 @@
     },
     {
       "multivalued": false,
+      "name": "actionType",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "date",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "type",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "userEmail",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "actionType",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "date",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "type",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "userEmail",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "actionType",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "date",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "type",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "userEmail",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "active",
       "path": "//*[local-name()='active']/text()",
       "defaultValue": false,

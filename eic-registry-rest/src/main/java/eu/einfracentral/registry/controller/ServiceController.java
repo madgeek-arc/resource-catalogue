@@ -317,8 +317,22 @@ public class ServiceController {
     public ResponseEntity<InfraService> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
                                                         @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         InfraService service = infraService.auditResource(id, comment, actionType, auth);
-        logger.info("User '{}' updated Provider with name '{}' [actionType: {}]", auth, service.getService().getName(), actionType);
+        logger.info("User '{}' audited Provider with name '{}' [actionType: {}]", auth, service.getService().getName(), actionType);
         return new ResponseEntity<>(service, HttpStatus.OK);
+    }
+
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<InfraService>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        ff.addFilter("actionType", LoggingInfo.ActionType.INVALID);
+        ff.setFilter(allRequestParams);
+        List<InfraService> infraServices = infraService.getRandomResources(ff, auth);
+        return new ResponseEntity<>(infraServices, HttpStatus.OK);
     }
 
 }
