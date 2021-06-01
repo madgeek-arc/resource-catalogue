@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import java.util.*;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
@@ -388,16 +390,25 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     public List<InfraService> getRandomResources(FacetFilter ff, Authentication auth){
-        List<InfraService> ret = new ArrayList<>();
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setResourceType(getResourceType());
         facetFilter.setQuantity(10000);
-        facetFilter.addFilter("actionType", LoggingInfo.ActionType.INVALID);
+        List<InfraService> ret = new ArrayList<>();
+        List<InfraService> invalidResources = new ArrayList<>();
         List<InfraService> allResources = getAll(facetFilter, auth).getResults();
-        Collections.shuffle(allResources);
-        int retQuantity = ff.getQuantity();
-        for (int i=0; i<retQuantity; i++){
-            ret.add(allResources.get(i));
+        for (InfraService infraService : allResources){
+            if (infraService.getLatestAuditInfo() != null){
+                if(infraService.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
+                    invalidResources.add(infraService);
+                }
+            }
+        }
+        Collections.shuffle(invalidResources);
+        if (invalidResources.size() >= ff.getQuantity()){
+            for (int i=0; i<ff.getQuantity(); i++){
+                ret.add(invalidResources.get(i));
+            }
+        } else{
+            ret.addAll(invalidResources);
         }
         return ret;
     }

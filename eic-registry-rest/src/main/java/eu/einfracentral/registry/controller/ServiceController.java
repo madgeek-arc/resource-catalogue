@@ -329,7 +329,6 @@ public class ServiceController {
     public ResponseEntity<List<InfraService>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        ff.addFilter("actionType", LoggingInfo.ActionType.INVALID);
         ff.setFilter(allRequestParams);
         List<InfraService> infraServices = infraService.getRandomResources(ff, auth);
         return new ResponseEntity<>(infraServices, HttpStatus.OK);
