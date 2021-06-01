@@ -193,73 +193,73 @@
     },
     {
       "multivalued": false,
-      "name": "actionType",
+      "name": "latestAuditActionType",
       "path": "//*[local-name()='latestAuditInfo']/*[local-name()='actionType']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "date",
+      "name": "latestAuditDate",
       "path": "//*[local-name()='latestAuditInfo']/*[local-name()='date']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "type",
+      "name": "latestAuditType",
       "path": "//*[local-name()='latestAuditInfo']/*[local-name()='type']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "userEmail",
+      "name": "latestAuditUserEmail",
       "path": "//*[local-name()='latestAuditInfo']/*[local-name()='userEmail']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "actionType",
+      "name": "latestUpdateActionType",
       "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "date",
+      "name": "latestUpdateDate",
       "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='date']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "type",
+      "name": "latestUpdateType",
       "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='type']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "userEmail",
+      "name": "latestUpdateUserEmail",
       "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='userEmail']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "actionType",
+      "name": "latestOnboardingActionType",
       "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='actionType']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "date",
+      "name": "latestOnboardingDate",
       "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='date']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "type",
+      "name": "latestOnboardingType",
       "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='type']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "userEmail",
+      "name": "latestOnboardingUserEmail",
       "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='userEmail']/text()",
       "type": "java.lang.String"
     },
