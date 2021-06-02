@@ -78,6 +78,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add((loggingInfo));
         infraService.setLoggingInfo(loggingInfoList);
+        infraService.getService().setGeographicalAvailabilities(sortCountries(infraService.getService().getGeographicalAvailabilities()));
+        infraService.getService().setResourceGeographicLocations(sortCountries(infraService.getService().getResourceGeographicLocations()));
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
@@ -128,6 +130,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
         infraService.setLoggingInfo(loggingInfoList);
         infraService.setActive(existingService.isActive());
+        infraService.getService().setGeographicalAvailabilities(sortCountries(infraService.getService().getGeographicalAvailabilities()));
+        infraService.getService().setResourceGeographicLocations(sortCountries(infraService.getService().getResourceGeographicLocations()));
 
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
@@ -321,6 +325,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             role = "user";
         }
         return role;
+    }
+
+    public List<String> sortCountries(List<String> countries){
+        Collections.sort(countries);
+        return countries;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

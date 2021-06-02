@@ -65,16 +65,23 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean hasRole(Authentication auth, String role) {
+        if (auth == null) return false;
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsProviderAdmin(user, providerId);
     }
 
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow) {
         if (auth == null && noThrow) {
+            return false;
+        }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
@@ -117,6 +124,9 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, String serviceId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, serviceId);
     }
@@ -126,12 +136,18 @@ public class OIDCSecurityService implements SecurityService {
         if (auth == null && noThrow) {
             return false;
         }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, serviceId);
     }
 
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, service);
     }
@@ -141,12 +157,18 @@ public class OIDCSecurityService implements SecurityService {
         if (auth == null && noThrow) {
             return false;
         }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, service);
     }
 
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, infraService);
     }
@@ -154,6 +176,9 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow) {
         if (auth == null && noThrow) {
+            return false;
+        }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
