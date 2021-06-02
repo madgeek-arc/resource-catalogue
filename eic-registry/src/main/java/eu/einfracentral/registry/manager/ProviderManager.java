@@ -824,7 +824,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             providerBrowsing.getResults().remove(i);
         }
         providerBrowsing.setFrom(ff.getFrom());
-        providerBrowsing.setTo(ff.getQuantity()-1);
+        providerBrowsing.setTo(providerBrowsing.getResults().size()-1);
+        providerBrowsing.setTotal(providerBrowsing.getResults().size()-1);
         return providerBrowsing;
     }
 }
