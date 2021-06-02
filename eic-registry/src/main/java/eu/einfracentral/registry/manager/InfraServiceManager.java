@@ -409,8 +409,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             serviceBrowsing.getResults().remove(i);
         }
         serviceBrowsing.setFrom(ff.getFrom());
-        serviceBrowsing.setTo(serviceBrowsing.getResults().size()-1);
-        serviceBrowsing.setTotal(serviceBrowsing.getResults().size()-1);
+        serviceBrowsing.setTo(serviceBrowsing.getResults().size());
+        serviceBrowsing.setTotal(serviceBrowsing.getResults().size());
         return serviceBrowsing;
     }
 
