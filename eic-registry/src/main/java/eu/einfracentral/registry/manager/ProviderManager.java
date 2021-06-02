@@ -29,6 +29,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import java.net.URL;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -803,27 +805,24 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public List<ProviderBundle> getRandomProviders(FacetFilter ff, Authentication auth){
+    public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth){
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(10000);
-        List<ProviderBundle> ret = new ArrayList<>();
-        List<ProviderBundle> invalidProviders = new ArrayList<>();
-        List<ProviderBundle> allProviders = getAll(facetFilter, auth).getResults();
-        for (ProviderBundle providerBundle : allProviders){
+        facetFilter.setQuantity(1000);
+        Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
+        List<ProviderBundle> providerList = getAll(facetFilter, auth).getResults();
+        long todayEpochTime = System.currentTimeMillis();
+        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
+        for (ProviderBundle providerBundle : providerList){
             if (providerBundle.getLatestAuditInfo() != null){
-                if(providerBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
-                    invalidProviders.add(providerBundle);
+                if(Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) < interval){
+                    providerBrowsing.getResults().remove(providerBundle);
                 }
             }
         }
-        Collections.shuffle(invalidProviders);
-        if (invalidProviders.size() >= ff.getQuantity()){
-            for (int i=0; i<ff.getQuantity(); i++){
-                ret.add(invalidProviders.get(i));
-            }
-        } else{
-            ret.addAll(invalidProviders);
+        Collections.shuffle(providerBrowsing.getResults());
+        for (int i=providerBrowsing.getResults().size()-1; i>ff.getQuantity(); i--){
+            providerBrowsing.getResults().remove(i);
         }
-        return ret;
+        return providerBrowsing;
     }
 }

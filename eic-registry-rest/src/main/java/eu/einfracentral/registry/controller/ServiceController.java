@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,9 @@ public class ServiceController {
     private final InfraServiceService<InfraService, InfraService> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource dataSource;
+
+    @Value("${auditing.interval:6}")
+    private String auditingInterval;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
@@ -323,15 +327,26 @@ public class ServiceController {
 
 
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<InfraService>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Paging<Service>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
-        List<InfraService> infraServices = infraService.getRandomResources(ff, auth);
-        return new ResponseEntity<>(infraServices, HttpStatus.OK);
+        List<Service> serviceList = new LinkedList<>();
+        Paging<InfraService> infraServicePaging = infraService.getRandomResources(ff, auditingInterval, auth);
+        for (InfraService infraService : infraServicePaging.getResults()) {
+            serviceList.add(infraService.getService());
+        }
+        Paging<Service> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
+                infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
+        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 
 }
