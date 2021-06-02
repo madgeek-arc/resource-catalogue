@@ -99,7 +99,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * @param ff
      * @param auth
+     * @param auditingInterval
      * @return
      */
-    List<ProviderBundle> getRandomProviders(FacetFilter ff, Authentication auth);
+    Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
 }

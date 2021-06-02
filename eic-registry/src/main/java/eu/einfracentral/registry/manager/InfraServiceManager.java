@@ -10,6 +10,7 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.service.ServiceException;
@@ -17,17 +18,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
-import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
@@ -389,28 +390,25 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return super.update(service, auth);
     }
 
-    public List<InfraService> getRandomResources(FacetFilter ff, Authentication auth){
+    public Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth){
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(10000);
-        List<InfraService> ret = new ArrayList<>();
-        List<InfraService> invalidResources = new ArrayList<>();
-        List<InfraService> allResources = getAll(facetFilter, auth).getResults();
-        for (InfraService infraService : allResources){
+        facetFilter.setQuantity(1000);
+        Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
+        List<InfraService> serviceList = getAll(facetFilter, auth).getResults();
+        long todayEpochTime = System.currentTimeMillis();
+        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
+        for (InfraService infraService : serviceList){
             if (infraService.getLatestAuditInfo() != null){
-                if(infraService.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
-                    invalidResources.add(infraService);
+                if(Long.parseLong(infraService.getLatestAuditInfo().getDate()) < interval){
+                    serviceBrowsing.getResults().remove(infraService);
                 }
             }
         }
-        Collections.shuffle(invalidResources);
-        if (invalidResources.size() >= ff.getQuantity()){
-            for (int i=0; i<ff.getQuantity(); i++){
-                ret.add(invalidResources.get(i));
-            }
-        } else{
-            ret.addAll(invalidResources);
+        Collections.shuffle(serviceBrowsing.getResults());
+        for (int i=serviceBrowsing.getResults().size()-1; i>ff.getQuantity(); i--){
+            serviceBrowsing.getResults().remove(i);
         }
-        return ret;
+        return serviceBrowsing;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

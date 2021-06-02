@@ -219,9 +219,10 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     /**
      * @param ff
      * @param auth
+     * @param auditingInterval
      * @return
      */
-    List<InfraService> getRandomResources(FacetFilter ff, Authentication auth);
+    Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
 //
 //    /**

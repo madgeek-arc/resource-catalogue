@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,9 @@ public class ProviderController {
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
+
+    @Value("${auditing.interval:6}")
+    private String auditingInterval;
 
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
@@ -300,14 +304,25 @@ public class ProviderController {
     }
 
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getRandomProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Paging<Provider>> getRandomProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
-        List<ProviderBundle> providers = providerManager.getRandomProviders(ff, auth);
-        return new ResponseEntity<>(providers, HttpStatus.OK);
+        List<Provider> providerList = new LinkedList<>();
+        Paging<ProviderBundle> providerBundlePaging = providerManager.getRandomProviders(ff, auditingInterval, auth);
+        for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
+            providerList.add(providerBundle.getProvider());
+        }
+        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
+                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
+        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
 }
