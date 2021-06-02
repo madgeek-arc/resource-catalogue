@@ -41,7 +41,11 @@ public class RecommendationManager implements RecommendationService<RichService,
         int user_id = -1;
         String query = "SELECT user_pk FROM users WHERE user_email = ?;";
         try {
-            user_id = jdbcTemplate.queryForObject(query, new Object[]{((OIDCAuthenticationToken) authentication).getUserInfo().getEmail()}, int.class);
+            if (authentication != null) {
+                user_id = jdbcTemplate.queryForObject(query, new Object[]{((OIDCAuthenticationToken) authentication).getUserInfo().getEmail()}, int.class);
+            }
+
+            // TODO: get recommendations for non authenticated users
             query = "SELECT service_name " +
                     "FROM services " +
                     "WHERE service_pk IN " +
@@ -53,8 +57,6 @@ public class RecommendationManager implements RecommendationService<RichService,
             services = infraService.getByIds(authentication, ids);
         } catch (DataAccessException e) {
             logger.warn("Could not find user {} in recommendation database.", ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail());
-        } catch (NullPointerException e) {
-            logger.error("Null pointer exception", e);
         } catch (Exception e) {
             logger.error(e);
         }
