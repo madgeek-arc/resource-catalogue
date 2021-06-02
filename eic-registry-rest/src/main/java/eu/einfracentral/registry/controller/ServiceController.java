@@ -333,18 +333,18 @@ public class ServiceController {
     })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Paging<Service>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<InfraService>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
-        List<Service> serviceList = new LinkedList<>();
+        List<InfraService> serviceList = new LinkedList<>();
         Paging<InfraService> infraServicePaging = infraService.getRandomResources(ff, auditingInterval, auth);
         for (InfraService infraService : infraServicePaging.getResults()) {
-            serviceList.add(infraService.getService());
+            serviceList.add(infraService);
         }
-        Paging<Service> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
+        Paging<InfraService> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
                 infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
         return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
