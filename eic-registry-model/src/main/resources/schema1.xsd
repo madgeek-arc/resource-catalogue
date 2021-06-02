@@ -52,6 +52,9 @@
   <xs:complexType abstract="true" name="bundle">
     <xs:sequence>
       <xs:element name="active" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="latestAuditInfo" type="tns:loggingInfo"/>
+      <xs:element minOccurs="0" name="latestOnboardingInfo" type="tns:loggingInfo"/>
+      <xs:element minOccurs="0" name="latestUpdateInfo" type="tns:loggingInfo"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
       <xs:element minOccurs="0" ref="tns:metadata"/>
       <xs:element minOccurs="0" name="status" type="xs:string"/>
@@ -60,6 +63,8 @@
 
   <xs:complexType name="loggingInfo">
     <xs:sequence>
+      <xs:element default="null" minOccurs="0" name="actionType" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="comment" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="type" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="userEmail" type="xs:string"/>

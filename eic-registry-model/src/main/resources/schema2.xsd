@@ -25,7 +25,15 @@
       <xs:enumeration value="APPROVED"/>
       <xs:enumeration value="VALIDATED"/>
       <xs:enumeration value="REJECTED"/>
+      <xs:enumeration value="AUDITED"/>
       <xs:enumeration value="INITIALIZATION"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="actionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="VALID"/>
+      <xs:enumeration value="INVALID"/>
     </xs:restriction>
   </xs:simpleType>
 
