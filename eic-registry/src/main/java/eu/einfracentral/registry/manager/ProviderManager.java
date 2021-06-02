@@ -100,6 +100,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setActive(false);
         provider.setStatus(vocabularyService.get("pending initial approval").getId());
 
+        provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+
         ProviderBundle ret;
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {}", provider);
@@ -135,6 +137,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             loggingInfoList = new ArrayList<>();
             loggingInfoList.add((loggingInfo));
         }
+        provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
         provider.setLoggingInfo(loggingInfoList);
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
@@ -719,5 +722,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         serviceTemplate.setLoggingInfo(loggingInfoList);
         return serviceTemplate;
+    }
+
+    public List<String> sortCountries(List<String> countries){
+        Collections.sort(countries);
+        return countries;
     }
 }

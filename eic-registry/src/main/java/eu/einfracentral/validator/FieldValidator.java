@@ -95,6 +95,7 @@ public class FieldValidator {
 
             validateMaxLength(field, fieldValue, validationAnnotation);
             validateUrlValidity(field, fieldValue);
+            validateDuplicates(field, fieldValue);
 
             if (validationAnnotation.containsId()) {
                 validateIds(field, fieldValue, validationAnnotation);
@@ -237,6 +238,21 @@ public class FieldValidator {
                     }
                 } else {
                     i.remove(); // remove null entries
+                }
+            }
+        }
+    }
+
+    public void validateDuplicates(Field field, Object o) {
+        Set<String> duplicateEntries = new HashSet<>();
+        String subField = field.toString().substring(field.toString().lastIndexOf(".")+1);
+        if (o != null) {
+            Class clazz = o.getClass();
+            if (ArrayList.class.equals(clazz)) {
+                for (int i=0; i<((ArrayList) o).size(); i++) {
+                    if (!duplicateEntries.add(((ArrayList) o).get(i).toString())) {
+                        throw new ValidationException(String.format("Duplicate value found '%s' on field '%s'", ((ArrayList) o).get(i).toString(), subField));
+                    }
                 }
             }
         }
