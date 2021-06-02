@@ -405,9 +405,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             }
         }
         Collections.shuffle(serviceBrowsing.getResults());
-        for (int i=serviceBrowsing.getResults().size()-1; i>ff.getQuantity(); i--){
+        for (int i=serviceBrowsing.getResults().size()-1; i>ff.getQuantity()-1; i--){
             serviceBrowsing.getResults().remove(i);
         }
+        serviceBrowsing.setFrom(ff.getFrom());
+        serviceBrowsing.setTo(ff.getQuantity()-1);
         return serviceBrowsing;
     }
 

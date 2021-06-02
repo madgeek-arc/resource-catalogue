@@ -820,9 +820,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
         Collections.shuffle(providerBrowsing.getResults());
-        for (int i=providerBrowsing.getResults().size()-1; i>ff.getQuantity(); i--){
+        for (int i=providerBrowsing.getResults().size()-1; i>ff.getQuantity()-1; i--){
             providerBrowsing.getResults().remove(i);
         }
+        providerBrowsing.setFrom(ff.getFrom());
+        providerBrowsing.setTo(ff.getQuantity()-1);
         return providerBrowsing;
     }
 }
