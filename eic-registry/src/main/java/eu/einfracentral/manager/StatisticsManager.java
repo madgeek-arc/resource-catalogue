@@ -566,13 +566,12 @@ public class StatisticsManager implements StatisticsService {
                         expandedPlaces = new String[]{place};
                     }
                     for (String p : expandedPlaces) {
-                        try{
-                            Set<Value> values = placeServices.get(p);
-                            values.add(value);
-                            placeServices.put(p, values);
-                        } catch(NullPointerException e){
-                            logger.info(p);
+                        if (placeServices.get(p) == null) {
+                            continue;
                         }
+                        Set<Value> values = placeServices.get(p);
+                        values.add(value);
+                        placeServices.put(p, values);
                     }
                 }
             }
@@ -601,15 +600,14 @@ public class StatisticsManager implements StatisticsService {
         for (InfraService infraService : allServices) {
             Value value = new Value(infraService.getId(), infraService.getService().getName());
 
-            try {
-                Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
-                for (String country : countries) {
-                    Set<Value> values = mapValues.get(country);
-                    values.add(value);
-                    mapValues.put(country, values);
+            Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
+            for (String country : countries) {
+                if (mapValues.get(country) == null) {
+                    continue;
                 }
-            } catch (NullPointerException e){
-                logger.info(e);
+                Set<Value> values = mapValues.get(country);
+                values.add(value);
+                mapValues.put(country, values);
             }
         }
 
