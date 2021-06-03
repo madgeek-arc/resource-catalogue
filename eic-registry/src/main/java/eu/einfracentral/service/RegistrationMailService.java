@@ -592,4 +592,64 @@ public class RegistrationMailService {
         }
     }
 
+    public void notifyProviderAdminsForProviderAuditing(ProviderBundle providerBundle) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("providerBundle", providerBundle);
+
+        String subject = String.format("[%s Portal] Your Provider '%s' has been audited by the EPOT team", projectName, providerBundle.getProvider().getName());
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            root.put("user", user);
+            String recipient = "provider";
+            sendMailsFromTemplate("providerAudit.ftl", root, subject, user.getEmail(), recipient);
+        }
+    }
+
+    public void notifyProviderAdminsForResourceAuditing(InfraService infraService) {
+
+        ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("infraService", infraService);
+
+        String subject = String.format("[%s Portal] Your Resource '%s' has been audited by the EPOT team", projectName, infraService.getService().getName());
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            root.put("user", user);
+            String recipient = "provider";
+            sendMailsFromTemplate("resourceAudit.ftl", root, subject, user.getEmail(), recipient);
+        }
+    }
+
+    public void notifyPortalAdminsForInvalidProviderUpdate(ProviderBundle providerBundle) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("providerBundle", providerBundle);
+
+        // send email to Admins
+        String subject = String.format("[%s Portal] The Provider [%s] previously marked as [invalid] has been updated", projectName, providerBundle.getProvider().getName());
+        String recipient = "admin";
+        sendMailsFromTemplate("invalidProviderUpdate.ftl", root, subject, registrationEmail, recipient);
+    }
+
+    public void notifyPortalAdminsForInvalidResourceUpdate(InfraService infraService) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("infraService", infraService);
+
+        // send email to Admins
+        String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, infraService.getService().getName());
+        String recipient = "admin";
+        sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, recipient);
+    }
+
 }

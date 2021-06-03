@@ -33,6 +33,15 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @XmlElement
     private List<LoggingInfo> loggingInfo;
 
+    @XmlElement
+    private LoggingInfo latestAuditInfo;
+
+    @XmlElement
+    private LoggingInfo latestOnboardingInfo;
+
+    @XmlElement
+    private LoggingInfo latestUpdateInfo;
+
     public Bundle() {
     }
 
@@ -86,6 +95,30 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.loggingInfo = loggingInfo;
     }
 
+    public LoggingInfo getLatestAuditInfo() {
+        return latestAuditInfo;
+    }
+
+    public void setLatestAuditInfo(LoggingInfo latestAuditInfo) {
+        this.latestAuditInfo = latestAuditInfo;
+    }
+
+    public LoggingInfo getLatestOnboardingInfo() {
+        return latestOnboardingInfo;
+    }
+
+    public void setLatestOnboardingInfo(LoggingInfo latestOnboardingInfo) {
+        this.latestOnboardingInfo = latestOnboardingInfo;
+    }
+
+    public LoggingInfo getLatestUpdateInfo() {
+        return latestUpdateInfo;
+    }
+
+    public void setLatestUpdateInfo(LoggingInfo latestUpdateInfo) {
+        this.latestUpdateInfo = latestUpdateInfo;
+    }
+
     @Override
     public String toString() {
         return "Bundle{" +
@@ -94,6 +127,9 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", active=" + active +
                 ", status='" + status + '\'' +
                 ", loggingInfo=" + loggingInfo +
+                ", latestAuditInfo=" + latestAuditInfo +
+                ", latestOnboardingInfo=" + latestOnboardingInfo +
+                ", latestUpdateInfo=" + latestUpdateInfo +
                 '}';
     }
 }
