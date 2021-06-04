@@ -851,9 +851,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     public Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth) {
         List<String> orderedBrowseBy = new ArrayList<>();
 
-        browseBy.add("active");
-        orderedBrowseBy.add(browseBy.get(13));    // resource_organisation
-        orderedBrowseBy.add(browseBy.get(23));    // active
+        orderedBrowseBy.add("resource_organisation");   // resource_organisation
+        orderedBrowseBy.add("active");                  // active
 
         filter.setBrowseBy(orderedBrowseBy);
 
