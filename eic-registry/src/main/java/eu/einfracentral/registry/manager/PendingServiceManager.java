@@ -54,7 +54,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
             service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
         if (service.getLoggingInfo() == null){
-            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
             loggingInfoList.add(loggingInfo);
             service.setLoggingInfo(loggingInfoList);
@@ -145,20 +145,5 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     public void adminAcceptedTerms(String providerId, Authentication auth){
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
-    }
-
-    // TODO: Remove me and my duplicates from all over the place XXX
-    public String determineRole(Authentication authentication) {
-        String role;
-        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
-            role = "admin";
-        } else if (securityService.hasRole(authentication, "ROLE_EPOT")) {
-            role = "EPOT";
-        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
-            role = "provider";
-        } else {
-            role = "user";
-        }
-        return role;
     }
 }

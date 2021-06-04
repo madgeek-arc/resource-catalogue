@@ -95,7 +95,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add((loggingInfo));
         provider.setLoggingInfo(loggingInfoList);
@@ -133,12 +133,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList;
         if (provider.getLoggingInfo() != null) {
-            loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+            loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATED.getKey());
             loggingInfo.setComment(comment);
             loggingInfoList = provider.getLoggingInfo();
             loggingInfoList.add(loggingInfo);
         } else {
-            loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+            loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
             loggingInfo.setComment(comment);
             loggingInfoList = new ArrayList<>();
@@ -286,7 +286,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
         LoggingInfo loggingInfo = new LoggingInfo();
-        loggingInfo.setUserRole(determineRole(authentication));
+        loggingInfo.setUserRole(securityService.getRoleName(authentication));
         loggingInfo.setType(LoggingInfo.Types.DELETED.getKey());
         loggingInfo.setUserEmail(User.of(authentication).getEmail());
         loggingInfoList.add(loggingInfo);
@@ -327,7 +327,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     active = true;
                 }
                 provider.setActive(active);
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.APPROVED.getKey());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.APPROVED.getKey());
                 loggingInfoList.add((loggingInfo));
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                 provider.setLoggingInfo(loggingInfoList);
@@ -347,7 +347,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             default:
                 switch (status) {
                     case "rejected":
-                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.REJECTED.getKey());
+                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.REJECTED.getKey());
                         loggingInfoList.add((loggingInfo));
                         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                         provider.setLoggingInfo(loggingInfoList);
@@ -356,7 +356,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         provider.setLatestOnboardingInfo(loggingInfo);
                         break;
                     case "pending template submission":
-                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.VALIDATED.getKey());
+                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.VALIDATED.getKey());
                         loggingInfoList.add((loggingInfo));
                         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                         provider.setLoggingInfo(loggingInfoList);
@@ -383,7 +383,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setActive(active);
             if (!active) {
                 if (!status.equals("pending template submission") && !status.equals("pending template approval")) {
-                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
                     loggingInfoList.add((loggingInfo));
                     provider.setLoggingInfo(loggingInfoList);
 
@@ -393,7 +393,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 deactivateServices(provider.getId(), auth);
             } else {
                 if (!status.equals("approved")) {
-                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
                     loggingInfoList.add((loggingInfo));
                     provider.setLoggingInfo(loggingInfoList);
 
@@ -533,7 +533,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
             LoggingInfo loggingInfo;
             try {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
             } catch (InsufficientAuthenticationException e) {
                 loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.ACTIVATED.getKey());
             }
@@ -563,7 +563,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             if (auth == null) {
                 loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.DEACTIVATED.getKey());
             } else {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(loggingInfo);
             service.setLoggingInfo(loggingInfoList);
@@ -726,21 +726,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    // TODO: Remove me and my duplicates from all over the place XXX
-    public String determineRole(Authentication authentication) {
-        String role;
-        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
-            role = "admin";
-        } else if (securityService.hasRole(authentication, "ROLE_EPOT")) {
-            role = "EPOT";
-        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
-            role = "provider";
-        } else {
-            role = "user";
-        }
-        return role;
-    }
-
     public InfraService updateInfraServiceLoggingInfo(String providerId, String type, Authentication authentication) {
         List<Service> providerServices = getServices(providerId);
         List<InfraService> infraServices = new ArrayList<>();
@@ -757,14 +742,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         if (serviceTemplate.getLoggingInfo() != null) {
             loggingInfoList = serviceTemplate.getLoggingInfo();
-            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
+            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), securityService.getRoleName(authentication), type);
             loggingInfoList.add((loggingInfo));
 
             // latestOnboardingInfo
             serviceTemplate.setLatestOnboardingInfo(loggingInfo);
         } else {
             LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
-            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), determineRole(authentication), type);
+            LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), securityService.getRoleName(authentication), type);
             loggingInfoList.add(oldProviderRegistration);
             loggingInfoList.add(loggingInfo);
 
@@ -793,7 +778,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             loggingInfoList.add(oldProviderRegistration);
         }
 
-        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.AUDITED.getKey());
+        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.AUDITED.getKey());
         loggingInfo.setComment(comment);
         loggingInfo.setActionType(actionType);
         loggingInfoList.add(loggingInfo);
