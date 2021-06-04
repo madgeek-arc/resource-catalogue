@@ -262,10 +262,13 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         update(get(providerId), auth);
     }
 
+    // TODO: Remove me and my duplicates from all over the place XXX
     public String determineRole(Authentication authentication) {
         String role;
         if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
             role = "admin";
+        } else if (securityService.hasRole(authentication, "ROLE_EPOT")) {
+            role = "EPOT";
         } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
             role = "provider";
         } else {

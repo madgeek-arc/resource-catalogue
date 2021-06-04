@@ -48,7 +48,7 @@ public class ProviderController {
 
     // Deletes the Provider with the given id.
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.get(id);
         if (provider == null) {
@@ -88,7 +88,7 @@ public class ProviderController {
     //    @Override
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#provider.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.get(provider.getId(), auth);
         providerBundle.setProvider(provider);
@@ -156,7 +156,7 @@ public class ProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
                                                                         @RequestParam(required = false) Set<String> status) {
         FacetFilter ff = new FacetFilter();
@@ -227,7 +227,7 @@ public class ProviderController {
 
     // Accept/Reject a Provider.
     @PatchMapping(path = "verifyProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                          @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.verifyProvider(id, status, active, auth);
@@ -237,7 +237,7 @@ public class ProviderController {
 
     // Publish all Provider services.
     @PatchMapping(path = "publishServices", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle provider = providerManager.get(id);
@@ -295,7 +295,7 @@ public class ProviderController {
     }
 
     @PatchMapping(path = "auditProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam(required = false) String comment,
                                                         @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.auditProvider(id, comment, actionType, auth);
@@ -309,7 +309,7 @@ public class ProviderController {
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
