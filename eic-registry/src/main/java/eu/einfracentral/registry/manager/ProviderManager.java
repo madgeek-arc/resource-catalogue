@@ -250,7 +250,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
-            if (securityService.hasRole(auth, "ROLE_ADMIN")) {
+            if (securityService.hasRole(auth, "ROLE_ADMIN") ||
+                securityService.hasRole(auth, "ROLE_EPOT")) {
                 return super.getAll(ff, auth);
             }
             // if user is not an admin, check if he is a provider
@@ -412,7 +413,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<ProviderBundle> providers;
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
-        } else if (securityService.hasRole(auth, "ROLE_ADMIN")) {
+        } else if (securityService.hasRole(auth, "ROLE_ADMIN") ||
+                    securityService.hasRole(auth, "ROLE_EPOT")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
             providers = super.getAll(ff, null).getResults();
@@ -724,10 +726,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
+    // TODO: Remove me and my duplicates from all over the place XXX
     public String determineRole(Authentication authentication) {
         String role;
         if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
             role = "admin";
+        } else if (securityService.hasRole(authentication, "ROLE_EPOT")) {
+            role = "EPOT";
         } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
             role = "provider";
         } else {

@@ -47,7 +47,7 @@ public class CSVController {
 
     // Downloads a csv file with Service entries
     @GetMapping(path = "services", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
@@ -60,7 +60,7 @@ public class CSVController {
 
     // Downloads a csv file with Provider entries
     @GetMapping(path = "providers", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<String> providersToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);

@@ -32,7 +32,8 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
     private Map<String, SimpleGrantedAuthority> userRolesMap;
-    private String admins;
+    private final String admins;
+    private String epotAdmins;
     private final int maxQuantity;
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
@@ -41,6 +42,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
 
     @Autowired
     public EICAuthoritiesMapper(@Value("${project.admins}") String admins,
+                                @Value("${project.admins.epot}") String epotAdmins,
                                 @Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                 ProviderService<ProviderBundle, Authentication> manager,
                                 PendingResourceService<ProviderBundle> pendingProviderService,
@@ -53,6 +55,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             throw new ServiceException("No Admins Provided");
         }
         this.admins = admins;
+        this.epotAdmins = epotAdmins;
         mapAuthorities(admins);
     }
 
@@ -127,6 +130,13 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
+                ));
+
+        userRolesMap.putAll(Arrays.stream(epotAdmins.replace(" ", "").split(","))
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        a -> new SimpleGrantedAuthority("ROLE_EPOT"))
                 ));
     }
 }

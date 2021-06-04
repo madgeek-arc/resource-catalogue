@@ -60,7 +60,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
@@ -86,7 +86,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<InfraService>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", id);
@@ -101,7 +101,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
     @PostMapping(path = "/updateResource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = pendingServiceManager.get(service.getId());
         infraService.setService(service);
@@ -109,19 +109,19 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
     @PostMapping("/transform/pending")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #serviceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #serviceId)")
     public void transformServiceToPending(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToPending(serviceId, auth);
     }
 
     @PostMapping("/transform/resource")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #serviceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #serviceId)")
     public void transformServiceToInfra(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToActive(serviceId, auth);
     }
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService();
         try {
@@ -137,7 +137,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
     }
 
     @PutMapping(path = "/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         pendingServiceManager.transformToPending(service.getId(), auth);
         InfraService infraService = pendingServiceManager.get(service.getId());
