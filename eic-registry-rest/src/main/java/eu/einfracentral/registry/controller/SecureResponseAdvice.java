@@ -39,8 +39,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     @Override
     public T beforeBodyWrite(T t, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN")) {
-            logger.trace("User is not Admin: attempting to remove sensitive information");
+        if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")) {
+            logger.trace("User is not Admin nor EPOT: attempting to remove sensitive information");
             if (t instanceof ProviderBundle
                     && !this.securityService.isProviderAdmin(auth, ((ProviderBundle) t).getId(), true)) {
                 ((ProviderBundle) t).getProvider().setMainContact(null);

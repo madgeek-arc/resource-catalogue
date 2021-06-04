@@ -82,7 +82,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add((loggingInfo));
         infraService.setLoggingInfo(loggingInfoList);
@@ -129,13 +129,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList;
         if (existingService.getLoggingInfo() != null){
-            loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.UPDATED.getKey());
+            loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATED.getKey());
             loggingInfo.setComment(comment);
             loggingInfoList = existingService.getLoggingInfo();
             loggingInfoList.add(loggingInfo);
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         } else{
-            loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+            loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
             loggingInfo.setComment(comment);
             loggingInfoList = new ArrayList<>();
@@ -296,9 +296,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         if (service.getLoggingInfo() != null){
             loggingInfoList = service.getLoggingInfo();
             if (active){
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
             } else{
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(loggingInfo);
 
@@ -308,9 +308,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         else{
             LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
             if (active){
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.ACTIVATED.getKey());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
             } else{
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(oldServiceRegistration);
             loggingInfoList.add(loggingInfo);
@@ -346,18 +346,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
     }
 
-    public String determineRole(Authentication authentication) {
-        String role;
-        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
-            role = "admin";
-        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
-            role = "provider";
-        } else {
-            role = "user";
-        }
-        return role;
-    }
-
     public List<String> sortCountries(List<String> countries){
         Collections.sort(countries);
         return countries;
@@ -374,7 +362,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             loggingInfoList.add(oldProviderRegistration);
         }
 
-        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), determineRole(auth), LoggingInfo.Types.AUDITED.getKey());
+        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.AUDITED.getKey());
         loggingInfo.setComment(comment);
         loggingInfo.setActionType(actionType);
         loggingInfoList.add(loggingInfo);
