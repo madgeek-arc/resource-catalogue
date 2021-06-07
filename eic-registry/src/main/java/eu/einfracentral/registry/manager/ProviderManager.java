@@ -312,8 +312,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         ProviderBundle provider = get(id);
         provider.setStatus(vocabularyService.get(status).getId());
-        LoggingInfo loggingInfo;
+        LoggingInfo loggingInfo = null;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
         if (provider.getLoggingInfo() != null) {
             loggingInfoList = provider.getLoggingInfo();
         } else {
@@ -327,13 +328,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     active = true;
                 }
                 provider.setActive(active);
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.APPROVED.getKey());
-                loggingInfoList.add((loggingInfo));
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                provider.setLoggingInfo(loggingInfoList);
 
-                // latestOnboardingInfo
-                provider.setLatestOnboardingInfo(loggingInfo);
+                if (!provider.getStatus().equals("approved")) { // TODO: move creation of loggingInfo outside of switch.
+                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.APPROVED.getKey());
+                }
 
                 // update Service Template ProviderInfo
                 serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.APPROVED.getKey(), auth);
@@ -344,65 +342,51 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 }
                 break;
 
+            case "rejected":
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.REJECTED.getKey());
+                break;
+            case "pending template submission":
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.VALIDATED.getKey());
+                break;
+            case "rejected template":
+                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.REJECTED.getKey());
+
+                // update Service Template ProviderInfo
+                serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.REJECTED.getKey(), auth);
+                try {
+                    infraServiceService.update(serviceTemplate, auth);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Could not update service with id '{}' (verifyProvider)", serviceTemplate.getService().getId());
+                }
+                break;
             default:
-                switch (status) {
-                    case "rejected":
-                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.REJECTED.getKey());
-                        loggingInfoList.add((loggingInfo));
-                        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                        provider.setLoggingInfo(loggingInfoList);
-
-                        // latestOnboardingInfo
-                        provider.setLatestOnboardingInfo(loggingInfo);
-                        break;
-                    case "pending template submission":
-                        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.VALIDATED.getKey());
-                        loggingInfoList.add((loggingInfo));
-                        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                        provider.setLoggingInfo(loggingInfoList);
-
-                        // latestOnboardingInfo
-                        provider.setLatestOnboardingInfo(loggingInfo);
-                        break;
-                    case "rejected template":
-                        // update Service Template ProviderInfo
-                        serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.REJECTED.getKey(), auth);
-                        try {
-                            infraServiceService.update(serviceTemplate, auth);
-                        } catch (ResourceNotFoundException e) {
-                            logger.error("Could not update service with id '{}' (verifyProvider)", serviceTemplate.getService().getId());
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                provider.setActive(false);
+        }
+        if (active == null) {
+            active = false;
         }
 
-        if (active != null) {
-            provider.setActive(active);
-            if (!active) {
-                if (!status.equals("pending template submission") && !status.equals("pending template approval")) {
-                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
-                    loggingInfoList.add((loggingInfo));
-                    provider.setLoggingInfo(loggingInfoList);
-
-                    // latestOnboardingInfo
-                    provider.setLatestOnboardingInfo(loggingInfo);
-                }
-                deactivateServices(provider.getId(), auth);
-            } else {
-                if (!status.equals("approved")) {
-                    loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
-                    loggingInfoList.add((loggingInfo));
-                    provider.setLoggingInfo(loggingInfoList);
-
-                    // latestOnboardingInfo
-                    provider.setLatestOnboardingInfo(loggingInfo);
-                }
-                activateServices(provider.getId(), auth);
-            }
+        if (loggingInfo == null) {
+            // no logging info created due to onboarding status change
+            // create logging info for activation/deactivation of provider
+            loggingInfo = LoggingInfo.updateLoggingInfo(
+                    User.of(auth).getEmail(),
+                    securityService.getRoleName(auth),
+                    active ? LoggingInfo.Types.ACTIVATED.getKey() : LoggingInfo.Types.DEACTIVATED.getKey());
+            provider.setLatestUpdateInfo(loggingInfo);
+        } else {
+            provider.setLatestOnboardingInfo(loggingInfo);
         }
+        loggingInfoList.add((loggingInfo));
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+        provider.setLoggingInfo(loggingInfoList);
+
+        provider.setActive(active);
+        if (!active) {
+            deactivateServices(provider.getId(), auth);
+        } else {
+            activateServices(provider.getId(), auth);
+        }
+
         logger.info("Verifying Provider: {}", provider);
         return super.update(provider, auth);
     }
