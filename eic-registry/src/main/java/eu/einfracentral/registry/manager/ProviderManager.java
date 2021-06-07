@@ -526,22 +526,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<InfraService> services = this.getInfraServices(providerId);
         logger.info("Activating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
-//            service.setActive(service.getStatus() == null || service.getStatus().equals("true"));
-//            service.setStatus(null);
-            service.setActive(true);
-            // update LoggingInfo
-            List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
+            // create LoggingInfo
             LoggingInfo loggingInfo;
-            try {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
-            } catch (InsufficientAuthenticationException e) {
-                loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.ACTIVATED.getKey());
+            List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
+            if (loggingInfoList == null) {
+                loggingInfoList = new ArrayList<>();
             }
+            loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.ACTIVATED.getKey());
             loggingInfoList.add(loggingInfo);
-            service.setLoggingInfo(loggingInfoList);
 
-            // latestOnboardingInfo
-            service.setLatestOnboardingInfo(loggingInfo);
+            // update Service
+            service.setLoggingInfo(loggingInfoList);
+            service.setLatestUpdateInfo(loggingInfo);
+            service.setActive(true);
+
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
                 infraServiceService.update(service, null);
@@ -555,21 +553,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<InfraService> services = this.getInfraServices(providerId);
         logger.info("Deactivating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
-//            service.setStatus(service.isActive() != null ? service.isActive().toString() : "true");
-//            service.setStatus(null);
-            service.setActive(false);
-            List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
             LoggingInfo loggingInfo;
-            if (auth == null) {
-                loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.DEACTIVATED.getKey());
-            } else {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
+            List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
+            if (loggingInfoList == null) {
+                loggingInfoList = new ArrayList<>();
             }
+            loggingInfo = LoggingInfo.updateLoggingInfo(LoggingInfo.Types.DEACTIVATED.getKey());
             loggingInfoList.add(loggingInfo);
-            service.setLoggingInfo(loggingInfoList);
 
-            // latestOnboardingInfo
-            service.setLatestOnboardingInfo(loggingInfo);
+            service.setLoggingInfo(loggingInfoList);
+            service.setLatestUpdateInfo(loggingInfo);
+            service.setActive(false);
+
             try {
                 logger.debug("Setting Service with id '{}' as inactive", service.getService().getId());
                 infraServiceService.update(service, null);
