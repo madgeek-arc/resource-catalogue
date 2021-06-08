@@ -91,7 +91,7 @@ public class ServiceController {
     // Get the specified version of a RichService providing the Service id and version.
     @GetMapping(path = "rich/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
-                    "or @securityService.isServiceProviderAdmin(#auth, #id)")
+            "or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
                                                       @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.getRichService(id, version, auth), HttpStatus.OK);
@@ -294,7 +294,7 @@ public class ServiceController {
         List<Service> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
             if (provider.getStatus().equals("pending template approval")) {
-                serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
+                serviceTemplates.addAll(infraService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
             }
         }
         Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
@@ -320,7 +320,7 @@ public class ServiceController {
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InfraService> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
-                                                        @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+                                                      @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         InfraService service = infraService.auditResource(id, comment, actionType, auth);
         logger.info("User '{}' audited Provider with name '{}' [actionType: {}]", auth, service.getService().getName(), actionType);
         return new ResponseEntity<>(service, HttpStatus.OK);

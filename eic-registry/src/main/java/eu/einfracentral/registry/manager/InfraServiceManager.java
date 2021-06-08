@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
@@ -27,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 
@@ -47,14 +49,15 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private String projectName;
 
     @Autowired
-    public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator,
-                               @Lazy FieldValidator fieldValidator, IdCreator idCreator, @Lazy SecurityService securityService,
+    public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator, IdCreator idCreator,
+                               @Lazy FieldValidator fieldValidator,
+                               @Lazy SecurityService securityService,
                                @Lazy RegistrationMailService registrationMailService) {
         super(InfraService.class);
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
+        this.fieldValidator = fieldValidator;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
     }
@@ -100,7 +103,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return ret;
     }
 
-//    @Override
+    //    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
@@ -128,13 +131,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList;
-        if (existingService.getLoggingInfo() != null){
+        if (existingService.getLoggingInfo() != null) {
             loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATED.getKey());
             loggingInfo.setComment(comment);
             loggingInfoList = existingService.getLoggingInfo();
             loggingInfoList.add(loggingInfo);
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        } else{
+        } else {
             loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
             loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
             loggingInfo.setComment(comment);
@@ -151,7 +154,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
-        if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null){
+        if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null) {
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
 
@@ -181,10 +184,10 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         // send notification emails to Portal Admins
-        if (infraService.getLatestAuditInfo() != null && infraService.getLatestUpdateInfo() != null){
+        if (infraService.getLatestAuditInfo() != null && infraService.getLatestUpdateInfo() != null) {
             Long latestAudit = Long.parseLong(infraService.getLatestAuditInfo().getDate());
             Long latestUpdate = Long.parseLong(infraService.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && infraService.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
+            if (latestAudit < latestUpdate && infraService.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
                 registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(infraService);
             }
         }
@@ -219,7 +222,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
             int rand = randomNumberGenerator.nextInt(providers.size());
-            services = providerManager.getActiveServices(providers.get(rand).getId());
+            services = this.getActiveServices(providers.get(rand).getId());
             providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
             if (!services.isEmpty()) {
                 featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
@@ -293,23 +296,22 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         service.setActive(active);
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;
-        if (service.getLoggingInfo() != null){
+        if (service.getLoggingInfo() != null) {
             loggingInfoList = service.getLoggingInfo();
-            if (active){
+            if (active) {
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
-            } else{
+            } else {
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(loggingInfo);
 
             // latestOnboardingInfo
             service.setLatestOnboardingInfo(loggingInfo);
-        }
-        else{
+        } else {
             LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
-            if (active){
+            if (active) {
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
-            } else{
+            } else {
                 loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
             }
             loggingInfoList.add(oldServiceRegistration);
@@ -324,29 +326,29 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return service;
     }
 
-    public void validateCategories(List<ServiceCategory> categories){
-        for (ServiceCategory serviceCategory : categories){
+    public void validateCategories(List<ServiceCategory> categories) {
+        for (ServiceCategory serviceCategory : categories) {
             String[] parts = serviceCategory.getSubcategory().split("-");
             String category = "category-" + parts[1] + "-" + parts[2];
-            if (!serviceCategory.getCategory().equals(category)){
+            if (!serviceCategory.getCategory().equals(category)) {
                 throw new ValidationException("Subcategory '" + serviceCategory.getSubcategory() + "' should have as Category the value '"
-                        + category +"'");
+                        + category + "'");
             }
         }
     }
 
-    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains){
-        for (ServiceProviderDomain serviceScientificDomain : scientificDomains){
+    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains) {
+        for (ServiceProviderDomain serviceScientificDomain : scientificDomains) {
             String[] parts = serviceScientificDomain.getScientificSubdomain().split("-");
             String scientificDomain = "scientific_domain-" + parts[1];
-            if (!serviceScientificDomain.getScientificDomain().equals(scientificDomain)){
+            if (!serviceScientificDomain.getScientificDomain().equals(scientificDomain)) {
                 throw new ValidationException("Scientific Subdomain '" + serviceScientificDomain.getScientificSubdomain() +
-                        "' should have as Scientific Domain the value '" + scientificDomain +"'");
+                        "' should have as Scientific Domain the value '" + scientificDomain + "'");
             }
         }
     }
 
-    public List<String> sortCountries(List<String> countries){
+    private List<String> sortCountries(List<String> countries) {
         Collections.sort(countries);
         return countries;
     }
@@ -378,28 +380,90 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return super.update(service, auth);
     }
 
-    public Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth){
+    public Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
         Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
         List<InfraService> serviceList = getAll(facetFilter, auth).getResults();
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (InfraService infraService : serviceList){
-            if (infraService.getLatestAuditInfo() != null){
-                if(Long.parseLong(infraService.getLatestAuditInfo().getDate()) < interval){
+        for (InfraService infraService : serviceList) {
+            if (infraService.getLatestAuditInfo() != null) {
+                if (Long.parseLong(infraService.getLatestAuditInfo().getDate()) < interval) {
                     serviceBrowsing.getResults().remove(infraService);
                 }
             }
         }
         Collections.shuffle(serviceBrowsing.getResults());
-        for (int i=serviceBrowsing.getResults().size()-1; i>ff.getQuantity()-1; i--){
+        for (int i = serviceBrowsing.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
             serviceBrowsing.getResults().remove(i);
         }
         serviceBrowsing.setFrom(ff.getFrom());
         serviceBrowsing.setTo(serviceBrowsing.getResults().size());
         serviceBrowsing.setTotal(serviceBrowsing.getResults().size());
         return serviceBrowsing;
+    }
+
+    @Override
+    public List<InfraService> getInfraServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, null).getResults();
+    }
+
+    @Override
+    public List<Service> getServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("latest", true);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+    }
+
+    @Override
+    public InfraService getServiceTemplate(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.setQuantity(1);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("registeredAt", "asc"));
+        return this.getAll(ff, null).getResults().get(0);
+    }
+
+    @Override
+    public List<Service> getActiveServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InfraService> getInactiveServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("active", false);
+        ff.setFrom(0);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, null).getResults();
+    }
+
+    //Gets random Services to be featured at the Carousel
+    @Override
+    public Service getFeaturedService(String providerId) {
+        // TODO: change this method
+        List<Service> services = getServices(providerId);
+        Service featuredService = null;
+        if (!services.isEmpty()) {
+            featuredService = services.get(randomNumberGenerator.nextInt(services.size()));
+        }
+        return featuredService;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
