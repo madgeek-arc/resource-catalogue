@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping({"service", "resource"})
+@RequestMapping({"resource"})
 @Api(description = "Operations for Resources/Services", tags = {"resource-controller"})
 public class ServiceController {
 
