@@ -3,7 +3,6 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.*;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
@@ -46,23 +45,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     boolean validateUrl(URL urlForValidation) throws Throwable;
 
     void requestProviderDeletion(String providerId, Authentication auth);
-
-
-    // TODO: move to Infra
-    List<InfraService> getInfraServices(String providerId);
-
-    // TODO: move to Infra
-    List<Service> getServices(String providerId);
-
-    // TODO: move to Infra
-    List<Service> getActiveServices(String providerId);
-
-    // TODO: move to Infra
-    Service getFeaturedService(String providerId);
-
-    // TODO: move to Infra
-    List<InfraService> getInactiveServices(String providerId);
-
 
     List<T> getInactive();
 

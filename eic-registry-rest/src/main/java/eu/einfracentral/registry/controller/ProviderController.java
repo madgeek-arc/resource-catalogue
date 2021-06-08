@@ -92,7 +92,7 @@ public class ProviderController {
     public ResponseEntity<Provider> update(@RequestBody Provider provider, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.get(provider.getId(), auth);
         providerBundle.setProvider(provider);
-        if (comment == null || comment.equals("")){
+        if (comment == null || comment.equals("")) {
             comment = "no comment";
         }
         providerBundle = providerManager.update(providerBundle, comment, auth);
@@ -183,13 +183,13 @@ public class ProviderController {
     @ApiOperation(value = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(providerManager.getServices(id), HttpStatus.OK);
+        return new ResponseEntity<>(infraServiceService.getServices(id), HttpStatus.OK);
     }
 
     // Get a featured InfraService offered by a Provider. // TODO enable in a future release
     @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
-        return new ResponseEntity<>(providerManager.getFeaturedService(id), HttpStatus.OK);
+        return new ResponseEntity<>(infraServiceService.getFeaturedService(id), HttpStatus.OK);
     }
 
     // Get a list of Providers in which the given user is admin.
@@ -211,7 +211,7 @@ public class ProviderController {
     // Get the pending services of the given Provider.
     @GetMapping(path = "services/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        List<Service> ret = providerManager.getInactiveServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
+        List<Service> ret = infraServiceService.getInactiveServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 

@@ -24,7 +24,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
@@ -42,7 +41,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final SecurityService securityService;
-    private final Random randomNumberGenerator;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final EventService eventService;
@@ -53,8 +51,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
-                           @Lazy SecurityService securityService, Random randomNumberGenerator,
-                           @Lazy FieldValidator fieldValidator, @Lazy RegistrationMailService registrationMailService,
+                           @Lazy SecurityService securityService,
+                           @Lazy FieldValidator fieldValidator,
+                           @Lazy RegistrationMailService registrationMailService,
                            IdCreator idCreator,
                            EventService eventService,
                            JmsTemplate jmsTopicTemplate,
@@ -63,7 +62,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
-        this.randomNumberGenerator = randomNumberGenerator;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
@@ -118,7 +116,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return ret;
     }
 
-//    @Override
+    //    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
@@ -163,10 +161,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         adminDifferences(provider, ex);
 
         // send notification emails to Portal Admins
-        if (provider.getLatestAuditInfo() != null && provider.getLatestUpdateInfo() != null){
+        if (provider.getLatestAuditInfo() != null && provider.getLatestUpdateInfo() != null) {
             Long latestAudit = Long.parseLong(provider.getLatestAuditInfo().getDate());
             Long latestUpdate = Long.parseLong(provider.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && provider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())){
+            if (latestAudit < latestUpdate && provider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
                 registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
             }
         }
@@ -251,7 +249,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<ProviderBundle> userProviders = null;
         if (auth != null && auth.isAuthenticated()) {
             if (securityService.hasRole(auth, "ROLE_ADMIN") ||
-                securityService.hasRole(auth, "ROLE_EPOT")) {
+                    securityService.hasRole(auth, "ROLE_EPOT")) {
                 return super.getAll(ff, auth);
             }
             // if user is not an admin, check if he is a provider
@@ -274,7 +272,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(Authentication authentication, ProviderBundle provider) {
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<InfraService> services = this.getInfraServices(provider.getId());
+        List<InfraService> services = infraServiceService.getInfraServices(provider.getId());
         services.forEach(s -> {
             try {
                 infraServiceService.delete(s);
@@ -398,7 +396,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
         } else if (securityService.hasRole(auth, "ROLE_ADMIN") ||
-                    securityService.hasRole(auth, "ROLE_EPOT")) {
+                securityService.hasRole(auth, "ROLE_EPOT")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
             providers = super.getAll(ff, null).getResults();
@@ -444,48 +442,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public List<InfraService> getInfraServices(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return infraServiceService.getAll(ff, null).getResults();
-    }
-
-    @Override
-    public List<Service> getServices(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("latest", true);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Service> getActiveServices(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return infraServiceService.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
-    }
-
-    //Gets random Services to be featured at the Carousel
-    @Override
-    public Service getFeaturedService(String providerId) {
-        // TODO: change this method
-        List<Service> services = getServices(providerId);
-        Service featuredService = null;
-        if (!services.isEmpty()) {
-            featuredService = services.get(randomNumberGenerator.nextInt(services.size()));
-        }
-        return featuredService;
-    }
-
-    @Override
     public List<ProviderBundle> getInactive() {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
@@ -495,19 +451,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return getAll(ff, null).getResults();
     }
 
-    @Override
-    public List<InfraService> getInactiveServices(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return infraServiceService.getAll(ff, null).getResults();
-    }
-
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = this.getInfraServices(providerId);
+        List<InfraService> services = infraServiceService.getInfraServices(providerId);
         logger.info("Activating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
             // create LoggingInfo
@@ -534,7 +479,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = this.getInfraServices(providerId);
+        List<InfraService> services = infraServiceService.getInfraServices(providerId);
         logger.info("Deactivating all Services of the Provider with id: {}", providerId);
         for (InfraService service : services) {
             LoggingInfo loggingInfo;
@@ -706,7 +651,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public InfraService updateInfraServiceLoggingInfo(String providerId, String type, Authentication authentication) {
-        List<Service> providerServices = getServices(providerId);
+        List<Service> providerServices = infraServiceService.getServices(providerId);
         List<InfraService> infraServices = new ArrayList<>();
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         for (Service service : providerServices) {
@@ -740,7 +685,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return serviceTemplate;
     }
 
-    public List<String> sortCountries(List<String> countries){
+    public List<String> sortCountries(List<String> countries) {
         Collections.sort(countries);
         return countries;
     }
@@ -774,22 +719,22 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth){
+    public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
         Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
         List<ProviderBundle> providerList = getAll(facetFilter, auth).getResults();
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (ProviderBundle providerBundle : providerList){
-            if (providerBundle.getLatestAuditInfo() != null){
-                if(Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) < interval){
+        for (ProviderBundle providerBundle : providerList) {
+            if (providerBundle.getLatestAuditInfo() != null) {
+                if (Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) < interval) {
                     providerBrowsing.getResults().remove(providerBundle);
                 }
             }
         }
         Collections.shuffle(providerBrowsing.getResults());
-        for (int i=providerBrowsing.getResults().size()-1; i>ff.getQuantity()-1; i--){
+        for (int i = providerBrowsing.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
             providerBrowsing.getResults().remove(i);
         }
         providerBrowsing.setFrom(ff.getFrom());
