@@ -125,18 +125,18 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             logger.warn("There are no Provider entries in DB");
         }
 
-        userRolesMap.putAll(Arrays.stream(admins.replace(" ", "").split(","))
-                .map(String::toLowerCase)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
-                ));
-
         userRolesMap.putAll(Arrays.stream(epotAdmins.replace(" ", "").split(","))
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_EPOT"))
+                ));
+
+        userRolesMap.putAll(Arrays.stream(admins.replace(" ", "").split(","))
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
                 ));
     }
 }
