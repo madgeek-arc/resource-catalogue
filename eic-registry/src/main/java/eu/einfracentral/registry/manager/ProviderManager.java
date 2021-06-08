@@ -282,14 +282,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         });
         logger.debug("Deleting Provider: {}", provider);
 
-        List<LoggingInfo> loggingInfoList = provider.getLoggingInfo();
-        LoggingInfo loggingInfo = new LoggingInfo();
-        loggingInfo.setUserRole(securityService.getRoleName(authentication));
-        loggingInfo.setType(LoggingInfo.Types.DELETED.getKey());
-        loggingInfo.setUserEmail(User.of(authentication).getEmail());
-        loggingInfoList.add(loggingInfo);
-        provider.setLoggingInfo(loggingInfoList);
-
         jmsTopicTemplate.convertAndSend("provider.delete", provider);
 
         super.delete(provider);
@@ -651,19 +643,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public InfraService updateInfraServiceLoggingInfo(String providerId, String type, Authentication authentication) {
-        List<Service> providerServices = infraServiceService.getServices(providerId);
-        List<InfraService> infraServices = new ArrayList<>();
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        for (Service service : providerServices) {
-            infraServices.add(infraServiceService.get(service.getId()));
-        }
-        // find the Service Template
-        InfraService serviceTemplate = infraServices.get(0);
-        for (InfraService infraService : infraServices) {
-            if (Double.parseDouble(infraService.getMetadata().getRegisteredAt()) < Double.parseDouble(serviceTemplate.getMetadata().getRegisteredAt())) {
-                serviceTemplate = infraService;
-            }
-        }
+        InfraService serviceTemplate = infraServiceService.getServiceTemplate(providerId);
+
         if (serviceTemplate.getLoggingInfo() != null) {
             loggingInfoList = serviceTemplate.getLoggingInfo();
             LoggingInfo loggingInfo = LoggingInfo.updateLoggingInfo(User.of(authentication).getEmail(), securityService.getRoleName(authentication), type);
