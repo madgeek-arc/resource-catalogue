@@ -68,7 +68,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
     public InfraService addService(InfraService infraService, Authentication auth) {
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
             String id = idCreator.createServiceId(infraService.getService());
@@ -104,7 +104,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     //    @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
