@@ -291,12 +291,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle verifyProvider(String id, String status, Boolean active, Authentication auth) {
-        try {
-            vocabularyService.get(status);
-        } catch (ResourceException e) {
-            throw new ResourceException(String.format("Vocabulary %s does not exist!", status), HttpStatus.NOT_FOUND);
-        }
-        if (!vocabularyService.get(status).getType().equals("Provider state")) {
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Provider state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
