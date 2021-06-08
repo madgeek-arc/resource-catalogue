@@ -11,6 +11,13 @@ import java.util.Map;
 public interface VocabularyService extends ResourceService<Vocabulary, Authentication> {
 
     /**
+     * Retrieves Vocabulary based on id or throws exception if not found.
+     *
+     * @return
+     */
+    Vocabulary getOrElseThrow(String id);
+
+    /**
      * @param name
      * @return
      */
