@@ -68,7 +68,7 @@ public class PendingServiceController extends ResourceController<InfraService, A
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(path = "/resource/id", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> getService(@PathVariable String id) {
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
