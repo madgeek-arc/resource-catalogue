@@ -54,7 +54,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
             service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
         if (service.getLoggingInfo() == null){
-            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
+            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
             loggingInfoList.add(loggingInfo);
             service.setLoggingInfo(loggingInfoList);
