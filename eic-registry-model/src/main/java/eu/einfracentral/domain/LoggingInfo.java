@@ -41,16 +41,10 @@ public class LoggingInfo {
     }
 
     public enum Types {
-        REGISTERED("registered"),
-        UPDATED("updated"),
-        DELETED("deleted"), // deleted Provider (DELETED) or deleted Service (DELETED)
-        ACTIVATED("activated"),
-        DEACTIVATED("deactivated"),
-        APPROVED("approved"), // approved Provider (APPROVED) or approved Service (APPROVED)
-        VALIDATED("validated"), // validated Provider (ST_SUBMISSION)
-        REJECTED("rejected"), // rejected Provider (REJECTED) or rejected Service (REJECTED_ST),
-        AUDITED("audited"),
-        INITIALIZATION("initialization");
+        ONBOARD("onboard"),
+        UPDATE("update"),
+        AUDIT("audit"),
+        DRAFT("draft");
 
         private final String type;
 
@@ -75,8 +69,22 @@ public class LoggingInfo {
     }
 
     public enum ActionType {
+        // Onboard
+        REGISTERED("registered"),
+        APPROVED("approved"),
+        VALIDATED("validated"),
+        REJECTED("rejected"),
+        // Update
+        UPDATED("updated"),
+        UPDATED_VERSION("updated version"),
+        DELETED("deleted"),
+        ACTIVATED("activated"),
+        DEACTIVATED("deactivated"),
+        // Audit
         VALID("valid"),
-        INVALID("invalid");
+        INVALID("invalid"),
+        // Draft
+        CREATED("drafted");
 
         private final String actionType;
 
@@ -100,38 +108,32 @@ public class LoggingInfo {
         }
     }
 
-    public static LoggingInfo createLoggingInfo(String userEmail, String role){
+    public static LoggingInfo createLoggingInfoEntry(String userEmail, String role, String type, String actionType){
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
-        ret.setType(Types.REGISTERED.getKey());
+        ret.setType(type);
+        ret.setActionType(actionType);
         ret.setUserEmail(userEmail);
         ret.setUserRole(role);
         return ret;
     }
 
-    public static LoggingInfo updateLoggingInfo(String userEmail, String role, String type){
+    public static LoggingInfo createLoggingInfoEntry(String userEmail, String role, String type, String actionType, String comment){
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
+        ret.setActionType(actionType);
         ret.setUserEmail(userEmail);
         ret.setUserRole(role);
+        ret.setComment(comment);
         return ret;
     }
 
-    public static LoggingInfo updateLoggingInfo(String type){
+    public static LoggingInfo systemUpdateLoggingInfo(String actionType){
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
-        ret.setType(type);
-        ret.setUserEmail("-");
-        ret.setUserRole("system");
-        return ret;
-    }
-
-    // already registered Providers / Resources
-    public static LoggingInfo createLoggingInfoForExistingEntry(){
-        LoggingInfo ret = new LoggingInfo();
-        ret.setDate("1609491600");
-        ret.setType(Types.INITIALIZATION.getKey());
+        ret.setType(Types.UPDATE.getKey());
+        ret.setActionType(actionType);
         ret.setUserEmail("-");
         ret.setUserRole("system");
         return ret;
@@ -193,7 +195,7 @@ public class LoggingInfo {
         return actionType;
     }
 
-    public void setActionType(ActionType actionType) {
-        this.actionType = actionType.getKey();
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
     }
 }
