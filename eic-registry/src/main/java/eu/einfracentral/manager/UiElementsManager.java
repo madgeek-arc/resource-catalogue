@@ -378,7 +378,7 @@ public class UiElementsManager implements UiElementsService {
         for (Map.Entry<String, List<Vocabulary>> entry : vocabularyService.getBy("type").entrySet()) {
             values = entry.getValue()
                     .parallelStream()
-                    .map(v -> new eu.einfracentral.dto.Value(v.getId(), v.getName()))
+                    .map(v -> new eu.einfracentral.dto.Value(v.getId(), v.getName(), v.getParentId()))
                     .collect(Collectors.toList());
             controlValues.put(entry.getKey(), values);
         }

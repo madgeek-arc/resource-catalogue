@@ -4,6 +4,7 @@ public class Value {
 
     String id;
     String name;
+    String parentId = null;
 
     public Value() {
     }
@@ -11,6 +12,12 @@ public class Value {
     public Value(String id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Value(String id, String name, String parentId) {
+        this.id = id;
+        this.name = name;
+        this.parentId = parentId;
     }
 
     public String getId() {
@@ -27,5 +34,13 @@ public class Value {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 }
