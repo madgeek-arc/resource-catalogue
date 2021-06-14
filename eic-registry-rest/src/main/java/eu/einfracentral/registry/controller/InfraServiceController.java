@@ -1,7 +1,9 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.DynamicField;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
+import eu.einfracentral.dto.ServiceWithExtras;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -22,6 +24,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,6 +97,51 @@ public class InfraServiceController {
         logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
         logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
         return ret;
+    }
+
+    // FIXME: replace this method
+    @GetMapping(path = "dynamic/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ServiceWithExtras getEntry(@PathVariable("id") String id, Authentication authentication) {
+
+        InfraService service = this.infraService.get(id);
+
+        logger.info(service);
+        DynamicField<String> field = new DynamicField<>();
+        field.setName("portfolio");
+        field.setValue("test portfolio");
+        List<DynamicField<?>> fields = new ArrayList<>();
+        fields.add(field);
+
+        DynamicField<List<String>> field2 = new DynamicField<>();
+        field2.setName("benefits");
+        field2.setMultiplicity(true);
+        field2.setValue(new ArrayList<>());
+        field2.getValue().add("benefit 1");
+        field2.getValue().add("benefit 2");
+        fields.add(field2);
+
+        DynamicField<List<String>> field3 = new DynamicField<>();
+        field3.setName("usageScenarios");
+        field3.setMultiplicity(true);
+        field3.setValue(new ArrayList<>());
+        field3.getValue().add("usage scenario 1");
+        field3.getValue().add("usage scenario 2");
+        fields.add(field3);
+
+        service.setExtras(fields);
+
+        return ServiceWithExtras.create(service);
+    }
+
+    // FIXME: save service with extras instead of just returning them
+    @PostMapping(path = "dynamic", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ServiceWithExtras addDynamic(@RequestBody ServiceWithExtras service, Authentication authentication) {
+
+        logger.info(service);
+//        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
+//        logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
+//        logger.info("Extras: {}", service.getExtras().stream().map(DynamicField::toString).collect(Collectors.joining()));
+        return service;
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
