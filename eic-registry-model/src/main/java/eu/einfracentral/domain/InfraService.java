@@ -3,6 +3,7 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -10,6 +11,8 @@ public class InfraService extends Bundle<Service> {
 
     @XmlElement
     private boolean latest;
+
+    private List<DynamicField<?>> extras;
 
 
     public InfraService() {
@@ -52,5 +55,13 @@ public class InfraService extends Bundle<Service> {
 
     public void setLatest(boolean latest) {
         this.latest = latest;
+    }
+
+    public List<DynamicField<?>> getExtras() {
+        return extras;
+    }
+
+    public void setExtras(List<DynamicField<?>> extras) {
+        this.extras = extras;
     }
 }
