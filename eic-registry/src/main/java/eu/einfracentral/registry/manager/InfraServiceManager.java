@@ -492,22 +492,47 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 versions.sort(Comparator.comparing(Version::getCreationDate));
                 boolean firstVersion = true;
                 for (Version version : versions) {
+                    // Save Version as Resource so we can deserialize it and get userFullName
+                    Resource tempResource = resource;
+                    tempResource.setPayload(version.getPayload());
+                    InfraService tempService = deserialize(tempResource);
                     LoggingInfo loggingInfo = new LoggingInfo();
                     if (firstResource && firstVersion) {
                         loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
                         loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
                         loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                        if (tempService.getMetadata() != null && tempService.getMetadata().getRegisteredBy() != null){
+                            if (tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("System")){
+                                loggingInfo.setUserRole("system");
+                            } else{
+                                loggingInfo.setUserFullName(tempService.getMetadata().getRegisteredBy());
+                            }
+                        }
                         firstResource = false;
                         firstVersion = false;
                     } else if (!firstResource && firstVersion) {
                         loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
                         loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED_VERSION.getKey());
                         loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                        if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
+                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System")){
+                                loggingInfo.setUserRole("system");
+                            } else{
+                                loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
+                            }
+                        }
                         firstVersion = false;
                     } else {
                         loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
                         loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED.getKey());
                         loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                        if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
+                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System")){
+                                loggingInfo.setUserRole("system");
+                            } else{
+                                loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
+                            }
+                        }
                     }
                     resourceHistory.add(loggingInfo);
                 }
