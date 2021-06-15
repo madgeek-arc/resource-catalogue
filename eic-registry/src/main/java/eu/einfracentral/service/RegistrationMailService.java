@@ -102,7 +102,7 @@ public class RegistrationMailService {
             throw new ResourceNotFoundException("Provider is null");
         }
 
-        List<Service> serviceList = providerManager.getServices(providerBundle.getId());
+        List<Service> serviceList = infraServiceManager.getServices(providerBundle.getId());
         Service serviceTemplate = null;
         if (!serviceList.isEmpty()) {
             root.put("service", serviceList.get(0));

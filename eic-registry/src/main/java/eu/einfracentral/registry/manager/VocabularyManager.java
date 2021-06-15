@@ -45,6 +45,17 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    public Vocabulary getOrElseThrow(String id) {
+        Vocabulary vocabulary = null;
+        try {
+            vocabulary = get(id);
+        } catch (ResourceException e) {
+            throw new ResourceException(String.format("Vocabulary with id '%s' does not exist!", id), HttpStatus.NOT_FOUND);
+        }
+        return vocabulary;
+    }
+
+    @Override
     public String[] getRegion(String name) {
         Region region = regions.get(name);
         if (region.getMembers() == null || region.getMembers().length == 0) {

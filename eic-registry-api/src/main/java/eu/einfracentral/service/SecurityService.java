@@ -10,6 +10,8 @@ public interface SecurityService {
 
     Authentication getAdminAccess();
 
+    String getRoleName(Authentication authentication);
+
     boolean hasRole(Authentication auth, String role);
 
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
