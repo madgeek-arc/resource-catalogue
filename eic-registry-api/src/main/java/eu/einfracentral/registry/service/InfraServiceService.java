@@ -237,4 +237,17 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
 
     List<InfraService> getInactiveServices(String providerId);
 
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth);
+
+    /**
+     * Get the History of the Resource with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<LoggingInfo> getLoggingInfoHistory(String id);
 }
