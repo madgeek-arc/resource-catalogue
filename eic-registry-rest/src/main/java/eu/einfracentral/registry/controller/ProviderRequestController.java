@@ -61,7 +61,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
     }
 
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or hasRole('ROLE_USER')")
     public ResponseEntity<ProviderRequest> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderRequest providerRequest = providerRequestService.get(id);
         providerRequestService.delete(providerRequest);
