@@ -91,7 +91,8 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
             providerBundle.setStatus("pending initial approval");
         }
 
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add(loggingInfo);
         providerBundle.setLoggingInfo(loggingInfoList);

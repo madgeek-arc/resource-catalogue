@@ -17,6 +17,9 @@ public class LoggingInfo {
     private String userEmail;
 
     @XmlElement(defaultValue = "null")
+    private String userFullName;
+
+    @XmlElement(defaultValue = "null")
     private String userRole;
 
     @XmlElement(defaultValue = "null")
@@ -34,6 +37,7 @@ public class LoggingInfo {
     public LoggingInfo(LoggingInfo loggingInfo) {
         this.date = loggingInfo.getDate();
         this.userEmail = loggingInfo.getUserEmail();
+        this.userFullName = loggingInfo.getUserFullName();
         this.userRole = loggingInfo.getUserRole();
         this.type = loggingInfo.getType();
         this.comment = loggingInfo.getComment();
@@ -108,22 +112,24 @@ public class LoggingInfo {
         }
     }
 
-    public static LoggingInfo createLoggingInfoEntry(String userEmail, String role, String type, String actionType){
+    public static LoggingInfo createLoggingInfoEntry(String userEmail, String userFullName, String role, String type, String actionType){
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
         ret.setUserEmail(userEmail);
+        ret.setUserFullName(userFullName);
         ret.setUserRole(role);
         return ret;
     }
 
-    public static LoggingInfo createLoggingInfoEntry(String userEmail, String role, String type, String actionType, String comment){
+    public static LoggingInfo createLoggingInfoEntry(String userEmail, String userFullName, String role, String type, String actionType, String comment){
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
         ret.setUserEmail(userEmail);
+        ret.setUserFullName(userFullName);
         ret.setUserRole(role);
         ret.setComment(comment);
         return ret;
@@ -135,6 +141,7 @@ public class LoggingInfo {
         ret.setType(Types.UPDATE.getKey());
         ret.setActionType(actionType);
         ret.setUserEmail("-");
+        ret.setUserFullName("-");
         ret.setUserRole("system");
         return ret;
     }
@@ -165,6 +172,14 @@ public class LoggingInfo {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public String getUserFullName() {
+        return userFullName;
+    }
+
+    public void setUserFullName(String userFullName) {
+        this.userFullName = userFullName;
     }
 
     public String getUserRole() {
