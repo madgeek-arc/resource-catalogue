@@ -10,6 +10,7 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ObjectUtils;
+import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -75,8 +76,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
-        validateCategories(infraService.getService().getCategories());
-        validateScientificDomains(infraService.getService().getScientificDomains());
         infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
@@ -93,8 +92,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // latestOnboardingInfo
         infraService.setLatestOnboardingInfo(loggingInfo);
 
-        infraService.getService().setGeographicalAvailabilities(sortCountries(infraService.getService().getGeographicalAvailabilities()));
-        infraService.getService().setResourceGeographicLocations(sortCountries(infraService.getService().getResourceGeographicLocations()));
+        infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
+        infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
@@ -108,8 +107,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
-        validateCategories(infraService.getService().getCategories());
-        validateScientificDomains(infraService.getService().getScientificDomains());
         InfraService existingService;
 
         // if service version is empty set it null
@@ -149,8 +146,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // latestUpdateInfo
         infraService.setLatestUpdateInfo(loggingInfo);
         infraService.setActive(existingService.isActive());
-        infraService.getService().setGeographicalAvailabilities(sortCountries(infraService.getService().getGeographicalAvailabilities()));
-        infraService.getService().setResourceGeographicLocations(sortCountries(infraService.getService().getResourceGeographicLocations()));
+        infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
+        infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
 
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
@@ -264,7 +261,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public boolean validate(InfraService infraService) {
         Service service = infraService.getService();
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
-        //just check if validateVocabularies did anything or not
         logger.debug("Validating Service with id: {}", service.getId());
 
         try {
@@ -272,6 +268,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
+
+        validateCategories(infraService.getService().getCategories());
+        validateScientificDomains(infraService.getService().getScientificDomains());
 
         return true;
     }
@@ -348,10 +347,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
     }
 
-    private List<String> sortCountries(List<String> countries) {
-        Collections.sort(countries);
-        return countries;
-    }
 
     public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         InfraService service = get(serviceId);
