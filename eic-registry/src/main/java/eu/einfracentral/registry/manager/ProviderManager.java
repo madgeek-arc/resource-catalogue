@@ -27,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -852,12 +853,27 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         loggingInfo.setType(LoggingInfo.Types.AUDIT.getKey());
                     }
                 }
-
-                if (loggingInfoList.get(0).getType().equals("updated") || loggingInfoList.get(0).getType().equals("audited")){
-                    List<LoggingInfo> newLoggingInfoList = historyToLogging;
-                    newLoggingInfoList.addAll(loggingInfoList);
-                    providerBundle.setLoggingInfo(newLoggingInfoList);
-                }
+                List<LoggingInfo> concatLoggingInfoList = new ArrayList<>();
+                if (loggingInfoList.get(0).getType().equals(LoggingInfo.Types.UPDATE.getKey()) || loggingInfoList.get(0).getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+                    Instant loggingInstant = Instant.ofEpochSecond(Long.parseLong(loggingInfoList.get(0).getDate()));
+                    Instant firstHistoryInstant = Instant.ofEpochSecond(Long.parseLong(historyToLogging.get(0).getDate()));
+                    Duration dif = Duration.between(firstHistoryInstant, loggingInstant);
+                    long sec = dif.getSeconds();
+                    if (sec > 20){ // if the difference < 20 secs, both lists contain the same items. If not (>20), concat them
+                        for (LoggingInfo loggingFromHistory : historyToLogging) {
+                            Instant historyInstant = Instant.ofEpochSecond(Long.parseLong(loggingFromHistory.getDate()));
+                            Duration difference = Duration.between(historyInstant, loggingInstant);
+                            long seconds = difference.getSeconds();
+                            if (seconds > 20){
+                                concatLoggingInfoList.add(loggingFromHistory);
+                            } else{
+                                concatLoggingInfoList.addAll(loggingInfoList);
+                                providerBundle.setLoggingInfo(concatLoggingInfoList);
+                                break;
+                            }
+                        }
+                    }
+                } // else it's on the Onboard state, so we keep the existing LoggingInfo
             } else{
                 providerBundle.setLoggingInfo(historyToLogging);
             }
