@@ -5,6 +5,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.dto.ServiceWithExtras;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -36,10 +37,13 @@ public class InfraServiceController {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
     private final InfraServiceService<InfraService, InfraService> infraService;
+    private final UiElementsService uiElementsService;
 
     @Autowired
-    InfraServiceController(InfraServiceService<InfraService, InfraService> service) {
+    InfraServiceController(InfraServiceService<InfraService, InfraService> service,
+                           UiElementsService uiElementsService) {
         this.infraService = service;
+        this.uiElementsService = uiElementsService;
     }
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -106,26 +110,28 @@ public class InfraServiceController {
         InfraService service = this.infraService.get(id);
 
         logger.info(service);
-        DynamicField<String> field = new DynamicField<>();
+        DynamicField field = new DynamicField();
         field.setName("portfolio");
         field.setValue("test portfolio");
-        List<DynamicField<?>> fields = new ArrayList<>();
+        List<DynamicField> fields = new ArrayList<>();
         fields.add(field);
 
-        DynamicField<List<String>> field2 = new DynamicField<>();
+        DynamicField field2 = new DynamicField();
         field2.setName("benefits");
         field2.setMultiplicity(true);
-        field2.setValue(new ArrayList<>());
-        field2.getValue().add("benefit 1");
-        field2.getValue().add("benefit 2");
+        List<String> benefitList = new ArrayList<>();
+        benefitList.add("benefit 1");
+        benefitList.add("benefit 2");
+        field2.setValue(benefitList);
         fields.add(field2);
 
-        DynamicField<List<String>> field3 = new DynamicField<>();
+        DynamicField field3 = new DynamicField();
         field3.setName("usageScenarios");
         field3.setMultiplicity(true);
-        field3.setValue(new ArrayList<>());
-        field3.getValue().add("usage scenario 1");
-        field3.getValue().add("usage scenario 2");
+        List<String> usageList = new ArrayList<>();
+        usageList.add("usage scenario 1");
+        usageList.add("usage scenario 2");
+        field3.setValue(usageList);
         fields.add(field3);
 
         service.setExtras(fields);
@@ -138,10 +144,11 @@ public class InfraServiceController {
     public ServiceWithExtras addDynamic(@RequestBody ServiceWithExtras service, Authentication authentication) {
 
         logger.info(service);
+        InfraService infraService = uiElementsService.createService(service);
 //        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
 //        logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
 //        logger.info("Extras: {}", service.getExtras().stream().map(DynamicField::toString).collect(Collectors.joining()));
-        return service;
+        return ServiceWithExtras.create(infraService);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})

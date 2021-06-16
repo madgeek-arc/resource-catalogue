@@ -3,9 +3,11 @@ package eu.einfracentral.manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
+import eu.einfracentral.domain.DynamicField;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.dto.ServiceWithExtras;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -116,6 +118,46 @@ public class UiElementsManager implements UiElementsService {
         }
 
         return fields;
+    }
+
+    private Field getExtraField(String name) {
+        List<Field> allFields = readFields(directory + "/" + FILENAME_FIELDS);
+        for (Field field : allFields) {
+            if (field.getParent() != null && "extras".equals(field.getParent()) && name.equals(field.getName())) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    public InfraService createService(ServiceWithExtras service) {
+        List<DynamicField> extras = new ArrayList<>();
+
+        for (Map.Entry<String, ?> entry : service.getExtras().entrySet()) {
+            DynamicField field = new DynamicField();
+            field.setName(entry.getKey());
+            field.setValue(entry.getValue());
+            extras.add(field);
+
+
+            Field fieldInfo = getExtraField(entry.getKey());
+            if (fieldInfo != null) {
+                if (fieldInfo.getMultiplicity()) {
+                    if (!Collections.class.isAssignableFrom(entry.getValue().getClass())) {
+                        List<Object> temp = new ArrayList<>();
+                        temp.add(entry.getValue());
+                        field.setValue(temp);
+                    }
+                }
+
+
+            }
+
+        }
+        InfraService infraService = new InfraService();
+        infraService.setService(service.getService());
+        infraService.setExtras(extras);
+        return infraService;
     }
 
     @Override

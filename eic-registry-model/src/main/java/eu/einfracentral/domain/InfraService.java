@@ -12,7 +12,7 @@ public class InfraService extends Bundle<Service> {
     @XmlElement
     private boolean latest;
 
-    private List<DynamicField<?>> extras;
+    private List<DynamicField> extras;
 
 
     public InfraService() {
@@ -57,11 +57,11 @@ public class InfraService extends Bundle<Service> {
         this.latest = latest;
     }
 
-    public List<DynamicField<?>> getExtras() {
+    public List<DynamicField> getExtras() {
         return extras;
     }
 
-    public void setExtras(List<DynamicField<?>> extras) {
+    public void setExtras(List<DynamicField> extras) {
         this.extras = extras;
     }
 }
