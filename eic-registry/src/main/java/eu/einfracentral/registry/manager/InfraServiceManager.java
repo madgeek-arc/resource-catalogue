@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -477,12 +478,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
         List<InfraService> allInfraServices = getAll(ff, auth).getResults();
         List<Resource> allResources;
         for (InfraService infraService : allInfraServices) {
-            if (infraService.getService().getId().equals("mht.adebayo")){
-                logger.info("asdf");
-            }
             allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             boolean firstResource = true;
@@ -578,10 +578,26 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                             loggingInfo.setType(LoggingInfo.Types.AUDIT.getKey());
                         }
                     }
+                    List<LoggingInfo> concatLoggingInfoList = new ArrayList<>();
                     if (loggingInfoList.get(0).getType().equals(LoggingInfo.Types.UPDATE.getKey()) || loggingInfoList.get(0).getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
-                        List<LoggingInfo> newLoggingInfoList = resourceHistory;
-                        newLoggingInfoList.addAll(loggingInfoList);
-                        service.setLoggingInfo(newLoggingInfoList);
+                        Instant loggingInstant = Instant.ofEpochSecond(Long.parseLong(loggingInfoList.get(0).getDate()));
+                        Instant firstHistoryInstant = Instant.ofEpochSecond(Long.parseLong(resourceHistory.get(0).getDate()));
+                        Duration dif = Duration.between(firstHistoryInstant, loggingInstant);
+                        long sec = dif.getSeconds();
+                        if (sec > 20){ // if the difference < 20 secs, both lists contain the same items. If not (>20), concat them
+                            for (LoggingInfo loggingFromHistory : resourceHistory) {
+                                Instant historyInstant = Instant.ofEpochSecond(Long.parseLong(loggingFromHistory.getDate()));
+                                Duration difference = Duration.between(historyInstant, loggingInstant);
+                                long seconds = difference.getSeconds();
+                                if (seconds > 20){
+                                    concatLoggingInfoList.add(loggingFromHistory);
+                                } else{
+                                    concatLoggingInfoList.addAll(loggingInfoList);
+                                    service.setLoggingInfo(concatLoggingInfoList);
+                                    break;
+                                }
+                            }
+                        }
                     } // else it's on the Onboard state, so we keep the existing LoggingInfo
                 } else {
                     service.setLoggingInfo(resourceHistory);
