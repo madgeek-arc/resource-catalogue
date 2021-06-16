@@ -1,10 +1,20 @@
 package eu.einfracentral.domain;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class DynamicField {
 
+    @XmlElement
     private String name;
+
+    @XmlElement
     private Object value;
+
+    @XmlElement
     private int fieldId;
 
     public DynamicField() {
