@@ -2,12 +2,12 @@ package eu.einfracentral.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class DynamicField<T> {
+public class DynamicField {
 
     private String name;
     private String type = "java.lang.String";
     private boolean multiplicity = false;
-    private T value;
+    private Object value;
 
     public DynamicField() {
 
@@ -38,11 +38,11 @@ public class DynamicField<T> {
         this.multiplicity = multiplicity;
     }
 
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(T value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 

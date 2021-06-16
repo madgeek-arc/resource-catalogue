@@ -18,7 +18,7 @@ public class ServiceWithExtras {
         ServiceWithExtras serviceWithExtras = new ServiceWithExtras();
         serviceWithExtras.service = service.getService();
         serviceWithExtras.extras = new HashMap<>();
-        for (DynamicField<?> field : service.getExtras()) {
+        for (DynamicField field : service.getExtras()) {
             serviceWithExtras.extras.put(field.getName(), field.getValue());
         }
         return serviceWithExtras;

@@ -89,7 +89,7 @@ public class Field {
         this.accessPath = accessPath;
     }
 
-    public boolean isMultiplicity() {
+    public boolean getMultiplicity() {
         return multiplicity;
     }
 

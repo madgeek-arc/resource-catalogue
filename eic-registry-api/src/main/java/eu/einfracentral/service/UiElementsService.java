@@ -1,5 +1,7 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.dto.ServiceWithExtras;
 import eu.einfracentral.dto.Value;
 import eu.einfracentral.ui.Field;
 import eu.einfracentral.ui.FieldGroup;
@@ -28,4 +30,6 @@ public interface UiElementsService {
     Map<String, List<Value>> getControlValuesByType();
 
     List<Value> getControlValuesByType(String type);
+
+    InfraService createService(ServiceWithExtras service);
 }
