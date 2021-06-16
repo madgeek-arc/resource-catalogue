@@ -118,7 +118,6 @@ public class InfraServiceController {
 
         DynamicField field2 = new DynamicField();
         field2.setName("benefits");
-        field2.setMultiplicity(true);
         List<String> benefitList = new ArrayList<>();
         benefitList.add("benefit 1");
         benefitList.add("benefit 2");
@@ -127,7 +126,6 @@ public class InfraServiceController {
 
         DynamicField field3 = new DynamicField();
         field3.setName("usageScenarios");
-        field3.setMultiplicity(true);
         List<String> usageList = new ArrayList<>();
         usageList.add("usage scenario 1");
         usageList.add("usage scenario 2");
@@ -144,11 +142,12 @@ public class InfraServiceController {
     public ServiceWithExtras addDynamic(@RequestBody ServiceWithExtras service, Authentication authentication) {
 
         logger.info(service);
-        InfraService infraService = uiElementsService.createService(service);
+        InfraService infra = uiElementsService.createService(service);
+        infra = infraService.addService(infra, authentication);
 //        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
 //        logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
 //        logger.info("Extras: {}", service.getExtras().stream().map(DynamicField::toString).collect(Collectors.joining()));
-        return ServiceWithExtras.create(infraService);
+        return ServiceWithExtras.create(infra);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})

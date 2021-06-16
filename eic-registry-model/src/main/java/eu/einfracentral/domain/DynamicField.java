@@ -1,13 +1,11 @@
 package eu.einfracentral.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class DynamicField {
 
     private String name;
-    private String type = "java.lang.String";
-    private boolean multiplicity = false;
     private Object value;
+    private int fieldId;
 
     public DynamicField() {
 
@@ -21,23 +19,6 @@ public class DynamicField {
         this.name = name;
     }
 
-    @JsonIgnore
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public boolean isMultiplicity() {
-        return multiplicity;
-    }
-
-    public void setMultiplicity(boolean multiplicity) {
-        this.multiplicity = multiplicity;
-    }
-
     public Object getValue() {
         return value;
     }
@@ -46,13 +27,20 @@ public class DynamicField {
         this.value = value;
     }
 
+    public int getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(int fieldId) {
+        this.fieldId = fieldId;
+    }
+
     @Override
     public String toString() {
         return "DynamicField{" +
                 "name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", multiplicity=" + multiplicity +
                 ", value=" + value +
+                ", fieldId='" + fieldId + '\'' +
                 '}';
     }
 }

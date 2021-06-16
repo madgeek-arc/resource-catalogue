@@ -150,7 +150,7 @@ public class UiElementsManager implements UiElementsService {
                     }
                 }
 
-
+                field.setFieldId(fieldInfo.getId());
             }
 
         }
