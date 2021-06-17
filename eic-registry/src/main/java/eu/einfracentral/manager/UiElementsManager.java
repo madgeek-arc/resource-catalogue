@@ -137,6 +137,8 @@ public class UiElementsManager implements UiElementsService {
         return null;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public InfraService createService(UiService service) {
         List<DynamicField> extras = new ArrayList<>();
 
