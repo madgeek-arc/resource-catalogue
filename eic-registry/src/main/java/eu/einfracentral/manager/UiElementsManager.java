@@ -136,20 +136,18 @@ public class UiElementsManager implements UiElementsService {
         for (Map.Entry<String, ?> entry : service.getExtras().entrySet()) {
             DynamicField field = new DynamicField();
             field.setName(entry.getKey());
-            field.setValue((List<Object>) entry.getValue());
+            if (!Collection.class.isAssignableFrom(entry.getValue().getClass())) {
+                List<Object> temp = new ArrayList<>();
+                temp.add(entry.getValue());
+                field.setValue(temp);
+            } else {
+                field.setValue((List<Object>) entry.getValue());
+            }
             extras.add(field);
 
 
             Field fieldInfo = getExtraField(entry.getKey());
             if (fieldInfo != null) {
-                if (fieldInfo.getMultiplicity()) {
-                    if (!Collections.class.isAssignableFrom(entry.getValue().getClass())) {
-                        List<Object> temp = new ArrayList<>();
-                        temp.add(entry.getValue());
-                        field.setValue(temp);
-                    }
-                }
-
                 field.setFieldId(fieldInfo.getId());
             }
 
