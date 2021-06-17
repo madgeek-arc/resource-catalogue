@@ -112,13 +112,15 @@ public class InfraServiceController {
         logger.info(service);
         DynamicField field = new DynamicField();
         field.setName("portfolio");
-        field.setValue("test portfolio");
+        List<Object> portfolio = new ArrayList<>();
+        portfolio.add("test portfolio");
+        field.setValue(portfolio);
         List<DynamicField> fields = new ArrayList<>();
         fields.add(field);
 
         DynamicField field2 = new DynamicField();
         field2.setName("benefits");
-        List<String> benefitList = new ArrayList<>();
+        List<Object> benefitList = new ArrayList<>();
         benefitList.add("benefit 1");
         benefitList.add("benefit 2");
         field2.setValue(benefitList);
@@ -126,7 +128,7 @@ public class InfraServiceController {
 
         DynamicField field3 = new DynamicField();
         field3.setName("usageScenarios");
-        List<String> usageList = new ArrayList<>();
+        List<Object> usageList = new ArrayList<>();
         usageList.add("usage scenario 1");
         usageList.add("usage scenario 2");
         field3.setValue(usageList);

@@ -1,8 +1,10 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -11,8 +13,9 @@ public class DynamicField {
     @XmlElement
     private String name;
 
-    @XmlElement
-    private Object value;
+    @XmlElementWrapper(name = "values")
+    @XmlElement(name = "value")
+    private List<Object> values;
 
     @XmlElement
     private int fieldId;
@@ -29,12 +32,12 @@ public class DynamicField {
         this.name = name;
     }
 
-    public Object getValue() {
-        return value;
+    public List<Object> getValue() {
+        return values;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
+    public void setValue(List<Object> values) {
+        this.values = values;
     }
 
     public int getFieldId() {
@@ -49,8 +52,8 @@ public class DynamicField {
     public String toString() {
         return "DynamicField{" +
                 "name='" + name + '\'' +
-                ", value=" + value +
-                ", fieldId='" + fieldId + '\'' +
+                ", values=" + values +
+                ", fieldId=" + fieldId +
                 '}';
     }
 }

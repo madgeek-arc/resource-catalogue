@@ -125,7 +125,19 @@
             
       <xs:element minOccurs="0" name="name" type="xs:string"/>
             
-      <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+      <xs:element minOccurs="0" name="values">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="value" type="xs:anyType"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
           
     </xs:sequence>
       
