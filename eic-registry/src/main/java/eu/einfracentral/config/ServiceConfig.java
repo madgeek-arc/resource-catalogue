@@ -19,6 +19,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
 
@@ -53,7 +54,7 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
-        return JAXBContext.newInstance(Event.class, Provider.class, DynamicField.class,
+        return JAXBContext.newInstance(Event.class, Provider.class, DynamicField.class, ArrayList.class,
                 Service.class, User.class, InfraService.class, VocabularyCuration.class, VocabularyEntryRequest.class,
                 RangeValue.class, Vocabulary.class, ProviderMainContact.class, ProviderPublicContact.class,
                 ServiceMainContact.class, ServicePublicContact.class, ProviderLocation.class, ProviderRequest.class,
