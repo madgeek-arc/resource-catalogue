@@ -36,6 +36,7 @@ public class InfraService extends Bundle<Service> {
     public String toString() {
         return "InfraService{" +
                 "service=" + getService() +
+                ", extras=" + getExtras() +
                 ", metadata=" + getMetadata() +
                 ", active=" + isActive() +
                 ", status='" + getStatus() + '\'' +

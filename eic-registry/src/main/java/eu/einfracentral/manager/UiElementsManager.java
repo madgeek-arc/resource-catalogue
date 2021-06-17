@@ -7,7 +7,7 @@ import eu.einfracentral.domain.DynamicField;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
-import eu.einfracentral.dto.ServiceWithExtras;
+import eu.einfracentral.dto.UiService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -17,14 +17,12 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,7 +31,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FOR_UI;
-import static eu.einfracentral.config.CacheConfig.CACHE_VISITS;
 
 
 @Component
@@ -120,6 +117,16 @@ public class UiElementsManager implements UiElementsService {
         return fields;
     }
 
+    private Field getField(int id) {
+        List<Field> allFields = readFields(directory + "/" + FILENAME_FIELDS);
+        for (Field field : allFields) {
+            if (field.getId() == id) {
+                return field;
+            }
+        }
+        return null;
+    }
+
     private Field getExtraField(String name) {
         List<Field> allFields = readFields(directory + "/" + FILENAME_FIELDS);
         for (Field field : allFields) {
@@ -130,7 +137,7 @@ public class UiElementsManager implements UiElementsService {
         return null;
     }
 
-    public InfraService createService(ServiceWithExtras service) {
+    public InfraService createService(UiService service) {
         List<DynamicField> extras = new ArrayList<>();
 
         for (Map.Entry<String, ?> entry : service.getExtras().entrySet()) {
@@ -156,6 +163,26 @@ public class UiElementsManager implements UiElementsService {
         infraService.setService(service.getService());
         infraService.setExtras(extras);
         return infraService;
+    }
+
+    @Override
+    public UiService createUiService(InfraService service) {
+        UiService uiService = new UiService();
+        uiService.setService(service.getService());
+        uiService.setExtras(new HashMap<>());
+        for (DynamicField field : service.getExtras()) {
+            Field fieldInfo = getField(field.getFieldId());
+            if (fieldInfo != null && !fieldInfo.getMultiplicity()) {
+                if (field.getValue() != null && !field.getValue().isEmpty()) {
+                    uiService.getExtras().put(field.getName(), field.getValue().get(0));
+                } else {
+                    uiService.getExtras().put(field.getName(), field.getValue());
+                }
+            } else {
+                uiService.getExtras().put(field.getName(), field.getValue());
+            }
+        }
+        return uiService;
     }
 
     @Override

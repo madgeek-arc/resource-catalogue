@@ -20,9 +20,7 @@ public class DynamicField {
     @XmlElement
     private int fieldId;
 
-    public DynamicField() {
-
-    }
+    public DynamicField() {}
 
     public String getName() {
         return name;

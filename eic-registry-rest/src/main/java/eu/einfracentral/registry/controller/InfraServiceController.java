@@ -1,9 +1,8 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.DynamicField;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
-import eu.einfracentral.dto.ServiceWithExtras;
+import eu.einfracentral.dto.UiService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -25,7 +24,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,53 +101,25 @@ public class InfraServiceController {
         return ret;
     }
 
-    // FIXME: replace this method
+    // TODO: move elsewhere ??
     @GetMapping(path = "dynamic/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ServiceWithExtras getEntry(@PathVariable("id") String id, Authentication authentication) {
+    public UiService getEntry(@PathVariable("id") String id, Authentication authentication) {
 
         InfraService service = this.infraService.get(id);
-
         logger.info(service);
-        DynamicField field = new DynamicField();
-        field.setName("portfolio");
-        List<Object> portfolio = new ArrayList<>();
-        portfolio.add("test portfolio");
-        field.setValue(portfolio);
-        List<DynamicField> fields = new ArrayList<>();
-        fields.add(field);
 
-        DynamicField field2 = new DynamicField();
-        field2.setName("benefits");
-        List<Object> benefitList = new ArrayList<>();
-        benefitList.add("benefit 1");
-        benefitList.add("benefit 2");
-        field2.setValue(benefitList);
-        fields.add(field2);
-
-        DynamicField field3 = new DynamicField();
-        field3.setName("usageScenarios");
-        List<Object> usageList = new ArrayList<>();
-        usageList.add("usage scenario 1");
-        usageList.add("usage scenario 2");
-        field3.setValue(usageList);
-        fields.add(field3);
-
-        service.setExtras(fields);
-
-        return ServiceWithExtras.create(service);
+        return uiElementsService.createUiService(service);
     }
 
-    // FIXME: save service with extras instead of just returning them
+    // TODO: move elsewhere ??
     @PostMapping(path = "dynamic", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ServiceWithExtras addDynamic(@RequestBody ServiceWithExtras service, Authentication authentication) {
+    public UiService addDynamic(@RequestBody UiService service, Authentication authentication) {
 
         logger.info(service);
         InfraService infra = uiElementsService.createService(service);
         infra = infraService.addService(infra, authentication);
-//        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
-//        logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
-//        logger.info("Extras: {}", service.getExtras().stream().map(DynamicField::toString).collect(Collectors.joining()));
-        return ServiceWithExtras.create(infra);
+
+        return uiElementsService.createUiService(infra);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
