@@ -469,6 +469,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         InfraService infraService = get(id);
         if (infraService.getLoggingInfo() != null){
             List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
+            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
             return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
         }
         return null;

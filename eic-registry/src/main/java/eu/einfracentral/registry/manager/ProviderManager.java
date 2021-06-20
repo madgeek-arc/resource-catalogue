@@ -731,7 +731,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             loggingInfoList.add(oldProviderRegistration);
         }
 
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
                 actionType.getKey(), comment);
         loggingInfoList.add(loggingInfo);
         provider.setLoggingInfo(loggingInfoList);
@@ -776,6 +776,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle providerBundle = get(id);
         if (providerBundle.getLoggingInfo() != null){
             List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
+            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
             return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
         }
         return null;
