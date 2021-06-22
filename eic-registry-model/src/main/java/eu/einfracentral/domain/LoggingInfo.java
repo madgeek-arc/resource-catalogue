@@ -140,8 +140,6 @@ public class LoggingInfo {
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(Types.UPDATE.getKey());
         ret.setActionType(actionType);
-        ret.setUserEmail("-");
-        ret.setUserFullName("-");
         ret.setUserRole("system");
         return ret;
     }
