@@ -137,15 +137,16 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         if (infraService.getService().getVersion().equals(existingService.getService().getVersion())){
             loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED.getKey(), comment);
+            if (existingService.getLoggingInfo() != null){
+                loggingInfoList = existingService.getLoggingInfo();
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+            } else{
+                loggingInfoList.add(loggingInfo);
+            }
         } else{
             loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
-        }
-        if (existingService.getLoggingInfo() != null){
-            loggingInfoList = existingService.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        } else{
             loggingInfoList.add(loggingInfo);
         }
         infraService.setLoggingInfo(loggingInfoList);
