@@ -444,12 +444,12 @@ public class UiElementsManager implements UiElementsService {
 
 
         // add all vocabularies
-        for (Map.Entry<String, List<Vocabulary>> entry : vocabularyService.getBy("type").entrySet()) {
+        for (Map.Entry<Vocabulary.Type, List<Vocabulary>> entry : vocabularyService.getAllVocabulariesByType().entrySet()) {
             values = entry.getValue()
                     .parallelStream()
                     .map(v -> new eu.einfracentral.dto.Value(v.getId(), v.getName(), v.getParentId()))
                     .collect(Collectors.toList());
-            controlValues.put(entry.getKey(), values);
+            controlValues.put(entry.getKey().getKey(), values);
         }
 
         return controlValues;
