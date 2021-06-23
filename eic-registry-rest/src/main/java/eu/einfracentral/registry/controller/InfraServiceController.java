@@ -122,6 +122,24 @@ public class InfraServiceController {
         return uiElementsService.createUiService(infra);
     }
 
+    // TODO: move elsewhere ??
+    @PutMapping(path = "dynamic", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public UiService putDynamic(@RequestBody UiService service, Authentication authentication) throws ResourceNotFoundException {
+
+        logger.info(service);
+        InfraService infra = uiElementsService.createService(service);
+        if (infra.getId() == null) {
+            return addDynamic(service, authentication);
+        }
+
+        InfraService previous = infraService.get(infra.getId());
+        previous.setService(infra.getService());
+        previous.setExtras(infra.getExtras());
+        infra = infraService.updateService(previous, authentication);
+
+        return uiElementsService.createUiService(infra);
+    }
+
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
