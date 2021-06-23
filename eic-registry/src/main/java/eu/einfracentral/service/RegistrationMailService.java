@@ -121,6 +121,7 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("registrationEmail", registrationEmail);
         // get the first user's information for the registration team email
+        // TODO: GET THE userFullName & userEmail from LoggingInfo (the one who REGISTERED)
         root.put("user", providerBundle.getProvider().getUsers().get(0));
 
         try {
