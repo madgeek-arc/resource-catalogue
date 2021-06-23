@@ -134,7 +134,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
         // update VS version update
-        if (infraService.getService().getVersion().equals(existingService.getService().getVersion())){
+        if (((infraService.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
+                (infraService.getService().getVersion().equals(existingService.getService().getVersion()))){
             loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED.getKey(), comment);
             if (existingService.getLoggingInfo() != null){
@@ -470,12 +471,17 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
         InfraService infraService = get(id);
-        if (infraService.getLoggingInfo() != null){
-            List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+        List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+        allResources.sort(Comparator.comparing((Resource::getCreationDate)));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        for (Resource resource : allResources){
+            InfraService service = deserialize(resource);
+            if (service.getLoggingInfo() != null){
+                loggingInfoList.addAll(service.getLoggingInfo());
+            }
         }
-        return null;
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+        return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
     }
 
     public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
