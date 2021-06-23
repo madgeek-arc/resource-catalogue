@@ -531,7 +531,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             // update Service
             service.setLoggingInfo(loggingInfoList);
             service.setLatestUpdateInfo(loggingInfo);
-            service.setActive(true);
+            service.setActive(false);
 
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
