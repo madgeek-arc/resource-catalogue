@@ -211,7 +211,8 @@ public class UiElementsManager implements UiElementsService {
 
             int total = 0;
             for (Field f : groupedFields.getFields()) {
-                if (f.getForm().getMandatory() != null && f.getForm().getMandatory()) {
+                if (f.getForm().getMandatory() != null && f.getForm().getMandatory()
+                        && f.getType() != null && !f.getType().equals("composite")) {
                     total += 1;
                 }
             }
