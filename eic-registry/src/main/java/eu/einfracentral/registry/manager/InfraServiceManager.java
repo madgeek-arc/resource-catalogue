@@ -385,25 +385,36 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         facetFilter.setQuantity(1000);
         facetFilter.addFilter("active", true);
         facetFilter.addFilter("latest", true);
-        Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
         List<InfraService> serviceList = getAll(facetFilter, auth).getResults();
+        facetFilter.setQuantity(1000);
+        facetFilter.addFilter("active", true);
+        facetFilter.addFilter("latest", true);
+        Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
+        Browsing<InfraService> ret = serviceBrowsing;
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
         for (InfraService infraService : serviceList) {
             if (infraService.getLatestAuditInfo() != null) {
-                if (Long.parseLong(infraService.getLatestAuditInfo().getDate()) < interval) {
-                    serviceBrowsing.getResults().remove(infraService);
+                if (Long.parseLong(infraService.getLatestAuditInfo().getDate()) > interval) {
+                    int index = 0;
+                    for (int i=0; i<serviceBrowsing.getResults().size(); i++){
+                        if (serviceBrowsing.getResults().get(i).getService().getId().equals(infraService.getService().getId())){
+                            index = i;
+                            break;
+                        }
+                    }
+                    ret.getResults().remove(index);
                 }
             }
         }
-        Collections.shuffle(serviceBrowsing.getResults());
-        for (int i = serviceBrowsing.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
-            serviceBrowsing.getResults().remove(i);
+        Collections.shuffle(ret.getResults());
+        for (int i = ret.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
+            ret.getResults().remove(i);
         }
-        serviceBrowsing.setFrom(ff.getFrom());
-        serviceBrowsing.setTo(serviceBrowsing.getResults().size());
-        serviceBrowsing.setTotal(serviceBrowsing.getResults().size());
-        return serviceBrowsing;
+        ret.setFrom(ff.getFrom());
+        ret.setTo(ret.getResults().size());
+        ret.setTotal(ret.getResults().size());
+        return ret;
     }
 
     @Override

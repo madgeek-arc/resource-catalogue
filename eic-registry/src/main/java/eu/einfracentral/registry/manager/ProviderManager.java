@@ -757,8 +757,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
         for (ProviderBundle providerBundle : providerList) {
             if (providerBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) < interval) {
-                    providerBrowsing.getResults().remove(providerBundle);
+                if (Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) > interval) {
+                    int index = 0;
+                    for (int i=0; i<providerBrowsing.getResults().size(); i++){
+                        if (providerBrowsing.getResults().get(i).getProvider().getId().equals(providerBundle.getProvider().getId())){
+                            index = i;
+                            break;
+                        }
+                    }
+                    providerBrowsing.getResults().remove(index);
                 }
             }
         }
