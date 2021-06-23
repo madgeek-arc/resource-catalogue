@@ -750,6 +750,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
+        facetFilter.addFilter("status", "approved");
         Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
         List<ProviderBundle> providerList = getAll(facetFilter, auth).getResults();
         long todayEpochTime = System.currentTimeMillis();

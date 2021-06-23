@@ -382,6 +382,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
+        facetFilter.addFilter("active", true);
+        facetFilter.addFilter("latest", true);
         Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
         List<InfraService> serviceList = getAll(facetFilter, auth).getResults();
         long todayEpochTime = System.currentTimeMillis();
