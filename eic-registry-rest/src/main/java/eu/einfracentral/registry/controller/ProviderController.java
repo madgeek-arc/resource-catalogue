@@ -55,6 +55,18 @@ public class ProviderController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         logger.info("Deleting provider: {}", provider.getProvider().getName());
+
+        // delete all Provider's services
+        List<InfraService> allProviderServices = infraServiceService.getInfraServices(id);
+        for (InfraService infraService : allProviderServices){
+            try {
+                infraServiceService.delete(infraService);
+            } catch (ResourceNotFoundException e){
+                logger.info(String.format("Resource %s does not exist", infraService));
+            }
+        }
+
+        // delete Provider
         providerManager.delete(provider);
         logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
