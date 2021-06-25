@@ -345,7 +345,8 @@ public class ProviderController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    @PutMapping(path = "providerHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+//    @PutMapping(path = "providerHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public Map<String, List<LoggingInfo>> migrateProviderHistory(@ApiIgnore Authentication authentication) {
         return providerManager.migrateProviderHistory(authentication);
     }
