@@ -395,7 +395,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return serialized;
     }
 
-    private InfraService deserialize(Resource resource) {
+    public InfraService deserialize(Resource resource) {
         if (resource == null) {
             logger.warn("attempt to deserialize null resource");
             return null;
@@ -456,7 +456,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    private List<Resource> getResourcesWithServiceId(String infraServiceId) {
+    public List<Resource> getResourcesWithServiceId(String infraServiceId) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),

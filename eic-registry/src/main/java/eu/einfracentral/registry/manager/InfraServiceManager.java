@@ -12,10 +12,9 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.validator.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
+import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -48,6 +48,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     @Value("${project.name:}")
     private String projectName;
+
+    @Autowired
+    private VersionService versionService;
 
     @Autowired
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator, IdCreator idCreator,
@@ -84,9 +87,10 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add((loggingInfo));
+        loggingInfoList.add(loggingInfo);
         infraService.setLoggingInfo(loggingInfoList);
 
         // latestOnboardingInfo
@@ -127,18 +131,23 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // update existing service serviceMetadata
         infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList;
-        if (existingService.getLoggingInfo() != null) {
-            loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATED.getKey());
-            loggingInfo.setComment(comment);
-            loggingInfoList = existingService.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        } else {
-            loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth));
-            loggingInfo.setType(LoggingInfo.Types.UPDATED.getKey());
-            loggingInfo.setComment(comment);
-            loggingInfoList = new ArrayList<>();
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
+        // update VS version update
+        if (((infraService.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
+                (infraService.getService().getVersion().equals(existingService.getService().getVersion()))){
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
+                    LoggingInfo.ActionType.UPDATED.getKey(), comment);
+            if (existingService.getLoggingInfo() != null){
+                loggingInfoList = existingService.getLoggingInfo();
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+            } else{
+                loggingInfoList.add(loggingInfo);
+            }
+        } else{
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
+                    LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
             loggingInfoList.add(loggingInfo);
         }
         infraService.setLoggingInfo(loggingInfoList);
@@ -295,32 +304,29 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         service.setActive(active);
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;
-        if (service.getLoggingInfo() != null) {
+        if (active){
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
+        } else{
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
+        }
+        if (service.getLoggingInfo() != null){
             loggingInfoList = service.getLoggingInfo();
-            if (active) {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
-            } else {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
-            }
             loggingInfoList.add(loggingInfo);
-
-            // latestOnboardingInfo
-            service.setLatestOnboardingInfo(loggingInfo);
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
-            if (active) {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.ACTIVATED.getKey());
-            } else {
-                loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.DEACTIVATED.getKey());
-            }
+        }
+        else{
+            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
             loggingInfoList.add(oldServiceRegistration);
             loggingInfoList.add(loggingInfo);
-
-            // latestOnboardingInfo
-            service.setLatestOnboardingInfo(loggingInfo);
         }
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         service.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardingInfo
+        service.setLatestUpdateInfo(loggingInfo);
+
         this.update(service, auth);
         return service;
     }
@@ -355,13 +361,12 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         if (service.getLoggingInfo() != null) {
             loggingInfoList = service.getLoggingInfo();
         } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoForExistingEntry();
-            loggingInfoList.add(oldProviderRegistration);
+            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+            loggingInfoList.add(oldServiceRegistration);
         }
 
-        loggingInfo = LoggingInfo.updateLoggingInfo(User.of(auth).getEmail(), securityService.getRoleName(auth), LoggingInfo.Types.AUDITED.getKey());
-        loggingInfo.setComment(comment);
-        loggingInfo.setActionType(actionType);
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
         loggingInfoList.add(loggingInfo);
         service.setLoggingInfo(loggingInfoList);
 
@@ -378,25 +383,38 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
-        Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
+        facetFilter.addFilter("active", true);
+        facetFilter.addFilter("latest", true);
         List<InfraService> serviceList = getAll(facetFilter, auth).getResults();
+        facetFilter.setQuantity(1000);
+        facetFilter.addFilter("active", true);
+        facetFilter.addFilter("latest", true);
+        Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
+        Browsing<InfraService> ret = serviceBrowsing;
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
         for (InfraService infraService : serviceList) {
             if (infraService.getLatestAuditInfo() != null) {
-                if (Long.parseLong(infraService.getLatestAuditInfo().getDate()) < interval) {
-                    serviceBrowsing.getResults().remove(infraService);
+                if (Long.parseLong(infraService.getLatestAuditInfo().getDate()) > interval) {
+                    int index = 0;
+                    for (int i=0; i<serviceBrowsing.getResults().size(); i++){
+                        if (serviceBrowsing.getResults().get(i).getService().getId().equals(infraService.getService().getId())){
+                            index = i;
+                            break;
+                        }
+                    }
+                    ret.getResults().remove(index);
                 }
             }
         }
-        Collections.shuffle(serviceBrowsing.getResults());
-        for (int i = serviceBrowsing.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
-            serviceBrowsing.getResults().remove(i);
+        Collections.shuffle(ret.getResults());
+        for (int i = ret.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
+            ret.getResults().remove(i);
         }
-        serviceBrowsing.setFrom(ff.getFrom());
-        serviceBrowsing.setTo(serviceBrowsing.getResults().size());
-        serviceBrowsing.setTotal(serviceBrowsing.getResults().size());
-        return serviceBrowsing;
+        ret.setFrom(ff.getFrom());
+        ret.setTo(ret.getResults().size());
+        ret.setTotal(ret.getResults().size());
+        return ret;
     }
 
     @Override
@@ -459,6 +477,162 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             featuredService = services.get(randomNumberGenerator.nextInt(services.size()));
         }
         return featuredService;
+    }
+
+//    @Override
+    public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
+        InfraService infraService = get(id);
+        List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+        allResources.sort(Comparator.comparing((Resource::getCreationDate)));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        for (Resource resource : allResources){
+            InfraService service = deserialize(resource);
+            if (service.getLoggingInfo() != null){
+                loggingInfoList.addAll(service.getLoggingInfo());
+            }
+        }
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+        return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+    }
+
+    public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
+        Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
+        List<InfraService> allInfraServices = getAll(ff, auth).getResults();
+        List<Resource> allResources;
+        for (InfraService infraService : allInfraServices) {
+            allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+            allResources.sort(Comparator.comparing((Resource::getCreationDate)));
+            boolean firstResource = true;
+            for (Resource resource : allResources) {
+                List<LoggingInfo> resourceHistory = new ArrayList<>();
+                List<Version> versions = versionService.getVersionsByResource(resource.getId()); // get all updates of a specific Version of a specific Service
+                versions.sort(Comparator.comparing(Version::getCreationDate));
+                boolean firstVersion = true;
+                for (Version version : versions) {
+                    // Save Version as Resource so we can deserialize it and get userFullName
+                    Resource tempResource = resource;
+                    tempResource.setPayload(version.getPayload());
+                    InfraService tempService = deserialize(tempResource);
+                    LoggingInfo loggingInfo = new LoggingInfo();
+                    if (firstResource && firstVersion) {
+                        loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                        loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
+                        loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                        if (tempService.getMetadata() != null && tempService.getMetadata().getRegisteredBy() != null){
+                            if (tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("System")){
+                                loggingInfo.setUserRole("system");
+                            } else{
+                                loggingInfo.setUserFullName(tempService.getMetadata().getRegisteredBy());
+                            }
+                        }
+                        firstResource = false;
+                        firstVersion = false;
+                    } else if (!firstResource && firstVersion) {
+                        loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                        loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED_VERSION.getKey());
+                        loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                        if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
+                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System")){
+                                loggingInfo.setUserRole("system");
+                            } else{
+                                loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
+                            }
+                        }
+                        firstVersion = false;
+                    } else {
+                        loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                        loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED.getKey());
+                        loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                        if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
+                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System")){
+                                loggingInfo.setUserRole("system");
+                            } else{
+                                loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
+                            }
+                        }
+                    }
+                    resourceHistory.add(loggingInfo);
+                }
+                resourceHistory.sort(Comparator.comparing(LoggingInfo::getDate));
+
+                InfraService service = deserialize(resource);
+
+                if (service.getLoggingInfo() != null) {
+                    List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
+                    for (LoggingInfo loggingInfo : loggingInfoList) {
+                        // update initialization type
+                        if (loggingInfo.getType().equals("initialization")) {
+                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
+                            loggingInfo.setDate(service.getMetadata().getRegisteredAt()); // we may need to go further to core creationDate
+                        }
+                        // migrate all the other states
+                        if (loggingInfo.getType().equals("registered")){
+                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
+                        } else if (loggingInfo.getType().equals("updated")){
+                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED.getKey());
+                        } else if (loggingInfo.getType().equals("deleted")){
+                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.DELETED.getKey());
+                        } else if (loggingInfo.getType().equals("activated")){
+                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.ACTIVATED.getKey());
+                        } else if (loggingInfo.getType().equals("deactivated")){
+                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                        } else if (loggingInfo.getType().equals("approved")){
+                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.APPROVED.getKey());
+                        } else if (loggingInfo.getType().equals("validated")){
+                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.VALIDATED.getKey());
+                        } else if (loggingInfo.getType().equals("rejected")){
+                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.REJECTED.getKey());
+                        } else if (loggingInfo.getType().equals("audited")){
+                            loggingInfo.setType(LoggingInfo.Types.AUDIT.getKey());
+                        }
+                    }
+                    List<LoggingInfo> concatLoggingInfoList = new ArrayList<>();
+                    if (loggingInfoList.get(0).getType().equals(LoggingInfo.Types.UPDATE.getKey()) || loggingInfoList.get(0).getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+                        Instant loggingInstant = Instant.ofEpochSecond(Long.parseLong(loggingInfoList.get(0).getDate()));
+                        Instant firstHistoryInstant = Instant.ofEpochSecond(Long.parseLong(resourceHistory.get(0).getDate()));
+                        Duration dif = Duration.between(firstHistoryInstant, loggingInstant);
+                        long sec = dif.getSeconds();
+                        if (sec > 20){ // if the difference < 20 secs, both lists contain the same items. If not (>20), concat them
+                            for (LoggingInfo loggingFromHistory : resourceHistory) {
+                                Instant historyInstant = Instant.ofEpochSecond(Long.parseLong(loggingFromHistory.getDate()));
+                                Duration difference = Duration.between(historyInstant, loggingInstant);
+                                long seconds = difference.getSeconds();
+                                if (seconds > 20){
+                                    concatLoggingInfoList.add(loggingFromHistory);
+                                } else{
+                                    concatLoggingInfoList.addAll(loggingInfoList);
+                                    service.setLoggingInfo(concatLoggingInfoList);
+                                    break;
+                                }
+                            }
+                        }
+                    } // else it's on the Onboard state, so we keep the existing LoggingInfo
+                } else {
+                    service.setLoggingInfo(resourceHistory);
+                }
+                //            logger.info(String.format("Resource's [%s] new Logging Info %s", infraService.getService().getName(), infraService.getLoggingInfo()));
+                //            super.update(infraService, auth);
+                if (service.getService().getVersion() == null){
+                    allMigratedLoggingInfos.put(service.getService().getId()+" with null version", service.getLoggingInfo());
+                } else{
+                    allMigratedLoggingInfos.put(service.getService().getId()+" with version "+service.getService().getVersion(), service.getLoggingInfo());
+                }
+            }
+        }
+    return allMigratedLoggingInfos;
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

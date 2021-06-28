@@ -350,4 +350,17 @@ public class ServiceController {
         return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 
+    // Get all modification details of a specific Resource based on id.
+    @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Paging<LoggingInfo> loggingInfoHistory = this.infraService.getLoggingInfoHistory(id);
+        return ResponseEntity.ok(loggingInfoHistory);
+    }
+
+//    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public Map<String, List<LoggingInfo>> migrateResourceHistory(@ApiIgnore Authentication authentication) {
+        return infraService.migrateResourceHistory(authentication);
+    }
+
 }
