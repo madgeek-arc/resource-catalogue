@@ -495,6 +495,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
     }
 
+    // TODO: After migrating for active/latest, migrate for inactive/non-latest too (if infraService.loggingInfo == null/empty)
     public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
         FacetFilter ff = new FacetFilter();
@@ -623,13 +624,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 } else {
                     service.setLoggingInfo(resourceHistory);
                 }
-                //            logger.info(String.format("Resource's [%s] new Logging Info %s", infraService.getService().getName(), infraService.getLoggingInfo()));
-                //            super.update(infraService, auth);
                 if (service.getService().getVersion() == null){
                     allMigratedLoggingInfos.put(service.getService().getId()+" with null version", service.getLoggingInfo());
                 } else{
                     allMigratedLoggingInfos.put(service.getService().getId()+" with version "+service.getService().getVersion(), service.getLoggingInfo());
                 }
+                logger.info(String.format("Resource's [%s] new Logging Info %s", service.getService().getName(), service.getLoggingInfo()));
+                super.update(service, auth);
             }
         }
     return allMigratedLoggingInfos;
