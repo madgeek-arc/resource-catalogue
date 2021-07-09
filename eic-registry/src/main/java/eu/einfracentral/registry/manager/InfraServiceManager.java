@@ -495,29 +495,35 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
     }
 
-    // TODO: After migrating for active/latest, migrate for inactive/non-latest too (if infraService.loggingInfo == null/empty)
+    // TODO: First run with active/latest and no broke segment, second without active/latest and broke segment
     public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
+//        ff.addFilter("active", true);
+//        ff.addFilter("latest", true);
         List<InfraService> allInfraServices = getAll(ff, auth).getResults();
         List<Resource> allResources;
         for (InfraService infraService : allInfraServices) {
             allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             boolean firstResource = true;
+            boolean broke = false;
             for (Resource resource : allResources) {
                 List<LoggingInfo> resourceHistory = new ArrayList<>();
                 List<Version> versions = versionService.getVersionsByResource(resource.getId()); // get all updates of a specific Version of a specific Service
                 versions.sort(Comparator.comparing(Version::getCreationDate));
                 boolean firstVersion = true;
                 for (Version version : versions) {
+                    broke = false;
                     // Save Version as Resource so we can deserialize it and get userFullName
                     Resource tempResource = resource;
                     tempResource.setPayload(version.getPayload());
                     InfraService tempService = deserialize(tempResource);
+                    if (tempService.getLoggingInfo() != null && !tempService.getLoggingInfo().isEmpty()){
+                        broke = true;
+                        break;
+                    }
                     LoggingInfo loggingInfo = new LoggingInfo();
                     if (firstResource && firstVersion) {
                         loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
@@ -558,6 +564,10 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     }
                     resourceHistory.add(loggingInfo);
                 }
+                if (broke){
+                    continue;
+                }
+
                 resourceHistory.sort(Comparator.comparing(LoggingInfo::getDate));
 
                 InfraService service = deserialize(resource);
@@ -630,7 +640,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     allMigratedLoggingInfos.put(service.getService().getId()+" with version "+service.getService().getVersion(), service.getLoggingInfo());
                 }
                 logger.info(String.format("Resource's [%s] new Logging Info %s", service.getService().getName(), service.getLoggingInfo()));
-                super.update(service, auth);
+//                super.update(service, auth);
             }
         }
     return allMigratedLoggingInfos;
