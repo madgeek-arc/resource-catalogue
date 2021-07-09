@@ -524,7 +524,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                         loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
                         loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
                         if (tempService.getMetadata() != null && tempService.getMetadata().getRegisteredBy() != null){
-                            if (tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("System")){
+                            if (tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("System") || tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("einfracentral")){
                                 loggingInfo.setUserRole("system");
                             } else{
                                 loggingInfo.setUserFullName(tempService.getMetadata().getRegisteredBy());
@@ -537,7 +537,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                         loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED_VERSION.getKey());
                         loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
                         if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
-                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System")){
+                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System") || tempService.getMetadata().getModifiedBy().equalsIgnoreCase("einfracentral")){
                                 loggingInfo.setUserRole("system");
                             } else{
                                 loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
@@ -549,7 +549,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                         loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED.getKey());
                         loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
                         if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
-                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System")){
+                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System") || tempService.getMetadata().getModifiedBy().equalsIgnoreCase("einfracentral")){
                                 loggingInfo.setUserRole("system");
                             } else{
                                 loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
