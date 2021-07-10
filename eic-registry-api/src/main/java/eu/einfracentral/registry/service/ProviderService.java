@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
@@ -85,4 +86,18 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateProviderHistory(Authentication auth);
+
+    /**
+     * Get the History of the Provider with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<LoggingInfo> getLoggingInfoHistory(String id);
 }

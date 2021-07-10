@@ -5,6 +5,7 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.AuthoritiesMapper;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
@@ -28,7 +29,7 @@ import java.util.stream.Stream;
 
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
+public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
     private Map<String, SimpleGrantedAuthority> userRolesMap;
@@ -86,6 +87,25 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         return out;
     }
 
+    @Override
+    public boolean isAdmin(String email) {
+        if (!userRolesMap.containsKey(email)) {
+            return false;
+        } else {
+            return userRolesMap.get(email).getAuthority().equals("ROLE_ADMIN");
+        }
+    }
+
+    @Override
+    public boolean isEPOT(String email) {
+        if (!userRolesMap.containsKey(email)) {
+            return false;
+        } else {
+            return userRolesMap.get(email).getAuthority().equals("ROLE_EPOT");
+        }
+    }
+
+    @Override
     public void updateAuthorities() {
         logger.info("Updating authorities map");
         mapAuthorities(admins);
