@@ -68,6 +68,7 @@
       <xs:element default="null" minOccurs="0" name="date" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="type" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="userEmail" type="xs:string"/>
+      <xs:element default="null" minOccurs="0" name="userFullName" type="xs:string"/>
       <xs:element default="null" minOccurs="0" name="userRole" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>

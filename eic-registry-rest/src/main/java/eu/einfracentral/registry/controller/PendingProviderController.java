@@ -59,13 +59,13 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PostMapping("/transform/pending")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void transformProviderToPending(@RequestParam String providerId, @ApiIgnore Authentication auth) {
         pendingProviderService.transformToPending(providerId, auth);
     }
 
     @PostMapping("/transform/active")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void transformProviderToActive(@RequestParam String providerId, @ApiIgnore Authentication auth) {
         pendingProviderService.transformToActive(providerId, auth);
     }
@@ -96,7 +96,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
-        if (provider.getId() == null) {
+        if (provider.getId() == null || provider.getId().equals("")) {
             provider.setId(idCreator.createProviderId(provider));
         }
         try {
@@ -112,7 +112,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth, #provider)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #provider)")
     public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         pendingProviderService.transformToPending(provider.getId(), auth);
         ProviderBundle bundle = pendingProviderService.get(provider.getId());

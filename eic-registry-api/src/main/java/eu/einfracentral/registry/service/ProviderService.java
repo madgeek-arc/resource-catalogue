@@ -3,11 +3,11 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.*;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
@@ -46,23 +46,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     boolean validateUrl(URL urlForValidation) throws Throwable;
 
     void requestProviderDeletion(String providerId, Authentication auth);
-
-
-    // TODO: move to Infra
-    List<InfraService> getInfraServices(String providerId);
-
-    // TODO: move to Infra
-    List<Service> getServices(String providerId);
-
-    // TODO: move to Infra
-    List<Service> getActiveServices(String providerId);
-
-    // TODO: move to Infra
-    Service getFeaturedService(String providerId);
-
-    // TODO: move to Infra
-    List<InfraService> getInactiveServices(String providerId);
-
 
     List<T> getInactive();
 
@@ -103,4 +86,18 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateProviderHistory(Authentication auth);
+
+    /**
+     * Get the History of the Provider with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<LoggingInfo> getLoggingInfoHistory(String id);
 }
