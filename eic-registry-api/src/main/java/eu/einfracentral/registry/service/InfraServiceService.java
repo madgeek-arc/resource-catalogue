@@ -224,11 +224,30 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
-//
-//    /**
-//     * Migrates Service's fields for Catris.
-//     *
-//     */
-//    void migrateCatrisServices(List<InfraService> infraServices);
 
+    List<InfraService> getInfraServices(String providerId);
+
+    List<Service> getServices(String providerId);
+
+    List<Service> getActiveServices(String providerId);
+
+    InfraService getServiceTemplate(String providerId);
+
+    Service getFeaturedService(String providerId);
+
+    List<InfraService> getInactiveServices(String providerId);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth);
+
+    /**
+     * Get the History of the Resource with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<LoggingInfo> getLoggingInfoHistory(String id);
 }

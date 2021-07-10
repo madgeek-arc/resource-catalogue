@@ -102,7 +102,7 @@ public class RegistrationMailService {
             throw new ResourceNotFoundException("Provider is null");
         }
 
-        List<Service> serviceList = providerManager.getServices(providerBundle.getId());
+        List<Service> serviceList = infraServiceManager.getServices(providerBundle.getId());
         Service serviceTemplate = null;
         if (!serviceList.isEmpty()) {
             root.put("service", serviceList.get(0));
@@ -121,6 +121,7 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("registrationEmail", registrationEmail);
         // get the first user's information for the registration team email
+        // TODO: GET THE userFullName & userEmail from LoggingInfo (the one who REGISTERED)
         root.put("user", providerBundle.getProvider().getUsers().get(0));
 
         try {
