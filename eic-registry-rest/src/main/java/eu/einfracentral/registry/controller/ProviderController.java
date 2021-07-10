@@ -337,4 +337,17 @@ public class ProviderController {
                 providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
         return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
+
+    // Get all modification details of a specific Provider based on id.
+    @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Paging<LoggingInfo> loggingInfoHistory = this.providerManager.getLoggingInfoHistory(id);
+        return ResponseEntity.ok(loggingInfoHistory);
+    }
+
+//    @PutMapping(path = "providerHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public Map<String, List<LoggingInfo>> migrateProviderHistory(@ApiIgnore Authentication authentication) {
+        return providerManager.migrateProviderHistory(authentication);
+    }
 }
