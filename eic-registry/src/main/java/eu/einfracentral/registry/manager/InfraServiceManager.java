@@ -15,8 +15,12 @@ import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
 import eu.openminted.registry.core.service.VersionService;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,6 +29,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -481,18 +487,24 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
 //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
-        InfraService infraService = get(id);
-        List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
-        allResources.sort(Comparator.comparing((Resource::getCreationDate)));
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        for (Resource resource : allResources){
-            InfraService service = deserialize(resource);
-            if (service.getLoggingInfo() != null){
-                loggingInfoList.addAll(service.getLoggingInfo());
+        InfraService infraService = new InfraService();
+        try{
+            infraService = get(id);
+            List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+            allResources.sort(Comparator.comparing((Resource::getCreationDate)));
+            List<LoggingInfo> loggingInfoList = new ArrayList<>();
+            for (Resource resource : allResources){
+                InfraService service = deserialize(resource);
+                if (service.getLoggingInfo() != null){
+                    loggingInfoList.addAll(service.getLoggingInfo());
+                }
             }
+            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+        } catch(ResourceNotFoundException e){
+            logger.info(String.format("Resource with id [%s] not found", id));
         }
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-        return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+        return null;
     }
 
     // TODO: First run with active/latest and no broke segment, second without active/latest and broke segment
@@ -644,6 +656,96 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             }
         }
     return allMigratedLoggingInfos;
+    }
+    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth){
+        Map<String, List<LoggingInfo>> allMigratedLogginInfos = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> allServices = getAll(ff, auth).getResults();
+        for (InfraService infraService : allServices){
+            boolean lastAuditFound = false;
+            boolean lastUpdateFound = false;
+            boolean lastOnboardFound = false;
+            LoggingInfo lastUpdate = null;
+            LoggingInfo lastAudit = null;
+            LoggingInfo lastOnboard = null;
+            List<LoggingInfo> loggingInfoList = null;
+            try {
+                loggingInfoList = getLoggingInfoHistory(infraService.getService().getId()).getResults();
+            } catch (NullPointerException e){
+                logger.info(e);
+                continue;
+            }
+            for (LoggingInfo loggingInfo : loggingInfoList){
+                if (loggingInfo.getType().equals(LoggingInfo.Types.UPDATE.getKey()) && !lastUpdateFound){
+                    lastUpdate = loggingInfo;
+                    lastUpdateFound = true;
+                }
+                if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey()) && !lastAuditFound){
+                    lastAudit = loggingInfo;
+                    lastAuditFound = true;
+                }
+                if (loggingInfo.getType().equals(LoggingInfo.Types.ONBOARD.getKey()) && !lastOnboardFound){
+                    lastOnboard = loggingInfo;
+                    lastOnboardFound = true;
+                }
+            }
+            if (infraService.getLatestOnboardingInfo() == null){
+                infraService.setLatestOnboardingInfo(lastOnboard);
+            }
+            if (infraService.getLatestUpdateInfo() == null){
+                infraService.setLatestUpdateInfo(lastUpdate);
+            }
+            if (infraService.getLatestAuditInfo() == null){
+                infraService.setLatestAuditInfo(lastAudit);
+            }
+
+            List<LoggingInfo> latestLoggings = new ArrayList<>();
+            latestLoggings.add(lastOnboard);
+            latestLoggings.add(lastUpdate);
+            latestLoggings.add(lastAudit);
+            logger.info(String.format("Resource's [%s] new Latest Onboard Info %s", infraService.getService().getName(), infraService.getLatestOnboardingInfo()));
+            logger.info(String.format("Resource's [%s] new Latest Update Info %s", infraService.getService().getName(), infraService.getLatestUpdateInfo()));
+            logger.info(String.format("Resource's [%s] new Latest Audit Info %s", infraService.getService().getName(), infraService.getLatestAuditInfo()));
+            super.update(infraService, auth);
+            allMigratedLogginInfos.put(infraService.getService().getId(), latestLoggings);
+        }
+        return allMigratedLogginInfos;
+    }
+
+    public void updateResourceAudits(Authentication auth){
+        JSONParser parser = new JSONParser();
+        try{
+            JSONArray resourceJSON = (JSONArray) parser.parse(new FileReader("/home/mike/Desktop/ResourceAudits.json"));
+            for (int i = 0; i < resourceJSON.size(); i++){
+//                logger.info(resourceJSON.get(i));
+                JSONObject jObject = (JSONObject) resourceJSON.get(i);
+                String resourceId = jObject.getAsString("id");
+                InfraService infraService = get(resourceId);
+                JSONArray loggingInfoObject = (JSONArray) jObject.get("loggingInfo");
+                JSONObject loggingInfoArray = (JSONObject) loggingInfoObject.get(0);
+                LoggingInfo loggingInfo = new LoggingInfo();
+                loggingInfo.setDate(loggingInfoArray.getAsString("date"));
+                loggingInfo.setUserEmail(loggingInfoArray.getAsString("userEmail"));
+                loggingInfo.setUserFullName(loggingInfoArray.getAsString("userFullName"));
+                loggingInfo.setUserRole(loggingInfoArray.getAsString("userRole"));
+                loggingInfo.setType(loggingInfoArray.getAsString("type"));
+                loggingInfo.setComment(loggingInfoArray.getAsString("comment"));
+                loggingInfo.setActionType(loggingInfoArray.getAsString("actionType"));
+                List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
+                logger.info(resourceId);
+                logger.info(String.format("Old Logging Info %s", infraService.getLoggingInfo()));
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                infraService.setLoggingInfo(loggingInfoList);
+                logger.info(String.format("New Logging Info %s", infraService.getLoggingInfo()));
+                super.update(infraService, auth);
+            }
+        } catch (FileNotFoundException e){
+            logger.info("asdf");
+        } catch (ParseException g){
+            logger.info("asdf2");
+        }
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period

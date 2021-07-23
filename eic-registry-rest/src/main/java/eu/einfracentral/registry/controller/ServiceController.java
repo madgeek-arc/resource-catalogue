@@ -363,4 +363,15 @@ public class ServiceController {
         return infraService.migrateResourceHistory(authentication);
     }
 
+//    @PutMapping(path = "resourceLatestHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(@ApiIgnore Authentication authentication) {
+        return infraService.migrateLatestResourceHistory(authentication);
+    }
+
+//    @PutMapping(path = "updateResourceAudits", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public void updateResourceAudits(@ApiIgnore Authentication authentication) {
+        infraService.updateResourceAudits(authentication);
+    }
 }

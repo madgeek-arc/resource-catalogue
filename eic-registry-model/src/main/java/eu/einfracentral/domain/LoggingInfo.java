@@ -5,6 +5,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -141,6 +143,48 @@ public class LoggingInfo {
         ret.setType(Types.UPDATE.getKey());
         ret.setActionType(actionType);
         ret.setUserRole("system");
+        return ret;
+    }
+
+    // find the AUDIT_STATE of a specific Provider or Resource through its LoggingInfo list
+    //TODO: decide if we need this method
+    public static String createAuditVocabularyStatuses(List<LoggingInfo> loggingInfoList){
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+        Boolean hasBeenAudited = false;
+        Boolean hasBeenUpdatedAfterAudit = false;
+        String auditActionType = "";
+        int auditIndex = -1;
+        for (LoggingInfo loggingInfo : loggingInfoList){
+            auditIndex++;
+            if (loggingInfo.getType().equals(Types.AUDIT.getKey())){
+                hasBeenAudited = true;
+                auditActionType = loggingInfo.getActionType();
+                break;
+            }
+        }
+        // if we have an update after the audit
+        if (hasBeenAudited){
+            for (int i=0; i<auditIndex; i++){
+                if (loggingInfoList.get(i).getType().equals(Types.UPDATE.getKey())){
+                    hasBeenUpdatedAfterAudit = true;
+                    break;
+                }
+            }
+        }
+        String ret = null;
+        if (!hasBeenAudited){
+            ret = "Not Audited";
+        } else if (hasBeenAudited && !hasBeenUpdatedAfterAudit){
+            if (auditActionType.equals(ActionType.INVALID.getKey())){
+                ret = "Invalid and not updated";
+            }
+        } else if (hasBeenAudited && hasBeenUpdatedAfterAudit){
+            if (auditActionType.equals(ActionType.INVALID.getKey())){
+                ret = "Invalid and updated";
+            }
+        } else{
+            ret = "Valid";
+        }
         return ret;
     }
 
