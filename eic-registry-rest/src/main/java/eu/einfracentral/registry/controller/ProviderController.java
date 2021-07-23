@@ -129,8 +129,7 @@ public class ProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                   @RequestParam(required = false) Set<String> status, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -144,12 +143,8 @@ public class ProviderController {
             sort.put(orderField, order);
             ff.setOrderBy(sort);
         }
-        allRequestParams.remove("status");
         ff.setFilter(allRequestParams);
         List<Provider> providerList = new LinkedList<>();
-        if (status != null) {
-            ff.addFilter("status", status);
-        }
         Paging<ProviderBundle> providerBundlePaging = providerManager.getAll(ff, auth);
         for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
             providerList.add(providerBundle.getProvider());
@@ -175,7 +170,7 @@ public class ProviderController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
-                                                                        @RequestParam(required = false) Set<String> status) {
+                                                                        @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> auditState) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -193,6 +188,22 @@ public class ProviderController {
         ff.setFilter(allRequestParams);
         if (status != null) {
             ff.addFilter("status", status);
+        }
+        //TODO: decide how we proceed with audit filters
+        if (auditState != null) {
+            allRequestParams.remove("auditState");
+            if (auditState.contains("valid")){
+                ff.addFilter("latestAuditActionType", "valid");
+            }
+            if (auditState.contains("not audited")){
+                ff.addFilter("latestAuditActionType", null);
+            }
+            if (auditState.contains("invalid and not updated")){
+                ff.addFilter("latestAuditActionType", "invalid");
+            }
+            if (auditState.contains("invalid and updated")){
+                ff.addFilter("latestAuditActionType", "invalid");
+            }
         }
         return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
@@ -354,5 +365,17 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public Map<String, List<LoggingInfo>> migrateProviderHistory(@ApiIgnore Authentication authentication) {
         return providerManager.migrateProviderHistory(authentication);
+    }
+
+//    @PutMapping(path = "providerLatestHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public Map<String, List<LoggingInfo>> migrateLatestProviderHistory(@ApiIgnore Authentication authentication) {
+        return providerManager.migrateLatestProviderHistory(authentication);
+    }
+
+//    @PutMapping(path = "updateProviderAudits", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public void updateProviderAudits(@ApiIgnore Authentication authentication) {
+        providerManager.updateProviderAudits(authentication);
     }
 }

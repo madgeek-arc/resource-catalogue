@@ -100,4 +100,16 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateLatestProviderHistory(Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    void updateProviderAudits(Authentication auth);
 }

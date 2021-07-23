@@ -250,4 +250,16 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    void updateResourceAudits(Authentication auth);
 }
