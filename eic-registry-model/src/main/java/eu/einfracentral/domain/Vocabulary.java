@@ -1,7 +1,5 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.ui.FieldType;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -60,6 +58,13 @@ public class Vocabulary implements Identifiable {
         FUNDING_BODY("Funding body"),
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
+
+        // FIXME: Remove vocabulary type enumeration. Find a way to replace this functionality, so that when a new
+        //  vocabulary type is created, there will be no need to make changes in code.
+        // OpenAIRE vocabularies
+        PORTFOLIOS("Portfolios"),
+        USERS("Users"),
+
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
         PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
@@ -95,6 +100,7 @@ public class Vocabulary implements Identifiable {
 
         /**
          * Checks if the given {@link String} exists in the values of the enum.
+         *
          * @return boolean
          */
         public static boolean exists(String s) {
