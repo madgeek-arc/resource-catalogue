@@ -64,6 +64,7 @@ public class Vocabulary implements Identifiable {
         // OpenAIRE vocabularies
         PORTFOLIOS("Portfolios"),
         USERS("Users"),
+        SUBUSERS("Subusers"),
 
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
