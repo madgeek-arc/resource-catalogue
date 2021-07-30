@@ -172,16 +172,18 @@ public class UiElementsManager implements UiElementsService {
         UiService uiService = new UiService();
         uiService.setService(service.getService());
         uiService.setExtras(new HashMap<>());
-        for (DynamicField field : service.getExtras()) {
-            Field fieldInfo = getField(field.getFieldId());
-            if (fieldInfo != null && !fieldInfo.getMultiplicity()) {
-                if (field.getValue() != null && !field.getValue().isEmpty()) {
-                    uiService.getExtras().put(field.getName(), field.getValue().get(0));
+        if (service.getExtras() != null) {
+            for (DynamicField field : service.getExtras()) {
+                Field fieldInfo = getField(field.getFieldId());
+                if (fieldInfo != null && !fieldInfo.getMultiplicity()) {
+                    if (field.getValue() != null && !field.getValue().isEmpty()) {
+                        uiService.getExtras().put(field.getName(), field.getValue().get(0));
+                    } else {
+                        uiService.getExtras().put(field.getName(), field.getValue());
+                    }
                 } else {
                     uiService.getExtras().put(field.getName(), field.getValue());
                 }
-            } else {
-                uiService.getExtras().put(field.getName(), field.getValue());
             }
         }
         return uiService;
