@@ -15,7 +15,7 @@ public class DynamicField {
 
     @XmlElementWrapper(name = "values")
     @XmlElement(name = "value")
-    private List<Object> values;
+    private List<?> values;
 
     @XmlElement
     private int fieldId;
@@ -30,11 +30,11 @@ public class DynamicField {
         this.name = name;
     }
 
-    public List<Object> getValue() {
+    public List<?> getValue() {
         return values;
     }
 
-    public void setValue(List<Object> values) {
+    public void setValue(List<?> values) {
         this.values = values;
     }
 

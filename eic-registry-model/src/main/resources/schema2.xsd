@@ -85,6 +85,12 @@
             
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
             
+      <xs:enumeration value="PORTFOLIOS"/>
+            
+      <xs:enumeration value="USERS"/>
+            
+      <xs:enumeration value="SUBUSERS"/>
+            
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
             
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>

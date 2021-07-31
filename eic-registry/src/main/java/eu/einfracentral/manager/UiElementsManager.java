@@ -137,12 +137,11 @@ public class UiElementsManager implements UiElementsService {
         return null;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public InfraService createService(UiService service) {
+    private List<DynamicField> createExtras(Map<String, ?> extraFields) {
         List<DynamicField> extras = new ArrayList<>();
 
-        for (Map.Entry<String, ?> entry : service.getExtras().entrySet()) {
+        for (Map.Entry<String, ?> entry : extraFields.entrySet()) {
             DynamicField field = new DynamicField();
             field.setName(entry.getKey());
             if (!Collection.class.isAssignableFrom(entry.getValue().getClass())) {
@@ -150,17 +149,32 @@ public class UiElementsManager implements UiElementsService {
                 temp.add(entry.getValue());
                 field.setValue(temp);
             } else {
-                field.setValue((List<Object>) entry.getValue());
+                if (!((List<?>) entry.getValue()).isEmpty()
+                    && Map.class.isAssignableFrom(((List<?>) entry.getValue()).get(0).getClass())) {
+                    List<DynamicField> subFields = new ArrayList<>();
+                    for (Object item : ((List<?>) entry.getValue())) {
+                        subFields.addAll(createExtras((Map<String, ?>) item));
+                    }
+                    field.setValue(subFields);
+                } else {
+                    field.setValue((List<Object>) entry.getValue());
+                }
             }
-            extras.add(field);
-
 
             Field fieldInfo = getExtraField(entry.getKey());
             if (fieldInfo != null) {
                 field.setFieldId(fieldInfo.getId());
             }
 
+            extras.add(field);
         }
+        return extras;
+    }
+
+    @Override
+    public InfraService createService(UiService service) {
+        List<DynamicField> extras = createExtras(service.getExtras());
+
         InfraService infraService = new InfraService();
         infraService.setService(service.getService());
         infraService.setExtras(extras);
