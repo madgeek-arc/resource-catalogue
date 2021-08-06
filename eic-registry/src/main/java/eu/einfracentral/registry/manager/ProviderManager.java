@@ -16,6 +16,7 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.VersionService;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minidev.json.JSONArray;
@@ -29,7 +30,9 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
+import org.springframework.web.util.NestedServletException;
 
+import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
@@ -37,6 +40,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.*;
@@ -97,7 +102,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
-
+        validateEmailsAndPhoneNumbers(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
@@ -134,6 +139,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
+        validateEmailsAndPhoneNumbers(provider);
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;
@@ -981,6 +987,55 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             logger.info("asdf");
         } catch (ParseException g){
             logger.info("asdf2");
+        }
+    }
+
+    public void validateEmailsAndPhoneNumbers(ProviderBundle providerBundle){
+        EmailValidator validator = EmailValidator.getInstance();
+        Pattern pattern = Pattern.compile("^(\\+\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
+        // main contact email
+        String mainContactEmail = providerBundle.getProvider().getMainContact().getEmail();
+        if (!validator.isValid(mainContactEmail)) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Main Contact Email", mainContactEmail));
+        }
+        // main contact phone
+        if (providerBundle.getProvider().getMainContact().getPhone() != null && !providerBundle.getProvider().getMainContact().getPhone().equals("")){
+            String mainContactPhone = providerBundle.getProvider().getMainContact().getPhone();
+            Matcher mainContactPhoneMatcher = pattern.matcher(mainContactPhone);
+            try {
+                assertTrue(mainContactPhoneMatcher.matches());
+            } catch(AssertionError e){
+                throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Main Contact Phone", mainContactPhone));
+            }
+        }
+        // public contact
+        for (ProviderPublicContact providerPublicContact : providerBundle.getProvider().getPublicContacts()){
+            // public contact email
+            if (providerPublicContact.getEmail() != null && !providerPublicContact.getEmail().equals("")){
+                String publicContactEmail = providerPublicContact.getEmail();
+                if (!validator.isValid(publicContactEmail)) {
+                    throw new ValidationException(String.format("Email [%s] is not valid. Found in field Public Contact Email", publicContactEmail));
+                }
+            }
+            // public contact phone
+            if (providerPublicContact.getPhone() != null && !providerPublicContact.getPhone().equals("")){
+                String publicContactPhone = providerPublicContact.getPhone();
+                Matcher publicContactPhoneMatcher = pattern.matcher(publicContactPhone);
+                try {
+                    assertTrue(publicContactPhoneMatcher.matches());
+                } catch(AssertionError e){
+                    throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Public Contact Phone", publicContactPhone));
+                }
+            }
+        }
+        // user email
+        for (User user : providerBundle.getProvider().getUsers()){
+            if (user.getEmail() != null && !user.getEmail().equals("")){
+                String userEmail = user.getEmail();
+                if (!validator.isValid(userEmail)) {
+                    throw new ValidationException(String.format("Email [%s] is not valid. Found in field User Email", userEmail));
+                }
+            }
         }
     }
 }
