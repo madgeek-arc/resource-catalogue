@@ -17,6 +17,7 @@ import eu.openminted.registry.core.service.ServiceException;
 import eu.openminted.registry.core.service.VersionService;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minidev.json.JSONArray;
@@ -35,9 +36,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
+import static org.junit.Assert.assertTrue;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
@@ -85,6 +89,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             infraService.getService().setId(id);
         }
         validate(infraService);
+        validateEmailsAndPhoneNumbers(infraService);
         infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
@@ -117,6 +122,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
+        validateEmailsAndPhoneNumbers(infraService);
         InfraService existingService;
 
         // if service version is empty set it null
@@ -745,6 +751,56 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             logger.info("asdf");
         } catch (ParseException g){
             logger.info("asdf2");
+        }
+    }
+
+    public void validateEmailsAndPhoneNumbers(InfraService infraService){
+        EmailValidator validator = EmailValidator.getInstance();
+        Pattern pattern = Pattern.compile("^(\\+\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
+        // main contact email
+        String mainContactEmail = infraService.getService().getMainContact().getEmail();
+        if (!validator.isValid(mainContactEmail)) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Main Contact Email", mainContactEmail));
+        }
+        // main contact phone
+        if (infraService.getService().getMainContact().getPhone() != null && !infraService.getService().getMainContact().getPhone().equals("")){
+            String mainContactPhone = infraService.getService().getMainContact().getPhone();
+            Matcher mainContactPhoneMatcher = pattern.matcher(mainContactPhone);
+            try {
+                assertTrue(mainContactPhoneMatcher.matches());
+            } catch(AssertionError e){
+                throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Main Contact Phone", mainContactPhone));
+            }
+        }
+        // public contact
+        for (ServicePublicContact servicePublicContact : infraService.getService().getPublicContacts()){
+            // public contact email
+            if (servicePublicContact.getEmail() != null && !servicePublicContact.getEmail().equals("")){
+                String publicContactEmail = servicePublicContact.getEmail();
+                if (!validator.isValid(publicContactEmail)) {
+                    throw new ValidationException(String.format("Email [%s] is not valid. Found in field Public Contact Email", publicContactEmail));
+                }
+            }
+            // public contact phone
+            if (servicePublicContact.getPhone() != null && !servicePublicContact.getPhone().equals("")){
+                String publicContactPhone = servicePublicContact.getPhone();
+                Matcher publicContactPhoneMatcher = pattern.matcher(publicContactPhone);
+                try {
+                    assertTrue(publicContactPhoneMatcher.matches());
+                } catch(AssertionError e){
+                    throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Public Contact Phone", publicContactPhone));
+                }
+            }
+        }
+        // helpdesk email
+        String helpdeskEmail = infraService.getService().getHelpdeskEmail();
+        if (!validator.isValid(helpdeskEmail)) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Helpdesk Email", helpdeskEmail));
+        }
+        // security contact email
+        String securityContactEmail = infraService.getService().getSecurityContactEmail();
+        if (!validator.isValid(securityContactEmail)) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Security Contact Email", securityContactEmail));
         }
     }
 
