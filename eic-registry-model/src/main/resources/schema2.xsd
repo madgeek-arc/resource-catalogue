@@ -41,6 +41,61 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="field">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ID"/>
+      <xs:enumeration value="NAME"/>
+      <xs:enumeration value="RESOURCE_ORGANISATION"/>
+      <xs:enumeration value="RESOURCE_PROVIDERS"/>
+      <xs:enumeration value="WEBPAGE"/>
+      <xs:enumeration value="DESCRIPTION"/>
+      <xs:enumeration value="TAGLINE"/>
+      <xs:enumeration value="LOGO"/>
+      <xs:enumeration value="MULTIMEDIA"/>
+      <xs:enumeration value="USE_CASES"/>
+      <xs:enumeration value="SCIENTIFIC_DOMAINS"/>
+      <xs:enumeration value="CATEGORIES"/>
+      <xs:enumeration value="TARGET_USERS"/>
+      <xs:enumeration value="ACCESS_TYPES"/>
+      <xs:enumeration value="ACCESS_MODES"/>
+      <xs:enumeration value="TAGS"/>
+      <xs:enumeration value="GEOGRAPHICAL_AVAILABILITIES"/>
+      <xs:enumeration value="LANGUAGE_AVAILABILITIES"/>
+      <xs:enumeration value="RESOURCE_GEOGRAPHIC_LOCATIONS"/>
+      <xs:enumeration value="MAIN_CONTACT"/>
+      <xs:enumeration value="PUBLIC_CONTACTS"/>
+      <xs:enumeration value="HELPDESK_EMAIL"/>
+      <xs:enumeration value="SECURITY_CONTACT_EMAILS"/>
+      <xs:enumeration value="TRL"/>
+      <xs:enumeration value="LIFE_CYCLE_STATUS"/>
+      <xs:enumeration value="CERTIFICATIONS"/>
+      <xs:enumeration value="STANDARDS"/>
+      <xs:enumeration value="OPEN_SOURCE_TECHNOLOGIES"/>
+      <xs:enumeration value="VERSION"/>
+      <xs:enumeration value="LAST_UPDATE"/>
+      <xs:enumeration value="CHANGE_LOG"/>
+      <xs:enumeration value="REQUIRED_RESOURCES"/>
+      <xs:enumeration value="RELATED_RESOURCES"/>
+      <xs:enumeration value="RELATED_PLATFORMS"/>
+      <xs:enumeration value="FUNDING_BODY"/>
+      <xs:enumeration value="FUNDING_PROGRAMS"/>
+      <xs:enumeration value="GRANT_PROJECT_NAMES"/>
+      <xs:enumeration value="HELPDESK_PAGE"/>
+      <xs:enumeration value="USER_MANUAL"/>
+      <xs:enumeration value="TERMS_OF_USE"/>
+      <xs:enumeration value="PRIVACY_POLICY"/>
+      <xs:enumeration value="ACCESS_POLICY"/>
+      <xs:enumeration value="SERVICE_LEVEL"/>
+      <xs:enumeration value="TRAINING_INFORMATION"/>
+      <xs:enumeration value="STATUS_MONITORING"/>
+      <xs:enumeration value="MAINTENANCE"/>
+      <xs:enumeration value="ORDER_TYPE"/>
+      <xs:enumeration value="ORDER"/>
+      <xs:enumeration value="PAYMENT_MODEL"/>
+      <xs:enumeration value="PRICING"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="type">
     <xs:restriction base="xs:string">
       <xs:enumeration value="SUPERCATEGORY"/>

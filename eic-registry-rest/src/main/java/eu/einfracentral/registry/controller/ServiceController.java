@@ -198,10 +198,10 @@ public class ServiceController {
 
     @ApiOperation(value = "Get all Resources in the catalogue organized by an attribute, e.g. get Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
+    public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable (value = "field") Service.Field field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         Map<String, List<InfraService>> results;
         try {
-            results = infraService.getBy(field);
+            results = infraService.getBy(field.getKey());
         } catch (NoSuchFieldException e) {
             logger.error(e);
             throw e;
