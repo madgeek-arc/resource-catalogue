@@ -121,8 +121,26 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("registrationEmail", registrationEmail);
         // get the first user's information for the registration team email
-        // TODO: GET THE userFullName & userEmail from LoggingInfo (the one who REGISTERED)
-        root.put("user", providerBundle.getProvider().getUsers().get(0));
+        for (LoggingInfo loggingInfo : providerBundle.getLoggingInfo()){
+            if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())){
+                User user = new User();
+                if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")){
+                    user.setEmail(loggingInfo.getUserEmail());
+                }
+                if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")){
+                    String[] parts = loggingInfo.getUserFullName().split(" ");
+                    String name = parts[0];
+                    String surname = parts[1];
+                    user.setName(name);
+                    user.setSurname(surname);
+                }
+                root.put("user", user);
+                break;
+            }
+        }
+        if (!root.containsKey("user")){
+            root.put("user", providerBundle.getProvider().getUsers().get(0));
+        }
 
         try {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
