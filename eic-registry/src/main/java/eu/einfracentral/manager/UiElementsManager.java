@@ -188,19 +188,50 @@ public class UiElementsManager implements UiElementsService {
         uiService.setExtras(new HashMap<>());
         if (service.getExtras() != null) {
             for (DynamicField field : service.getExtras()) {
-                Field fieldInfo = getField(field.getFieldId());
-                if (fieldInfo != null && !fieldInfo.getMultiplicity()) {
-                    if (field.getValue() != null && !field.getValue().isEmpty()) {
-                        uiService.getExtras().put(field.getName(), field.getValue().get(0));
-                    } else {
-                        uiService.getExtras().put(field.getName(), field.getValue());
-                    }
-                } else {
-                    uiService.getExtras().put(field.getName(), field.getValue());
-                }
+                uiService.getExtras().put(field.getName(), getFieldValues(field));
             }
         }
         return uiService;
+    }
+
+    private Object getFieldValues(DynamicField field) {
+        Set<String> innerFieldNames = new HashSet<>();
+        Field fieldInfo = getField(field.getFieldId());
+
+        try {
+            if (field.getValue().size() > 1) {
+                innerFieldNames = field.getValue()
+                        .stream()
+                        .map(o -> (DynamicField) o)
+                        .map(DynamicField::getName)
+                        .collect(Collectors.toSet());
+            }
+        } catch (ClassCastException e) {
+            logger.debug("DynamicField contains string values");
+        }
+
+        // when a field's value is an object (with its own inner fields), a key-value map is created
+        if (!innerFieldNames.isEmpty() && field.getValue().size() >= innerFieldNames.size()) {
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            for (int k = 0; k < field.getValue().size() / innerFieldNames.size(); k++) {
+                Map<String, Object> keyValues = new HashMap<>();
+                for (int i = 0; i < innerFieldNames.size(); i++) {
+                    DynamicField innerField = (DynamicField) field.getValue().get(k * innerFieldNames.size() + i);
+                    if (innerField.getValue().size() == 1) {
+                        keyValues.put(innerField.getName(), innerField.getValue().get(0));
+                    } else { // recurse here for more complex objects
+                        keyValues.put(innerField.getName(), getFieldValues(innerField));
+                    }
+                }
+                mapList.add(keyValues);
+            }
+            return mapList;
+        } else {
+            if (fieldInfo != null && !fieldInfo.getMultiplicity() && field.getValue() != null && !field.getValue().isEmpty()) {
+                return field.getValue().get(0);
+            }
+        }
+        return field.getValue();
     }
 
     @Override
