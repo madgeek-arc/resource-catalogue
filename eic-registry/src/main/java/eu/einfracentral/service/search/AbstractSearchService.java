@@ -1,32 +1,34 @@
-package eu.einfracentral.service;
+package eu.einfracentral.service.search;
 
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.SearchServiceImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bouncycastle.util.Strings;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
-@Service
-@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-public class SearchServiceEIC extends SearchServiceImpl implements SearchService {
+public abstract class AbstractSearchService extends SearchServiceImpl implements SearchService {
 
-    private static final Logger logger = LogManager.getLogger(SearchServiceEIC.class);
-
-    public SearchServiceEIC() {
+    public AbstractSearchService() {
         super();
     }
+
+    /**
+     * User can define custom logic for filtering resources based on the filters provided. The custom queries must be
+     * applied on the existing {@param qBuilder} that is given.
+     *
+     * @param qBuilder   Accepts the {@link BoolQueryBuilder} object used to search.
+     * @param allFilters Filters provided.
+     * @return
+     */
+    public abstract BoolQueryBuilder customFilters(BoolQueryBuilder qBuilder, Map<String, List<Object>> allFilters);
 
     @Override
     public BoolQueryBuilder createQueryBuilder(FacetFilter filter) {
@@ -93,20 +95,13 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
             qBuilder.must(QueryBuilders.matchAllQuery());
         }
 
-        for (Map.Entry<String, List<Object>> filters : allFilters.entrySet()) {
-            if ("active".equals(filters.getKey())) {
-                qBuilder.filter(createDisMaxQuery(filters.getKey(), filters.getValue()));
-            } else if ("latest".equals(filters.getKey())) {
-                qBuilder.filter(createDisMaxQuery(filters.getKey(), filters.getValue()));
-            } else {
-                qBuilder.must(createDisMaxQuery(filters.getKey(), filters.getValue()));
-            }
+        // Custom Filters
+        qBuilder = customFilters(qBuilder, allFilters);
 
-        }
         return qBuilder;
     }
 
-    private DisMaxQueryBuilder createDisMaxQuery(String key, List<Object> filters) {
+    protected DisMaxQueryBuilder createDisMaxQuery(String key, List<Object> filters) {
         DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
         for (Object f : filters) {
             qb.add(termQuery(key, (String) f));
@@ -125,7 +120,7 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
      * @param tieBreaker (parameter of the {@link DisMaxQueryBuilder})
      * @return {@link DisMaxQueryBuilder}
      */
-    private DisMaxQueryBuilder createMatchQuery(List<Object> fields, List<String> keywords, Float boost, Float tieBreaker) {
+    protected DisMaxQueryBuilder createMatchQuery(List<Object> fields, List<String> keywords, Float boost, Float tieBreaker) {
         DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
         for (Object field : fields) {
             for (String keyword : keywords) {
@@ -160,7 +155,7 @@ public class SearchServiceEIC extends SearchServiceImpl implements SearchService
      * @param tieBreaker (parameter of the {@link DisMaxQueryBuilder})
      * @return {@link DisMaxQueryBuilder}
      */
-    private DisMaxQueryBuilder createPhraseQuery(List<Object> fields, List<String> phrases, Float boost, Float tieBreaker) {
+    protected DisMaxQueryBuilder createPhraseQuery(List<Object> fields, List<String> phrases, Float boost, Float tieBreaker) {
         DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
         for (Object field : fields) {
             for (String phrase : phrases) {
