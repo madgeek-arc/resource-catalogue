@@ -14,7 +14,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SearchServiceEIC;
+import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
