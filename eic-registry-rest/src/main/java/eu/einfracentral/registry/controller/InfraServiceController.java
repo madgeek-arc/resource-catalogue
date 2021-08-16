@@ -119,7 +119,7 @@ public class InfraServiceController {
     // TODO: move elsewhere ??
     // FIXME: improve this method!!
     @GetMapping(path = "dynamic/by/extra/{vocabulary}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Map<String, List<UiService>> getByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", defaultValue = "null") String value, Authentication authentication) {
+    public Map<String, List<UiService>> getByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value, Authentication authentication) {
         Map<String, List<UiService>> serviceMap = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
