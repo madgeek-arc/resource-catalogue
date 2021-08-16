@@ -117,7 +117,7 @@ public class UiElementsManager implements UiElementsService {
         return fields;
     }
 
-    private Field getField(int id) {
+    public Field getField(int id) {
         List<Field> allFields = readFields(directory + "/" + FILENAME_FIELDS);
         for (Field field : allFields) {
             if (field.getId() == id) {

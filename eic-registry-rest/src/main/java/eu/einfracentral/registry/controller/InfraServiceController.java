@@ -1,10 +1,14 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.DynamicField;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.dto.UiService;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.UiElementsService;
+import eu.einfracentral.ui.Field;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -24,9 +28,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("infraService")
@@ -36,6 +38,9 @@ public class InfraServiceController {
     private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
     private final InfraServiceService<InfraService, InfraService> infraService;
     private final UiElementsService uiElementsService;
+
+    @Autowired
+    VocabularyService vocabularyService;
 
     @Autowired
     InfraServiceController(InfraServiceService<InfraService, InfraService> service,
@@ -109,6 +114,63 @@ public class InfraServiceController {
         logger.info(service);
 
         return uiElementsService.createUiService(service);
+    }
+
+    // TODO: move elsewhere ??
+    // FIXME: improve this method!!
+    @GetMapping(path = "dynamic/by/extra/{vocabulary}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Map<String, List<UiService>> getByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", defaultValue = "null") String value, Authentication authentication) {
+        Map<String, List<UiService>> serviceMap = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> services = this.infraService.getAll(ff, null).getResults();
+
+        List<Vocabulary> values = new ArrayList<>();
+        if (value == null) {
+            values = vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyType));
+        } else {
+            values.add(vocabularyService.get("name", value));
+        }
+        for (Vocabulary v : values) {
+            serviceMap.put(v.getName(), new ArrayList<>());
+
+            for (InfraService service : services) {
+                if (service.getExtras() == null) {
+                    continue;
+                }
+                for (DynamicField field : service.getExtras()) {
+                    if (valueExists(field, v)) {
+                        serviceMap.get(v.getName()).add(uiElementsService.createUiService(service));
+                        break;
+                    }
+                }
+            }
+        }
+
+        return serviceMap;
+    }
+
+    private boolean valueExists(DynamicField field, Vocabulary vocabulary) {
+        boolean result = false;
+        Field fieldDesc = uiElementsService.getField(field.getFieldId());
+        if (fieldDesc.getType().equals("vocabulary") &&
+                fieldDesc.getForm().getVocabulary().equals(vocabulary.getType())) {
+            for (Object value : field.getValue()) {
+                if (value.equals(vocabulary.getId())) {
+                    result = true;
+                }
+            }
+        } else {
+            for (Object df : field.getValue()) {
+                try {
+                    result = valueExists((DynamicField) df, vocabulary);
+                } catch (Exception e) {
+                    result = false;
+                }
+            }
+//            result = field.getValue().stream().anyMatch(f -> valueExists((DynamicField) f, vocabularyType));
+        }
+        return result;
     }
 
     // TODO: move elsewhere ??

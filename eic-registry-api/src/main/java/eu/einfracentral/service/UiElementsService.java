@@ -23,6 +23,8 @@ public interface UiElementsService {
 
     List<Group> getGroups();
 
+    Field getField(int id);
+
     List<Field> getFields();
 
     List<Field> createFields(String className, String group) throws ClassNotFoundException;
