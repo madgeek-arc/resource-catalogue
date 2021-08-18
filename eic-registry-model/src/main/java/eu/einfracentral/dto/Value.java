@@ -1,5 +1,7 @@
 package eu.einfracentral.dto;
 
+import java.util.Objects;
+
 public class Value {
 
     String id;
@@ -42,5 +44,18 @@ public class Value {
 
     public void setParentId(String parentId) {
         this.parentId = parentId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Value value = (Value) o;
+        return id.equals(value.id) && name.equals(value.name) && Objects.equals(parentId, value.parentId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, parentId);
     }
 }
