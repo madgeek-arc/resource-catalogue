@@ -13,6 +13,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.*;
+import eu.einfracentral.utils.ListUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -556,7 +557,7 @@ public class UiElementsManager implements UiElementsService {
     // TODO: optimize
     @Override
     public List<eu.einfracentral.dto.Value> getControlValues(String type, Boolean used) {
-        List<eu.einfracentral.dto.Value> valuesList = new ArrayList<>();
+        List<eu.einfracentral.dto.Value> usedValues = new ArrayList<>();
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -579,7 +580,7 @@ public class UiElementsManager implements UiElementsService {
                 }
                 for (DynamicField field : service.getExtras()) {
                     if (valueExists(field, v)) {
-                        valuesList.add(new eu.einfracentral.dto.Value(v.getId(), v.getName(), v.getParentId()));
+                        usedValues.add(new eu.einfracentral.dto.Value(v.getId(), v.getName(), v.getParentId()));
                         found = true;
                         break;
                     }
@@ -591,22 +592,14 @@ public class UiElementsManager implements UiElementsService {
         }
 
         if (!used) {
-            return values
+            List<eu.einfracentral.dto.Value> vocValues = values
                     .stream()
-                    .filter(vocabulary ->
-                    {
-                        for (eu.einfracentral.dto.Value v : valuesList) {
-                            if (vocabulary.getId().equals(v.getId())) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    })
                     .map(vocabulary -> new eu.einfracentral.dto.Value(vocabulary.getId(), vocabulary.getName(), vocabulary.getParentId()))
                     .collect(Collectors.toList());
+            return ListUtils.remainingItems(vocValues, usedValues);
         }
 
-        return valuesList;
+        return usedValues;
     }
 
     // TODO: optimize
