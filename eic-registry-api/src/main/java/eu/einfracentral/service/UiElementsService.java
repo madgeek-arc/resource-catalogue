@@ -29,11 +29,15 @@ public interface UiElementsService {
 
     List<Field> createFields(String className, String group) throws ClassNotFoundException;
 
-    Map<String, List<Value>> getControlValuesByType();
+    Map<String, List<Value>> getControlValuesMap();
 
-    List<Value> getControlValuesByType(String type);
+    List<Value> getControlValues(String type);
+
+    List<Value> getControlValues(String type, Boolean used);
 
     InfraService createService(UiService service);
 
     UiService createUiService(InfraService service);
+
+    Map<String, List<UiService>> getUiServicesByExtraVoc(String vocabularyType, String value);
 }
