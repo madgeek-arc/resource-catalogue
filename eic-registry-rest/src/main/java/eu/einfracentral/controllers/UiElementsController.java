@@ -8,10 +8,7 @@ import eu.einfracentral.ui.GroupedFields;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -50,13 +47,13 @@ public class UiElementsController {
         return uiElementsService.getModel();
     }
 
-    @GetMapping(value = "vocabulary/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Value> getControlValuesByType(@PathVariable("type") String type) {
-        return uiElementsService.getControlValuesByType(type);
+    @GetMapping(path = "vocabulary/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<Value> getByExtraVoc(@PathVariable("type") String vocabularyType, @RequestParam(name = "used", required = false) Boolean used) {
+        return uiElementsService.getControlValues(vocabularyType, used);
     }
 
     @GetMapping(value = "vocabularies", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, List<Value>> getControlValuesByType() {
-        return uiElementsService.getControlValuesByType();
+        return uiElementsService.getControlValuesMap();
     }
 }

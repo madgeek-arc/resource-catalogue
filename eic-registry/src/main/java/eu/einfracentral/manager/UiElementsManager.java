@@ -73,7 +73,7 @@ public class UiElementsManager implements UiElementsService {
     @Scheduled(fixedRate = 3600000)
     @CachePut(value = CACHE_FOR_UI)
     public Map<String, List<eu.einfracentral.dto.Value>> cacheVocabularies() {
-        return getControlValuesByType();
+        return getControlValuesMap();
     }
 
     protected String readFile(String filename) throws IOException {
@@ -150,7 +150,7 @@ public class UiElementsManager implements UiElementsService {
                 field.setValue(temp);
             } else {
                 if (!((List<?>) entry.getValue()).isEmpty()
-                    && Map.class.isAssignableFrom(((List<?>) entry.getValue()).get(0).getClass())) {
+                        && Map.class.isAssignableFrom(((List<?>) entry.getValue()).get(0).getClass())) {
                     List<DynamicField> subFields = new ArrayList<>();
                     for (Object item : ((List<?>) entry.getValue())) {
                         subFields.addAll(createExtras((Map<String, ?>) item));
@@ -192,6 +192,37 @@ public class UiElementsManager implements UiElementsService {
             }
         }
         return uiService;
+    }
+
+    @Override
+    public Map<String, List<UiService>> getUiServicesByExtraVoc(String vocabularyType, String value) {
+        Map<String, List<UiService>> serviceMap = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
+
+        List<Vocabulary> values = new ArrayList<>();
+        if (value == null) {
+            values = vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyType));
+        } else {
+            values.add(vocabularyService.get("name", value));
+        }
+        for (Vocabulary v : values) {
+            serviceMap.put(v.getName(), new ArrayList<>());
+
+            for (InfraService service : services) {
+                if (service.getExtras() == null) {
+                    continue;
+                }
+                for (DynamicField field : service.getExtras()) {
+                    if (valueExists(field, v)) {
+                        serviceMap.get(v.getName()).add(createUiService(service));
+                        break;
+                    }
+                }
+            }
+        }
+        return serviceMap;
     }
 
     private Object getFieldValues(DynamicField field) {
@@ -468,7 +499,7 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     @Cacheable(value = CACHE_FOR_UI)
-    public Map<String, List<eu.einfracentral.dto.Value>> getControlValuesByType() {
+    public Map<String, List<eu.einfracentral.dto.Value>> getControlValuesMap() {
         Map<String, List<eu.einfracentral.dto.Value>> controlValues = new HashMap<>();
         List<eu.einfracentral.dto.Value> values;
         FacetFilter ff = new FacetFilter();
@@ -505,7 +536,7 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     @Cacheable(cacheNames = CACHE_FOR_UI, key = "#type")
-    public List<eu.einfracentral.dto.Value> getControlValuesByType(String type) {
+    public List<eu.einfracentral.dto.Value> getControlValues(String type) {
         List<eu.einfracentral.dto.Value> values = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
@@ -520,5 +551,85 @@ public class UiElementsManager implements UiElementsService {
             services.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getService().getName())));
         }
         return values;
+    }
+
+    // TODO: optimize
+    @Override
+    public List<eu.einfracentral.dto.Value> getControlValues(String type, Boolean used) {
+        List<eu.einfracentral.dto.Value> valuesList = new ArrayList<>();
+
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
+        List<Vocabulary> values = vocabularyService.getByType(Vocabulary.Type.fromString(type));
+
+        if (used == null) {
+            return values
+                    .stream()
+                    .map(vocabulary -> new eu.einfracentral.dto.Value(vocabulary.getId(), vocabulary.getName(), vocabulary.getParentId()))
+                    .collect(Collectors.toList());
+        }
+
+        for (Vocabulary v : values) {
+            boolean found = false;
+
+            for (InfraService service : services) {
+                if (service.getExtras() == null) {
+                    continue;
+                }
+                for (DynamicField field : service.getExtras()) {
+                    if (valueExists(field, v)) {
+                        valuesList.add(new eu.einfracentral.dto.Value(v.getId(), v.getName(), v.getParentId()));
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    break;
+                }
+            }
+        }
+
+        if (!used) {
+            return values
+                    .stream()
+                    .filter(vocabulary ->
+                    {
+                        for (eu.einfracentral.dto.Value v : valuesList) {
+                            if (vocabulary.getId().equals(v.getId())) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .map(vocabulary -> new eu.einfracentral.dto.Value(vocabulary.getId(), vocabulary.getName(), vocabulary.getParentId()))
+                    .collect(Collectors.toList());
+        }
+
+        return valuesList;
+    }
+
+    // TODO: optimize
+    private boolean valueExists(DynamicField field, Vocabulary vocabulary) {
+        boolean result = false;
+        Field fieldDesc = getField(field.getFieldId());
+        if (fieldDesc.getType().equals("vocabulary") &&
+                fieldDesc.getForm().getVocabulary().equals(vocabulary.getType())) {
+            for (Object value : field.getValue()) {
+                if (value.equals(vocabulary.getId())) {
+                    result = true;
+                    break;
+                }
+            }
+        } else {
+            for (Object df : field.getValue()) {
+                try {
+                    result = valueExists((DynamicField) df, vocabulary);
+                } catch (Exception e) {
+                    result = false;
+                }
+            }
+        }
+        return result;
     }
 }
