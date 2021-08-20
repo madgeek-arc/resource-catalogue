@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -311,10 +312,70 @@ public class ServiceController {
     })
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<InfraService>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                           @RequestParam(required = false) Boolean active, @ApiIgnore Authentication authentication) {
+                                                                           @RequestParam(required = false) Set<String> auditState, @ApiIgnore Authentication authentication) {
+
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
-        return ResponseEntity.ok(infraService.getAllForAdmin(ff, null));
+
+        List<InfraService> valid = new ArrayList<>();
+        List<InfraService> notAudited = new ArrayList<>();
+        List<InfraService> invalidAndUpdated = new ArrayList<>();
+        List<InfraService> invalidAndNotUpdated = new ArrayList<>();
+        if (auditState == null) {
+            return ResponseEntity.ok(infraService.getAllForAdmin(ff, authentication));
+        } else {
+            allRequestParams.remove("auditState");
+            FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+            ff2.addFilter("latest", true);
+            ff2.setQuantity(ff.getQuantity());
+            Paging<InfraService> retPaging = infraService.getAllForAdmin(ff, authentication);
+            List<InfraService> allWithoutAuditFilterList =  infraService.getAllForAdmin(ff2, authentication).getResults();
+            List<InfraService> ret = new ArrayList<>();
+            for (InfraService infraService : allWithoutAuditFilterList) {
+                String auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(infraService.getLoggingInfo());
+                switch (auditVocStatus) {
+                    case "Valid and updated":
+                    case "Valid and not updated":
+                        valid.add(infraService);
+                        break;
+                    case "Not Audited":
+                        notAudited.add(infraService);
+                        break;
+                    case "Invalid and updated":
+                        invalidAndUpdated.add(infraService);
+                        break;
+                    case "Invalid and not updated":
+                        invalidAndNotUpdated.add(infraService);
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+                }
+            }
+            for (String state : auditState) {
+                if (state.equals("Valid")) {
+                    ret.addAll(valid);
+                } else if (state.equals("Not Audited")) {
+                    ret.addAll(notAudited);
+                } else if (state.equals("Invalid and updated")) {
+                    ret.addAll(invalidAndUpdated);
+                } else if (state.equals("Invalid and not updated")) {
+                    ret.addAll(invalidAndNotUpdated);
+                } else {
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+                }
+            }
+            if (!ret.isEmpty()) {
+                retPaging.setResults(ret);
+                retPaging.setTotal(ret.size());
+                retPaging.setTo(ret.size());
+            } else{
+                retPaging.setResults(ret);
+                retPaging.setTotal(0);
+                retPaging.setFrom(0);
+                retPaging.setTo(0);
+            }
+            return ResponseEntity.ok(retPaging);
+        }
     }
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})

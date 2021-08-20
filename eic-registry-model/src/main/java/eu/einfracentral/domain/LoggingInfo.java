@@ -177,13 +177,17 @@ public class LoggingInfo {
         } else if (hasBeenAudited && !hasBeenUpdatedAfterAudit){
             if (auditActionType.equals(ActionType.INVALID.getKey())){
                 ret = "Invalid and not updated";
+            } else{
+                ret = "Valid and not updated";
             }
         } else if (hasBeenAudited && hasBeenUpdatedAfterAudit){
             if (auditActionType.equals(ActionType.INVALID.getKey())){
                 ret = "Invalid and updated";
+            } else{
+                ret = "Valid and updated";
             }
         } else{
-            ret = "Valid";
+            ret = null;
         }
         return ret;
     }
