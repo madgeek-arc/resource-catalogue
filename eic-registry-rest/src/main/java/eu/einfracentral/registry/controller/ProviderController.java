@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -189,23 +190,63 @@ public class ProviderController {
         if (status != null) {
             ff.addFilter("status", status);
         }
-        //TODO: decide how we proceed with audit filters
-        if (auditState != null) {
+
+        List<ProviderBundle> valid = new ArrayList<>();
+        List<ProviderBundle> notAudited = new ArrayList<>();
+        List<ProviderBundle> invalidAndUpdated = new ArrayList<>();
+        List<ProviderBundle> invalidAndNotUpdated = new ArrayList<>();
+        if (auditState == null){
+            return ResponseEntity.ok(providerManager.getAll(ff, auth));
+        } else{
             allRequestParams.remove("auditState");
-            if (auditState.contains("valid")){
-                ff.addFilter("latestAuditActionType", "valid");
+            Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
+            List<ProviderBundle> allWithoutAuditFilterList = providerManager.getAll(ff, auth).getResults();
+            List<ProviderBundle> ret = new ArrayList<>();
+            for (ProviderBundle providerBundle : allWithoutAuditFilterList){
+                String auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(providerBundle.getLoggingInfo());
+                switch (auditVocStatus){
+                    case "Valid and updated":
+                    case "Valid and not updated":
+                        valid.add(providerBundle);
+                        break;
+                    case "Not Audited":
+                        notAudited.add(providerBundle);
+                        break;
+                    case "Invalid and updated":
+                        invalidAndUpdated.add(providerBundle);
+                        break;
+                    case "Invalid and not updated":
+                        invalidAndNotUpdated.add(providerBundle);
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+                }
             }
-            if (auditState.contains("not audited")){
-                ff.addFilter("latestAuditActionType", null);
+            for (String state : auditState){
+                if (state.equals("Valid")){
+                    ret.addAll(valid);
+                } else if (state.equals("Not Audited")){
+                    ret.addAll(notAudited);
+                } else if (state.equals("Invalid and updated")){
+                    ret.addAll(invalidAndUpdated);
+                } else if (state.equals("Invalid and not updated")) {
+                    ret.addAll(invalidAndNotUpdated);
+                } else {
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+                }
             }
-            if (auditState.contains("invalid and not updated")){
-                ff.addFilter("latestAuditActionType", "invalid");
+            if (!ret.isEmpty()) {
+                retPaging.setResults(ret);
+                retPaging.setTotal(ret.size());
+                retPaging.setTo(ret.size());
+            } else{
+                retPaging.setResults(ret);
+                retPaging.setTotal(0);
+                retPaging.setFrom(0);
+                retPaging.setTo(0);
             }
-            if (auditState.contains("invalid and updated")){
-                ff.addFilter("latestAuditActionType", "invalid");
-            }
+            return ResponseEntity.ok(retPaging);
         }
-        return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
 
     @ApiOperation(value = "Get a list of services offered by a Provider.")
