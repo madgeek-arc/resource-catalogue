@@ -112,12 +112,6 @@ public class InfraServiceController {
     }
 
     // TODO: move elsewhere ??
-    @GetMapping(path = "dynamic/by/extra/{vocabulary}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Map<String, List<UiService>> getByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value) {
-        return uiElementsService.getUiServicesByExtraVoc(vocabularyType, value);
-    }
-
-    // TODO: move elsewhere ??
     @PostMapping(path = "dynamic", produces = {MediaType.APPLICATION_JSON_VALUE})
     public UiService addDynamic(@RequestBody UiService service, Authentication authentication) {
 
