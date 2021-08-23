@@ -147,7 +147,6 @@ public class LoggingInfo {
     }
 
     // find the AUDIT_STATE of a specific Provider or Resource through its LoggingInfo list
-    //TODO: decide if we need this method
     public static String createAuditVocabularyStatuses(List<LoggingInfo> loggingInfoList){
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
         Boolean hasBeenAudited = false;
