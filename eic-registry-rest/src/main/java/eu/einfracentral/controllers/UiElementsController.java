@@ -1,5 +1,6 @@
 package eu.einfracentral.controllers;
 
+import eu.einfracentral.dto.UiService;
 import eu.einfracentral.dto.Value;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.Field;
@@ -55,5 +56,12 @@ public class UiElementsController {
     @GetMapping(value = "vocabularies", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, List<Value>> getControlValuesByType() {
         return uiElementsService.getControlValuesMap();
+    }
+
+
+    // Services
+    @GetMapping(path = "services/by/extra/{vocabulary}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Map<String, List<Value>> getServicesValuesByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value) {
+        return uiElementsService.getServicesValuesByExtraVoc(vocabularyType, value);
     }
 }

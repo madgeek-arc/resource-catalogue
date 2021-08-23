@@ -8,6 +8,7 @@ import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.dto.UiService;
+import eu.einfracentral.dto.Value;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -16,8 +17,8 @@ import eu.einfracentral.ui.*;
 import eu.einfracentral.utils.ListUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
+import org.jsoup.select.Evaluator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -45,7 +46,7 @@ public class UiElementsManager implements UiElementsService {
     private final String directory;
     private String jsonObject;
 
-    @Value("${elastic.index.max_result_window:10000}")
+    @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
     private final VocabularyService vocabularyService;
@@ -53,7 +54,7 @@ public class UiElementsManager implements UiElementsService {
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
-    public UiElementsManager(@Value("${ui.elements.json.dir}") String directory,
+    public UiElementsManager(@org.springframework.beans.factory.annotation.Value("${ui.elements.json.dir}") String directory,
                              VocabularyService vocabularyService,
                              ProviderService<ProviderBundle, Authentication> providerService,
                              InfraServiceService<InfraService, InfraService> infraServiceService) {
@@ -73,7 +74,7 @@ public class UiElementsManager implements UiElementsService {
 
     @Scheduled(fixedRate = 3600000)
     @CachePut(value = CACHE_FOR_UI)
-    public Map<String, List<eu.einfracentral.dto.Value>> cacheVocabularies() {
+    public Map<String, List<Value>> cacheVocabularies() {
         return getControlValuesMap();
     }
 
@@ -197,7 +198,37 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     public Map<String, List<UiService>> getUiServicesByExtraVoc(String vocabularyType, String value) {
-        Map<String, List<UiService>> serviceMap = new HashMap<>();
+        Map<String, List<InfraService>> serviceMap = getServicesByExtraVoc(vocabularyType, value);
+        Map<String, List<UiService>> valuesMap = new HashMap<>();
+
+        for (Map.Entry<String, List<InfraService>> v : serviceMap.entrySet()) {
+            List<UiService> services = new ArrayList<>();
+            for (InfraService service : v.getValue()) {
+                services.add(createUiService(service));
+            }
+            valuesMap.put(v.getKey(), services);
+        }
+        return valuesMap;
+    }
+
+    @Override
+    public Map<String, List<Value>> getServicesValuesByExtraVoc(String vocabularyType, String value) {
+        Map<String, List<InfraService>> serviceMap = getServicesByExtraVoc(vocabularyType, value);
+        Map<String, List<Value>> valuesMap = new HashMap<>();
+
+        for (Map.Entry<String, List<InfraService>> v : serviceMap.entrySet()) {
+            List<Value> serviceValues = new ArrayList<>();
+            for (InfraService service : v.getValue()) {
+                serviceValues.add(new Value(service.getId(), service.getService().getName(), null));
+            }
+            valuesMap.put(v.getKey(), serviceValues);
+        }
+        return valuesMap;
+    }
+
+    @Override
+    public Map<String, List<InfraService>> getServicesByExtraVoc(String vocabularyType, String value) {
+        Map<String, List<InfraService>> serviceMap = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
@@ -206,7 +237,7 @@ public class UiElementsManager implements UiElementsService {
         if (value == null) {
             values = vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyType));
         } else {
-            values.add(vocabularyService.get("name", value));
+            values.add(vocabularyService.get(value));
         }
         for (Vocabulary v : values) {
             serviceMap.put(v.getName(), new ArrayList<>());
@@ -217,7 +248,7 @@ public class UiElementsManager implements UiElementsService {
                 }
                 for (DynamicField field : service.getExtras()) {
                     if (valueExists(field, v)) {
-                        serviceMap.get(v.getName()).add(createUiService(service));
+                        serviceMap.get(v.getName()).add(service);
                         break;
                     }
                 }
@@ -500,16 +531,16 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     @Cacheable(value = CACHE_FOR_UI)
-    public Map<String, List<eu.einfracentral.dto.Value>> getControlValuesMap() {
-        Map<String, List<eu.einfracentral.dto.Value>> controlValues = new HashMap<>();
-        List<eu.einfracentral.dto.Value> values;
+    public Map<String, List<Value>> getControlValuesMap() {
+        Map<String, List<Value>> controlValues = new HashMap<>();
+        List<Value> values;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
 
         // add providers
         values = this.providerService.getAll(ff, null).getResults()
                 .parallelStream()
-                .map(value -> new eu.einfracentral.dto.Value(value.getId(), value.getProvider().getName()))
+                .map(value -> new Value(value.getId(), value.getProvider().getName()))
                 .collect(Collectors.toList());
         controlValues.put("Provider", values);
 
@@ -518,7 +549,7 @@ public class UiElementsManager implements UiElementsService {
         ff.addFilter("latest", true);
         values = this.infraServiceService.getAll(ff, null).getResults()
                 .parallelStream()
-                .map(value -> new eu.einfracentral.dto.Value(value.getId(), value.getService().getName()))
+                .map(value -> new Value(value.getId(), value.getService().getName()))
                 .collect(Collectors.toList());
         controlValues.put("Service", values);
 
@@ -527,7 +558,7 @@ public class UiElementsManager implements UiElementsService {
         for (Map.Entry<Vocabulary.Type, List<Vocabulary>> entry : vocabularyService.getAllVocabulariesByType().entrySet()) {
             values = entry.getValue()
                     .parallelStream()
-                    .map(v -> new eu.einfracentral.dto.Value(v.getId(), v.getName(), v.getParentId()))
+                    .map(v -> new Value(v.getId(), v.getName(), v.getParentId()))
                     .collect(Collectors.toList());
             controlValues.put(entry.getKey().getKey(), values);
         }
@@ -537,27 +568,27 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     @Cacheable(cacheNames = CACHE_FOR_UI, key = "#type")
-    public List<eu.einfracentral.dto.Value> getControlValues(String type) {
-        List<eu.einfracentral.dto.Value> values = new ArrayList<>();
+    public List<Value> getControlValues(String type) {
+        List<Value> values = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         if (Vocabulary.Type.exists(type)) {
             List<Vocabulary> vocabularies = this.vocabularyService.getByType(Vocabulary.Type.fromString(type));
-            vocabularies.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getName())));
+            vocabularies.forEach(v -> values.add(new Value(v.getId(), v.getName())));
         } else if (type.equalsIgnoreCase("provider")) {
             List<ProviderBundle> providers = this.providerService.getAll(ff, null).getResults();
-            providers.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getProvider().getName())));
+            providers.forEach(v -> values.add(new Value(v.getId(), v.getProvider().getName())));
         } else if (type.equalsIgnoreCase("service") || type.equalsIgnoreCase("resource")) {
             List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
-            services.forEach(v -> values.add(new eu.einfracentral.dto.Value(v.getId(), v.getService().getName())));
+            services.forEach(v -> values.add(new Value(v.getId(), v.getService().getName())));
         }
         return values;
     }
 
     // TODO: optimize
     @Override
-    public List<eu.einfracentral.dto.Value> getControlValues(String type, Boolean used) {
-        List<eu.einfracentral.dto.Value> usedValues = new ArrayList<>();
+    public List<Value> getControlValues(String type, Boolean used) {
+        List<Value> usedValues = new ArrayList<>();
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -567,7 +598,7 @@ public class UiElementsManager implements UiElementsService {
         if (used == null) {
             return values
                     .stream()
-                    .map(vocabulary -> new eu.einfracentral.dto.Value(vocabulary.getId(), vocabulary.getName(), vocabulary.getParentId()))
+                    .map(vocabulary -> new Value(vocabulary.getId(), vocabulary.getName(), vocabulary.getParentId()))
                     .collect(Collectors.toList());
         }
 
@@ -580,7 +611,7 @@ public class UiElementsManager implements UiElementsService {
                 }
                 for (DynamicField field : service.getExtras()) {
                     if (valueExists(field, v)) {
-                        usedValues.add(new eu.einfracentral.dto.Value(v.getId(), v.getName(), v.getParentId()));
+                        usedValues.add(new Value(v.getId(), v.getName(), v.getParentId()));
                         found = true;
                         break;
                     }
@@ -592,9 +623,9 @@ public class UiElementsManager implements UiElementsService {
         }
 
         if (!used) {
-            List<eu.einfracentral.dto.Value> vocValues = values
+            List<Value> vocValues = values
                     .stream()
-                    .map(vocabulary -> new eu.einfracentral.dto.Value(vocabulary.getId(), vocabulary.getName(), vocabulary.getParentId()))
+                    .map(vocabulary -> new Value(vocabulary.getId(), vocabulary.getName(), vocabulary.getParentId()))
                     .collect(Collectors.toList());
             return ListUtils.remainingItems(vocValues, usedValues);
         }
