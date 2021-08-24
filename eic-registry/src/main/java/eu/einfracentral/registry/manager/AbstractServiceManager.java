@@ -210,7 +210,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
                             infraService.getService().getId(), infraService.getService().getVersion()));
         }
-        synchronizerService.syncUpdate(infraService);
+        synchronizerService.syncUpdate(infraService, get(infraService.getService().getId()));
 
         prettifyServiceTextFields(infraService, ",");
         existing.setPayload(serialize(infraService));

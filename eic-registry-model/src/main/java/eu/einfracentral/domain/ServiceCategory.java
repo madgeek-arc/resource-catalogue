@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -46,6 +47,19 @@ public class ServiceCategory {
                 "category='" + category + '\'' +
                 ", subcategory='" + subcategory + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceCategory that = (ServiceCategory) o;
+        return Objects.equals(category, that.category) && Objects.equals(subcategory, that.subcategory);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(category, subcategory);
     }
 
     public String getCategory() {

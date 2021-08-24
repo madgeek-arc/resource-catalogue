@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -46,6 +47,19 @@ public class ServiceProviderDomain {
                 "scientificDomain='" + scientificDomain + '\'' +
                 ", scientificSubdomain='" + scientificSubdomain + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceProviderDomain that = (ServiceProviderDomain) o;
+        return Objects.equals(scientificDomain, that.scientificDomain) && Objects.equals(scientificSubdomain, that.scientificSubdomain);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(scientificDomain, scientificSubdomain);
     }
 
     public String getScientificDomain() {

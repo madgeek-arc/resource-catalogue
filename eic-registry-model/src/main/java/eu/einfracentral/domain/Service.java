@@ -2,6 +2,7 @@ package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
+import eu.einfracentral.utils.EqualityUtils;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
 
@@ -538,56 +539,56 @@ public class Service implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Service service = (Service) o;
-        return Objects.equals(id, service.id) &&
-                Objects.equals(name, service.name) &&
-                Objects.equals(resourceOrganisation, service.resourceOrganisation) &&
-                Objects.equals(resourceProviders, service.resourceProviders) &&
-                Objects.equals(webpage, service.webpage) &&
-                Objects.equals(description, service.description) &&
-                Objects.equals(tagline, service.tagline) &&
-                Objects.equals(logo, service.logo) &&
-                Objects.equals(multimedia, service.multimedia) &&
-                Objects.equals(useCases, service.useCases) &&
-                Objects.equals(scientificDomains, service.scientificDomains) &&
-                Objects.equals(categories, service.categories) &&
-                Objects.equals(targetUsers, service.targetUsers) &&
-                Objects.equals(accessTypes, service.accessTypes) &&
-                Objects.equals(accessModes, service.accessModes) &&
-                Objects.equals(tags, service.tags) &&
-                Objects.equals(geographicalAvailabilities, service.geographicalAvailabilities) &&
-                Objects.equals(languageAvailabilities, service.languageAvailabilities) &&
-                Objects.equals(resourceGeographicLocations, service.resourceGeographicLocations) &&
-                Objects.equals(mainContact, service.mainContact) &&
-                Objects.equals(publicContacts, service.publicContacts) &&
-                Objects.equals(helpdeskEmail, service.helpdeskEmail) &&
-                Objects.equals(securityContactEmail, service.securityContactEmail) &&
-                Objects.equals(trl, service.trl) &&
-                Objects.equals(lifeCycleStatus, service.lifeCycleStatus) &&
-                Objects.equals(certifications, service.certifications) &&
-                Objects.equals(standards, service.standards) &&
-                Objects.equals(openSourceTechnologies, service.openSourceTechnologies) &&
-                Objects.equals(version, service.version) &&
-                Objects.equals(lastUpdate, service.lastUpdate) &&
-                Objects.equals(changeLog, service.changeLog) &&
-                Objects.equals(requiredResources, service.requiredResources) &&
-                Objects.equals(relatedResources, service.relatedResources) &&
-                Objects.equals(relatedPlatforms, service.relatedPlatforms) &&
-                Objects.equals(fundingBody, service.fundingBody) &&
-                Objects.equals(fundingPrograms, service.fundingPrograms) &&
-                Objects.equals(grantProjectNames, service.grantProjectNames) &&
-                Objects.equals(helpdeskPage, service.helpdeskPage) &&
-                Objects.equals(userManual, service.userManual) &&
-                Objects.equals(termsOfUse, service.termsOfUse) &&
-                Objects.equals(privacyPolicy, service.privacyPolicy) &&
-                Objects.equals(accessPolicy, service.accessPolicy) &&
-                Objects.equals(serviceLevel, service.serviceLevel) &&
-                Objects.equals(trainingInformation, service.trainingInformation) &&
-                Objects.equals(statusMonitoring, service.statusMonitoring) &&
-                Objects.equals(maintenance, service.maintenance) &&
-                Objects.equals(orderType, service.orderType) &&
-                Objects.equals(order, service.order) &&
-                Objects.equals(paymentModel, service.paymentModel) &&
-                Objects.equals(pricing, service.pricing);
+        return EqualityUtils.equals(id, service.id) &&
+                EqualityUtils.equals(name, service.name) &&
+                EqualityUtils.equals(resourceOrganisation, service.resourceOrganisation) &&
+                EqualityUtils.stringListsAreEqual(resourceProviders, service.resourceProviders) &&
+                EqualityUtils.equals(webpage, service.webpage) &&
+                EqualityUtils.equals(description, service.description) &&
+                EqualityUtils.equals(tagline, service.tagline) &&
+                EqualityUtils.equals(logo, service.logo) &&
+                EqualityUtils.equals(multimedia, service.multimedia) &&
+                EqualityUtils.equals(useCases, service.useCases) &&
+                EqualityUtils.equals(scientificDomains, service.scientificDomains) &&
+                EqualityUtils.equals(categories, service.categories) &&
+                EqualityUtils.stringListsAreEqual(targetUsers, service.targetUsers) &&
+                EqualityUtils.stringListsAreEqual(accessTypes, service.accessTypes) &&
+                EqualityUtils.stringListsAreEqual(accessModes, service.accessModes) &&
+                EqualityUtils.stringListsAreEqual(tags, service.tags) &&
+                EqualityUtils.stringListsAreEqual(geographicalAvailabilities, service.geographicalAvailabilities) &&
+                EqualityUtils.stringListsAreEqual(languageAvailabilities, service.languageAvailabilities) &&
+                EqualityUtils.stringListsAreEqual(resourceGeographicLocations, service.resourceGeographicLocations) &&
+                EqualityUtils.equals(mainContact, service.mainContact) &&
+                EqualityUtils.equals(publicContacts, service.publicContacts) &&
+                EqualityUtils.equals(helpdeskEmail, service.helpdeskEmail) &&
+                EqualityUtils.equals(securityContactEmail, service.securityContactEmail) &&
+                EqualityUtils.equals(trl, service.trl) &&
+                EqualityUtils.equals(lifeCycleStatus, service.lifeCycleStatus) &&
+                EqualityUtils.stringListsAreEqual(certifications, service.certifications) &&
+                EqualityUtils.stringListsAreEqual(standards, service.standards) &&
+                EqualityUtils.stringListsAreEqual(openSourceTechnologies, service.openSourceTechnologies) &&
+                EqualityUtils.equals(version, service.version) &&
+                EqualityUtils.equals(lastUpdate, service.lastUpdate) &&
+                EqualityUtils.stringListsAreEqual(changeLog, service.changeLog) &&
+                EqualityUtils.stringListsAreEqual(requiredResources, service.requiredResources) &&
+                EqualityUtils.stringListsAreEqual(relatedResources, service.relatedResources) &&
+                EqualityUtils.stringListsAreEqual(relatedPlatforms, service.relatedPlatforms) &&
+                EqualityUtils.stringListsAreEqual(fundingBody, service.fundingBody) &&
+                EqualityUtils.stringListsAreEqual(fundingPrograms, service.fundingPrograms) &&
+                EqualityUtils.stringListsAreEqual(grantProjectNames, service.grantProjectNames) &&
+                EqualityUtils.equals(helpdeskPage, service.helpdeskPage) &&
+                EqualityUtils.equals(userManual, service.userManual) &&
+                EqualityUtils.equals(termsOfUse, service.termsOfUse) &&
+                EqualityUtils.equals(privacyPolicy, service.privacyPolicy) &&
+                EqualityUtils.equals(accessPolicy, service.accessPolicy) &&
+                EqualityUtils.equals(serviceLevel, service.serviceLevel) &&
+                EqualityUtils.equals(trainingInformation, service.trainingInformation) &&
+                EqualityUtils.equals(statusMonitoring, service.statusMonitoring) &&
+                EqualityUtils.equals(maintenance, service.maintenance) &&
+                EqualityUtils.equals(orderType, service.orderType) &&
+                EqualityUtils.equals(order, service.order) &&
+                EqualityUtils.equals(paymentModel, service.paymentModel) &&
+                EqualityUtils.equals(pricing, service.pricing);
     }
 
     @Override
@@ -605,34 +606,14 @@ public class Service implements Identifiable {
         return Objects.hash(id, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, serviceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
-    private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
-        if (stringListIsEmpty(list1) && stringListIsEmpty(list2)) {
-            return true;
-        }
-        return Objects.equals(list1, list2);
-    }
-
-    /**
-     * Method checking if a {@link List<String>} object is null or is empty or it contains only one entry
-     * with an empty String ("")
-     *
-     * @param list
-     * @return
-     */
-    private boolean stringListIsEmpty(List<String> list) {
-        if (list == null || list.isEmpty()) {
-            return true;
-        } else return list.size() == 1 && "".equals(list.get(0));
-    }
-
-    public static String createId(Service service) {
-        String provider = service.getResourceOrganisation();
-        return String.format("%s.%s", provider, StringUtils
-                .stripAccents(service.getName())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
-    }
+//    public static String createId(Service service) {
+//        String provider = service.getResourceOrganisation();
+//        return String.format("%s.%s", provider, StringUtils
+//                .stripAccents(service.getName())
+//                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+//                .replace(" ", "_")
+//                .toLowerCase());
+//    }
 
     @Override
     public String getId() {
