@@ -21,14 +21,19 @@ public class ServiceSync extends AbstractSyncService<InfraService> {
 
     private static final Logger logger = LogManager.getLogger(ServiceSync.class);
 
+    @Autowired
+    public ServiceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename) {
+        super(host, filename);
+    }
+
     @Override
     protected String getController() {
         return "/infraService";
     }
 
-    @Autowired
-    public ServiceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename) {
-        super(host, filename);
+    @Override
+    public boolean filterOut(InfraService infraService, InfraService previous) {
+        return infraService.getService().equals(previous.getService());
     }
 
     @Override

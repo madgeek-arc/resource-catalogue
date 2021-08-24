@@ -36,6 +36,8 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
 
     protected abstract String getController();
 
+    public abstract boolean filterOut(T t, T previous);
+
     @Autowired
     public AbstractSyncService(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename) {
         this.host = host;
@@ -125,7 +127,13 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
     }
 
     @Override
-    public void syncUpdate(T t) {
+    public void syncUpdate(T t, T previous) {
+        if (!filterOut(t, previous)) {
+            syncUpdate(t);
+        }
+    }
+
+    protected void syncUpdate(T t) {
         boolean retryKey = true;
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
