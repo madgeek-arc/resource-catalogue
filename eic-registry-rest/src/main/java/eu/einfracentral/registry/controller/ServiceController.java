@@ -324,10 +324,11 @@ public class ServiceController {
         if (auditState == null) {
             return ResponseEntity.ok(infraService.getAllForAdmin(ff, authentication));
         } else {
+            int quantity = ff.getQuantity();
             allRequestParams.remove("auditState");
             FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
             ff2.addFilter("latest", true);
-            ff2.setQuantity(ff.getQuantity());
+            ff2.setQuantity(10000);
             Paging<InfraService> retPaging = infraService.getAllForAdmin(ff, authentication);
             List<InfraService> allWithoutAuditFilterList =  infraService.getAllForAdmin(ff2, authentication).getResults();
             List<InfraService> ret = new ArrayList<>();
@@ -365,9 +366,19 @@ public class ServiceController {
                 }
             }
             if (!ret.isEmpty()) {
-                retPaging.setResults(ret);
-                retPaging.setTotal(ret.size());
-                retPaging.setTo(ret.size());
+                List<InfraService> retWithCorrectQuantity = new ArrayList<>();
+                if (ret.size() < quantity){
+                    retPaging.setResults(ret);
+                    retPaging.setTotal(allWithoutAuditFilterList.size());
+                    retPaging.setTo(ret.size()-1);
+                } else{
+                    for (int i=0; i<=quantity; i++){
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                    retPaging.setResults(retWithCorrectQuantity);
+                    retPaging.setTotal(allWithoutAuditFilterList.size());
+                    retPaging.setTo(retWithCorrectQuantity.size()-1);
+                }
             } else{
                 retPaging.setResults(ret);
                 retPaging.setTotal(0);
