@@ -198,6 +198,8 @@ public class ProviderController {
         if (auditState == null){
             return ResponseEntity.ok(providerManager.getAll(ff, auth));
         } else{
+            int quantity = ff.getQuantity();
+            ff.setQuantity(10000);
             allRequestParams.remove("auditState");
             Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
             List<ProviderBundle> allWithoutAuditFilterList = providerManager.getAll(ff, auth).getResults();
@@ -236,9 +238,19 @@ public class ProviderController {
                 }
             }
             if (!ret.isEmpty()) {
-                retPaging.setResults(ret);
-                retPaging.setTotal(ret.size());
-                retPaging.setTo(ret.size());
+                List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
+                if (ret.size() < quantity){
+                    retPaging.setResults(ret);
+                    retPaging.setTotal(allWithoutAuditFilterList.size());
+                    retPaging.setTo(ret.size()-1);
+                } else{
+                    for (int i=0; i<=quantity; i++){
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                    retPaging.setResults(retWithCorrectQuantity);
+                    retPaging.setTotal(allWithoutAuditFilterList.size());
+                    retPaging.setTo(retWithCorrectQuantity.size()-1);
+                }
             } else{
                 retPaging.setResults(ret);
                 retPaging.setTotal(0);
