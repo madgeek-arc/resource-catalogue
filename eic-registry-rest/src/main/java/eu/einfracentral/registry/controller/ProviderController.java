@@ -199,7 +199,9 @@ public class ProviderController {
             return ResponseEntity.ok(providerManager.getAll(ff, auth));
         } else{
             int quantity = ff.getQuantity();
-            ff.setQuantity(10000);
+            int from = ff.getFrom();
+            ff.setQuantity(1000);
+            ff.setFrom(0);
             allRequestParams.remove("auditState");
             Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
             List<ProviderBundle> allWithoutAuditFilterList = providerManager.getAll(ff, auth).getResults();
@@ -239,18 +241,28 @@ public class ProviderController {
             }
             if (!ret.isEmpty()) {
                 List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
-                if (ret.size() < quantity){
-                    retPaging.setResults(ret);
-                    retPaging.setTotal(allWithoutAuditFilterList.size());
-                    retPaging.setTo(ret.size()-1);
-                } else{
-                    for (int i=0; i<=quantity; i++){
-                        retWithCorrectQuantity.add(ret.get(i));
+                if (from == 0){
+                    if (quantity <= ret.size()){
+                        for (int i=from; i<=quantity-1; i++){
+                            retWithCorrectQuantity.add(ret.get(i));
+                        }
+                    } else{
+                        retWithCorrectQuantity.addAll(ret);
                     }
-                    retPaging.setResults(retWithCorrectQuantity);
-                    retPaging.setTotal(allWithoutAuditFilterList.size());
-                    retPaging.setTo(retWithCorrectQuantity.size()-1);
+                    retPaging.setTo(retWithCorrectQuantity.size());
+                } else{
+                    if (quantity <= ret.size()){
+                        for (int i=from; i<=quantity+1; i++){
+                            retWithCorrectQuantity.add(ret.get(i));
+                        }
+                    } else{
+                        retWithCorrectQuantity.addAll(ret);
+                    }
+                    retPaging.setTo(retWithCorrectQuantity.size()+from);
                 }
+                retPaging.setFrom(from);
+                retPaging.setResults(retWithCorrectQuantity);
+                retPaging.setTotal(ret.size());
             } else{
                 retPaging.setResults(ret);
                 retPaging.setTotal(0);
