@@ -12,6 +12,7 @@ public class Field {
     String accessPath;
     boolean multiplicity = false;
     String type;
+    boolean includedInSnippet;
     Form form;
     Display display;
 
@@ -95,6 +96,14 @@ public class Field {
 
     public void setMultiplicity(boolean multiplicity) {
         this.multiplicity = multiplicity;
+    }
+
+    public boolean isIncludedInSnippet() {
+        return includedInSnippet;
+    }
+
+    public void setIncludedInSnippet(boolean includedInSnippet) {
+        this.includedInSnippet = includedInSnippet;
     }
 
     public Form getForm() {
