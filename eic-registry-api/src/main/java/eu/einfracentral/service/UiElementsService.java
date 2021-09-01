@@ -39,6 +39,8 @@ public interface UiElementsService {
 
     UiService createUiService(InfraService service);
 
+    Map<String, Object> createServiceSnippet(InfraService service);
+
     Map<String, List<InfraService>> getServicesByExtraVoc(String vocabularyType, String value);
 
     Map<String, List<Value>> getServicesValuesByExtraVoc(String vocabularyType, String value);
