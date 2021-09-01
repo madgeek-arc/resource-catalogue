@@ -24,6 +24,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -93,10 +94,11 @@ public class UiElementsController {
             snippets.setTo(services.getBody().getTo());
             snippets.setTotal(services.getBody().getTotal());
             snippets.setFacets(services.getBody().getFacets());
-            List<Map<String, Object>> snippetsList = new ArrayList<>();
-            for (InfraService infraService : services.getBody().getResults()) {
-                snippetsList.add(uiElementsService.createServiceSnippet(infraService));
-            }
+            List<Map<String, Object>> snippetsList = services.getBody().getResults()
+                    .stream()
+                    .parallel()
+                    .map(uiElementsService::createServiceSnippet)
+                    .collect(Collectors.toList());
             snippets.setResults(snippetsList);
         }
         return new ResponseEntity<>(snippets, HttpStatus.OK);
