@@ -43,7 +43,7 @@ public interface UiElementsService {
 
     Map<String, List<InfraService>> getServicesByExtraVoc(String vocabularyType, String value);
 
-    Map<String, List<Value>> getServicesValuesByExtraVoc(String vocabularyType, String value);
+    Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(String vocabularyType, String value);
 
     Map<String, List<UiService>> getUiServicesByExtraVoc(String vocabularyType, String value);
 }
