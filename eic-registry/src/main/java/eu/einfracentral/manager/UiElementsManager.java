@@ -1,6 +1,9 @@
 package eu.einfracentral.manager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import eu.einfracentral.domain.DynamicField;
@@ -17,7 +20,6 @@ import eu.einfracentral.ui.*;
 import eu.einfracentral.utils.ListUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
-import org.jsoup.select.Evaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -181,6 +183,51 @@ public class UiElementsManager implements UiElementsService {
         infraService.setService(service.getService());
         infraService.setExtras(extras);
         return infraService;
+    }
+
+
+    @Override
+    public Map<String, Object> createServiceSnippet(InfraService service) {
+        Map<String, Object> snippet = new HashMap<>();
+        List<Field> allFields = getFields();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> serviceMap = null;
+        JsonElement el = new Gson().toJsonTree(service);
+        try {
+            serviceMap = mapper.readValue(new Gson().toJson(createUiService(service)), Map.class);
+        } catch (JsonProcessingException e) {
+            logger.error(e);
+        }
+
+        if (serviceMap != null) {
+            for (Field field : allFields) {
+                if (field.isIncludedInSnippet()) {
+                    snippet.put(field.getName(), getMultiMap(serviceMap, field.getAccessPath()));
+                }
+            }
+        }
+        return snippet;
+    }
+
+    private Object getMultiMap(Map<String, Object> map, String path) {
+        if (path != null && path.contains(".")) {
+            int index = path.indexOf(".");
+            String newPath = path.substring(index + 1); // +1 to exclude the . from the substring
+            path = path.substring(0, index);
+            Object mapValue = map.get(path);
+            if (mapValue != null && List.class.isAssignableFrom(mapValue.getClass())) {
+                List<Object> values = new ArrayList<>();
+                for (Object item : (List<Object>) mapValue) {
+                    values.add(getMultiMap((Map<String, Object>) item, newPath));
+                }
+                return values;
+            } else {
+                return getMultiMap((Map<String, Object>) mapValue, newPath);
+            }
+        }
+        return map != null ? map.get(path) : null;
     }
 
     @Override
