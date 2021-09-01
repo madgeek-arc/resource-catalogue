@@ -259,14 +259,14 @@ public class UiElementsManager implements UiElementsService {
     }
 
     @Override
-    public Map<String, List<Value>> getServicesValuesByExtraVoc(String vocabularyType, String value) {
+    public Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(String vocabularyType, String value) {
         Map<String, List<InfraService>> serviceMap = getServicesByExtraVoc(vocabularyType, value);
-        Map<String, List<Value>> valuesMap = new HashMap<>();
+        Map<String, List<Map<String, Object>>> valuesMap = new HashMap<>();
 
         for (Map.Entry<String, List<InfraService>> v : serviceMap.entrySet()) {
-            List<Value> serviceValues = new ArrayList<>();
+            List<Map<String, Object>> serviceValues = new ArrayList<>();
             for (InfraService service : v.getValue()) {
-                serviceValues.add(new Value(service.getId(), service.getService().getName(), null));
+                serviceValues.add(createServiceSnippet(service));
             }
             valuesMap.put(v.getKey(), serviceValues);
         }

@@ -21,7 +21,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -110,7 +109,7 @@ public class UiElementsController {
     }
 
     @GetMapping(path = "services/by/extra/{vocabulary}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Map<String, List<Value>> getServicesValuesByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value) {
-        return uiElementsService.getServicesValuesByExtraVoc(vocabularyType, value);
+    public Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value) {
+        return uiElementsService.getServicesSnippetsByExtraVoc(vocabularyType, value);
     }
 }
