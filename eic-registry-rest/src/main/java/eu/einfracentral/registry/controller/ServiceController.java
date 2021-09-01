@@ -325,10 +325,12 @@ public class ServiceController {
             return ResponseEntity.ok(infraService.getAllForAdmin(ff, authentication));
         } else {
             int quantity = ff.getQuantity();
+            int from = ff.getFrom();
             allRequestParams.remove("auditState");
             FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
             ff2.addFilter("latest", true);
-            ff2.setQuantity(10000);
+            ff2.setQuantity(1000);
+            ff2.setFrom(0);
             Paging<InfraService> retPaging = infraService.getAllForAdmin(ff, authentication);
             List<InfraService> allWithoutAuditFilterList =  infraService.getAllForAdmin(ff2, authentication).getResults();
             List<InfraService> ret = new ArrayList<>();
@@ -367,18 +369,28 @@ public class ServiceController {
             }
             if (!ret.isEmpty()) {
                 List<InfraService> retWithCorrectQuantity = new ArrayList<>();
-                if (ret.size() < quantity){
-                    retPaging.setResults(ret);
-                    retPaging.setTotal(allWithoutAuditFilterList.size());
-                    retPaging.setTo(ret.size()-1);
-                } else{
-                    for (int i=0; i<=quantity; i++){
-                        retWithCorrectQuantity.add(ret.get(i));
+                if (from == 0){
+                    if (quantity <= ret.size()){
+                        for (int i=from; i<=quantity-1; i++){
+                            retWithCorrectQuantity.add(ret.get(i));
+                        }
+                    } else{
+                        retWithCorrectQuantity.addAll(ret);
                     }
-                    retPaging.setResults(retWithCorrectQuantity);
-                    retPaging.setTotal(allWithoutAuditFilterList.size());
-                    retPaging.setTo(retWithCorrectQuantity.size()-1);
+                    retPaging.setTo(retWithCorrectQuantity.size());
+                } else{
+                    if (quantity <= ret.size()){
+                        for (int i=from; i<=quantity+1; i++){
+                            retWithCorrectQuantity.add(ret.get(i));
+                        }
+                    } else{
+                        retWithCorrectQuantity.addAll(ret);
+                    }
+                    retPaging.setTo(retWithCorrectQuantity.size()+from);
                 }
+                retPaging.setFrom(from);
+                retPaging.setResults(retWithCorrectQuantity);
+                retPaging.setTotal(ret.size());
             } else{
                 retPaging.setResults(ret);
                 retPaging.setTotal(0);
