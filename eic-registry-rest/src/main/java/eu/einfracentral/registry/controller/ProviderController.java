@@ -251,14 +251,32 @@ public class ProviderController {
                     }
                     retPaging.setTo(retWithCorrectQuantity.size());
                 } else{
+                    boolean indexOutOfBound = false;
                     if (quantity <= ret.size()){
-                        for (int i=from; i<=quantity+1; i++){
-                            retWithCorrectQuantity.add(ret.get(i));
+                        for (int i=from; i<quantity+from; i++){
+                            try{
+                                retWithCorrectQuantity.add(ret.get(i));
+                                if (quantity+from > ret.size()){
+                                    retPaging.setTo(ret.size());
+                                } else{
+                                    retPaging.setTo(quantity+from);
+                                }
+                            } catch (IndexOutOfBoundsException e){
+                                indexOutOfBound = true;
+                                continue;
+                            }
+                        }
+                        if (indexOutOfBound){
+                            retPaging.setTo(ret.size());
                         }
                     } else{
                         retWithCorrectQuantity.addAll(ret);
+                        if (quantity+from > ret.size()){
+                            retPaging.setTo(ret.size());
+                        } else{
+                            retPaging.setTo(quantity+from);
+                        }
                     }
-                    retPaging.setTo(retWithCorrectQuantity.size()+from);
                 }
                 retPaging.setFrom(from);
                 retPaging.setResults(retWithCorrectQuantity);
