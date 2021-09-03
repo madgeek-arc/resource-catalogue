@@ -10,6 +10,7 @@ import eu.einfracentral.ui.Field;
 import eu.einfracentral.ui.FieldGroup;
 import eu.einfracentral.ui.GroupedFields;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import org.apache.log4j.Logger;
@@ -107,6 +108,29 @@ public class UiElementsController {
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public UiService getUiService(@PathVariable("id") String id) {
         return uiElementsService.createUiService(infraServiceService.get(id));
+    }
+
+    @PostMapping(path = "services", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public UiService addDynamic(@RequestBody UiService service, Authentication authentication) {
+        logger.info(service);
+        InfraService infra = uiElementsService.createService(service);
+        infra = infraServiceService.addService(infra, authentication);
+        return uiElementsService.createUiService(infra);
+    }
+
+    @PutMapping(path = "services", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public UiService putDynamic(@RequestBody UiService service, Authentication authentication) throws ResourceNotFoundException {
+        logger.info(service);
+        InfraService infra = uiElementsService.createService(service);
+        if (infra.getId() == null) {
+            return addDynamic(service, authentication);
+        }
+        InfraService previous = infraServiceService.get(infra.getId());
+        previous.setService(infra.getService());
+        previous.setExtras(infra.getExtras());
+        infra = infraServiceService.updateService(previous, authentication);
+
+        return uiElementsService.createUiService(infra);
     }
 
     // Snippets

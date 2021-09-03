@@ -2,9 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Metadata;
-import eu.einfracentral.dto.UiService;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -35,13 +33,10 @@ public class InfraServiceController {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
     private final InfraServiceService<InfraService, InfraService> infraService;
-    private final UiElementsService uiElementsService;
 
     @Autowired
-    InfraServiceController(InfraServiceService<InfraService, InfraService> service,
-                           UiElementsService uiElementsService) {
+    InfraServiceController(InfraServiceService<InfraService, InfraService> service) {
         this.infraService = service;
-        this.uiElementsService = uiElementsService;
     }
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -99,45 +94,6 @@ public class InfraServiceController {
         logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
         logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
         return ret;
-    }
-
-    // TODO: move elsewhere ??
-    @GetMapping(path = "dynamic/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UiService getEntry(@PathVariable("id") String id, Authentication authentication) {
-
-        InfraService service = this.infraService.get(id);
-        logger.info(service);
-
-        return uiElementsService.createUiService(service);
-    }
-
-    // TODO: move elsewhere ??
-    @PostMapping(path = "dynamic", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UiService addDynamic(@RequestBody UiService service, Authentication authentication) {
-
-        logger.info(service);
-        InfraService infra = uiElementsService.createService(service);
-        infra = infraService.addService(infra, authentication);
-
-        return uiElementsService.createUiService(infra);
-    }
-
-    // TODO: move elsewhere ??
-    @PutMapping(path = "dynamic", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UiService putDynamic(@RequestBody UiService service, Authentication authentication) throws ResourceNotFoundException {
-
-        logger.info(service);
-        InfraService infra = uiElementsService.createService(service);
-        if (infra.getId() == null) {
-            return addDynamic(service, authentication);
-        }
-
-        InfraService previous = infraService.get(infra.getId());
-        previous.setService(infra.getService());
-        previous.setExtras(infra.getExtras());
-        infra = infraService.updateService(previous, authentication);
-
-        return uiElementsService.createUiService(infra);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
