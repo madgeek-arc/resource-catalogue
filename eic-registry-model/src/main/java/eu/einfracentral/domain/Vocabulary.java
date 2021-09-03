@@ -65,6 +65,7 @@ public class Vocabulary implements Identifiable {
         PORTFOLIOS("Portfolios"),
         USERS("Users"),
         SUBUSERS("Subusers"),
+        LABEL("Label"),
 
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
