@@ -7,4 +7,6 @@ public interface SynchronizerService<T> {
     void syncUpdate(T t, T previous);
 
     void syncDelete(T t);
+
+    void syncAll();
 }

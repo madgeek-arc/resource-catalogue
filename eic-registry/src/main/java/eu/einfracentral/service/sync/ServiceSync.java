@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 
@@ -22,8 +23,11 @@ public class ServiceSync extends AbstractSyncService<InfraService> {
     private static final Logger logger = LogManager.getLogger(ServiceSync.class);
 
     @Autowired
-    public ServiceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename) {
-        super(host, filename);
+    public ServiceSync(@Value("${sync.host:}") String host,
+                       @Value("${swagger.url:}") String self,
+                       @Value("${sync.token.filepath:}") String filename,
+                       @Value("${elastic.index.max_result_window:10000}") int maxQuantity) {
+        super(host, self, filename, maxQuantity, InfraService.class);
     }
 
     @Override
@@ -69,5 +73,11 @@ public class ServiceSync extends AbstractSyncService<InfraService> {
                 }
             }
         }
+    }
+
+    @Async
+    @Override
+    public void syncAll() {
+        super.syncAll();
     }
 }
