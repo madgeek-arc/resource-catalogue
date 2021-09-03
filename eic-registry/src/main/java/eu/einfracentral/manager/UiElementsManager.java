@@ -318,6 +318,7 @@ public class UiElementsManager implements UiElementsService {
             }
         } catch (ClassCastException e) {
             logger.debug("DynamicField contains string values");
+            return field.getValue();
         }
 
         // when a field's value is an object (with its own inner fields), a key-value map is created

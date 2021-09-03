@@ -1,6 +1,7 @@
 package eu.einfracentral.controllers;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.dto.UiService;
 import eu.einfracentral.dto.Value;
 import eu.einfracentral.registry.controller.InfraServiceController;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -84,8 +85,40 @@ public class UiElementsController {
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
+    @GetMapping(path = "services", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<UiService>> getAllUiServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
+        Paging<UiService> uiServicePaging = new Paging<>();
+        ResponseEntity<Paging<InfraService>> services = infraServiceController.getAll(allRequestParams, authentication);
+        if (services.hasBody()) {
+            uiServicePaging.setFrom(services.getBody().getFrom());
+            uiServicePaging.setTo(services.getBody().getTo());
+            uiServicePaging.setTotal(services.getBody().getTotal());
+            uiServicePaging.setFacets(services.getBody().getFacets());
+            List<UiService> uiServiceList = services.getBody().getResults()
+                    .stream()
+                    .parallel()
+                    .map(uiElementsService::createUiService)
+                    .collect(Collectors.toList());
+            uiServicePaging.setResults(uiServiceList);
+        }
+        return new ResponseEntity<>(uiServicePaging, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public UiService getUiService(@PathVariable("id") String id) {
+        return uiElementsService.createUiService(infraServiceService.get(id));
+    }
+
+    // Snippets
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
     @GetMapping(path = "services/snippets", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<Map<String, Object>>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Paging<Map<String, Object>>> getAllSnippets(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         Paging<Map<String, Object>> snippets = new Paging<>();
         ResponseEntity<Paging<InfraService>> services = infraServiceController.getAll(allRequestParams, authentication);
         if (services.hasBody()) {
