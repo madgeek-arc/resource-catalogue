@@ -122,7 +122,11 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             try {
                 URI uri = new URI(host + controller).normalize();
                 ResponseEntity<?> re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, t.getClass());
-                if (re.getStatusCode() != HttpStatus.CREATED) {
+                if (re.getStatusCode() == HttpStatus.CONFLICT) {
+                    logger.warn("Resource already exists.. Performing update operation instead");
+                    syncUpdate(t);
+                    return;
+                } else if (re.getStatusCode() != HttpStatus.CREATED) {
                     logger.error("Adding {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
                             t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
