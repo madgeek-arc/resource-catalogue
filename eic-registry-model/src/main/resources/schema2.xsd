@@ -124,6 +124,8 @@
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
       <xs:enumeration value="PROVIDER_STATE"/>
+      <xs:enumeration value="RESOURCE_STATE"/>
+      <xs:enumeration value="TEMPLATE_STATE"/>
       <xs:enumeration value="AUDIT_STATE"/>
     </xs:restriction>
   </xs:simpleType>
