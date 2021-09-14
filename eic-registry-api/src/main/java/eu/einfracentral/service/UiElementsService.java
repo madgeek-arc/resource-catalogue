@@ -7,15 +7,12 @@ import eu.einfracentral.ui.Field;
 import eu.einfracentral.ui.FieldGroup;
 import eu.einfracentral.ui.Group;
 import eu.einfracentral.ui.GroupedFields;
+import eu.openminted.registry.core.domain.Facet;
 
 import java.util.List;
 import java.util.Map;
 
 public interface UiElementsService {
-
-    List<Object> getElements();
-
-    List<String> getElementNames();
 
     List<GroupedFields<FieldGroup>> getModel();
 
@@ -46,4 +43,8 @@ public interface UiElementsService {
     Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(String vocabularyType, String value);
 
     Map<String, List<UiService>> getUiServicesByExtraVoc(String vocabularyType, String value);
+
+    List<Facet> createExtraFacets(List<UiService> services);
+
+    List<Facet> createExtraFacets();
 }
