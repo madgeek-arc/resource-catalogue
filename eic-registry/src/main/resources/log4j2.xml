@@ -2,7 +2,7 @@
 <Configuration status="INFO">
     <Properties>
         <Property name="baseDir">logs</Property>
-        <Property name="syncBaseDir">syncLogs</Property>
+        <Property name="syncBaseDir">logs/syncLogs</Property>
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
