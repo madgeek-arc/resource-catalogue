@@ -44,7 +44,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService add(InfraService service, Authentication auth) {
 
         service.setId(idCreator.createServiceId(service.getService()));
@@ -69,7 +69,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, infraService.getId());
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName()));
@@ -84,13 +84,13 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService transformToPending(InfraService infraService, Authentication auth) {
         return transformToPending(infraService.getId(), auth);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
         InfraService infraService = infraServiceService.get(serviceId);
@@ -101,7 +101,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService transformToActive(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, infraService.getId());
         infraServiceService.validate(infraService);
@@ -116,7 +116,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService transformToActive(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
         InfraService infraService = this.get(serviceId);

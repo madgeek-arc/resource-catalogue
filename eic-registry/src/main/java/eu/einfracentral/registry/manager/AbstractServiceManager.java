@@ -167,7 +167,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Service: {}", auth, infraService);
         if (infraService.getService().getId() == null) {
@@ -197,7 +197,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Service: {}", auth, infraService);
         // if service version is empty set it null
@@ -223,7 +223,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public void delete(InfraService infraService) {
         logger.trace("User is attempting to delete the Service: {}", infraService);
         if (infraService == null || infraService.getService().getId() == null) {

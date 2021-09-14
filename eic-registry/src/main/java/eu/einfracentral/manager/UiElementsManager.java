@@ -18,6 +18,7 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.*;
 import eu.einfracentral.utils.ListUtils;
+import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,10 +35,11 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.einfracentral.config.CacheConfig.CACHE_EXTRA_FACETS;
 import static eu.einfracentral.config.CacheConfig.CACHE_FOR_UI;
 
 
-@Component
+@Service
 public class UiElementsManager implements UiElementsService {
 
     private static final Logger logger = Logger.getLogger(UiElementsManager.class);
@@ -132,9 +134,9 @@ public class UiElementsManager implements UiElementsService {
     }
 
     private Field getExtraField(String name) {
-        List<Field> allFields = readFields(directory + "/" + FILENAME_FIELDS);
+        List<Field> allFields = getFields();
         for (Field field : allFields) {
-            if (field.getParent() != null && "extras".equals(field.getParent()) && name.equals(field.getName())) {
+            if (field.getParent() != null && field.getAccessPath().startsWith("extras") && name.equals(field.getName())) {
                 return field;
             }
         }
@@ -258,6 +260,154 @@ public class UiElementsManager implements UiElementsService {
         return valuesMap;
     }
 
+    @Scheduled(initialDelay = 25000, fixedRate = 3600000)
+    @Cacheable(CACHE_EXTRA_FACETS)
+    @Override
+    public List<Facet> createExtraFacets() {
+        List<Facet> facetsList = new ArrayList<>();
+        Map<Field, Vocabulary.Type> vocabularyTypes = getExtraVocabularyFieldsAndTypes();
+        for (Map.Entry<Field, Vocabulary.Type> fieldTypeEntry : vocabularyTypes.entrySet()) {
+            // TODO: possible optimization -> "servicesByExtraVoc = getByExtraVoc(null, null)" before loop.
+            Map<Vocabulary, List<InfraService>> servicesByExtraVoc = getByExtraVoc(fieldTypeEntry.getValue().getKey(), null);
+            Facet facet = new Facet();
+            facet.setField(fieldTypeEntry.getKey().getName());
+            facet.setLabel(fieldTypeEntry.getKey().getLabel());
+            List<eu.openminted.registry.core.domain.Value> valuesList = new ArrayList<>();
+            for (Map.Entry<Vocabulary, List<InfraService>> entry : servicesByExtraVoc.entrySet()) {
+                eu.openminted.registry.core.domain.Value value = new eu.openminted.registry.core.domain.Value();
+                value.setValue(entry.getKey().getId());
+                value.setLabel(entry.getKey().getName());
+                value.setCount(entry.getValue().size());
+                valuesList.add(value);
+            }
+            facet.setValues(valuesList);
+            facetsList.add(facet);
+        }
+        return facetsList;
+    }
+
+    private Map<Field, Vocabulary.Type> getExtraVocabularyFieldsAndTypes() {
+        Map<Field, Vocabulary.Type> vocabularyFieldsAndTypes = new HashMap<>();
+
+        for (Field field : getFields()) {
+            String vocabularyName = field.getForm().getVocabulary();
+            if (field.getParent() != null && field.getAccessPath().startsWith("extras") && vocabularyName != null && !"".equals(vocabularyName)) {
+                try {
+                    vocabularyFieldsAndTypes.put(field, Vocabulary.Type.fromString(vocabularyName));
+                } catch (IllegalArgumentException e) {
+                    logger.debug("vocabulary '" + vocabularyName + "' does not exist, skipping this value", e);
+                }
+            }
+        }
+        return vocabularyFieldsAndTypes;
+    }
+
+    @Override
+    public List<Facet> createExtraFacets(List<UiService> services) { // TODO: probably delete this
+        List<Field> fieldsList = getFields();
+        List<Field> vocabularyFields = new ArrayList<>();
+//        Map<String, Map<String, Integer>> valuesMap = new HashMap<>();
+        // A map of Vocabulary types containing maps of vocabulary ids and their occurrence number.
+        Map<String, Map<String, Integer>> valuesMap = new HashMap<>();
+
+        for (Field field : fieldsList) {
+            String vocabularyName = field.getForm().getVocabulary();
+            if (field.getParent() != null && field.getAccessPath().startsWith("extras") && vocabularyName != null && !"".equals(vocabularyName)) {
+                try {
+                    List<Vocabulary> vocabularyValues = vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyName));
+                    vocabularyFields.add(field);
+                    valuesMap.put(field.getName(), new HashMap<>());
+                    if (vocabularyValues != null) {
+                        for (Vocabulary value : vocabularyValues) {
+                            valuesMap.get(field.getName()).put(value.getId(), 0);
+                        }
+                    }
+                } catch (IllegalArgumentException e) {
+                    logger.debug("vocabulary '" + vocabularyName + "' does not exist, skipping this value", e);
+                }
+            }
+        }
+//        valuesMap.values().forEach(vocabularyValuesEnsemble::putAll);
+
+        for (UiService service : services) {
+            if (service.getExtras() != null) {
+
+                for (Map.Entry<String, Map<String, Integer>> entry : valuesMap.entrySet()) {
+                    Object extraValues = service.getExtras().get(entry.getKey());
+                    if (extraValues == null) {
+                        continue;
+                    }
+                    if (List.class.isAssignableFrom(extraValues.getClass())) {
+                        for (Object item : (List<?>) extraValues) {
+                            if (item.equals(item.toString())) {
+                                entry.getValue().put((String) item, entry.getValue().get(item) + 1);
+                            }
+                        }
+                    } else {
+                        if (extraValues.equals(extraValues.toString())) {
+                            entry.getValue().put((String) extraValues, entry.getValue().get(extraValues) + 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        List<Facet> facets = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Integer>> entry : valuesMap.entrySet()) {
+            Facet facet = new Facet();
+            facet.setField(entry.getKey());
+            facet.setLabel(getExtraField(entry.getKey()).getLabel());
+            List<eu.openminted.registry.core.domain.Value> values = new ArrayList<>();
+            for (Map.Entry<String, Integer> vocabularyValue : entry.getValue().entrySet()) {
+                eu.openminted.registry.core.domain.Value value = new eu.openminted.registry.core.domain.Value();
+                value.setValue(vocabularyValue.getKey());
+                value.setCount(vocabularyValue.getValue());
+                value.setLabel(vocabularyService.get(vocabularyValue.getKey()).getName());
+                values.add(value);
+            }
+            facet.setValues(values);
+            facets.add(facet);
+        }
+
+        return facets;
+    }
+
+    private Map<Vocabulary, List<InfraService>> getByExtraVoc(String vocabularyType, String value) {
+        Map<Vocabulary, List<InfraService>> serviceMap = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
+
+        List<Vocabulary> values = new ArrayList<>();
+        if (vocabularyType == null && value == null) {
+            for (Map.Entry<Field, Vocabulary.Type> entry : getExtraVocabularyFieldsAndTypes().entrySet()) {
+                values.addAll(vocabularyService.getByType(entry.getValue()));
+            }
+        } else if (value == null) {
+            values = vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyType));
+        } else {
+            values.add(vocabularyService.get(value));
+        }
+        for (Vocabulary v : values) {
+            serviceMap.put(v, new ArrayList<>());
+
+            for (InfraService service : services) {
+                if (service.getExtras() == null) {
+                    continue;
+                }
+                // TODO: try using field info (from getExtraVocabularyFieldsAndTypes()) to help with optimization
+                //       when searching for a value in extra fields.
+                for (DynamicField field : service.getExtras()) {
+                    if (valueExists(field, v)) {
+                        serviceMap.get(v).add(service);
+                        break;
+                    }
+                }
+            }
+        }
+        return serviceMap;
+    }
+
     @Override
     public Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(String vocabularyType, String value) {
         Map<String, List<InfraService>> serviceMap = getServicesByExtraVoc(vocabularyType, value);
@@ -276,30 +426,8 @@ public class UiElementsManager implements UiElementsService {
     @Override
     public Map<String, List<InfraService>> getServicesByExtraVoc(String vocabularyType, String value) {
         Map<String, List<InfraService>> serviceMap = new HashMap<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
-
-        List<Vocabulary> values = new ArrayList<>();
-        if (value == null) {
-            values = vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyType));
-        } else {
-            values.add(vocabularyService.get(value));
-        }
-        for (Vocabulary v : values) {
-            serviceMap.put(v.getName(), new ArrayList<>());
-
-            for (InfraService service : services) {
-                if (service.getExtras() == null) {
-                    continue;
-                }
-                for (DynamicField field : service.getExtras()) {
-                    if (valueExists(field, v)) {
-                        serviceMap.get(v.getName()).add(service);
-                        break;
-                    }
-                }
-            }
+        for (Map.Entry<Vocabulary, List<InfraService>> entry : getByExtraVoc(vocabularyType, value).entrySet()) {
+            serviceMap.put(entry.getKey().getName(), entry.getValue());
         }
         return serviceMap;
     }
@@ -343,16 +471,6 @@ public class UiElementsManager implements UiElementsService {
             }
         }
         return field.getValue();
-    }
-
-    @Override
-    public List<Object> getElements() {
-        return null;
-    }
-
-    @Override
-    public List<String> getElementNames() {
-        return null;
     }
 
     @Override // TODO: refactoring
@@ -684,9 +802,12 @@ public class UiElementsManager implements UiElementsService {
     // TODO: optimize
     private boolean valueExists(DynamicField field, Vocabulary vocabulary) {
         boolean result = false;
-        Field fieldDesc = getField(field.getFieldId());
-        if (fieldDesc.getType().equals("vocabulary") &&
-                fieldDesc.getForm().getVocabulary().equals(vocabulary.getType())) {
+//        Field fieldDesc = getField(field.getFieldId());
+        Field fieldDesc = getExtraField(field.getName());
+        if (fieldDesc != null
+                && fieldDesc.getType().equals("vocabulary")
+                && fieldDesc.getForm().getVocabulary() != null
+                && fieldDesc.getForm().getVocabulary().equals(vocabulary.getType())) {
             for (Object value : field.getValue()) {
                 if (value.equals(vocabulary.getId())) {
                     result = true;

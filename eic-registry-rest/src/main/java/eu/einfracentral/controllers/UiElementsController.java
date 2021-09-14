@@ -9,6 +9,7 @@ import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.Field;
 import eu.einfracentral.ui.FieldGroup;
 import eu.einfracentral.ui.GroupedFields;
+import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.ApiImplicitParam;
@@ -23,6 +24,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -101,12 +103,14 @@ public class UiElementsController {
                     .map(uiElementsService::createUiService)
                     .collect(Collectors.toList());
             uiServicePaging.setResults(uiServiceList);
+            uiServicePaging.getFacets().addAll(uiElementsService.createExtraFacets());
         }
         return new ResponseEntity<>(uiServicePaging, HttpStatus.OK);
     }
 
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public UiService getUiService(@PathVariable("id") String id) {
+        List<Facet> facets = uiElementsService.createExtraFacets(Collections.singletonList(uiElementsService.createUiService(infraServiceService.get(id))));
         return uiElementsService.createUiService(infraServiceService.get(id));
     }
 
@@ -156,6 +160,7 @@ public class UiElementsController {
                     .map(uiElementsService::createServiceSnippet)
                     .collect(Collectors.toList());
             snippets.setResults(snippetsList);
+            snippets.getFacets().addAll(uiElementsService.createExtraFacets());
         }
         return new ResponseEntity<>(snippets, HttpStatus.OK);
     }
@@ -166,6 +171,11 @@ public class UiElementsController {
     }
 
     @GetMapping(path = "services/by/extra/{vocabulary}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Map<String, List<UiService>> getUiServicesByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value) {
+        return uiElementsService.getUiServicesByExtraVoc(vocabularyType, value);
+    }
+
+    @GetMapping(path = "services/snippets/by/extra/{vocabulary}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value) {
         return uiElementsService.getServicesSnippetsByExtraVoc(vocabularyType, value);
     }

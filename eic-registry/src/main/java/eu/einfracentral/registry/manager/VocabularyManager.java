@@ -166,13 +166,13 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public void delete(Vocabulary vocabulary) {
         super.delete(vocabulary);
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
             String id = vocabulary.getName().toLowerCase();
@@ -197,7 +197,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE, CACHE_FOR_UI}, allEntries = true)
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
     public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
         String serialized = serialize(vocabulary);
