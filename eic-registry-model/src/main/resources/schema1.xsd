@@ -121,10 +121,6 @@
         
     <xs:sequence>
             
-      <xs:element name="fieldId" type="xs:int"/>
-            
-      <xs:element minOccurs="0" name="name" type="xs:string"/>
-            
       <xs:element minOccurs="0" name="values">
                 
         <xs:complexType>
@@ -140,6 +136,12 @@
       </xs:element>
           
     </xs:sequence>
+        
+    <xs:attribute name="fieldId" type="xs:int" use="required"/>
+        
+    <xs:attribute name="name" type="xs:string" use="required"/>
+        
+    <xs:attribute name="vocabulary" type="xs:string"/>
       
   </xs:complexType>
     

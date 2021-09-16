@@ -91,6 +91,8 @@
             
       <xs:enumeration value="SUBUSERS"/>
             
+      <xs:enumeration value="LABEL"/>
+            
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
             
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
