@@ -1,42 +1,26 @@
 package eu.einfracentral.domain;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class DynamicField {
 
-    @XmlElement
+    @XmlAttribute(required = true)
+    private int fieldId;
+
+    @XmlAttribute(required = true)
     private String name;
+
+    @XmlAttribute
+    private String vocabulary = null;
 
     @XmlElementWrapper(name = "values")
     @XmlElement(name = "value")
     private List<?> values;
 
-    @XmlElement
-    private int fieldId;
-
     public DynamicField() {}
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<?> getValue() {
-        return values;
-    }
-
-    public void setValue(List<?> values) {
-        this.values = values;
-    }
 
     public int getFieldId() {
         return fieldId;
@@ -46,12 +30,37 @@ public class DynamicField {
         this.fieldId = fieldId;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVocabulary() {
+        return vocabulary;
+    }
+
+    public void setVocabulary(String vocabulary) {
+        this.vocabulary = vocabulary;
+    }
+
+    public List<?> getValues() {
+        return values;
+    }
+
+    public void setValues(List<?> values) {
+        this.values = values;
+    }
+
     @Override
     public String toString() {
         return "DynamicField{" +
-                "name='" + name + '\'' +
+                "fieldId=" + fieldId +
+                ", name='" + name + '\'' +
+                ", vocabulary='" + vocabulary + '\'' +
                 ", values=" + values +
-                ", fieldId=" + fieldId +
                 '}';
     }
 }

@@ -136,27 +136,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
-        //TODO: Rearrange depending on front-end's needs
-        //Order Service's facets as we like (+removed Service Name - no4)
-        List<String> orderedBrowseBy = new ArrayList<>();
-
-        orderedBrowseBy.add(browseBy.get(16));    // Categories
-        orderedBrowseBy.add(browseBy.get(15));    // Scientific Domains
-        orderedBrowseBy.add(browseBy.get(14));    // Resource Providers
-        orderedBrowseBy.add(browseBy.get(13));    // Resource Organisation
-        orderedBrowseBy.add(browseBy.get(7));     // LifeCycleStatus
-        orderedBrowseBy.add(browseBy.get(20));    // TRL
-        orderedBrowseBy.add(browseBy.get(5));     // Geographical Availabilities
-        orderedBrowseBy.add(browseBy.get(12));    // Geographic Locations
-        orderedBrowseBy.add(browseBy.get(6));     // Language Availabilities
-        orderedBrowseBy.add(browseBy.get(1));     // Access Types
-        orderedBrowseBy.add(browseBy.get(0));     // Access Modes
-        orderedBrowseBy.add(browseBy.get(19));    // Target Users
-        orderedBrowseBy.add(browseBy.get(3));     // Funding Body
-        orderedBrowseBy.add(browseBy.get(11));    // Resource Type
-
-        filter.setBrowseBy(orderedBrowseBy);
-
+        filter.setBrowseBy(browseBy);
         filter.setResourceType(getResourceType());
         return getMatchingServices(filter);
     }
@@ -167,7 +147,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
     public InfraService add(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Service: {}", auth, infraService);
         if (infraService.getService().getId() == null) {
@@ -197,7 +177,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Service: {}", auth, infraService);
         // if service version is empty set it null
@@ -223,7 +203,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI, CACHE_EXTRA_FACETS}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED, CACHE_FOR_UI}, allEntries = true)
     public void delete(InfraService infraService) {
         logger.trace("User is attempting to delete the Service: {}", infraService);
         if (infraService == null || infraService.getService().getId() == null) {

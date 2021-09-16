@@ -103,14 +103,15 @@ public class UiElementsController {
                     .map(uiElementsService::createUiService)
                     .collect(Collectors.toList());
             uiServicePaging.setResults(uiServiceList);
-            uiServicePaging.getFacets().addAll(uiElementsService.createExtraFacets());
+//            allRequestParams.set("quantity", "10000");
+//            List<InfraService> allServices = infraServiceController.getAll(allRequestParams, authentication).getBody().getResults();
+//            uiServicePaging.getFacets().addAll(uiElementsService.createExtraFacets(allServices));
         }
         return new ResponseEntity<>(uiServicePaging, HttpStatus.OK);
     }
 
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public UiService getUiService(@PathVariable("id") String id) {
-        List<Facet> facets = uiElementsService.createExtraFacets(Collections.singletonList(uiElementsService.createUiService(infraServiceService.get(id))));
         return uiElementsService.createUiService(infraServiceService.get(id));
     }
 
@@ -160,7 +161,9 @@ public class UiElementsController {
                     .map(uiElementsService::createServiceSnippet)
                     .collect(Collectors.toList());
             snippets.setResults(snippetsList);
-            snippets.getFacets().addAll(uiElementsService.createExtraFacets());
+//            allRequestParams.set("quantity", "10000");
+//            List<InfraService> allServices = infraServiceController.getAll(allRequestParams, authentication).getBody().getResults();
+//            snippets.getFacets().addAll(uiElementsService.createExtraFacets(allServices));
         }
         return new ResponseEntity<>(snippets, HttpStatus.OK);
     }

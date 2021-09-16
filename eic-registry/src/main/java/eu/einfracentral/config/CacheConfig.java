@@ -20,7 +20,6 @@ public class CacheConfig {
 
     public static final String CACHE_PROVIDERS = "providers";
     public static final String CACHE_FOR_UI = "ui_vocabularies";
-    public static final String CACHE_EXTRA_FACETS = "ui_extra_facets";
     public static final String CACHE_VOCABULARIES = "vocabularies";
     public static final String CACHE_VOCABULARY_MAP = "vocabulary_map";
     public static final String CACHE_VOCABULARY_TREE = "vocabulary_tree";
@@ -41,7 +40,6 @@ public class CacheConfig {
                         CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).maximumSize(50).build().asMap(), false),
                 new ConcurrentMapCache(CACHE_PROVIDERS),
                 new ConcurrentMapCache(CACHE_FOR_UI),
-                new ConcurrentMapCache(CACHE_EXTRA_FACETS),
                 new ConcurrentMapCache(CACHE_EVENTS),
                 new ConcurrentMapCache(CACHE_SERVICE_EVENTS),
                 new ConcurrentMapCache(CACHE_VOCABULARIES),

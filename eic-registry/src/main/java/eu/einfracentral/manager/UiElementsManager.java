@@ -18,7 +18,6 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.*;
 import eu.einfracentral.utils.ListUtils;
-import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_EXTRA_FACETS;
 import static eu.einfracentral.config.CacheConfig.CACHE_FOR_UI;
 
 
@@ -153,7 +151,7 @@ public class UiElementsManager implements UiElementsService {
             if (!Collection.class.isAssignableFrom(entry.getValue().getClass())) {
                 List<Object> temp = new ArrayList<>();
                 temp.add(entry.getValue());
-                field.setValue(temp);
+                field.setValues(temp);
             } else {
                 if (!((List<?>) entry.getValue()).isEmpty()
                         && Map.class.isAssignableFrom(((List<?>) entry.getValue()).get(0).getClass())) {
@@ -161,15 +159,18 @@ public class UiElementsManager implements UiElementsService {
                     for (Object item : ((List<?>) entry.getValue())) {
                         subFields.addAll(createExtras((Map<String, ?>) item));
                     }
-                    field.setValue(subFields);
+                    field.setValues(subFields);
                 } else {
-                    field.setValue((List<Object>) entry.getValue());
+                    field.setValues((List<Object>) entry.getValue());
                 }
             }
 
             Field fieldInfo = getExtraField(entry.getKey());
             if (fieldInfo != null) {
                 field.setFieldId(fieldInfo.getId());
+                if (fieldInfo.getForm() != null) {
+                    field.setVocabulary(fieldInfo.getForm().getVocabulary());
+                }
             }
 
             extras.add(field);
@@ -260,33 +261,7 @@ public class UiElementsManager implements UiElementsService {
         return valuesMap;
     }
 
-    @Scheduled(initialDelay = 25000, fixedRate = 3600000)
-    @Cacheable(CACHE_EXTRA_FACETS)
-    @Override
-    public List<Facet> createExtraFacets() {
-        List<Facet> facetsList = new ArrayList<>();
-        Map<Field, Vocabulary.Type> vocabularyTypes = getExtraVocabularyFieldsAndTypes();
-        for (Map.Entry<Field, Vocabulary.Type> fieldTypeEntry : vocabularyTypes.entrySet()) {
-            // TODO: possible optimization -> "servicesByExtraVoc = getByExtraVoc(null, null)" before loop.
-            Map<Vocabulary, List<InfraService>> servicesByExtraVoc = getByExtraVoc(fieldTypeEntry.getValue().getKey(), null);
-            Facet facet = new Facet();
-            facet.setField(fieldTypeEntry.getKey().getName());
-            facet.setLabel(fieldTypeEntry.getKey().getLabel());
-            List<eu.openminted.registry.core.domain.Value> valuesList = new ArrayList<>();
-            for (Map.Entry<Vocabulary, List<InfraService>> entry : servicesByExtraVoc.entrySet()) {
-                eu.openminted.registry.core.domain.Value value = new eu.openminted.registry.core.domain.Value();
-                value.setValue(entry.getKey().getId());
-                value.setLabel(entry.getKey().getName());
-                value.setCount(entry.getValue().size());
-                valuesList.add(value);
-            }
-            facet.setValues(valuesList);
-            facetsList.add(facet);
-        }
-        return facetsList;
-    }
-
-    private Map<Field, Vocabulary.Type> getExtraVocabularyFieldsAndTypes() {
+    public Map<Field, Vocabulary.Type> getExtraVocabularyFieldsAndTypes() {
         Map<Field, Vocabulary.Type> vocabularyFieldsAndTypes = new HashMap<>();
 
         for (Field field : getFields()) {
@@ -303,76 +278,7 @@ public class UiElementsManager implements UiElementsService {
     }
 
     @Override
-    public List<Facet> createExtraFacets(List<UiService> services) { // TODO: probably delete this
-        List<Field> fieldsList = getFields();
-        List<Field> vocabularyFields = new ArrayList<>();
-//        Map<String, Map<String, Integer>> valuesMap = new HashMap<>();
-        // A map of Vocabulary types containing maps of vocabulary ids and their occurrence number.
-        Map<String, Map<String, Integer>> valuesMap = new HashMap<>();
-
-        for (Field field : fieldsList) {
-            String vocabularyName = field.getForm().getVocabulary();
-            if (field.getParent() != null && field.getAccessPath().startsWith("extras") && vocabularyName != null && !"".equals(vocabularyName)) {
-                try {
-                    List<Vocabulary> vocabularyValues = vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyName));
-                    vocabularyFields.add(field);
-                    valuesMap.put(field.getName(), new HashMap<>());
-                    if (vocabularyValues != null) {
-                        for (Vocabulary value : vocabularyValues) {
-                            valuesMap.get(field.getName()).put(value.getId(), 0);
-                        }
-                    }
-                } catch (IllegalArgumentException e) {
-                    logger.debug("vocabulary '" + vocabularyName + "' does not exist, skipping this value", e);
-                }
-            }
-        }
-//        valuesMap.values().forEach(vocabularyValuesEnsemble::putAll);
-
-        for (UiService service : services) {
-            if (service.getExtras() != null) {
-
-                for (Map.Entry<String, Map<String, Integer>> entry : valuesMap.entrySet()) {
-                    Object extraValues = service.getExtras().get(entry.getKey());
-                    if (extraValues == null) {
-                        continue;
-                    }
-                    if (List.class.isAssignableFrom(extraValues.getClass())) {
-                        for (Object item : (List<?>) extraValues) {
-                            if (item.equals(item.toString())) {
-                                entry.getValue().put((String) item, entry.getValue().get(item) + 1);
-                            }
-                        }
-                    } else {
-                        if (extraValues.equals(extraValues.toString())) {
-                            entry.getValue().put((String) extraValues, entry.getValue().get(extraValues) + 1);
-                        }
-                    }
-                }
-            }
-        }
-
-        List<Facet> facets = new ArrayList<>();
-        for (Map.Entry<String, Map<String, Integer>> entry : valuesMap.entrySet()) {
-            Facet facet = new Facet();
-            facet.setField(entry.getKey());
-            facet.setLabel(getExtraField(entry.getKey()).getLabel());
-            List<eu.openminted.registry.core.domain.Value> values = new ArrayList<>();
-            for (Map.Entry<String, Integer> vocabularyValue : entry.getValue().entrySet()) {
-                eu.openminted.registry.core.domain.Value value = new eu.openminted.registry.core.domain.Value();
-                value.setValue(vocabularyValue.getKey());
-                value.setCount(vocabularyValue.getValue());
-                value.setLabel(vocabularyService.get(vocabularyValue.getKey()).getName());
-                values.add(value);
-            }
-            facet.setValues(values);
-            facets.add(facet);
-        }
-
-        return facets;
-    }
-
-    private Map<Vocabulary, List<InfraService>> getByExtraVoc(String vocabularyType, String value) {
+    public Map<Vocabulary, List<InfraService>> getByExtraVoc(String vocabularyType, String value) {
         Map<Vocabulary, List<InfraService>> serviceMap = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -437,8 +343,8 @@ public class UiElementsManager implements UiElementsService {
         Field fieldInfo = getField(field.getFieldId());
 
         try {
-            if (field.getValue().size() > 1) {
-                innerFieldNames = field.getValue()
+            if (field.getValues().size() > 1) {
+                innerFieldNames = field.getValues()
                         .stream()
                         .map(o -> (DynamicField) o)
                         .map(DynamicField::getName)
@@ -446,18 +352,18 @@ public class UiElementsManager implements UiElementsService {
             }
         } catch (ClassCastException e) {
             logger.debug("DynamicField contains string values");
-            return field.getValue();
+            return field.getValues();
         }
 
         // when a field's value is an object (with its own inner fields), a key-value map is created
-        if (!innerFieldNames.isEmpty() && field.getValue().size() >= innerFieldNames.size()) {
+        if (!innerFieldNames.isEmpty() && field.getValues().size() >= innerFieldNames.size()) {
             List<Map<String, Object>> mapList = new ArrayList<>();
-            for (int k = 0; k < field.getValue().size() / innerFieldNames.size(); k++) {
+            for (int k = 0; k < field.getValues().size() / innerFieldNames.size(); k++) {
                 Map<String, Object> keyValues = new HashMap<>();
                 for (int i = 0; i < innerFieldNames.size(); i++) {
-                    DynamicField innerField = (DynamicField) field.getValue().get(k * innerFieldNames.size() + i);
-                    if (innerField.getValue().size() == 1) {
-                        keyValues.put(innerField.getName(), innerField.getValue().get(0));
+                    DynamicField innerField = (DynamicField) field.getValues().get(k * innerFieldNames.size() + i);
+                    if (innerField.getValues().size() == 1) {
+                        keyValues.put(innerField.getName(), innerField.getValues().get(0));
                     } else { // recurse here for more complex objects
                         keyValues.put(innerField.getName(), getFieldValues(innerField));
                     }
@@ -466,11 +372,11 @@ public class UiElementsManager implements UiElementsService {
             }
             return mapList;
         } else {
-            if (fieldInfo != null && !fieldInfo.getMultiplicity() && field.getValue() != null && !field.getValue().isEmpty()) {
-                return field.getValue().get(0);
+            if (fieldInfo != null && !fieldInfo.getMultiplicity() && field.getValues() != null && !field.getValues().isEmpty()) {
+                return field.getValues().get(0);
             }
         }
-        return field.getValue();
+        return field.getValues();
     }
 
     @Override // TODO: refactoring
@@ -799,6 +705,26 @@ public class UiElementsManager implements UiElementsService {
         return usedValues;
     }
 
+    private boolean dynamicFieldContains(DynamicField df, String facetName) {
+        boolean fieldExists = false;
+        if (df != null && facetName != null) {
+            if (df.getName().equals(facetName)) {
+                return true;
+            } else {
+
+                for (Object obj : df.getValues()) {
+                    try {
+                        DynamicField innerField = (DynamicField) obj;
+                        dynamicFieldContains(innerField, facetName);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }
+        return fieldExists;
+    }
+
     // TODO: optimize
     private boolean valueExists(DynamicField field, Vocabulary vocabulary) {
         boolean result = false;
@@ -808,14 +734,14 @@ public class UiElementsManager implements UiElementsService {
                 && fieldDesc.getType().equals("vocabulary")
                 && fieldDesc.getForm().getVocabulary() != null
                 && fieldDesc.getForm().getVocabulary().equals(vocabulary.getType())) {
-            for (Object value : field.getValue()) {
+            for (Object value : field.getValues()) {
                 if (value.equals(vocabulary.getId())) {
                     result = true;
                     break;
                 }
             }
         } else {
-            for (Object df : field.getValue()) {
+            for (Object df : field.getValues()) {
                 try {
                     result = valueExists((DynamicField) df, vocabulary);
                 } catch (Exception e) {
