@@ -1,6 +1,7 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.dto.UiService;
 import eu.einfracentral.dto.Value;
 import eu.einfracentral.ui.Field;
@@ -38,13 +39,15 @@ public interface UiElementsService {
 
     Map<String, Object> createServiceSnippet(InfraService service);
 
+    /**
+     *  Get Vocabulary - Service map by extra vocabulary
+     */
+
+    Map<Vocabulary, List<InfraService>> getByExtraVoc(String vocabularyType, String value);
+
     Map<String, List<InfraService>> getServicesByExtraVoc(String vocabularyType, String value);
 
     Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(String vocabularyType, String value);
 
     Map<String, List<UiService>> getUiServicesByExtraVoc(String vocabularyType, String value);
-
-    List<Facet> createExtraFacets(List<UiService> services);
-
-    List<Facet> createExtraFacets();
 }

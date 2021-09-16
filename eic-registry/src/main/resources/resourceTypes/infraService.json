@@ -226,8 +226,8 @@
     },
     {
       "multivalued": true,
-      "name": "users",
-      "label": "Users",
+      "name": "portfolios",
+      "label": "Portfolios",
       "path": "//*[local-name()='extra']//*[local-name()='value'][@vocabulary='Portfolios']//*[local-name()='value']/text()",
       "type": "java.lang.String"
     }
