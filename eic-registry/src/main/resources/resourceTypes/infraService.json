@@ -209,6 +209,27 @@
       "name": "latest",
       "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": true,
+      "name": "users",
+      "label": "Users",
+      "path": "//*[local-name()='extra']//*[local-name()='value'][@vocabulary='Users']//*[local-name()='value']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "subUsers",
+      "label": "Subusers",
+      "path": "//*[local-name()='extra']//*[local-name()='value'][@vocabulary='Subusers']//*[local-name()='value']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "users",
+      "label": "Users",
+      "path": "//*[local-name()='extra']//*[local-name()='value'][@vocabulary='Portfolios']//*[local-name()='value']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
