@@ -91,23 +91,17 @@ public class UiElementsController {
     @GetMapping(path = "services", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<UiService>> getAllUiServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         Paging<UiService> uiServicePaging = new Paging<>();
-        ResponseEntity<Paging<InfraService>> services = infraServiceController.getAll(allRequestParams, authentication);
-        if (services.hasBody()) {
-            uiServicePaging.setFrom(services.getBody().getFrom());
-            uiServicePaging.setTo(services.getBody().getTo());
-            uiServicePaging.setTotal(services.getBody().getTotal());
-            uiServicePaging.setFacets(services.getBody().getFacets());
-            List<UiService> uiServiceList = services.getBody().getResults()
+        ResponseEntity<Paging<InfraService>> servicesResponse = infraServiceController.getAllActiveLatest(allRequestParams, authentication);
+        if (servicesResponse.hasBody()) {
+            Paging<InfraService> services = servicesResponse.getBody();
+            List<UiService> uiServiceList = services.getResults()
                     .stream()
                     .parallel()
                     .map(uiElementsService::createUiService)
                     .collect(Collectors.toList());
-            uiServicePaging.setResults(uiServiceList);
-//            allRequestParams.set("quantity", "10000");
-//            List<InfraService> allServices = infraServiceController.getAll(allRequestParams, authentication).getBody().getResults();
-//            uiServicePaging.getFacets().addAll(uiElementsService.createExtraFacets(allServices));
+            uiServicePaging = new Paging<>(services, uiServiceList);
         }
-        return new ResponseEntity<>(uiServicePaging, HttpStatus.OK);
+        return new ResponseEntity<>(uiServicePaging, servicesResponse.getStatusCode());
     }
 
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -149,23 +143,17 @@ public class UiElementsController {
     @GetMapping(path = "services/snippets", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Map<String, Object>>> getAllSnippets(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         Paging<Map<String, Object>> snippets = new Paging<>();
-        ResponseEntity<Paging<InfraService>> services = infraServiceController.getAll(allRequestParams, authentication);
-        if (services.hasBody()) {
-            snippets.setFrom(services.getBody().getFrom());
-            snippets.setTo(services.getBody().getTo());
-            snippets.setTotal(services.getBody().getTotal());
-            snippets.setFacets(services.getBody().getFacets());
-            List<Map<String, Object>> snippetsList = services.getBody().getResults()
+        ResponseEntity<Paging<InfraService>> servicesResponse = infraServiceController.getAllActiveLatest(allRequestParams, authentication);
+        if (servicesResponse.hasBody()) {
+            Paging<InfraService> services = servicesResponse.getBody();
+            List<Map<String, Object>> snippetsList = services.getResults()
                     .stream()
                     .parallel()
                     .map(uiElementsService::createServiceSnippet)
                     .collect(Collectors.toList());
-            snippets.setResults(snippetsList);
-//            allRequestParams.set("quantity", "10000");
-//            List<InfraService> allServices = infraServiceController.getAll(allRequestParams, authentication).getBody().getResults();
-//            snippets.getFacets().addAll(uiElementsService.createExtraFacets(allServices));
+            snippets = new Paging<>(services, snippetsList);
         }
-        return new ResponseEntity<>(snippets, HttpStatus.OK);
+        return new ResponseEntity<>(snippets, servicesResponse.getStatusCode());
     }
 
     @GetMapping(path = "services/snippets/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})

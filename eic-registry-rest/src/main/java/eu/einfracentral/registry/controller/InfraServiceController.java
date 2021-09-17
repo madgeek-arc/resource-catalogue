@@ -124,6 +124,21 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.getAll(ff, authentication));
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<InfraService>> getAllActiveLatest(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
+        return ResponseEntity.ok(infraService.getAll(ff, authentication));
+    }
+
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field));
