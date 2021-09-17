@@ -214,21 +214,21 @@
       "multivalued": true,
       "name": "users",
       "label": "Users",
-      "path": "//*[local-name()='extra']//*[local-name()='value'][@vocabulary='Users']//*[local-name()='value']/text()",
+      "path": "//*[local-name()='extra'][@vocabulary='Users']//*[local-name()='value']/text() | //*[local-name()='extra']//*[local-name()='value'][@vocabulary='Users']//*[local-name()='value']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "subUsers",
       "label": "Subusers",
-      "path": "//*[local-name()='extra']//*[local-name()='value'][@vocabulary='Subusers']//*[local-name()='value']/text()",
+      "path": "//*[local-name()='extra'][@vocabulary='Subusers']//*[local-name()='value']/text() | //*[local-name()='extra']//*[local-name()='value'][@vocabulary='Subusers']//*[local-name()='value']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "portfolios",
       "label": "Portfolios",
-      "path": "//*[local-name()='extra']//*[local-name()='value'][@vocabulary='Portfolios']//*[local-name()='value']/text()",
+      "path": "//*[local-name()='extra'][@vocabulary='Portfolios']//*[local-name()='value']/text() | //*[local-name()='extra']//*[local-name()='value'][@vocabulary='Portfolios']//*[local-name()='value']/text()",
       "type": "java.lang.String"
     }
   ],
