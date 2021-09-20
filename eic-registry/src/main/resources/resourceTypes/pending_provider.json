@@ -157,8 +157,14 @@
     },
     {
       "multivalued": false,
-      "name": "status",
-      "path": "//*[local-name()='status']/text()",
+      "name": "providerStatus",
+      "path": "//*[local-name()='providerStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "templateStatus",
+      "path": "//*[local-name()='templateStatus']/text()",
       "type": "java.lang.String"
     }
   ],
