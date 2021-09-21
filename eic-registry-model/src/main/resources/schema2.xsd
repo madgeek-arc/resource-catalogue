@@ -28,29 +28,47 @@
   <xs:simpleType name="types">
         
     <xs:restriction base="xs:string">
+            
       <xs:enumeration value="ONBOARD"/>
+            
       <xs:enumeration value="UPDATE"/>
+            
       <xs:enumeration value="AUDIT"/>
+            
       <xs:enumeration value="DRAFT"/>
+          
     </xs:restriction>
+      
   </xs:simpleType>
-
+    
   <xs:simpleType name="actionType">
+        
     <xs:restriction base="xs:string">
+            
       <xs:enumeration value="REGISTERED"/>
+            
       <xs:enumeration value="APPROVED"/>
+            
       <xs:enumeration value="VALIDATED"/>
+            
       <xs:enumeration value="REJECTED"/>
+            
       <xs:enumeration value="UPDATED"/>
+            
       <xs:enumeration value="UPDATED_VERSION"/>
+            
       <xs:enumeration value="DELETED"/>
             
       <xs:enumeration value="ACTIVATED"/>
             
       <xs:enumeration value="DEACTIVATED"/>
+            
       <xs:enumeration value="VALID"/>
+            
       <xs:enumeration value="INVALID"/>
+            
       <xs:enumeration value="CREATED"/>
+          
     </xs:restriction>
       
   </xs:simpleType>

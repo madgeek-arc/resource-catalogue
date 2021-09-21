@@ -115,7 +115,7 @@ public class UiElementsController {
     }
 
     @PutMapping(path = "services", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UiService putDynamic(@RequestBody UiService service, Authentication authentication) throws ResourceNotFoundException {
+    public UiService putDynamic(@RequestBody UiService service, @RequestParam(required = false) String comment, Authentication authentication) throws ResourceNotFoundException {
         logger.info(service);
         InfraService infra = uiElementsService.createService(service);
         if (infra.getId() == null) {
@@ -124,7 +124,7 @@ public class UiElementsController {
         InfraService previous = infraServiceService.get(infra.getId());
         previous.setService(infra.getService());
         previous.setExtras(infra.getExtras());
-        infra = infraServiceService.updateService(previous, authentication);
+        infra = infraServiceService.updateService(previous, comment, authentication);
 
         return uiElementsService.createUiService(infra);
     }
