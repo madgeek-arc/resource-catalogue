@@ -85,7 +85,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
 
 //    @ApiOperation(value = "Adds a new Vocabulary")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
     public ResponseEntity<Vocabulary> add(@RequestBody Vocabulary vocabulary, @ApiIgnore Authentication auth) {
         return super.add(vocabulary, auth);
@@ -93,7 +93,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
 
 //    @ApiOperation(value = "Updates a Vocabulary")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
     public ResponseEntity<Vocabulary> update(@RequestBody Vocabulary vocabulary, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         return super.update(vocabulary, auth);
@@ -101,7 +101,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
 
 //    @ApiOperation(value = "Deletes a Vocabulary")
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
     public ResponseEntity<Vocabulary> delete(@RequestBody Vocabulary vocabulary, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         return super.delete(vocabulary, auth);
@@ -109,7 +109,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
 
 //    @ApiOperation(value = "Adds all new Vocabularies")
     @PostMapping(path = "/addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void addAll(@RequestBody List<Vocabulary> newVocabularies, @ApiIgnore Authentication auth) {
         vocabularyService.addAll(newVocabularies, auth);
     }

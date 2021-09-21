@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping({"service", "resource"})
+@RequestMapping({"resource"})
 @Api(description = "Operations for Resources/Services", tags = {"resource-controller"})
 public class ServiceController {
 
@@ -39,6 +40,9 @@ public class ServiceController {
     private final InfraServiceService<InfraService, InfraService> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource dataSource;
+
+    @Value("${auditing.interval:6}")
+    private String auditingInterval;
 
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
@@ -50,7 +54,7 @@ public class ServiceController {
     }
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service;
         if (version.isPresent()) {
@@ -65,14 +69,14 @@ public class ServiceController {
 
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the specified version of a Resource, providing the Resource id and version.")
     @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or " +
+    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
             "(@securityService.isServiceProviderAdmin(#auth, #id) or @securityService.isServiceProviderAdmin(#auth, #version))")
     public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
                                         @ApiIgnore Authentication auth) {
@@ -86,7 +90,8 @@ public class ServiceController {
 
     // Get the specified version of a RichService providing the Service id and version.
     @GetMapping(path = "rich/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+            "or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
                                                       @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.getRichService(id, version, auth), HttpStatus.OK);
@@ -94,7 +99,7 @@ public class ServiceController {
 
     @ApiOperation(value = "Creates a new Resource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddServices(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraService.addService(new InfraService(service), auth);
         logger.info("User '{}' created a new Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
@@ -102,10 +107,10 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isServiceProviderAdmin(#auth,#service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService ret = this.infraService.updateService(new InfraService(service), auth);
+    public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService ret = this.infraService.updateService(new InfraService(service), comment, auth);
         logger.info("User '{}' updated Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
@@ -274,7 +279,7 @@ public class ServiceController {
 
     // Providing the Service id and version, set the Service to active or inactive.
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         logger.info("User '{}' attempts to save Resource with id '{}' and version '{}' as '{}'", auth, id, version, active);
@@ -283,13 +288,13 @@ public class ServiceController {
 
     // Get all pending Service Templates.
     @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
         List<ProviderBundle> pendingProviders = providerService.getInactive();
         List<Service> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
             if (provider.getStatus().equals("pending template approval")) {
-                serviceTemplates.addAll(providerService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
+                serviceTemplates.addAll(infraService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
             }
         }
         Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
@@ -310,6 +315,52 @@ public class ServiceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
         return ResponseEntity.ok(infraService.getAllForAdmin(ff, null));
+    }
+
+    @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<InfraService> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+                                                      @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+        InfraService service = infraService.auditResource(id, comment, actionType, auth);
+        logger.info("User '{}' audited Provider with name '{}' [actionType: {}]", auth, service.getService().getName(), actionType);
+        return new ResponseEntity<>(service, HttpStatus.OK);
+    }
+
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<InfraService>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        ff.setFilter(allRequestParams);
+        List<InfraService> serviceList = new LinkedList<>();
+        Paging<InfraService> infraServicePaging = infraService.getRandomResources(ff, auditingInterval, auth);
+        for (InfraService infraService : infraServicePaging.getResults()) {
+            serviceList.add(infraService);
+        }
+        Paging<InfraService> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
+                infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
+        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
+    }
+
+    // Get all modification details of a specific Resource based on id.
+    @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
+        Paging<LoggingInfo> loggingInfoHistory = this.infraService.getLoggingInfoHistory(id);
+        return ResponseEntity.ok(loggingInfoHistory);
+    }
+
+//    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public Map<String, List<LoggingInfo>> migrateResourceHistory(@ApiIgnore Authentication authentication) {
+        return infraService.migrateResourceHistory(authentication);
     }
 
 }

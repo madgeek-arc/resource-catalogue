@@ -178,7 +178,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         try {
             ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
             if (throwOnNull && ret == null) {
-                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
+                throw new ResourceException(String.format("%s '%s' does not exist!", resourceType.getName(), value), HttpStatus.NOT_FOUND);
             }
         } catch (UnknownHostException e) {
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);

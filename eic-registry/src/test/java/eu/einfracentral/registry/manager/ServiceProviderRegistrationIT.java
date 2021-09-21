@@ -85,7 +85,7 @@ public class ServiceProviderRegistrationIT {
 
             providerService.verifyProvider(providerId, "rejected template", false, securityService.getAdminAccess());
 
-            infraServiceService.updateService(infraService, securityService.getAdminAccess());
+            infraServiceService.updateService(infraService, "woof", securityService.getAdminAccess());
 
             providerService.verifyProvider(providerId, "approved", true, securityService.getAdminAccess());
             providerService.verifyProvider(providerId, "approved", false, securityService.getAdminAccess());

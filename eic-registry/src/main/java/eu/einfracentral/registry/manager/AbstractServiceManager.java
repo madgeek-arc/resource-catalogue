@@ -375,7 +375,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return serialized;
     }
 
-    private InfraService deserialize(Resource resource) {
+    public InfraService deserialize(Resource resource) {
         if (resource == null) {
             logger.warn("attempt to deserialize null resource");
             return null;
@@ -436,7 +436,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    private List<Resource> getResourcesWithServiceId(String infraServiceId) {
+    public List<Resource> getResourcesWithServiceId(String infraServiceId) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
@@ -831,9 +831,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     public Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth) {
         List<String> orderedBrowseBy = new ArrayList<>();
 
-        browseBy.add("active");
-        orderedBrowseBy.add(browseBy.get(13));    // resource_organisation
-        orderedBrowseBy.add(browseBy.get(23));    // active
+        orderedBrowseBy.add("resource_organisation");   // resource_organisation
+        orderedBrowseBy.add("active");                  // active
 
         filter.setBrowseBy(orderedBrowseBy);
 
