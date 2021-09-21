@@ -281,7 +281,7 @@ public class UiElementsManager implements UiElementsService {
     public Map<Vocabulary, List<InfraService>> getByExtraVoc(String vocabularyType, String value) {
         Map<Vocabulary, List<InfraService>> serviceMap = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
 
         List<Vocabulary> values = new ArrayList<>();
@@ -663,7 +663,7 @@ public class UiElementsManager implements UiElementsService {
         List<Value> usedValues = new ArrayList<>();
 
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
         List<Vocabulary> values = vocabularyService.getByType(Vocabulary.Type.fromString(type));
 

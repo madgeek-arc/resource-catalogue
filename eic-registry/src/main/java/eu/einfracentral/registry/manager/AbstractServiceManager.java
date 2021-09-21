@@ -109,7 +109,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         }
         browseBy = new ArrayList<>();
         browseBy.addAll(browseSet);
-        browseBy.add("resourceType");
+//        browseBy.add("resourceType");
         java.util.Collections.sort(browseBy);
         logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
     }
