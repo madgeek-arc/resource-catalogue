@@ -8,7 +8,6 @@ import eu.einfracentral.ui.Field;
 import eu.einfracentral.ui.FieldGroup;
 import eu.einfracentral.ui.Group;
 import eu.einfracentral.ui.GroupedFields;
-import eu.openminted.registry.core.domain.Facet;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ public interface UiElementsService {
     Map<String, Object> createServiceSnippet(InfraService service);
 
     /**
-     *  Get Vocabulary - Service map by extra vocabulary
+     * Get Vocabulary - Service map by extra vocabulary
      */
 
     Map<Vocabulary, List<InfraService>> getByExtraVoc(String vocabularyType, String value);
