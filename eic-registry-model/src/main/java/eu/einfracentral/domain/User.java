@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class User implements Identifiable {
 
+    //TODO: Make fields mandatory
     private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement

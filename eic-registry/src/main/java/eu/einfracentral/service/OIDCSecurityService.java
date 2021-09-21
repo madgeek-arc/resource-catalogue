@@ -64,6 +64,21 @@ public class OIDCSecurityService implements SecurityService {
         return adminAccess;
     }
 
+    @Override
+    public String getRoleName(Authentication authentication) {
+        String role;
+        if (hasRole(authentication, "ROLE_ADMIN")) {
+            role = "admin";
+        } else if (hasRole(authentication, "ROLE_EPOT")) {
+            role = "EPOT";
+        } else if (hasRole(authentication, "ROLE_PROVIDER")) {
+            role = "provider";
+        } else {
+            role = "user";
+        }
+        return role;
+    }
+
     public boolean hasRole(Authentication auth, String role) {
         if (auth == null) return false;
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
@@ -253,9 +268,7 @@ public class OIDCSecurityService implements SecurityService {
                     throw new ServiceException("Provider status field is null");
                 }
                 if (provider.isActive() && provider.getStatus().equals("approved")) {
-                    if (isProviderAdmin(auth, provider.getId())) {
-                        return true;
-                    }
+                    return true;
                 } else if (provider.getStatus().equals("pending template submission")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());

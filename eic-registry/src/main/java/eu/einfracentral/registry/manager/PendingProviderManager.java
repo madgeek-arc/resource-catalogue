@@ -91,9 +91,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
             providerBundle.setStatus("pending initial approval");
         }
 
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfo(User.of(auth).getEmail(), determineRole(auth));
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add((loggingInfo));
+        loggingInfoList.add(loggingInfo);
         providerBundle.setLoggingInfo(loggingInfoList);
 
         super.add(providerBundle, auth);
@@ -260,18 +261,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     public void adminAcceptedTerms(String providerId, Authentication auth){
         update(get(providerId), auth);
-    }
-
-    public String determineRole(Authentication authentication) {
-        String role;
-        if (securityService.hasRole(authentication, "ROLE_ADMIN")) {
-            role = "admin";
-        } else if (securityService.hasRole(authentication, "ROLE_PROVIDER")) {
-            role = "provider";
-        } else {
-            role = "user";
-        }
-        return role;
     }
 
 }

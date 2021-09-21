@@ -246,7 +246,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> providerRatings(String id, Interval by) {
-        Map<String, Float> providerRatings = providerService.getServices(id)
+        Map<String, Float> providerRatings = infraServiceManager.getServices(id)
                 .stream()
                 .flatMap(s -> ratings(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
@@ -263,7 +263,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerFavourites(String id, Interval by) {
-        Map<String, Integer> providerFavorites = providerService.getServices(id)
+        Map<String, Integer> providerFavorites = infraServiceManager.getServices(id)
                 .stream()
                 .flatMap(s -> favourites(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -296,7 +296,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
-        Map<String, Integer> providerAddToProject = providerService.getServices(id)
+        Map<String, Integer> providerAddToProject = infraServiceManager.getServices(id)
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -341,7 +341,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerVisits(String id, Interval by) {
         Map<String, Integer> results = new HashMap<>();
-        for (Service service : providerService.getServices(id)){
+        for (Service service : infraServiceManager.getServices(id)){
             Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(),by).entrySet();
             for (Map.Entry<String, Integer> entry : entrySet){
                 if (!results.containsKey(entry.getKey())){
@@ -356,7 +356,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> providerVisitation(String id, Interval by) {
-        Map<String, Integer> counts = providerService.getServices(id).stream().collect(Collectors.toMap(
+        Map<String, Integer> counts = infraServiceManager.getServices(id).stream().collect(Collectors.toMap(
                 Service::getName,
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
         ));
@@ -566,13 +566,12 @@ public class StatisticsManager implements StatisticsService {
                         expandedPlaces = new String[]{place};
                     }
                     for (String p : expandedPlaces) {
-                        try{
-                            Set<Value> values = placeServices.get(p);
-                            values.add(value);
-                            placeServices.put(p, values);
-                        } catch(NullPointerException e){
-                            logger.info(p);
+                        if (placeServices.get(p) == null) {
+                            continue;
                         }
+                        Set<Value> values = placeServices.get(p);
+                        values.add(value);
+                        placeServices.put(p, values);
                     }
                 }
             }
@@ -601,15 +600,14 @@ public class StatisticsManager implements StatisticsService {
         for (InfraService infraService : allServices) {
             Value value = new Value(infraService.getId(), infraService.getService().getName());
 
-            try {
-                Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
-                for (String country : countries) {
-                    Set<Value> values = mapValues.get(country);
-                    values.add(value);
-                    mapValues.put(country, values);
+            Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
+            for (String country : countries) {
+                if (mapValues.get(country) == null) {
+                    continue;
                 }
-            } catch (NullPointerException e){
-                logger.info(e);
+                Set<Value> values = mapValues.get(country);
+                values.add(value);
+                mapValues.put(country, values);
             }
         }
 

@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -16,10 +17,19 @@ public class LoggingInfo {
     private String userEmail;
 
     @XmlElement(defaultValue = "null")
+    private String userFullName;
+
+    @XmlElement(defaultValue = "null")
     private String userRole;
 
     @XmlElement(defaultValue = "null")
     private String type;
+
+    @XmlElement(defaultValue = "null")
+    private String comment;
+
+    @XmlElement(defaultValue = "null")
+    private String actionType;
 
     public LoggingInfo() {
     }
@@ -27,20 +37,18 @@ public class LoggingInfo {
     public LoggingInfo(LoggingInfo loggingInfo) {
         this.date = loggingInfo.getDate();
         this.userEmail = loggingInfo.getUserEmail();
+        this.userFullName = loggingInfo.getUserFullName();
         this.userRole = loggingInfo.getUserRole();
         this.type = loggingInfo.getType();
+        this.comment = loggingInfo.getComment();
+        this.actionType = loggingInfo.getActionType();
     }
 
     public enum Types {
-        REGISTERED("registered"),
-        UPDATED("updated"),
-        DELETED("deleted"), // deleted Provider (DELETED) or deleted Service (DELETED)
-        ACTIVATED("activated"),
-        DEACTIVATED("deactivated"),
-        APPROVED("approved"), // approved Provider (APPROVED) or approved Service (APPROVED)
-        VALIDATED("validated"), // validated Provider (ST_SUBMISSION)
-        REJECTED("rejected"), // rejected Provider (REJECTED) or rejected Service (REJECTED_ST)
-        INITIALIZATION("initialization");
+        ONBOARD("onboard"),
+        UPDATE("update"),
+        AUDIT("audit"),
+        DRAFT("draft");
 
         private final String type;
 
@@ -64,39 +72,74 @@ public class LoggingInfo {
         }
     }
 
-    public static LoggingInfo createLoggingInfo(String userEmail, String role){
+    public enum ActionType {
+        // Onboard
+        REGISTERED("registered"),
+        APPROVED("approved"),
+        VALIDATED("validated"),
+        REJECTED("rejected"),
+        // Update
+        UPDATED("updated"),
+        UPDATED_VERSION("updated version"),
+        DELETED("deleted"),
+        ACTIVATED("activated"),
+        DEACTIVATED("deactivated"),
+        // Audit
+        VALID("valid"),
+        INVALID("invalid"),
+        // Draft
+        CREATED("drafted");
+
+        private final String actionType;
+
+        ActionType(final String actionType) {
+            this.actionType = actionType;
+        }
+
+        public String getKey() {
+            return actionType;
+        }
+
+        /**
+         * @return the Enum representation for the given string.
+         * @throws IllegalArgumentException if unknown string.
+         */
+        public static ActionType fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(ActionType.values())
+                    .filter(v -> v.actionType.equals(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
+    }
+
+    public static LoggingInfo createLoggingInfoEntry(String userEmail, String userFullName, String role, String type, String actionType){
         LoggingInfo ret = new LoggingInfo();
-        ret.setDate(now());
-        ret.setType(Types.REGISTERED.getKey());
+        ret.setDate(String.valueOf(System.currentTimeMillis()));
+        ret.setType(type);
+        ret.setActionType(actionType);
         ret.setUserEmail(userEmail);
+        ret.setUserFullName(userFullName);
         ret.setUserRole(role);
         return ret;
     }
 
-    public static LoggingInfo updateLoggingInfo(String userEmail, String role, String type){
+    public static LoggingInfo createLoggingInfoEntry(String userEmail, String userFullName, String role, String type, String actionType, String comment){
         LoggingInfo ret = new LoggingInfo();
-        ret.setDate(now());
+        ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
+        ret.setActionType(actionType);
         ret.setUserEmail(userEmail);
+        ret.setUserFullName(userFullName);
         ret.setUserRole(role);
+        ret.setComment(comment);
         return ret;
     }
 
-    public static LoggingInfo updateLoggingInfo(String type){
+    public static LoggingInfo systemUpdateLoggingInfo(String actionType){
         LoggingInfo ret = new LoggingInfo();
-        ret.setDate(now());
-        ret.setType(type);
-        ret.setUserEmail("-");
-        ret.setUserRole("system");
-        return ret;
-    }
-
-    // already registered Providers / Resources
-    public static LoggingInfo createLoggingInfoForExistingEntry(){
-        LoggingInfo ret = new LoggingInfo();
-        ret.setDate("1609491600");
-        ret.setType(Types.INITIALIZATION.getKey());
-        ret.setUserEmail("-");
+        ret.setDate(String.valueOf(System.currentTimeMillis()));
+        ret.setType(Types.UPDATE.getKey());
+        ret.setActionType(actionType);
         ret.setUserRole("system");
         return ret;
     }
@@ -104,15 +147,13 @@ public class LoggingInfo {
     @Override
     public String toString() {
         return "LoggingInfo{" +
-                "date=" + date +
+                "date='" + date + '\'' +
                 ", userEmail='" + userEmail + '\'' +
                 ", userRole='" + userRole + '\'' +
                 ", type='" + type + '\'' +
+                ", comment='" + comment + '\'' +
+                ", actionType='" + actionType + '\'' +
                 '}';
-    }
-
-    public static String now(){
-        return String.valueOf(System.currentTimeMillis());
     }
 
     public String getDate() {
@@ -131,6 +172,14 @@ public class LoggingInfo {
         this.userEmail = userEmail;
     }
 
+    public String getUserFullName() {
+        return userFullName;
+    }
+
+    public void setUserFullName(String userFullName) {
+        this.userFullName = userFullName;
+    }
+
     public String getUserRole() {
         return userRole;
     }
@@ -145,5 +194,21 @@ public class LoggingInfo {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
     }
 }

@@ -29,11 +29,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Method to update a service.
      *
      * @param service
+     * @param comment
      * @param auth
      * @return
      * @throws ResourceNotFoundException
      */
-    T updateService(T service, Authentication auth) throws ResourceNotFoundException;
+    T updateService(T service, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
      * Returns the Service with the specified id and version.
@@ -207,11 +208,46 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth);
 
-//
-//    /**
-//     * Migrates Service's fields for Catris.
-//     *
-//     */
-//    void migrateCatrisServices(List<InfraService> infraServices);
+    /**
+     * @param serviceId
+     * @param actionType
+     * @param auth
+     * @return
+     */
+    InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
+    /**
+     * @param ff
+     * @param auth
+     * @param auditingInterval
+     * @return
+     */
+    Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
+
+
+    List<InfraService> getInfraServices(String providerId);
+
+    List<Service> getServices(String providerId);
+
+    List<Service> getActiveServices(String providerId);
+
+    InfraService getServiceTemplate(String providerId);
+
+    Service getFeaturedService(String providerId);
+
+    List<InfraService> getInactiveServices(String providerId);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth);
+
+    /**
+     * Get the History of the Resource with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<LoggingInfo> getLoggingInfoHistory(String id);
 }
