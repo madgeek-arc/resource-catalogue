@@ -498,149 +498,153 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     // TODO: First run with active/latest and no broke segment, second without active/latest and broke segment
     public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-//        ff.addFilter("active", true);
-//        ff.addFilter("latest", true);
-        List<InfraService> allInfraServices = getAll(ff, auth).getResults();
-        List<Resource> allResources;
-        for (InfraService infraService : allInfraServices) {
-            allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
-            allResources.sort(Comparator.comparing((Resource::getCreationDate)));
-            boolean firstResource = true;
-            boolean broke = false;
-            for (Resource resource : allResources) {
-                List<LoggingInfo> resourceHistory = new ArrayList<>();
-                List<Version> versions = versionService.getVersionsByResource(resource.getId()); // get all updates of a specific Version of a specific Service
-                versions.sort(Comparator.comparing(Version::getCreationDate));
-                boolean firstVersion = true;
-                for (Version version : versions) {
-                    broke = false;
-                    // Save Version as Resource so we can deserialize it and get userFullName
-                    Resource tempResource = resource;
-                    tempResource.setPayload(version.getPayload());
-                    InfraService tempService = deserialize(tempResource);
-                    if (tempService.getLoggingInfo() != null && !tempService.getLoggingInfo().isEmpty()){
-                        broke = true;
-                        break;
-                    }
-                    LoggingInfo loggingInfo = new LoggingInfo();
-                    if (firstResource && firstVersion) {
-                        loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
-                        loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
-                        loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
-                        if (tempService.getMetadata() != null && tempService.getMetadata().getRegisteredBy() != null){
-                            if (tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("System") || tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("einfracentral")){
-                                loggingInfo.setUserRole("system");
-                            } else{
-                                loggingInfo.setUserFullName(tempService.getMetadata().getRegisteredBy());
-                            }
+        for (int k = 0; k < 2; k++) {
+            FacetFilter ff = new FacetFilter();
+            ff.setQuantity(10000);
+            if (k == 0) {
+                ff.addFilter("active", true);
+                ff.addFilter("latest", true);
+            }
+            List<InfraService> allInfraServices = getAll(ff, auth).getResults();
+            List<Resource> allResources;
+            for (InfraService infraService : allInfraServices) {
+                allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+                allResources.sort(Comparator.comparing((Resource::getCreationDate)));
+                boolean firstResource = true;
+                boolean broke = false;
+                for (Resource resource : allResources) {
+                    List<LoggingInfo> resourceHistory = new ArrayList<>();
+                    List<Version> versions = versionService.getVersionsByResource(resource.getId()); // get all updates of a specific Version of a specific Service
+                    versions.sort(Comparator.comparing(Version::getCreationDate));
+                    boolean firstVersion = true;
+                    for (Version version : versions) {
+                        broke = false;
+                        // Save Version as Resource so we can deserialize it and get userFullName
+                        Resource tempResource = resource;
+                        tempResource.setPayload(version.getPayload());
+                        InfraService tempService = deserialize(tempResource);
+                        if (tempService.getLoggingInfo() != null && !tempService.getLoggingInfo().isEmpty()) {
+                            broke = true;
+                            break;
                         }
-                        firstResource = false;
-                        firstVersion = false;
-                    } else if (!firstResource && firstVersion) {
-                        loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
-                        loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED_VERSION.getKey());
-                        loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
-                        if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
-                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System") || tempService.getMetadata().getModifiedBy().equalsIgnoreCase("einfracentral")){
-                                loggingInfo.setUserRole("system");
-                            } else{
-                                loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
-                            }
-                        }
-                        firstVersion = false;
-                    } else {
-                        loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
-                        loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED.getKey());
-                        loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
-                        if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null){
-                            if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System") || tempService.getMetadata().getModifiedBy().equalsIgnoreCase("einfracentral")){
-                                loggingInfo.setUserRole("system");
-                            } else{
-                                loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
-                            }
-                        }
-                    }
-                    resourceHistory.add(loggingInfo);
-                }
-                if (broke){
-                    continue;
-                }
-
-                resourceHistory.sort(Comparator.comparing(LoggingInfo::getDate));
-
-                InfraService service = deserialize(resource);
-
-                if (service.getLoggingInfo() != null) {
-                    List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
-                    for (LoggingInfo loggingInfo : loggingInfoList) {
-                        // update initialization type
-                        if (loggingInfo.getType().equals("initialization")) {
+                        LoggingInfo loggingInfo = new LoggingInfo();
+                        if (firstResource && firstVersion) {
                             loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
                             loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
-                            loggingInfo.setDate(service.getMetadata().getRegisteredAt()); // we may need to go further to core creationDate
-                        }
-                        // migrate all the other states
-                        if (loggingInfo.getType().equals("registered")){
-                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
-                            loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
-                        } else if (loggingInfo.getType().equals("updated")){
+                            loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                            if (tempService.getMetadata() != null && tempService.getMetadata().getRegisteredBy() != null) {
+                                if (tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("System") || tempService.getMetadata().getRegisteredBy().equalsIgnoreCase("einfracentral")) {
+                                    loggingInfo.setUserRole("system");
+                                } else {
+                                    loggingInfo.setUserFullName(tempService.getMetadata().getRegisteredBy());
+                                }
+                            }
+                            firstResource = false;
+                            firstVersion = false;
+                        } else if (!firstResource && firstVersion) {
+                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                            loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED_VERSION.getKey());
+                            loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                            if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null) {
+                                if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System") || tempService.getMetadata().getModifiedBy().equalsIgnoreCase("einfracentral")) {
+                                    loggingInfo.setUserRole("system");
+                                } else {
+                                    loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
+                                }
+                            }
+                            firstVersion = false;
+                        } else {
                             loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
                             loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED.getKey());
-                        } else if (loggingInfo.getType().equals("deleted")){
-                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
-                            loggingInfo.setActionType(LoggingInfo.ActionType.DELETED.getKey());
-                        } else if (loggingInfo.getType().equals("activated")){
-                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
-                            loggingInfo.setActionType(LoggingInfo.ActionType.ACTIVATED.getKey());
-                        } else if (loggingInfo.getType().equals("deactivated")){
-                            loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
-                            loggingInfo.setActionType(LoggingInfo.ActionType.DEACTIVATED.getKey());
-                        } else if (loggingInfo.getType().equals("approved")){
-                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
-                            loggingInfo.setActionType(LoggingInfo.ActionType.APPROVED.getKey());
-                        } else if (loggingInfo.getType().equals("validated")){
-                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
-                            loggingInfo.setActionType(LoggingInfo.ActionType.VALIDATED.getKey());
-                        } else if (loggingInfo.getType().equals("rejected")){
-                            loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
-                            loggingInfo.setActionType(LoggingInfo.ActionType.REJECTED.getKey());
-                        } else if (loggingInfo.getType().equals("audited")){
-                            loggingInfo.setType(LoggingInfo.Types.AUDIT.getKey());
-                        }
-                    }
-                    List<LoggingInfo> concatLoggingInfoList = new ArrayList<>();
-                    if (loggingInfoList.get(0).getType().equals(LoggingInfo.Types.UPDATE.getKey()) || loggingInfoList.get(0).getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
-                        Instant loggingInstant = Instant.ofEpochSecond(Long.parseLong(loggingInfoList.get(0).getDate()));
-                        Instant firstHistoryInstant = Instant.ofEpochSecond(Long.parseLong(resourceHistory.get(0).getDate()));
-                        Duration dif = Duration.between(firstHistoryInstant, loggingInstant);
-                        long sec = dif.getSeconds();
-                        if (sec > 20){ // if the difference < 20 secs, both lists contain the same items. If not (>20), concat them
-                            for (LoggingInfo loggingFromHistory : resourceHistory) {
-                                Instant historyInstant = Instant.ofEpochSecond(Long.parseLong(loggingFromHistory.getDate()));
-                                Duration difference = Duration.between(historyInstant, loggingInstant);
-                                long seconds = difference.getSeconds();
-                                if (seconds > 20){
-                                    concatLoggingInfoList.add(loggingFromHistory);
-                                } else{
-                                    concatLoggingInfoList.addAll(loggingInfoList);
-                                    service.setLoggingInfo(concatLoggingInfoList);
-                                    break;
+                            loggingInfo.setDate(String.valueOf(version.getCreationDate().getTime()));
+                            if (tempService.getMetadata() != null && tempService.getMetadata().getModifiedBy() != null) {
+                                if (tempService.getMetadata().getModifiedBy().equalsIgnoreCase("System") || tempService.getMetadata().getModifiedBy().equalsIgnoreCase("einfracentral")) {
+                                    loggingInfo.setUserRole("system");
+                                } else {
+                                    loggingInfo.setUserFullName(tempService.getMetadata().getModifiedBy());
                                 }
                             }
                         }
-                    } // else it's on the Onboard state, so we keep the existing LoggingInfo
-                } else {
-                    service.setLoggingInfo(resourceHistory);
+                        resourceHistory.add(loggingInfo);
+                    }
+                    if (k == 1 && broke) {
+                        continue;
+                    }
+
+                    resourceHistory.sort(Comparator.comparing(LoggingInfo::getDate));
+
+                    InfraService service = deserialize(resource);
+
+                    if (service.getLoggingInfo() != null) {
+                        List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
+                        for (LoggingInfo loggingInfo : loggingInfoList) {
+                            // update initialization type
+                            if (loggingInfo.getType().equals("initialization")) {
+                                loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
+                                loggingInfo.setDate(service.getMetadata().getRegisteredAt()); // we may need to go further to core creationDate
+                            }
+                            // migrate all the other states
+                            if (loggingInfo.getType().equals("registered")) {
+                                loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.REGISTERED.getKey());
+                            } else if (loggingInfo.getType().equals("updated")) {
+                                loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.UPDATED.getKey());
+                            } else if (loggingInfo.getType().equals("deleted")) {
+                                loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.DELETED.getKey());
+                            } else if (loggingInfo.getType().equals("activated")) {
+                                loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.ACTIVATED.getKey());
+                            } else if (loggingInfo.getType().equals("deactivated")) {
+                                loggingInfo.setType(LoggingInfo.Types.UPDATE.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                            } else if (loggingInfo.getType().equals("approved")) {
+                                loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.APPROVED.getKey());
+                            } else if (loggingInfo.getType().equals("validated")) {
+                                loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.VALIDATED.getKey());
+                            } else if (loggingInfo.getType().equals("rejected")) {
+                                loggingInfo.setType(LoggingInfo.Types.ONBOARD.getKey());
+                                loggingInfo.setActionType(LoggingInfo.ActionType.REJECTED.getKey());
+                            } else if (loggingInfo.getType().equals("audited")) {
+                                loggingInfo.setType(LoggingInfo.Types.AUDIT.getKey());
+                            }
+                        }
+                        List<LoggingInfo> concatLoggingInfoList = new ArrayList<>();
+                        if (loggingInfoList.get(0).getType().equals(LoggingInfo.Types.UPDATE.getKey()) || loggingInfoList.get(0).getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+                            Instant loggingInstant = Instant.ofEpochSecond(Long.parseLong(loggingInfoList.get(0).getDate()));
+                            Instant firstHistoryInstant = Instant.ofEpochSecond(Long.parseLong(resourceHistory.get(0).getDate()));
+                            Duration dif = Duration.between(firstHistoryInstant, loggingInstant);
+                            long sec = dif.getSeconds();
+                            if (sec > 20) { // if the difference < 20 secs, both lists contain the same items. If not (>20), concat them
+                                for (LoggingInfo loggingFromHistory : resourceHistory) {
+                                    Instant historyInstant = Instant.ofEpochSecond(Long.parseLong(loggingFromHistory.getDate()));
+                                    Duration difference = Duration.between(historyInstant, loggingInstant);
+                                    long seconds = difference.getSeconds();
+                                    if (seconds > 20) {
+                                        concatLoggingInfoList.add(loggingFromHistory);
+                                    } else {
+                                        concatLoggingInfoList.addAll(loggingInfoList);
+                                        service.setLoggingInfo(concatLoggingInfoList);
+                                        break;
+                                    }
+                                }
+                            }
+                        } // else it's on the Onboard state, so we keep the existing LoggingInfo
+                    } else {
+                        service.setLoggingInfo(resourceHistory);
+                    }
+                    if (service.getService().getVersion() == null) {
+                        allMigratedLoggingInfos.put(service.getService().getId() + " " + k + " with null version", service.getLoggingInfo());
+                    } else {
+                        allMigratedLoggingInfos.put(service.getService().getId() + " " + k + " with version " + service.getService().getVersion(), service.getLoggingInfo());
+                    }
+                    logger.info(String.format("Resource's [%s] new Logging Info %s", service.getService().getName(), service.getLoggingInfo()));
+                    super.update(service, auth);
                 }
-                if (service.getService().getVersion() == null){
-                    allMigratedLoggingInfos.put(service.getService().getId()+" with null version", service.getLoggingInfo());
-                } else{
-                    allMigratedLoggingInfos.put(service.getService().getId()+" with version "+service.getService().getVersion(), service.getLoggingInfo());
-                }
-                logger.info(String.format("Resource's [%s] new Logging Info %s", service.getService().getName(), service.getLoggingInfo()));
-//                super.update(service, auth);
             }
         }
     return allMigratedLoggingInfos;

@@ -357,8 +357,8 @@ public class ServiceController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-//    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Map<String, List<LoggingInfo>> migrateResourceHistory(@ApiIgnore Authentication authentication) {
         return infraService.migrateResourceHistory(authentication);
     }

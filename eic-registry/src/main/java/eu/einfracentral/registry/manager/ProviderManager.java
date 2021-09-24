@@ -887,7 +887,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 providerBundle.setLoggingInfo(historyToLogging);
             }
             logger.info(String.format("Provider's [%s] new Logging Info %s", providerBundle.getProvider().getName(), providerBundle.getLoggingInfo()));
-//            super.update(providerBundle, auth);
+            super.update(providerBundle, auth);
             allMigratedLogginInfos.put(providerBundle.getProvider().getId(), providerBundle.getLoggingInfo());
         }
         return allMigratedLogginInfos;
