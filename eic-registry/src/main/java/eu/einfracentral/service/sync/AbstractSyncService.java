@@ -224,41 +224,39 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
 
     @Override
     public void syncAll() {
-        while (active) {
-            logger.info("Retrieving resources from remote host: {}", host);
-            Paging<T> remoteResources = getResources(host, maxQuantity);
-            Paging<T> localResources = getResources(self, maxQuantity);
-            if (remoteResources != null && localResources != null) {
-                List<T> missingResources = localResources.getResults();
-                List<T> updatedResources = new ArrayList<>();
-                List<T> deletedResources = remoteResources.getResults();
+        logger.info("Retrieving resources from remote host: {}", host);
+        Paging<T> remoteResources = getResources(host, maxQuantity);
+        Paging<T> localResources = getResources(self, maxQuantity);
+        if (remoteResources != null && localResources != null) {
+            List<T> missingResources = localResources.getResults();
+            List<T> updatedResources = new ArrayList<>();
+            List<T> deletedResources = remoteResources.getResults();
 
-                Iterator<T> remoteResourceIter = deletedResources.iterator();
-                while (remoteResourceIter.hasNext()) {
-                    T remoteResource = remoteResourceIter.next();
+            Iterator<T> remoteResourceIter = deletedResources.iterator();
+            while (remoteResourceIter.hasNext()) {
+                T remoteResource = remoteResourceIter.next();
 
-                    Iterator<T> localResourceIter = missingResources.iterator();
-                    while (localResourceIter.hasNext()) {
-                        T localResource = localResourceIter.next();
+                Iterator<T> localResourceIter = missingResources.iterator();
+                while (localResourceIter.hasNext()) {
+                    T localResource = localResourceIter.next();
 
-                        if (localResource.getId().equals(remoteResource.getId())) {
-                            if (!filterOut(localResource, remoteResource)) {
-                                updatedResources.add(localResource);
-                            }
-                            localResourceIter.remove();
-                            remoteResourceIter.remove();
-                            break;
+                    if (localResource.getId().equals(remoteResource.getId())) {
+                        if (!filterOut(localResource, remoteResource)) {
+                            updatedResources.add(localResource);
                         }
+                        localResourceIter.remove();
+                        remoteResourceIter.remove();
+                        break;
                     }
                 }
-                logger.info("Missing Resources: {}", missingResources.size());
-                logger.info("Updated Resources: {}", updatedResources.size());
-                logger.info("Deleted Resources: {}", deletedResources.size());
-
-                missingResources.forEach(this::syncAdd);
-                updatedResources.forEach(this::syncUpdate);
-                deletedResources.forEach(this::syncDelete);
             }
+            logger.info("Missing Resources: {}", missingResources.size());
+            logger.info("Updated Resources: {}", updatedResources.size());
+            logger.info("Deleted Resources: {}", deletedResources.size());
+
+            missingResources.forEach(this::syncAdd);
+            updatedResources.forEach(this::syncUpdate);
+            deletedResources.forEach(this::syncDelete);
         }
     }
 
