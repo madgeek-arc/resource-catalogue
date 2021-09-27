@@ -224,6 +224,10 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
 
     @Override
     public void syncAll() {
+        if (!active) {
+            logger.error("Sync functionality is not activated..");
+            return;
+        }
         logger.info("Retrieving resources from remote host: {}", host);
         Paging<T> remoteResources = getResources(host, maxQuantity);
         Paging<T> localResources = getResources(self, maxQuantity);
