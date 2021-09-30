@@ -229,8 +229,8 @@
     },
     {
       "multivalued": false,
-      "name": "providerStatus",
-      "path": "//*[local-name()='providerStatus']/text()",
+      "name": "status",
+      "path": "//*[local-name()='status']/text()",
       "type": "java.lang.String"
     },
     {
