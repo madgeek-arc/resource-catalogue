@@ -200,8 +200,8 @@
     },
     {
       "multivalued": false,
-      "name": "resourceStatus",
-      "path": "//*[local-name()='infraService']/*[local-name()='resourceStatus']/text()",
+      "name": "status",
+      "path": "//*[local-name()='infraService']/*[local-name()='status']/text()",
       "type": "java.lang.String"
     },
     {
