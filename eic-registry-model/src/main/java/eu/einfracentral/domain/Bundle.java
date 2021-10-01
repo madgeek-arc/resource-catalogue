@@ -1,7 +1,6 @@
 package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
-import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -25,10 +24,6 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @XmlElement
     private boolean active;
-
-    @XmlElement
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
-    private String status;
 
     @XmlElement
     private List<LoggingInfo> loggingInfo;
@@ -79,14 +74,6 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.active = active;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public List<LoggingInfo> getLoggingInfo() {
         return loggingInfo;
     }
@@ -125,7 +112,6 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 "payload=" + payload +
                 ", metadata=" + metadata +
                 ", active=" + active +
-                ", status='" + status + '\'' +
                 ", loggingInfo=" + loggingInfo +
                 ", latestAuditInfo=" + latestAuditInfo +
                 ", latestOnboardingInfo=" + latestOnboardingInfo +

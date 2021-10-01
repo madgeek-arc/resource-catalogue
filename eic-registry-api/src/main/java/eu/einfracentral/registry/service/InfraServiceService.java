@@ -231,11 +231,13 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
 
     List<Service> getActiveServices(String providerId);
 
-    InfraService getServiceTemplate(String providerId);
+    InfraService getServiceTemplate(String providerId, Authentication auth);
 
     Service getFeaturedService(String providerId);
 
     List<InfraService> getInactiveServices(String providerId);
+
+    List<InfraService> getRejectedServices(String providerId);
 
     /**
      * @param auth
@@ -262,4 +264,13 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     void updateResourceAudits(Authentication auth);
+
+    /**
+     * @param id
+     * @param status
+     * @param active
+     * @param auth
+     * @return
+     */
+    InfraService verifyResource(String id, String status, Boolean active, Authentication auth);
 }

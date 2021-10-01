@@ -116,6 +116,16 @@ public class ServiceController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 
+    // Accept/Reject a Resource.
+    @PatchMapping(path = "verifyResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<InfraService> verifyResource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
+                                                         @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
+        InfraService resource = infraService.verifyResource(id, status, active, auth);
+        logger.info("User '{}' updated Resource with name '{}' [status: {}] [active: {}]", auth, resource.getService().getName(), status, active);
+        return new ResponseEntity<>(resource, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "Validates the Resource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Service service) {
@@ -282,7 +292,7 @@ public class ServiceController {
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<InfraService> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
-                                                  @RequestParam Boolean active, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                  @RequestParam Boolean active, @ApiIgnore Authentication auth) {
         logger.info("User '{}' attempts to save Resource with id '{}' and version '{}' as '{}'", auth, id, version, active);
         return ResponseEntity.ok(infraService.publish(id, version, active, auth));
     }
@@ -294,7 +304,7 @@ public class ServiceController {
         List<ProviderBundle> pendingProviders = providerService.getInactive();
         List<Service> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
-            if (provider.getStatus().equals("pending template approval")) {
+            if (provider.getTemplateStatus().equals("pending template")) {
                 serviceTemplates.addAll(infraService.getInactiveServices(provider.getId()).stream().map(InfraService::getService).collect(Collectors.toList()));
             }
         }
@@ -457,6 +467,12 @@ public class ServiceController {
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
         Paging<LoggingInfo> loggingInfoHistory = this.infraService.getLoggingInfoHistory(id);
         return ResponseEntity.ok(loggingInfoHistory);
+    }
+
+    // Get the Service Template of a specific Provider (status = "pending provider")
+    @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public InfraService getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {
+        return infraService.getServiceTemplate(id, auth);
     }
 
 //    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

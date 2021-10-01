@@ -326,6 +326,13 @@ public class ProviderController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
+    // Get the rejected services of the given Provider.
+    @GetMapping(path = "services/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<Service>> getRejectedServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        List<Service> ret = infraServiceService.getRejectedServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
     // Get all inactive Providers.
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
@@ -343,6 +350,16 @@ public class ProviderController {
                                                          @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.verifyProvider(id, status, active, auth);
         logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getProvider().getName(), status, active);
+        return new ResponseEntity<>(provider, HttpStatus.OK);
+    }
+
+    // Activate/Deactivate a Provider.
+    @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
+    public ResponseEntity<ProviderBundle> publish(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
+                                                  @ApiIgnore Authentication auth) {
+        ProviderBundle provider = providerManager.publish(id, active, auth);
+        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getProvider().getName(), active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
