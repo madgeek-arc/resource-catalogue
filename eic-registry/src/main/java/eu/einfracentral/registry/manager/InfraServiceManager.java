@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -54,6 +55,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
+    private final VocabularyService vocabularyService;
 
 
     @Value("${project.name:}")
@@ -66,7 +68,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator, IdCreator idCreator,
                                @Lazy FieldValidator fieldValidator,
                                @Lazy SecurityService securityService,
-                               @Lazy RegistrationMailService registrationMailService) {
+                               @Lazy RegistrationMailService registrationMailService,
+                               @Lazy VocabularyService vocabularyService) {
         super(InfraService.class);
         this.providerManager = providerManager;
         this.randomNumberGenerator = randomNumberGenerator;
@@ -74,6 +77,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         this.fieldValidator = fieldValidator;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
+        this.vocabularyService = vocabularyService;
     }
 
     @Override
@@ -84,6 +88,12 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
     public InfraService addService(InfraService infraService, Authentication auth) {
+        // check if Provider is approved
+        if (!providerManager.get(infraService.getService().getResourceOrganisation()).getStatus().equals(vocabularyService.get("approved provider").getId())){
+            throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
+                    infraService.getService().getResourceOrganisation()));
+        }
+
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
             String id = idCreator.createServiceId(infraService.getService());
             infraService.getService().setId(id);
@@ -102,13 +112,29 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add(loggingInfo);
-        infraService.setLoggingInfo(loggingInfoList);
 
         // latestOnboardingInfo
         infraService.setLatestOnboardingInfo(loggingInfo);
 
         infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
         infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
+
+        // resource status & extra loggingInfo for Approval
+        ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
+        if (providerBundle.getTemplateStatus().equals("approved template")){
+            infraService.setStatus(vocabularyService.get("approved resource").getId());
+            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(loggingInfoApproved);
+
+            // latestOnboardingInfo
+            infraService.setLatestOnboardingInfo(loggingInfoApproved);
+        } else{
+            infraService.setStatus(vocabularyService.get("pending resource").getId());
+        }
+
+        // LoggingInfo
+        infraService.setLoggingInfo(loggingInfoList);
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
@@ -219,6 +245,77 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         super.delete(infraService);
     }
 
+    public InfraService verifyResource(String id, String status, Boolean active, Authentication auth) {
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
+        }
+        logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        String[] parts = id.split("\\.");
+        String providerId = parts[0];
+        InfraService infraService = null;
+        List<InfraService> infraServices = getInfraServices(providerId);
+        for (InfraService service : infraServices){
+            if (service.getService().getId().equals(id)){
+                infraService = service;
+            }
+        }
+        if (infraService == null){
+            throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
+        }
+        infraService.setStatus(vocabularyService.get(status).getId());
+        ProviderBundle resourceProvider = providerManager.get(infraService.getService().getResourceOrganisation());
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
+        if (infraService.getLoggingInfo() != null) {
+            loggingInfoList = infraService.getLoggingInfo();
+        } else {
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+            loggingInfoList.add(oldProviderRegistration);
+        }
+        switch (status) {
+            case "pending resource":
+                // update Provider's templateStatus
+                resourceProvider.setTemplateStatus("pending template");
+                break;
+            case "approved resource":
+                infraService.setActive(active);
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                infraService.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                infraService.setLatestOnboardingInfo(loggingInfo);
+
+                // update Provider's templateStatus
+                resourceProvider.setTemplateStatus("approved template");
+                break;
+            case "rejected resource":
+                infraService.setActive(false);
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                infraService.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                infraService.setLatestOnboardingInfo(loggingInfo);
+
+                // update Provider's templateStatus
+                resourceProvider.setTemplateStatus("rejected template");
+                break;
+            default:
+                break;
+        }
+        logger.info("Verifying Resource: {}", infraService);
+        providerManager.update(resourceProvider, auth);
+        return super.update(infraService, auth);
+    }
+
     @Override
     public Paging<InfraService> getInactiveServices() {
         FacetFilter ff = new FacetFilter();
@@ -307,7 +404,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         ProviderBundle providerBundle = providerManager.get(service.getService().getResourceOrganisation());
-        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
         if (active && activeProvider.equals("")) {
@@ -448,13 +545,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
+    // Different that the one called on migration methods!
     @Override
-    public InfraService getServiceTemplate(String providerId) {
+    public InfraService getServiceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.setQuantity(1);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("registeredAt", "asc"));
-        return this.getAll(ff, null).getResults().get(0);
+        List<InfraService> allProviderServices = getAll(ff, auth).getResults();
+        for (InfraService infraService : allProviderServices){
+            if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId())){
+                return infraService;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -473,6 +575,17 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("active", false);
+        ff.setFrom(0);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, null).getResults();
+    }
+
+    @Override
+    public List<InfraService> getRejectedServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("status", "rejected resource");
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));

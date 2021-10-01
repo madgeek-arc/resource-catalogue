@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.VocabularyValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -11,6 +13,9 @@ public class InfraService extends Bundle<Service> {
     @XmlElement
     private boolean latest;
 
+    @XmlElement
+    @VocabularyValidation(type = Vocabulary.Type.RESOURCE_STATE)
+    private String status;
 
     public InfraService() {
         // No arg constructor
@@ -52,5 +57,13 @@ public class InfraService extends Bundle<Service> {
 
     public void setLatest(boolean latest) {
         this.latest = latest;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

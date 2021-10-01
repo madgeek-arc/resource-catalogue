@@ -30,7 +30,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
-import org.springframework.web.util.NestedServletException;
 
 import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
@@ -110,7 +109,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add((loggingInfo));
         provider.setLoggingInfo(loggingInfoList);
         provider.setActive(false);
-        provider.setStatus(vocabularyService.get("pending initial approval").getId());
+        provider.setStatus(vocabularyService.get("pending provider").getId());
+        provider.setTemplateStatus(vocabularyService.get("no template status").getId());
 
         // latestOnboardingInfo
         provider.setLatestOnboardingInfo(loggingInfo);
@@ -286,7 +286,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             try {
                 infraServiceService.delete(s);
             } catch (ResourceNotFoundException e) {
-                logger.error("Error deleting Service", e);
+                logger.error("Error deleting Resource", e);
             }
         });
         logger.debug("Deleting Provider: {}", provider);
@@ -331,9 +331,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
             loggingInfoList.add(oldProviderRegistration);
         }
-        InfraService serviceTemplate;
         switch (status) {
-            case "approved":
+            case "approved provider":
                 if (active == null) {
                     active = true;
                 }
@@ -346,81 +345,69 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
                 // latestOnboardingInfo
                 provider.setLatestOnboardingInfo(loggingInfo);
-
-                // update Service Template ProviderInfo
-                serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey(), auth);
-                try {
-                    infraServiceService.update(serviceTemplate, auth);
-                } catch (ResourceNotFoundException e) {
-                    logger.error("Could not update service with id '{}' (verifyProvider)", serviceTemplate.getService().getId());
-                }
                 break;
+            case "rejected provider":
+                provider.setActive(false);
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                provider.setLoggingInfo(loggingInfoList);
 
+                // latestOnboardingInfo
+                provider.setLatestOnboardingInfo(loggingInfo);
+                break;
             default:
-                switch (status) {
-                    case "rejected":
-                        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
-                        loggingInfoList.add(loggingInfo);
-                        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                        provider.setLoggingInfo(loggingInfoList);
-
-                        // latestOnboardingInfo
-                        provider.setLatestOnboardingInfo(loggingInfo);
-                        break;
-                    case "pending template submission":
-                        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.VALIDATED.getKey());
-                        loggingInfoList.add(loggingInfo);
-                        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                        provider.setLoggingInfo(loggingInfoList);
-
-                        // latestOnboardingInfo
-                        provider.setLatestOnboardingInfo(loggingInfo);
-                        break;
-                    case "rejected template":
-                        // update Service Template ProviderInfo
-                        serviceTemplate = updateInfraServiceLoggingInfo(id, LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey(), auth);
-                        try {
-                            infraServiceService.update(serviceTemplate, auth);
-                        } catch (ResourceNotFoundException e) {
-                            logger.error("Could not update service with id '{}' (verifyProvider)", serviceTemplate.getService().getId());
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                break;
         }
+        logger.info("Verifying Provider: {}", provider);
+        return super.update(provider, auth);
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
+        ProviderBundle provider = get(providerId);
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
+        if (provider.getLoggingInfo() != null) {
+            loggingInfoList = provider.getLoggingInfo();
+        } else {
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+            loggingInfoList.add(oldProviderRegistration);
+        }
+
         if (active == null) {
             active = false;
         }
-
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                if (!status.equals("pending template submission") && !status.equals("pending template approval")) {
-                    loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-                    loggingInfoList.add(loggingInfo);
-                    provider.setLoggingInfo(loggingInfoList);
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                loggingInfoList.add(loggingInfo);
+                provider.setLoggingInfo(loggingInfoList);
 
-                    // latestOnboardingInfo
-                    provider.setLatestUpdateInfo(loggingInfo);
-                }
+                // latestOnboardingInfo
+                provider.setLatestUpdateInfo(loggingInfo);
+
+                // deactivate Provider's Services
                 deactivateServices(provider.getId(), auth);
+                logger.info("Deactivating Provider: {}", provider);
             } else {
-                if (!status.equals("approved")) {
-                    loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-                    loggingInfoList.add(loggingInfo);
-                    provider.setLoggingInfo(loggingInfoList);
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+                loggingInfoList.add(loggingInfo);
+                provider.setLoggingInfo(loggingInfoList);
 
-                    // latestOnboardingInfo
-                    provider.setLatestUpdateInfo(loggingInfo);
-                }
+                // latestOnboardingInfo
+                provider.setLatestUpdateInfo(loggingInfo);
+
+                // activate Provider's Services
                 activateServices(provider.getId(), auth);
+                logger.info("Activating Provider: {}", provider);
             }
         }
-
-        logger.info("Verifying Provider: {}", provider);
         return super.update(provider, auth);
     }
 
@@ -488,7 +475,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
         List<InfraService> services = infraServiceService.getInfraServices(providerId);
-        logger.info("Activating all Services of the Provider with id: {}", providerId);
+        logger.info("Activating all Resources of the Provider with id: {}", providerId);
         for (InfraService service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
@@ -522,7 +509,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
         List<InfraService> services = infraServiceService.getInfraServices(providerId);
-        logger.info("Activating all Services of the Provider with id: {}", providerId);
+        logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
         for (InfraService service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
@@ -703,7 +690,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public InfraService updateInfraServiceLoggingInfo(String providerId, String type,  String actionType, Authentication authentication) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        InfraService serviceTemplate = infraServiceService.getServiceTemplate(providerId);
+        InfraService serviceTemplate = infraServiceService.getServiceTemplate(providerId, authentication);
         LoggingInfo loggingInfo;
         if (serviceTemplate.getLoggingInfo() != null) {
             loggingInfoList = serviceTemplate.getLoggingInfo();
@@ -762,7 +749,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
-        facetFilter.addFilter("status", "approved");
+        facetFilter.addFilter("status", "approved provider");
         Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
         List<ProviderBundle> providerList = getAll(facetFilter, auth).getResults();
         long todayEpochTime = System.currentTimeMillis();

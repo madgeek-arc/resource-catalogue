@@ -52,6 +52,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     T verifyProvider(String id, String status, Boolean active, U auth);
 
+    ProviderBundle publish(String providerId, Boolean active, Authentication auth);
 
     void deleteUserInfo(Authentication authentication);
 
