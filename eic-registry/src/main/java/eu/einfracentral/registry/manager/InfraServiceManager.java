@@ -24,7 +24,9 @@ import org.apache.logging.log4j.Logger;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 import static org.junit.Assert.assertTrue;
 
 @org.springframework.stereotype.Service("infraServiceService")
@@ -49,7 +52,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
-    private final ProviderManager providerManager;
+    private final ResourceManager<ProviderBundle> resourceManager;
     private final Random randomNumberGenerator;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -65,13 +68,14 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private VersionService versionService;
 
     @Autowired
-    public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator, IdCreator idCreator,
+    public InfraServiceManager(@Qualifier("providerManager") ResourceManager<ProviderBundle> resourceManager,
+                               Random randomNumberGenerator, IdCreator idCreator,
                                @Lazy FieldValidator fieldValidator,
                                @Lazy SecurityService securityService,
                                @Lazy RegistrationMailService registrationMailService,
                                @Lazy VocabularyService vocabularyService) {
         super(InfraService.class);
-        this.providerManager = providerManager;
+        this.resourceManager = resourceManager; // for providers
         this.randomNumberGenerator = randomNumberGenerator;
         this.idCreator = idCreator;
         this.fieldValidator = fieldValidator;
@@ -89,7 +93,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
     public InfraService addService(InfraService infraService, Authentication auth) {
         // check if Provider is approved
-        if (!providerManager.get(infraService.getService().getResourceOrganisation()).getStatus().equals(vocabularyService.get("approved provider").getId())){
+        if (!resourceManager.get(infraService.getService().getResourceOrganisation()).getStatus().equals(vocabularyService.get("approved provider").getId())){
             throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
                     infraService.getService().getResourceOrganisation()));
         }
@@ -100,7 +104,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
         validate(infraService);
         validateEmailsAndPhoneNumbers(infraService);
-        infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
+        infraService.setActive(resourceManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
 
@@ -120,7 +124,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
 
         // resource status & extra loggingInfo for Approval
-        ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
+        ProviderBundle providerBundle = resourceManager.get(infraService.getService().getResourceOrganisation());
         if (providerBundle.getTemplateStatus().equals("approved template")){
             infraService.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
@@ -245,6 +249,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         super.delete(infraService);
     }
 
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService verifyResource(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
@@ -264,7 +269,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
         }
         infraService.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerManager.get(infraService.getService().getResourceOrganisation());
+        ProviderBundle resourceProvider = resourceManager.get(infraService.getService().getResourceOrganisation());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
@@ -312,7 +317,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 break;
         }
         logger.info("Verifying Resource: {}", infraService);
-        providerManager.update(resourceProvider, auth);
+        resourceManager.update(resourceProvider, auth);
         return super.update(infraService, auth);
     }
 
@@ -332,7 +337,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providers = providerManager.getAll(ff, null).getResults();
+        List<ProviderBundle> providers = resourceManager.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
@@ -403,7 +408,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             service = this.get(serviceId, version);
         }
 
-        ProviderBundle providerBundle = providerManager.get(service.getService().getResourceOrganisation());
+        ProviderBundle providerBundle = resourceManager.get(service.getService().getResourceOrganisation());
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
