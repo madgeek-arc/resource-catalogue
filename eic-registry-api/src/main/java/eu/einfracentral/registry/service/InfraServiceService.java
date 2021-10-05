@@ -237,8 +237,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
 
     List<InfraService> getInactiveServices(String providerId);
 
-    List<InfraService> getRejectedServices(String providerId);
-
     /**
      * @param auth
      * @return
