@@ -149,6 +149,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     //    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS}, allEntries = true)
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
@@ -200,6 +201,17 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
         infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
 
+        // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
+        if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())){
+            ProviderBundle providerBundle = resourceManager.get(infraService.getService().getResourceOrganisation());
+            if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())){
+                infraService.setStatus(vocabularyService.get("pending resource").getId());
+                infraService.setActive(true);
+                providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
+                resourceManager.update(providerBundle, auth);
+            }
+        }
+
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
         if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null) {
@@ -210,7 +222,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 || infraService.getService().getVersion() != null
                 && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
             infraService.setLatest(existingService.isLatest());
-            infraService.setStatus(existingService.getStatus());
+//            infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, auth);
             logger.info("Updating Service without version change: {}", infraService);
             logger.info("Service Version: {}", infraService.getService().getVersion());
@@ -580,17 +592,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults();
-    }
-
-    @Override
-    public List<InfraService> getRejectedServices(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("status", "rejected resource");
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));

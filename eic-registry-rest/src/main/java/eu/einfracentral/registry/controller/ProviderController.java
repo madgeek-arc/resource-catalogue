@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -21,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -327,10 +329,20 @@ public class ProviderController {
     }
 
     // Get the rejected services of the given Provider.
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
     @GetMapping(path = "services/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Service>> getRejectedServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        List<Service> ret = infraServiceService.getRejectedServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+    public ResponseEntity<Paging<InfraService>> getRejectedServices(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                    @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("status", "rejected resource");
+        return ResponseEntity.ok(infraServiceService.getAll(ff, auth));
     }
 
     // Get all inactive Providers.
