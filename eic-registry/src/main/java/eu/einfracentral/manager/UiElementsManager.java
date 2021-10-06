@@ -6,10 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
-import eu.einfracentral.domain.DynamicField;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.UiService;
 import eu.einfracentral.dto.Value;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -18,6 +15,7 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.*;
 import eu.einfracentral.utils.ListUtils;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +24,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -616,6 +615,9 @@ public class UiElementsManager implements UiElementsService {
                 .collect(Collectors.toList());
         controlValues.put("Provider", values);
 
+        // add Resource Organizations from EOSC
+        controlValues.put("resourceProviders", getEoscProviders());
+
         // add services
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
@@ -636,6 +638,25 @@ public class UiElementsManager implements UiElementsService {
         }
 
         return controlValues;
+    }
+
+    private List<Value> getEoscProviders() {
+        // TODO: replace separate restTemplate calls with one when now statuses are deployed on eosc
+        RestTemplate restTemplate = new RestTemplate();
+        Browsing<Map<String, String>> eoscProviders;
+        List<Map<String, String>> providerList = new ArrayList<>();
+        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=approved&quantity=1000", Browsing.class);
+        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
+        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=rejected template&quantity=1000", Browsing.class);
+        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
+        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=pending template approval&quantity=1000", Browsing.class);
+        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
+        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=pending template submission&quantity=1000", Browsing.class);
+        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
+
+        return providerList.stream()
+                .map(value -> new Value(value.get("id"), value.get("name")))
+                .collect(Collectors.toList());
     }
 
     @Override
