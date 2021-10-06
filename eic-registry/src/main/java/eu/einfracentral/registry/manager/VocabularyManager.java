@@ -35,8 +35,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     public VocabularyManager() {
         super(Vocabulary.class);
-        regions.put("EU", new Region("https://restcountries.eu/rest/v2/regionalbloc/EU?fields=alpha2Code"));
-        regions.put("WW", new Region("https://restcountries.eu/rest/v2?fields=alpha2Code"));
+        regions.put("EU", new Region("https://restcountries.com/v2/regionalbloc/EU?fields=alpha2Code"));
+        regions.put("WW", new Region("https://restcountries.com/v2/all?fields=alpha2Code"));
     }
 
     @Override
