@@ -345,7 +345,12 @@ public class ServiceController {
             List<InfraService> allWithoutAuditFilterList =  infraService.getAllForAdmin(ff2, authentication).getResults();
             List<InfraService> ret = new ArrayList<>();
             for (InfraService infraService : allWithoutAuditFilterList) {
-                String auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(infraService.getLoggingInfo());
+                String auditVocStatus;
+                try{
+                    auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(infraService.getLoggingInfo());
+                } catch (NullPointerException e){ // infraService has null loggingInfo
+                    continue;
+                }
                 switch (auditVocStatus) {
                     case "Valid and updated":
                     case "Valid and not updated":
