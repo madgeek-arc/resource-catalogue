@@ -206,11 +206,38 @@ public class UiElementsManager implements UiElementsService {
         if (serviceMap != null) {
             for (Field field : allFields) {
                 if (field.isIncludedInSnippet()) {
-                    snippet.put(field.getName(), getMultiMap(serviceMap, field.getAccessPath()));
+                    Object value = getMultiMap(serviceMap, field.getAccessPath());
+
+                    if (field.getForm().getVocabulary() != null) {
+                        if (value instanceof String) {
+                            value = createValues(field, value);
+                        } else if (value instanceof List) {
+                            value = ((List<?>) value).stream().map(v -> createValues(field, v)).collect(Collectors.toSet());
+                        }
+                    }
+                    snippet.put(field.getName(), value);
                 }
             }
         }
         return snippet;
+    }
+
+    // TODO: use for Snippet values
+    private Object createValues(Field field, Object value) {
+        if (value instanceof String && field.getForm().getVocabulary() != null) {
+            Vocabulary vocabulary = vocabularyService.get((String) value);
+            return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+        }
+        return value;
+    }
+
+    // TODO: use for Snippet values
+    private Object createValues(DynamicField field, Object value) {
+        if (value instanceof String && field.getVocabulary() != null) {
+            Vocabulary vocabulary = vocabularyService.get((String) value);
+            return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+        }
+        return value;
     }
 
     private Object getMultiMap(Map<String, Object> map, String path) {
