@@ -389,7 +389,7 @@ public class UiElementsManager implements UiElementsService {
                 for (int i = 0; i < innerFieldNames.size(); i++) {
                     DynamicField innerField = (DynamicField) field.getValues().get(k * innerFieldNames.size() + i);
                     if (innerField.getValues().size() == 1) {
-                        keyValues.put(innerField.getName(), innerField.getValues().get(0));
+                        keyValues.put(innerField.getName(), createValues(innerField, innerField.getValues().get(0)));
                     } else { // recurse here for more complex objects
                         keyValues.put(innerField.getName(), getFieldValues(innerField));
                     }
@@ -399,10 +399,29 @@ public class UiElementsManager implements UiElementsService {
             return mapList;
         } else {
             if (fieldInfo != null && !fieldInfo.getMultiplicity() && field.getValues() != null && !field.getValues().isEmpty()) {
-                return field.getValues().get(0);
+                return createValues(fieldInfo, field.getValues().get(0));
             }
         }
+        if (field.getValues() != null && fieldInfo != null) {
+            return field.getValues().stream().map(value -> createValues(fieldInfo, value)).collect(Collectors.toList());
+        }
         return field.getValues();
+    }
+
+    private Object createValues(Field field, Object value) {
+        if (value instanceof String && field.getForm().getVocabulary() != null) {
+            Vocabulary vocabulary = vocabularyService.get((String) value);
+            return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+        }
+        return value;
+    }
+
+    private Object createValues(DynamicField field, Object value) {
+        if (value instanceof String && field.getVocabulary() != null) {
+            Vocabulary vocabulary = vocabularyService.get((String) value);
+            return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+        }
+        return value;
     }
 
     @Override // TODO: refactoring
