@@ -173,7 +173,8 @@ public class ProviderController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
-                                                                        @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> auditState) {
+                                                                        @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
+                                                                        @RequestParam(required = false) Set<String> auditState) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -209,7 +210,12 @@ public class ProviderController {
             List<ProviderBundle> allWithoutAuditFilterList = providerManager.getAll(ff, auth).getResults();
             List<ProviderBundle> ret = new ArrayList<>();
             for (ProviderBundle providerBundle : allWithoutAuditFilterList){
-                String auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(providerBundle.getLoggingInfo());
+                String auditVocStatus;
+                try{
+                    auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(providerBundle.getLoggingInfo());
+                } catch (NullPointerException e){ // providerBundle has null loggingInfo
+                    continue;
+                }
                 switch (auditVocStatus){
                     case "Valid and updated":
                     case "Valid and not updated":
