@@ -225,8 +225,10 @@ public class UiElementsManager implements UiElementsService {
     // TODO: use for Snippet values
     private Object createValues(Field field, Object value) {
         if (value instanceof String && field.getForm().getVocabulary() != null) {
-            Vocabulary vocabulary = vocabularyService.get((String) value);
-            return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+            if (!"".equals((String) value)) {
+                Vocabulary vocabulary = vocabularyService.get((String) value);
+                return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+            }
         }
         return value;
     }
@@ -234,8 +236,10 @@ public class UiElementsManager implements UiElementsService {
     // TODO: use for Snippet values
     private Object createValues(DynamicField field, Object value) {
         if (value instanceof String && field.getVocabulary() != null) {
-            Vocabulary vocabulary = vocabularyService.get((String) value);
-            return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+            if (!"".equals((String) value)) {
+                Vocabulary vocabulary = vocabularyService.get((String) value);
+                return new Value((String) value, vocabulary.getName(), vocabulary.getParentId());
+            }
         }
         return value;
     }
