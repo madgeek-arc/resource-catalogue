@@ -167,4 +167,9 @@ public class UiElementsController {
     public Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(@PathVariable("vocabulary") String vocabularyType, @RequestParam(name = "value", required = false) String value) {
         return uiElementsService.getServicesSnippetsByExtraVoc(vocabularyType, value);
     }
+
+    @GetMapping(path = "services/names/by/indexed/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Map<String, List<Value>> getServicesSnippetsByIndexedVoc(@PathVariable("field") String field, @RequestParam(name = "vocabularyType") String vocabularyType) {
+        return uiElementsService.getServiceNamesByIndexedVoc(field, vocabularyType);
+    }
 }

@@ -38,6 +38,8 @@ public interface UiElementsService {
 
     Map<String, Object> createServiceSnippet(InfraService service);
 
+    Map<String, Object> createServiceSnippet(UiService service);
+
     /**
      * Get Vocabulary - Service map by extra vocabulary
      */
@@ -49,4 +51,6 @@ public interface UiElementsService {
     Map<String, List<Map<String, Object>>> getServicesSnippetsByExtraVoc(String vocabularyType, String value);
 
     Map<String, List<UiService>> getUiServicesByExtraVoc(String vocabularyType, String value);
+
+    Map<String, List<Value>> getServiceNamesByIndexedVoc(String field, String vocabularyType);
 }
