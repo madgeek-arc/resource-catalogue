@@ -190,6 +190,12 @@ public class UiElementsManager implements UiElementsService {
 
     @Override
     public Map<String, Object> createServiceSnippet(InfraService service) {
+        return createServiceSnippet(createUiService(service));
+    }
+
+
+    @Override
+    public Map<String, Object> createServiceSnippet(UiService service) {
         Map<String, Object> snippet = new HashMap<>();
         List<Field> allFields = getFields();
 
@@ -198,7 +204,7 @@ public class UiElementsManager implements UiElementsService {
         Map<String, Object> serviceMap = null;
         JsonElement el = new Gson().toJsonTree(service);
         try {
-            serviceMap = mapper.readValue(new Gson().toJson(createUiService(service)), Map.class);
+            serviceMap = mapper.readValue(new Gson().toJson(service), Map.class);
         } catch (JsonProcessingException e) {
             logger.error(e);
         }
@@ -364,6 +370,23 @@ public class UiElementsManager implements UiElementsService {
         Map<String, List<InfraService>> serviceMap = new HashMap<>();
         for (Map.Entry<Vocabulary, List<InfraService>> entry : getByExtraVoc(vocabularyType, value).entrySet()) {
             serviceMap.put(entry.getKey().getName(), entry.getValue());
+        }
+        return serviceMap;
+    }
+
+    @Override
+    public Map<String, List<Value>> getServiceNamesByIndexedVoc(String field, String vocabularyType) {
+        Map<String, List<Value>> serviceMap = new HashMap<>();
+        for (Vocabulary voc : vocabularyService.getByType(Vocabulary.Type.fromString(vocabularyType))) {
+            serviceMap.put(voc.getName(), new ArrayList<>());
+
+            FacetFilter ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+            ff.addFilter(field, voc.getId()); // FIXME: this means that the field name should be the same with the vocabulary type name
+            List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
+            for (InfraService service : services) {
+                serviceMap.get(voc.getName()).add(new Value(service.getId(), service.getService().getName()));
+            }
         }
         return serviceMap;
     }
