@@ -419,7 +419,7 @@ public class UiElementsManager implements UiElementsService {
                 Map<String, Object> keyValues = new HashMap<>();
                 for (int i = 0; i < innerFieldNames.size(); i++) {
                     DynamicField innerField = (DynamicField) field.getValues().get(k * innerFieldNames.size() + i);
-                    if (innerField.getValues().size() == 1) {
+                    if (innerField.getValues().size() == 1 && !getField(innerField.getFieldId()).getMultiplicity()) {
                         keyValues.put(innerField.getName(), innerField.getValues().get(0));
                     } else { // recurse here for more complex objects
                         keyValues.put(innerField.getName(), getFieldValues(innerField));
