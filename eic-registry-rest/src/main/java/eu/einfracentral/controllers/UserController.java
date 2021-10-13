@@ -1,5 +1,6 @@
 package eu.einfracentral.controllers;
 
+import io.swagger.annotations.Authorization;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -24,7 +25,7 @@ public class UserController {
     private static final Logger logger = LogManager.getLogger(UserController.class);
 
     @GetMapping(value = "/info")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> login() {
         OIDCAuthenticationToken authentication = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         logger.debug("User authentication : " + authentication);
