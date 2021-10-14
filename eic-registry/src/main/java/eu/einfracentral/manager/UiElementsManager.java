@@ -823,6 +823,9 @@ public class UiElementsManager implements UiElementsService {
             for (Object df : field.getValues()) {
                 try {
                     result = valueExists((DynamicField) df, vocabulary);
+                    if (result) {
+                        break;
+                    }
                 } catch (Exception e) {
                     result = false;
                 }
