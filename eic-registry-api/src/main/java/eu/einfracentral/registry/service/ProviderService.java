@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
@@ -113,4 +114,27 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     void updateProviderAudits(Authentication auth);
+
+    /**
+     * @param auditState
+     * @param ff
+     * @param auth
+     * @return
+     */
+    Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, Authentication auth);
+
+    /**
+     * @param ff
+     * @return
+     */
+    List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff);
+
+    /**
+     * @param providerBundle
+     * @param providerBundlePaging
+     * @param quantity
+     * @param from
+     * @return
+     */
+    Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging, int quantity, int from);
 }

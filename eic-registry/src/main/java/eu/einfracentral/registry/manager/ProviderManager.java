@@ -26,10 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
+
+import javax.sql.DataSource;
 
 import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
@@ -58,17 +62,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final RegistrationMailService registrationMailService;
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
+    private final DataSource dataSource;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService,
                            @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator,
-                           EventService eventService,
-                           JmsTemplate jmsTopicTemplate,
-                           VersionService versionService,
-                           VocabularyService vocabularyService) {
+                           IdCreator idCreator, EventService eventService,
+                           JmsTemplate jmsTopicTemplate, VersionService versionService,
+                           VocabularyService vocabularyService, DataSource dataSource) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -79,6 +82,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
+        this.dataSource = dataSource;
     }
 
 
@@ -786,6 +790,155 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
         }
         return null;
+    }
+
+    public Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, Authentication auth) {
+        List<ProviderBundle> valid = new ArrayList<>();
+        List<ProviderBundle> notAudited = new ArrayList<>();
+        List<ProviderBundle> invalidAndUpdated = new ArrayList<>();
+        List<ProviderBundle> invalidAndNotUpdated = new ArrayList<>();
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+        Paging<ProviderBundle> retPaging = getAll(ff, auth);
+        List<ProviderBundle> allWithoutAuditFilterList = getAll(ff, auth).getResults();
+        List<ProviderBundle> ret = new ArrayList<>();
+        for (ProviderBundle providerBundle : allWithoutAuditFilterList){
+            String auditVocStatus;
+            try{
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(providerBundle.getLoggingInfo());
+            } catch (NullPointerException e){ // providerBundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus){
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(providerBundle);
+                    break;
+                case "Not Audited":
+                    notAudited.add(providerBundle);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(providerBundle);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(providerBundle);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState){
+            if (state.equals("Valid")){
+                ret.addAll(valid);
+            } else if (state.equals("Not Audited")){
+                ret.addAll(notAudited);
+            } else if (state.equals("Invalid and updated")){
+                ret.addAll(invalidAndUpdated);
+            } else if (state.equals("Invalid and not updated")) {
+                ret.addAll(invalidAndNotUpdated);
+            } else {
+                throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        return createCorrectQuantityFacets(ret, retPaging, quantity, from);
+    }
+
+    public Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging,
+                                                        int quantity, int from){
+        if (!providerBundle.isEmpty()) {
+            List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0){
+                if (quantity <= providerBundle.size()){
+                    for (int i=from; i<=quantity-1; i++){
+                        retWithCorrectQuantity.add(providerBundle.get(i));
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(providerBundle);
+                }
+                providerBundlePaging.setTo(retWithCorrectQuantity.size());
+            } else{
+                boolean indexOutOfBound = false;
+                if (quantity <= providerBundle.size()){
+                    for (int i=from; i<quantity+from; i++){
+                        try{
+                            retWithCorrectQuantity.add(providerBundle.get(i));
+                            if (quantity+from > providerBundle.size()){
+                                providerBundlePaging.setTo(providerBundle.size());
+                            } else{
+                                providerBundlePaging.setTo(quantity+from);
+                            }
+                        } catch (IndexOutOfBoundsException e){
+                            indexOutOfBound = true;
+                            continue;
+                        }
+                    }
+                    if (indexOutOfBound){
+                        providerBundlePaging.setTo(providerBundle.size());
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(providerBundle);
+                    if (quantity+from > providerBundle.size()){
+                        providerBundlePaging.setTo(providerBundle.size());
+                    } else{
+                        providerBundlePaging.setTo(quantity+from);
+                    }
+                }
+            }
+            providerBundlePaging.setFrom(from);
+            providerBundlePaging.setResults(retWithCorrectQuantity);
+            providerBundlePaging.setTotal(providerBundle.size());
+        } else{
+            providerBundlePaging.setResults(providerBundle);
+            providerBundlePaging.setTotal(0);
+            providerBundlePaging.setFrom(0);
+            providerBundlePaging.setTo(0);
+        }
+        return providerBundlePaging;
+    }
+
+    public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff){
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+
+        String query = "SELECT provider_id FROM provider_view WHERE";
+
+        boolean firstTime = true;
+        boolean hasStatus = false;
+        boolean hasTemplateStatus = false;
+        for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
+            in.addValue(entry.getKey(), entry.getValue());
+            if (entry.getKey().equals("status")) {
+                hasStatus = true;
+                if (firstTime) {
+                    query += String.format(" (status=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    if (hasStatus && hasTemplateStatus){
+                        query += String.format(" AND (status=%s)", entry.getValue().toString());
+                    }
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR status='");
+                }
+            }
+            if (entry.getKey().equals("templateStatus")) {
+                hasTemplateStatus = true;
+                if (firstTime) {
+                    query += String.format(" (templateStatus=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    if (hasStatus && hasTemplateStatus){
+                        query += String.format(" AND (templateStatus=%s)", entry.getValue().toString());
+                    }
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR templateStatus='");
+                }
+            }
+        }
+
+        query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
+        return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
     public Map<String, List<LoggingInfo>> migrateProviderHistory(Authentication auth){

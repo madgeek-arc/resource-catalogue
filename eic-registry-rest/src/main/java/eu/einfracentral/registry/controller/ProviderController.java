@@ -188,114 +188,29 @@ public class ProviderController {
             sort.put(orderField, order);
             ff.setOrderBy(sort);
         }
-        allRequestParams.remove("status");
-        ff.setFilter(allRequestParams);
         if (status != null) {
             ff.addFilter("status", status);
         }
-
-        List<ProviderBundle> valid = new ArrayList<>();
-        List<ProviderBundle> notAudited = new ArrayList<>();
-        List<ProviderBundle> invalidAndUpdated = new ArrayList<>();
-        List<ProviderBundle> invalidAndNotUpdated = new ArrayList<>();
+        if (templateStatus != null) {
+            ff.addFilter("templateStatus", templateStatus);
+        }
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
         if (auditState == null){
-            return ResponseEntity.ok(providerManager.getAll(ff, auth));
+            List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff);
+            List<ProviderBundle> ret = new ArrayList<>();
+            Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
+            for (Map<String, Object> record : records){
+                for (Map.Entry<String, Object> entry : record.entrySet()){
+                    ret.add(providerManager.get((String) entry.getValue()));
+                }
+            }
+            return ResponseEntity.ok(providerManager.createCorrectQuantityFacets(ret, retPaging, quantity, from));
         } else{
-            int quantity = ff.getQuantity();
-            int from = ff.getFrom();
             ff.setQuantity(1000);
             ff.setFrom(0);
-            allRequestParams.remove("auditState");
-            Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
-            List<ProviderBundle> allWithoutAuditFilterList = providerManager.getAll(ff, auth).getResults();
-            List<ProviderBundle> ret = new ArrayList<>();
-            for (ProviderBundle providerBundle : allWithoutAuditFilterList){
-                String auditVocStatus;
-                try{
-                    auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(providerBundle.getLoggingInfo());
-                } catch (NullPointerException e){ // providerBundle has null loggingInfo
-                    continue;
-                }
-                switch (auditVocStatus){
-                    case "Valid and updated":
-                    case "Valid and not updated":
-                        valid.add(providerBundle);
-                        break;
-                    case "Not Audited":
-                        notAudited.add(providerBundle);
-                        break;
-                    case "Invalid and updated":
-                        invalidAndUpdated.add(providerBundle);
-                        break;
-                    case "Invalid and not updated":
-                        invalidAndNotUpdated.add(providerBundle);
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-                }
-            }
-            for (String state : auditState){
-                if (state.equals("Valid")){
-                    ret.addAll(valid);
-                } else if (state.equals("Not Audited")){
-                    ret.addAll(notAudited);
-                } else if (state.equals("Invalid and updated")){
-                    ret.addAll(invalidAndUpdated);
-                } else if (state.equals("Invalid and not updated")) {
-                    ret.addAll(invalidAndNotUpdated);
-                } else {
-                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-                }
-            }
-            if (!ret.isEmpty()) {
-                List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
-                if (from == 0){
-                    if (quantity <= ret.size()){
-                        for (int i=from; i<=quantity-1; i++){
-                            retWithCorrectQuantity.add(ret.get(i));
-                        }
-                    } else{
-                        retWithCorrectQuantity.addAll(ret);
-                    }
-                    retPaging.setTo(retWithCorrectQuantity.size());
-                } else{
-                    boolean indexOutOfBound = false;
-                    if (quantity <= ret.size()){
-                        for (int i=from; i<quantity+from; i++){
-                            try{
-                                retWithCorrectQuantity.add(ret.get(i));
-                                if (quantity+from > ret.size()){
-                                    retPaging.setTo(ret.size());
-                                } else{
-                                    retPaging.setTo(quantity+from);
-                                }
-                            } catch (IndexOutOfBoundsException e){
-                                indexOutOfBound = true;
-                                continue;
-                            }
-                        }
-                        if (indexOutOfBound){
-                            retPaging.setTo(ret.size());
-                        }
-                    } else{
-                        retWithCorrectQuantity.addAll(ret);
-                        if (quantity+from > ret.size()){
-                            retPaging.setTo(ret.size());
-                        } else{
-                            retPaging.setTo(quantity+from);
-                        }
-                    }
-                }
-                retPaging.setFrom(from);
-                retPaging.setResults(retWithCorrectQuantity);
-                retPaging.setTotal(ret.size());
-            } else{
-                retPaging.setResults(ret);
-                retPaging.setTotal(0);
-                retPaging.setFrom(0);
-                retPaging.setTo(0);
-            }
-            return ResponseEntity.ok(retPaging);
+            allRequestParams.remove("auditState"); // check if needed
+            return ResponseEntity.ok(providerManager.determineAuditState(auditState, ff, auth));
         }
     }
 
