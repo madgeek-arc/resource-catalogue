@@ -792,15 +792,19 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return null;
     }
 
-    public Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, Authentication auth) {
+    public Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, int quantity, int from, List<ProviderBundle> providers, Authentication auth) {
         List<ProviderBundle> valid = new ArrayList<>();
         List<ProviderBundle> notAudited = new ArrayList<>();
         List<ProviderBundle> invalidAndUpdated = new ArrayList<>();
         List<ProviderBundle> invalidAndNotUpdated = new ArrayList<>();
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
+
         Paging<ProviderBundle> retPaging = getAll(ff, auth);
-        List<ProviderBundle> allWithoutAuditFilterList = getAll(ff, auth).getResults();
+        List<ProviderBundle> allWithoutAuditFilterList = new ArrayList<>();
+        if (providers.isEmpty()){
+            allWithoutAuditFilterList = getAll(ff, auth).getResults();
+        } else{
+            allWithoutAuditFilterList.addAll(providers);
+        }
         List<ProviderBundle> ret = new ArrayList<>();
         for (ProviderBundle providerBundle : allWithoutAuditFilterList){
             String auditVocStatus;
@@ -900,7 +904,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
-        String query = "SELECT provider_id FROM provider_view WHERE";
+        String query;
+        if (ff.getFilter().entrySet().isEmpty()){
+            query = "SELECT provider_id FROM provider_view";
+        } else{
+            query = "SELECT provider_id FROM provider_view WHERE";
+        }
 
         boolean firstTime = true;
         boolean hasStatus = false;
