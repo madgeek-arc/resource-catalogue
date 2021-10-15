@@ -196,21 +196,19 @@ public class ProviderController {
         }
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
-        if (auditState == null){
-            List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff);
-            List<ProviderBundle> ret = new ArrayList<>();
-            Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
-            for (Map<String, Object> record : records){
-                for (Map.Entry<String, Object> entry : record.entrySet()){
-                    ret.add(providerManager.get((String) entry.getValue()));
-                }
+        List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff);
+        List<ProviderBundle> ret = new ArrayList<>();
+        Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
+        for (Map<String, Object> record : records){
+            for (Map.Entry<String, Object> entry : record.entrySet()){
+                ret.add(providerManager.get((String) entry.getValue()));
             }
+        }
+        if (auditState == null){
             return ResponseEntity.ok(providerManager.createCorrectQuantityFacets(ret, retPaging, quantity, from));
         } else{
-            ff.setQuantity(1000);
-            ff.setFrom(0);
-            allRequestParams.remove("auditState"); // check if needed
-            return ResponseEntity.ok(providerManager.determineAuditState(auditState, ff, auth));
+            Paging<ProviderBundle> retWithAuditState = providerManager.determineAuditState(auditState, ff, quantity, from, ret, auth);
+            return ResponseEntity.ok(retWithAuditState);
         }
     }
 
