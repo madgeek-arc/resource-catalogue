@@ -145,6 +145,9 @@ public class UiElementsManager implements UiElementsService {
         List<DynamicField> extras = new ArrayList<>();
 
         for (Map.Entry<String, ?> entry : extraFields.entrySet()) {
+            if (entry.getValue() == null) {
+                continue;
+            }
             DynamicField field = new DynamicField();
             field.setName(entry.getKey());
             if (!Collection.class.isAssignableFrom(entry.getValue().getClass())) {
