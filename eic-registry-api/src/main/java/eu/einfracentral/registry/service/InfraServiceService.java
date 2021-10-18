@@ -238,6 +238,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     List<InfraService> getInactiveServices(String providerId);
 
     /**
+     * @param resourceId
+     * @param auth
+     */
+    void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
+
+    /**
      * @param auth
      * @return
      */

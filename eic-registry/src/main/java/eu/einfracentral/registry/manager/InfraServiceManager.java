@@ -632,6 +632,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return null;
     }
 
+    public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth){
+        String providerId = resourceManager.get(get(resourceId).getService().getResourceOrganisation()).getId();
+        String providerName = resourceManager.get(get(resourceId).getService().getResourceOrganisation()).getProvider().getName();
+        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Resources", providerId, providerName));
+        registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
+    }
+
     // TODO: First run with active/latest and no broke segment, second without active/latest and broke segment
     public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();

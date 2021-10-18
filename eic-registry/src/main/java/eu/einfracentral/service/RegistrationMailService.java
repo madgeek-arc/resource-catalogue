@@ -2,6 +2,7 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.PendingServiceManager;
@@ -195,6 +196,25 @@ public class RegistrationMailService {
                     sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), recipient);
                 }
             }
+        }
+    }
+
+    public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        InfraService infraService = infraServiceManager.get(resourceId);
+        ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
+        if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
+        }
+        String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", projectName, providerBundle.getProvider().getName());
+        root.put("providerBundle", providerBundle);
+        root.put("infraService", infraService);
+        for (User user : providerBundle.getProvider().getUsers()) {
+            root.put("user", user);
+            String recipient = "provider";
+            sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), recipient);
         }
     }
 

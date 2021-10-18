@@ -474,6 +474,13 @@ public class ServiceController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
+    // Send emails to Providers whose Resources are outdated
+    @GetMapping(path = {"sendEmailForOutdatedResource/{resourceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public void sendEmailNotificationsToProvidersWithOutdatedResources(@PathVariable String resourceId, @ApiIgnore Authentication authentication) {
+        infraService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId, authentication);
+    }
+
     // Get the Service Template of a specific Provider (status = "pending provider")
     @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public InfraService getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {
