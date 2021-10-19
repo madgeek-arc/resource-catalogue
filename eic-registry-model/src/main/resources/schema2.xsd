@@ -21,6 +21,7 @@
       <xs:enumeration value="UPDATE"/>
       <xs:enumeration value="AUDIT"/>
       <xs:enumeration value="DRAFT"/>
+      <xs:enumeration value="MOVE"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -38,6 +39,7 @@
       <xs:enumeration value="VALID"/>
       <xs:enumeration value="INVALID"/>
       <xs:enumeration value="CREATED"/>
+      <xs:enumeration value="MOVED"/>
     </xs:restriction>
   </xs:simpleType>
 
