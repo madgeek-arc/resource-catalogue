@@ -277,4 +277,10 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     InfraService verifyResource(String id, String status, Boolean active, Authentication auth);
+
+    /**
+     * @param resourceId
+     * @param auth
+     */
+    InfraService changeProvider(String resourceId, String newProvider, Authentication auth);
 }

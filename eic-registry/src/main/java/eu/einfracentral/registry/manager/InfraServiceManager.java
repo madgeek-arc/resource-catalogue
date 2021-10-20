@@ -639,6 +639,46 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
+    public InfraService changeProvider(String resourceId, String newProviderId, Authentication auth){
+        InfraService infraService = get(resourceId);
+        ProviderBundle newProvider = resourceManager.get(newProviderId);
+        ProviderBundle oldProvider =  resourceManager.get(infraService.getService().getResourceOrganisation());
+
+        // update loggingInfo
+        List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+        loggingInfoList.add(loggingInfo);
+        infraService.setLoggingInfo(loggingInfoList);
+
+        // update metadata
+        Metadata metadata = infraService.getMetadata();
+        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+        metadata.setModifiedBy( User.of(auth).getFullName());
+        metadata.setTerms(null);
+        infraService.setMetadata(metadata);
+
+        // update id
+        String initialId = infraService.getId();
+        String[] parts = initialId.split("\\.");
+        String serviceId = parts[1];
+        String newResourceId = newProvider.getId()+"."+serviceId;
+        infraService.setId(newResourceId);
+        infraService.getService().setId(newResourceId);
+
+        // update ResourceOrganisation
+        infraService.getService().setResourceOrganisation(newProvider.getId());
+
+        // add Resource, delete the old one
+        add(infraService, auth);
+        delete(get(resourceId));
+
+        // emails to EPOT, old and new Provider
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService.getService().getName(), auth);
+
+        return infraService;
+    }
+
     // TODO: First run with active/latest and no broke segment, second without active/latest and broke segment
     public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
