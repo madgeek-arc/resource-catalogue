@@ -481,6 +481,13 @@ public class ServiceController {
         infraService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId, authentication);
     }
 
+    // Move a Resource to another Provider
+    @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @ApiIgnore Authentication authentication) {
+        infraService.changeProvider(resourceId, newProvider, authentication);
+    }
+
     // Get the Service Template of a specific Provider (status = "pending provider")
     @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public InfraService getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {

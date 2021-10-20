@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -218,6 +219,44 @@ public class RegistrationMailService {
         }
     }
 
+    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, String resourceName, Authentication auth){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        if (oldProvider.getProvider().getUsers() == null || oldProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", oldProvider.getId(), oldProvider.getProvider().getName()));
+        }
+        if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
+        }
+        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, resourceName,
+                oldProvider.getProvider().getName(), newProvider.getProvider().getName());
+        String recipient = "provider";
+        root.put("oldProvider", oldProvider);
+        root.put("newProvider", newProvider);
+        root.put("resourceName", resourceName);
+
+        // emails to old Provider's Users
+        for (User user : oldProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail(), recipient);
+        }
+//        root.remove("user");
+
+        // emails to new Provider's Users
+        for (User user : newProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail(), recipient);
+        }
+
+        // emails to Admins
+        recipient = "admin";
+        root.put("adminFullName", User.of(auth).getFullName());
+        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminRole", securityService.getRoleName(auth));
+        sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, recipient);
+    }
+
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
     public void sendEmailNotificationsToAdmins() {
         FacetFilter ff = new FacetFilter();
@@ -357,7 +396,7 @@ public class RegistrationMailService {
         root.put("loggingInfoServiceMap", loggingInfoServiceMap);
 
         String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
-        String recipient = "provider";
+        String recipient = "admin";
         sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail, recipient);
     }
 

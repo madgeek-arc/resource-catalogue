@@ -50,7 +50,8 @@ public class LoggingInfo {
         ONBOARD("onboard"),
         UPDATE("update"),
         AUDIT("audit"),
-        DRAFT("draft");
+        DRAFT("draft"),
+        MOVE("move");
 
         private final String type;
 
@@ -90,7 +91,9 @@ public class LoggingInfo {
         VALID("valid"),
         INVALID("invalid"),
         // Draft
-        CREATED("drafted");
+        CREATED("drafted"),
+        // Resource change Provider
+        MOVED("moved");
 
         private final String actionType;
 
