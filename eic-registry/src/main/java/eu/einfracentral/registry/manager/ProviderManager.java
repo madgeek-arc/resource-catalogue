@@ -847,6 +847,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return createCorrectQuantityFacets(ret, retPaging, quantity, from);
     }
 
+    @Cacheable(value = CACHE_PROVIDERS)
     public Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging,
                                                         int quantity, int from){
         if (!providerBundle.isEmpty()) {
@@ -900,6 +901,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providerBundlePaging;
     }
 
+    @Cacheable(value = CACHE_PROVIDERS)
     public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff){
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
