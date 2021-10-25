@@ -260,17 +260,27 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> userProviders = null;
+
+        // if user is ADMIN or EPOT return everything
         if (auth != null && auth.isAuthenticated()) {
             if (securityService.hasRole(auth, "ROLE_ADMIN") ||
                     securityService.hasRole(auth, "ROLE_EPOT")) {
                 return super.getAll(ff, auth);
             }
-            // if user is not an admin, check if he is a provider
+            // if user is PROVIDER ADMIN return his Users too
             userProviders = getMyServiceProviders(auth);
         }
 
-        // retrieve providers
+        // else return ONLY approved Providers
+        ff.addFilter("status", "approved provider");
         Browsing<ProviderBundle> providers = super.getAll(ff, auth);
+        List<ProviderBundle> retList = new ArrayList<>();
+        for (ProviderBundle providerBundle : providers.getResults()){
+            if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+                retList.add(providerBundle);
+            }
+        }
+        providers.setResults(retList);
 
         if (userProviders != null) {
             // replace user providers having null users with complete provider entries
