@@ -68,7 +68,10 @@ public class Vocabulary implements Identifiable {
         PROVIDER_STRUCTURE_TYPE("Provider structure type"),
         PROVIDER_MERIL_SCIENTIFIC_DOMAIN("Provider meril scientific domain"),
         PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN("Provider meril scientific subdomain"),
-        PROVIDER_STATE("Provider state");
+        PROVIDER_STATE("Provider state"),
+        RESOURCE_STATE("Resource state"),
+        TEMPLATE_STATE("Template state"),
+        AUDIT_STATE("Audit state");
 
         private final String type;
 

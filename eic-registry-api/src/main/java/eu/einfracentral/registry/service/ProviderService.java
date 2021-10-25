@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
@@ -52,6 +53,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     T verifyProvider(String id, String status, Boolean active, U auth);
 
+    ProviderBundle publish(String providerId, Boolean active, Authentication auth);
 
     void deleteUserInfo(Authentication authentication);
 
@@ -100,4 +102,42 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateLatestProviderHistory(Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    void updateProviderAudits(Authentication auth);
+
+    /**
+     * @param auditState
+     * @param ff
+     * @param quantity
+     * @param from
+     * @param ret
+     * @param auth
+     * @return
+     */
+    Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, int quantity, int from, List<ProviderBundle> ret, Authentication auth);
+
+    /**
+     * @param ff
+     * @return
+     */
+    List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff);
+
+    /**
+     * @param providerBundle
+     * @param providerBundlePaging
+     * @param quantity
+     * @param from
+     * @return
+     */
+    Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging, int quantity, int from);
 }

@@ -61,6 +61,7 @@ public class ServiceProviderRegistrationIT {
         assert provider == null;
     }
 
+    //TODO: Refactor IT with new model
 
     @Test
     public void addUpdateAndDeleteProvider() throws ResourceNotFoundException, MalformedURLException {

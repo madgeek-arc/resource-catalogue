@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -622,6 +623,80 @@ public class Service implements Identifiable {
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_")
                 .toLowerCase());
+    }
+
+    public enum Field {
+        ID("id"),
+        NAME("name"),
+        RESOURCE_ORGANISATION("resourceOrganisation"),
+        RESOURCE_PROVIDERS("resourceProviders"),
+        WEBPAGE("webpage"),
+        DESCRIPTION("description"),
+        TAGLINE("tagline"),
+        LOGO("logo"),
+        MULTIMEDIA("multimedia"),
+        USE_CASES("useCases"),
+        SCIENTIFIC_DOMAINS("scientificDomains"),
+        CATEGORIES("categories"),
+        TARGET_USERS("targetUsers"),
+        ACCESS_TYPES("accessTypes"),
+        ACCESS_MODES("accessModes"),
+        TAGS("tags"),
+        GEOGRAPHICAL_AVAILABILITIES("geographicalAvailabilities"),
+        LANGUAGE_AVAILABILITIES("languageAvailabilities"),
+        RESOURCE_GEOGRAPHIC_LOCATIONS("resourceGeographicLocations"),
+        MAIN_CONTACT("mainContact"),
+        PUBLIC_CONTACTS("publicContacts"),
+        HELPDESK_EMAIL("helpdeskEmail"),
+        SECURITY_CONTACT_EMAILS("securityContactEmail"),
+        TRL("trl"),
+        LIFE_CYCLE_STATUS("lifeCycleStatus"),
+        CERTIFICATIONS("certifications"),
+        STANDARDS("standards"),
+        OPEN_SOURCE_TECHNOLOGIES("openSourceTechnologies"),
+        VERSION("version"),
+        LAST_UPDATE("lastUpdate"),
+        CHANGE_LOG("changeLog"),
+        REQUIRED_RESOURCES("requiredResources"),
+        RELATED_RESOURCES("relatedResources"),
+        RELATED_PLATFORMS("relatedPlatforms"),
+        FUNDING_BODY("fundingBody"),
+        FUNDING_PROGRAMS("fundingPrograms"),
+        GRANT_PROJECT_NAMES("grantProjectNames"),
+        HELPDESK_PAGE("helpdeskPage"),
+        USER_MANUAL("userManual"),
+        TERMS_OF_USE("termsOfUse"),
+        PRIVACY_POLICY("privacyPolicy"),
+        ACCESS_POLICY("accessPolicy"),
+        SERVICE_LEVEL("serviceLevel"),
+        TRAINING_INFORMATION("trainingInformation"),
+        STATUS_MONITORING("statusMonitoring"),
+        MAINTENANCE("maintenance"),
+        ORDER_TYPE("orderType"),
+        ORDER("order"),
+        PAYMENT_MODEL("paymentModel"),
+        PRICING("pricing");
+
+        private final String field;
+
+        Field(final String field) {
+            this.field = field;
+        }
+
+        public String getKey() {
+            return field;
+        }
+
+        /**
+         * @return the Enum representation for the given string.
+         * @throws IllegalArgumentException if unknown string.
+         */
+        public static Service.Field fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(Service.Field.values())
+                    .filter(v -> v.field.equals(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
     }
 
     @Override
