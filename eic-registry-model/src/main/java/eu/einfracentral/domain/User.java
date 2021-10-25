@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.einfracentral.annotation.FieldValidation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -15,19 +16,21 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class User implements Identifiable {
 
-    //TODO: Make fields mandatory
     private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement
     private String id;
 
     @XmlElement
+    @FieldValidation
     private String email;
 
     @XmlElement
+    @FieldValidation
     private String name;
 
     @XmlElement
+    @FieldValidation
     private String surname;
 
     public User() {

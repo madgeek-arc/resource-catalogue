@@ -231,11 +231,17 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
 
     List<Service> getActiveServices(String providerId);
 
-    InfraService getServiceTemplate(String providerId);
+    InfraService getServiceTemplate(String providerId, Authentication auth);
 
     Service getFeaturedService(String providerId);
 
     List<InfraService> getInactiveServices(String providerId);
+
+    /**
+     * @param resourceId
+     * @param auth
+     */
+    void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
 
     /**
      * @param auth
@@ -250,4 +256,31 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    void updateResourceAudits(Authentication auth);
+
+    /**
+     * @param id
+     * @param status
+     * @param active
+     * @param auth
+     * @return
+     */
+    InfraService verifyResource(String id, String status, Boolean active, Authentication auth);
+
+    /**
+     * @param resourceId
+     * @param auth
+     */
+    InfraService changeProvider(String resourceId, String newProvider, Authentication auth);
 }

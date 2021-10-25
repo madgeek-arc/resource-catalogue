@@ -57,7 +57,6 @@
       <xs:element minOccurs="0" name="latestUpdateInfo" type="tns:loggingInfo"/>
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
       <xs:element minOccurs="0" ref="tns:metadata"/>
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -140,6 +139,7 @@
         <xs:sequence>
           <xs:element name="latest" type="xs:boolean"/>
           <xs:element minOccurs="0" ref="tns:service"/>
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -959,6 +959,8 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:extension base="tns:bundle">
         <xs:sequence>
           <xs:element minOccurs="0" ref="tns:provider"/>
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
+          <xs:element minOccurs="0" name="templateStatus" type="xs:string"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
