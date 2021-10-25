@@ -112,6 +112,9 @@ public class PendingServiceController extends ResourceController<InfraService, A
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         InfraService infraService = new InfraService();
+        if (service.getId() == null || service.getId().equals("")) {
+            service.setId(idCreator.createServiceId(service));
+        }
         try {
             infraService = pendingServiceManager.get(service.getId());
             infraService.setService(service);

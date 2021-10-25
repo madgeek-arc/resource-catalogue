@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -15,35 +16,49 @@ import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
 import eu.openminted.registry.core.service.VersionService;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+import static org.junit.Assert.assertTrue;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
-    private final ProviderManager providerManager;
+    private final ResourceManager<ProviderBundle> resourceManager;
     private final Random randomNumberGenerator;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
+    private final VocabularyService vocabularyService;
 
 
     @Value("${project.name:}")
@@ -53,17 +68,20 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private VersionService versionService;
 
     @Autowired
-    public InfraServiceManager(ProviderManager providerManager, Random randomNumberGenerator, IdCreator idCreator,
+    public InfraServiceManager(@Qualifier("providerManager") ResourceManager<ProviderBundle> resourceManager,
+                               Random randomNumberGenerator, IdCreator idCreator,
                                @Lazy FieldValidator fieldValidator,
                                @Lazy SecurityService securityService,
-                               @Lazy RegistrationMailService registrationMailService) {
+                               @Lazy RegistrationMailService registrationMailService,
+                               @Lazy VocabularyService vocabularyService) {
         super(InfraService.class);
-        this.providerManager = providerManager;
+        this.resourceManager = resourceManager; // for providers
         this.randomNumberGenerator = randomNumberGenerator;
         this.idCreator = idCreator;
         this.fieldValidator = fieldValidator;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
+        this.vocabularyService = vocabularyService;
     }
 
     @Override
@@ -74,12 +92,19 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
     public InfraService addService(InfraService infraService, Authentication auth) {
+        // check if Provider is approved
+        if (!resourceManager.get(infraService.getService().getResourceOrganisation()).getStatus().equals(vocabularyService.get("approved provider").getId())){
+            throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
+                    infraService.getService().getResourceOrganisation()));
+        }
+
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
             String id = idCreator.createServiceId(infraService.getService());
             infraService.getService().setId(id);
         }
         validate(infraService);
-        infraService.setActive(providerManager.get(infraService.getService().getResourceOrganisation()).isActive());
+        validateEmailsAndPhoneNumbers(infraService);
+        infraService.setActive(resourceManager.get(infraService.getService().getResourceOrganisation()).isActive());
 
         infraService.setLatest(true);
 
@@ -91,13 +116,29 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add(loggingInfo);
-        infraService.setLoggingInfo(loggingInfoList);
 
         // latestOnboardingInfo
         infraService.setLatestOnboardingInfo(loggingInfo);
 
         infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
         infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
+
+        // resource status & extra loggingInfo for Approval
+        ProviderBundle providerBundle = resourceManager.get(infraService.getService().getResourceOrganisation());
+        if (providerBundle.getTemplateStatus().equals("approved template")){
+            infraService.setStatus(vocabularyService.get("approved resource").getId());
+            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(loggingInfoApproved);
+
+            // latestOnboardingInfo
+            infraService.setLatestOnboardingInfo(loggingInfoApproved);
+        } else{
+            infraService.setStatus(vocabularyService.get("pending resource").getId());
+        }
+
+        // LoggingInfo
+        infraService.setLoggingInfo(loggingInfoList);
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
@@ -108,9 +149,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     //    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS}, allEntries = true)
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
+        validateEmailsAndPhoneNumbers(infraService);
         InfraService existingService;
 
         // if service version is empty set it null
@@ -158,6 +201,17 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
         infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
 
+        // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
+        if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())){
+            ProviderBundle providerBundle = resourceManager.get(infraService.getService().getResourceOrganisation());
+            if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())){
+                infraService.setStatus(vocabularyService.get("pending resource").getId());
+                infraService.setActive(true);
+                providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
+                resourceManager.update(providerBundle, auth);
+            }
+        }
+
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
         if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null) {
@@ -168,7 +222,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 || infraService.getService().getVersion() != null
                 && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
             infraService.setLatest(existingService.isLatest());
-            infraService.setStatus(existingService.getStatus());
+//            infraService.setStatus(existingService.getStatus());
             ret = super.update(infraService, auth);
             logger.info("Updating Service without version change: {}", infraService);
             logger.info("Service Version: {}", infraService.getService().getVersion());
@@ -207,6 +261,78 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         super.delete(infraService);
     }
 
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public InfraService verifyResource(String id, String status, Boolean active, Authentication auth) {
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
+        }
+        logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        String[] parts = id.split("\\.");
+        String providerId = parts[0];
+        InfraService infraService = null;
+        List<InfraService> infraServices = getInfraServices(providerId);
+        for (InfraService service : infraServices){
+            if (service.getService().getId().equals(id)){
+                infraService = service;
+            }
+        }
+        if (infraService == null){
+            throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
+        }
+        infraService.setStatus(vocabularyService.get(status).getId());
+        ProviderBundle resourceProvider = resourceManager.get(infraService.getService().getResourceOrganisation());
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
+        if (infraService.getLoggingInfo() != null) {
+            loggingInfoList = infraService.getLoggingInfo();
+        } else {
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+            loggingInfoList.add(oldProviderRegistration);
+        }
+        switch (status) {
+            case "pending resource":
+                // update Provider's templateStatus
+                resourceProvider.setTemplateStatus("pending template");
+                break;
+            case "approved resource":
+                infraService.setActive(active);
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                infraService.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                infraService.setLatestOnboardingInfo(loggingInfo);
+
+                // update Provider's templateStatus
+                resourceProvider.setTemplateStatus("approved template");
+                break;
+            case "rejected resource":
+                infraService.setActive(false);
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                infraService.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                infraService.setLatestOnboardingInfo(loggingInfo);
+
+                // update Provider's templateStatus
+                resourceProvider.setTemplateStatus("rejected template");
+                break;
+            default:
+                break;
+        }
+        logger.info("Verifying Resource: {}", infraService);
+        resourceManager.update(resourceProvider, auth);
+        return super.update(infraService, auth);
+    }
+
     @Override
     public Paging<InfraService> getInactiveServices() {
         FacetFilter ff = new FacetFilter();
@@ -223,7 +349,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providers = providerManager.getAll(ff, null).getResults();
+        List<ProviderBundle> providers = resourceManager.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
@@ -294,8 +420,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             service = this.get(serviceId, version);
         }
 
-        ProviderBundle providerBundle = providerManager.get(service.getService().getResourceOrganisation());
-        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
+        ProviderBundle providerBundle = resourceManager.get(service.getService().getResourceOrganisation());
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
         if (active && activeProvider.equals("")) {
@@ -436,13 +562,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
+    // Different that the one called on migration methods!
     @Override
-    public InfraService getServiceTemplate(String providerId) {
+    public InfraService getServiceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.setQuantity(1);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("registeredAt", "asc"));
-        return this.getAll(ff, null).getResults().get(0);
+        List<InfraService> allProviderServices = getAll(ff, auth).getResults();
+        for (InfraService infraService : allProviderServices){
+            if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId())){
+                return infraService;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -481,18 +612,71 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
 //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
-        InfraService infraService = get(id);
-        List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
-        allResources.sort(Comparator.comparing((Resource::getCreationDate)));
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        for (Resource resource : allResources){
-            InfraService service = deserialize(resource);
-            if (service.getLoggingInfo() != null){
-                loggingInfoList.addAll(service.getLoggingInfo());
+        InfraService infraService = new InfraService();
+        try{
+            infraService = get(id);
+            List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+            allResources.sort(Comparator.comparing((Resource::getCreationDate)));
+            List<LoggingInfo> loggingInfoList = new ArrayList<>();
+            for (Resource resource : allResources){
+                InfraService service = deserialize(resource);
+                if (service.getLoggingInfo() != null){
+                    loggingInfoList.addAll(service.getLoggingInfo());
+                }
             }
+            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+        } catch(ResourceNotFoundException e){
+            logger.info(String.format("Resource with id [%s] not found", id));
         }
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-        return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+        return null;
+    }
+
+    public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth){
+        String providerId = resourceManager.get(get(resourceId).getService().getResourceOrganisation()).getId();
+        String providerName = resourceManager.get(get(resourceId).getService().getResourceOrganisation()).getProvider().getName();
+        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Resources", providerId, providerName));
+        registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
+    }
+
+    public InfraService changeProvider(String resourceId, String newProviderId, Authentication auth){
+        InfraService infraService = get(resourceId);
+        ProviderBundle newProvider = resourceManager.get(newProviderId);
+        ProviderBundle oldProvider =  resourceManager.get(infraService.getService().getResourceOrganisation());
+
+        // update loggingInfo
+        List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+        loggingInfoList.add(loggingInfo);
+        infraService.setLoggingInfo(loggingInfoList);
+
+        // update metadata
+        Metadata metadata = infraService.getMetadata();
+        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+        metadata.setModifiedBy( User.of(auth).getFullName());
+        metadata.setTerms(null);
+        infraService.setMetadata(metadata);
+
+        // update id
+        String initialId = infraService.getId();
+        String[] parts = initialId.split("\\.");
+        String serviceId = parts[1];
+        String newResourceId = newProvider.getId()+"."+serviceId;
+        infraService.setId(newResourceId);
+        infraService.getService().setId(newResourceId);
+
+        // update ResourceOrganisation
+        infraService.getService().setResourceOrganisation(newProvider.getId());
+
+        // add Resource, delete the old one
+        add(infraService, auth);
+        delete(get(resourceId));
+
+        // emails to EPOT, old and new Provider
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService.getService().getName(), auth);
+
+        return infraService;
     }
 
     // TODO: First run with active/latest and no broke segment, second without active/latest and broke segment
@@ -644,6 +828,146 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             }
         }
     return allMigratedLoggingInfos;
+    }
+    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth){
+        Map<String, List<LoggingInfo>> allMigratedLogginInfos = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> allServices = getAll(ff, auth).getResults();
+        for (InfraService infraService : allServices){
+            boolean lastAuditFound = false;
+            boolean lastUpdateFound = false;
+            boolean lastOnboardFound = false;
+            LoggingInfo lastUpdate = null;
+            LoggingInfo lastAudit = null;
+            LoggingInfo lastOnboard = null;
+            List<LoggingInfo> loggingInfoList = null;
+            try {
+                loggingInfoList = getLoggingInfoHistory(infraService.getService().getId()).getResults();
+            } catch (NullPointerException e){
+                logger.info(e);
+                continue;
+            }
+            for (LoggingInfo loggingInfo : loggingInfoList){
+                if (loggingInfo.getType().equals(LoggingInfo.Types.UPDATE.getKey()) && !lastUpdateFound){
+                    lastUpdate = loggingInfo;
+                    lastUpdateFound = true;
+                }
+                if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey()) && !lastAuditFound){
+                    lastAudit = loggingInfo;
+                    lastAuditFound = true;
+                }
+                if (loggingInfo.getType().equals(LoggingInfo.Types.ONBOARD.getKey()) && !lastOnboardFound){
+                    lastOnboard = loggingInfo;
+                    lastOnboardFound = true;
+                }
+            }
+            if (infraService.getLatestOnboardingInfo() == null){
+                infraService.setLatestOnboardingInfo(lastOnboard);
+            }
+            if (infraService.getLatestUpdateInfo() == null){
+                infraService.setLatestUpdateInfo(lastUpdate);
+            }
+            if (infraService.getLatestAuditInfo() == null){
+                infraService.setLatestAuditInfo(lastAudit);
+            }
+
+            List<LoggingInfo> latestLoggings = new ArrayList<>();
+            latestLoggings.add(lastOnboard);
+            latestLoggings.add(lastUpdate);
+            latestLoggings.add(lastAudit);
+            logger.info(String.format("Resource's [%s] new Latest Onboard Info %s", infraService.getService().getName(), infraService.getLatestOnboardingInfo()));
+            logger.info(String.format("Resource's [%s] new Latest Update Info %s", infraService.getService().getName(), infraService.getLatestUpdateInfo()));
+            logger.info(String.format("Resource's [%s] new Latest Audit Info %s", infraService.getService().getName(), infraService.getLatestAuditInfo()));
+            super.update(infraService, auth);
+            allMigratedLogginInfos.put(infraService.getService().getId(), latestLoggings);
+        }
+        return allMigratedLogginInfos;
+    }
+
+    public void updateResourceAudits(Authentication auth){
+        JSONParser parser = new JSONParser();
+        try{
+            JSONArray resourceJSON = (JSONArray) parser.parse(new FileReader("/home/mike/Desktop/ResourceAudits.json"));
+            for (int i = 0; i < resourceJSON.size(); i++){
+//                logger.info(resourceJSON.get(i));
+                JSONObject jObject = (JSONObject) resourceJSON.get(i);
+                String resourceId = jObject.getAsString("id");
+                InfraService infraService = get(resourceId);
+                JSONArray loggingInfoObject = (JSONArray) jObject.get("loggingInfo");
+                JSONObject loggingInfoArray = (JSONObject) loggingInfoObject.get(0);
+                LoggingInfo loggingInfo = new LoggingInfo();
+                loggingInfo.setDate(loggingInfoArray.getAsString("date"));
+                loggingInfo.setUserEmail(loggingInfoArray.getAsString("userEmail"));
+                loggingInfo.setUserFullName(loggingInfoArray.getAsString("userFullName"));
+                loggingInfo.setUserRole(loggingInfoArray.getAsString("userRole"));
+                loggingInfo.setType(loggingInfoArray.getAsString("type"));
+                loggingInfo.setComment(loggingInfoArray.getAsString("comment"));
+                loggingInfo.setActionType(loggingInfoArray.getAsString("actionType"));
+                List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
+                logger.info(resourceId);
+                logger.info(String.format("Old Logging Info %s", infraService.getLoggingInfo()));
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                infraService.setLoggingInfo(loggingInfoList);
+                logger.info(String.format("New Logging Info %s", infraService.getLoggingInfo()));
+                super.update(infraService, auth);
+            }
+        } catch (FileNotFoundException e){
+            logger.info("asdf");
+        } catch (ParseException g){
+            logger.info("asdf2");
+        }
+    }
+
+    public void validateEmailsAndPhoneNumbers(InfraService infraService){
+        EmailValidator validator = EmailValidator.getInstance();
+        Pattern pattern = Pattern.compile("^(\\+\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
+        // main contact email
+        String mainContactEmail = infraService.getService().getMainContact().getEmail();
+        if (!validator.isValid(mainContactEmail)) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Main Contact Email", mainContactEmail));
+        }
+        // main contact phone
+        if (infraService.getService().getMainContact().getPhone() != null && !infraService.getService().getMainContact().getPhone().equals("")){
+            String mainContactPhone = infraService.getService().getMainContact().getPhone();
+            Matcher mainContactPhoneMatcher = pattern.matcher(mainContactPhone);
+            try {
+                assertTrue(mainContactPhoneMatcher.matches());
+            } catch(AssertionError e){
+                throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Main Contact Phone", mainContactPhone));
+            }
+        }
+        // public contact
+        for (ServicePublicContact servicePublicContact : infraService.getService().getPublicContacts()){
+            // public contact email
+            if (servicePublicContact.getEmail() != null && !servicePublicContact.getEmail().equals("")){
+                String publicContactEmail = servicePublicContact.getEmail();
+                if (!validator.isValid(publicContactEmail)) {
+                    throw new ValidationException(String.format("Email [%s] is not valid. Found in field Public Contact Email", publicContactEmail));
+                }
+            }
+            // public contact phone
+            if (servicePublicContact.getPhone() != null && !servicePublicContact.getPhone().equals("")){
+                String publicContactPhone = servicePublicContact.getPhone();
+                Matcher publicContactPhoneMatcher = pattern.matcher(publicContactPhone);
+                try {
+                    assertTrue(publicContactPhoneMatcher.matches());
+                } catch(AssertionError e){
+                    throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Public Contact Phone", publicContactPhone));
+                }
+            }
+        }
+        // helpdesk email
+        String helpdeskEmail = infraService.getService().getHelpdeskEmail();
+        if (!validator.isValid(helpdeskEmail)) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Helpdesk Email", helpdeskEmail));
+        }
+        // security contact email
+        String securityContactEmail = infraService.getService().getSecurityContactEmail();
+        if (!validator.isValid(securityContactEmail)) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Security Contact Email", securityContactEmail));
+        }
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
