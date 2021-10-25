@@ -484,8 +484,8 @@ public class ServiceController {
     // Move a Resource to another Provider
     @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @ApiIgnore Authentication authentication) {
-        infraService.changeProvider(resourceId, newProvider, authentication);
+    public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam String comment, @ApiIgnore Authentication authentication) {
+        infraService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
     // Get the Service Template of a specific Provider (status = "pending provider")

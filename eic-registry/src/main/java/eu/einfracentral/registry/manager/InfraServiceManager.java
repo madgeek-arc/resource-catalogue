@@ -639,15 +639,21 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
-    public InfraService changeProvider(String resourceId, String newProviderId, Authentication auth){
+    public InfraService changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
         InfraService infraService = get(resourceId);
         ProviderBundle newProvider = resourceManager.get(newProviderId);
         ProviderBundle oldProvider =  resourceManager.get(infraService.getService().getResourceOrganisation());
 
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+        LoggingInfo loggingInfo;
+        if (comment == null || comment == ""){
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+        } else{
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
+        }
         loggingInfoList.add(loggingInfo);
         infraService.setLoggingInfo(loggingInfoList);
 
