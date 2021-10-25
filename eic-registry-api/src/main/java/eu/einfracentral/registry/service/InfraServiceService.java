@@ -280,7 +280,9 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
 
     /**
      * @param resourceId
+     * @param newProvider
+     * @param comment
      * @param auth
      */
-    InfraService changeProvider(String resourceId, String newProvider, Authentication auth);
+    InfraService changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 }
