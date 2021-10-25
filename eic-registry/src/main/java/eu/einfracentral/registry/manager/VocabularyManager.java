@@ -35,8 +35,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     public VocabularyManager() {
         super(Vocabulary.class);
-        regions.put("EU", new Region("https://restcountries.eu/rest/v2/regionalbloc/EU?fields=alpha2Code"));
-        regions.put("WW", new Region("https://restcountries.eu/rest/v2?fields=alpha2Code"));
+        regions.put("EU", new Region("https://restcountries.com/v3.1/region/europe?fields=cca2"));
+        regions.put("WW", new Region("https://restcountries.com/v3.1/all?fields=cca2"));
     }
 
     @Override
@@ -223,7 +223,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             if (c.getResponseCode() == 200) {
                 Country[] countries = new ObjectMapper().readValue(c.getInputStream(), Country[].class);
                 c.disconnect();
-                region.setMembers(Stream.of(countries).map(e -> e.alpha2Code).toArray(String[]::new));
+                region.setMembers(Stream.of(countries).map(e -> e.cca2).toArray(String[]::new));
             }
         } catch (IOException e) {
             logger.error("ERROR", e);
@@ -236,14 +236,14 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     private static class Country {
-        private String alpha2Code;
+        private String cca2;
 
-        public String getAlpha2Code() {
-            return alpha2Code;
+        public String getCca2() {
+            return cca2;
         }
 
-        public void setAlpha2Code(String alpha2Code) {
-            this.alpha2Code = alpha2Code;
+        public void setCca2(String cca2) {
+            this.cca2 = cca2;
         }
     }
 

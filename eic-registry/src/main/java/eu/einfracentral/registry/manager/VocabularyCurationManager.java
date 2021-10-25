@@ -7,7 +7,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.RegistrationMailService;
-import eu.einfracentral.service.SearchServiceEIC;
+import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
