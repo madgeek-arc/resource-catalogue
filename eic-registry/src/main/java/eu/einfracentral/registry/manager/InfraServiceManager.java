@@ -680,7 +680,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         delete(get(resourceId));
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService.getService().getName(), auth);
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService, auth);
 
         return infraService;
     }
