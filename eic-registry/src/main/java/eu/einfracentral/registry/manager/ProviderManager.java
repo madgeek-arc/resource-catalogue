@@ -63,6 +63,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
+    // variable with DB tables a keyword is been searched on
+    //TODO: enable searching on Array Columns too (eg tags, affiliations)
+    private final String columnsOfInterest = "provider_id, name, abbreviation";
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -913,6 +916,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Cacheable(value = CACHE_PROVIDERS)
     public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff){
+        String keyword = ff.getKeyword();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
@@ -955,6 +959,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR templateStatus='");
                 }
+            }
+        }
+
+        // keyword on search bar
+        if (keyword != null && !keyword.equals("")){
+            if (firstTime){
+                query += String.format(" WHERE '%s' in (%s)", keyword, columnsOfInterest) + " OR array_to_string(tags, ',') like '%" + String.format("%s", keyword) + "%'";
+            } else{
+                query += String.format(" AND '%s' in (%s)", keyword, columnsOfInterest) + " OR array_to_string(tags, ',') like '%" + String.format("%s", keyword) + "%'";
             }
         }
 
