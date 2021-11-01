@@ -63,9 +63,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
-    // variable with DB tables a keyword is been searched on
-    //TODO: enable searching on Array Columns too (eg tags, affiliations)
-    private final String columnsOfInterest = "provider_id, name, abbreviation";
+    //TODO: maybe add description on DB and elastic too
+    private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
+        " networks, scientific_subdomains, societal_grand_challenges, structure_types"; // variable with DB tables a keyword is been searched on
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -965,9 +965,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // keyword on search bar
         if (keyword != null && !keyword.equals("")){
             if (firstTime){
-                query += String.format(" WHERE '%s' in (%s)", keyword, columnsOfInterest) + " OR array_to_string(tags, ',') like '%" + String.format("%s", keyword) + "%'";
+                query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
             } else{
-                query += String.format(" AND '%s' in (%s)", keyword, columnsOfInterest) + " OR array_to_string(tags, ',') like '%" + String.format("%s", keyword) + "%'";
+                query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
             }
         }
 
