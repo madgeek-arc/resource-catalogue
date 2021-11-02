@@ -72,16 +72,16 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
         return cfg;
     }
 
-    @Bean
-    public CookieSerializer cookieSerializer() {
-        DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
-        defaultCookieSerializer.setCookieName("EICSESSION");
-        defaultCookieSerializer.setCookiePath("/");
-//        defaultCookieSerializer.setUseSecureCookie(Boolean.parseBoolean(env.getProperty(COOKIE_SECURE)));
-        defaultCookieSerializer.setUseHttpOnlyCookie(true);
-//        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
-        return defaultCookieSerializer;
-    }
+//    @Bean
+//    public CookieSerializer cookieSerializer() {
+//        DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
+//        defaultCookieSerializer.setCookieName("EICSESSION");
+//        defaultCookieSerializer.setCookiePath("/");
+////        defaultCookieSerializer.setUseSecureCookie(Boolean.parseBoolean(env.getProperty(COOKIE_SECURE)));
+//        defaultCookieSerializer.setUseHttpOnlyCookie(true);
+////        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
+//        return defaultCookieSerializer;
+//    }
 
 //    @Bean
 //    public SessionRepository sessionRepository() {
