@@ -227,7 +227,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
 
     List<InfraService> getInfraServices(String providerId);
 
-    List<Service> getServices(String providerId);
+    List<Service> getServices(String providerId, Authentication auth);
 
     List<Service> getActiveServices(String providerId);
 
