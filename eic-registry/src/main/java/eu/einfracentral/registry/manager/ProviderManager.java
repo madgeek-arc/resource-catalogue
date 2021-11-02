@@ -210,7 +210,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle get(String id, Authentication auth) {
-        return get(id);
+        ProviderBundle providerBundle = get(id);
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+                    securityService.userIsProviderAdmin(user, id)) {
+                return providerBundle;
+            }
+        }
+        // else return the Provider ONLY if he is active
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+            return providerBundle;
+        }
+        throw new ValidationException("You cannot view the specific Provider");
     }
 
     @Override
@@ -263,6 +276,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> userProviders = null;
+        List<ProviderBundle> retList = new ArrayList<>();
 
         // if user is ADMIN or EPOT return everything
         if (auth != null && auth.isAuthenticated()) {
@@ -270,28 +284,35 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     securityService.hasRole(auth, "ROLE_EPOT")) {
                 return super.getAll(ff, auth);
             }
-            // if user is PROVIDER ADMIN return his Users too
+            // if user is PROVIDER ADMIN return all his Providers (rejected, pending) with their sensitive data (Users, MainContact) too
+            User user = User.of(auth);
+            Browsing<ProviderBundle> providers = super.getAll(ff, auth);
+            for (ProviderBundle providerBundle : providers.getResults()){
+                if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
+                securityService.userIsProviderAdmin(user, providerBundle.getId())) {
+                    retList.add(providerBundle);
+                }
+            }
+            providers.setResults(retList);
+            providers.setTotal(retList.size());
+            providers.setTo(retList.size());
             userProviders = getMyServiceProviders(auth);
+            if (userProviders != null) {
+                // replace user providers having null users with complete provider entries
+                userProviders.forEach(x -> {
+                    providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
+                    providers.getResults().add(x);
+                });
+            }
+            return providers;
         }
 
         // else return ONLY approved Providers
         ff.addFilter("status", "approved provider");
         Browsing<ProviderBundle> providers = super.getAll(ff, auth);
-        List<ProviderBundle> retList = new ArrayList<>();
-        for (ProviderBundle providerBundle : providers.getResults()){
-            if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
-                retList.add(providerBundle);
-            }
-        }
+        retList.addAll(providers.getResults());
         providers.setResults(retList);
 
-        if (userProviders != null) {
-            // replace user providers having null users with complete provider entries
-            userProviders.forEach(x -> {
-                providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
-                providers.getResults().add(x);
-            });
-        }
         return providers;
     }
 

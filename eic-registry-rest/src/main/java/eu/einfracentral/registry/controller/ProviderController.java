@@ -215,7 +215,7 @@ public class ProviderController {
     @ApiOperation(value = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(infraServiceService.getServices(id), HttpStatus.OK);
+        return new ResponseEntity<>(infraServiceService.getServices(id, auth), HttpStatus.OK);
     }
 
     // Get a featured InfraService offered by a Provider. // TODO enable in a future release
