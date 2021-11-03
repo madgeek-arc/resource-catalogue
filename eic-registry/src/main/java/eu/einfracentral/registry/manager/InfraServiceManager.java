@@ -91,6 +91,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService addService(InfraService infraService, Authentication auth) {
         // check if Provider is approved
         if (!resourceManager.get(infraService.getService().getResourceOrganisation()).getStatus().equals(vocabularyService.get("approved provider").getId())){
@@ -149,7 +150,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     //    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
@@ -573,6 +574,16 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
         }
         throw new ValidationException("You cannot view the Resources of the specific Provider");
+    }
+
+    // for sendProviderMails on RegistrationMailService
+    public List<Service> getServices(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("latest", true);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
     // Different that the one called on migration methods!

@@ -783,6 +783,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return super.update(provider, auth);
     }
 
+    @Cacheable(value = CACHE_PROVIDERS)
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
