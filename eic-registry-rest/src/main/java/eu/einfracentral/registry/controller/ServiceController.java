@@ -145,9 +145,7 @@ public class ServiceController {
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
-        Paging<InfraService> infraServices = infraService.getAll(ff, null);
+        Paging<InfraService> infraServices = infraService.getAll(ff, authentication);
         List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
@@ -187,10 +185,11 @@ public class ServiceController {
         return infraService.getChildrenFromParent(type, parent, rec);
     }
 
-    @ApiOperation(value = "Get a list of Resources based on a set of ids.")
+//    @ApiOperation(value = "Get a list of Resources based on a set of ids.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(
@@ -212,7 +211,7 @@ public class ServiceController {
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable (value = "field") Service.Field field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         Map<String, List<InfraService>> results;
         try {
-            results = infraService.getBy(field.getKey());
+            results = infraService.getBy(field.getKey(), auth);
         } catch (NoSuchFieldException e) {
             logger.error(e);
             throw e;
@@ -221,8 +220,6 @@ public class ServiceController {
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
             List<Service> items = services.getValue()
                     .stream()
-                    .filter(InfraService::isActive)
-                    .filter(InfraService::isLatest)
                     .map(InfraService::getService).collect(Collectors.toList());
             if (!items.isEmpty()) {
                 serviceResults.put(services.getKey(), items);
