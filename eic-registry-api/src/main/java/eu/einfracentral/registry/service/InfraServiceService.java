@@ -50,9 +50,10 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Get InfraServices by a specific field.
      *
      * @param field
+     * @param auth
      * @return
      */
-    Map<String, List<T>> getBy(String field) throws NoSuchFieldException;
+    Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * Get RichServices with the specified ids.

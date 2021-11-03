@@ -14,6 +14,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -46,8 +47,16 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     private static final Logger logger = LogManager.getLogger(AbstractServiceManager.class);
 
+    @Autowired
+    private SecurityService securityService;
+
     public AbstractServiceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
+    }
+
+    public AbstractServiceManager(Class<InfraService> typeParameterClass, SecurityService securityService) {
+        super(typeParameterClass);
+        this.securityService = securityService;
     }
 
     @Autowired
@@ -136,6 +145,19 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
+        // if user is Provider Admin or User or Unauthorized, return active/latest ONLY
+        if (auth == null){
+            filter.addFilter("active", true);
+            filter.addFilter("latest", true);
+        }
+        if (auth != null && auth.isAuthenticated()){
+            if (!securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")){
+                //TODO: If ROLE_PROVIDER, return all his Resources too
+                filter.addFilter("active", true);
+                filter.addFilter("latest", true);
+            }
+        }
+
         //TODO: Rearrange depending on front-end's needs
         //Order Service's facets as we like (+removed Service Name - no4)
         List<String> orderedBrowseBy = new ArrayList<>();
@@ -156,8 +178,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         orderedBrowseBy.add(browseBy.get(11));    // Resource Type
 
         filter.setBrowseBy(orderedBrowseBy);
-
         filter.setResourceType(getResourceType());
+
         return getMatchingServices(filter);
     }
 
@@ -236,7 +258,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Map<String, List<InfraService>> getBy(String field) throws NoSuchFieldException {
+    public Map<String, List<InfraService>> getBy(String field, Authentication auth) throws NoSuchFieldException {
         Field serviceField = null;
         try {
             serviceField = Service.class.getDeclaredField(field);
@@ -248,7 +270,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        Browsing<InfraService> services = getAll(ff, null);
+        Browsing<InfraService> services = getAll(ff, auth);
 
         final Field f = serviceField;
         final String undef = "undefined";
