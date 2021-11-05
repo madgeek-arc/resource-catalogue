@@ -196,7 +196,7 @@ public class ProviderController {
         }
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
-        List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff);
+        List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
         Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
         for (Map<String, Object> record : records){
