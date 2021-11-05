@@ -219,6 +219,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
 
+        // set status
+        infraService.setStatus(existingService.getStatus());
+
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
                 || infraService.getService().getVersion() != null
                 && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
