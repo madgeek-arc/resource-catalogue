@@ -937,8 +937,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Cacheable(value = CACHE_PROVIDERS)
-    public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff){
+    public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff, String orderDirection, String orderField){
         String keyword = ff.getKeyword();
+        Map<String, Object> order = ff.getOrderBy();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
@@ -991,6 +992,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             } else{
                 query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
             }
+        }
+
+        // order/orderField
+        if (orderField !=null || !orderField.equals("")){
+            query += String.format(" ORDER BY %s", orderField);
+        }
+        if (orderDirection !=null || !orderDirection.equals("")){
+            query += String.format(" %s", orderDirection);
         }
 
         query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
