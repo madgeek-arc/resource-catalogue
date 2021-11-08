@@ -91,6 +91,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService addService(InfraService infraService, Authentication auth) {
         // check if Provider is approved
         if (!resourceManager.get(infraService.getService().getResourceOrganisation()).getStatus().equals(vocabularyService.get("approved provider").getId())){
@@ -149,7 +150,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     //    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS}, allEntries = true)
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
         InfraService ret;
         validate(infraService);
@@ -556,6 +557,29 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
+    public List<Service> getServices(String providerId, Authentication auth) {
+        ProviderBundle providerBundle = resourceManager.get(providerId);
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("latest", true);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+                    securityService.userIsProviderAdmin(user, providerId)) {
+                return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+            }
+        }
+        // else return Provider's Services ONLY if he is active
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+            return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+        }
+        throw new ValidationException("You cannot view the Resources of the specific Provider");
+    }
+
+    // for sendProviderMails on RegistrationMailService
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
@@ -605,7 +629,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @Override
     public Service getFeaturedService(String providerId) {
         // TODO: change this method
-        List<Service> services = getServices(providerId);
+        List<Service> services = getServices(providerId, null);
         Service featuredService = null;
         if (!services.isEmpty()) {
             featuredService = services.get(randomNumberGenerator.nextInt(services.size()));
@@ -642,15 +666,21 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
-    public InfraService changeProvider(String resourceId, String newProviderId, Authentication auth){
+    public InfraService changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
         InfraService infraService = get(resourceId);
         ProviderBundle newProvider = resourceManager.get(newProviderId);
         ProviderBundle oldProvider =  resourceManager.get(infraService.getService().getResourceOrganisation());
 
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+        LoggingInfo loggingInfo;
+        if (comment == null || comment == ""){
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+        } else{
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
+        }
         loggingInfoList.add(loggingInfo);
         infraService.setLoggingInfo(loggingInfoList);
 
@@ -677,7 +707,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         delete(get(resourceId));
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService.getService().getName(), auth);
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService, auth);
 
         return infraService;
     }

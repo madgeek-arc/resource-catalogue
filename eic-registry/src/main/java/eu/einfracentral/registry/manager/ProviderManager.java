@@ -63,6 +63,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
+    //TODO: maybe add description on DB and elastic too
+    private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
+        " networks, scientific_subdomains, societal_grand_challenges, structure_types"; // variable with DB tables a keyword is been searched on
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -207,7 +210,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle get(String id, Authentication auth) {
-        return get(id);
+        ProviderBundle providerBundle = get(id);
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+                    securityService.userIsProviderAdmin(user, id)) {
+                return providerBundle;
+            }
+        }
+        // else return the Provider ONLY if he is active
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+            return providerBundle;
+        }
+        throw new ValidationException("You cannot view the specific Provider");
     }
 
     @Override
@@ -260,25 +276,43 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS)
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> userProviders = null;
+        List<ProviderBundle> retList = new ArrayList<>();
+
+        // if user is ADMIN or EPOT return everything
         if (auth != null && auth.isAuthenticated()) {
             if (securityService.hasRole(auth, "ROLE_ADMIN") ||
                     securityService.hasRole(auth, "ROLE_EPOT")) {
                 return super.getAll(ff, auth);
             }
-            // if user is not an admin, check if he is a provider
+            // if user is PROVIDER ADMIN return all his Providers (rejected, pending) with their sensitive data (Users, MainContact) too
+            User user = User.of(auth);
+            Browsing<ProviderBundle> providers = super.getAll(ff, auth);
+            for (ProviderBundle providerBundle : providers.getResults()){
+                if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
+                securityService.userIsProviderAdmin(user, providerBundle.getId())) {
+                    retList.add(providerBundle);
+                }
+            }
+            providers.setResults(retList);
+            providers.setTotal(retList.size());
+            providers.setTo(retList.size());
             userProviders = getMyServiceProviders(auth);
+            if (userProviders != null) {
+                // replace user providers having null users with complete provider entries
+                userProviders.forEach(x -> {
+                    providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
+                    providers.getResults().add(x);
+                });
+            }
+            return providers;
         }
 
-        // retrieve providers
+        // else return ONLY approved Providers
+        ff.addFilter("status", "approved provider");
         Browsing<ProviderBundle> providers = super.getAll(ff, auth);
+        retList.addAll(providers.getResults());
+        providers.setResults(retList);
 
-        if (userProviders != null) {
-            // replace user providers having null users with complete provider entries
-            userProviders.forEach(x -> {
-                providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
-                providers.getResults().add(x);
-            });
-        }
         return providers;
     }
 
@@ -749,6 +783,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return super.update(provider, auth);
     }
 
+    @Cacheable(value = CACHE_PROVIDERS)
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
@@ -902,7 +937,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Cacheable(value = CACHE_PROVIDERS)
-    public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff){
+    public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff, String orderDirection, String orderField){
+        String keyword = ff.getKeyword();
+        Map<String, Object> order = ff.getOrderBy();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
@@ -946,6 +983,23 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     query = query.replaceAll(", ", "' OR templateStatus='");
                 }
             }
+        }
+
+        // keyword on search bar
+        if (keyword != null && !keyword.equals("")){
+            if (firstTime){
+                query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
+            } else{
+                query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
+            }
+        }
+
+        // order/orderField
+        if (orderField !=null || !orderField.equals("")){
+            query += String.format(" ORDER BY %s", orderField);
+        }
+        if (orderDirection !=null || !orderDirection.equals("")){
+            query += String.format(" %s", orderDirection);
         }
 
         query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
