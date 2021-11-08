@@ -614,6 +614,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // TargetUsers Names
             if (infraService.getService().getTargetUsers() != null) {
+                infraService.getService().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
                 richService.setTargetUsersNames(infraService.getService().getTargetUsers()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -624,6 +625,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // AccessTypes Names
             if (infraService.getService().getAccessTypes() != null) {
+                infraService.getService().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
                 richService.setAccessTypeNames(infraService.getService().getAccessTypes()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -634,6 +636,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // AccessModes Names
             if (infraService.getService().getAccessModes() != null) {
+                infraService.getService().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
                 richService.setAccessModeNames(infraService.getService().getAccessModes()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -644,6 +647,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // FundingBodies Names
             if (infraService.getService().getFundingBody() != null) {
+                infraService.getService().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
                 richService.setFundingBodyNames(infraService.getService().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -654,6 +658,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // FundingPrograms Names
             if (infraService.getService().getFundingPrograms() != null) {
+                infraService.getService().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
                 richService.setFundingProgramNames(infraService.getService().getFundingPrograms()
                         .stream()
                         .filter(v -> !v.equals(""))
