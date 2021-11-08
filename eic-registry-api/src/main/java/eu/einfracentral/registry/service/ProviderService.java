@@ -130,7 +130,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param ff
      * @return
      */
-    List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff);
+    List<Map<String, Object>> createQueryForProviderFilters(FacetFilter ff, String orderDirection, String orderField);
 
     /**
      * @param providerBundle
