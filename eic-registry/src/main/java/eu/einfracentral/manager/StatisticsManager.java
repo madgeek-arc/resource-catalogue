@@ -246,7 +246,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> providerRatings(String id, Interval by) {
-        Map<String, Float> providerRatings = infraServiceManager.getServices(id)
+        Map<String, Float> providerRatings = infraServiceManager.getServices(id, null)
                 .stream()
                 .flatMap(s -> ratings(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
@@ -263,7 +263,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerFavourites(String id, Interval by) {
-        Map<String, Integer> providerFavorites = infraServiceManager.getServices(id)
+        Map<String, Integer> providerFavorites = infraServiceManager.getServices(id, null)
                 .stream()
                 .flatMap(s -> favourites(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -296,7 +296,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
-        Map<String, Integer> providerAddToProject = infraServiceManager.getServices(id)
+        Map<String, Integer> providerAddToProject = infraServiceManager.getServices(id, null)
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -341,7 +341,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerVisits(String id, Interval by) {
         Map<String, Integer> results = new HashMap<>();
-        for (Service service : infraServiceManager.getServices(id)){
+        for (Service service : infraServiceManager.getServices(id, null)){
             Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(),by).entrySet();
             for (Map.Entry<String, Integer> entry : entrySet){
                 if (!results.containsKey(entry.getKey())){
@@ -356,7 +356,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> providerVisitation(String id, Interval by) {
-        Map<String, Integer> counts = infraServiceManager.getServices(id).stream().collect(Collectors.toMap(
+        Map<String, Integer> counts = infraServiceManager.getServices(id, null).stream().collect(Collectors.toMap(
                 Service::getName,
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
         ));

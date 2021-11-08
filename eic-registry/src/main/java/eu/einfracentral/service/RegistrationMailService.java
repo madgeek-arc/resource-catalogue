@@ -219,7 +219,7 @@ public class RegistrationMailService {
         }
     }
 
-    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, String resourceName, Authentication auth){
+    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, InfraService infraService, Authentication auth){
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
@@ -229,12 +229,13 @@ public class RegistrationMailService {
         if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
         }
-        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, resourceName,
+        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, infraService.getService().getName(),
                 oldProvider.getProvider().getName(), newProvider.getProvider().getName());
         String recipient = "provider";
         root.put("oldProvider", oldProvider);
         root.put("newProvider", newProvider);
-        root.put("resourceName", resourceName);
+        root.put("infraService", infraService);
+        root.put("comment", infraService.getLoggingInfo().get(infraService.getLoggingInfo().size() - 1).getComment());
 
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {

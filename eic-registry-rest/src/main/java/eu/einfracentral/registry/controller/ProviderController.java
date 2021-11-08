@@ -2,7 +2,6 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -158,6 +157,7 @@ public class ProviderController {
     }
 
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id)")
     public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(providerManager.get(id, auth), HttpStatus.OK);
     }
@@ -196,7 +196,7 @@ public class ProviderController {
         }
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
-        List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff);
+        List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
         Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
         for (Map<String, Object> record : records){
@@ -215,7 +215,7 @@ public class ProviderController {
     @ApiOperation(value = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(infraServiceService.getServices(id), HttpStatus.OK);
+        return new ResponseEntity<>(infraServiceService.getServices(id, auth), HttpStatus.OK);
     }
 
     // Get a featured InfraService offered by a Provider. // TODO enable in a future release

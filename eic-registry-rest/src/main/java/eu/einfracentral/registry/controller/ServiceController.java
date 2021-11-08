@@ -145,9 +145,7 @@ public class ServiceController {
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
-        Paging<InfraService> infraServices = infraService.getAll(ff, null);
+        Paging<InfraService> infraServices = infraService.getAll(ff, authentication);
         List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
         return ResponseEntity.ok(new Paging<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(), services, infraServices.getFacets()));
     }
@@ -187,10 +185,11 @@ public class ServiceController {
         return infraService.getChildrenFromParent(type, parent, rec);
     }
 
-    @ApiOperation(value = "Get a list of Resources based on a set of ids.")
+//    @ApiOperation(value = "Get a list of Resources based on a set of ids.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(
@@ -212,7 +211,7 @@ public class ServiceController {
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable (value = "field") Service.Field field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         Map<String, List<InfraService>> results;
         try {
-            results = infraService.getBy(field.getKey());
+            results = infraService.getBy(field.getKey(), auth);
         } catch (NoSuchFieldException e) {
             logger.error(e);
             throw e;
@@ -221,8 +220,6 @@ public class ServiceController {
         for (Map.Entry<String, List<InfraService>> services : results.entrySet()) {
             List<Service> items = services.getValue()
                     .stream()
-                    .filter(InfraService::isActive)
-                    .filter(InfraService::isLatest)
                     .map(InfraService::getService).collect(Collectors.toList());
             if (!items.isEmpty()) {
                 serviceResults.put(services.getKey(), items);
@@ -231,6 +228,7 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
+    // REVISE: returns InfraService (sensitive data)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -321,6 +319,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InfraService>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                            @RequestParam(required = false) Set<String> auditState, @ApiIgnore Authentication authentication) {
 
@@ -484,14 +483,32 @@ public class ServiceController {
     // Move a Resource to another Provider
     @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @ApiIgnore Authentication authentication) {
-        infraService.changeProvider(resourceId, newProvider, authentication);
+    public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam String comment, @ApiIgnore Authentication authentication) {
+        infraService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
     // Get the Service Template of a specific Provider (status = "pending provider")
     @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public InfraService getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {
         return infraService.getServiceTemplate(id, auth);
+    }
+
+    // REVISE: returns InfraService (sensitive data)
+    // Given a provider id, return all the Resources he is a resourceProvider
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "getSharedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+    public ResponseEntity<Paging<InfraService>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("latest", true);
+        ff.addFilter("resource_providers", id);
+        return ResponseEntity.ok(infraService.getAll(ff, null));
     }
 
 //    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
