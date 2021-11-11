@@ -145,14 +145,15 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
-        // if user is Provider Admin or User or Unauthorized, return active/latest ONLY
+        // if user is Unauthorized, return active/latest ONLY
         if (auth == null){
             filter.addFilter("active", true);
             filter.addFilter("latest", true);
         }
         if (auth != null && auth.isAuthenticated()){
-            if (!securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")){
-                //TODO: If ROLE_PROVIDER, return all his Resources too
+            // if user is Authorized with ROLE_USER, return active/latest ONLY
+            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
+                    !securityService.hasRole(auth, "ROLE_ADMIN")){
                 filter.addFilter("active", true);
                 filter.addFilter("latest", true);
             }

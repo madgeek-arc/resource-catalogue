@@ -242,7 +242,7 @@ public class ServiceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
         ff.addFilter("resource_organisation", id);
-        return ResponseEntity.ok(infraService.getAll(ff, null));
+        return ResponseEntity.ok(infraService.getAll(ff, auth));
     }
 
     // Get all modification details of a specific Service, providing the Service id.
