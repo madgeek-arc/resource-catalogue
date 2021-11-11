@@ -59,7 +59,7 @@ public class ProviderController {
         logger.info("Deleting provider: {}", provider.getProvider().getName());
 
         // delete all Provider's services
-        List<InfraService> allProviderServices = infraServiceService.getInfraServices(id);
+        List<InfraService> allProviderServices = infraServiceService.getInfraServices(id, auth);
         for (InfraService infraService : allProviderServices){
             try {
                 infraServiceService.delete(infraService);
