@@ -267,9 +267,9 @@ public class OIDCSecurityService implements SecurityService {
                 if (provider.getStatus() == null) {
                     throw new ServiceException("Provider status field is null");
                 }
-                if (provider.isActive() && provider.getStatus().equals("approved")) {
+                if (provider.isActive() && provider.getStatus().equals("approved provider")) {
                     return true;
-                } else if (provider.getStatus().equals("pending template submission")) {
+                } else if (provider.getTemplateStatus().equals("no template status")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());
                     if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {

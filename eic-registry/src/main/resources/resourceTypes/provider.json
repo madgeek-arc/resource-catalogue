@@ -232,6 +232,12 @@
       "name": "status",
       "path": "//*[local-name()='status']/text()",
       "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "templateStatus",
+      "path": "//*[local-name()='templateStatus']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",

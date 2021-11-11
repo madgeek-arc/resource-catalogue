@@ -50,9 +50,10 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Get InfraServices by a specific field.
      *
      * @param field
+     * @param auth
      * @return
      */
-    Map<String, List<T>> getBy(String field) throws NoSuchFieldException;
+    Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * Get RichServices with the specified ids.
@@ -225,17 +226,23 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
 
-    List<InfraService> getInfraServices(String providerId);
+    List<InfraService> getInfraServices(String providerId, Authentication auth);
 
-    List<Service> getServices(String providerId);
+    List<Service> getServices(String providerId, Authentication auth);
 
     List<Service> getActiveServices(String providerId);
 
-    InfraService getServiceTemplate(String providerId);
+    InfraService getServiceTemplate(String providerId, Authentication auth);
 
     Service getFeaturedService(String providerId);
 
     List<InfraService> getInactiveServices(String providerId);
+
+    /**
+     * @param resourceId
+     * @param auth
+     */
+    void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
 
     /**
      * @param auth
@@ -250,4 +257,33 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    void updateResourceAudits(Authentication auth);
+
+    /**
+     * @param id
+     * @param status
+     * @param active
+     * @param auth
+     * @return
+     */
+    InfraService verifyResource(String id, String status, Boolean active, Authentication auth);
+
+    /**
+     * @param resourceId
+     * @param newProvider
+     * @param comment
+     * @param auth
+     */
+    InfraService changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 }

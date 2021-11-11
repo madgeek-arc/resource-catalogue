@@ -2,6 +2,7 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.InfraServiceManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.PendingServiceManager;
@@ -13,7 +14,6 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -25,11 +25,8 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -121,8 +118,26 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("registrationEmail", registrationEmail);
         // get the first user's information for the registration team email
-        // TODO: GET THE userFullName & userEmail from LoggingInfo (the one who REGISTERED)
-        root.put("user", providerBundle.getProvider().getUsers().get(0));
+        for (LoggingInfo loggingInfo : providerBundle.getLoggingInfo()){
+            if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())){
+                User user = new User();
+                if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")){
+                    user.setEmail(loggingInfo.getUserEmail());
+                }
+                if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")){
+                    String[] parts = loggingInfo.getUserFullName().split(" ");
+                    String name = parts[0];
+                    String surname = parts[1];
+                    user.setName(name);
+                    user.setSurname(surname);
+                }
+                root.put("user", user);
+                break;
+            }
+        }
+        if (!root.containsKey("user")){
+            root.put("user", providerBundle.getProvider().getUsers().get(0));
+        }
 
         try {
             Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
@@ -170,7 +185,7 @@ public class RegistrationMailService {
         root.put("endpoint", endpoint);
 
         for (ProviderBundle providerBundle : allProviders) {
-            if (providerBundle.getStatus().equals("pending template submission")) {
+            if (providerBundle.getTemplateStatus().equals("no template status")) { //FIXME: we spam even those who don't want to continue to a Resource submission
                 if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
                     continue;
                 }
@@ -185,6 +200,64 @@ public class RegistrationMailService {
         }
     }
 
+    public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        InfraService infraService = infraServiceManager.get(resourceId);
+        ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
+        if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
+        }
+        String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", projectName, providerBundle.getProvider().getName());
+        root.put("providerBundle", providerBundle);
+        root.put("infraService", infraService);
+        for (User user : providerBundle.getProvider().getUsers()) {
+            root.put("user", user);
+            String recipient = "provider";
+            sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), recipient);
+        }
+    }
+
+    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, InfraService infraService, Authentication auth){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        if (oldProvider.getProvider().getUsers() == null || oldProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", oldProvider.getId(), oldProvider.getProvider().getName()));
+        }
+        if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
+        }
+        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, infraService.getService().getName(),
+                oldProvider.getProvider().getName(), newProvider.getProvider().getName());
+        String recipient = "provider";
+        root.put("oldProvider", oldProvider);
+        root.put("newProvider", newProvider);
+        root.put("infraService", infraService);
+        root.put("comment", infraService.getLoggingInfo().get(infraService.getLoggingInfo().size() - 1).getComment());
+
+        // emails to old Provider's Users
+        for (User user : oldProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail(), recipient);
+        }
+//        root.remove("user");
+
+        // emails to new Provider's Users
+        for (User user : newProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail(), recipient);
+        }
+
+        // emails to Admins
+        recipient = "admin";
+        root.put("adminFullName", User.of(auth).getFullName());
+        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminRole", securityService.getRoleName(auth));
+        sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, recipient);
+    }
+
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
     public void sendEmailNotificationsToAdmins() {
         FacetFilter ff = new FacetFilter();
@@ -194,10 +267,10 @@ public class RegistrationMailService {
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
         List<String> providersWaitingForSTApproval = new ArrayList<>();
         for (ProviderBundle providerBundle : allProviders) {
-            if (providerBundle.getStatus().equals("pending initial approval")) {
+            if (providerBundle.getStatus().equals("pending provider")) {
                 providersWaitingForInitialApproval.add(providerBundle.getProvider().getName());
             }
-            if (providerBundle.getStatus().equals("pending template approval")) {
+            if (providerBundle.getTemplateStatus().equals("pending template")) {
                 providersWaitingForSTApproval.add(providerBundle.getProvider().getName());
             }
         }
@@ -324,7 +397,7 @@ public class RegistrationMailService {
         root.put("loggingInfoServiceMap", loggingInfoServiceMap);
 
         String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
-        String recipient = "provider";
+        String recipient = "admin";
         sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail, recipient);
     }
 
@@ -372,49 +445,56 @@ public class RegistrationMailService {
         String subject;
         String providerName = providerBundle.getProvider().getName();
 
-        switch (providerBundle.getStatus()) {
-            case "pending initial approval":
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                        "as a new %s Provider to the %s Portal has been received and is under review",
-                        this.projectName, providerName, this.projectName, this.projectName);
-                break;
-            case "pending template submission":
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                        "as a new %s Provider to the %s Portal has been approved",
-                        this.projectName, providerName, this.projectName, this.projectName);
-                break;
-            case "rejected":
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                        "as a new %s Provider to the %s Portal has been rejected",
-                        this.projectName, providerName, this.projectName, this.projectName);
-                break;
-            case "pending template approval":
-                assert serviceTemplate != null;
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                        "as a new %s to the %s Portal has been received and is under review",
-                        this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
-                break;
-            case "approved":
-                if (providerBundle.isActive()) {
+        if (providerBundle.getTemplateStatus().equals("no template status")){
+            switch (providerBundle.getStatus()) {
+                case "pending provider":
+                    subject = String.format("[%s Portal] Your application for registering [%s] " +
+                                    "as a new %s Provider to the %s Portal has been received and is under review",
+                            this.projectName, providerName, this.projectName, this.projectName);
+                    break;
+                case "rejected provider":
+                    subject = String.format("[%s Portal] Your application for registering [%s] " +
+                                    "as a new %s Provider to the %s Portal has been rejected",
+                            this.projectName, providerName, this.projectName, this.projectName);
+                    break;
+                case "approved provider":
+                    subject = String.format("[%s Portal] Your application for registering [%s] " +
+                                    "as a new %s Provider to the %s Portal has been approved",
+                            this.projectName, providerName, this.projectName, this.projectName);
+                    break;
+                default:
+                    subject = String.format("[%s Portal] Provider Registration", this.projectName);
+            }
+        } else{
+            switch (providerBundle.getTemplateStatus()) {
+                case "pending template":
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
-                            "as a new %s to the %s Portal has been approved",
+                                    "as a new %s to the %s Portal has been received and is under review",
                             this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
                     break;
-                } else {
+                case "approved template":
+                    if (providerBundle.isActive()) {
+                        assert serviceTemplate != null;
+                        subject = String.format("[%s Portal] Your application for registering [%s] " +
+                                        "as a new %s to the %s Portal has been approved",
+                                this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
+                        break;
+                    } else {
+                        assert serviceTemplate != null;
+                        subject = String.format("[%s Portal] Your %s Provider [%s] has been set to inactive",
+                                projectName, serviceOrResource, providerName);
+                        break;
+                    }
+                case "rejected template":
                     assert serviceTemplate != null;
-                    subject = String.format("[%s Portal] Your %s Provider [%s] has been set to inactive",
-                            projectName, serviceOrResource, providerName);
+                    subject = String.format("[%s Portal] Your application for registering [%s] " +
+                                    "as a new %s to the %s Portal has been rejected",
+                            this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
                     break;
-                }
-            case "rejected template":
-                assert serviceTemplate != null;
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                        "as a new %s to the %s Portal has been rejected",
-                         this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
-                break;
-            default:
-                subject = String.format("[%s Portal] Provider Registration", this.projectName);
+                default:
+                    subject = String.format("[%s Portal] Provider Registration", this.projectName);
+            }
         }
 
         return subject;
@@ -435,49 +515,56 @@ public class RegistrationMailService {
         String providerName = providerBundle.getProvider().getName();
         String providerId = providerBundle.getProvider().getId();
 
-        switch (providerBundle.getStatus()) {
-            case "pending initial approval":
-                subject = String.format("[%s Portal] A new application for registering [%s] - ([%s]) " +
-                        "as a new %s Provider to the %s Portal has been received and should be reviewed",
-                        this.projectName, providerName, providerId, this.projectName, this.projectName);
-                break;
-            case "pending template submission":
-                subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
-                        "as a new %s Provider has been approved",
-                        this.projectName, providerName, providerId, this.projectName);
-                break;
-            case "rejected":
-                subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
-                        "as a new %s Provider has been rejected",
-                        this.projectName, providerName, providerId, this.projectName);
-                break;
-            case "pending template approval":
-                assert serviceTemplate != null;
-                subject = String.format("[%s Portal] A new application for registering [%s] " +
-                        "as a new %s to the %s Portal has been received and should be reviewed",
-                        this.projectName, serviceTemplate.getId(), serviceOrResource, this.projectName);
-                break;
-            case "approved":
-                if (providerBundle.isActive()) {
+        if (providerBundle.getTemplateStatus().equals("no template status")){
+            switch (providerBundle.getStatus()) {
+                case "pending provider":
+                    subject = String.format("[%s Portal] A new application for registering [%s] - ([%s]) " +
+                                    "as a new %s Provider to the %s Portal has been received and should be reviewed",
+                            this.projectName, providerName, providerId, this.projectName, this.projectName);
+                    break;
+                case "approved provider":
+                    subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
+                                    "as a new %s Provider has been approved",
+                            this.projectName, providerName, providerId, this.projectName);
+                    break;
+                case "rejected provider":
+                    subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
+                                    "as a new %s Provider has been rejected",
+                            this.projectName, providerName, providerId, this.projectName);
+                    break;
+                default:
+                    subject = String.format("[%s Portal] Provider Registration", this.projectName);
+            }
+        } else{
+            switch (providerBundle.getTemplateStatus()) {
+                case "pending template":
+                    assert serviceTemplate != null;
+                    subject = String.format("[%s Portal] A new application for registering [%s] " +
+                                    "as a new %s to the %s Portal has been received and should be reviewed",
+                            this.projectName, serviceTemplate.getId(), serviceOrResource, this.projectName);
+                    break;
+                case "approved template":
+                    if (providerBundle.isActive()) {
+                        assert serviceTemplate != null;
+                        subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
+                                        "for registering as a new %s has been approved",
+                                this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), serviceOrResource);
+                        break;
+                    } else {
+                        assert serviceTemplate != null;
+                        subject = String.format("[%s Portal] The %s Provider [%s] has been set to inactive",
+                                this.projectName, serviceOrResource, providerName);
+                        break;
+                    }
+                case "rejected template":
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
-                            "for registering as a new %s has been approved",
-                             this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), serviceOrResource);
+                                    "for registering as a %s %s has been rejected",
+                            this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), this.projectName, serviceOrResource);
                     break;
-                } else {
-                    assert serviceTemplate != null;
-                    subject = String.format("[%s Portal] The %s Provider [%s] has been set to inactive",
-                            this.projectName, serviceOrResource, providerName);
-                    break;
-                }
-            case "rejected template":
-                assert serviceTemplate != null;
-                subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
-                        "for registering as a %s %s has been rejected",
-                        this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), this.projectName, serviceOrResource);
-                break;
-            default:
-                subject = String.format("[%s Portal] Provider Registration", this.projectName);
+                default:
+                    subject = String.format("[%s Portal] Provider Registration", this.projectName);
+            }
         }
 
         return subject;

@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -12,6 +13,7 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,16 +41,18 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final IdCreator idCreator;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
+    private final VocabularyService vocabularyService;
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
                                   IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
-                                  @Lazy SecurityService securityService) {
+                                  @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
+        this.vocabularyService = vocabularyService;
     }
 
 
@@ -86,10 +90,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         }
         logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        if (providerBundle.getStatus() == null) {
-            providerBundle.setStatus("pending initial approval");
-        }
 
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
@@ -156,13 +156,40 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
             providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
         }
         if (providerManager.exists(providerBundle)) {
-            throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()), HttpStatus.CONFLICT);
         }
-        providerBundle = update(providerBundle, auth);
+
+        // update loggingInfo
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
+        if (providerBundle.getLoggingInfo() != null) {
+            loggingInfoList = providerBundle.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        providerBundle.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardInfo
+        providerBundle.setLatestOnboardingInfo(loggingInfo);
+
+        // update providerStatus
+        providerBundle.setStatus(vocabularyService.get("pending provider").getId());
+        providerBundle.setTemplateStatus(vocabularyService.get("no template status").getId());
+
+        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerBundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
+
+        try {
+            providerBundle = providerManager.update(providerBundle, auth);
+        } catch (ResourceNotFoundException e) {
+            e.printStackTrace();
+        }
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(providerBundle, null);
         return providerBundle;
@@ -176,7 +203,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         ProviderBundle providerBundle = get(providerId);
 
         if (providerManager.exists(providerBundle)) {
-            throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), providerBundle.getId()), HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()), HttpStatus.CONFLICT);
         }
         providerManager.validate(providerBundle);
         if (providerBundle.getProvider().getScientificDomains() != null && !providerBundle.getProvider().getScientificDomains().isEmpty()) {
@@ -185,11 +212,38 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         if (providerBundle.getProvider().getMerilScientificDomains() != null && !providerBundle.getProvider().getMerilScientificDomains().isEmpty()){
             providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
         }
+
+        // update loggingInfo
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
+        if (providerBundle.getLoggingInfo() != null) {
+            loggingInfoList = providerBundle.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        providerBundle.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardInfo
+        providerBundle.setLatestOnboardingInfo(loggingInfo);
+
+        // update providerStatus
+        providerBundle.setStatus(vocabularyService.get("pending provider").getId());
+        providerBundle.setTemplateStatus(vocabularyService.get("no template status").getId());
+
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getResource(providerId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
+
+        try {
+            providerBundle = providerManager.update(providerBundle, auth);
+        } catch (ResourceNotFoundException e) {
+            e.printStackTrace();
+        }
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(providerBundle, null);
         return providerBundle;
