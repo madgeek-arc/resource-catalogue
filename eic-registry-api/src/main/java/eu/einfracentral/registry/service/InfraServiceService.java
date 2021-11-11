@@ -226,7 +226,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
 
-    List<InfraService> getInfraServices(String providerId);
+    List<InfraService> getInfraServices(String providerId, Authentication auth);
 
     List<Service> getServices(String providerId, Authentication auth);
 
