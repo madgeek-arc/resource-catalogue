@@ -319,7 +319,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(Authentication authentication, ProviderBundle provider) {
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<InfraService> services = infraServiceService.getInfraServices(provider.getId());
+        List<InfraService> services = infraServiceService.getInfraServices(provider.getId(), authentication);
         services.forEach(s -> {
             try {
                 infraServiceService.delete(s);
@@ -512,7 +512,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId);
+        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
         logger.info("Activating all Resources of the Provider with id: {}", providerId);
         for (InfraService service : services) {
             List<LoggingInfo> loggingInfoList;
@@ -546,7 +546,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId);
+        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
         logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
         for (InfraService service : services) {
             List<LoggingInfo> loggingInfoList;
