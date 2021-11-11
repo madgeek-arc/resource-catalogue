@@ -275,7 +275,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         String[] parts = id.split("\\.");
         String providerId = parts[0];
         InfraService infraService = null;
-        List<InfraService> infraServices = getInfraServices(providerId);
+        List<InfraService> infraServices = getInfraServices(providerId, auth);
         for (InfraService service : infraServices){
             if (service.getService().getId().equals(id)){
                 infraService = service;
@@ -548,12 +548,12 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    public List<InfraService> getInfraServices(String providerId) {
+    public List<InfraService> getInfraServices(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults();
+        return this.getAll(ff, auth).getResults();
     }
 
     @Override
