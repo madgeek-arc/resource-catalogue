@@ -40,10 +40,10 @@ public class SimpleIdCreator implements IdCreator {
     @Override
     public String createServiceId(eu.einfracentral.domain.Service service) {
         if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service must have a Service Organisation.");
+            throw new ValidationException("Resource must have a Resource Organisation.");
         }
         if (service.getName() == null || service.getName().equals("")) {
-            throw new ValidationException("Service must have a Name.");
+            throw new ValidationException("Resource must have a Name.");
         }
         String provider = service.getResourceOrganisation();
         return String.format("%s.%s", provider, StringUtils
