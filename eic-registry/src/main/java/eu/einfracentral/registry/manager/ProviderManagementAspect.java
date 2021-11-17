@@ -93,6 +93,7 @@ public class ProviderManagementAspect {
             if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                         infraService.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending resource");
+                //TODO: AUTH = securityService.getAdminAccess()
                 infraServiceService.verifyResource(infraService.getService().getId(), "pending resource", false, null);
             }
         } catch (RuntimeException e) {
