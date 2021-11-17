@@ -288,7 +288,8 @@ public class RegistrationMailService {
         }
     }
 
-    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
+//    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
+//    @Scheduled(fixedDelay = 10000)
     public void dailyNotificationsToAdmins() {
         // Create timestamps for today and yesterday
         LocalDate today = LocalDate.now();
@@ -354,30 +355,40 @@ public class RegistrationMailService {
         List<LoggingInfo> loggingInfoServiceList = new ArrayList<>();
         Timestamp timestamp;
         for (ProviderBundle providerBundle : activeProviders) {
+            loggingInfoProviderList = new ArrayList<>();
+            boolean providerHasLoggingChanges = false;
             if (providerBundle.getLoggingInfo() != null) {
                 for (LoggingInfo loggingInfo : providerBundle.getLoggingInfo()){
                     timestamp = new Timestamp(Long.parseLong(loggingInfo.getDate()));
                     if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)){
                         loggingInfoProviderList.add(loggingInfo);
+                        providerHasLoggingChanges = true;
                     }
                 }
             } else {
                 continue;
             }
-            loggingInfoProviderMap.put(providerBundle.getId(), loggingInfoProviderList);
+            if (providerHasLoggingChanges){
+                loggingInfoProviderMap.put(providerBundle.getId(), loggingInfoProviderList);
+            }
         }
         for (InfraService infraService : activeServices) {
+            loggingInfoServiceList = new ArrayList<>();
+            boolean serviceHasLoggingChanges = false;
             if (infraService.getLoggingInfo() != null) {
                 for (LoggingInfo loggingInfo : infraService.getLoggingInfo()){
                     timestamp = new Timestamp(Long.parseLong(loggingInfo.getDate()));
                     if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)){
                         loggingInfoServiceList.add(loggingInfo);
+                        serviceHasLoggingChanges = true;
                     }
                 }
             } else {
                 continue;
             }
-            loggingInfoServiceMap.put(infraService.getId(), loggingInfoServiceList);
+            if (serviceHasLoggingChanges){
+                loggingInfoServiceMap.put(infraService.getId(), loggingInfoServiceList);
+            }
         }
 
         boolean changes = true;
