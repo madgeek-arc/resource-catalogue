@@ -404,9 +404,4 @@ public class ProviderController {
         return providerManager.migrateLatestProviderHistory(authentication);
     }
 
-//    @PutMapping(path = "updateProviderAudits", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public void updateProviderAudits(@ApiIgnore Authentication authentication) {
-        providerManager.updateProviderAudits(authentication);
-    }
 }

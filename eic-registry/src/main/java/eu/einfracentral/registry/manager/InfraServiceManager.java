@@ -16,13 +16,9 @@ import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
 import eu.openminted.registry.core.service.VersionService;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -105,8 +99,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
         validate(infraService);
         validateEmailsAndPhoneNumbers(infraService);
-        infraService.setActive(resourceManager.get(infraService.getService().getResourceOrganisation()).isActive());
-
+        if (resourceManager.get(infraService.getService().getResourceOrganisation()).getTemplateStatus().equals(vocabularyService.get("approved template").getId())){
+            infraService.setActive(true);
+        } else{
+            infraService.setActive(false);
+        }
         infraService.setLatest(true);
 
         if (infraService.getMetadata() == null) {
@@ -717,28 +714,28 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-//        ff.addFilter("active", true);
-//        ff.addFilter("latest", true);
+        ff.addFilter("active", true);
+        ff.addFilter("latest", true);
         List<InfraService> allInfraServices = getAll(ff, auth).getResults();
         List<Resource> allResources;
         for (InfraService infraService : allInfraServices) {
             allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             boolean firstResource = true;
-            boolean broke = false;
+//            boolean broke = false;
             for (Resource resource : allResources) {
                 List<LoggingInfo> resourceHistory = new ArrayList<>();
                 List<Version> versions = versionService.getVersionsByResource(resource.getId()); // get all updates of a specific Version of a specific Service
                 versions.sort(Comparator.comparing(Version::getCreationDate));
                 boolean firstVersion = true;
                 for (Version version : versions) {
-                    broke = false;
+//                    broke = false;
                     // Save Version as Resource so we can deserialize it and get userFullName
                     Resource tempResource = resource;
                     tempResource.setPayload(version.getPayload());
                     InfraService tempService = deserialize(tempResource);
                     if (tempService.getLoggingInfo() != null && !tempService.getLoggingInfo().isEmpty()){
-                        broke = true;
+//                        broke = true;
                         break;
                     }
                     LoggingInfo loggingInfo = new LoggingInfo();
@@ -781,9 +778,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     }
                     resourceHistory.add(loggingInfo);
                 }
-                if (broke){
-                    continue;
-                }
+//                if (broke){
+//                    continue;
+//                }
 
                 resourceHistory.sort(Comparator.comparing(LoggingInfo::getDate));
 
@@ -857,7 +854,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     allMigratedLoggingInfos.put(service.getService().getId()+" with version "+service.getService().getVersion(), service.getLoggingInfo());
                 }
                 logger.info(String.format("Resource's [%s] new Logging Info %s", service.getService().getName(), service.getLoggingInfo()));
-//                super.update(service, auth);
+                try{
+//                    super.update(service, auth);
+                } catch (ServiceException e){
+                    continue;
+                }
             }
         }
     return allMigratedLoggingInfos;
@@ -916,41 +917,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             allMigratedLogginInfos.put(infraService.getService().getId(), latestLoggings);
         }
         return allMigratedLogginInfos;
-    }
-
-    public void updateResourceAudits(Authentication auth){
-        JSONParser parser = new JSONParser();
-        try{
-            JSONArray resourceJSON = (JSONArray) parser.parse(new FileReader("/home/mike/Desktop/ResourceAudits.json"));
-            for (int i = 0; i < resourceJSON.size(); i++){
-//                logger.info(resourceJSON.get(i));
-                JSONObject jObject = (JSONObject) resourceJSON.get(i);
-                String resourceId = jObject.getAsString("id");
-                InfraService infraService = get(resourceId);
-                JSONArray loggingInfoObject = (JSONArray) jObject.get("loggingInfo");
-                JSONObject loggingInfoArray = (JSONObject) loggingInfoObject.get(0);
-                LoggingInfo loggingInfo = new LoggingInfo();
-                loggingInfo.setDate(loggingInfoArray.getAsString("date"));
-                loggingInfo.setUserEmail(loggingInfoArray.getAsString("userEmail"));
-                loggingInfo.setUserFullName(loggingInfoArray.getAsString("userFullName"));
-                loggingInfo.setUserRole(loggingInfoArray.getAsString("userRole"));
-                loggingInfo.setType(loggingInfoArray.getAsString("type"));
-                loggingInfo.setComment(loggingInfoArray.getAsString("comment"));
-                loggingInfo.setActionType(loggingInfoArray.getAsString("actionType"));
-                List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
-                logger.info(resourceId);
-                logger.info(String.format("Old Logging Info %s", infraService.getLoggingInfo()));
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                infraService.setLoggingInfo(loggingInfoList);
-                logger.info(String.format("New Logging Info %s", infraService.getLoggingInfo()));
-                super.update(infraService, auth);
-            }
-        } catch (FileNotFoundException e){
-            logger.info("asdf");
-        } catch (ParseException g){
-            logger.info("asdf2");
-        }
     }
 
     public void validateEmailsAndPhoneNumbers(InfraService infraService){
