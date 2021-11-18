@@ -566,7 +566,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
                     securityService.userIsProviderAdmin(user, providerId)) {
-                return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+                return this.getAll(ff, auth).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
             }
         }
         // else return Provider's Services ONLY if he is active
@@ -576,14 +576,14 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         throw new ValidationException("You cannot view the Resources of the specific Provider");
     }
 
-    // for sendProviderMails on RegistrationMailService
+    // for sendProviderMails on RegistrationMailService AND StatisticsManager
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+        return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
     }
 
     // Different that the one called on migration methods!

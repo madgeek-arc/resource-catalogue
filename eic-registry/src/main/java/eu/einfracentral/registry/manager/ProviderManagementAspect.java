@@ -5,6 +5,7 @@ import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
+import eu.einfracentral.service.SecurityService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -26,13 +27,16 @@ public class ProviderManagementAspect {
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final InfraServiceService infraServiceService;
     private final RegistrationMailService registrationMailService;
+    private final SecurityService securityService;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
-                                    RegistrationMailService registrationMailService, InfraServiceService infraServiceService) {
+                                    RegistrationMailService registrationMailService, InfraServiceService infraServiceService,
+                                    SecurityService securityService) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
         this.infraServiceService = infraServiceService;
+        this.securityService = securityService;
     }
 
 
@@ -93,8 +97,7 @@ public class ProviderManagementAspect {
             if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                         infraService.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending resource");
-                //TODO: AUTH = securityService.getAdminAccess()
-                infraServiceService.verifyResource(infraService.getService().getId(), "pending resource", false, null);
+                infraServiceService.verifyResource(infraService.getService().getId(), "pending resource", false, securityService.getAdminAccess());
             }
         } catch (RuntimeException e) {
             logger.error(e);
