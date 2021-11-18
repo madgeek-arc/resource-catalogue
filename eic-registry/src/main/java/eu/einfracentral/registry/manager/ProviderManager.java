@@ -400,6 +400,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
         ProviderBundle provider = get(providerId);
+        if ((provider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
+                provider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !provider.isActive()){
+            throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", provider.getStatus()));
+        }
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 

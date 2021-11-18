@@ -421,6 +421,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             service = this.get(serviceId, version);
         }
 
+        if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
+                service.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !service.isActive()){
+            throw new ValidationException(String.format("You cannot activate this Resource, because it's Inactive with status = [%s]", service.getStatus()));
+        }
+
         ProviderBundle providerBundle = resourceManager.get(service.getService().getResourceOrganisation());
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
