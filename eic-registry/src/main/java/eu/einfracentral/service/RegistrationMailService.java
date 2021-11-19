@@ -288,7 +288,7 @@ public class RegistrationMailService {
         }
     }
 
-//    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
+    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
 //    @Scheduled(fixedDelay = 10000)
     public void dailyNotificationsToAdmins() {
         // Create timestamps for today and yesterday
