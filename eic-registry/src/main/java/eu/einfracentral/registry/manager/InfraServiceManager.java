@@ -598,7 +598,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ff.addFilter("resource_organisation", providerId);
         List<InfraService> allProviderServices = getAll(ff, auth).getResults();
         for (InfraService infraService : allProviderServices){
-            if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId())){
+            if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
+                    infraService.getStatus().equals(vocabularyService.get("rejected resource").getId())){
                 return infraService;
             }
         }
