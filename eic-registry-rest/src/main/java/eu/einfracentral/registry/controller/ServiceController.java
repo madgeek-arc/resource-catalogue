@@ -487,7 +487,7 @@ public class ServiceController {
         infraService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
-    // Get the Service Template of a specific Provider (status = "pending provider")
+    // Get the Service Template of a specific Provider (status = "pending provider" or "rejected provider")
     @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public InfraService getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {
         return infraService.getServiceTemplate(id, auth);
