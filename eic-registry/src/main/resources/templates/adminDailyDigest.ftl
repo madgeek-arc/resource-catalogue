@@ -37,7 +37,7 @@ Provider Logging Info:
         <#list loggingInfoProviderMap as key, value>
             <#list value as item>
                 <#assign providerItem = item>
-                Provider "${key}" got "${providerItem.type}" by [${providerItem.userRole} - ${providerItem.userEmail}]
+                Provider "${key}" got "${providerItem.type}" by [${providerItem.userRole} <#if providerItem.userEmail??>- ${providerItem.userEmail}</#if>]
             </#list>
         </#list>
     </#if>
