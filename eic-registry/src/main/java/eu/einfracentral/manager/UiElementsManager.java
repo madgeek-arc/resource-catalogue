@@ -14,6 +14,7 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.*;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ListUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -323,6 +324,7 @@ public class UiElementsManager implements UiElementsService {
         ff.setQuantity(maxQuantity);
         ff.addFilter("active", "true");
         ff.addFilter("latest", "true");
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name"));
         List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
 
         List<Vocabulary> values = new ArrayList<>();
@@ -390,6 +392,7 @@ public class UiElementsManager implements UiElementsService {
             ff.addFilter("active", "true");
             ff.addFilter("latest", "true");
             ff.addFilter(field, voc.getId()); // FIXME: this means that the field name should be the same with the vocabulary type name
+            ff.setOrderBy(FacetFilterUtils.createOrderBy("name"));
             List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
             for (InfraService service : services) {
                 serviceMap.get(voc.getName()).add(new Value(service.getId(), service.getService().getName()));

@@ -20,9 +20,19 @@ public class FacetFilterUtils {
     private FacetFilterUtils() {
     }
 
+    public static Map<String, Object> createOrderBy(String field) {
+        return createOrderBy(field, null);
+    }
+
     public static Map<String, Object> createOrderBy(String field, String orderType) {
+        if (field == null) {
+            return null;
+        }
         Map<String, Object> sort = new HashMap<>();
         Map<String, Object> order = new HashMap<>();
+        if (orderType == null || orderType.equals("")) {
+            orderType = "asc";
+        }
         order.put("order", orderType);
         sort.put(field, order);
         return sort;
@@ -110,15 +120,10 @@ public class FacetFilterUtils {
         facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");
         facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from").get(0)) : 0);
         facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity").get(0)) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
         String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order").get(0) : "asc";
         String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField").get(0) : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            facetFilter.setOrderBy(sort);
-        }
+        facetFilter.setOrderBy(createOrderBy(orderField, orderDirection));
+
         if (!allRequestParams.isEmpty()) {
             Set<Map.Entry<String, List<Object>>> filterSet = allRequestParams.entrySet();
             for (Map.Entry<String, List<Object>> entry : filterSet) {
