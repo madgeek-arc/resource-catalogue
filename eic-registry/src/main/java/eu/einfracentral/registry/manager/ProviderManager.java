@@ -1156,7 +1156,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             logger.info(String.format("Provider's [%s] new Latest Onboard Info %s", providerBundle.getProvider().getName(), providerBundle.getLatestOnboardingInfo()));
             logger.info(String.format("Provider's [%s] new Latest Update Info %s", providerBundle.getProvider().getName(), providerBundle.getLatestUpdateInfo()));
             logger.info(String.format("Provider's [%s] new Latest Audit Info %s", providerBundle.getProvider().getName(), providerBundle.getLatestAuditInfo()));
-            super.update(providerBundle, auth);
+//            super.update(providerBundle, auth);
             allMigratedLogginInfos.put(providerBundle.getProvider().getId(), latestLoggings);
         }
         return allMigratedLogginInfos;
