@@ -716,19 +716,19 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     // TODO: First run with active/latest and no broke segment, second without active/latest and broke segment
-    public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth){
+    public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication authentication){
         Map<String, List<LoggingInfo>> allMigratedLoggingInfos = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("active", true);
-        ff.addFilter("latest", true);
-        List<InfraService> allInfraServices = getAll(ff, auth).getResults();
+//        ff.addFilter("active", true);
+//        ff.addFilter("latest", true);
+        List<InfraService> allInfraServices = getAll(ff, securityService.getAdminAccess()).getResults();
         List<Resource> allResources;
         for (InfraService infraService : allInfraServices) {
             allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             boolean firstResource = true;
-//            boolean broke = false;
+            boolean broke = false;
             for (Resource resource : allResources) {
                 List<LoggingInfo> resourceHistory = new ArrayList<>();
                 List<Version> versions = versionService.getVersionsByResource(resource.getId()); // get all updates of a specific Version of a specific Service
@@ -741,7 +741,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     tempResource.setPayload(version.getPayload());
                     InfraService tempService = deserialize(tempResource);
                     if (tempService.getLoggingInfo() != null && !tempService.getLoggingInfo().isEmpty()){
-//                        broke = true;
+                        broke = true;
                         break;
                     }
                     LoggingInfo loggingInfo = new LoggingInfo();
@@ -784,9 +784,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     }
                     resourceHistory.add(loggingInfo);
                 }
-//                if (broke){
-//                    continue;
-//                }
+                if (broke){
+                    continue;
+                }
 
                 resourceHistory.sort(Comparator.comparing(LoggingInfo::getDate));
 
@@ -861,7 +861,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 }
                 logger.info(String.format("Resource's [%s] new Logging Info %s", service.getService().getName(), service.getLoggingInfo()));
                 try{
-//                    super.update(service, auth);
+//                  super.update(infraService, securityService.getAdminAccess());
                 } catch (ServiceException e){
                     continue;
                 }
@@ -869,11 +869,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
     return allMigratedLoggingInfos;
     }
-    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth){
+    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication authentication){
         Map<String, List<LoggingInfo>> allMigratedLogginInfos = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<InfraService> allServices = getAll(ff, auth).getResults();
+        List<InfraService> allServices = getAll(ff, securityService.getAdminAccess()).getResults();
         for (InfraService infraService : allServices){
             boolean lastAuditFound = false;
             boolean lastUpdateFound = false;
@@ -919,7 +919,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             logger.info(String.format("Resource's [%s] new Latest Onboard Info %s", infraService.getService().getName(), infraService.getLatestOnboardingInfo()));
             logger.info(String.format("Resource's [%s] new Latest Update Info %s", infraService.getService().getName(), infraService.getLatestUpdateInfo()));
             logger.info(String.format("Resource's [%s] new Latest Audit Info %s", infraService.getService().getName(), infraService.getLatestAuditInfo()));
-            super.update(infraService, auth);
+//            super.update(infraService, securityService.getAdminAccess());
             allMigratedLogginInfos.put(infraService.getService().getId(), latestLoggings);
         }
         return allMigratedLogginInfos;
