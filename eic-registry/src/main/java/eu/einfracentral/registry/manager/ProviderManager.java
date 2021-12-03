@@ -993,10 +993,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         // order/orderField
-        if (orderField !=null || !orderField.equals("")){
+        if (orderField !=null && !orderField.equals("")){
             query += String.format(" ORDER BY %s", orderField);
         }
-        if (orderDirection !=null || !orderDirection.equals("")){
+        if (orderField == null){
+            query += String.format(" ORDER BY name");
+        }
+        if (orderDirection !=null && !orderDirection.equals("")){
             query += String.format(" %s", orderDirection);
         }
 

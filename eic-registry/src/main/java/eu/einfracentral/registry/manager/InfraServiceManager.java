@@ -199,12 +199,15 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
         infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
 
+        // set status
+        infraService.setStatus(existingService.getStatus());
+
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())){
             ProviderBundle providerBundle = resourceManager.get(infraService.getService().getResourceOrganisation());
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())){
                 infraService.setStatus(vocabularyService.get("pending resource").getId());
-                infraService.setActive(true);
+                infraService.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
                 resourceManager.update(providerBundle, auth);
             }
@@ -215,9 +218,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null) {
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
-
-        // set status
-        infraService.setStatus(existingService.getStatus());
 
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
                 || infraService.getService().getVersion() != null
