@@ -14,13 +14,9 @@ import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.VersionService;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -36,8 +32,6 @@ import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserExc
 import javax.sql.DataSource;
 
 import static org.junit.Assert.assertTrue;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
@@ -406,6 +400,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
         ProviderBundle provider = get(providerId);
+        if ((provider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
+                provider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !provider.isActive()){
+            throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", provider.getStatus()));
+        }
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
@@ -1121,7 +1119,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             LoggingInfo lastUpdate = null;
             LoggingInfo lastAudit = null;
             LoggingInfo lastOnboard = null;
-            List<LoggingInfo> loggingInfoList = getLoggingInfoHistory(providerBundle.getProvider().getId()).getResults();
+            List<LoggingInfo> loggingInfoList;
+            try{
+                loggingInfoList = getLoggingInfoHistory(providerBundle.getProvider().getId()).getResults();
+            } catch (NullPointerException e){
+                continue;
+            }
             for (LoggingInfo loggingInfo : loggingInfoList){
                 if (loggingInfo.getType().equals(LoggingInfo.Types.UPDATE.getKey()) && !lastUpdateFound){
                     lastUpdate = loggingInfo;
@@ -1153,45 +1156,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             logger.info(String.format("Provider's [%s] new Latest Onboard Info %s", providerBundle.getProvider().getName(), providerBundle.getLatestOnboardingInfo()));
             logger.info(String.format("Provider's [%s] new Latest Update Info %s", providerBundle.getProvider().getName(), providerBundle.getLatestUpdateInfo()));
             logger.info(String.format("Provider's [%s] new Latest Audit Info %s", providerBundle.getProvider().getName(), providerBundle.getLatestAuditInfo()));
-            super.update(providerBundle, auth);
+//            super.update(providerBundle, auth);
             allMigratedLogginInfos.put(providerBundle.getProvider().getId(), latestLoggings);
         }
         return allMigratedLogginInfos;
-    }
-
-    public void updateProviderAudits(Authentication auth){
-        JSONParser parser = new JSONParser();
-        try{
-            JSONArray providerJSON = (JSONArray) parser.parse(new FileReader("/home/mike/Desktop/ProviderAudits.json"));
-            for (int i = 0; i < providerJSON.size(); i++){
-//                logger.info(providerJSON.get(i));
-                JSONObject jObject = (JSONObject) providerJSON.get(i);
-                String providerId = jObject.getAsString("id");
-                ProviderBundle providerBundle = get(providerId);
-                JSONArray loggingInfoObject = (JSONArray) jObject.get("loggingInfo");
-                JSONObject loggingInfoArray = (JSONObject) loggingInfoObject.get(0);
-                LoggingInfo loggingInfo = new LoggingInfo();
-                loggingInfo.setDate(loggingInfoArray.getAsString("date"));
-                loggingInfo.setUserEmail(loggingInfoArray.getAsString("userEmail"));
-                loggingInfo.setUserFullName(loggingInfoArray.getAsString("userFullName"));
-                loggingInfo.setUserRole(loggingInfoArray.getAsString("userRole"));
-                loggingInfo.setType(loggingInfoArray.getAsString("type"));
-                loggingInfo.setComment(loggingInfoArray.getAsString("comment"));
-                loggingInfo.setActionType(loggingInfoArray.getAsString("actionType"));
-                List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
-                logger.info(providerId);
-                logger.info(String.format("Old Logging Info %s", providerBundle.getLoggingInfo()));
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                providerBundle.setLoggingInfo(loggingInfoList);
-                logger.info(String.format("New Logging Info %s", providerBundle.getLoggingInfo()));
-                super.update(providerBundle, auth);
-            }
-        } catch (FileNotFoundException e){
-            logger.info("asdf");
-        } catch (ParseException g){
-            logger.info("asdf2");
-        }
     }
 
     public void validateEmailsAndPhoneNumbers(ProviderBundle providerBundle){

@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -487,7 +488,7 @@ public class ServiceController {
         infraService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
-    // Get the Service Template of a specific Provider (status = "pending provider")
+    // Get the Service Template of a specific Provider (status = "pending provider" or "rejected provider")
     @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public InfraService getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {
         return infraService.getServiceTemplate(id, auth);
@@ -513,19 +514,19 @@ public class ServiceController {
 
 //    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateResourceHistory(@ApiIgnore Authentication authentication) {
-        return infraService.migrateResourceHistory(authentication);
+    public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication authentication) {
+        try{
+            return infraService.migrateResourceHistory(authentication);
+        } catch (UnexpectedRollbackException e){
+            logger.warn("Rollback");
+            return null;
+        }
     }
 
 //    @PutMapping(path = "resourceLatestHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(@ApiIgnore Authentication authentication) {
+    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication authentication) {
         return infraService.migrateLatestResourceHistory(authentication);
     }
 
-//    @PutMapping(path = "updateResourceAudits", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public void updateResourceAudits(@ApiIgnore Authentication authentication) {
-        infraService.updateResourceAudits(authentication);
-    }
 }

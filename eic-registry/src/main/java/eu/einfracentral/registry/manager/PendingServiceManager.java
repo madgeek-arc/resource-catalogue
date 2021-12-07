@@ -80,7 +80,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
             service.setLoggingInfo(loggingInfoList);
         }
 
-        service.setActive(true);
+        service.setActive(false);
         service.setLatest(true);
 
         super.add(service, auth);

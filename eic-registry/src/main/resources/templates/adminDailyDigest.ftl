@@ -19,14 +19,14 @@ Updated Providers:
     </#if>
 
     <#if newServices?? && newServices?size &gt; 0>
-New Services:
+New Resources:
         <#list newServices as service>
     ${service}
         </#list>
     </#if>
 
     <#if updatedServices?? && updatedServices?size &gt; 0>
-Updated Services:
+Updated Resources:
         <#list updatedServices as service>
     ${service}
         </#list>
@@ -37,17 +37,17 @@ Provider Logging Info:
         <#list loggingInfoProviderMap as key, value>
             <#list value as item>
                 <#assign providerItem = item>
-                Provider "${key}" got "${providerItem.type}" by [${providerItem.userRole} - ${providerItem.userEmail}]
+                Provider "${key}" got "${providerItem.type}" by [${providerItem.userRole} <#if providerItem.userEmail??>- ${providerItem.userEmail}</#if>]
             </#list>
         </#list>
     </#if>
 
     <#if loggingInfoServiceMap?? && loggingInfoServiceMap?size &gt; 0>
-Service Logging Info:
+Resource Logging Info:
         <#list loggingInfoServiceMap as key, value>
             <#list value as item>
                 <#assign serviceItem = item>
-                Service "${key}" got "${serviceItem.type}" by [${serviceItem.userRole} - ${serviceItem.userEmail}]
+                Resource "${key}" got "${serviceItem.type}" by [${serviceItem.userRole} - ${serviceItem.userEmail}]
             </#list>
         </#list>
     </#if>
