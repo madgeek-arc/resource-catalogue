@@ -365,7 +365,7 @@ public class RegistrationMailService {
                         loggingInfoProviderList.add(providerLoggingInfo.get(i));
                         providerHasLoggingChanges = true;
                     }
-                    if (!providerHasLoggingChanges){
+                    else {
                         break;
                     }
                 }
