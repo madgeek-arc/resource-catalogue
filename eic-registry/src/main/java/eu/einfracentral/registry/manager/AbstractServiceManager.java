@@ -200,7 +200,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if ("".equals(infraService.getService().getVersion())) {
             infraService.getService().setVersion(null);
         }
-        synchronizerService.syncAdd(infraService.getService());
         if (exists(infraService)) {
             throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
@@ -215,6 +214,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         resourceService.addResource(created);
 
         jmsTopicTemplate.convertAndSend("resource.create", infraService);
+
+        synchronizerService.syncAdd(infraService.getService());
 
         return infraService;
     }
@@ -233,7 +234,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
                             infraService.getService().getId(), infraService.getService().getVersion()));
         }
-        synchronizerService.syncUpdate(infraService.getService());
 
         prettifyServiceTextFields(infraService, ",");
         existing.setPayload(serialize(infraService));
@@ -249,6 +249,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
         jmsTopicTemplate.convertAndSend("resource.update", infraService);
 
+        synchronizerService.syncUpdate(infraService.getService());
+
         return infraService;
     }
 
@@ -259,10 +261,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (infraService == null || infraService.getService().getId() == null) {
             throw new ServiceException("You cannot delete a null service or service with null id field");
         }
-        synchronizerService.syncDelete(infraService.getService());
+
         resourceService.deleteResource(getResource(infraService.getService().getId(), infraService.getService().getVersion()).getId());
 
         jmsTopicTemplate.convertAndSend("resource.delete", infraService);
+
+        synchronizerService.syncDelete(infraService.getService());
+
     }
 
     @Override
