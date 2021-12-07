@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.*;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -60,6 +62,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
         " networks, scientific_subdomains, societal_grand_challenges, structure_types"; // variable with DB tables a keyword is been searched on
+
+    @Autowired
+    @Qualifier("providerSync")
+    private SynchronizerService<Provider> synchronizerService;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -116,7 +122,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // latestOnboardingInfo
         provider.setLatestOnboardingInfo(loggingInfo);
 
-        provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+        if (provider.getProvider().getParticipatingCountries() != null && !provider.getProvider().getParticipatingCountries().isEmpty()){
+            provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+        }
 
         ProviderBundle ret;
         ret = super.add(provider, null);
@@ -125,6 +133,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
         jmsTopicTemplate.convertAndSend("provider.create", provider);
+
+        synchronizerService.syncAdd(provider.getProvider());
 
         return ret;
     }
@@ -180,6 +190,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         jmsTopicTemplate.convertAndSend("provider.update", provider);
+
+        synchronizerService.syncUpdate(provider.getProvider());
 
         return provider;
     }
@@ -341,6 +353,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         super.delete(provider);
         registrationMailService.notifyProviderAdmins(provider);
+
+        synchronizerService.syncDelete(provider.getProvider());
+
     }
 
     @Override
