@@ -518,7 +518,7 @@ public class ServiceController {
         try{
             return infraService.migrateResourceHistory(authentication);
         } catch (UnexpectedRollbackException e){
-            logger.info("Rollback");
+            logger.warn("Rollback");
             return null;
         }
     }
