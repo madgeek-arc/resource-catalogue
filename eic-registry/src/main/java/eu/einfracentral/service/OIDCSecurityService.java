@@ -226,7 +226,7 @@ public class OIDCSecurityService implements SecurityService {
         InfraService service;
         try {
             service = infraServiceService.get(serviceId);
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             try {
                 service = pendingServiceManager.get(serviceId);
             } catch (RuntimeException re) {

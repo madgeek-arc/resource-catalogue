@@ -109,11 +109,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      */
     Map<String, List<LoggingInfo>> migrateLatestProviderHistory(Authentication auth);
 
-    /**
-     * @param auth
-     * @return
-     */
-    void updateProviderAudits(Authentication auth);
 
     /**
      * @param auditState
