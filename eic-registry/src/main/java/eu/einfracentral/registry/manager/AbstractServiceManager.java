@@ -240,6 +240,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
 
+        // for CatRIs history migration
+//        try{
+//            resourceService.updateResource(existing);
+//        } catch (ServiceException e){
+//            logger.info("Service Exception");
+//        }
+
         jmsTopicTemplate.convertAndSend("resource.update", infraService);
 
         return infraService;

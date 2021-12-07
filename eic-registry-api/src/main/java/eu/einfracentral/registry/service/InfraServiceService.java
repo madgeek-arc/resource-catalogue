@@ -265,12 +265,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth);
 
     /**
-     * @param auth
-     * @return
-     */
-    void updateResourceAudits(Authentication auth);
-
-    /**
      * @param id
      * @param status
      * @param active
