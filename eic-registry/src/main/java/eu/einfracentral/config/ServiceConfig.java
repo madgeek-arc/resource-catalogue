@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
+import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.session.web.context.AbstractHttpSessionApplicationInitializer;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
@@ -35,7 +36,7 @@ import java.util.Random;
         "eu.einfracentral.recdb"})
 @Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
-@EnableSpringHttpSession
+//@EnableSpringHttpSession
 @EnableAspectJAutoProxy
 @EnableAsync
 @EnableJms
@@ -71,21 +72,21 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
         return cfg;
     }
 
-    @Bean
-    public CookieSerializer cookieSerializer() {
-        DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
-        defaultCookieSerializer.setCookieName("EICSESSION");
-        defaultCookieSerializer.setCookiePath("/");
-//        defaultCookieSerializer.setUseSecureCookie(Boolean.parseBoolean(env.getProperty(COOKIE_SECURE)));
-        defaultCookieSerializer.setUseHttpOnlyCookie(true);
-//        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
-        return defaultCookieSerializer;
-    }
+//    @Bean
+//    public CookieSerializer cookieSerializer() {
+//        DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
+//        defaultCookieSerializer.setCookieName("EICSESSION");
+//        defaultCookieSerializer.setCookiePath("/");
+////        defaultCookieSerializer.setUseSecureCookie(Boolean.parseBoolean(env.getProperty(COOKIE_SECURE)));
+//        defaultCookieSerializer.setUseHttpOnlyCookie(true);
+////        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
+//        return defaultCookieSerializer;
+//    }
 
-    @Bean
-    public SessionRepository sessionRepository() {
-        return new MapSessionRepository();
-    }
+//    @Bean
+//    public SessionRepository sessionRepository() {
+//        return new MapSessionRepository();
+//    }
 
     @Bean
     public Random randomNumberGenerator() {
