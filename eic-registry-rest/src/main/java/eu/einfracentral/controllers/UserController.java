@@ -29,12 +29,10 @@ public class UserController {
         OIDCAuthenticationToken authentication = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         logger.debug("User authentication : " + authentication);
         Map<String,Object> user = new HashMap<>();
-        user.put("sub",authentication.getSub());
-        if(authentication.getUserInfo().getName() == null || authentication.getUserInfo().getName().equals(""))
-            user.put("name",authentication.getUserInfo().getGivenName() + " " + authentication.getUserInfo().getFamilyName());
-        else
-            user.put("name",authentication.getUserInfo().getName());
-
+        user.put("sub", authentication.getSub());
+        user.put("firstName", authentication.getUserInfo().getGivenName());
+        user.put("lastName", authentication.getUserInfo().getFamilyName());
+        user.put("fullName", authentication.getUserInfo().getName());
         user.put("email",authentication.getUserInfo().getEmail());
         List<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         user.put("roles",roles);
