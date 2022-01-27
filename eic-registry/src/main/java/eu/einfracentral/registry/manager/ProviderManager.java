@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -65,7 +66,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Autowired
     @Qualifier("providerSync")
-    private SynchronizerService<Provider> synchronizerService;
+    private SynchronizerService<Provider> synchronizerServiceProvider;
+
+    @Autowired
+    @Qualifier("serviceSync")
+    private SynchronizerService<Service> synchronizerServiceResource;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -134,7 +139,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         jmsTopicTemplate.convertAndSend("provider.create", provider);
 
-        synchronizerService.syncAdd(provider.getProvider());
+        synchronizerServiceProvider.syncAdd(provider.getProvider());
 
         return ret;
     }
@@ -191,7 +196,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         jmsTopicTemplate.convertAndSend("provider.update", provider);
 
-        synchronizerService.syncUpdate(provider.getProvider());
+        synchronizerServiceProvider.syncUpdate(provider.getProvider());
 
         return provider;
     }
@@ -354,7 +359,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         super.delete(provider);
         registrationMailService.notifyProviderAdmins(provider);
 
-        synchronizerService.syncDelete(provider.getProvider());
+        synchronizerServiceProvider.syncDelete(provider.getProvider());
 
     }
 
@@ -1225,6 +1230,79 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 if (!validator.isValid(userEmail)) {
                     throw new ValidationException(String.format("Email [%s] is not valid. Found in field User Email", userEmail));
                 }
+            }
+        }
+    }
+
+    public void initialCatRIsCatalogueSync(){
+        // SOS: AFTER MIGRATION THE IDS WILL BE LOWERCASE
+        List<String> testProviders = Arrays.asList("catris", "tcris", "tstp", "ceric-eric", "test_beam__desy_ii", "elixir", "fsd", "gbif", "infrafrontier", "prace", "sinq", "sites");
+        List<String> testResources = Arrays.asList("catris.catris_test", "european_xfel.access_to_the_european_xfel_free_electron_laser", "czechnanolab.example",
+                "elettra__fermi.access_to_the_fermi_free_electron_laser", "catris.advanced_imaging_and_microscopy", "bo.biocellular_service",
+                "jrc-elsa.european_laboratory_for_structural_assessment_reaction_wall", "embrc-eric.e-infrastructure_data_and_services", "catris.example",
+                "embrc-eric.experimental_facilities", "bo.giorgos_giannopoulos", "embrc-eric.marine_biological_resources", "resif.resif_french_seismologic_and_geodetic_network",
+                "fin.we_offer_conventional_and_advanced_analysis_in_lab__synchrotron_techniques", "embrc-eric.technology_platforms_for_marine_biology",
+                "infrafrontier.covid-19_resources_and_measures", "sinq.swiss_spallation_neutron_source_sinq", "prace.prace_best_practice_guides",
+                "test_beam__desy_ii.test_beam", "infrafrontier.european_mutant_mouse_archive_emma", "sites.swedish_infrastructure_for_ecosystem_science_sites",
+                "elixir.data_resources_compute_interoperability_and_standards_software_tools_training", "embrc-eric.training_and_education",
+                "nffa.nanoscience_foundries__fine_analysis", "fsd.aila_data_service", "eurofleets.transnational_the_eurofleets_project_will_facilitate_open_free_of_charge_access_to_an_integrated_and_advanced_research_vessel_fleet_designed_to_meet_the_evolving_and_challenging_needs_of_the_user_community_european_and_international_researchers_from_academia_and_industry_will_be_able_to_apply_for_several_access_programmes_through_a_single-entry_system_eurofleets_will_prioritise_support_for_research_on_sustainable_clean_and_healthy_oceans_linking_with_existing_ocean_observation_infrastructures_and_it_will_support_innovation_through_working_closely_with_industry_the_project_will_enable_access_to_a_unique_fleet_of_27_state-of-the-art_research_vessels_from_european_and_international_partners_through_competitive_calls_researchers_will_be_able_to_access_the_entire_north_atlantic_mediterranean_black_sea_north_sea_baltic_sea_pacific_southern_ocean_and_ross_sea_in_addition_to_ship_time_researchers_will_also_have_access_to_new_auvs_and_rovsaccess");
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ProviderBundle> allProviders = getAll(ff, securityService.getAdminAccess()).getResults();
+        List<InfraService> allResources = infraServiceService.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<Provider> allActiveAndApprovedProviders = new ArrayList<>();
+        List<String> allActiveAndApprovedProviderIds = new ArrayList<>();
+        List<Service> allActiveAndApprovedResources = new ArrayList<>();
+        for (ProviderBundle providerBundle : allProviders){
+            if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()){
+                if (testProviders.contains(providerBundle.getProvider().getId())){
+                    logger.info(String.format("Test Provider with id [%s]..skipping..", providerBundle.getProvider().getId()));
+                    continue;
+                }
+                allActiveAndApprovedProviders.add(providerBundle.getProvider());
+                allActiveAndApprovedProviderIds.add(providerBundle.getProvider().getId());
+            }
+        }
+        for (InfraService infraService : allResources){
+            try{
+                if (infraService.getStatus().equals("approved resource") && infraService.isActive() && infraService.isLatest()){
+                    if (testResources.contains(infraService.getService().getId())){
+                        logger.info(String.format("Test Resource with id [%s]..skipping..", infraService.getService().getId()));
+                        continue;
+                    }
+                    allActiveAndApprovedResources.add(infraService.getService());
+                }
+            } catch (NullPointerException e){
+                logger.info(String.format("Service with id [%s] has no Active or Latest field", infraService.getId()));
+            }
+        }
+        // ADD PROVIDER
+        for (Provider provider : allActiveAndApprovedProviders){
+            try{
+                logger.info(String.format("Syncing Provider (ADD) with id [%s] from CatRIs to EOSC", provider.getId()));
+                synchronizerServiceProvider.syncAdd(provider);
+            } catch (ResourceException e){
+                logger.info(String.format("Provider with id [%s] already exists. Skipping.."));
+            }
+        }
+        // VERIFY PROVIDER
+        for (Provider provider : allActiveAndApprovedProviders){
+            logger.info(String.format("Syncing Provider (VERIFY) with id [%s] from CatRIs to EOSC", provider.getId()));
+            synchronizerServiceProvider.syncVerify(provider);
+        }
+        // ADD RESOURCE
+        for (Service service : allActiveAndApprovedResources){
+            try{
+                logger.info(String.format("Syncing Resource (ADD) with id [%s] from CatRIs to EOSC", service.getId()));
+                synchronizerServiceResource.syncAdd(service);
+                // Change Provider's templateStatus
+                if (allActiveAndApprovedProviderIds.contains(service.getResourceOrganisation())){
+                    logger.info(String.format("Syncing Resource (VERIFY) with id [%s] from CatRIs to EOSC", service.getId()));
+                    synchronizerServiceResource.syncVerify(service);
+                    allActiveAndApprovedProviderIds.remove(service.getResourceOrganisation());
+                }
+            } catch (ResourceException e){
+                logger.info(String.format("Resource with id [%s] already exists. Skipping..", service.getId()));
             }
         }
     }
