@@ -598,8 +598,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ff.addFilter("resource_organisation", providerId);
         List<InfraService> allProviderServices = getAll(ff, auth).getResults();
         for (InfraService infraService : allProviderServices){
-            if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
-                    infraService.getStatus().equals(vocabularyService.get("rejected resource").getId())){
+            if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId())){
                 return infraService;
             }
         }
@@ -923,6 +922,32 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             allMigratedLogginInfos.put(infraService.getService().getId(), latestLoggings);
         }
         return allMigratedLogginInfos;
+    }
+
+    public void emailPhoneValidityCheck(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<InfraService> allResources = getAll(ff, securityService.getAdminAccess()).getResults();
+        List<InfraService> approvedActivedLatestResources = new ArrayList<>();
+        for (InfraService infraService : allResources){
+            logger.info(infraService.getId());
+            if (infraService.getService().getResourceOrganisation().equals("catris")){
+                continue;
+            }
+            if (infraService.isLatest() && infraService.getStatus().equals(vocabularyService.get("approved resource").getId())
+                    && infraService.isActive()){
+                approvedActivedLatestResources.add(infraService);
+            }
+        }
+        logger.info(approvedActivedLatestResources.size());
+        for (InfraService infraService : approvedActivedLatestResources){
+            try{
+                validateEmailsAndPhoneNumbers(infraService);
+            } catch (ValidationException e){
+                logger.info(String.format("Resource with id [%s])", infraService.getId()));
+                logger.info(e);
+            }
+        }
     }
 
     public void validateEmailsAndPhoneNumbers(InfraService infraService){
