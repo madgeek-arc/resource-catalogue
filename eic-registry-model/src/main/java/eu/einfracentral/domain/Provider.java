@@ -17,9 +17,9 @@ import java.util.List;
 public class Provider implements Identifiable {
 
 
-    // Provider Basic Information
+    // Basic Information
     /**
-     * A persistent identifier, a unique reference to the Provider.
+     * A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, required = true)
@@ -27,23 +27,23 @@ public class Provider implements Identifiable {
     private String id;
 
     /**
-     * Full Name of the Provider/Organisation offering Resources and acting as main contact point for the Resources.
+     * An abbreviation of the Provider Name as assigned by the Provider.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, required = true)
     @FieldValidation
-    private String name;
+    private String abbreviation;
 
     /**
-     * Abbreviation or short name of the Provider.
+     * Full Name of the Provider/Organisation offering the resource and acting as main contact point.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, required = true)
     @FieldValidation
-    private String abbreviation;
+    private String name;
 
     /**
-     * Webpage of the Provider.
+     * Website with information about the Provider.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, example = "https://example.com", required = true)
@@ -68,13 +68,25 @@ public class Provider implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
     private String legalStatus;
 
+    /**
+     * Name of the organisation/institution legally hosting (housing) the provider/research infrastructure or its coordinating centre.
+     * A distinction is made between: (1) research infrastructures that are self-standing and have a defined and distinct legal entity,
+     * (2) research infrastructures that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.).
+     * If (1) - name of the research infrastructure, If (2) - name of the hosting organisation.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 7, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
+    private String hostingLegalEntity;
 
-    // Provider Marketing Information
+
+    // Marketing Information
     /**
      * A high-level description of the Provider in fairly non-technical terms, with the vision, mission, objectives, background, experience.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 7, required = true)
+    @ApiModelProperty(position = 8, required = true)
     @FieldValidation
     private String description;
 
@@ -82,7 +94,7 @@ public class Provider implements Identifiable {
      * Link to the logo/visual identity of the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, example = "https://example.com", required = true)
+    @ApiModelProperty(position = 9, example = "https://example.com", required = true)
     @FieldValidation
     private URL logo;
 
@@ -91,18 +103,27 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
 //    @XmlElement(name = "multimedia")
-    @ApiModelProperty(position = 9)
+    @ApiModelProperty(position = 10)
     @FieldValidation(nullable = true)
     private List<URL> multimedia;
 
-
-    // Provider Classification Information
     /**
-     * A named group of providers that offer access to the same type of resource or capabilities, within the defined domain.
+     * Short description of the Multimedia content.
+     */
+    @XmlElementWrapper(name = "multimediaNames")
+    @XmlElement(name = "multimediaName")
+    @ApiModelProperty(position = 11)
+    @FieldValidation(nullable = true)
+    private List<String> multimediaNames;
+
+
+    // Classification Information
+    /**
+     * A named group of providers that offer access to the same type of resource or capabilities.
      */
     @XmlElementWrapper(name = "scientificDomains")
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 11, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 12, notes = "Vocabulary ID")
     @FieldValidation(nullable = true)
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -111,27 +132,37 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 12)
+    @ApiModelProperty(position = 13)
     @FieldValidation(nullable = true)
     private List<String> tags;
 
+    /**
+     * Defines the Provider structure type (single-sited, distributed, mobile, virtual, etc.).
+     */
+    @XmlElementWrapper(name = "structureTypes")
+    @XmlElement(name = "structureType")
+    @ApiModelProperty(position = 14, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STRUCTURE_TYPE)
+    private List<String> structureTypes;
 
-    // Provider Location Information
+
+    // Location Information
     /**
      * Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, required = true)
+    @ApiModelProperty(position = 15, required = true)
     @FieldValidation
     private ProviderLocation location;
 
 
-    // Provider Contact Information
+    // Contact Information
     /**
      * Provider's main contact info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, required = true)
+    @ApiModelProperty(position = 16, required = true)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -140,17 +171,17 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @ApiModelProperty(position = 15, required = true)
+    @ApiModelProperty(position = 17, required = true)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
 
-    // Provider Maturity Information
+    // Maturity Information
     /**
      * Current status of the Provider life-cycle.
      */
     @XmlElement
-    @ApiModelProperty(position = 16, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 18, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LIFE_CYCLE_STATUS)
     private String lifeCycleStatus;
@@ -160,29 +191,18 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
-    @ApiModelProperty(position = 17)
+    @ApiModelProperty(position = 19)
     @FieldValidation(nullable = true)
     private List<String> certifications;
 
 
-    // Provider Other Information
+    // Dependencies Information
     /**
-     * Name of the organisation/institution legally hosting (housing) the provider/research infrastructure or its coordinating centre.
-     * A distinction is made between: (1) research infrastructures that are self-standing and have a defined and distinct legal entity,
-     * (2) research infrastructures that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.).
-     * If (1) - name of the research infrastructure, If (2) - name of the hosting organisation.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 18)
-    @FieldValidation(nullable = true)
-    private String hostingLegalEntity;
-
-    /**
-     * Providers that are funded by several countries should list here all supporting countries (including the coordinating country first).
+     * Providers/Research Infrastructures that are funded by several countries should list here all supporting countries (including the Coordinating country).
      */
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> participatingCountries;
@@ -192,7 +212,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
-    @ApiModelProperty(position = 20)
+    @ApiModelProperty(position = 21)
     @FieldValidation(nullable = true)
     private List<String> affiliations;
 
@@ -201,27 +221,27 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
-    @ApiModelProperty(position = 21, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 22, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
     private List<String> networks;
 
     /**
-     * Defines the Provider structure type (single-sited, distributed, mobile, virtual, etc.).
+     * The Catalogue this Provider is originally registered at.
      */
-    @XmlElementWrapper(name = "structureTypes")
-    @XmlElement(name = "structureType")
-    @ApiModelProperty(position = 22, notes = "Vocabulary ID")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STRUCTURE_TYPE)
-    private List<String> structureTypes;
+    @XmlElement
+    @ApiModelProperty(position = 23)
+    @FieldValidation(nullable = true)
+    private String catalogueId; //TODO: Should we have a Vocabulary with Catalogue IDs?
 
+
+    // Other Information
     /**
      * ESFRI domain classification.
      */
     @XmlElementWrapper(name = "esfriDomains")
     @XmlElement(name = "esfriDomain")
-    @ApiModelProperty(position = 23, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 24, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_DOMAIN)
     private List<String> esfriDomains;
@@ -231,7 +251,7 @@ public class Provider implements Identifiable {
      * a) is a node of an ESFRI project, b) is an ESFRI project, c) is an ESFRI landmark, d) is not an ESFRI project or landmark.
      */
     @XmlElement
-    @ApiModelProperty(position = 24, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 25, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_TYPE)
     private String esfriType;
@@ -241,7 +261,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "merilScientificDomains")
     @XmlElement(name = "merilScientificDomain")
-    @ApiModelProperty(position = 25, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 26, notes = "Vocabulary ID")
     @FieldValidation(nullable = true)
     private List<ProviderMerilDomain> merilScientificDomains;
 
@@ -266,7 +286,7 @@ public class Provider implements Identifiable {
     private List<String> societalGrandChallenges;
 
     /**
-     * Roadmaps	Provider's participation in a national roadmap.
+     * Provider's participation in a national roadmap.
      */
     @XmlElementWrapper(name = "nationalRoadmaps")
     @XmlElement(name = "nationalRoadmap")
@@ -286,60 +306,32 @@ public class Provider implements Identifiable {
     public Provider() {
     }
 
-//    public enum States {
-//        PENDING_1("pending initial approval"),
-//        ST_SUBMISSION("pending template submission"),
-//        PENDING_2("pending template approval"),
-//        REJECTED_ST("rejected template"),
-//        APPROVED("approved"),
-//        REJECTED("rejected");
-//
-//        private final String type;
-//
-//        States(final String type) {
-//            this.type = type;
-//        }
-//
-//        public String getKey() {
-//            return type;
-//        }
-//
-//        /**
-//         * @return the Enum representation for the given string.
-//         * @throws IllegalArgumentException if unknown string.
-//         */
-//        public static States fromString(String s) throws IllegalArgumentException {
-//            return Arrays.stream(States.values())
-//                    .filter(v -> v.type.equals(s))
-//                    .findFirst()
-//                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
-//        }
-//    }
-
     @Override
     public String toString() {
         return "Provider{" +
                 "id='" + id + '\'' +
-                ", name='" + name + '\'' +
                 ", abbreviation='" + abbreviation + '\'' +
+                ", name='" + name + '\'' +
                 ", website=" + website +
                 ", legalEntity=" + legalEntity +
                 ", legalStatus='" + legalStatus + '\'' +
+                ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
                 ", description='" + description + '\'' +
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
+                ", multimediaNames=" + multimediaNames +
                 ", scientificDomains=" + scientificDomains +
                 ", tags=" + tags +
+                ", structureTypes=" + structureTypes +
                 ", location=" + location +
                 ", mainContact=" + mainContact +
                 ", publicContacts=" + publicContacts +
                 ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
                 ", certifications=" + certifications +
-                ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
                 ", participatingCountries=" + participatingCountries +
                 ", affiliations=" + affiliations +
                 ", networks=" + networks +
-                ", structureTypes=" + structureTypes +
+                ", catalogueId='" + catalogueId + '\'' +
                 ", esfriDomains=" + esfriDomains +
                 ", esfriType='" + esfriType + '\'' +
                 ", merilScientificDomains=" + merilScientificDomains +
@@ -360,20 +352,20 @@ public class Provider implements Identifiable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getAbbreviation() {
         return abbreviation;
     }
 
     public void setAbbreviation(String abbreviation) {
         this.abbreviation = abbreviation;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public URL getWebsite() {
@@ -400,6 +392,14 @@ public class Provider implements Identifiable {
         this.legalStatus = legalStatus;
     }
 
+    public String getHostingLegalEntity() {
+        return hostingLegalEntity;
+    }
+
+    public void setHostingLegalEntity(String hostingLegalEntity) {
+        this.hostingLegalEntity = hostingLegalEntity;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -424,6 +424,14 @@ public class Provider implements Identifiable {
         this.multimedia = multimedia;
     }
 
+    public List<String> getMultimediaNames() {
+        return multimediaNames;
+    }
+
+    public void setMultimediaNames(List<String> multimediaNames) {
+        this.multimediaNames = multimediaNames;
+    }
+
     public List<ServiceProviderDomain> getScientificDomains() {
         return scientificDomains;
     }
@@ -438,6 +446,14 @@ public class Provider implements Identifiable {
 
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public List<String> getStructureTypes() {
+        return structureTypes;
+    }
+
+    public void setStructureTypes(List<String> structureTypes) {
+        this.structureTypes = structureTypes;
     }
 
     public ProviderLocation getLocation() {
@@ -480,14 +496,6 @@ public class Provider implements Identifiable {
         this.certifications = certifications;
     }
 
-    public String getHostingLegalEntity() {
-        return hostingLegalEntity;
-    }
-
-    public void setHostingLegalEntity(String hostingLegalEntity) {
-        this.hostingLegalEntity = hostingLegalEntity;
-    }
-
     public List<String> getParticipatingCountries() {
         return participatingCountries;
     }
@@ -512,12 +520,12 @@ public class Provider implements Identifiable {
         this.networks = networks;
     }
 
-    public List<String> getStructureTypes() {
-        return structureTypes;
+    public String getCatalogueId() {
+        return catalogueId;
     }
 
-    public void setStructureTypes(List<String> structureTypes) {
-        this.structureTypes = structureTypes;
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
     }
 
     public List<String> getEsfriDomains() {

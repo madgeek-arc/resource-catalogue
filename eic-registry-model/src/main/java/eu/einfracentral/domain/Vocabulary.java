@@ -58,6 +58,8 @@ public class Vocabulary implements Identifiable {
         FUNDING_BODY("Funding body"),
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
+        RELATED_PLATFORM("Related platform"),
+        PROVIDER_HOSTING_LEGAL_ENTITY("Provider hosting legal entity"),
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
         PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),

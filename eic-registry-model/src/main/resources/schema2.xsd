@@ -46,6 +46,7 @@
   <xs:simpleType name="field">
     <xs:restriction base="xs:string">
       <xs:enumeration value="ID"/>
+      <xs:enumeration value="ABBREVIATION"/>
       <xs:enumeration value="NAME"/>
       <xs:enumeration value="RESOURCE_ORGANISATION"/>
       <xs:enumeration value="RESOURCE_PROVIDERS"/>
@@ -54,7 +55,9 @@
       <xs:enumeration value="TAGLINE"/>
       <xs:enumeration value="LOGO"/>
       <xs:enumeration value="MULTIMEDIA"/>
+      <xs:enumeration value="MULTIMEDIA_NAMES"/>
       <xs:enumeration value="USE_CASES"/>
+      <xs:enumeration value="USE_CASES_NAMES"/>
       <xs:enumeration value="SCIENTIFIC_DOMAINS"/>
       <xs:enumeration value="CATEGORIES"/>
       <xs:enumeration value="TARGET_USERS"/>
@@ -79,6 +82,7 @@
       <xs:enumeration value="REQUIRED_RESOURCES"/>
       <xs:enumeration value="RELATED_RESOURCES"/>
       <xs:enumeration value="RELATED_PLATFORMS"/>
+      <xs:enumeration value="CATALOGUE_ID"/>
       <xs:enumeration value="FUNDING_BODY"/>
       <xs:enumeration value="FUNDING_PROGRAMS"/>
       <xs:enumeration value="GRANT_PROJECT_NAMES"/>
@@ -87,7 +91,7 @@
       <xs:enumeration value="TERMS_OF_USE"/>
       <xs:enumeration value="PRIVACY_POLICY"/>
       <xs:enumeration value="ACCESS_POLICY"/>
-      <xs:enumeration value="SERVICE_LEVEL"/>
+      <xs:enumeration value="RESOURCE_LEVEL"/>
       <xs:enumeration value="TRAINING_INFORMATION"/>
       <xs:enumeration value="STATUS_MONITORING"/>
       <xs:enumeration value="MAINTENANCE"/>
@@ -115,6 +119,8 @@
       <xs:enumeration value="FUNDING_BODY"/>
       <xs:enumeration value="FUNDING_PROGRAM"/>
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
+      <xs:enumeration value="RELATED_PLATFORM"/>
+      <xs:enumeration value="PROVIDER_HOSTING_LEGAL_ENTITY"/>
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
       <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
