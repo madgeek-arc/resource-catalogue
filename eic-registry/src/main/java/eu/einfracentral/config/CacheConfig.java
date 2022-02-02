@@ -1,6 +1,7 @@
 package eu.einfracentral.config;
 
 import com.google.common.cache.CacheBuilder;
+import eu.einfracentral.domain.Provider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cache.CacheManager;
@@ -9,7 +10,19 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +39,8 @@ public class CacheConfig {
     public static final String CACHE_EVENTS = "events";
     public static final String CACHE_SERVICE_EVENTS = "service_events";
     public static final String CACHE_VISITS = "visits";
+
+    protected RestTemplate restTemplate;
 
     @Bean
     public CacheManager cacheManager() {
@@ -49,5 +64,32 @@ public class CacheConfig {
                 new ConcurrentMapCache("resourceTypesIndexFields")
         ));
         return cacheManager;
+    }
+
+//    @Scheduled(initialDelay = 0, fixedRate = 120000) //run every 2 min
+    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
+    public void updateCache() throws IOException {
+        // Update Cache URL
+        URL updateCache = new URL("https://providers.eosc-portal.eu/stats-api/cache/updateCache");
+        HttpURLConnection updateCon = (HttpURLConnection) updateCache.openConnection();
+        updateCon.setRequestMethod("GET");
+        // Promote Cache URL
+        URL promoteCache = new URL("https://providers.eosc-portal.eu/stats-api/cache/promoteCache");
+        HttpURLConnection promoteCon = (HttpURLConnection) promoteCache.openConnection();
+        promoteCon.setRequestMethod("GET");
+        int responseUpdateCode = updateCon.getResponseCode();
+        logger.info(String.format("Updating Cache. Response Code: %d", responseUpdateCode));
+        if (responseUpdateCode == HttpURLConnection.HTTP_OK) { // success
+            logger.info("Success..Proceeding to Promoting Cache");
+            int responsePromoteCode = promoteCon.getResponseCode();
+            logger.info(String.format("Promoting Cache. Response Code: %d", responsePromoteCode));
+            if (responsePromoteCode == HttpURLConnection.HTTP_OK) { // success
+                logger.info("Cache Updated and Promoted Successfully");
+            } else {
+                logger.info(String.format("An error occurred while trying to Promote Cache. Response Code: %d", responsePromoteCode));
+            }
+        } else {
+            logger.info(String.format("An error occurred while trying to Update Cache. Response Code: %d", responseUpdateCode));
+        }
     }
 }
