@@ -58,9 +58,9 @@ public class CacheConfig {
         return cacheManager;
     }
 
-//    @Scheduled(initialDelay = 0, fixedRate = 120000) //run every 2 min
-    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
-    public void updateCache() throws IOException {
+    @Scheduled(initialDelay = 0, fixedRate = 120000) //run every 2 min
+//    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
+    public void updateCache() throws IOException, InterruptedException {
         // Update Cache URL
         URL updateCache = new URL("https://providers.eosc-portal.eu/stats-api/cache/updateCache");
         HttpURLConnection updateCon = (HttpURLConnection) updateCache.openConnection();
@@ -73,6 +73,7 @@ public class CacheConfig {
         logger.info(String.format("Updating Cache. Response Code: %d", responseUpdateCode));
         if (responseUpdateCode == HttpURLConnection.HTTP_OK) { // success
             logger.info("Success..Proceeding to Promoting Cache");
+            TimeUnit.MINUTES.sleep(1);
             int responsePromoteCode = promoteCon.getResponseCode();
             logger.info(String.format("Promoting Cache. Response Code: %d", responsePromoteCode));
             if (responsePromoteCode == HttpURLConnection.HTTP_OK) { // success
