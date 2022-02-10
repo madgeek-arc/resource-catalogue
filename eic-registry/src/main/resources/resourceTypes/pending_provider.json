@@ -23,13 +23,6 @@
     },
     {
       "multivalued": false,
-      "name": "abbreviation",
-      "label": "Abbreviation",
-      "path": "//*[local-name()='abbreviation']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "legal_entity",
       "label": "Legal Entity",
       "path": "//*[local-name()='legalEntity']/text()",
