@@ -16,6 +16,13 @@
     },
     {
       "multivalued": false,
+      "name": "abbreviation",
+      "label": "Abbreviation",
+      "path": "//*[local-name()='abbreviation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "version",
       "label": "Version",
       "path": "//*[local-name()='service']/*[local-name()='version']/text()",
@@ -103,6 +110,13 @@
       "name": "life_cycle_status",
       "label": "Life Cycle Status",
       "path": "//*[local-name()='service']//*[local-name()='lifeCycleStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
       "type": "java.lang.String"
     },
     {

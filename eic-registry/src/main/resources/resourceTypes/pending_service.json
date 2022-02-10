@@ -106,6 +106,13 @@
       "type": "java.lang.String"
     },
     {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": true,
       "name": "funding_body",
       "label": "Funding Body",
