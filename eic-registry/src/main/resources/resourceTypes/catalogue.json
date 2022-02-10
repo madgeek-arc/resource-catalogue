@@ -2,16 +2,16 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "provider_id",
-      "path": "//*[local-name()='provider']/*[local-name()='id']/text()",
+      "name": "catalogue_id",
+      "path": "//*[local-name()='catalogue']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
     {
       "multivalued": false,
       "name": "name",
-      "label": "Provider Name",
-      "path": "//*[local-name()='provider']/*[local-name()='name']/text()",
+      "label": "Catalogue Name",
+      "path": "//*[local-name()='catalogue']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
@@ -43,13 +43,6 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "catalogue_id",
-      "label": "Catalogue ID",
-      "path": "//*[local-name()='catalogueId']/text()",
-      "type": "java.lang.String"
-    },
-    {
       "multivalued": true,
       "name": "scientific_subdomains",
       "label": "Scientific Subdomain",
@@ -58,16 +51,9 @@
     },
     {
       "multivalued": true,
-      "name": "meril_scientific_subdomains",
-      "label": "Meril Scientific Subdomain",
-      "path": "//*[local-name()='merilScientificDomain']/*[local-name()='merilScientificSubdomain']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "structure_types",
-      "label": "Structure Type",
-      "path": "//*[local-name()='structureType']/text()",
+      "name": "tags",
+      "label": "Tag",
+      "path": "//*[local-name()='tag']/text()",
       "type": "java.lang.String"
     },
     {
@@ -82,48 +68,6 @@
       "name": "networks",
       "label": "Network",
       "path": "//*[local-name()='network']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "tags",
-      "label": "Tag",
-      "path": "//*[local-name()='tag']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "esfri_domains",
-      "label": "Esfri Domain",
-      "path": "//*[local-name()='esfriDomain']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "life_cycle_status",
-      "label": "Life Cycle Status",
-      "path": "//*[local-name()='lifeCycleStatus']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "esfri_type",
-      "label": "Esfri Type",
-      "path": "//*[local-name()='esfriType']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "areas_of_activity",
-      "label": "Area of Activity",
-      "path": "//*[local-name()='areaOfActivity']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "societal_grand_challenges",
-      "label": "Societal Grand Challenge",
-      "path": "//*[local-name()='societalGrandChallenge']/text()",
       "type": "java.lang.String"
     },
     {
@@ -246,16 +190,10 @@
       "name": "status",
       "path": "//*[local-name()='status']/text()",
       "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "templateStatus",
-      "path": "//*[local-name()='templateStatus']/text()",
-      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "provider",
+  "name": "catalogue",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"

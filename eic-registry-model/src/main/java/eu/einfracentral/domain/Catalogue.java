@@ -13,7 +13,7 @@ import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Catalogue { //implements Identifiable
+public class Catalogue implements Identifiable {
 
 
     // Basic Information
@@ -138,7 +138,7 @@ public class Catalogue { //implements Identifiable
      * Physical location of the Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 15, required = true)
+    @ApiModelProperty(position = 14, required = true)
     @FieldValidation
     private ProviderLocation location;
 
@@ -148,7 +148,7 @@ public class Catalogue { //implements Identifiable
      * Catalogue's main contact info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 16, required = true)
+    @ApiModelProperty(position = 15, required = true)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -157,7 +157,7 @@ public class Catalogue { //implements Identifiable
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @ApiModelProperty(position = 17, required = true)
+    @ApiModelProperty(position = 16, required = true)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
@@ -168,7 +168,7 @@ public class Catalogue { //implements Identifiable
      */
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 17, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> participatingCountries;
@@ -178,7 +178,7 @@ public class Catalogue { //implements Identifiable
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
-    @ApiModelProperty(position = 21)
+    @ApiModelProperty(position = 18)
     @FieldValidation(nullable = true)
     private List<String> affiliations;
 
@@ -187,8 +187,207 @@ public class Catalogue { //implements Identifiable
      */
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
-    @ApiModelProperty(position = 22, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
     private List<String> networks;
+
+
+    // Extra needed fields
+    @XmlElementWrapper(name = "users", required = true)
+    @XmlElement(name = "user")
+    @ApiModelProperty(position = 20, required = true)
+    @FieldValidation
+    private List<User> users;
+
+    public Catalogue(){
+    }
+
+    @Override
+    public String toString() {
+        return "Catalogue{" +
+                "id='" + id + '\'' +
+                ", abbreviation='" + abbreviation + '\'' +
+                ", name='" + name + '\'' +
+                ", website=" + website +
+                ", legalEntity=" + legalEntity +
+                ", legalStatus='" + legalStatus + '\'' +
+                ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
+                ", description='" + description + '\'' +
+                ", logo=" + logo +
+                ", multimedia=" + multimedia +
+                ", multimediaNames=" + multimediaNames +
+                ", scientificDomains=" + scientificDomains +
+                ", tags=" + tags +
+                ", location=" + location +
+                ", mainContact=" + mainContact +
+                ", publicContacts=" + publicContacts +
+                ", participatingCountries=" + participatingCountries +
+                ", affiliations=" + affiliations +
+                ", networks=" + networks +
+                ", users=" + users +
+                '}';
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getAbbreviation() {
+        return abbreviation;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public URL getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(URL website) {
+        this.website = website;
+    }
+
+    public boolean isLegalEntity() {
+        return legalEntity;
+    }
+
+    public void setLegalEntity(boolean legalEntity) {
+        this.legalEntity = legalEntity;
+    }
+
+    public String getLegalStatus() {
+        return legalStatus;
+    }
+
+    public void setLegalStatus(String legalStatus) {
+        this.legalStatus = legalStatus;
+    }
+
+    public String getHostingLegalEntity() {
+        return hostingLegalEntity;
+    }
+
+    public void setHostingLegalEntity(String hostingLegalEntity) {
+        this.hostingLegalEntity = hostingLegalEntity;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public URL getLogo() {
+        return logo;
+    }
+
+    public void setLogo(URL logo) {
+        this.logo = logo;
+    }
+
+    public List<URL> getMultimedia() {
+        return multimedia;
+    }
+
+    public void setMultimedia(List<URL> multimedia) {
+        this.multimedia = multimedia;
+    }
+
+    public List<String> getMultimediaNames() {
+        return multimediaNames;
+    }
+
+    public void setMultimediaNames(List<String> multimediaNames) {
+        this.multimediaNames = multimediaNames;
+    }
+
+    public List<ServiceProviderDomain> getScientificDomains() {
+        return scientificDomains;
+    }
+
+    public void setScientificDomains(List<ServiceProviderDomain> scientificDomains) {
+        this.scientificDomains = scientificDomains;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public ProviderLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(ProviderLocation location) {
+        this.location = location;
+    }
+
+    public ProviderMainContact getMainContact() {
+        return mainContact;
+    }
+
+    public void setMainContact(ProviderMainContact mainContact) {
+        this.mainContact = mainContact;
+    }
+
+    public List<ProviderPublicContact> getPublicContacts() {
+        return publicContacts;
+    }
+
+    public void setPublicContacts(List<ProviderPublicContact> publicContacts) {
+        this.publicContacts = publicContacts;
+    }
+
+    public List<String> getParticipatingCountries() {
+        return participatingCountries;
+    }
+
+    public void setParticipatingCountries(List<String> participatingCountries) {
+        this.participatingCountries = participatingCountries;
+    }
+
+    public List<String> getAffiliations() {
+        return affiliations;
+    }
+
+    public void setAffiliations(List<String> affiliations) {
+        this.affiliations = affiliations;
+    }
+
+    public List<String> getNetworks() {
+        return networks;
+    }
+
+    public void setNetworks(List<String> networks) {
+        this.networks = networks;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
 }

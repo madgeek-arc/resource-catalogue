@@ -23,6 +23,13 @@
     },
     {
       "multivalued": false,
+      "name": "abbreviation",
+      "label": "Abbreviation",
+      "path": "//*[local-name()='abbreviation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "legal_entity",
       "label": "Legal Entity",
       "path": "//*[local-name()='legalEntity']/text()",
@@ -33,6 +40,20 @@
       "name": "legal_status",
       "label": "Legal Status",
       "path": "//*[local-name()='legalStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "hosting_legal_entity",
+      "label": "Hosting Legal Entity",
+      "path": "//*[local-name()='hostingLegalEntity']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
       "type": "java.lang.String"
     },
     {

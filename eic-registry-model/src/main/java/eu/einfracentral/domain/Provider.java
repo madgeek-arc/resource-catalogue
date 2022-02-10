@@ -231,8 +231,8 @@ public class Provider implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 23)
-    @FieldValidation(nullable = true)
-    private String catalogueId; //TODO: Should we have a Vocabulary with Catalogue IDs?
+    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
 
 
     // Other Information
