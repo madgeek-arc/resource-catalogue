@@ -16,6 +16,13 @@
     },
     {
       "multivalued": false,
+      "name": "abbreviation",
+      "label": "Abbreviation",
+      "path": "//*[local-name()='abbreviation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "version",
       "label": "Version",
       "path": "//*[local-name()='service']/*[local-name()='version']/text()",
@@ -32,7 +39,7 @@
       "multivalued": true,
       "name": "resource_providers",
       "label": "Resource Provider",
-      "path": "//*[local-name()='service']//*[local-name()='resourceProviders']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='resourceProvider']/text()",
       "type": "java.lang.String"
     },
     {
