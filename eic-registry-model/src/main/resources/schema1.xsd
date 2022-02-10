@@ -5,6 +5,8 @@
     
   <xs:element name="bundle" type="tns:bundle"/>
     
+  <xs:element name="catalogue" type="tns:catalogue"/>
+    
   <xs:element name="emailMessage" type="tns:emailMessage"/>
     
   <xs:element name="event" type="tns:event"/>
@@ -119,6 +121,424 @@
                   
         </xs:complexType>
               
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="catalogue">
+        
+    <xs:sequence>
+            
+      <xs:element name="abbreviation" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[An abbreviation of the (Multi-Provider Regional or Thematic) Catalogue Name.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="affiliations">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Catalogues that are members or affiliated or associated with other organisations should list those organisations here.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="affiliation" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="description" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[A high-level description of the Catalogue in fairly non-technical terms, with the vision, mission, objectives, background, experience.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="hostingLegalEntity" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Name of the organisation legally hosting (housing) the Catalogue or its coordinating centre.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[A persistent identifier, a unique reference to the  (Multi-Provider Regional or Thematic) Catalogue in the context of the EOSC Portal.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="legalEntity" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[A Y/N question to define whether the (Multi-Provider Regional or Thematic) Catalogue is owned by a Legal Entity or not.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="legalStatus" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Legal status of the (Multi-Provider Regional or Thematic ) Catalogue Owner. The legal status is usually noted in the registration act/statutes.
+For independent legal entities (1) - legal status of the Catalogue. For embedded Catalogues (2) - legal status of the hosting legal entity.
+It is also possible to select Not a legal entity.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="location" type="tns:providerLocation">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Physical location of the Catalogue.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="logo" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Link to the logo/visual identity of the Catalogue.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="mainContact" type="tns:providerMainContact">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Catalogue's main contact info.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="multimedia">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Link to video, slideshow, photos, screenshots with details of the Catalogue.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" nillable="true" type="xs:anyURI"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="multimediaNames">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Short description of the Multimedia content.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimediaName" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Full Name of the (Multi-Provider Regional or Thematic) Catalogue.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="networks">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Catalogues that are members of networks should list those networks here.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="network" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="participatingCountries">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Catalogues that are funded/supported by several countries should list here all supporting countries (including the Coordinating country).]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="participatingCountry" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="publicContacts">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[List of the Catalogue's public contacts info.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:providerPublicContact"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="scientificDomains">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[A named group of providers that offer access to the same type of resource or capabilities.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomain" type="tns:serviceProviderDomain"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="tags">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Keywords associated to the Catalogue to simplify search by relevant keywords.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="tag" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="website" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Website with information about the (Multi-Provider Regional or Thematic) Catalogue.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="providerLocation">
+        
+    <xs:sequence>
+            
+      <xs:element name="city" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[City of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="country" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Country of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="postalCode" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Postal code of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="region" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Region of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="streetNameAndNumber" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Street and Number of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="providerMainContact">
+        
+    <xs:sequence>
+            
+      <xs:element name="email" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Email of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="firstName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[First Name of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="lastName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Last Name of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="phone" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Phone of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="position" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Position of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="providerPublicContact">
+        
+    <xs:sequence>
+            
+      <xs:element name="email" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Email of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="firstName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[First Name of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="lastName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Last Name of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="phone" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Phone of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="position" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Position of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="serviceProviderDomain">
+        
+    <xs:sequence>
+            
+      <xs:element name="scientificDomain" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[The branch of science, scientific discipline that is related to the Resource.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="scientificSubdomain" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[The subbranch of science, scientific subdicipline that is related to the Resource.]]>
+          </xs:documentation>
+        </xs:annotation>
       </xs:element>
           
     </xs:sequence>
@@ -1077,30 +1497,6 @@ c) list of customers, communities, users, etc. using the Resource.]]>
       
   </xs:complexType>
     
-  <xs:complexType name="serviceProviderDomain">
-        
-    <xs:sequence>
-            
-      <xs:element name="scientificDomain" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[The branch of science, scientific discipline that is related to the Resource.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element name="scientificSubdomain" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[The subbranch of science, scientific subdicipline that is related to the Resource.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:complexType name="provider">
         
     <xs:sequence>
@@ -1525,102 +1921,6 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       
   </xs:complexType>
     
-  <xs:complexType name="providerLocation">
-        
-    <xs:sequence>
-            
-      <xs:element name="city" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[City of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element name="country" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Country of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element name="postalCode" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Postal code of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="region" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Region of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element name="streetNameAndNumber" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Street and Number of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="providerMainContact">
-        
-    <xs:sequence>
-            
-      <xs:element name="email" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Email of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element name="firstName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[First Name of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="lastName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Last Name of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="phone" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Phone of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="position" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Position of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:complexType name="providerMerilDomain">
         
     <xs:sequence>
@@ -1637,54 +1937,6 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         <xs:annotation>
           <xs:documentation>
             <![CDATA[MERIL scientific subdomain classification.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="providerPublicContact">
-        
-    <xs:sequence>
-            
-      <xs:element name="email" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Email of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="firstName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[First Name of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="lastName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Last Name of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="phone" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Phone of the Provider's main contact person/Provider manager.]]>
-          </xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="position" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Position of the Provider's main contact person/Provider manager.]]>
           </xs:documentation>
         </xs:annotation>
       </xs:element>
