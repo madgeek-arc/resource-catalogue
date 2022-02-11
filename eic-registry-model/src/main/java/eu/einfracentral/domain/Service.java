@@ -99,22 +99,13 @@ public class Service implements Identifiable {
     private URL logo;
 
     /**
-     * Link to video, screenshots or slides showing details of the Resource.
+     * Link to video, slideshow, photos, screenshots with details of the Provider.
      */
     @XmlElementWrapper(name = "multimedia")
+    @XmlElement(name = "multimedia")
     @ApiModelProperty(position = 10)
     @FieldValidation(nullable = true)
-    private List<URL> multimedia;
-
-    /**
-     * Short description of the Multimedia content.
-     */
-    @XmlElementWrapper(name = "multimediaNames")
-    @XmlElement(name = "multimediaName")
-    @ApiModelProperty(position = 11)
-    @FieldValidation(nullable = true)
-    private List<String> multimediaNames;
-
+    private List<MultimediaPair> multimedia;
 
     /**
      * Link to use cases supported by this Resource.
@@ -123,16 +114,7 @@ public class Service implements Identifiable {
     @XmlElement(name = "useCase")
     @ApiModelProperty(position = 12)
     @FieldValidation(nullable = true)
-    private List<URL> useCases;
-
-    /**
-     * Short description of the Multimedia content.
-     */
-    @XmlElementWrapper(name = "useCasesNames")
-    @XmlElement(name = "useCasesName")
-    @ApiModelProperty(position = 13)
-    @FieldValidation(nullable = true)
-    private List<String> useCasesNames;
+    private List<UseCasesPair> useCases;
 
 
     // Classification Information
@@ -516,7 +498,7 @@ public class Service implements Identifiable {
         // No arg constructor
     }
 
-    public Service(String id, String abbreviation, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<URL> multimedia, List<String> multimediaNames, List<URL> useCases, List<String> useCasesNames, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, String catalogueId, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL resourceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
+    public Service(String id, String abbreviation, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<MultimediaPair> multimedia, List<UseCasesPair> useCases, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, String catalogueId, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL resourceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
         this.id = id;
         this.abbreviation = abbreviation;
         this.name = name;
@@ -527,9 +509,7 @@ public class Service implements Identifiable {
         this.tagline = tagline;
         this.logo = logo;
         this.multimedia = multimedia;
-        this.multimediaNames = multimediaNames;
         this.useCases = useCases;
-        this.useCasesNames = useCasesNames;
         this.scientificDomains = scientificDomains;
         this.categories = categories;
         this.targetUsers = targetUsers;
@@ -588,9 +568,7 @@ public class Service implements Identifiable {
                 Objects.equals(tagline, service.tagline) &&
                 Objects.equals(logo, service.logo) &&
                 Objects.equals(multimedia, service.multimedia) &&
-                Objects.equals(multimediaNames, service.multimediaNames) &&
                 Objects.equals(useCases, service.useCases) &&
-                Objects.equals(useCasesNames, service.useCasesNames) &&
                 Objects.equals(scientificDomains, service.scientificDomains) &&
                 Objects.equals(categories, service.categories) &&
                 Objects.equals(targetUsers, service.targetUsers) &&
@@ -636,7 +614,7 @@ public class Service implements Identifiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, abbreviation, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, multimediaNames, useCases, useCasesNames, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, catalogueId, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, resourceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
+        return Objects.hash(id, abbreviation, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, catalogueId, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, resourceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
     private boolean stringListsAreEqual(List<String> list1, List<String> list2) {
@@ -679,9 +657,7 @@ public class Service implements Identifiable {
         TAGLINE("tagline"),
         LOGO("logo"),
         MULTIMEDIA("multimedia"),
-        MULTIMEDIA_NAMES("multimediaNames"),
         USE_CASES("useCases"),
-        USE_CASES_NAMES("useCasesNames"),
         SCIENTIFIC_DOMAINS("scientificDomains"),
         CATEGORIES("categories"),
         TARGET_USERS("targetUsers"),
@@ -820,36 +796,20 @@ public class Service implements Identifiable {
         this.logo = logo;
     }
 
-    public List<URL> getMultimedia() {
+    public List<MultimediaPair> getMultimedia() {
         return multimedia;
     }
 
-    public void setMultimedia(List<URL> multimedia) {
+    public void setMultimedia(List<MultimediaPair> multimedia) {
         this.multimedia = multimedia;
     }
 
-    public List<String> getMultimediaNames() {
-        return multimediaNames;
-    }
-
-    public void setMultimediaNames(List<String> multimediaNames) {
-        this.multimediaNames = multimediaNames;
-    }
-
-    public List<URL> getUseCases() {
+    public List<UseCasesPair> getUseCases() {
         return useCases;
     }
 
-    public void setUseCases(List<URL> useCases) {
+    public void setUseCases(List<UseCasesPair> useCases) {
         this.useCases = useCases;
-    }
-
-    public List<String> getUseCasesNames() {
-        return useCasesNames;
-    }
-
-    public void setUseCasesNames(List<String> useCasesNames) {
-        this.useCasesNames = useCasesNames;
     }
 
     public List<ServiceProviderDomain> getScientificDomains() {

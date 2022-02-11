@@ -19,6 +19,8 @@
     
   <xs:element name="metadata" type="tns:metadata"/>
     
+  <xs:element name="multimediaPair" type="tns:multimediaPair"/>
+    
   <xs:element name="provider" type="tns:provider"/>
     
   <xs:element name="providerBundle" type="tns:providerBundle"/>
@@ -45,6 +47,8 @@
     
   <xs:element name="servicePublicContact" type="tns:servicePublicContact"/>
     
+  <xs:element name="useCasesPair" type="tns:useCasesPair"/>
+    
   <xs:element name="user" type="tns:user"/>
     
   <xs:element name="vocabulary" type="tns:vocabulary"/>
@@ -68,6 +72,8 @@
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
             
       <xs:element minOccurs="0" ref="tns:metadata"/>
+            
+      <xs:element name="suspended" type="xs:boolean"/>
           
     </xs:sequence>
       
@@ -229,7 +235,7 @@ It is also possible to select Not a legal entity.]]>
       <xs:element minOccurs="0" name="multimedia">
         <xs:annotation>
           <xs:documentation>
-            <![CDATA[Link to video, slideshow, photos, screenshots with details of the Catalogue.]]>
+            <![CDATA[Link to video, slideshow, photos, screenshots with details of the Provider.]]>
           </xs:documentation>
         </xs:annotation>
                 
@@ -237,26 +243,7 @@ It is also possible to select Not a legal entity.]]>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" nillable="true" type="xs:anyURI"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="multimediaNames">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Short description of the Multimedia content.]]>
-          </xs:documentation>
-        </xs:annotation>
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimediaName" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" type="tns:multimediaPair"/>
                       
           </xs:sequence>
                   
@@ -481,6 +468,30 @@ It is also possible to select Not a legal entity.]]>
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Position of the Provider's main contact person/Provider manager.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="multimediaPair">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="multimediaName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Short description of the Multimedia content.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="multimediaURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Link to video, slideshow, photos, screenshots with details of the Provider.]]>
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -991,7 +1002,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
       <xs:element minOccurs="0" name="multimedia">
         <xs:annotation>
           <xs:documentation>
-            <![CDATA[Link to video, screenshots or slides showing details of the Resource.]]>
+            <![CDATA[Link to video, slideshow, photos, screenshots with details of the Provider.]]>
           </xs:documentation>
         </xs:annotation>
                 
@@ -999,26 +1010,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" nillable="true" type="xs:anyURI"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="multimediaNames">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Short description of the Multimedia content.]]>
-          </xs:documentation>
-        </xs:annotation>
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimediaName" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" type="tns:multimediaPair"/>
                       
           </xs:sequence>
                   
@@ -1358,26 +1350,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="useCase" type="xs:anyURI"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="useCasesNames">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Short description of the Multimedia content.]]>
-          </xs:documentation>
-        </xs:annotation>
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="useCasesName" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="useCase" type="tns:useCasesPair"/>
                       
           </xs:sequence>
                   
@@ -1541,6 +1514,30 @@ c) list of customers, communities, users, etc. using the Resource.]]>
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Position of the Resource's contact person to be displayed at the portal.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="useCasesPair">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="useCasesName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Short description of the Multimedia content.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="useCase" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Link to use cases supported by this Resource.]]>
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -1760,26 +1757,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" nillable="true" type="xs:anyURI"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="multimediaNames">
-        <xs:annotation>
-          <xs:documentation>
-            <![CDATA[Short description of the Multimedia content.]]>
-          </xs:documentation>
-        </xs:annotation>
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimediaName" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" type="tns:multimediaPair"/>
                       
           </xs:sequence>
                   

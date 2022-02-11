@@ -101,11 +101,7 @@
             
       <xs:enumeration value="MULTIMEDIA"/>
             
-      <xs:enumeration value="MULTIMEDIA_NAMES"/>
-            
       <xs:enumeration value="USE_CASES"/>
-            
-      <xs:enumeration value="USE_CASES_NAMES"/>
             
       <xs:enumeration value="SCIENTIFIC_DOMAINS"/>
             
