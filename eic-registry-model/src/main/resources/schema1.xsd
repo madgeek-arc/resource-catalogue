@@ -597,8 +597,6 @@ It is also possible to select Not a legal entity.]]>
         <xs:sequence>
                     
           <xs:element minOccurs="0" ref="tns:catalogue"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               

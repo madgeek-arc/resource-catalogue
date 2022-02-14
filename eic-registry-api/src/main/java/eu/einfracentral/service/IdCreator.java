@@ -1,5 +1,6 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
 
@@ -20,4 +21,12 @@ public interface IdCreator {
      * @return
      */
     String createServiceId(Service service);
+
+    /**
+     * Creates id for {@link Catalogue}
+     *
+     * @param catalogue
+     * @return
+     */
+    String createCatalogueId(Catalogue catalogue);
 }

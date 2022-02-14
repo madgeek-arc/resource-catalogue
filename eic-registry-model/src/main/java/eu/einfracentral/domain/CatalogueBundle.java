@@ -1,7 +1,5 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.annotation.VocabularyValidation;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -10,9 +8,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class CatalogueBundle extends Bundle<Catalogue>{
 
-    @XmlElement
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
-    private String status;
 
     public CatalogueBundle() {
         // no arg constructor
@@ -36,13 +31,4 @@ public class CatalogueBundle extends Bundle<Catalogue>{
     public void setCatalogue(Catalogue catalogue) {
         this.setPayload(catalogue);
     }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
 }
