@@ -2,8 +2,6 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.CatalogueBundle;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.CatalogueService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;

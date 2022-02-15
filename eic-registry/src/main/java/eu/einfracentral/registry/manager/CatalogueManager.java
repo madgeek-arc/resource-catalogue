@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 
@@ -36,14 +37,16 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
+    private final JmsTemplate jmsTopicTemplate;
 
     @Autowired
     public CatalogueManager(@Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                            IdCreator idCreator) {
+                            IdCreator idCreator, JmsTemplate jmsTopicTemplate) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
+        this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
     @Override
@@ -87,7 +90,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
         catalogue.setId(idCreator.createCatalogueId(catalogue.getCatalogue()));
-        logger.trace("User '{}' is attempting to add a new Provider: {}", auth, catalogue);
+        logger.trace("User '{}' is attempting to add a new Catalogue: {}", auth, catalogue);
         addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         if (catalogue.getCatalogue().getScientificDomains() != null && !catalogue.getCatalogue().getScientificDomains().isEmpty()) {
@@ -113,11 +116,11 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         CatalogueBundle ret;
         ret = super.add(catalogue, null);
-        logger.debug("Adding Provider: {}", catalogue);
+        logger.debug("Adding Catalogue: {}", catalogue);
 
 //        registrationMailService.sendEmailsToNewlyAddedAdmins(catalogue, null);
 //
-//        jmsTopicTemplate.convertAndSend("catalogue.create", catalogue);
+        jmsTopicTemplate.convertAndSend("catalogue.create", catalogue);
 //
 //        synchronizerServiceProvider.syncAdd(catalogue.getCatalogue());
 
