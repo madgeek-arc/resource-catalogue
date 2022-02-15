@@ -191,12 +191,6 @@
       "path": "//*[local-name()='suspended']/text()",
       "defaultValue": false,
       "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
-      "name": "status",
-      "path": "//*[local-name()='status']/text()",
-      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",

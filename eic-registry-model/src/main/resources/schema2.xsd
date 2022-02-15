@@ -225,13 +225,13 @@
             
       <xs:enumeration value="RELATED_PLATFORM"/>
             
-      <xs:enumeration value="PROVIDER_HOSTING_LEGAL_ENTITY"/>
-            
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
             
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
             
       <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
+            
+      <xs:enumeration value="PROVIDER_HOSTING_LEGAL_ENTITY"/>
             
       <xs:enumeration value="PROVIDER_LEGAL_STATUS"/>
             
