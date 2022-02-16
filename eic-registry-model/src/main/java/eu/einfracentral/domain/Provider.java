@@ -75,8 +75,10 @@ public class Provider implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 7, notes = "Vocabulary ID")
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
+    @FieldValidation(nullable = true)
+    //TODO: ENABLE THESE AFTER MIGRATION
+//    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+//    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
     private String hostingLegalEntity;
 
 
