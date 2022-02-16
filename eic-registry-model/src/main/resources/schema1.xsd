@@ -488,7 +488,7 @@ It is also possible to select Not a legal entity.]]>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="multimediaURL" type="xs:anyURI">
+      <xs:element name="multimediaURL" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Link to video, slideshow, photos, screenshots with details of the Provider.]]>
@@ -1532,7 +1532,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="useCase" type="xs:anyURI">
+      <xs:element name="useCase" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Link to use cases supported by this Resource.]]>

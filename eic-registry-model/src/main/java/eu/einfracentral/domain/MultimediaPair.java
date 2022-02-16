@@ -15,9 +15,9 @@ public class MultimediaPair {
     /**
      * Link to video, slideshow, photos, screenshots with details of the Provider.
      */
-    @XmlElement(name = "multimediaURL")
-    @ApiModelProperty(position = 1)
-    @FieldValidation(nullable = true)
+    @XmlElement(name = "multimediaURL", required = true)
+    @ApiModelProperty(position = 1, required = true)
+    @FieldValidation()
     private URL multimediaURL;
 
     /**

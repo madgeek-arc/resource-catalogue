@@ -15,9 +15,9 @@ public class UseCasesPair {
     /**
      * Link to use cases supported by this Resource.
      */
-    @XmlElement(name = "useCase")
-    @ApiModelProperty(position = 1)
-    @FieldValidation(nullable = true)
+    @XmlElement(name = "useCase", required = true)
+    @ApiModelProperty(position = 1, required = true)
+    @FieldValidation()
     private URL useCaseURL;
 
     /**
