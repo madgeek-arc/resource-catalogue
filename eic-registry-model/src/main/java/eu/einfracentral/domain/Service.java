@@ -342,10 +342,8 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "relatedPlatforms")
     @XmlElement(name = "relatedPlatform")
     @ApiModelProperty(position = 35, notes = "Vocabulary ID")
-    @FieldValidation(nullable = true)
-    //TODO: ENABLE THESE AFTER MIGRATION
-//    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-//    @VocabularyValidation(type = Vocabulary.Type.RELATED_PLATFORM)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.RELATED_PLATFORM)
     private List<String> relatedPlatforms;
 
     /**
@@ -407,18 +405,16 @@ public class Service implements Identifiable {
     /**
      * Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.
      */
-    //TODO: CHANGE REQUIRED TO TRUE AFTER MIGRATION
-    @XmlElement(required = false)
-    @ApiModelProperty(position = 42, required = false, example = "https://example.com")
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 42, required = true, example = "https://example.com")
     @FieldValidation
     private URL termsOfUse;
 
     /**
      * Link to the privacy policy applicable to the Resource.
      */
-    //TODO: CHANGE REQUIRED TO TRUE AFTER MIGRATION
-    @XmlElement(required = false)
-    @ApiModelProperty(position = 43, required = false, example = "https://example.com")
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 43, required = true, example = "https://example.com")
     @FieldValidation
     private URL privacyPolicy;
 
