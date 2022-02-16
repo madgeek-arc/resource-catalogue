@@ -1075,7 +1075,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="privacyPolicy" type="xs:anyURI">
+      <xs:element minOccurs="0" name="privacyPolicy" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Link to the privacy policy applicable to the Resource.]]>
@@ -1313,7 +1313,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
               
       </xs:element>
             
-      <xs:element name="termsOfUse" type="xs:anyURI">
+      <xs:element minOccurs="0" name="termsOfUse" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.]]>
