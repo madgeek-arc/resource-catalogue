@@ -15,7 +15,7 @@ public class UseCasesPair {
     /**
      * Link to use cases supported by this Resource.
      */
-    @XmlElement(name = "useCase", required = true)
+    @XmlElement(required = true)
     @ApiModelProperty(position = 1, required = true)
     @FieldValidation()
     private URL useCaseURL;
@@ -23,7 +23,7 @@ public class UseCasesPair {
     /**
      * Short description of the Multimedia content.
      */
-    @XmlElement(name = "useCasesName")
+    @XmlElement()
     @ApiModelProperty(position = 2)
     @FieldValidation(nullable = true)
     private String useCaseName;
@@ -34,6 +34,14 @@ public class UseCasesPair {
     public UseCasesPair(URL useCaseURL, String useCaseName) {
         this.useCaseURL = useCaseURL;
         this.useCaseName = useCaseName;
+    }
+
+    @Override
+    public String toString() {
+        return "UseCasesPair{" +
+                "useCaseURL=" + useCaseURL +
+                ", useCaseName='" + useCaseName + '\'' +
+                '}';
     }
 
     public URL getUseCaseURL() {
