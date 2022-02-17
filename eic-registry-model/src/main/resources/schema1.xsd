@@ -1524,7 +1524,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
         
     <xs:sequence>
             
-      <xs:element minOccurs="0" name="useCasesName" type="xs:string">
+      <xs:element minOccurs="0" name="useCaseName" type="xs:string">
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Short description of the Multimedia content.]]>
@@ -1532,7 +1532,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="useCase" type="xs:anyURI">
+      <xs:element name="useCaseURL" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Link to use cases supported by this Resource.]]>
