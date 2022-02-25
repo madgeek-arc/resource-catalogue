@@ -1,6 +1,7 @@
 package eu.einfracentral.service.sync;
 
 import eu.einfracentral.domain.Identifiable;
+import eu.einfracentral.domain.Provider;
 import eu.einfracentral.service.SynchronizerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,6 +9,7 @@ import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
@@ -27,7 +29,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
     private static final Logger logger = LogManager.getLogger(AbstractSyncService.class);
 
     protected RestTemplate restTemplate;
-    protected boolean active = false;
+    protected boolean active = true;
     protected String host;
     protected String controller;
     private String filename;
@@ -80,6 +82,9 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
                         break;
                     case "delete":
                         syncDelete(pair.getValue0());
+                        break;
+                    case "verify":
+                        syncVerify(pair.getValue0());
                         break;
                     default:
                         logger.warn("Unsupported action: {}", pair.getValue1());
@@ -190,9 +195,50 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         }
     }
 
+    @Override
+    public void syncVerify(T t) {
+        boolean retryKey = true;
+        if (active) {
+            HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
+            URI uri;
+            logger.info("Verifying resource with id: {} - Host: {}", t.getId(), host);
+            try {
+                if (t instanceof Provider){
+                    uri = new URI(host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider").normalize();
+                } else{
+                    uri = new URI(host + controller + "/verifyResource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
+                }
+                HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+                restTemplate.setRequestFactory(requestFactory);
+                ResponseEntity<?> re = restTemplate.exchange(uri.normalize(), HttpMethod.PATCH, request, t.getClass());
+                if (re.getStatusCode() != HttpStatus.OK) {
+                    logger.error("Verifying {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                            t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
+                } else {
+                    retryKey = false;
+                }
+            } catch (URISyntaxException e) {
+                logger.error("could not create URI for host: {}", host, e);
+            } catch (HttpServerErrorException e) {
+                logger.error("Failed to patch {} with id {} to host {}\nMessage: {}",
+                        t.getClass(), t.getId(), host, e.getResponseBodyAsString());
+            } catch (RuntimeException re) {
+                logger.error("syncVerify failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
+            }
+            if (retryKey) {
+                try {
+                    queue.add(Pair.with(t, "verify"));
+                } catch (IllegalStateException e) {
+                    logger.info("No space is currently available in the Queue");
+                }
+            }
+        }
+    }
+
     protected HttpHeaders createHeaders() {
         String token;
         HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
         try {
             token = readFile(filename);
             headers.add("Authorization", "Bearer " + token);
