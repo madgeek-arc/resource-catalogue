@@ -1,14 +1,12 @@
 package eu.einfracentral.registry.controller;
 
 import com.google.gson.Gson;
-import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import org.apache.ivy.osgi.core.BundleRequirement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.CDL;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
 import java.util.List;
 
 @RestController

@@ -404,4 +404,9 @@ public class ProviderController {
         return providerManager.migrateLatestProviderHistory(authentication);
     }
 
+//    @PostMapping(path = "initialCatRIsCatalogueSync", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void initialCatRIsCatalogueSync(@ApiIgnore Authentication authentication) {
+        providerManager.initialCatRIsCatalogueSync();
+    }
 }

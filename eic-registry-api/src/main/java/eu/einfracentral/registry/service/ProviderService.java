@@ -135,4 +135,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging, int quantity, int from);
+
+    void initialCatRIsCatalogueSync();
 }
