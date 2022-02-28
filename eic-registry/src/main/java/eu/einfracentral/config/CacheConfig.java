@@ -32,6 +32,7 @@ public class CacheConfig {
     public static final String CACHE_SERVICE_EVENTS = "service_events";
     public static final String CACHE_VISITS = "visits";
     public static final String CACHE_CATALOGUES = "catalogues";
+    public static final String CACHE_DATASOURCES = "datasources";
 
     protected RestTemplate restTemplate;
 

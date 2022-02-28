@@ -43,6 +43,7 @@ public class Vocabulary implements Identifiable {
     }
 
     public enum Type {
+        // Resource
         SUPERCATEGORY("Supercategory"),
         CATEGORY("Category"),
         SUBCATEGORY("Subcategory"),
@@ -59,6 +60,7 @@ public class Vocabulary implements Identifiable {
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
         RELATED_PLATFORM("Related platform"),
+        // Provider
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
         PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
@@ -70,10 +72,17 @@ public class Vocabulary implements Identifiable {
         PROVIDER_STRUCTURE_TYPE("Provider structure type"),
         PROVIDER_MERIL_SCIENTIFIC_DOMAIN("Provider meril scientific domain"),
         PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN("Provider meril scientific subdomain"),
+        // States
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
-        AUDIT_STATE("Audit state");
+        AUDIT_STATE("Audit state"),
+        // DataSource
+        DS_RESEARCH_ENTITY_TYPE("Research Entity Type"),
+        DS_PERSISTENT_IDENTITY_SCHEME("Persistent Identity Scheme"),
+        DS_JURISDICTION("Jurisdiction"),
+        DS_CLASSIFICATION("Classification"),
+        DS_COAR_ACCESS_RIGHTS_1_0("COAR Access Rights 1.0");
 
         private final String type;
 

@@ -12,6 +12,7 @@ import java.util.List;
 public class RichService {
 
     private Service service;
+    private DataSource dataSourceBundle;
     private Metadata metadata;
 
     private List<String> languageAvailabilityNames;
@@ -49,6 +50,11 @@ public class RichService {
     public RichService(InfraService service) {
         this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = service.getMetadata();
+    }
+
+    public RichService(DataSourceBundle dataSourceBundle) {
+        this.dataSourceBundle = dataSourceBundle.getDataSource(); // copy constructor is needed to 'hide' infraService fields
+        this.metadata = dataSourceBundle.getMetadata();
     }
 
     public Service getService() {

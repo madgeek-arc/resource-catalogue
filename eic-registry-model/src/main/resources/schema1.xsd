@@ -9,6 +9,10 @@
     
   <xs:element name="catalogueBundle" type="tns:catalogueBundle"/>
     
+  <xs:element name="dataSource" type="tns:dataSource"/>
+    
+  <xs:element name="dataSourceBundle" type="tns:dataSourceBundle"/>
+    
   <xs:element name="emailMessage" type="tns:emailMessage"/>
     
   <xs:element name="event" type="tns:event"/>
@@ -606,95 +610,169 @@ It is also possible to select Not a legal entity.]]>
       
   </xs:complexType>
     
-  <xs:complexType name="emailMessage">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="message" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="recipientEmail" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="senderEmail" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="senderName" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="subject" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="event">
-        
-    <xs:sequence>
-            
-      <xs:element name="id" type="xs:string"/>
-            
-      <xs:element name="instant" type="xs:long"/>
-            
-      <xs:element name="service" type="xs:string"/>
-            
-      <xs:element name="type" type="xs:string"/>
-            
-      <xs:element name="user" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="value" type="xs:float"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasMapType">
-        
-    <xs:sequence>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" nillable="true" type="tns:extrasType"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasType">
-        
-    <xs:simpleContent>
-            
-      <xs:extension base="xs:string">
-                
-        <xs:attribute name="key" type="xs:string"/>
-              
-      </xs:extension>
-          
-    </xs:simpleContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasMapTypeAdapter">
+  <xs:complexType name="dataSource">
         
     <xs:complexContent>
             
-      <xs:extension base="xmlAdapter">
-                
-        <xs:sequence/>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="infraService">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="tns:bundle">
+      <xs:extension base="tns:service">
                 
         <xs:sequence>
                     
-          <xs:element name="latest" type="xs:boolean"/>
+          <xs:element name="dataSourceClassification" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[The specific type of the data source based on the vocabulary defined for this property]]>
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
                     
-          <xs:element minOccurs="0" ref="tns:service"/>
+          <xs:element name="jurisdiction" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property]]>
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
                     
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
+          <xs:element minOccurs="0" name="persistentIdentitySystems">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[The persistent identifier systems that are used by the Data Source to identify the EntityType it supports]]>
+              </xs:documentation>
+            </xs:annotation>
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="persistentIdentitySystem" type="tns:persistentIdentitySystem"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
+                    
+          <xs:element minOccurs="0" name="preservationPolicyURL" type="xs:anyURI">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[This policy provides a comprehensive framework for the long-term preservation of the research products.
+Principles aims and responsibilities must be clarified. An important aspect is the description of preservation concepts to ensure the technical and conceptual
+utility of the content]]>
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+                    
+          <xs:element name="researchEntityTypes">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[The types of OpenAIRE entities managed by the data source, based on the vocabulary for this property]]>
+              </xs:documentation>
+            </xs:annotation>
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="researchEntityType" type="xs:string"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
+                    
+          <xs:element minOccurs="0" name="researchProductAccessPolicies">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[Research product access policy]]>
+              </xs:documentation>
+            </xs:annotation>
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="researchProductAccessPolicy" type="xs:string"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
+                    
+          <xs:element minOccurs="0" name="researchProductLicensings">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[Licenses under which the research products contained within the data sources can be made available.
+Repositories can allow a license to be defined for each research product, while for scientific databases the database is typically provided under a single license.]]>
+              </xs:documentation>
+            </xs:annotation>
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="researchProductLicensing" type="tns:researchProductLicensing"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
+                    
+          <xs:element minOccurs="0" name="researchProductMetadataAccessPolicies">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[Research Product Metadata Access Policy]]>
+              </xs:documentation>
+            </xs:annotation>
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="researchProductMetadataAccessPolicy" type="xs:string"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
+                    
+          <xs:element minOccurs="0" name="researchProductMetadataLicensing" type="tns:researchProductMetadataLicensing">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[Metadata Policy for information describing items in the repository:
+Access and re-use of metadata]]>
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+                    
+          <xs:element minOccurs="0" name="submissionPolicyURL" type="xs:anyURI">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[This policy provides a comprehensive framework for the contribution of research products.
+Criteria for submitting content to the repository as well as product preparation guidelines can be stated. Concepts for quality assurance may be provided.]]>
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+                    
+          <xs:element name="thematic" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[Boolean value specifying if the data source is dedicated to a given discipline or is instead discipline agnostic]]>
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+                    
+          <xs:element name="versionControl" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>
+                <![CDATA[If data versioning is supported: the data source explicitly allows the deposition of different versions of the same object]]>
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
                   
         </xs:sequence>
               
@@ -1384,6 +1462,89 @@ c) list of customers, communities, users, etc. using the Resource.]]>
       
   </xs:complexType>
     
+  <xs:complexType name="persistentIdentitySystem">
+        
+    <xs:sequence>
+            
+      <xs:element name="persistentIdentityEntityType" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Specify the EntityType to which the persistent identifier is referring to.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="persistentIdentityEntityTypeSchemes">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Specify the list of persistent identifier schemes used to refer to EntityTypes.]]>
+          </xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="persistentIdentityEntityType" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="researchProductLicensing">
+        
+    <xs:sequence>
+            
+      <xs:element name="researchProductLicenseName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Research product license name]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="researchProductLicenseURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Research product license URL]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="researchProductMetadataLicensing">
+        
+    <xs:sequence>
+            
+      <xs:element name="researchProductMetadataLicenseName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Research Product Metadata License Name]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="researchProductMetadataLicenseURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Research Product Metadata License URL]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
   <xs:complexType name="serviceCategory">
         
     <xs:sequence>
@@ -1541,6 +1702,122 @@ c) list of customers, communities, users, etc. using the Resource.]]>
       </xs:element>
           
     </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="dataSourceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:dataSource"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="emailMessage">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="message" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="recipientEmail" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="senderEmail" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="senderName" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="subject" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="event">
+        
+    <xs:sequence>
+            
+      <xs:element name="id" type="xs:string"/>
+            
+      <xs:element name="instant" type="xs:long"/>
+            
+      <xs:element name="service" type="xs:string"/>
+            
+      <xs:element name="type" type="xs:string"/>
+            
+      <xs:element name="user" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="value" type="xs:float"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="extrasMapType">
+        
+    <xs:sequence>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" nillable="true" type="tns:extrasType"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="extrasType">
+        
+    <xs:simpleContent>
+            
+      <xs:extension base="xs:string">
+                
+        <xs:attribute name="key" type="xs:string"/>
+              
+      </xs:extension>
+          
+    </xs:simpleContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="extrasMapTypeAdapter">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="xmlAdapter">
+                
+        <xs:sequence/>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="infraService">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element name="latest" type="xs:boolean"/>
+                    
+          <xs:element minOccurs="0" ref="tns:service"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
       
   </xs:complexType>
     
