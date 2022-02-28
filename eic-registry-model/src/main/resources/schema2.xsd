@@ -254,6 +254,16 @@
       <xs:enumeration value="TEMPLATE_STATE"/>
             
       <xs:enumeration value="AUDIT_STATE"/>
+            
+      <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
+            
+      <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
+            
+      <xs:enumeration value="DS_JURISDICTION"/>
+            
+      <xs:enumeration value="DS_CLASSIFICATION"/>
+            
+      <xs:enumeration value="DS_COAR_ACCESS_RIGHTS_1_0"/>
           
     </xs:restriction>
       
