@@ -12,6 +12,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -22,6 +23,7 @@ import eu.openminted.registry.core.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
@@ -69,9 +71,9 @@ public abstract class AbstractDataSourceManager extends AbstractGenericService<D
     @Autowired
     private FacetLabelService facetLabelService;
 
-//    @Autowired
-//    @Qualifier("serviceSync")
-//    private SynchronizerService<DataSource> synchronizerService;
+    @Autowired
+    @Qualifier("dataSourceSync")
+    private SynchronizerService<DataSource> synchronizerService;
 
     @Autowired
     private AnalyticsService analyticsService;
@@ -210,7 +212,7 @@ public abstract class AbstractDataSourceManager extends AbstractGenericService<D
 
         jmsTopicTemplate.convertAndSend("resource.create", dataSourceBundle);
 
-//        synchronizerService.syncAdd(infraService.getService());
+        synchronizerService.syncAdd(dataSourceBundle.getDataSource());
 
         return dataSourceBundle;
     }
@@ -244,7 +246,7 @@ public abstract class AbstractDataSourceManager extends AbstractGenericService<D
 
         jmsTopicTemplate.convertAndSend("resource.update", dataSourceBundle);
 
-//        synchronizerService.syncUpdate(dataSourceBundle.getDataSource());
+        synchronizerService.syncUpdate(dataSourceBundle.getDataSource());
 
         return dataSourceBundle;
     }
@@ -261,7 +263,7 @@ public abstract class AbstractDataSourceManager extends AbstractGenericService<D
 
         jmsTopicTemplate.convertAndSend("resource.delete", dataSourceBundle);
 
-//        synchronizerService.syncDelete(dataSourceBundle.getDataSource());
+        synchronizerService.syncDelete(dataSourceBundle.getDataSource());
 
     }
 
