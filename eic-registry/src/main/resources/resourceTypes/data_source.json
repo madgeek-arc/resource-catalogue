@@ -305,7 +305,7 @@
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "dataSource",
+  "name": "data_source",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/dataSource/eic-registry-model/src/main/resources/schema1.xsd"
