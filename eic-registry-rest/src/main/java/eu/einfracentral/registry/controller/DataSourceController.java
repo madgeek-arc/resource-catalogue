@@ -1,11 +1,8 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.DataSourceBundle;
-import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.Service;
 import eu.einfracentral.registry.service.DataSourceService;
-import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
