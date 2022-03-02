@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "infra_service_id",
+      "name": "data_source_id",
       "path": "//*[local-name()='service']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
@@ -10,7 +10,7 @@
     {
       "multivalued": false,
       "name": "name",
-      "label": "Service Name",
+      "label": "DataSource Name",
       "path": "//*[local-name()='service']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
