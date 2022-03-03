@@ -2,16 +2,16 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "infra_service_id",
-      "path": "//*[local-name()='service']/*[local-name()='id']/text()",
+      "name": "catalogue_id",
+      "path": "//*[local-name()='catalogue']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
     {
       "multivalued": false,
       "name": "name",
-      "label": "Service Name",
-      "path": "//*[local-name()='service']/*[local-name()='name']/text()",
+      "label": "Catalogue Name",
+      "path": "//*[local-name()='catalogue']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
@@ -23,30 +23,23 @@
     },
     {
       "multivalued": false,
-      "name": "version",
-      "label": "Version",
-      "path": "//*[local-name()='service']/*[local-name()='version']/text()",
+      "name": "legal_entity",
+      "label": "Legal Entity",
+      "path": "//*[local-name()='legalEntity']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "legal_status",
+      "label": "Legal Status",
+      "path": "//*[local-name()='legalStatus']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "resource_organisation",
-      "label": "Resource Organisation",
-      "path": "//*[local-name()='service']/*[local-name()='resourceOrganisation']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "resource_providers",
-      "label": "Resource Provider",
-      "path": "//*[local-name()='service']//*[local-name()='resourceProvider']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "subcategories",
-      "label": "Subcategory",
-      "path": "//*[local-name()='category']/*[local-name()='subcategory']/text()",
+      "name": "hosting_legal_entity",
+      "label": "Hosting Legal Entity",
+      "path": "//*[local-name()='hostingLegalEntity']/text()",
       "type": "java.lang.String"
     },
     {
@@ -58,121 +51,29 @@
     },
     {
       "multivalued": true,
-      "name": "target_users",
-      "label": "Target User",
-      "path": "//*[local-name()='service']//*[local-name()='targetUser']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "access_types",
-      "label": "Access Type",
-      "path": "//*[local-name()='service']//*[local-name()='accessType']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "access_modes",
-      "label": "Access Mode",
-      "path": "//*[local-name()='service']//*[local-name()='accessMode']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "language_availabilities",
-      "label": "Language Availability",
-      "path": "//*[local-name()='service']//*[local-name()='languageAvailability']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "geographical_availabilities",
-      "label": "Geographical Availability",
-      "path": "//*[local-name()='service']//*[local-name()='geographicalAvailability']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "resource_geographic_locations",
-      "label": "Resource Geographic Location",
-      "path": "//*[local-name()='service']//*[local-name()='resourceGeographicLocation']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "trl",
-      "label": "TRL",
-      "path": "//*[local-name()='service']/*[local-name()='trl']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "life_cycle_status",
-      "label": "Life Cycle Status",
-      "path": "//*[local-name()='service']//*[local-name()='lifeCycleStatus']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "catalogue_id",
-      "label": "Catalogue ID",
-      "path": "//*[local-name()='catalogueId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "funding_body",
-      "label": "Funding Body",
-      "path": "//*[local-name()='service']//*[local-name()='fundingBody']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "funding_programs",
-      "label": "Funding Program",
-      "path": "//*[local-name()='service']//*[local-name()='fundingProgram']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "description",
-      "label": "Description",
-      "path": "//*[local-name()='service']/*[local-name()='description']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "tagline",
-      "label": "Tagline",
-      "path": "//*[local-name()='service']/*[local-name()='tagline']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "use_cases",
-      "label": "Use Case",
-      "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "open_source_technologies",
-      "label": "Open Source Technology",
-      "path": "//*[local-name()='service']//*[local-name()='openSourceTechnology']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "tags",
       "label": "Tag",
-      "path": "//*[local-name()='service']//*[local-name()='tag']/text()",
+      "path": "//*[local-name()='tag']/text()",
       "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "order_type",
-      "label": "Order Type",
-      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
+      "multivalued": true,
+      "name": "affiliations",
+      "label": "Affiliation",
+      "path": "//*[local-name()='affiliation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "networks",
+      "label": "Network",
+      "path": "//*[local-name()='network']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "users",
+      "path": "//*[local-name()='user']/*[local-name()='email']/text()",
       "type": "java.lang.String"
     },
     {
@@ -280,8 +181,8 @@
     {
       "multivalued": false,
       "name": "active",
+      "path": "//*[local-name()='active']/text()",
       "defaultValue": false,
-      "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
       "type": "java.lang.Boolean"
     },
     {
@@ -290,22 +191,10 @@
       "path": "//*[local-name()='suspended']/text()",
       "defaultValue": false,
       "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
-      "name": "status",
-      "path": "//*[local-name()='infraService']/*[local-name()='status']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latest",
-      "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
-      "type": "java.lang.Boolean"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "infra_service",
+  "name": "catalogue",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/eosc_model_v4.00/eic-registry-model/src/main/resources/schema1.xsd"

@@ -153,4 +153,9 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
+//    @GetMapping(path = "emailPhoneProblematicIds", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void emailPhoneProblematicIds(){
+        infraService.emailPhoneValidityCheck();
+    }
 }
