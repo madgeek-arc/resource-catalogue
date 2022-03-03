@@ -20,6 +20,12 @@ public interface SecurityService {
 
     boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId);
 
+    boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId);
+
+    boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow);
+
+    boolean userIsCatalogueAdmin(@NotNull User user, @NotNull String catalogueId);
+
     boolean isServiceProviderAdmin(Authentication auth, String serviceId);
 
     boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow);

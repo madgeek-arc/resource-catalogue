@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "infra_service_id",
+      "name": "data_source_id",
       "path": "//*[local-name()='service']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
@@ -10,7 +10,7 @@
     {
       "multivalued": false,
       "name": "name",
-      "label": "Service Name",
+      "label": "DataSource Name",
       "path": "//*[local-name()='service']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
@@ -305,8 +305,8 @@
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "infra_service",
+  "name": "data_source",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/eosc_model_v4.00/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/dataSource/eic-registry-model/src/main/resources/schema1.xsd"
 }
