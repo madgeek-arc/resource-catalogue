@@ -29,6 +29,9 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private boolean suspended;
 
     @XmlElement
+    private MigrationStatus migrationStatus;
+
+    @XmlElement
     private List<LoggingInfo> loggingInfo;
 
     @XmlElement
