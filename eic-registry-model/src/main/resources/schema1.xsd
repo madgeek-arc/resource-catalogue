@@ -23,6 +23,8 @@
     
   <xs:element name="metadata" type="tns:metadata"/>
     
+  <xs:element name="migrationStatus" type="tns:migrationStatus"/>
+    
   <xs:element name="multimediaPair" type="tns:multimediaPair"/>
     
   <xs:element name="provider" type="tns:provider"/>
@@ -76,6 +78,8 @@
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
             
       <xs:element minOccurs="0" ref="tns:metadata"/>
+            
+      <xs:element minOccurs="0" ref="tns:migrationStatus"/>
             
       <xs:element name="suspended" type="xs:boolean"/>
           
@@ -134,6 +138,36 @@
         </xs:complexType>
               
       </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="migrationStatus">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="comments">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="comment" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element default="null" minOccurs="0" name="migrationDate" type="xs:string"/>
+            
+      <xs:element default="null" minOccurs="0" name="modelVersion" type="xs:string"/>
+            
+      <xs:element default="null" minOccurs="0" name="modified" type="xs:string"/>
+            
+      <xs:element default="null" minOccurs="0" name="resolutionDate" type="xs:string"/>
           
     </xs:sequence>
       
