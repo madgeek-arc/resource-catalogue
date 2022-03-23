@@ -29,6 +29,9 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private boolean suspended;
 
     @XmlElement
+    private Identifier identifier;
+
+    @XmlElement
     private MigrationStatus migrationStatus;
 
     @XmlElement
@@ -86,6 +89,22 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     public void setSuspended(boolean suspended) {
         this.suspended = suspended;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
+    }
+
+    public MigrationStatus getMigrationStatus() {
+        return migrationStatus;
+    }
+
+    public void setMigrationStatus(MigrationStatus migrationStatus) {
+        this.migrationStatus = migrationStatus;
     }
 
     public List<LoggingInfo> getLoggingInfo() {

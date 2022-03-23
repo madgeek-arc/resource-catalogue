@@ -255,6 +255,8 @@
             
       <xs:enumeration value="AUDIT_STATE"/>
             
+      <xs:enumeration value="CATALOGUE_STATE"/>
+            
       <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
             
       <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
