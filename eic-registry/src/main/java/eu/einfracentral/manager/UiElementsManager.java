@@ -395,7 +395,17 @@ public class UiElementsManager implements UiElementsService {
             ff.setOrderBy(FacetFilterUtils.createOrderBy("name"));
             List<InfraService> services = this.infraServiceService.getAll(ff, null).getResults();
             for (InfraService service : services) {
-                serviceMap.get(voc.getName()).add(new Value(service.getId(), service.getService().getName()));
+                String image = null;
+                for (DynamicField dynamicField : service.getExtras()) {
+                    if (dynamicField.getName().equals("image")) {
+                        if (dynamicField.getValues() != null && !dynamicField.getValues().isEmpty()) {
+                            image = (String) dynamicField.getValues().get(0);
+                        }
+                        break;
+                    }
+                }
+                Value value = new Value(service.getId(), service.getService().getName(), null, service.getService().getTagline(), image);
+                serviceMap.get(voc.getName()).add(value);
             }
         }
         return serviceMap;

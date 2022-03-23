@@ -7,6 +7,8 @@ public class Value {
     String id;
     String name;
     String parentId = null;
+    String tagline = null;
+    String image = null;
 
     public Value() {
     }
@@ -20,6 +22,14 @@ public class Value {
         this.id = id;
         this.name = name;
         this.parentId = parentId;
+    }
+
+    public Value(String id, String name, String parentId, String tagline, String image) {
+        this.id = id;
+        this.name = name;
+        this.parentId = parentId;
+        this.tagline = tagline;
+        this.image = image;
     }
 
     public String getId() {
@@ -44,6 +54,22 @@ public class Value {
 
     public void setParentId(String parentId) {
         this.parentId = parentId;
+    }
+
+    public String getTagline() {
+        return tagline;
+    }
+
+    public void setTagline(String tagline) {
+        this.tagline = tagline;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     @Override
