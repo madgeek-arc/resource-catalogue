@@ -1,11 +1,16 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueService;
+import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -13,24 +18,26 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
+import org.springframework.stereotype.Service;
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_CATALOGUES;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 import static org.junit.Assert.assertTrue;
 
-@org.springframework.stereotype.Service("catalogueManager")
+@Service("catalogueManager")
 public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService<CatalogueBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(CatalogueManager.class);
@@ -38,15 +45,25 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
     private final JmsTemplate jmsTopicTemplate;
+    private final FieldValidator fieldValidator;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceManager<ProviderBundle> providerResourceManager;
 
     @Autowired
     public CatalogueManager(@Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                            IdCreator idCreator, JmsTemplate jmsTopicTemplate) {
+                            IdCreator idCreator, JmsTemplate jmsTopicTemplate, ProviderService<ProviderBundle, Authentication> providerService,
+                            FieldValidator fieldValidator, InfraServiceService<InfraService, InfraService> infraServiceService,
+                            @Qualifier("providerManager") ResourceManager<ProviderBundle> providerResourceManager) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
         this.jmsTopicTemplate = jmsTopicTemplate;
+        this.fieldValidator = fieldValidator;
+        this.providerService = providerService;
+        this.infraServiceService = infraServiceService;
+        this.providerResourceManager = providerResourceManager;
     }
 
     @Override
@@ -54,12 +71,13 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return "catalogue";
     }
 
+    //SECTION: CATALOGUE
     @Override
     @Cacheable(value = CACHE_CATALOGUES)
     public CatalogueBundle get(String id) {
         CatalogueBundle catalogue = super.get(id);
         if (catalogue == null) {
-            throw new eu.einfracentral.exception.ResourceNotFoundException(
+            throw new ResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", id));
         }
         return catalogue;
@@ -86,10 +104,56 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
+    @Cacheable(value = CACHE_CATALOGUES)
+    public Browsing<CatalogueBundle> getAll(FacetFilter ff, Authentication auth) {
+        List<CatalogueBundle> userCatalogues = null;
+        List<CatalogueBundle> retList = new ArrayList<>();
+
+        // if user is ADMIN or EPOT return everything
+        if (auth != null && auth.isAuthenticated()) {
+            if (securityService.hasRole(auth, "ROLE_ADMIN") ||
+                    securityService.hasRole(auth, "ROLE_EPOT")) {
+                return super.getAll(ff, auth);
+            }
+            // if user is CATALOGUE ADMIN return all his Catalogues (rejected, pending) with their sensitive data (Users, MainContact) too
+            User user = User.of(auth);
+            Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
+            for (CatalogueBundle catalogueBundle : catalogues.getResults()){
+                if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
+                        securityService.userIsCatalogueAdmin(user, catalogueBundle.getId())) {
+                    retList.add(catalogueBundle);
+                }
+            }
+            catalogues.setResults(retList);
+            catalogues.setTotal(retList.size());
+            catalogues.setTo(retList.size());
+            userCatalogues = getMyCatalogues(auth);
+            if (userCatalogues != null) {
+                // replace user providers having null users with complete provider entries
+                userCatalogues.forEach(x -> {
+                    catalogues.getResults().removeIf(catalogue -> catalogue.getId().equals(x.getId()));
+                    catalogues.getResults().add(x);
+                });
+            }
+            return catalogues;
+        }
+
+        // else return ONLY approved Catalogues
+        ff.addFilter("status", "approved catalogue");
+        Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
+        retList.addAll(catalogues.getResults());
+        catalogues.setResults(retList);
+
+        return catalogues;
+    }
+
+    @Override
     @CacheEvict(value = CACHE_CATALOGUES, allEntries = true)
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
-        catalogue.setId(idCreator.createCatalogueId(catalogue.getCatalogue()));
+        if (catalogue.getId() == null || catalogue.getId().equals("")){
+            catalogue.setId(idCreator.createCatalogueId(catalogue.getCatalogue()));
+        }
         logger.trace("User '{}' is attempting to add a new Catalogue: {}", auth, catalogue);
         addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
@@ -104,8 +168,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         loggingInfoList.add((loggingInfo));
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
-        //TODO: ACTIVATE THIS IF CATALOGUE GET A STATUS FIELD
-//        catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
+        catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
 
         // latestOnboardingInfo
         catalogue.setLatestOnboardingInfo(loggingInfo);
@@ -155,8 +218,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         Resource existing = whereID(catalogue.getId(), true);
         CatalogueBundle ex = deserialize(existing);
         catalogue.setActive(ex.isActive());
-        //TODO: ACTIVATE THIS IF CATALOGUE GET A STATUS FIELD
-//        catalogue.setStatus(ex.getStatus());
+        catalogue.setStatus(ex.getStatus());
         existing.setPayload(serialize(catalogue));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
@@ -183,22 +245,73 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
-    public Browsing<CatalogueBundle> getAll(FacetFilter ff, Authentication auth) {
-        //TODO: REFACTOR IF WE ENABLE STATUS FIELD IN CATALOGUE
-        return super.getAll(ff, auth);
+    public CatalogueBundle validate(CatalogueBundle catalogue) {
+        logger.debug("Validating Catalogue with id: {}", catalogue.getId());
+
+        try {
+            fieldValidator.validateFields(catalogue.getCatalogue());
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
+
+        return catalogue;
     }
 
-    private void addAuthenticatedUser(Catalogue catalogue, Authentication auth) {
-        List<User> users;
-        User authUser = User.of(auth);
-        users = catalogue.getUsers();
-        if (users == null) {
-            users = new ArrayList<>();
+    @Override
+    @Cacheable(value = CACHE_PROVIDERS)
+    public List<CatalogueBundle> getMyCatalogues(Authentication auth) {
+        if (auth == null) {
+            throw new UnauthorizedUserException("Please log in.");
         }
-        if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
-            users.add(authUser);
-            catalogue.setUsers(users);
+        User user = User.of(auth);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return super.getAll(ff, auth).getResults()
+                .stream().map(p -> {
+                    if (securityService.userIsCatalogueAdmin(user, p.getId())) {
+                        return p;
+                    } else return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CatalogueBundle> getInactive() {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("active", false);
+        ff.setFrom(0);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return getAll(ff, null).getResults();
+    }
+
+    private void addAuthenticatedUser(Object object, Authentication auth) {
+        if (object instanceof Catalogue){
+            Catalogue catalogue = (Catalogue) object;
+            List<User> users;
+            User authUser = User.of(auth);
+            users = catalogue.getUsers();
+            if (users == null) {
+                users = new ArrayList<>();
+            }
+            if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
+                users.add(authUser);
+                catalogue.setUsers(users);
+            }
+        } else{
+            Provider provider = (Provider) object;
+            List<User> users;
+            User authUser = User.of(auth);
+            users = provider.getUsers();
+            if (users == null) {
+                users = new ArrayList<>();
+            }
+            if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
+                users.add(authUser);
+                provider.setUsers(users);
+            }
         }
     }
 
@@ -287,5 +400,238 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 //        if (!adminsDeleted.isEmpty()) {
 //            registrationMailService.sendEmailsToNewlyDeletedAdmins(existingProvider, adminsDeleted);
 //        }
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_CATALOGUES, allEntries = true)
+    public CatalogueBundle verifyCatalogue(String id, String status, Boolean active, Authentication auth) {
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Catalogue state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Catalogue State!", status));
+        }
+        logger.trace("verifyCatalogue with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        CatalogueBundle catalogue = get(id);
+        catalogue.setStatus(vocabularyService.get(status).getId());
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
+        if (catalogue.getLoggingInfo() != null) {
+            loggingInfoList = catalogue.getLoggingInfo();
+        } else {
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+            loggingInfoList.add(oldProviderRegistration);
+        }
+        switch (status) {
+            case "approved catalogue":
+                if (active == null) {
+                    active = true;
+                }
+                catalogue.setActive(active);
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                catalogue.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                catalogue.setLatestOnboardingInfo(loggingInfo);
+                break;
+            case "rejected catalogue":
+                catalogue.setActive(false);
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                catalogue.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                catalogue.setLatestOnboardingInfo(loggingInfo);
+                break;
+            default:
+                break;
+        }
+        logger.info("Verifying Catalogue: {}", catalogue);
+        return super.update(catalogue, auth);
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_CATALOGUES, allEntries = true)
+    public CatalogueBundle publish(String catalogueId, Boolean active, Authentication auth) {
+        CatalogueBundle catalogue = get(catalogueId);
+        if ((catalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
+                catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()){
+            throw new ValidationException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]", catalogue.getStatus()));
+        }
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
+        if (catalogue.getLoggingInfo() != null) {
+            loggingInfoList = catalogue.getLoggingInfo();
+        } else {
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+            loggingInfoList.add(oldProviderRegistration);
+        }
+
+        if (active == null) {
+            active = false;
+        }
+        if (active != null) {
+            catalogue.setActive(active);
+            if (!active) {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                loggingInfoList.add(loggingInfo);
+                catalogue.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                catalogue.setLatestUpdateInfo(loggingInfo);
+
+            } else {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+                loggingInfoList.add(loggingInfo);
+                catalogue.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                catalogue.setLatestUpdateInfo(loggingInfo);
+            }
+        }
+        return super.update(catalogue, auth);
+    }
+
+    //SECTION: PROVIDER
+    @Cacheable(value = CACHE_PROVIDERS)
+    public ProviderBundle getCatalogueProvider(String catalogueId, String providerId, Authentication auth) {
+        ProviderBundle providerBundle = providerService.get(providerId);
+        if (providerBundle == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not find provider with id: %s", providerId));
+        }
+        if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
+            throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", providerId, catalogueId));
+        }
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+                    securityService.userIsCatalogueAdmin(user, providerId)) {
+                return providerBundle;
+            }
+        }
+        // else return the Provider ONLY if he is active
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+            return providerBundle;
+        }
+        throw new ValidationException("You cannot view the specific Provider");
+    }
+
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public ProviderBundle addCatalogueProvider(ProviderBundle provider, Authentication auth) {
+        String catalogueId;
+        if (provider.getProvider().getCatalogueId() == null || provider.getProvider().getCatalogueId().equals("")){
+            throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
+        } else{
+            catalogueId = provider.getProvider().getCatalogueId();
+        }
+        try{
+            get(catalogueId);
+        } catch (ResourceNotFoundException e){
+            logger.info(String.format("The catalogue with id [%s] does not exists.", catalogueId));
+        }
+        provider.setId(UUID.randomUUID().toString());
+        logger.trace("User '{}' is attempting to add a new Provider: {} on Catalogue: {}", auth, provider, catalogueId);
+        addAuthenticatedUser(provider.getProvider(), auth);
+        providerService.validate(provider);
+        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
+            providerService.validateScientificDomains(provider.getProvider().getScientificDomains());
+        }
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
+            providerService.validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
+        }
+        providerService.validateEmailsAndPhoneNumbers(provider);
+        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        loggingInfoList.add(loggingInfo);
+        provider.setLoggingInfo(loggingInfoList);
+        provider.setActive(false);
+        provider.setStatus(vocabularyService.get("pending provider").getId());
+        provider.setTemplateStatus(vocabularyService.get("no template status").getId());
+
+        // latestOnboardingInfo
+        provider.setLatestOnboardingInfo(loggingInfo);
+
+        if (provider.getProvider().getParticipatingCountries() != null && !provider.getProvider().getParticipatingCountries().isEmpty()){
+            provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+        }
+
+        ProviderBundle ret;
+        ret = providerResourceManager.add(provider, null);
+        logger.debug("Adding Provider: {} of Catalogue: {}", provider, catalogueId);
+
+        //TODO: ENABLE WHEN READY
+//        registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
+//        jmsTopicTemplate.convertAndSend("provider.create", provider);
+//        synchronizerServiceProvider.syncAdd(provider.getProvider());
+
+        return ret;
+    }
+
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public ProviderBundle updateCatalogueProvider(ProviderBundle provider, String comment, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
+        providerService.validate(provider);
+        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
+            providerService.validateScientificDomains(provider.getProvider().getScientificDomains());
+        }
+        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
+            providerService.validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
+        }
+        providerService.validateEmailsAndPhoneNumbers(provider);
+        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo;
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey(), comment);
+        if (provider.getLoggingInfo() != null) {
+            loggingInfoList = provider.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+        provider.setLoggingInfo(loggingInfoList);
+
+        // latestUpdateInfo
+        provider.setLatestUpdateInfo(loggingInfo);
+
+        Resource existing = whereID(provider.getId(), true);
+        ProviderBundle ex = providerResourceManager.deserialize(existing);
+        provider.setActive(ex.isActive());
+        provider.setStatus(ex.getStatus());
+        existing.setPayload(providerResourceManager.serialize(provider));
+        existing.setResourceType(resourceType);
+        resourceService.updateResource(existing);
+        logger.debug("Updating Provider: {} of Catalogue {}", provider, provider.getProvider().getCatalogueId());
+
+        // Send emails to newly added or deleted Admins
+        providerService.adminDifferences(provider, ex);
+
+        //TODO: ENABLE WHEN READY
+        // send notification emails to Portal Admins
+//        if (provider.getLatestAuditInfo() != null && provider.getLatestUpdateInfo() != null) {
+//            Long latestAudit = Long.parseLong(provider.getLatestAuditInfo().getDate());
+//            Long latestUpdate = Long.parseLong(provider.getLatestUpdateInfo().getDate());
+//            if (latestAudit < latestUpdate && provider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+//                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
+//            }
+//        }
+//
+//        jmsTopicTemplate.convertAndSend("provider.update", provider);
+//
+//        synchronizerServiceProvider.syncUpdate(provider.getProvider());
+
+        return provider;
     }
 }
