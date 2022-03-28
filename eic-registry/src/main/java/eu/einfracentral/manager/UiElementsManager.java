@@ -705,7 +705,7 @@ public class UiElementsManager implements UiElementsService {
         // add all vocabularies
         for (Map.Entry<Vocabulary.Type, List<Vocabulary>> entry : vocabularyService.getAllVocabulariesByType().entrySet()) {
             values = entry.getValue()
-                    .parallelStream()
+                    .stream()
                     .map(v -> new Value(v.getId(), v.getName(), v.getParentId()))
                     .collect(Collectors.toList());
             controlValues.put(entry.getKey().getKey(), values);
@@ -715,18 +715,10 @@ public class UiElementsManager implements UiElementsService {
     }
 
     private List<Value> getEoscProviders() {
-        // TODO: replace separate restTemplate calls with one when now statuses are deployed on eosc
         RestTemplate restTemplate = new RestTemplate();
         Browsing<Map<String, String>> eoscProviders;
-        List<Map<String, String>> providerList = new ArrayList<>();
-        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=approved&quantity=1000", Browsing.class);
-        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
-        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=rejected template&quantity=1000", Browsing.class);
-        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
-        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=pending template approval&quantity=1000", Browsing.class);
-        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
-        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=pending template submission&quantity=1000", Browsing.class);
-        providerList.addAll(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
+        eoscProviders = restTemplate.getForObject("https://providers.eosc-portal.eu/api/provider/all?status=approved provider&quantity=1000", Browsing.class);
+        List<Map<String, String>> providerList = new ArrayList<>(eoscProviders != null && eoscProviders.getResults() != null ? eoscProviders.getResults() : new ArrayList<>());
 
         return providerList.stream()
                 .map(value -> new Value(value.get("id"), value.get("name")))
