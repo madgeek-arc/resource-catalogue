@@ -1,7 +1,9 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.CatalogueBundle;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
@@ -26,17 +28,19 @@ public class ProviderManagementAspect {
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final InfraServiceService infraServiceService;
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
                                     RegistrationMailService registrationMailService, InfraServiceService infraServiceService,
-                                    SecurityService securityService) {
+                                    SecurityService securityService, CatalogueService catalogueService) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
+        this.catalogueService = catalogueService;
     }
 
 
@@ -70,6 +74,16 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
         registrationMailService.sendProviderMails(providerBundle);
+    }
+
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.CatalogueManager.verifyCatalogue(String, " +
+            "String, Boolean, org.springframework.security.core.Authentication)) ||" +
+            "execution(* eu.einfracentral.registry.manager.CatalogueManager.add(eu.einfracentral.domain.CatalogueBundle," +
+            "org.springframework.security.core.Authentication)))",
+            returning = "catalogueBundle")
+    public void catalogueRegistrationEmails(CatalogueBundle catalogueBundle) {
+        logger.trace("Sending Registration emails");
+        registrationMailService.sendCatalogueMails(catalogueBundle);
     }
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, " +
