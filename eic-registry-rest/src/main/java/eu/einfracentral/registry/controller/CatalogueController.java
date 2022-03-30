@@ -23,10 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("catalogue")
@@ -153,29 +150,80 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
-    //SECTION: PROVIDER
-    @ApiOperation(value = "Returns the Provider with the given id.")
-    @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Provider> getCatalogueProvider(@PathVariable("catalogueId") String catalogueId, @PathVariable("providerId") String providerId, @ApiIgnore Authentication auth) {
-        Provider provider = catalogueManager.getCatalogueProvider(providerId, catalogueId, auth).getProvider();
-        if (provider.getCatalogueId() == null){
-            throw new ValidationException("Provider's catalogueId cannot be null");
-        } else {
-            if (provider.getCatalogueId().equals(catalogueId)){
-                return new ResponseEntity<>(provider, HttpStatus.OK);
-            } else{
-                throw new ValidationException(String.format("The Provider [%s] you requested does not belong to the specific Catalogue [%s]",  providerId, catalogueId));
+    // Filter a list of Catalogues based on a set of filters or get a list of all Catalogues in the Portal.
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
+                                                                        @RequestParam(required = false) Set<String> status) {
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            ff.setOrderBy(sort);
+        }
+        if (status != null) {
+            ff.addFilter("status", status);
+        }
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+        List<Map<String, Object>> records = catalogueManager.createQueryForCatalogueFilters(ff, orderDirection, orderField);
+        List<CatalogueBundle> ret = new ArrayList<>();
+        Paging<CatalogueBundle> retPaging = catalogueManager.getAll(ff, auth);
+        for (Map<String, Object> record : records){
+            for (Map.Entry<String, Object> entry : record.entrySet()){
+                ret.add(catalogueManager.get((String) entry.getValue()));
             }
         }
+        return ResponseEntity.ok(catalogueManager.createCorrectQuantityFacets(ret, retPaging, quantity, from));
     }
 
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
-        ProviderBundle providerBundle = catalogueManager.addCatalogueProvider(new ProviderBundle(provider), auth);
-        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), provider.getCatalogueId());
-        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
+    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public boolean hasAdminAcceptedTerms(@RequestParam String catalogueId, @ApiIgnore Authentication authentication) {
+        return catalogueManager.hasAdminAcceptedTerms(catalogueId, authentication);
     }
+
+    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void adminAcceptedTerms(@RequestParam String catalogueId, @ApiIgnore Authentication authentication) {
+        catalogueManager.adminAcceptedTerms(catalogueId, authentication);
+    }
+
+    //SECTION: PROVIDER
+//    @ApiOperation(value = "Returns the Provider with the given id.")
+//    @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+//    public ResponseEntity<Provider> getCatalogueProvider(@PathVariable("catalogueId") String catalogueId, @PathVariable("providerId") String providerId, @ApiIgnore Authentication auth) {
+//        Provider provider = catalogueManager.getCatalogueProvider(providerId, catalogueId, auth).getProvider();
+//        if (provider.getCatalogueId() == null){
+//            throw new ValidationException("Provider's catalogueId cannot be null");
+//        } else {
+//            if (provider.getCatalogueId().equals(catalogueId)){
+//                return new ResponseEntity<>(provider, HttpStatus.OK);
+//            } else{
+//                throw new ValidationException(String.format("The Provider [%s] you requested does not belong to the specific Catalogue [%s]",  providerId, catalogueId));
+//            }
+//        }
+//    }
+//
+//    @PostMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_USER')")
+//    public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
+//        ProviderBundle providerBundle = catalogueManager.addCatalogueProvider(new ProviderBundle(provider), auth);
+//        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), provider.getCatalogueId());
+//        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
+//    }
 
 //    @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
 //    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
