@@ -130,6 +130,12 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogueManager.get(id, auth), HttpStatus.OK);
     }
 
+    // Get a list of Catalogues in which you are admin.
+    @GetMapping(path = "getMyCatalogues", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<CatalogueBundle>> getMyCatalogues(@ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(catalogueManager.getMyCatalogues(auth), HttpStatus.OK);
+    }
+
     // Accept/Reject a Catalogue.
     @PatchMapping(path = "verifyCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
@@ -224,7 +230,7 @@ public class CatalogueController {
 //        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), provider.getCatalogueId());
 //        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
 //    }
-
+//
 //    @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
 //    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")

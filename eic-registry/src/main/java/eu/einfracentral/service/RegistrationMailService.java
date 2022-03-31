@@ -765,6 +765,50 @@ public class RegistrationMailService {
         }
     }
 
+    public void sendEmailsToNewlyAddedCatalogueAdmins(CatalogueBundle catalogueBundle, List<String> admins) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("catalogueBundle", catalogueBundle);
+
+        String subject = String.format("[%s Portal] Your email has been added as an Administrator for the Catalogue '%s'", projectName, catalogueBundle.getCatalogue().getName());
+
+        if (admins == null){
+            for (User user : catalogueBundle.getCatalogue().getUsers()) {
+                root.put("user", user);
+                String recipient = "provider";
+                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), recipient);
+            }
+        } else {
+            for (User user : catalogueBundle.getCatalogue().getUsers()) {
+                if (admins.contains(user.getEmail())){
+                    root.put("user", user);
+                    String recipient = "provider";
+                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), recipient);
+                }
+            }
+        }
+    }
+
+    public void sendEmailsToNewlyDeletedCatalogueAdmins(CatalogueBundle catalogueBundle, List<String> admins) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("catalogueBundle", catalogueBundle);
+
+        String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Catalogue '%s'", projectName, catalogueBundle.getCatalogue().getName());
+
+        for (User user : catalogueBundle.getCatalogue().getUsers()) {
+            if (admins.contains(user.getEmail())){
+                root.put("user", user);
+                String recipient = "provider";
+                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail(), recipient);
+            }
+        }
+    }
+
     public void informPortalAdminsForProviderDeletion(ProviderBundle provider, User user){
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
@@ -876,6 +920,19 @@ public class RegistrationMailService {
         String subject = String.format("[%s Portal] The Provider [%s] previously marked as [invalid] has been updated", projectName, providerBundle.getProvider().getName());
         String recipient = "admin";
         sendMailsFromTemplate("invalidProviderUpdate.ftl", root, subject, registrationEmail, recipient);
+    }
+
+    public void notifyPortalAdminsForInvalidCatalogueUpdate(CatalogueBundle catalogueBundle) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("catalogueBundle", catalogueBundle);
+
+        // send email to Admins
+        String subject = String.format("[%s Portal] The Catalogue [%s] previously marked as [invalid] has been updated", projectName, catalogueBundle.getCatalogue().getName());
+        String recipient = "admin";
+        sendMailsFromTemplate("invalidCatalogueUpdate.ftl", root, subject, registrationEmail, recipient);
     }
 
     public void notifyPortalAdminsForInvalidResourceUpdate(InfraService infraService) {
