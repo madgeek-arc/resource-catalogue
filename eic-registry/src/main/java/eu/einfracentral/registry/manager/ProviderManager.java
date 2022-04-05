@@ -62,7 +62,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final DataSource dataSource;
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
-        " networks, scientific_subdomains, societal_grand_challenges, structure_types"; // variable with DB tables a keyword is been searched on
+        " networks, scientific_subdomains, societal_grand_challenges, structure_types, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
     @Autowired
     @Qualifier("providerSync")
@@ -1005,6 +1005,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         // keyword on search bar
         if (keyword != null && !keyword.equals("")){
+            // replace apostrophes to avoid bad sql grammar
+            if (keyword.contains("'")){
+                keyword = keyword.replaceAll("'", "''");
+            }
             if (firstTime){
                 query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
             } else{

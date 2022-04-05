@@ -56,14 +56,15 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final ResourceManager<ProviderBundle> providerResourceManager;
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
-    private final String columnsOfInterest = "catalogue_id, name, abbreviation, affiliations, tags, networks, scientific_subdomains"; // variable with DB tables a keyword is been searched on
+    private final String columnsOfInterest = "catalogue_id, name, abbreviation, affiliations, tags, networks," +
+            "scientific_subdomains, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
     @Autowired
     public CatalogueManager(@Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
                             IdCreator idCreator, JmsTemplate jmsTopicTemplate, ProviderService<ProviderBundle, Authentication> providerService,
                             FieldValidator fieldValidator, InfraServiceService<InfraService, InfraService> infraServiceService,
                             @Qualifier("providerManager") ResourceManager<ProviderBundle> providerResourceManager, DataSource dataSource,
-                            RegistrationMailService registrationMailService) {
+                            @Lazy RegistrationMailService registrationMailService) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
@@ -266,7 +267,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
+    @Cacheable(value = CACHE_CATALOGUES)
     public List<CatalogueBundle> getMyCatalogues(Authentication auth) {
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
@@ -561,6 +562,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         // keyword on search bar
         if (keyword != null && !keyword.equals("")){
+            // replace apostrophes to avoid bad sql grammar
+            if (keyword.contains("'")){
+                keyword = keyword.replaceAll("'", "''");
+            }
             if (firstTime){
                 query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
             } else{
