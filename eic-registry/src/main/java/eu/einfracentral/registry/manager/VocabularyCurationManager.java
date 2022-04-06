@@ -234,7 +234,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         String resourceType = vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceType();
         if (resourceType.equalsIgnoreCase("provider")){
             if (!vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_DOMAIN.getKey()) && !vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.SCIENTIFIC_SUBDOMAIN.getKey())
-                && !vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.COUNTRY.getKey())){
+                && !vocabularyCuration.getVocabulary().equalsIgnoreCase(Vocabulary.Type.PROVIDER_COUNTRY.getKey())){
                 if (!StringUtils.containsIgnoreCase(vocabularyCuration.getVocabulary(), "provider")){
                     throw new ValidationException("Resource Type " +resourceType.toLowerCase()+ " can't have as a Vocabulary the value " +vocabularyCuration.getVocabulary());
                 }

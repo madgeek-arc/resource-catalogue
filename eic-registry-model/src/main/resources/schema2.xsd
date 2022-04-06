@@ -227,6 +227,8 @@
             
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
             
+      <xs:enumeration value="PROVIDER_COUNTRY"/>
+            
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
             
       <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
