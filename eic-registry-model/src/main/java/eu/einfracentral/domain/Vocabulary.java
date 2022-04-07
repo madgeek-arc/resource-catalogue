@@ -64,7 +64,6 @@ public class Vocabulary implements Identifiable {
         RELATED_PLATFORM("Related platform"),
         // Provider
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
-        PROVIDER_COUNTRY("Provider country"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
         PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
         PROVIDER_HOSTING_LEGAL_ENTITY("Provider hosting legal entity"),

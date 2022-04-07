@@ -184,7 +184,7 @@ public class Service implements Identifiable {
     @XmlElement(name = "geographicalAvailability")
     @ApiModelProperty(position = 18, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
+    @VocabularyValidation(type = Vocabulary.Type.REGION)
     private List<String> geographicalAvailabilities;
 
     /**
@@ -206,7 +206,7 @@ public class Service implements Identifiable {
     @XmlElement(name = "resourceGeographicLocation")
     @ApiModelProperty(position = 20, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
+    @VocabularyValidation(type = Vocabulary.Type.REGION)
     private List<String> resourceGeographicLocations;
 
 
