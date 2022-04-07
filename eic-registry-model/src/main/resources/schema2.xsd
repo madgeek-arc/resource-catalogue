@@ -121,7 +121,6 @@
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
       <xs:enumeration value="RELATED_PLATFORM"/>
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
-      <xs:enumeration value="PROVIDER_COUNTRY"/>
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
       <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
       <xs:enumeration value="PROVIDER_HOSTING_LEGAL_ENTITY"/>

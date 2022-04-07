@@ -194,7 +194,7 @@ public class Provider implements Identifiable {
     @XmlElement(name = "participatingCountry")
     @ApiModelProperty(position = 19, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_COUNTRY)
+    @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> participatingCountries;
 
     /**
