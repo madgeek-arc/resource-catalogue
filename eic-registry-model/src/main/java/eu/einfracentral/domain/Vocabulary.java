@@ -48,6 +48,8 @@ public class Vocabulary implements Identifiable {
         CATEGORY("Category"),
         SUBCATEGORY("Subcategory"),
         LANGUAGE("Language"),
+        GEOGRAPHIC_LOCATION("Geographic location"),
+        REGION("Region"),
         COUNTRY("Country"),
         TRL("Technology readiness level"),
         SCIENTIFIC_DOMAIN("Scientific domain"),
