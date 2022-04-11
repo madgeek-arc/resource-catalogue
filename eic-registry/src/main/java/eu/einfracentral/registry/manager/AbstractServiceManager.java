@@ -890,6 +890,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
         orderedBrowseBy.add("resource_organisation");   // resource_organisation
         orderedBrowseBy.add("active");                  // active
+        orderedBrowseBy.add("catalogue_id");            // catalogueId
 
         filter.setBrowseBy(orderedBrowseBy);
 

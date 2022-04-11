@@ -321,116 +321,46 @@ public class ServiceController {
     })
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InfraService>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                           @RequestParam(required = false) Set<String> auditState, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Paging<InfraService>> getAllServicesForAdminPage(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                           @RequestParam(required = false) Set<String> status,
+                                                                           @RequestParam(required = false) Set<String> catalogueId,
+                                                                           @RequestParam(required = false) Set<String> auditState,
+                                                                           @ApiIgnore Authentication authentication) {
 
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("latest", true);
-
-        List<InfraService> valid = new ArrayList<>();
-        List<InfraService> notAudited = new ArrayList<>();
-        List<InfraService> invalidAndUpdated = new ArrayList<>();
-        List<InfraService> invalidAndNotUpdated = new ArrayList<>();
-        if (auditState == null) {
-            return ResponseEntity.ok(infraService.getAllForAdmin(ff, authentication));
-        } else {
-            int quantity = ff.getQuantity();
-            int from = ff.getFrom();
-            allRequestParams.remove("auditState");
-            FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-            ff2.addFilter("latest", true);
-            ff2.setQuantity(1000);
-            ff2.setFrom(0);
-            Paging<InfraService> retPaging = infraService.getAllForAdmin(ff, authentication);
-            List<InfraService> allWithoutAuditFilterList =  infraService.getAllForAdmin(ff2, authentication).getResults();
-            List<InfraService> ret = new ArrayList<>();
-            for (InfraService infraService : allWithoutAuditFilterList) {
-                String auditVocStatus;
-                try{
-                    auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(infraService.getLoggingInfo());
-                } catch (NullPointerException e){ // infraService has null loggingInfo
-                    continue;
-                }
-                switch (auditVocStatus) {
-                    case "Valid and updated":
-                    case "Valid and not updated":
-                        valid.add(infraService);
-                        break;
-                    case "Not Audited":
-                        notAudited.add(infraService);
-                        break;
-                    case "Invalid and updated":
-                        invalidAndUpdated.add(infraService);
-                        break;
-                    case "Invalid and not updated":
-                        invalidAndNotUpdated.add(infraService);
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-                }
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            ff.setOrderBy(sort);
+        }
+        if (status != null) {
+            ff.addFilter("status", status);
+        }
+        if (catalogueId != null) {
+            ff.addFilter("catalogue_id", catalogueId);
+        }
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+        List<Map<String, Object>> records = infraService.createQueryForResourceFilters(ff, orderDirection, orderField);
+        List<InfraService> ret = new ArrayList<>();
+        Paging<InfraService> retPaging = infraService.getAll(ff, authentication);
+        for (Map<String, Object> record : records){
+            for (Map.Entry<String, Object> entry : record.entrySet()){
+                ret.add(infraService.get((String) entry.getValue()));
             }
-            for (String state : auditState) {
-                if (state.equals("Valid")) {
-                    ret.addAll(valid);
-                } else if (state.equals("Not Audited")) {
-                    ret.addAll(notAudited);
-                } else if (state.equals("Invalid and updated")) {
-                    ret.addAll(invalidAndUpdated);
-                } else if (state.equals("Invalid and not updated")) {
-                    ret.addAll(invalidAndNotUpdated);
-                } else {
-                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-                }
-            }
-            if (!ret.isEmpty()) {
-                List<InfraService> retWithCorrectQuantity = new ArrayList<>();
-                if (from == 0){
-                    if (quantity <= ret.size()){
-                        for (int i=from; i<=quantity-1; i++){
-                            retWithCorrectQuantity.add(ret.get(i));
-                        }
-                    } else{
-                        retWithCorrectQuantity.addAll(ret);
-                    }
-                    retPaging.setTo(retWithCorrectQuantity.size());
-                } else{
-                    boolean indexOutOfBound = false;
-                    if (quantity <= ret.size()){
-                        for (int i=from; i<quantity+from; i++){
-                            try{
-                                retWithCorrectQuantity.add(ret.get(i));
-                                if (quantity+from > ret.size()){
-                                    retPaging.setTo(ret.size());
-                                } else{
-                                    retPaging.setTo(quantity+from);
-                                }
-                            } catch (IndexOutOfBoundsException e){
-                                indexOutOfBound = true;
-                                continue;
-                            }
-                        }
-                        if (indexOutOfBound){
-                            retPaging.setTo(ret.size());
-                        }
-                    } else{
-                        retWithCorrectQuantity.addAll(ret);
-                        if (quantity+from > ret.size()){
-                            retPaging.setTo(ret.size());
-                        } else{
-                            retPaging.setTo(quantity+from);
-                        }
-                    }
-                }
-                retPaging.setFrom(from);
-                retPaging.setResults(retWithCorrectQuantity);
-                retPaging.setTotal(ret.size());
-            } else{
-                retPaging.setResults(ret);
-                retPaging.setTotal(0);
-                retPaging.setFrom(0);
-                retPaging.setTo(0);
-            }
-            return ResponseEntity.ok(retPaging);
+        }
+        if (auditState == null){
+            return ResponseEntity.ok(infraService.createCorrectQuantityFacets(ret, retPaging, quantity, from));
+        } else{
+            Paging<InfraService> retWithAuditState = infraService.determineAuditState(auditState, ff, quantity, from, ret, authentication);
+            return ResponseEntity.ok(retWithAuditState);
         }
     }
 

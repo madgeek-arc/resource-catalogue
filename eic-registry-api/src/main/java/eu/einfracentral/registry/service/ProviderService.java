@@ -127,6 +127,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     /**
      * @param ff
+     * @param orderDirection
+     * @param orderField
      * @return
      */
     List<Map<String, Object>> createQueryForProviderFilters(FacetFilter ff, String orderDirection, String orderField);
