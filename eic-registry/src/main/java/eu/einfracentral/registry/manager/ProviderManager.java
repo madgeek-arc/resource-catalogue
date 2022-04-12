@@ -961,7 +961,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
-        String query;
+        String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
             query = "SELECT provider_id FROM provider_view";
         } else{
@@ -1015,15 +1015,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // order/orderField
         if (orderField !=null && !orderField.equals("")){
             query += String.format(" ORDER BY %s", orderField);
-        }
-        if (orderField == null){
-            query += String.format(" ORDER BY name");
+        } else{
+            query += " ORDER BY name";
         }
         if (orderDirection !=null && !orderDirection.equals("")){
             query += String.format(" %s", orderDirection);
         }
 
         query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
+        logger.debug(query);
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
