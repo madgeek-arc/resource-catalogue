@@ -211,7 +211,7 @@ public class CatalogueController {
 //    @ApiOperation(value = "Returns the Provider with the given id.")
 //    @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 //    public ResponseEntity<Provider> getCatalogueProvider(@PathVariable("catalogueId") String catalogueId, @PathVariable("providerId") String providerId, @ApiIgnore Authentication auth) {
-//        Provider provider = catalogueManager.getCatalogueProvider(providerId, catalogueId, auth).getProvider();
+//        Provider provider = catalogueManager.getCatalogueProvider(catalogueId, providerId, auth).getProvider();
 //        if (provider.getCatalogueId() == null){
 //            throw new ValidationException("Provider's catalogueId cannot be null");
 //        } else {
@@ -225,16 +225,16 @@ public class CatalogueController {
 //
 //    @PostMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_USER')")
-//    public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
+//    public ResponseEntity<Provider> addCatalogueProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
 //        ProviderBundle providerBundle = catalogueManager.addCatalogueProvider(new ProviderBundle(provider), auth);
 //        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), provider.getCatalogueId());
 //        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
 //    }
 //
 //    @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
-//    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PutMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
-//    public ResponseEntity<Provider> update(@RequestBody Provider provider, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+//    public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
 //        ProviderBundle providerBundle = providerManager.get(provider.getId(), auth);
 //        providerBundle.setProvider(provider);
 //        if (comment == null || comment.equals("")) {

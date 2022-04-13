@@ -1039,11 +1039,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             if (keyword.contains("'")){
                 keyword = keyword.replaceAll("'", "''");
             }
-            if (firstTime){
-                query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-            } else{
-                query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-            }
+            query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
         }
 
         // order/orderField
