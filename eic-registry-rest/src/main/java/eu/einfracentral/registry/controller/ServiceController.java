@@ -353,7 +353,7 @@ public class ServiceController {
         Paging<InfraService> retPaging = infraService.getAll(ff, authentication);
         for (Map<String, Object> record : records){
             for (Map.Entry<String, Object> entry : record.entrySet()){
-                ret.add(infraService.get((String) entry.getValue()));
+                ret.add(infraService.getOrNull((String) entry.getValue()));
             }
         }
         if (auditState == null){

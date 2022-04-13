@@ -1087,9 +1087,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // order/orderField
         if (orderField !=null && !orderField.equals("")){
             query += String.format(" ORDER BY %s", orderField);
-        }
-        if (orderField == null){
-            query += String.format(" ORDER BY name");
+        } else{
+            query += " ORDER BY name";
         }
         if (orderDirection !=null && !orderDirection.equals("")){
             query += String.format(" %s", orderDirection);
