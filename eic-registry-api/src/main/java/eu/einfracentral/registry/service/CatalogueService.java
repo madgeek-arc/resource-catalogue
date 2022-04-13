@@ -70,4 +70,12 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
 //     * @return
 //     */
 //    ProviderBundle addCatalogueProvider(ProviderBundle provider, Authentication auth);
+//
+//    /**
+//     * @param provider
+//     * @param comment
+//     * @param auth
+//     * @return
+//     */
+//    ProviderBundle updateCatalogueProvider(ProviderBundle provider, String comment, Authentication auth);
 }

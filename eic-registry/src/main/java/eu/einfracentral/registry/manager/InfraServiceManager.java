@@ -1077,11 +1077,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             if (keyword.contains("'")){
                 keyword = keyword.replaceAll("'", "''");
             }
-            if (firstTime){
-                query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-            } else{
-                query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-            }
+            query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
         }
 
         // order/orderField
@@ -1095,6 +1091,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
+        logger.info(query);
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
