@@ -30,6 +30,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.LinkedMultiValueMap;
 
 import javax.sql.DataSource;
 import java.time.Duration;
@@ -1018,55 +1019,42 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         String query;
         if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT infra_service_id FROM infra_service_view WHERE catalogue_id = 'eosc'";
+            query = "SELECT infra_service_id FROM infra_service_view WHERE catalogue_id = 'eosc' AND latest = 'true'";
         } else{
-            query = "SELECT infra_service_id FROM infra_service_view WHERE";
+            query = "SELECT infra_service_id FROM infra_service_view WHERE latest = 'true'";
         }
 
-        boolean firstTime = true;
-        boolean hasStatus = false;
-        boolean hasCatalogueId = false;
-        for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
-            in.addValue(entry.getKey(), entry.getValue());
-            // status
-            if (entry.getKey().equals("status")) {
-                hasStatus = true;
-                if (firstTime) {
-                    query += String.format(" (status=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    if (hasStatus && hasCatalogueId){
-                        query += String.format(" AND (status=%s)", entry.getValue().toString());
+        for (Map.Entry<String, Object> multiValueMapEntry : ff.getFilter().entrySet()) {
+
+
+            Set<String> keySet = ((LinkedMultiValueMap) multiValueMapEntry.getValue()).keySet();
+            Collection<List<String>> valueSet = ((LinkedMultiValueMap) multiValueMapEntry.getValue()).values();
+
+            for (int i=0; i<keySet.size(); i++) {
+                String entryKey = (String) keySet.toArray()[i];
+                String entryValue = valueSet.toArray()[i].toString().replace("[", "").replace("]", "");
+
+                in.addValue(entryKey, entryValue);
+                // status
+                if (entryKey.equals("status")) {
+                    query += String.format(" AND (status='%s')", entryValue);
+                    if (query.contains(",")) {
+                        query = query.replaceAll(", ", "' OR status='");
                     }
                 }
-                if (query.contains(",")){
-                    query = query.replaceAll(", ", "' OR status='");
-                }
-            }
-            // catalogue_id
-            if (entry.getKey().equals("catalogue_id")) {
-                hasCatalogueId = true;
-                if (firstTime) {
-                    if (((LinkedHashSet) entry.getValue()).contains("all")){
-                        query += String.format(" (catalogue_id LIKE '%%%%')");
-                        firstTime = false;
-                        continue;
-                    } else{
-                        query += String.format(" (catalogue_id=%s)", entry.getValue().toString());
-                        firstTime = false;
-                    }
-                } else {
-                    if ((hasStatus && hasCatalogueId)){
-                        if (((LinkedHashSet) entry.getValue()).contains("all")){
-                            query += String.format(" AND (catalogue_id LIKE '%%%%')");
-                            continue;
-                        } else{
-                            query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
-                        }
+                // catalogue_id
+                if (entryKey.equals("catalogue_id")) {
+                    query += String.format(" AND (catalogue_id='%s')", entryValue);
+                    if (query.contains(",")) {
+                        query = query.replaceAll(", ", "' OR catalogue_id='");
                     }
                 }
-                if (query.contains(",")){
-                    query = query.replaceAll(", ", "' OR catalogue_id='");
+                // resource_organisation
+                if (entryKey.equals("resource_organisation")) {
+                    query += String.format(" AND (resource_organisation='%s')", entryValue);
+                    if (query.contains(",")) {
+                        query = query.replaceAll(", ", "' OR resource_organisation='");
+                    }
                 }
             }
         }
