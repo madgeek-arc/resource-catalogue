@@ -321,33 +321,24 @@ public class ServiceController {
     })
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InfraService>> getAllServicesForAdminPage(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                           @RequestParam(required = false) Set<String> status,
-                                                                           @RequestParam(required = false) Set<String> catalogueId,
+    public ResponseEntity<Paging<InfraService>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                            @RequestParam(required = false) Set<String> auditState,
+                                                                           @RequestParam(required = false) Set<String> catalogue_id,
                                                                            @ApiIgnore Authentication authentication) {
 
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        if (status != null) {
-            ff.addFilter("status", status);
-        }
-        if (catalogueId != null) {
-            ff.addFilter("catalogue_id", catalogueId);
-        }
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
+        String orderField;
+        String orderDirection;
+        if (ff.getOrderBy() != null){
+            Map.Entry<String,Object> firstEntry = ff.getOrderBy().entrySet().iterator().next();
+            orderField = firstEntry.getKey();
+            orderDirection = firstEntry.getValue().toString().replace("{order=", "").replace("}", "");
+        } else{
+            orderField = "name";
+            orderDirection = "asc";
+        }
         List<Map<String, Object>> records = infraService.createQueryForResourceFilters(ff, orderDirection, orderField);
         List<InfraService> ret = new ArrayList<>();
         Paging<InfraService> retPaging = infraService.getAll(ff, authentication);
@@ -357,6 +348,7 @@ public class ServiceController {
             }
         }
         if (auditState == null){
+//            return ResponseEntity.ok(infraService.getAllForAdmin(ff, authentication));
             return ResponseEntity.ok(infraService.createCorrectQuantityFacets(ret, retPaging, quantity, from));
         } else{
             Paging<InfraService> retWithAuditState = infraService.determineAuditState(auditState, ff, quantity, from, ret, authentication);

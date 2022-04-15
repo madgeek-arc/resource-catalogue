@@ -174,7 +174,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
                                                                         @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
-                                                                        @RequestParam(required = false) Set<String> auditState, @RequestParam(required = false) Set<String> catalogueId) {
+                                                                        @RequestParam(required = false) Set<String> auditState, @RequestParam(required = false) Set<String> catalogue_id) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -194,8 +194,8 @@ public class ProviderController {
         if (templateStatus != null) {
             ff.addFilter("templateStatus", templateStatus);
         }
-        if (catalogueId != null) {
-            ff.addFilter("catalogue_id", catalogueId);
+        if (catalogue_id != null) {
+            ff.addFilter("catalogue_id", catalogue_id);
         }
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
