@@ -124,6 +124,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setStatus(vocabularyService.get("pending provider").getId());
         provider.setTemplateStatus(vocabularyService.get("no template status").getId());
 
+        // catalogueId
+        provider.getProvider().setCatalogueId("eosc");
+
         // latestOnboardingInfo
         provider.setLatestOnboardingInfo(loggingInfo);
 
@@ -1053,7 +1056,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
-        logger.debug(query);
+        logger.info(query);
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
