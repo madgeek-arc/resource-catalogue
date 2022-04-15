@@ -56,26 +56,27 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging, int quantity, int from);
 
     //SECTION: PROVIDER
-//    /**
-//     * @param catalogueId
-//     * @param providerId
-//     * @param auth
-//     * @return
-//     */
-//    ProviderBundle getCatalogueProvider(String catalogueId, String providerId, Authentication auth);
-//
-//    /**
-//     * @param provider
-//     * @param auth
-//     * @return
-//     */
-//    ProviderBundle addCatalogueProvider(ProviderBundle provider, Authentication auth);
-//
-//    /**
-//     * @param provider
-//     * @param comment
-//     * @param auth
-//     * @return
-//     */
-//    ProviderBundle updateCatalogueProvider(ProviderBundle provider, String comment, Authentication auth);
+    /**
+     * @param catalogueId
+     * @param providerId
+     * @param auth
+     * @return
+     */
+    ProviderBundle getCatalogueProvider(String catalogueId, String providerId, Authentication auth);
+
+    /**
+     * @param provider
+     * @param catalogueId
+     * @param auth
+     * @return
+     */
+    ProviderBundle addCatalogueProvider(ProviderBundle provider, String catalogueId, Authentication auth);
+
+    /**
+     * @param provider
+     * @param comment
+     * @param auth
+     * @return
+     */
+    ProviderBundle updateCatalogueProvider(ProviderBundle provider, String comment, Authentication auth);
 }
