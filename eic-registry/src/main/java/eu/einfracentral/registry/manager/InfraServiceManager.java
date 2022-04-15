@@ -147,6 +147,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // LoggingInfo
         infraService.setLoggingInfo(loggingInfoList);
 
+        // catalogueId
+        infraService.getService().setCatalogueId("eosc");
+
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
         ret = super.add(infraService, auth);
