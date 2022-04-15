@@ -176,7 +176,7 @@ public class FieldValidator {
             logger.trace(e.getMessage());
         }
 
-        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405){
+        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405 && statusCode != 503){
             if (field == null){
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
             } else {
