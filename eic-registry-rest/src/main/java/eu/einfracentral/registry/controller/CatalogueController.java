@@ -2,9 +2,8 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.CatalogueProviderService;
 import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -32,15 +31,12 @@ public class CatalogueController {
 
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
-    private final ProviderService<ProviderBundle, Authentication> providerManager;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final CatalogueProviderService<ProviderBundle, Authentication> catalogueProviderManager;
 
     @Autowired
-    CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager, ProviderService<ProviderBundle, Authentication> providerManager,
-                        InfraServiceService<InfraService, InfraService> infraServiceService) {
+    CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager, CatalogueProviderService<ProviderBundle, Authentication> catalogueProviderManager) {
         this.catalogueManager = catalogueManager;
-        this.providerManager = providerManager;
-        this.infraServiceService = infraServiceService;
+        this.catalogueProviderManager = catalogueProviderManager;
     }
 
     //SECTION: CATALOGUE
@@ -211,7 +207,7 @@ public class CatalogueController {
     @ApiOperation(value = "Returns the Provider with the given id.")
     @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> getCatalogueProvider(@PathVariable("catalogueId") String catalogueId, @PathVariable("providerId") String providerId, @ApiIgnore Authentication auth) {
-        Provider provider = catalogueManager.getCatalogueProvider(catalogueId, providerId, auth).getProvider();
+        Provider provider = catalogueProviderManager.getCatalogueProvider(catalogueId, providerId, auth).getProvider();
         if (provider.getCatalogueId() == null){
             throw new ValidationException("Provider's catalogueId cannot be null");
         } else {
@@ -223,26 +219,42 @@ public class CatalogueController {
         }
     }
 
-    @PostMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "{catalogueId}/provider/", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Provider> addCatalogueProvider(@RequestBody Provider provider, @RequestParam String catalogueId, @ApiIgnore Authentication auth) {
-        ProviderBundle providerBundle = catalogueManager.addCatalogueProvider(new ProviderBundle(provider), catalogueId, auth);
+    public ResponseEntity<Provider> addCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        ProviderBundle providerBundle = catalogueProviderManager.addCatalogueProvider(new ProviderBundle(provider), catalogueId, auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), catalogueId);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
+    @PostMapping(path = "{catalogueId}/provider/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ProviderBundle> addCatalogueProviderBundle(@RequestBody ProviderBundle provider, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        ProviderBundle providerBundle = catalogueProviderManager.addCatalogueProvider(provider, catalogueId, auth);
+        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getProvider().getName(), provider.getProvider().getId(), catalogueId);
+        return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
+    }
+
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
-    @PutMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "{catalogueId}/provider/", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
-    public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle providerBundle = providerManager.get(provider.getId(), auth);
+    public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ProviderBundle providerBundle = catalogueProviderManager.getCatalogueProvider(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
         if (comment == null || comment.equals("")) {
             comment = "no comment";
         }
-        providerBundle = providerManager.update(providerBundle, comment, auth);
-        logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
+        providerBundle = catalogueProviderManager.updateCatalogueProvider(providerBundle, catalogueId, comment, auth);
+        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), catalogueId);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "{catalogueId}/provider/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ProviderBundle> updateCatalogueProviderBundle(@RequestBody ProviderBundle provider, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ProviderBundle providerBundle = catalogueProviderManager.update(provider, auth);
+        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), provider.getProvider().getName(), provider.getProvider().getId(), catalogueId);
+        return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
     //SECTION: RESOURCE

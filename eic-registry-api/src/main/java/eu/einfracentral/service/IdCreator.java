@@ -29,4 +29,20 @@ public interface IdCreator {
      * @return
      */
     String createCatalogueId(Catalogue catalogue);
+
+    /**
+     * Creates id for {@link Provider}
+     *
+     * @param provider
+     * @return
+     */
+    String createCatalogueProviderId(Provider provider);
+
+    /**
+     * Creates id for {@link Service}
+     *
+     * @param service
+     * @return
+     */
+    String createCatalogueServiceId(Service service);
 }
