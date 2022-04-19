@@ -21,11 +21,12 @@ public interface CatalogueServiceService<T, U extends Authentication> extends Re
      */
     InfraService addCatalogueService(InfraService service, String catalogueId, Authentication auth);
 
-//    /**
-//     * @param service
-//     * @param comment
-//     * @param auth
-//     * @return
-//     */
-//    InfraService updateCatalogueService(InfraService service, String comment, Authentication auth);
+    /**
+     * @param service
+     * @param catalogueId
+     * @param comment
+     * @param auth
+     * @return
+     */
+    InfraService updateCatalogueService(InfraService service, String catalogueId, String comment, Authentication auth);
 }

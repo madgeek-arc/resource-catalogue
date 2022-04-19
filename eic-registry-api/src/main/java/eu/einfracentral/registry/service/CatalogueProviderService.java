@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.ProviderBundle;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
 public interface CatalogueProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
@@ -29,4 +31,11 @@ public interface CatalogueProviderService<T, U extends Authentication> extends R
      * @return
      */
     ProviderBundle updateCatalogueProvider(ProviderBundle provider, String catalogueId, String comment, Authentication auth);
+
+    /**
+     * @param ff
+     * @param auth
+     * @return
+     */
+    Browsing<ProviderBundle> getAllCatalogueProviders(FacetFilter ff, Authentication auth);
 }

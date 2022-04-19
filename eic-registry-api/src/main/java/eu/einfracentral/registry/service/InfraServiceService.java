@@ -311,4 +311,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     Paging<InfraService> createCorrectQuantityFacets(List<InfraService> infraService, Paging<InfraService> infraServicePaging, int quantity, int from);
 
     void emailPhoneValidityCheck();
+
+    void validateEmailsAndPhoneNumbers(InfraService infraService);
 }
