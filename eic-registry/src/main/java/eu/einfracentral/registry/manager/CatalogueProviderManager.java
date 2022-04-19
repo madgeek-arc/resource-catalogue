@@ -95,6 +95,50 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
         throw new ValidationException("You cannot view the specific Provider");
     }
 
+    @Override
+    @Cacheable(value = CACHE_PROVIDERS)
+    public Browsing<ProviderBundle> getAllCatalogueProviders(FacetFilter ff, Authentication auth) {
+        List<ProviderBundle> userProviders = null;
+        List<ProviderBundle> retList = new ArrayList<>();
+
+        // if user is ADMIN or EPOT return everything
+        if (auth != null && auth.isAuthenticated()) {
+            if (securityService.hasRole(auth, "ROLE_ADMIN") ||
+                    securityService.hasRole(auth, "ROLE_EPOT")) {
+                return super.getAll(ff, auth);
+            }
+            // if user is PROVIDER ADMIN return all his Providers (rejected, pending) with their sensitive data (Users, MainContact) too
+            User user = User.of(auth);
+            Browsing<ProviderBundle> providers = super.getAll(ff, auth);
+            for (ProviderBundle providerBundle : providers.getResults()){
+                if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
+                        securityService.userIsProviderAdmin(user, providerBundle.getId())) {
+                    retList.add(providerBundle);
+                }
+            }
+            providers.setResults(retList);
+            providers.setTotal(retList.size());
+            providers.setTo(retList.size());
+            userProviders = providerService.getMyServiceProviders(auth);
+            if (userProviders != null) {
+                // replace user providers having null users with complete provider entries
+                userProviders.forEach(x -> {
+                    providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
+                    providers.getResults().add(x);
+                });
+            }
+            return providers;
+        }
+
+        // else return ONLY approved Providers
+        ff.addFilter("status", "approved provider");
+        Browsing<ProviderBundle> providers = super.getAll(ff, auth);
+        retList.addAll(providers.getResults());
+        providers.setResults(retList);
+
+        return providers;
+    }
+
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle addCatalogueProvider(ProviderBundle provider, String catalogueId, Authentication auth) {
         checkCatalogueIdConsistency(provider, catalogueId);

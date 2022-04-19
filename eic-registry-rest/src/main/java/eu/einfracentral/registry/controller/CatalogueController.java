@@ -4,6 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueProviderService;
 import eu.einfracentral.registry.service.CatalogueService;
+import eu.einfracentral.registry.service.CatalogueServiceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -32,11 +33,15 @@ public class CatalogueController {
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
     private final CatalogueProviderService<ProviderBundle, Authentication> catalogueProviderManager;
+    private final CatalogueServiceService<InfraService, Authentication> catalogueServiceManager;
 
     @Autowired
-    CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager, CatalogueProviderService<ProviderBundle, Authentication> catalogueProviderManager) {
+    CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
+                        CatalogueProviderService<ProviderBundle, Authentication> catalogueProviderManager,
+                        CatalogueServiceService<InfraService, Authentication> catalogueServiceManager) {
         this.catalogueManager = catalogueManager;
         this.catalogueProviderManager = catalogueProviderManager;
+        this.catalogueServiceManager = catalogueServiceManager;
     }
 
     //SECTION: CATALOGUE
@@ -219,6 +224,43 @@ public class CatalogueController {
         }
     }
 
+    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "{catalogueId}/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @PathVariable("catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            ff.setOrderBy(sort);
+        }
+        ff.setFilter(allRequestParams);
+        if (!catalogueId.equals("all")){
+            ff.addFilter("catalogue_id", catalogueId);
+        }
+        List<Provider> providerList = new LinkedList<>();
+        Paging<ProviderBundle> providerBundlePaging = catalogueProviderManager.getAllCatalogueProviders(ff, auth);
+        for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
+            providerList.add(providerBundle.getProvider());
+        }
+        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
+                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
+        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+    }
+
     @PostMapping(path = "{catalogueId}/provider/", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
@@ -258,20 +300,37 @@ public class CatalogueController {
     }
 
     //SECTION: RESOURCE
-//    @ApiOperation(value = "Returns the Resource with the given id.")
-//    @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    public ResponseEntity<Provider> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-//        Service resource = catalogueManager.getCatalogueResource(resourceId, auth).getResource();
-//        if (resource.getCatalogueId() == null){
-//            //TODO: DO SOMETHING
-//            return null;
-//        } else {
-//            if (resource.getCatalogueId().equals(catalogueId)){
-//                return new ResponseEntity<>(resource, HttpStatus.OK);
-//            } else{
-//                throw new ValidationException(String.format("The Resource [%s] you requested does not belong to the specific Catalogue [%s]",  resourceId, catalogueId));
-//            }
-//        }
-//    }
+    @ApiOperation(value = "Returns the Resource with the given id.")
+    @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Service> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
+        Service resource = catalogueServiceManager.getCatalogueService(catalogueId, resourceId, auth).getService();
+        if (resource.getCatalogueId() == null){
+            throw new ValidationException("Service's catalogueId cannot be null");
+        } else {
+            if (resource.getCatalogueId().equals(catalogueId)){
+                return new ResponseEntity<>(resource, HttpStatus.OK);
+            } else{
+                throw new ValidationException(String.format("The Resource [%s] you requested does not belong to the specific Catalogue [%s]",  resourceId, catalogueId));
+            }
+        }
+    }
+
+    @ApiOperation(value = "Creates a new Resource.")
+    @PostMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #service)")
+    public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        InfraService ret = this.catalogueServiceManager.addCatalogueService(new InfraService(service), catalogueId, auth);
+        logger.info("User '{}' added the Service with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth,#service)")
+    @PutMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Service> updateService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService ret = this.catalogueServiceManager.updateCatalogueService(new InfraService(service), catalogueId, comment, auth);
+        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
+    }
 
 }
