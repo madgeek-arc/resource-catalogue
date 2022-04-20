@@ -142,7 +142,7 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle addCatalogueProvider(ProviderBundle provider, String catalogueId, Authentication auth) {
         checkCatalogueIdConsistency(provider, catalogueId);
-        provider.setId(idCreator.createCatalogueProviderId(provider.getProvider()));
+        provider.setId(idCreator.createProviderId(provider.getProvider()));
         logger.trace("User '{}' is attempting to add a new Provider: {} on Catalogue: {}", auth, provider, catalogueId);
         addAuthenticatedUser(provider.getProvider(), auth);
         providerService.validate(provider);

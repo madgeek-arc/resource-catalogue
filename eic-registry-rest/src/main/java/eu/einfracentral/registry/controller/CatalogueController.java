@@ -333,4 +333,11 @@ public class CatalogueController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Get all the Services of a specific Provider of a specific Catalogue")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<InfraService>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
+        Paging<InfraService> infraServices = catalogueServiceManager.getProviderServices(catalogueId, providerId, auth);
+        return new ResponseEntity<>(infraServices, HttpStatus.OK);
+    }
 }
