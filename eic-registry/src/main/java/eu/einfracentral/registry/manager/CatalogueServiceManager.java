@@ -1,14 +1,20 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.validator.FieldValidator;
+import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.ServiceException;
 import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -29,8 +36,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
-import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+import static eu.einfracentral.config.CacheConfig.*;
 
 @Service("CatalogueServiceManager")
 public class CatalogueServiceManager extends ResourceManager<InfraService> implements CatalogueServiceService<InfraService, Authentication> {
@@ -82,7 +88,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
 
     @Cacheable(value = CACHE_FEATURED)
     public InfraService getCatalogueService(String catalogueId, String serviceId, Authentication auth) {
-        InfraService infraService = abstractServiceManager.get(serviceId);
+        InfraService infraService = get(serviceId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (infraService == null) {
             throw new ResourceNotFoundException(
@@ -117,7 +123,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
     public InfraService addCatalogueService(InfraService infraService, String catalogueId, Authentication auth) {
         checkCatalogueIdConsistency(infraService, catalogueId);
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
-            String id = idCreator.createCatalogueServiceId(infraService.getService());
+            String id = idCreator.createServiceId(infraService.getService());
             infraService.getService().setId(id);
         }
         infraServiceService.validate(infraService);
@@ -147,7 +153,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
-        ret = super.add(infraService, auth);
+        ret = add(infraService, auth);
 
         return ret;
     }
@@ -170,7 +176,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
 
         try { // try to find a service with the same id and version
             existingService = get(infraService.getService().getId(), infraService.getService().getVersion());
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException | ResourceException e) {
             // if a service with version = infraService.getVersion() does not exist, get the latest service
             existingService = get(infraService.getService().getId());
         }
@@ -274,6 +280,97 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
                 throw new ValidationException("Parameter 'catalogueId' and Service's 'catalogueId' don't match");
             }
         }
+    }
+
+    @Override
+    public Paging<InfraService> getProviderServices(String catalogueId, String providerId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("resource_organisation", providerId);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, auth);
+    }
+
+    //TODO: CHECK IF WE WANT IT LIKE THAT
+
+    @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public InfraService add(InfraService infraService, Authentication auth) {
+        logger.trace("User '{}' is attempting to add a new Service: {}", auth, infraService);
+        if (infraService.getService().getId() == null) {
+            infraService.getService().setId(idCreator.createServiceId(infraService.getService()));
+        }
+        // if service version is empty set it null
+        if ("".equals(infraService.getService().getVersion())) {
+            infraService.getService().setVersion(null);
+        }
+        if (exists(infraService)) {
+            throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
+        }
+
+        abstractServiceManager.prettifyServiceTextFields(infraService, ",");
+
+        String serialized;
+        serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
+        Resource created = new Resource();
+        created.setPayload(serialized);
+        created.setResourceType(resourceType);
+        resourceService.addResource(created);
+
+//        jmsTopicTemplate.convertAndSend("resource.create", infraService);
+//
+//        synchronizerService.syncAdd(infraService.getService());
+
+        return infraService;
+    }
+
+    public InfraService get(String id, String catalogueId, String version) {
+        Resource resource = getResource(id, catalogueId, version);
+        if (resource == null) {
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s and version: %s", id, version));
+        }
+        return deserialize(resource);
+    }
+
+    public InfraService get(String id, String catalogueId) {
+        return get(id, catalogueId, "latest");
+    }
+
+
+    public Resource getResource(String serviceId, String catalogueId, String serviceVersion) {
+        Paging<Resource> resources;
+        if (serviceVersion == null || "".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueId),
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+            // return the latest modified resource that does not contain a version attribute
+            for (Resource resource : resources.getResults()) {
+                if (!resource.getPayload().contains("<tns:version>")) {
+                    return resource;
+                }
+            }
+            if (resources.getTotal() > 0) {
+                return resources.getResults().get(0);
+            }
+            return null;
+        } else if ("latest".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND latest = true", serviceId, catalogueId),
+                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
+        } else {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND version = \"%s\"", serviceId, catalogueId, serviceVersion), resourceType.getName());
+        }
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+    }
+
+    public boolean exists(InfraService infraService) {
+        if (infraService.getService().getVersion() != null) {
+            return getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion()) != null;
+        }
+        return getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), null) != null;
     }
 
 }

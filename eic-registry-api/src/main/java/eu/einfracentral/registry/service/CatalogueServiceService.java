@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.InfraService;
+import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 
 public interface CatalogueServiceService<T, U extends Authentication> extends ResourceService<T, Authentication> {
@@ -29,4 +30,12 @@ public interface CatalogueServiceService<T, U extends Authentication> extends Re
      * @return
      */
     InfraService updateCatalogueService(InfraService service, String catalogueId, String comment, Authentication auth);
+
+    /**
+     * @param catalogueId
+     * @param providerId
+     * @param auth
+     * @return
+     */
+    Paging<InfraService> getProviderServices(String catalogueId, String providerId, Authentication auth);
 }

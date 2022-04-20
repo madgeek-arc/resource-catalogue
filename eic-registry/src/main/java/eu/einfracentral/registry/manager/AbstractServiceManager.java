@@ -564,7 +564,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
      * @param specialCharacters
      * @return
      */
-    private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
+    public InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
         return infraService;
     }
