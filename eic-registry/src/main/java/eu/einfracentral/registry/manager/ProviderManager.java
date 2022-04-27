@@ -73,6 +73,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private SynchronizerService<Service> synchronizerServiceResource;
 
     @Autowired
+    @Qualifier("providerSync")
+    private SynchronizerService<Provider> synchronizerServiceProvider;
+
+    @Autowired
+    @Qualifier("serviceSync")
+    private SynchronizerService<Service> synchronizerServiceResource;
+
+    @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService,
                            @Lazy FieldValidator fieldValidator,
@@ -1046,7 +1054,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         // order/orderField
-        if (orderField !=null && !orderField.equals("")){
+        if (orderField != null && !orderField.equals("")){
             query += String.format(" ORDER BY %s", orderField);
         } else{
             query += " ORDER BY name";

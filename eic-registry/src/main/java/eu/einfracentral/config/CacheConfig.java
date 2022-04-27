@@ -36,6 +36,8 @@ public class CacheConfig {
 
     protected RestTemplate restTemplate;
 
+    protected RestTemplate restTemplate;
+
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
