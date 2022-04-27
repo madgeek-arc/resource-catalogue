@@ -16,6 +16,13 @@
     },
     {
       "multivalued": false,
+      "name": "abbreviation",
+      "label": "Abbreviation",
+      "path": "//*[local-name()='abbreviation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "version",
       "label": "Version",
       "path": "//*[local-name()='service']/*[local-name()='version']/text()",
@@ -32,7 +39,7 @@
       "multivalued": true,
       "name": "resource_providers",
       "label": "Resource Provider",
-      "path": "//*[local-name()='service']//*[local-name()='resourceProviders']/text()",
+      "path": "//*[local-name()='service']//*[local-name()='resourceProvider']/text()",
       "type": "java.lang.String"
     },
     {
@@ -103,6 +110,13 @@
       "name": "life_cycle_status",
       "label": "Life Cycle Status",
       "path": "//*[local-name()='service']//*[local-name()='lifeCycleStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
       "type": "java.lang.String"
     },
     {
@@ -196,6 +210,13 @@
       "name": "active",
       "defaultValue": false,
       "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
+      "defaultValue": false,
       "type": "java.lang.Boolean"
     },
     {

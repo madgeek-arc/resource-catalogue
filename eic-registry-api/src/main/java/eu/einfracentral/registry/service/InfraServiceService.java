@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, Authentication> {
 
@@ -281,5 +282,35 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     InfraService changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
+    /**
+     * @param auditState
+     * @param ff
+     * @param quantity
+     * @param from
+     * @param ret
+     * @param auth
+     * @return
+     */
+    Paging<InfraService> determineAuditState(Set<String> auditState, FacetFilter ff, int quantity, int from, List<InfraService> ret, Authentication auth);
+
+    /**
+     * @param ff
+     * @param orderDirection
+     * @param orderField
+     * @return
+     */
+    List<Map<String, Object>> createQueryForResourceFilters(FacetFilter ff, String orderDirection, String orderField);
+
+    /**
+     * @param infraService
+     * @param infraServicePaging
+     * @param quantity
+     * @param from
+     * @return
+     */
+    Paging<InfraService> createCorrectQuantityFacets(List<InfraService> infraService, Paging<InfraService> infraServicePaging, int quantity, int from);
+
     void emailPhoneValidityCheck();
+
+    void validateEmailsAndPhoneNumbers(InfraService infraService);
 }

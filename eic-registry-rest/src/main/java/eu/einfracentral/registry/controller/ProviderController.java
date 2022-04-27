@@ -174,7 +174,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
                                                                         @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
-                                                                        @RequestParam(required = false) Set<String> auditState) {
+                                                                        @RequestParam(required = false) Set<String> auditState, @RequestParam(required = false) Set<String> catalogue_id) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -193,6 +193,9 @@ public class ProviderController {
         }
         if (templateStatus != null) {
             ff.addFilter("templateStatus", templateStatus);
+        }
+        if (catalogue_id != null) {
+            ff.addFilter("catalogue_id", catalogue_id);
         }
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
@@ -222,6 +225,21 @@ public class ProviderController {
     @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(infraServiceService.getFeaturedService(id), HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("catalogue_id", id);
+        return ResponseEntity.ok(providerManager.getAll(ff, auth));
     }
 
     // Get a list of Providers in which the given user is admin.
