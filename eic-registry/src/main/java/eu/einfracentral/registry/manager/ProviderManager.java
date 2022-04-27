@@ -64,21 +64,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
         " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
-    @Autowired
-    @Qualifier("providerSync")
-    private SynchronizerService<Provider> synchronizerServiceProvider;
+    private final SynchronizerService<Provider> synchronizerServiceProvider;
 
-    @Autowired
     @Qualifier("serviceSync")
-    private SynchronizerService<Service> synchronizerServiceResource;
-
-    @Autowired
-    @Qualifier("providerSync")
-    private SynchronizerService<Provider> synchronizerServiceProvider;
-
-    @Autowired
-    @Qualifier("serviceSync")
-    private SynchronizerService<Service> synchronizerServiceResource;
+    private final SynchronizerService<Service> synchronizerServiceResource;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -87,7 +76,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy RegistrationMailService registrationMailService,
                            IdCreator idCreator, EventService eventService,
                            JmsTemplate jmsTopicTemplate, VersionService versionService,
-                           VocabularyService vocabularyService, DataSource dataSource) {
+                           VocabularyService vocabularyService, DataSource dataSource,
+                           SynchronizerService<Provider> synchronizerServiceProvider,
+                           SynchronizerService<Service> synchronizerServiceResource) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -99,6 +90,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
+        this.synchronizerServiceProvider = synchronizerServiceProvider;
+        this.synchronizerServiceResource = synchronizerServiceResource;
     }
 
 
