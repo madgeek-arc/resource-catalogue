@@ -1057,7 +1057,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
-        logger.info(query);
+        logger.debug(query);
+
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
