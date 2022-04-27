@@ -29,7 +29,6 @@ public class Metadata {
     @XmlElement(defaultValue = "null")
     private String originalId;
 
-    // TODO: move this to ProviderBundle and perform data migration, it is not needed for Services.
     @XmlElementWrapper(name = "terms")
     @XmlElement(name = "term")
     private List<String> terms;

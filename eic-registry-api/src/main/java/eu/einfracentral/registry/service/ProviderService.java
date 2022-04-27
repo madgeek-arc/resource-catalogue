@@ -46,6 +46,10 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     boolean validateUrl(URL urlForValidation) throws Throwable;
 
+    void validateEmailsAndPhoneNumbers(ProviderBundle providerBundle);
+
+    void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider);
+
     void requestProviderDeletion(String providerId, Authentication auth);
 
     List<T> getInactive();
@@ -123,6 +127,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     /**
      * @param ff
+     * @param orderDirection
+     * @param orderField
      * @return
      */
     List<Map<String, Object>> createQueryForProviderFilters(FacetFilter ff, String orderDirection, String orderField);
