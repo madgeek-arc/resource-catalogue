@@ -22,9 +22,9 @@ public class ProviderMainContact {
     /**
      * Last Name of the Provider's main contact person/Provider manager.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
-    @FieldValidation
+    @XmlElement
+    @ApiModelProperty(position = 2)
+    @FieldValidation(nullable = true)
     private String lastName;
 
     /**

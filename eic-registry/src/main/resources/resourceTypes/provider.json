@@ -36,6 +36,20 @@
       "type": "java.lang.String"
     },
     {
+      "multivalued": false,
+      "name": "hosting_legal_entity",
+      "label": "Hosting Legal Entity",
+      "path": "//*[local-name()='hostingLegalEntity']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": true,
       "name": "scientific_subdomains",
       "label": "Scientific Subdomain",
@@ -229,6 +243,13 @@
     },
     {
       "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
       "name": "status",
       "path": "//*[local-name()='status']/text()",
       "type": "java.lang.String"
@@ -244,5 +265,5 @@
   "name": "provider",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/eosc_model_v4.00/eic-registry-model/src/main/resources/schema1.xsd"
 }

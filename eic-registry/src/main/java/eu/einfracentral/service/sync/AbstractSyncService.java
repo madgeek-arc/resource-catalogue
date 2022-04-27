@@ -205,8 +205,10 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             try {
                 if (t instanceof Provider){
                     uri = new URI(host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider").normalize();
-                } else{
+                } else if (t instanceof eu.einfracentral.domain.Service){
                     uri = new URI(host + controller + "/verifyResource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
+                } else{
+                    uri = new URI(host + controller + "/verifyDataSource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
                 }
                 HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
                 restTemplate.setRequestFactory(requestFactory);

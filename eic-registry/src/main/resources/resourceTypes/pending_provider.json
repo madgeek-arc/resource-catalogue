@@ -36,6 +36,20 @@
       "type": "java.lang.String"
     },
     {
+      "multivalued": false,
+      "name": "hosting_legal_entity",
+      "label": "Hosting Legal Entity",
+      "path": "//*[local-name()='hostingLegalEntity']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": true,
       "name": "scientific_subdomains",
       "label": "Scientific Subdomain",
@@ -152,6 +166,13 @@
       "multivalued": false,
       "name": "active",
       "path": "//*[local-name()='active']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
       "defaultValue": false,
       "type": "java.lang.Boolean"
     },
