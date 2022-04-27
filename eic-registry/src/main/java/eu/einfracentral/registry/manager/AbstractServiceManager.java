@@ -8,10 +8,7 @@ import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
@@ -567,7 +564,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
      * @param specialCharacters
      * @return
      */
-    private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
+    public InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
         return infraService;
     }
@@ -893,6 +890,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
         orderedBrowseBy.add("resource_organisation");   // resource_organisation
         orderedBrowseBy.add("active");                  // active
+        orderedBrowseBy.add("catalogue_id");            // catalogueId
 
         filter.setBrowseBy(orderedBrowseBy);
 

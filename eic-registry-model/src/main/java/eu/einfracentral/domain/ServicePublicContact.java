@@ -60,7 +60,7 @@ public class ServicePublicContact {
      */
     @XmlElement
     @ApiModelProperty(position = 6)
-    @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
+    @FieldValidation(nullable = true)
     private String organisation;
 
     public ServicePublicContact() {
