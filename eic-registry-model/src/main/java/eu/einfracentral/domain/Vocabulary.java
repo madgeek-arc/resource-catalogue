@@ -48,6 +48,8 @@ public class Vocabulary implements Identifiable {
         CATEGORY("Category"),
         SUBCATEGORY("Subcategory"),
         LANGUAGE("Language"),
+        GEOGRAPHIC_LOCATION("Geographic location"),
+        REGION("Region"),
         COUNTRY("Country"),
         TRL("Technology readiness level"),
         SCIENTIFIC_DOMAIN("Scientific domain"),
@@ -77,6 +79,7 @@ public class Vocabulary implements Identifiable {
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
         AUDIT_STATE("Audit state"),
+        CATALOGUE_STATE("Catalogue state"),
         // DataSource
         DS_RESEARCH_ENTITY_TYPE("Research Entity Type"),
         DS_PERSISTENT_IDENTITY_SCHEME("Persistent Identity Scheme"),

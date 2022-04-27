@@ -26,9 +26,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.LinkedMultiValueMap;
 
+import javax.sql.DataSource;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -53,6 +57,10 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
+    private final DataSource dataSource;
+    private final String columnsOfInterest = "infra_service_id, name, abbreviation, resource_organisation, resource_providers, subcategories," +
+            "scientific_subdomains, access_types, access_modes, language_availabilities, geographical_availabilities, resource_geographic_locations," +
+            "trl, life_cycle_status, funding_body, funding_programs, tagline, open_source_technologies, order_type, catalogue_id";
 
 
     @Value("${project.name:}")
@@ -67,7 +75,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                                @Lazy FieldValidator fieldValidator,
                                @Lazy SecurityService securityService,
                                @Lazy RegistrationMailService registrationMailService,
-                               @Lazy VocabularyService vocabularyService) {
+                               @Lazy VocabularyService vocabularyService, @Lazy DataSource dataSource) {
         super(InfraService.class);
         this.resourceManager = resourceManager; // for providers
         this.randomNumberGenerator = randomNumberGenerator;
@@ -76,6 +84,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -137,6 +146,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // LoggingInfo
         infraService.setLoggingInfo(loggingInfoList);
+
+        // catalogueId
+        infraService.getService().setCatalogueId("eosc");
 
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
@@ -998,6 +1010,189 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         if (!validator.isValid(securityContactEmail)) {
             throw new ValidationException(String.format("Email [%s] is not valid. Found in field Security Contact Email", securityContactEmail));
         }
+    }
+
+    @Cacheable(value = CACHE_FEATURED)
+    public List<Map<String, Object>> createQueryForResourceFilters (FacetFilter ff, String orderDirection, String orderField){
+        String keyword = ff.getKeyword();
+        Map<String, Object> order = ff.getOrderBy();
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+        List<String> allFilters = new ArrayList<>();
+
+        String query;
+        if (ff.getFilter().entrySet().isEmpty()){
+            query = "SELECT infra_service_id FROM infra_service_view WHERE catalogue_id = 'eosc' AND latest = 'true'";
+        } else{
+            query = "SELECT infra_service_id FROM infra_service_view WHERE latest = 'true'";
+        }
+
+        for (Map.Entry<String, Object> multiValueMapEntry : ff.getFilter().entrySet()) {
+
+
+            Set<String> keySet = ((LinkedMultiValueMap) multiValueMapEntry.getValue()).keySet();
+            Collection<List<String>> valueSet = ((LinkedMultiValueMap) multiValueMapEntry.getValue()).values();
+
+            for (int i=0; i<keySet.size(); i++) {
+                String entryKey = (String) keySet.toArray()[i];
+                String entryValue = valueSet.toArray()[i].toString().replace("[", "").replace("]", "");
+
+                in.addValue(entryKey, entryValue);
+                // status
+                if (entryKey.equals("status")) {
+                    query += String.format(" AND (status='%s')", entryValue);
+                    if (query.contains(",")) {
+                        query = query.replaceAll(", ", "' OR status='");
+                    }
+                }
+                // catalogue_id
+                if (entryKey.equals("catalogue_id")) {
+                    query += String.format(" AND (catalogue_id='%s')", entryValue);
+                    if (query.contains(",")) {
+                        query = query.replaceAll(", ", "' OR catalogue_id='");
+                    }
+                }
+                // resource_organisation
+                if (entryKey.equals("resource_organisation")) {
+                    query += String.format(" AND (resource_organisation='%s')", entryValue);
+                    if (query.contains(",")) {
+                        query = query.replaceAll(", ", "' OR resource_organisation='");
+                    }
+                }
+            }
+        }
+
+        // keyword on search bar
+        if (keyword != null && !keyword.equals("")){
+            // replace apostrophes to avoid bad sql grammar
+            if (keyword.contains("'")){
+                keyword = keyword.replaceAll("'", "''");
+            }
+            query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
+        }
+
+        // order/orderField
+        if (orderField !=null && !orderField.equals("")){
+            query += String.format(" ORDER BY %s", orderField);
+        } else{
+            query += " ORDER BY name";
+        }
+        if (orderDirection !=null && !orderDirection.equals("")){
+            query += String.format(" %s", orderDirection);
+        }
+
+        query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
+        logger.info(query);
+        return namedParameterJdbcTemplate.queryForList(query, in);
+    }
+
+    @Cacheable(value = CACHE_FEATURED)
+    public Paging<InfraService> createCorrectQuantityFacets(List<InfraService> infraServices, Paging<InfraService> infraServicePaging,
+                                                              int quantity, int from){
+        if (!infraServices.isEmpty()) {
+            List<InfraService> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0){
+                if (quantity <= infraServices.size()){
+                    for (int i=from; i<=quantity-1; i++){
+                        retWithCorrectQuantity.add(infraServices.get(i));
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(infraServices);
+                }
+                infraServicePaging.setTo(retWithCorrectQuantity.size());
+            } else{
+                boolean indexOutOfBound = false;
+                if (quantity <= infraServices.size()){
+                    for (int i=from; i<quantity+from; i++){
+                        try{
+                            retWithCorrectQuantity.add(infraServices.get(i));
+                            if (quantity+from > infraServices.size()){
+                                infraServicePaging.setTo(infraServices.size());
+                            } else{
+                                infraServicePaging.setTo(quantity+from);
+                            }
+                        } catch (IndexOutOfBoundsException e){
+                            indexOutOfBound = true;
+                            continue;
+                        }
+                    }
+                    if (indexOutOfBound){
+                        infraServicePaging.setTo(infraServices.size());
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(infraServices);
+                    if (quantity+from > infraServices.size()){
+                        infraServicePaging.setTo(infraServices.size());
+                    } else{
+                        infraServicePaging.setTo(quantity+from);
+                    }
+                }
+            }
+            infraServicePaging.setFrom(from);
+            infraServicePaging.setResults(retWithCorrectQuantity);
+            infraServicePaging.setTotal(infraServices.size());
+        } else{
+            infraServicePaging.setResults(infraServices);
+            infraServicePaging.setTotal(0);
+            infraServicePaging.setFrom(0);
+            infraServicePaging.setTo(0);
+        }
+        return infraServicePaging;
+    }
+
+    public Paging<InfraService> determineAuditState(Set<String> auditState, FacetFilter ff, int quantity, int from, List<InfraService> resources, Authentication auth) {
+        List<InfraService> valid = new ArrayList<>();
+        List<InfraService> notAudited = new ArrayList<>();
+        List<InfraService> invalidAndUpdated = new ArrayList<>();
+        List<InfraService> invalidAndNotUpdated = new ArrayList<>();
+
+        Paging<InfraService> retPaging = getAll(ff, auth);
+        List<InfraService> allWithoutAuditFilterList = new ArrayList<>();
+        if (resources.isEmpty()){
+            allWithoutAuditFilterList = getAll(ff, auth).getResults();
+        } else{
+            allWithoutAuditFilterList.addAll(resources);
+        }
+        List<InfraService> ret = new ArrayList<>();
+        for (InfraService infraService : allWithoutAuditFilterList){
+            String auditVocStatus;
+            try{
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(infraService.getLoggingInfo());
+            } catch (NullPointerException e){ // providerBundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus){
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(infraService);
+                    break;
+                case "Not Audited":
+                    notAudited.add(infraService);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(infraService);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(infraService);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState){
+            if (state.equals("Valid")){
+                ret.addAll(valid);
+            } else if (state.equals("Not Audited")){
+                ret.addAll(notAudited);
+            } else if (state.equals("Invalid and updated")){
+                ret.addAll(invalidAndUpdated);
+            } else if (state.equals("Invalid and not updated")) {
+                ret.addAll(invalidAndNotUpdated);
+            } else {
+                throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        return createCorrectQuantityFacets(ret, retPaging, quantity, from);
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
