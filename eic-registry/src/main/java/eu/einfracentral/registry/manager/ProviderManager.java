@@ -62,7 +62,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final DataSource dataSource;
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
-        " networks, scientific_subdomains, societal_grand_challenges, structure_types"; // variable with DB tables a keyword is been searched on
+        " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
     @Autowired
     @Qualifier("providerSync")
@@ -123,6 +123,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setActive(false);
         provider.setStatus(vocabularyService.get("pending provider").getId());
         provider.setTemplateStatus(vocabularyService.get("no template status").getId());
+
+        // catalogueId
+        provider.getProvider().setCatalogueId("eosc");
 
         // latestOnboardingInfo
         provider.setLatestOnboardingInfo(loggingInfo);
@@ -960,10 +963,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Map<String, Object> order = ff.getOrderBy();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
+        List<String> allFilters = new ArrayList<>();
 
-        String query;
+        String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT provider_id FROM provider_view";
+            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = 'eosc'";
         } else{
             query = "SELECT provider_id FROM provider_view WHERE";
         }
@@ -971,8 +975,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         boolean firstTime = true;
         boolean hasStatus = false;
         boolean hasTemplateStatus = false;
+        boolean hasCatalogueId = false;
         for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
             in.addValue(entry.getKey(), entry.getValue());
+            // status
             if (entry.getKey().equals("status")) {
                 hasStatus = true;
                 if (firstTime) {
@@ -987,6 +993,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     query = query.replaceAll(", ", "' OR status='");
                 }
             }
+            // templateStatus
             if (entry.getKey().equals("templateStatus")) {
                 hasTemplateStatus = true;
                 if (firstTime) {
@@ -1001,29 +1008,55 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     query = query.replaceAll(", ", "' OR templateStatus='");
                 }
             }
+            // catalogue_id
+            if (entry.getKey().equals("catalogue_id")) {
+                hasCatalogueId = true;
+                if (firstTime) {
+                    if (((LinkedHashSet) entry.getValue()).contains("all")){
+                        query += String.format(" (catalogue_id LIKE '%%%%')");
+                        firstTime = false;
+                        continue;
+                    } else{
+                        query += String.format(" (catalogue_id=%s)", entry.getValue().toString());
+                        firstTime = false;
+                    }
+                } else {
+                    if ((hasStatus && hasCatalogueId) || (hasTemplateStatus && hasCatalogueId) || (hasStatus && hasTemplateStatus && hasCatalogueId)){
+                        if (((LinkedHashSet) entry.getValue()).contains("all")){
+                            query += String.format(" AND (catalogue_id LIKE '%%%%')");
+                            continue;
+                        } else{
+                            query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
+                        }
+                    }
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR catalogue_id='");
+                }
+            }
         }
 
         // keyword on search bar
         if (keyword != null && !keyword.equals("")){
-            if (firstTime){
-                query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-            } else{
-                query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
+            // replace apostrophes to avoid bad sql grammar
+            if (keyword.contains("'")){
+                keyword = keyword.replaceAll("'", "''");
             }
+            query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
         }
 
         // order/orderField
         if (orderField !=null && !orderField.equals("")){
             query += String.format(" ORDER BY %s", orderField);
-        }
-        if (orderField == null){
-            query += String.format(" ORDER BY name");
+        } else{
+            query += " ORDER BY name";
         }
         if (orderDirection !=null && !orderDirection.equals("")){
             query += String.format(" %s", orderDirection);
         }
 
         query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
+        logger.info(query);
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 

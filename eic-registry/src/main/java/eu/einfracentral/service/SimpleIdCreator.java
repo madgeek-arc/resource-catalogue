@@ -77,4 +77,45 @@ public class SimpleIdCreator implements IdCreator {
                 .replace(" ", "_")
                 .toLowerCase());
     }
+
+    @Override
+    public String createCatalogueProviderId(Provider provider) {
+        String providerId;
+        if (provider.getId() == null || "".equals(provider.getId())) {
+            if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation()) && !"null".equals(provider.getAbbreviation())) {
+                providerId = provider.getAbbreviation();
+            } else if (provider.getName() != null && !"".equals(provider.getName()) && !"null".equals(provider.getName())) {
+                providerId = provider.getName();
+            } else {
+                throw new ValidationException("Provider must have an acronym or name.");
+            }
+        } else {
+            providerId = provider.getId();
+        }
+        return String.format("%s.%s", provider.getCatalogueId(), StringUtils
+                .stripAccents(providerId)
+                .replaceAll("[\n\t\\s]+", " ")
+                .replaceAll("\\s+$", "")
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase());
+    }
+
+    @Override
+    public String createCatalogueServiceId(eu.einfracentral.domain.Service service) {
+        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
+            throw new ValidationException("Resource must have a Resource Organisation.");
+        }
+        if (service.getName() == null || service.getName().equals("")) {
+            throw new ValidationException("Resource must have a Name.");
+        }
+        String provider = service.getResourceOrganisation();
+        return String.format("%s.%s.%s", service.getCatalogueId(), provider, StringUtils
+                .stripAccents(service.getName())
+                .replaceAll("[\n\t\\s]+", " ")
+                .replaceAll("\\s+$", "")
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase());
+    }
 }
