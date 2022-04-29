@@ -144,7 +144,13 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Service>> getAllServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Paging<Service>> getAllServices(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                          @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                          @ApiIgnore Authentication authentication) {
+        allRequestParams.addIfAbsent("catalogue_id", catalogueIds);
+        if (catalogueIds != null && catalogueIds.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         Paging<InfraService> infraServices = infraService.getAll(ff, authentication);
         List<Service> services = infraServices.getResults().stream().map(InfraService::getService).collect(Collectors.toList());
