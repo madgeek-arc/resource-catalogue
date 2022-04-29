@@ -4,6 +4,7 @@ import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Value;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -52,9 +54,11 @@ public class FacetLabelService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
 //        ff.addFilter("active", "true");
-        Map<String, String> providerNames = providerService.getAll(ff, null)
-                .getResults()
-                .stream().collect(Collectors.toMap(ProviderBundle::getId, p -> p.getProvider().getName()));
+        // TODO: get all final providers (after deduplication process)
+        List<ProviderBundle> allProviders = providerService.getAll(ff, null).getResults();
+        Map<String, String> providerNames = new TreeMap<>();
+        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), p.getProvider().getName()));
+
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         Facet superCategories;

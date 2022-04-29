@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
@@ -10,13 +11,16 @@ import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.validator.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.ParserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -26,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
+import static eu.einfracentral.config.CacheConfig.*;
 
 @Service("catalogueProviderManager")
 public class CatalogueProviderManager extends ResourceManager<ProviderBundle> implements CatalogueProviderService<ProviderBundle, Authentication> {
@@ -66,7 +70,7 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
 
     @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle getCatalogueProvider(String catalogueId, String providerId, Authentication auth) {
-        ProviderBundle providerBundle = providerService.get(providerId);
+        ProviderBundle providerBundle = getWithCatalogueId(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (providerBundle == null) {
             throw new ResourceNotFoundException(
@@ -171,12 +175,12 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
         }
 
         ProviderBundle ret;
-        ret = super.add(provider, null);
+        ret = add(provider, null);
         logger.debug("Adding Provider: {} of Catalogue: {}", provider, catalogueId);
 
-//        registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
-        //TODO: check if the jms msg is the same on lower an upper lvl
-        jmsTopicTemplate.convertAndSend("provider.create", provider);
+        registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
+
+//        jmsTopicTemplate.convertAndSend("provider.create", provider);
 //        synchronizerServiceProvider.syncAdd(provider.getProvider());
 
         return ret;
@@ -227,10 +231,8 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
         logger.debug("Updating Provider: {} of Catalogue {}", provider, provider.getProvider().getCatalogueId());
 
         // Send emails to newly added or deleted Admins
-//        providerService.adminDifferences(provider, ex);
+        providerService.adminDifferences(provider, ex);
 
-        //TODO: ENABLE WHEN READY
-        // send notification emails to Portal Admins
         if (provider.getLatestAuditInfo() != null && provider.getLatestUpdateInfo() != null) {
             Long latestAudit = Long.parseLong(provider.getLatestAuditInfo().getDate());
             Long latestUpdate = Long.parseLong(provider.getLatestUpdateInfo().getDate());
@@ -239,8 +241,7 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
             }
         }
 
-        jmsTopicTemplate.convertAndSend("provider.update", provider);
-//
+//        jmsTopicTemplate.convertAndSend("provider.update", provider);
 //        synchronizerServiceProvider.syncUpdate(provider.getProvider());
 
         return provider;
@@ -277,6 +278,55 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
                 throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
             }
         }
+    }
+
+
+    @Override
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to add a new Provider: {}", auth, providerBundle);
+        if (providerBundle.getProvider().getId() == null) {
+            providerBundle.getProvider().setId(idCreator.createProviderId(providerBundle.getProvider()));
+        }
+
+        if (exists(providerBundle)) {
+            throw new ResourceException(String.format("Provider with id: %s already exists in the Catalogue with id: %s",
+                    providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()), HttpStatus.CONFLICT);
+        }
+
+        String serialized;
+        serialized = parserPool.serialize(providerBundle, ParserService.ParserServiceTypes.XML);
+        Resource created = new Resource();
+        created.setPayload(serialized);
+        created.setResourceType(resourceType);
+        resourceService.addResource(created);
+
+        return providerBundle;
+    }
+
+    public ProviderBundle get(String id, String catalogueId) {
+        Resource resource = getResource(id, catalogueId);
+        if (resource == null) {
+            throw new ResourceNotFoundException(String.format("Could not find provider with id: %s and catalogueId %s", id, catalogueId));
+        }
+        return deserialize(resource);
+    }
+
+    public ProviderBundle getWithCatalogueId(String id, String catalogueId) {
+        return get(id, catalogueId);
+    }
+
+
+    public Resource getResource(String providerId, String catalogueId) {
+        Paging<Resource> resources;
+        resources = searchService
+                .cqlQuery(String.format("provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId), resourceType.getName());
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+    }
+
+    public boolean exists(ProviderBundle providerBundle) {
+        return getResource(providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()) != null;
     }
 
 }

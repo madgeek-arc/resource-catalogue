@@ -175,10 +175,10 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
         }
 
         try { // try to find a service with the same id and version
-            existingService = get(infraService.getService().getId(), infraService.getService().getVersion());
+            existingService = get(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion());
         } catch (ResourceNotFoundException | ResourceException e) {
             // if a service with version = infraService.getVersion() does not exist, get the latest service
-            existingService = get(infraService.getService().getId());
+            existingService = get(infraService.getService().getId(), infraService.getService().getCatalogueId());
         }
         if ("".equals(existingService.getService().getVersion())) {
             existingService.getService().setVersion(null);
@@ -251,7 +251,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
 
             // set new service as latest
             infraService.setLatest(true);
-            ret = super.add(infraService, auth);
+            ret = add(infraService, auth);
             logger.info("Updating Service with version change (super.add): {}", infraService);
         }
 
@@ -292,7 +292,6 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
         return this.getAll(ff, auth);
     }
 
-    //TODO: CHECK IF WE WANT IT LIKE THAT
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
@@ -306,7 +305,8 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
             infraService.getService().setVersion(null);
         }
         if (exists(infraService)) {
-            throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("Service with id: %s already exists in the Catalogue with id: %s",
+                    infraService.getService().getId(), infraService.getService().getCatalogueId()), HttpStatus.CONFLICT);
         }
 
         abstractServiceManager.prettifyServiceTextFields(infraService, ",");
@@ -328,7 +328,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
     public InfraService get(String id, String catalogueId, String version) {
         Resource resource = getResource(id, catalogueId, version);
         if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find service with id: %s and version: %s", id, version));
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s, version: %s and catalogueId: %s", id, version, catalogueId));
         }
         return deserialize(resource);
     }
