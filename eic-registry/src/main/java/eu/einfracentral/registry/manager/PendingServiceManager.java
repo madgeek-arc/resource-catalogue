@@ -114,7 +114,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
         InfraService infraService = infraServiceService.get(serviceId);
-        Resource resource = infraServiceService.getResource(infraService.getService().getId(), infraService.getService().getVersion());
+        Resource resource = infraServiceService.getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion());
         resource.setResourceTypeName("infra_service");
         resourceService.changeResourceType(resource, resourceType);
         return infraService;

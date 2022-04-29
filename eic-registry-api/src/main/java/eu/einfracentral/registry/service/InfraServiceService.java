@@ -42,10 +42,18 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * If the version is null, empty or "latest" the method returns the latest service.
      *
      * @param id      of the Service.
+     * @param catalogueId
      * @param version of the Service.
      * @return service.
      */
-    R get(String id, String version);
+    R get(String id, String catalogueId, String version);
+
+    /**
+     * @param id      of the Service.
+     * @param catalogueId
+     * @return service.
+     */
+    R get(String id, String catalogueId);
 
     /**
      * Get InfraServices by a specific field.
@@ -76,10 +84,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Gets the specific Service with extra fields like views and ratings
      *
      * @param id
+     * @param catalogueId
+     * @param version
      * @param auth
      * @return
      */
-    RichService getRichService(String id, String version, Authentication auth);
+    RichService getRichService(String id, String catalogueId, String version, Authentication auth);
 
     /**
      * Creates a RichService for the specific Service
@@ -108,10 +118,11 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Get the service resource.
      *
      * @param id
+     * @param catalogueId
      * @param version
      * @return Resource
      */
-    Resource getResource(String id, String version);
+    Resource getResource(String id, String catalogueId, String version);
 
     /**
      * Get the History of the InfraService with the specified id.
@@ -255,9 +266,10 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Get the History of the Resource with the specified id.
      *
      * @param id
+     * @param catalogueId
      * @return
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id);
+    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
 
     /**
      * @param auth
