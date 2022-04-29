@@ -354,13 +354,18 @@ public class OIDCSecurityService implements SecurityService {
         return service.isActive();
     }
 
-    public boolean serviceIsActive(String serviceId, String version) {
+    public boolean serviceIsActive(String serviceId, String catalogueId) {
+        InfraService service = infraServiceService.get(serviceId, catalogueId);
+        return service.isActive();
+    }
+
+    public boolean serviceIsActive(String serviceId, String catalogueId, String version) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version
         if ("rich".equals(serviceId)) {
             return serviceIsActive(version);
         }
-        InfraService service = infraServiceService.get(serviceId, version);
+        InfraService service = infraServiceService.get(serviceId, catalogueId, version);
         return service.isActive();
     }
 }

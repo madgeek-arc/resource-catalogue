@@ -57,46 +57,50 @@ public class ServiceController {
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version,
+                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService service;
         if (version.isPresent()) {
-            service = infraService.get(id, version.get());
+            service = infraService.get(id, catalogueId, version.get());
         } else {
-            service = infraService.get(id);
+            service = infraService.get(id, catalogueId);
         }
         infraService.delete(service);
-        logger.info("User '{}' deleted Resource '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' deleted Resource '{}' with id: '{}' of the Catalogue: '{}'", auth.getName(), service.getService().getName(),
+                service.getService().getId(), service.getService().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    public ResponseEntity<Service> getService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(infraService.get(id).getService(), HttpStatus.OK);
+    @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    public ResponseEntity<Service> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(infraService.get(id, catalogueId).getService(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the specified version of a Resource, providing the Resource id and version.")
     @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
             "(@securityService.isServiceProviderAdmin(#auth, #id) or @securityService.isServiceProviderAdmin(#auth, #version))")
-    public ResponseEntity<?> getService(@PathVariable("id") String id, @PathVariable("version") String version,
-                                        @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                        @PathVariable("version") String version, @ApiIgnore Authentication auth) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version
         if ("rich".equals(id)) { // wrong controller (id = rich, version = serviceId)
-            return getRichService(version, "latest", auth);
+            return getRichService(id, catalogueId, "latest", auth);
         }
-        return new ResponseEntity<>(infraService.get(id, version).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.get(id, catalogueId, version).getService(), HttpStatus.OK);
     }
 
     // Get the specified version of a RichService providing the Service id and version.
     @GetMapping(path = "rich/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
+                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                       @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(infraService.getRichService(id, version, auth), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.getRichService(id, catalogueId, version, auth), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new Resource.")
@@ -166,7 +170,13 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                               @ApiIgnore Authentication auth) {
+        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
@@ -235,7 +245,7 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
-    // REVISE: returns InfraService (sensitive data)
+    // FIXME: active parameter for EPOT/ADMINS doesn't work, we always return everything to them
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -245,7 +255,13 @@ public class ServiceController {
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
-    public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<InfraService>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                      @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
         ff.addFilter("resource_organisation", id);
@@ -413,8 +429,9 @@ public class ServiceController {
 
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Paging<LoggingInfo> loggingInfoHistory = this.infraService.getLoggingInfoHistory(id);
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                  @ApiIgnore Authentication auth) {
+        Paging<LoggingInfo> loggingInfoHistory = this.infraService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 

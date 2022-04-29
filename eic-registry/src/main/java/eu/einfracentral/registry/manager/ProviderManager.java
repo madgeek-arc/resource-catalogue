@@ -747,7 +747,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public InfraService updateInfraServiceLoggingInfo(String providerId, String type,  String actionType, Authentication authentication) {
+    public InfraService updateInfraServiceLoggingInfo(String providerId, String type, String catalogueId, String actionType, Authentication authentication) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         InfraService serviceTemplate = infraServiceService.getServiceTemplate(providerId, authentication);
         LoggingInfo loggingInfo;
