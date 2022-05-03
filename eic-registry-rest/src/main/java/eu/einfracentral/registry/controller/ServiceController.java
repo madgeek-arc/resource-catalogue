@@ -286,15 +286,18 @@ public class ServiceController {
 
     // Get all modification details of a specific Service, providing the Service id.
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Paging<ResourceHistory> history = infraService.getHistory(id);
+    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
+                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                           @ApiIgnore Authentication auth) {
+        Paging<ResourceHistory> history = infraService.getHistory(id, catalogueId);
         return ResponseEntity.ok(history);
     }
 
     // Get all modifications of a specific Service, providing the Service id and the resource Version id.
     @GetMapping(path = {"history/{resourceId}/{versionId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> getVersionHistory(@PathVariable String serviceId, @PathVariable String versionId, @ApiIgnore Authentication auth) {
-        Service service = infraService.getVersionHistory(serviceId, versionId);
+    public ResponseEntity<Service> getVersionHistory(@PathVariable String resourceId, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                     @PathVariable String versionId, @ApiIgnore Authentication auth) {
+        Service service = infraService.getVersionHistory(resourceId, catalogueId, versionId);
         return ResponseEntity.ok(service);
     }
 

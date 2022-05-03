@@ -11,6 +11,7 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -315,6 +316,34 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     public void adminAcceptedTerms(String providerId, Authentication auth){
         update(get(providerId), auth);
+    }
+
+    public Resource getResource(String serviceId, String serviceVersion) {
+        Paging<Resource> resources;
+        if (serviceVersion == null || "".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"eosc\"", serviceId),
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+            // return the latest modified resource that does not contain a version attribute
+            for (Resource resource : resources.getResults()) {
+                if (!resource.getPayload().contains("<tns:version>")) {
+                    return resource;
+                }
+            }
+            if (resources.getTotal() > 0) {
+                return resources.getResults().get(0);
+            }
+            return null;
+        } else if ("latest".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"eosc\" AND latest = true", serviceId),
+                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
+        } else {
+            resources = searchService
+                    .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"eosc\" AND version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
+        }
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
 }
