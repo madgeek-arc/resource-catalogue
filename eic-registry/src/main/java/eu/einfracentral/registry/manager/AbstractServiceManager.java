@@ -334,11 +334,11 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Browsing<ResourceHistory> getHistory(String serviceId) {
+    public Browsing<ResourceHistory> getHistory(String serviceId, String catalogueId) {
         Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
         // get all resources with the specified Service id
-        List<Resource> resources = getResourcesWithServiceId(serviceId);
+        List<Resource> resources = getResourcesWithServiceId(serviceId, catalogueId);
 
         // for each resource (InfraService), get its versions
         if (resources != null) {
@@ -400,15 +400,15 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Service getVersionHistory(String serviceId, String versionId) {
-        List<Resource> resources = getResourcesWithServiceId(serviceId);
+    public Service getVersionHistory(String resourceId, String catalogueId, String versionId) {
+        List<Resource> resources = getResourcesWithServiceId(resourceId, catalogueId);
         Service service = new Service();
         List<Version> versions;
         List<Version> allVersions = new ArrayList<>();
 
         if (resources != null) {
             for (Resource resource : resources) {
-                versions = versionService.getVersionsByResource(resource.getId());
+                versions = versionService.getVersionsByResource(resource.getId()); //FIXME -> catalogueId needed
                 allVersions.addAll(versions);
             }
             for (Version version : allVersions) {
@@ -421,7 +421,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             }
             return service;
         } else {
-            throw new ValidationException("Service with id '" + serviceId + "' does not exist.");
+            throw new ValidationException("Service with id '" + resourceId + "' does not exist.");
         }
     }
 
@@ -492,10 +492,10 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    public List<Resource> getResourcesWithServiceId(String infraServiceId) {
+    public List<Resource> getResourcesWithServiceId(String infraServiceId, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
+                .cqlQuery(String.format("infra_service_id = \"%s\"  AND catalogue_id = \"%s\"", infraServiceId, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
 
         assert resources != null;

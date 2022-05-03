@@ -231,6 +231,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
 
+        // block catalogueId updates from Provider Admins
+        if (!securityService.hasRole(auth, "ROLE_ADMIN")){
+            if (!existingService.getService().getCatalogueId().equals(infraService.getService().getCatalogueId())){
+                throw new ValidationException("You cannot change catalogueId");
+            }
+        }
+
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
                 || infraService.getService().getVersion() != null
                 && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
@@ -612,6 +619,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<InfraService> getInfraServices(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, auth).getResults();
@@ -622,6 +630,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ProviderBundle providerBundle = resourceManager.get(providerId);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -644,6 +653,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -669,6 +679,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<Service> getActiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
@@ -680,6 +691,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<InfraService> getInactiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
@@ -704,7 +716,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         InfraService infraService = new InfraService();
         try{
             infraService = get(id, catalogueId);
-            List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+            List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId(), infraService.getService().getCatalogueId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
             for (Resource resource : allResources){
@@ -784,7 +796,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         List<InfraService> allInfraServices = getAll(ff, securityService.getAdminAccess()).getResults();
         List<Resource> allResources;
         for (InfraService infraService : allInfraServices) {
-            allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+            allResources = getResourcesWithServiceId(infraService.getService().getId(), infraService.getService().getCatalogueId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             boolean firstResource = true;
             boolean broke = false;
