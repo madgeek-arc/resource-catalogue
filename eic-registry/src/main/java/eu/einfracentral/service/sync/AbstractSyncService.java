@@ -29,7 +29,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
     private static final Logger logger = LogManager.getLogger(AbstractSyncService.class);
 
     protected RestTemplate restTemplate;
-    protected boolean active = true;
+    protected boolean active = false;
     protected String host;
     protected String controller;
     private String filename;
