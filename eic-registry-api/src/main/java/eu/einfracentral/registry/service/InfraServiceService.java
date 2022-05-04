@@ -181,6 +181,15 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     InfraService getOrNull(String id);
 
     /**
+     * Gets the InfraService or returns null (no throws).
+     *
+     * @param id
+     * @param catalogueId
+     * @return
+     */
+    InfraService getOrNull(String id, String catalogueId);
+
+    /**
      * Sets a Service as active/inactive.
      *
      * @param serviceId
