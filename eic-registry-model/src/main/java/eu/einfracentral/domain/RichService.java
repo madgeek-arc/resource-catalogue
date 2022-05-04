@@ -12,6 +12,7 @@ import java.util.List;
 public class RichService {
 
     private Service service;
+    private DataSource dataSourceBundle;
     private Metadata metadata;
 
     private List<String> languageAvailabilityNames;
@@ -26,12 +27,12 @@ public class RichService {
     private List<String> fundingProgramNames;
     private String orderTypeName;
 
-    private int views;
-    private int ratings;
+    private float views;
+    private float ratings;
     private float userRate;
     private float hasRate;
-    private int favourites;
-    private boolean isFavourite;
+    private float favourites;
+    private float isFavourite;
 
     private List<Category> categories;
     private List<ScientificDomain> domains;
@@ -49,6 +50,11 @@ public class RichService {
     public RichService(InfraService service) {
         this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = service.getMetadata();
+    }
+
+    public RichService(DataSourceBundle dataSourceBundle) {
+        this.dataSourceBundle = dataSourceBundle.getDataSource(); // copy constructor is needed to 'hide' infraService fields
+        this.metadata = dataSourceBundle.getMetadata();
     }
 
     public Service getService() {
@@ -158,19 +164,19 @@ public class RichService {
         this.orderTypeName = orderTypeName;
     }
 
-    public int getViews() {
+    public float getViews() {
         return views;
     }
 
-    public void setViews(int views) {
+    public void setViews(float views) {
         this.views = views;
     }
 
-    public int getRatings() {
+    public float getRatings() {
         return ratings;
     }
 
-    public void setRatings(int ratings) {
+    public void setRatings(float ratings) {
         this.ratings = ratings;
     }
 
@@ -190,20 +196,20 @@ public class RichService {
         this.hasRate = hasRate;
     }
 
-    public int getFavourites() {
+    public float getFavourites() {
         return favourites;
     }
 
-    public void setFavourites(int favourites) {
+    public void setFavourites(float favourites) {
         this.favourites = favourites;
     }
 
-    public boolean isFavourite() {
+    public float getIsFavourite() {
         return isFavourite;
     }
 
-    public void setFavourite(boolean favourite) {
-        isFavourite = favourite;
+    public void setIsFavourite(float isFavourite) {
+        this.isFavourite = isFavourite;
     }
 
     public List<Category> getCategories() {

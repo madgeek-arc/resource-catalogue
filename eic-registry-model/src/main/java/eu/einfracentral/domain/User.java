@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.einfracentral.annotation.FieldValidation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -21,12 +22,15 @@ public class User implements Identifiable {
     private String id;
 
     @XmlElement
+    @FieldValidation
     private String email;
 
     @XmlElement
+    @FieldValidation
     private String name;
 
     @XmlElement
+    @FieldValidation
     private String surname;
 
     public User() {

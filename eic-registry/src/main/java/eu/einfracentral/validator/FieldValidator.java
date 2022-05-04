@@ -2,14 +2,16 @@ package eu.einfracentral.validator;
 
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
+import eu.einfracentral.annotation.GeoLocationVocValidation;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.IndicatorManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.*;
@@ -24,21 +27,19 @@ import java.util.*;
 @Service
 public class FieldValidator {
 
+    private static final Logger logger = LogManager.getLogger(FieldValidator.class);
+
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final IndicatorManager indicatorService;
-
 
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          InfraServiceService<InfraService, InfraService> infraServiceService,
-                          IndicatorManager indicatorService) {
+                          InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.infraServiceService = infraServiceService;
-        this.indicatorService = indicatorService;
     }
 
     public void validateFields(Object o) throws IllegalAccessException {
@@ -62,9 +63,14 @@ public class FieldValidator {
 
         // check if FieldValidation annotation exists
         Annotation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
+        Annotation geoLocationVocValidation = field.getAnnotation(GeoLocationVocValidation.class);
         Annotation annotation = field.getAnnotation(FieldValidation.class);
         if (vocabularyValidation != null && annotation == null) {
             annotation = vocabularyValidation.annotationType().getAnnotation(FieldValidation.class);
+        }
+        // region/countries validation
+        if (geoLocationVocValidation != null && annotation == null) {
+            annotation = geoLocationVocValidation.annotationType().getAnnotation(FieldValidation.class);
         }
 
         if (annotation != null) {
@@ -95,6 +101,7 @@ public class FieldValidator {
 
             validateMaxLength(field, fieldValue, validationAnnotation);
             validateUrlValidity(field, fieldValue);
+            validateDuplicates(field, fieldValue);
 
             if (validationAnnotation.containsId()) {
                 validateIds(field, fieldValue, validationAnnotation);
@@ -157,25 +164,25 @@ public class FieldValidator {
 
     public void validateUrl(Field field, URL urlForValidation){
         HttpsTrustManager.allowAllSSL();
-        HttpURLConnection huc = null;
+        HttpURLConnection huc;
         int statusCode = 0;
+
         try {
+            // replace spaces with %20
+            if (urlForValidation.toString().contains(" ")) {
+                urlForValidation = new URL(urlForValidation.toString().replaceAll("\\s", "%20"));
+            }
+
+            // open connection and get response code
             huc = (HttpURLConnection) urlForValidation.openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             assert huc != null;
             huc.setRequestMethod("HEAD");
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        }
-        try {
             statusCode = huc.getResponseCode();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.trace(e.getMessage());
         }
-        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403){
+
+        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405 && statusCode != 503){
             if (field == null){
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
             } else {
@@ -196,11 +203,21 @@ public class FieldValidator {
                     if (Vocabulary.class.equals(annotation.idClass())) {
                         Vocabulary voc = vocabularyService.get(o.toString());
                         VocabularyValidation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
+                        GeoLocationVocValidation geoLocationVocValidation = field.getAnnotation(GeoLocationVocValidation.class);
                         if (vocabularyValidation != null) {
                             if (voc == null || Vocabulary.Type.fromString(voc.getType()) != vocabularyValidation.type()) {
                                 throw new ValidationException(
                                         String.format("Field '%s' should contain the ID of a type '%s' Vocabulary",
                                                 field.getName(), vocabularyValidation.type()));
+                            }
+                        }
+                        // region/countries validation
+                        if (geoLocationVocValidation != null) {
+                            if (voc == null || (Vocabulary.Type.fromString(voc.getType()) != geoLocationVocValidation.region()
+                                    && Vocabulary.Type.fromString(voc.getType()) != geoLocationVocValidation.country())) {
+                                throw new ValidationException(
+                                        String.format("Field '%s' should contain the ID of either one of the types '%s' or '%s' Vocabularies",
+                                                field.getName(), geoLocationVocValidation.region(), geoLocationVocValidation.country()));
                             }
                         }
                     } else if (Provider.class.equals(annotation.idClass())
@@ -211,11 +228,6 @@ public class FieldValidator {
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
                             || InfraService.class.equals(annotation.idClass()))
                             && infraServiceService.get(o.toString()) == null) {
-                        throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Service",
-                                        field.getName()));
-                    } else if (Indicator.class.equals(annotation.idClass())
-                            && indicatorService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
                                         field.getName()));
@@ -242,6 +254,21 @@ public class FieldValidator {
                     }
                 } else {
                     i.remove(); // remove null entries
+                }
+            }
+        }
+    }
+
+    public void validateDuplicates(Field field, Object o) {
+        Set<String> duplicateEntries = new HashSet<>();
+        String subField = field.toString().substring(field.toString().lastIndexOf(".")+1);
+        if (o != null) {
+            Class clazz = o.getClass();
+            if (ArrayList.class.equals(clazz)) {
+                for (int i=0; i<((ArrayList) o).size(); i++) {
+                    if (!duplicateEntries.add(((ArrayList) o).get(i).toString())) {
+                        throw new ValidationException(String.format("Duplicate value found '%s' on field '%s'", ((ArrayList) o).get(i).toString(), subField));
+                    }
                 }
             }
         }

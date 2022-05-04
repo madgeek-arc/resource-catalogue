@@ -11,7 +11,8 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SearchServiceEIC;
+import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -43,8 +44,16 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     private static final Logger logger = LogManager.getLogger(AbstractServiceManager.class);
 
+    @Autowired
+    private SecurityService securityService;
+
     public AbstractServiceManager(Class<InfraService> typeParameterClass) {
         super(typeParameterClass);
+    }
+
+    public AbstractServiceManager(Class<InfraService> typeParameterClass, SecurityService securityService) {
+        super(typeParameterClass);
+        this.securityService = securityService;
     }
 
     @Autowired
@@ -64,7 +73,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Autowired
     @Qualifier("serviceSync")
-    private SynchronizerService<InfraService> synchronizerService;
+    private SynchronizerService<eu.einfracentral.domain.Service> synchronizerService;
 
     @Autowired
     private AnalyticsService analyticsService;
@@ -133,6 +142,20 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
     @Override
     public Browsing<InfraService> getAll(FacetFilter filter, Authentication auth) {
+        // if user is Unauthorized, return active/latest ONLY
+        if (auth == null){
+            filter.addFilter("active", true);
+            filter.addFilter("latest", true);
+        }
+        if (auth != null && auth.isAuthenticated()){
+            // if user is Authorized with ROLE_USER, return active/latest ONLY
+            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
+                    !securityService.hasRole(auth, "ROLE_ADMIN")){
+                filter.addFilter("active", true);
+                filter.addFilter("latest", true);
+            }
+        }
+
         //TODO: Rearrange depending on front-end's needs
         //Order Service's facets as we like (+removed Service Name - no4)
         List<String> orderedBrowseBy = new ArrayList<>();
@@ -153,8 +176,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         orderedBrowseBy.add(browseBy.get(11));    // Resource Type
 
         filter.setBrowseBy(orderedBrowseBy);
-
         filter.setResourceType(getResourceType());
+
         return getMatchingServices(filter);
     }
 
@@ -174,7 +197,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if ("".equals(infraService.getService().getVersion())) {
             infraService.getService().setVersion(null);
         }
-        synchronizerService.syncAdd(infraService);
         if (exists(infraService)) {
             throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
         }
@@ -189,6 +211,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         resourceService.addResource(created);
 
         jmsTopicTemplate.convertAndSend("resource.create", infraService);
+
+        synchronizerService.syncAdd(infraService.getService());
 
         return infraService;
     }
@@ -207,14 +231,22 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
                             infraService.getService().getId(), infraService.getService().getVersion()));
         }
-        synchronizerService.syncUpdate(infraService);
 
         prettifyServiceTextFields(infraService, ",");
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
 
+        // for CatRIs history migration
+//        try{
+//            resourceService.updateResource(existing);
+//        } catch (ServiceException e){
+//            logger.info("Service Exception");
+//        }
+
         jmsTopicTemplate.convertAndSend("resource.update", infraService);
+
+        synchronizerService.syncUpdate(infraService.getService());
 
         return infraService;
     }
@@ -226,14 +258,17 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (infraService == null || infraService.getService().getId() == null) {
             throw new ServiceException("You cannot delete a null service or service with null id field");
         }
-        synchronizerService.syncDelete(infraService);
+
         resourceService.deleteResource(getResource(infraService.getService().getId(), infraService.getService().getVersion()).getId());
 
         jmsTopicTemplate.convertAndSend("resource.delete", infraService);
+
+        synchronizerService.syncDelete(infraService.getService());
+
     }
 
     @Override
-    public Map<String, List<InfraService>> getBy(String field) throws NoSuchFieldException {
+    public Map<String, List<InfraService>> getBy(String field, Authentication auth) throws NoSuchFieldException {
         Field serviceField = null;
         try {
             serviceField = Service.class.getDeclaredField(field);
@@ -244,8 +279,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         serviceField.setAccessible(true);
 
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        Browsing<InfraService> services = getAll(ff, null);
+        ff.setQuantity(maxQuantity);
+        Browsing<InfraService> services = getAll(ff, auth);
 
         final Field f = serviceField;
         final String undef = "undefined";
@@ -295,8 +330,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Browsing<ServiceHistory> getHistory(String serviceId) {
-        Map<String, ServiceHistory> historyMap = new TreeMap<>();
+    public Browsing<ResourceHistory> getHistory(String serviceId) {
+        Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
         // get all resources with the specified Service id
         List<Resource> resources = getResourcesWithServiceId(serviceId);
@@ -319,13 +354,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     tempResource.setPayload(versions.get(0).getPayload());
                     service = deserialize(tempResource);
                     if (service != null && service.getMetadata() != null) {
-                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, versions.get(0).getId(), true));
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ResourceHistory(service, versions.get(0).getId(), true));
                     }
                     versions.remove(0);
                 } else {
                     service = deserialize(tempResource);
                     if (service != null && service.getMetadata() != null) {
-                        historyMap.put(service.getMetadata().getModifiedAt(), new ServiceHistory(service, true));
+                        historyMap.put(service.getMetadata().getModifiedAt(), new ResourceHistory(service, true));
                     }
                 }
 
@@ -336,7 +371,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     service = deserialize(tempResource);
                     if (service != null) {
                         try {
-                            historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, version.getId(), false));
+                            historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ResourceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
                             logger.warn("InfraService with id '{}' does not have Metadata", service.getService().getId());
                         }
@@ -344,12 +379,12 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 }
                 service = deserialize(resource);
                 if (service != null && service.getMetadata() != null) {
-                    historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ServiceHistory(service, false));
+                    historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ResourceHistory(service, false));
                 }
             }
         }
 
-        List<ServiceHistory> history = new ArrayList<>(historyMap.values());
+        List<ResourceHistory> history = new ArrayList<>(historyMap.values());
         history.sort((serviceHistory, t1) -> {
             if (Long.parseLong(serviceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
                 return 1;
@@ -392,7 +427,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return serialized;
     }
 
-    private InfraService deserialize(Resource resource) {
+    public InfraService deserialize(Resource resource) {
         if (resource == null) {
             logger.warn("attempt to deserialize null resource");
             return null;
@@ -430,7 +465,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
                     .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
-                            resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
             // return the latest modified resource that does not contain a version attribute
             for (Resource resource : resources.getResults()) {
                 if (!resource.getPayload().contains("<tns:version>")) {
@@ -453,11 +488,11 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    private List<Resource> getResourcesWithServiceId(String infraServiceId) {
+    public List<Resource> getResourcesWithServiceId(String infraServiceId) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
-                        resourceType.getName(), 10000, 0, "modifiedAt", "DESC");
+                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
 
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults();
@@ -529,9 +564,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
      * @param specialCharacters
      * @return
      */
-    private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
+    public InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
-        infraService.getService().setDescription(TextUtils.prettifyText(infraService.getService().getDescription(), specialCharacters));
         return infraService;
     }
 
@@ -590,6 +624,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // TargetUsers Names
             if (infraService.getService().getTargetUsers() != null) {
+                infraService.getService().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
                 richService.setTargetUsersNames(infraService.getService().getTargetUsers()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -600,6 +635,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // AccessTypes Names
             if (infraService.getService().getAccessTypes() != null) {
+                infraService.getService().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
                 richService.setAccessTypeNames(infraService.getService().getAccessTypes()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -610,6 +646,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // AccessModes Names
             if (infraService.getService().getAccessModes() != null) {
+                infraService.getService().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
                 richService.setAccessModeNames(infraService.getService().getAccessModes()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -620,6 +657,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // FundingBodies Names
             if (infraService.getService().getFundingBody() != null) {
+                infraService.getService().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
                 richService.setFundingBodyNames(infraService.getService().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -630,6 +668,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
             // FundingPrograms Names
             if (infraService.getService().getFundingPrograms() != null) {
+                infraService.getService().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
                 richService.setFundingProgramNames(infraService.getService().getFundingPrograms()
                         .stream()
                         .filter(v -> !v.equals(""))
@@ -707,11 +746,11 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 try {
                     userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richService.getService().getId(), auth);
                     if (!userEvents.isEmpty()) {
-                        richService.setFavourite(userEvents.get(0).getValue().equals("1"));
+                        richService.setIsFavourite(userEvents.get(0).getValue());
                     }
                     userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richService.getService().getId(), auth);
                     if (!userEvents.isEmpty()) {
-                        richService.setUserRate(Float.parseFloat(userEvents.get(0).getValue()));
+                        richService.setUserRate(userEvents.get(0).getValue());
                     }
                 } catch (OIDCAuthenticationException e) {
                     // user not logged in
@@ -755,7 +794,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return browsing;
     }
 
-    private List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
+    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
         ff.setQuantity(0);
 
         Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
@@ -849,9 +888,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     public Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth) {
         List<String> orderedBrowseBy = new ArrayList<>();
 
-        browseBy.add("active");
-        orderedBrowseBy.add(browseBy.get(13));    // resource_organisation
-        orderedBrowseBy.add(browseBy.get(23));    // active
+        orderedBrowseBy.add("resource_organisation");   // resource_organisation
+        orderedBrowseBy.add("active");                  // active
+        orderedBrowseBy.add("catalogue_id");            // catalogueId
 
         filter.setBrowseBy(orderedBrowseBy);
 

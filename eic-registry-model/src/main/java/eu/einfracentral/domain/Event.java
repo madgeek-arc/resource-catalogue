@@ -18,12 +18,12 @@ public class Event implements Identifiable {
     @XmlElement(required = true)
     private String service;
     @XmlElement()
-    private String value;
+    private Float value;
 
     public Event() {
     }
 
-    public Event(String type, String user, String service, String value) {
+    public Event(String type, String user, String service, Float value) {
         this.type = type;
         this.user = user;
         this.service = service;
@@ -84,18 +84,20 @@ public class Event implements Identifiable {
         this.service = service;
     }
 
-    public String getValue() {
+    public Float getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Float value) {
         this.value = value;
     }
 
     public enum UserActionType {
         FAVOURITE("FAVOURITE"),
         RATING("RATING"),
-        AGGREGATED_VISITS("AGGREGATED_VISITS");
+        VISIT("VISIT"),
+        ORDER("ORDER"),
+        ADD_TO_PROJECT("ADD_TO_PROJECT");
 
         private final String type;
 

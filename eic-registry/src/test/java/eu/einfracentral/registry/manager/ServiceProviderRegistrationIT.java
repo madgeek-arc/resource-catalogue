@@ -61,6 +61,7 @@ public class ServiceProviderRegistrationIT {
         assert provider == null;
     }
 
+    //TODO: Refactor IT with new model
 
     @Test
     public void addUpdateAndDeleteProvider() throws ResourceNotFoundException, MalformedURLException {
@@ -75,7 +76,7 @@ public class ServiceProviderRegistrationIT {
             provider = updateProvider(providerId);
             assert provider != null;
 
-            providerService.verifyProvider(providerId, Provider.States.ST_SUBMISSION, true, securityService.getAdminAccess());
+            providerService.verifyProvider(providerId, "pending template submission", true, securityService.getAdminAccess());
 
             infraService = new InfraService(createService("WP4_TestService", provider.getProvider()));
 
@@ -83,13 +84,13 @@ public class ServiceProviderRegistrationIT {
 
             assert infraService != null;
 
-            providerService.verifyProvider(providerId, Provider.States.REJECTED_ST, false, securityService.getAdminAccess());
+            providerService.verifyProvider(providerId, "rejected template", false, securityService.getAdminAccess());
 
-            infraServiceService.updateService(infraService, securityService.getAdminAccess());
+            infraServiceService.updateService(infraService, "woof", securityService.getAdminAccess());
 
-            providerService.verifyProvider(providerId, Provider.States.APPROVED, true, securityService.getAdminAccess());
-            providerService.verifyProvider(providerId, Provider.States.APPROVED, false, securityService.getAdminAccess());
-            providerService.verifyProvider(providerId, Provider.States.REJECTED, false, securityService.getAdminAccess());
+            providerService.verifyProvider(providerId, "approved", true, securityService.getAdminAccess());
+            providerService.verifyProvider(providerId, "approved", false, securityService.getAdminAccess());
+            providerService.verifyProvider(providerId, "rejected", false, securityService.getAdminAccess());
 
         } catch (RuntimeException e) {
             logger.error("ERROR", e);

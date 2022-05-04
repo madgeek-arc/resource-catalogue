@@ -1,18 +1,21 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Metadata;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.SecurityService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +31,20 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final IdCreator idCreator;
+    private final SecurityService securityService;
+    private final VocabularyService vocabularyService;
+    private final ProviderManager providerManager;
 
     @Autowired
     public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService,
-                                 IdCreator idCreator) {
+                                 IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                                 @Lazy ProviderManager providerManager) {
         super(InfraService.class);
         this.infraServiceService = infraServiceService;
         this.idCreator = idCreator;
+        this.securityService = securityService;
+        this.vocabularyService = vocabularyService;
+        this.providerManager = providerManager;
     }
 
     @Override
@@ -47,12 +57,30 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService add(InfraService service, Authentication auth) {
 
         service.setId(idCreator.createServiceId(service.getService()));
+
+        // Check if there is a Resource with the specific id
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<InfraService> resourceList = infraServiceService.getAll(ff, auth).getResults();
+        for (InfraService existingResource : resourceList){
+            if (service.getService().getId().equals(existingResource.getService().getId())) {
+                throw new ValidationException("Resource with the specific id already exists. Please refactor your 'name' field.");
+            }
+        }
         logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
 
         if (service.getMetadata() == null) {
             service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
-        service.setActive(true);
+        if (service.getLoggingInfo() == null){
+            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
+            List<LoggingInfo> loggingInfoList = new ArrayList<>();
+            loggingInfoList.add(loggingInfo);
+            service.setLoggingInfo(loggingInfoList);
+        }
+
+        service.setActive(false);
         service.setLatest(true);
 
         super.add(service, auth);
@@ -99,11 +127,49 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         infraServiceService.validate(infraService);
         infraServiceService.validateCategories(infraService.getService().getCategories());
         infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
+
+        // update loggingInfo
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
+        if (infraService.getLoggingInfo() != null) {
+            loggingInfoList = infraService.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        infraService.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardInfo
+        infraService.setLatestOnboardingInfo(loggingInfo);
+
+        // set resource status according to Provider's templateStatus
+        if (providerManager.get(infraService.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
+            infraService.setStatus(vocabularyService.get("approved resource").getId());
+            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(loggingInfoApproved);
+
+            // latestOnboardingInfo
+            infraService.setLatestOnboardingInfo(loggingInfoApproved);
+        } else{
+            infraService.setStatus(vocabularyService.get("pending resource").getId());
+        }
+
+        infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+
         infraService = this.update(infraService, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = this.getResource(infraService.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
+
+        try {
+            infraService = infraServiceService.update(infraService, auth);
+        } catch (ResourceNotFoundException e) {
+            e.printStackTrace();
+        }
+
         return infraService;
     }
 
@@ -115,10 +181,48 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         infraServiceService.validate(infraService);
         infraServiceService.validateCategories(infraService.getService().getCategories());
         infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
+
+        // update loggingInfo
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
+        if (infraService.getLoggingInfo() != null) {
+            loggingInfoList = infraService.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        infraService.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardInfo
+        infraService.setLatestOnboardingInfo(loggingInfo);
+
+        // set resource status according to Provider's templateStatus
+        if (providerManager.get(infraService.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
+            infraService.setStatus(vocabularyService.get("approved resource").getId());
+            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(loggingInfoApproved);
+
+            // latestOnboardingInfo
+            infraService.setLatestOnboardingInfo(loggingInfoApproved);
+        } else{
+            infraService.setStatus(vocabularyService.get("pending resource").getId());
+        }
+
+        infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
         Resource resource = this.getResource(serviceId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
+
+        try {
+            infraService = infraServiceService.update(infraService, auth);
+        } catch (ResourceNotFoundException e) {
+            e.printStackTrace();
+        }
+
         return infraService;
     }
 

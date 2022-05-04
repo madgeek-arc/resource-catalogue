@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.CDL;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,8 +30,11 @@ import java.util.List;
 public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
-    private InfraServiceService<InfraService, InfraService> infraService;
-    private ProviderService<ProviderBundle, Authentication> providerService;
+    private final InfraServiceService<InfraService, InfraService> infraService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+
+    @Value("${elastic.index.max_result_window:10000}")
+    private int maxQuantity;
 
     @Autowired
     CSVController(InfraServiceService<InfraService, InfraService> service, ProviderService<ProviderBundle, Authentication> provider) {
@@ -40,25 +44,25 @@ public class CSVController {
 
     // Downloads a csv file with Service entries
     @GetMapping(path = "services", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("latest", true);
         Paging<InfraService> infraServices = infraService.getAll(ff, auth);
-        String csvData = listToCSV(infraServices.getResults());
+        String csvData = listServicesToCSV(infraServices.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
         return ResponseEntity.ok(csvData);
     }
 
     // Downloads a csv file with Provider entries
     @GetMapping(path = "providers", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<String> providersToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         Paging<ProviderBundle> providers = providerService.getAll(ff, auth);
-        String csvData = listToCSV(providers.getResults());
+        String csvData = listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
         return ResponseEntity.ok(csvData);
     }
@@ -67,5 +71,49 @@ public class CSVController {
         String json = new Gson().toJson(list);
         JSONArray results = new JSONArray(json);
         return CDL.toString(results);
+    }
+
+    private static String listProvidersToCSV(List<ProviderBundle> list) {
+        String resultCsv = listToCSV(list);
+        String[] rows = resultCsv.split("\n");
+        String[] header = rows[0].split(",");
+        rows[0] = "id;abbreviation;name;" + String.join(";", header);
+        for (int i = 1; i < rows.length; i++) {
+            rows[i] = replaceDelimiters(rows[i], ',', ';');
+            rows[i] = String.format("%s;%s;%s;%s", list.get(i-1).getId(), list.get(i-1).getProvider().getAbbreviation(),
+                    list.get(i-1).getProvider().getName(), rows[i]);
+        }
+        return String.join("\n", rows);
+    }
+
+    private static String listServicesToCSV(List<InfraService> list) {
+        String resultCsv = listToCSV(list);
+        String[] rows = resultCsv.split("\n");
+        String[] header = rows[0].split(",");
+        rows[0] = "id;name;" + String.join(";", header);
+        for (int i = 1; i < rows.length; i++) {
+            rows[i] = replaceDelimiters(rows[i], ',', ';');
+            rows[i] = String.format("%s;%s;%s", list.get(i-1).getId(), list.get(i-1).getService().getName(), rows[i]);
+        }
+        return String.join("\n", rows);
+    }
+
+    private static String replaceDelimiters(String row, char delimiter, char newDelimiter) {
+        char[] rowInChars = row.toCharArray();
+
+        // when encountering "{ treat it as a field opening and do not replace symbols as delimiters
+        // instead wait for the closing counterpart }" and after that replace all delimiters found.
+        boolean openedField = false;
+        for (int i = 1; i < row.length(); i++) {
+            if (!openedField && rowInChars[i-1] == '"' && rowInChars[i] == '{') {
+                openedField = true;
+            } else if (openedField && rowInChars[i-1] == '}' && rowInChars[i] == '"') {
+                openedField = false;
+            } else if (!openedField && rowInChars[i] == delimiter) {
+                rowInChars[i] = newDelimiter;
+            }
+        }
+
+        return new String(rowInChars);
     }
 }
