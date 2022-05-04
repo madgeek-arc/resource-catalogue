@@ -1255,6 +1255,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return createCorrectQuantityFacets(ret, retPaging, quantity, from);
     }
 
+    public void migrateServiceCatalogueId(Authentication authentication){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> allServices = getAll(ff, authentication).getResults();
+        for (InfraService infraService : allServices){
+            if (infraService.getService().getCatalogueId() == null){
+                infraService.getService().setCatalogueId("eosc");
+                super.update(infraService, authentication);
+            }
+        }
+    }
+
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
 //    private InfraService migrate(InfraService service) throws MalformedURLException {
 //        return service;
