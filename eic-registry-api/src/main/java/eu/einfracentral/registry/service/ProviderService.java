@@ -157,4 +157,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return Resource
      */
     Resource getResource(String id, String catalogueId);
+
+    public void migrateProviderCatalogueId(Authentication authentication);
 }

@@ -1365,4 +1365,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
+    public void migrateProviderCatalogueId(Authentication authentication){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ProviderBundle> allProviders = getAll(ff, authentication).getResults();
+        for (ProviderBundle providerBundle : allProviders){
+            if (providerBundle.getProvider().getCatalogueId() == null){
+                providerBundle.getProvider().setCatalogueId("eosc");
+                super.update(providerBundle, authentication);
+            }
+        }
+    }
+
 }

@@ -452,4 +452,10 @@ public class ProviderController {
     public void initialCatRIsCatalogueSync(@ApiIgnore Authentication authentication) {
         providerManager.initialCatRIsCatalogueSync();
     }
+
+//    @PutMapping(path = "migrateProviderCatalogueId", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void migrateProviderCatalogueId(Authentication authentication){
+        providerManager.migrateProviderCatalogueId(authentication);
+    }
 }

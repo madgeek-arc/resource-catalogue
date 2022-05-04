@@ -497,4 +497,10 @@ public class ServiceController {
         return infraService.migrateLatestResourceHistory(authentication);
     }
 
+//    @PutMapping(path = "migrateServiceCatalogueId", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void migrateServiceCatalogueId(Authentication authentication){
+        infraService.migrateServiceCatalogueId(authentication);
+    }
+
 }

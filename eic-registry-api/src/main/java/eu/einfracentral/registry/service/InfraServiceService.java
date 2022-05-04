@@ -327,4 +327,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     void emailPhoneValidityCheck();
 
     void validateEmailsAndPhoneNumbers(InfraService infraService);
+
+    public void migrateServiceCatalogueId(Authentication authentication);
+
 }
