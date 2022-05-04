@@ -51,12 +51,14 @@ public class ProviderController {
     // Deletes the Provider with the given id.
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        ProviderBundle provider = providerManager.get(id);
+    public ResponseEntity<Provider> delete(@PathVariable("id") String id,
+                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                           @ApiIgnore Authentication auth) {
+        ProviderBundle provider = providerManager.get(id, catalogueId);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting provider: {}", provider.getProvider().getName());
+        logger.info("Deleting provider: {} of the catalogues: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
         // delete all Provider's services
         List<InfraService> allProviderServices = infraServiceService.getInfraServices(id, auth);
