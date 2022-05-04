@@ -212,13 +212,30 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
      */
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
-    public ProviderBundle get(String id) {
-        ProviderBundle provider = super.get(id);
-        if (provider == null) {
-            throw new eu.einfracentral.exception.ResourceNotFoundException(
-                    String.format("Could not find provider with id: %s", id));
+    public ProviderBundle get(String id, String catalogueId) {
+        Resource resource = getResource(id, catalogueId);
+        if (resource == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(String.format("Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
         }
-        return provider;
+        return deserialize(resource);
+    }
+
+    @Cacheable(value = CACHE_PROVIDERS)
+    public ProviderBundle get(String id, String catalogueId, Authentication auth) {
+        ProviderBundle providerBundle = get(id, catalogueId);
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+                    securityService.userIsProviderAdmin(user, id)) {
+                return providerBundle;
+            }
+        }
+        // else return the Provider ONLY if he is active
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+            return providerBundle;
+        }
+        throw new ValidationException("You cannot view the specific Provider");
     }
 
     @Override
@@ -1339,4 +1356,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
     }
+
+    public Resource getResource(String providerId, String catalogueId) {
+        Paging<Resource> resources;
+        resources = searchService
+                .cqlQuery(String.format("provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId), resourceType.getName());
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+    }
+
 }
