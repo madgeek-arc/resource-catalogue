@@ -1,10 +1,13 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.CatalogueBundle;
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.registry.service.CatalogueService;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
+import eu.einfracentral.service.SecurityService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -24,13 +27,20 @@ public class ProviderManagementAspect {
     private static final Logger logger = LogManager.getLogger(ProviderManagementAspect.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final InfraServiceService infraServiceService;
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final RegistrationMailService registrationMailService;
+    private final SecurityService securityService;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
-                                    RegistrationMailService registrationMailService) {
+                                    RegistrationMailService registrationMailService, InfraServiceService infraServiceService,
+                                    SecurityService securityService, CatalogueService catalogueService) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
+        this.infraServiceService = infraServiceService;
+        this.securityService = securityService;
+        this.catalogueService = catalogueService;
     }
 
 
@@ -52,8 +62,8 @@ public class ProviderManagementAspect {
     }
 
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String," +
-            " eu.einfracentral.domain.Provider.States, Boolean, org.springframework.security.core.Authentication)) ||" +
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String, " +
+            "String, Boolean, org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
             "org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
@@ -66,7 +76,26 @@ public class ProviderManagementAspect {
         registrationMailService.sendProviderMails(providerBundle);
     }
 
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.CatalogueManager.verifyCatalogue(String, " +
+            "String, Boolean, org.springframework.security.core.Authentication)) ||" +
+            "execution(* eu.einfracentral.registry.manager.CatalogueManager.add(eu.einfracentral.domain.CatalogueBundle," +
+            "org.springframework.security.core.Authentication)))",
+            returning = "catalogueBundle")
+    public void catalogueRegistrationEmails(CatalogueBundle catalogueBundle) {
+        logger.trace("Sending Registration emails");
+        registrationMailService.sendCatalogueMails(catalogueBundle);
+    }
 
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, " +
+            "String, Boolean, org.springframework.security.core.Authentication)))",
+            returning = "infraService")
+    public void providerRegistrationEmails(InfraService infraService) {
+        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation());
+        logger.trace("Sending Registration emails");
+        registrationMailService.sendProviderMails(providerBundle);
+    }
+
+    //TODO: Probably no needed
     /**
      * This method is used to update a list of new providers with status
      * 'Provider.States.ST_SUBMISSION' or 'Provider.States.REJECTED_ST'
@@ -79,11 +108,10 @@ public class ProviderManagementAspect {
     public void updateServiceProviderStates(InfraService infraService) {
         try {
             ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), (Authentication) null);
-            if (Provider.States.fromString(providerBundle.getStatus()) == Provider.States.ST_SUBMISSION
-                    || Provider.States.fromString(providerBundle.getStatus()) == Provider.States.REJECTED_ST) {
+            if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        infraService.getService().getResourceOrganisation(), providerBundle.getStatus(), Provider.States.PENDING_2.getKey());
-                providerService.verifyProvider(infraService.getService().getResourceOrganisation(), Provider.States.PENDING_2, false, null);
+                        infraService.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending resource");
+                infraServiceService.verifyResource(infraService.getService().getId(), "pending resource", false, securityService.getAdminAccess());
             }
         } catch (RuntimeException e) {
             logger.error(e);

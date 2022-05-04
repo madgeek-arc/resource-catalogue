@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, Authentication> {
 
@@ -29,11 +30,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Method to update a service.
      *
      * @param service
+     * @param comment
      * @param auth
      * @return
      * @throws ResourceNotFoundException
      */
-    T updateService(T service, Authentication auth) throws ResourceNotFoundException;
+    T updateService(T service, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
      * Returns the Service with the specified id and version.
@@ -49,9 +51,10 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Get InfraServices by a specific field.
      *
      * @param field
+     * @param auth
      * @return
      */
-    Map<String, List<T>> getBy(String field) throws NoSuchFieldException;
+    Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * Get RichServices with the specified ids.
@@ -116,7 +119,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param id
      * @return
      */
-    Paging<ServiceHistory> getHistory(String id);
+    Paging<ResourceHistory> getHistory(String id);
 
     /**
      * Get the History of a specific resource version of the InfraService with the specified id.
@@ -207,11 +210,107 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth);
 
-//
-//    /**
-//     * Migrates Service's fields for Catris.
-//     *
-//     */
-//    void migrateCatrisServices(List<InfraService> infraServices);
+    /**
+     * @param serviceId
+     * @param actionType
+     * @param auth
+     * @return
+     */
+    InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
+    /**
+     * @param ff
+     * @param auth
+     * @param auditingInterval
+     * @return
+     */
+    Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
+
+
+    List<InfraService> getInfraServices(String providerId, Authentication auth);
+
+    List<Service> getServices(String providerId, Authentication auth);
+
+    List<Service> getActiveServices(String providerId);
+
+    InfraService getServiceTemplate(String providerId, Authentication auth);
+
+    Service getFeaturedService(String providerId);
+
+    List<InfraService> getInactiveServices(String providerId);
+
+    /**
+     * @param resourceId
+     * @param auth
+     */
+    void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth);
+
+    /**
+     * Get the History of the Resource with the specified id.
+     *
+     * @param id
+     * @return
+     */
+    Paging<LoggingInfo> getLoggingInfoHistory(String id);
+
+    /**
+     * @param auth
+     * @return
+     */
+    Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth);
+
+    /**
+     * @param id
+     * @param status
+     * @param active
+     * @param auth
+     * @return
+     */
+    InfraService verifyResource(String id, String status, Boolean active, Authentication auth);
+
+    /**
+     * @param resourceId
+     * @param newProvider
+     * @param comment
+     * @param auth
+     */
+    InfraService changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+
+    /**
+     * @param auditState
+     * @param ff
+     * @param quantity
+     * @param from
+     * @param ret
+     * @param auth
+     * @return
+     */
+    Paging<InfraService> determineAuditState(Set<String> auditState, FacetFilter ff, int quantity, int from, List<InfraService> ret, Authentication auth);
+
+    /**
+     * @param ff
+     * @param orderDirection
+     * @param orderField
+     * @return
+     */
+    List<Map<String, Object>> createQueryForResourceFilters(FacetFilter ff, String orderDirection, String orderField);
+
+    /**
+     * @param infraService
+     * @param infraServicePaging
+     * @param quantity
+     * @param from
+     * @return
+     */
+    Paging<InfraService> createCorrectQuantityFacets(List<InfraService> infraService, Paging<InfraService> infraServicePaging, int quantity, int from);
+
+    void emailPhoneValidityCheck();
+
+    void validateEmailsAndPhoneNumbers(InfraService infraService);
 }

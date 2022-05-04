@@ -33,6 +33,15 @@ public interface StatisticsService {
     Map<String, Integer> favourites(String serviceId, Interval by);
 
     /**
+     * Get time series of addToProject for a service.
+     *
+     * @param serviceId
+     * @param by
+     * @return
+     */
+    Map<String, Integer> addToProject(String serviceId, Interval by);
+
+    /**
      * Get time series of visits for a service.
      *
      * @param serviceId
@@ -58,6 +67,15 @@ public interface StatisticsService {
      * @return
      */
     Map<String, Integer> providerFavourites(String providerId, Interval by);
+
+    /**
+     * Get time series of aggregate favourites for all services offered by a provider.
+     *
+     * @param providerId
+     * @param by
+     * @return
+     */
+    Map<String, Integer> providerAddToProject(String providerId, Interval by);
 
     /**
      * Get time series of aggregate visits for all services offered by a provider.

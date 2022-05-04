@@ -1,17 +1,16 @@
 package eu.einfracentral.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.User;
 import org.springframework.security.core.Authentication;
 
 import javax.validation.constraints.NotNull;
-import java.util.Map;
 
 public interface SecurityService {
 
     Authentication getAdminAccess();
+
+    String getRoleName(Authentication authentication);
 
     boolean hasRole(Authentication auth, String role);
 
@@ -20,6 +19,12 @@ public interface SecurityService {
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow);
 
     boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId);
+
+    boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId);
+
+    boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow);
+
+    boolean userIsCatalogueAdmin(@NotNull User user, @NotNull String catalogueId);
 
     boolean isServiceProviderAdmin(Authentication auth, String serviceId);
 
@@ -33,8 +38,6 @@ public interface SecurityService {
 
     boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow);
 
-    boolean userIsServiceProviderAdmin(User user, Map<String, JsonNode> json) throws JsonProcessingException;
-
     boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service);
 
     boolean userIsServiceProviderAdmin(User user, InfraService infraService);
@@ -42,11 +45,6 @@ public interface SecurityService {
     boolean userIsServiceProviderAdmin(User user, String serviceId);
 
     boolean providerCanAddServices(Authentication auth, InfraService service);
-
-    boolean providerCanAddServices(Authentication auth, Map<String, JsonNode> json) throws JsonProcessingException;
-
-    @Deprecated
-    boolean providerIsActive(String providerId);
 
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId);
 

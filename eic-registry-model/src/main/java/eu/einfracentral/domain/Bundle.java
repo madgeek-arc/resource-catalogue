@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -25,7 +26,25 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private boolean active;
 
     @XmlElement
-    private String status;
+    private boolean suspended;
+
+    @XmlElement
+    private Identifier identifier;
+
+    @XmlElement
+    private MigrationStatus migrationStatus;
+
+    @XmlElement
+    private List<LoggingInfo> loggingInfo;
+
+    @XmlElement
+    private LoggingInfo latestAuditInfo;
+
+    @XmlElement
+    private LoggingInfo latestOnboardingInfo;
+
+    @XmlElement
+    private LoggingInfo latestUpdateInfo;
 
     public Bundle() {
     }
@@ -64,12 +83,60 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.active = active;
     }
 
-    public String getStatus() {
-        return status;
+    public boolean isSuspended() {
+        return suspended;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
+    }
+
+    public MigrationStatus getMigrationStatus() {
+        return migrationStatus;
+    }
+
+    public void setMigrationStatus(MigrationStatus migrationStatus) {
+        this.migrationStatus = migrationStatus;
+    }
+
+    public List<LoggingInfo> getLoggingInfo() {
+        return loggingInfo;
+    }
+
+    public void setLoggingInfo(List<LoggingInfo> loggingInfo) {
+        this.loggingInfo = loggingInfo;
+    }
+
+    public LoggingInfo getLatestAuditInfo() {
+        return latestAuditInfo;
+    }
+
+    public void setLatestAuditInfo(LoggingInfo latestAuditInfo) {
+        this.latestAuditInfo = latestAuditInfo;
+    }
+
+    public LoggingInfo getLatestOnboardingInfo() {
+        return latestOnboardingInfo;
+    }
+
+    public void setLatestOnboardingInfo(LoggingInfo latestOnboardingInfo) {
+        this.latestOnboardingInfo = latestOnboardingInfo;
+    }
+
+    public LoggingInfo getLatestUpdateInfo() {
+        return latestUpdateInfo;
+    }
+
+    public void setLatestUpdateInfo(LoggingInfo latestUpdateInfo) {
+        this.latestUpdateInfo = latestUpdateInfo;
     }
 
     @Override
@@ -78,7 +145,11 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 "payload=" + payload +
                 ", metadata=" + metadata +
                 ", active=" + active +
-                ", status='" + status + '\'' +
+                ", suspended=" + suspended +
+                ", loggingInfo=" + loggingInfo +
+                ", latestAuditInfo=" + latestAuditInfo +
+                ", latestOnboardingInfo=" + latestOnboardingInfo +
+                ", latestUpdateInfo=" + latestUpdateInfo +
                 '}';
     }
 }

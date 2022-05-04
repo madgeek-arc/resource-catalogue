@@ -12,7 +12,6 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.StatisticsService;
-import eu.openminted.registry.core.configuration.ElasticConfiguration;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -49,7 +48,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -73,6 +71,9 @@ public class StatisticsManager implements StatisticsService {
 
     @org.springframework.beans.factory.annotation.Value("${platform.root:}")
     String url;
+
+    @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
+    private int maxQuantity;
 
     @Autowired
     StatisticsManager(RestHighLevelClient client, AnalyticsService analyticsService,
@@ -245,7 +246,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> providerRatings(String id, Interval by) {
-        Map<String, Float> providerRatings = providerService.getServices(id)
+        Map<String, Float> providerRatings = infraServiceManager.getServices(id)
                 .stream()
                 .flatMap(s -> ratings(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
@@ -262,7 +263,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerFavourites(String id, Interval by) {
-        Map<String, Integer> providerFavorites = providerService.getServices(id)
+        Map<String, Integer> providerFavorites = infraServiceManager.getServices(id)
                 .stream()
                 .flatMap(s -> favourites(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -271,30 +272,91 @@ public class StatisticsManager implements StatisticsService {
     }
 
     @Override
+    public Map<String, Integer> addToProject(String id, Interval by) {
+        final long[] totalDocCounts = new long[2]; //0 - not added, 1 - added
+        List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.ADD_TO_PROJECT.getKey(), by).getBuckets();
+        return new TreeMap<>(buckets.stream().collect(
+                Collectors.toMap(
+                        MultiBucketsAggregation.Bucket::getKeyAsString,
+                        bucket -> {
+                            Terms subTerm = bucket.getAggregations().get("value");
+                            if (subTerm.getBuckets() != null) {
+                                totalDocCounts[0] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 0 ? subBucket.getDocCount() : 0
+                                ).sum();
+                                totalDocCounts[1] += subTerm.getBuckets().stream().mapToLong(
+                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
+                                ).sum();
+                            }
+                            return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
+                        }
+                )
+        ));
+    }
+
+    @Override
+    public Map<String, Integer> providerAddToProject(String id, Interval by) {
+        Map<String, Integer> providerAddToProject = infraServiceManager.getServices(id)
+                .stream()
+                .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+
+        return new TreeMap<>(providerAddToProject);
+    }
+
+    @Override
     @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
-        try {
-            return analyticsService.getVisitsForLabel("/service/" + id, by);
-        } catch (Exception e) {
-            logger.error("Could not find Matomo analytics", e);
-        }
-        return new HashMap<>();
+        List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.VISIT.getKey(), by).getBuckets();
+        final long[] totalDocCounts = new long[buckets.size()];
+        final int[] j = {-1}; // bucket counter
+        return new TreeMap<>(buckets.stream().collect(
+                Collectors.toMap(
+                        MultiBucketsAggregation.Bucket::getKeyAsString,
+                        bucket -> {
+                            j[0]++;
+                            Terms subTerm = bucket.getAggregations().get("value");
+                            if (subTerm.getBuckets() != null) {
+                                for (int i=0; i<subTerm.getBuckets().size(); i++){
+                                    Double key = (Double)subTerm.getBuckets().get(i).getKey();
+                                    Integer keyToInt = key.intValue();
+                                    int totalVistisOnBucket = keyToInt * Integer.parseInt(String.valueOf(subTerm.getBuckets().get(i).getDocCount()));
+                                    totalDocCounts[j[0]] += totalVistisOnBucket;
+                                }
+                            }
+                            return (int) Math.max(totalDocCounts[j[0]], 0);
+                        }
+                )
+        ));
+
+        // alternatively - fetching data from matomo
+//        try {
+//            return analyticsService.getVisitsForLabel("/service/" + id, by);
+//        } catch (Exception e) {
+//            logger.error("Could not find Matomo analytics", e);
+//        }
+//        return new HashMap<>();
     }
 
     @Override
     public Map<String, Integer> providerVisits(String id, Interval by) {
-        Map<String, Integer> results = providerService.getServices(id)
-                .stream()
-                .flatMap(s -> visits(s.getId(), by).entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
-
-        Map<String, Integer> sortedResults = new TreeMap<>(results);
-        return sortedResults;
+        Map<String, Integer> results = new HashMap<>();
+        for (Service service : infraServiceManager.getServices(id)){
+            Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(),by).entrySet();
+            for (Map.Entry<String, Integer> entry : entrySet){
+                if (!results.containsKey(entry.getKey())){
+                    results.put(entry.getKey(), entry.getValue());
+                } else {
+                    results.put(entry.getKey(), results.get(entry.getKey())+entry.getValue());
+                }
+            }
+        }
+        return results;
     }
 
     @Override
     public Map<String, Float> providerVisitation(String id, Interval by) {
-        Map<String, Integer> counts = providerService.getServices(id).stream().collect(Collectors.toMap(
+        Map<String, Integer> counts = infraServiceManager.getServices(id).stream().collect(Collectors.toMap(
                 Service::getName,
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
         ));
@@ -307,7 +369,7 @@ public class StatisticsManager implements StatisticsService {
         Paging<Resource> resources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND creation_date > %s AND creation_date < %s",
                         type, from.toInstant().toEpochMilli(), to.toInstant().toEpochMilli()), "event",
-                10000, 0, "creation_date", "ASC");
+                maxQuantity, 0, "creation_date", "ASC");
         List<Event> events = resources
                 .getResults()
                 .stream()
@@ -504,13 +566,12 @@ public class StatisticsManager implements StatisticsService {
                         expandedPlaces = new String[]{place};
                     }
                     for (String p : expandedPlaces) {
-                        try{
-                            Set<Value> values = placeServices.get(p);
-                            values.add(value);
-                            placeServices.put(p, values);
-                        } catch(NullPointerException e){
-                            logger.info(p);
+                        if (placeServices.get(p) == null) {
+                            continue;
                         }
+                        Set<Value> values = placeServices.get(p);
+                        values.add(value);
+                        placeServices.put(p, values);
                     }
                 }
             }
@@ -531,7 +592,7 @@ public class StatisticsManager implements StatisticsService {
         mapValues.put("EL", new HashSet<>());
         mapValues.put("UK", new HashSet<>());
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
 
         Map<String, Set<String>> providerCountries = providerCountriesMap();
 
@@ -539,15 +600,14 @@ public class StatisticsManager implements StatisticsService {
         for (InfraService infraService : allServices) {
             Value value = new Value(infraService.getId(), infraService.getService().getName());
 
-            try {
-                Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
-                for (String country : countries) {
-                    Set<Value> values = mapValues.get(country);
-                    values.add(value);
-                    mapValues.put(country, values);
+            Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
+            for (String country : countries) {
+                if (mapValues.get(country) == null) {
+                    continue;
                 }
-            } catch (NullPointerException e){
-                logger.info(e);
+                Set<Value> values = mapValues.get(country);
+                values.add(value);
+                mapValues.put(country, values);
             }
         }
 
@@ -609,7 +669,7 @@ public class StatisticsManager implements StatisticsService {
         String[] eu = vocabularyService.getRegion("EU");
 
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
 
         for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
             Set<String> countries = new HashSet<>();

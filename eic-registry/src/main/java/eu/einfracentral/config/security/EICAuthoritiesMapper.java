@@ -5,6 +5,7 @@ import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.service.AuthoritiesMapper;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
@@ -28,28 +29,34 @@ import java.util.stream.Stream;
 
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
+public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
     private Map<String, SimpleGrantedAuthority> userRolesMap;
-    private String admins;
+    private final String admins;
+    private String epotAdmins;
+    private final int maxQuantity;
 
-    private ProviderService<ProviderBundle, Authentication> providerService;
-    private PendingResourceService<ProviderBundle> pendingProviderService;
-    private SecurityService securityService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final PendingResourceService<ProviderBundle> pendingProviderService;
+    private final SecurityService securityService;
 
     @Autowired
     public EICAuthoritiesMapper(@Value("${project.admins}") String admins,
+                                @Value("${project.admins.epot}") String epotAdmins,
+                                @Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                 ProviderService<ProviderBundle, Authentication> manager,
                                 PendingResourceService<ProviderBundle> pendingProviderService,
                                 SecurityService securityService) {
         this.providerService = manager;
         this.pendingProviderService = pendingProviderService;
         this.securityService = securityService;
+        this.maxQuantity = maxQuantity;
         if (admins == null) {
             throw new ServiceException("No Admins Provided");
         }
         this.admins = admins;
+        this.epotAdmins = epotAdmins;
         mapAuthorities(admins);
     }
 
@@ -80,6 +87,25 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
         return out;
     }
 
+    @Override
+    public boolean isAdmin(String email) {
+        if (!userRolesMap.containsKey(email)) {
+            return false;
+        } else {
+            return userRolesMap.get(email).getAuthority().equals("ROLE_ADMIN");
+        }
+    }
+
+    @Override
+    public boolean isEPOT(String email) {
+        if (!userRolesMap.containsKey(email)) {
+            return false;
+        } else {
+            return userRolesMap.get(email).getAuthority().equals("ROLE_EPOT");
+        }
+    }
+
+    @Override
     public void updateAuthorities() {
         logger.info("Updating authorities map");
         mapAuthorities(admins);
@@ -88,7 +114,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
     private void mapAuthorities(String admins) {
         userRolesMap = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         try {
             List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
             providers.addAll(pendingProviderService.getAll(ff, null).getResults());
@@ -109,7 +135,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
                                 if (u.getId() != null && !"".equals(u.getId())) {
                                     return u.getId();
                                 }
-                                return u.getEmail();
+                                return u.getEmail().toLowerCase();
                             }))
                     .filter(Objects::nonNull)
                     .distinct()
@@ -119,7 +145,15 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper {
             logger.warn("There are no Provider entries in DB");
         }
 
+        userRolesMap.putAll(Arrays.stream(epotAdmins.replace(" ", "").split(","))
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        a -> new SimpleGrantedAuthority("ROLE_EPOT"))
+                ));
+
         userRolesMap.putAll(Arrays.stream(admins.replace(" ", "").split(","))
+                .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))

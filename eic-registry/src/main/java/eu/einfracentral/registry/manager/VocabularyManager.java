@@ -35,13 +35,24 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     public VocabularyManager() {
         super(Vocabulary.class);
-        regions.put("EU", new Region("https://restcountries.eu/rest/v2/regionalbloc/EU?fields=alpha2Code"));
-        regions.put("WW", new Region("https://restcountries.eu/rest/v2?fields=alpha2Code"));
+        regions.put("EU", new Region("https://restcountries.com/v3.1/region/europe?fields=cca2"));
+        regions.put("WW", new Region("https://restcountries.com/v3.1/all?fields=cca2"));
     }
 
     @Override
     public String getResourceType() {
         return "vocabulary";
+    }
+
+    @Override
+    public Vocabulary getOrElseThrow(String id) {
+        Vocabulary vocabulary = null;
+        try {
+            vocabulary = get(id);
+        } catch (ResourceException e) {
+            throw new ResourceException(String.format("Vocabulary with id '%s' does not exist!", id), HttpStatus.NOT_FOUND);
+        }
+        return vocabulary;
     }
 
     @Override
@@ -78,7 +89,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Cacheable(value = CACHE_VOCABULARIES)
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
         return vocList.stream().sorted(Comparator.comparing(Vocabulary::getId)).collect(Collectors.toList());
@@ -88,7 +99,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Cacheable(value = CACHE_VOCABULARY_MAP)
     public Map<String, Vocabulary> getVocabulariesMap() {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         return getAll(ff, null)
                 .getResults()
                 .stream()
@@ -109,7 +120,11 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            add(vocabulary, auth);
+            try {
+                add(vocabulary, auth);
+            } catch (ResourceException e){
+                logger.info(String.format("Vocabulary [%s] already exists", vocabulary.getId()));
+            }
         }
     }
 
@@ -118,7 +133,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
             delete(vocabulary);
@@ -212,7 +227,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             if (c.getResponseCode() == 200) {
                 Country[] countries = new ObjectMapper().readValue(c.getInputStream(), Country[].class);
                 c.disconnect();
-                region.setMembers(Stream.of(countries).map(e -> e.alpha2Code).toArray(String[]::new));
+                region.setMembers(Stream.of(countries).map(e -> e.cca2).toArray(String[]::new));
             }
         } catch (IOException e) {
             logger.error("ERROR", e);
@@ -225,14 +240,14 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     private static class Country {
-        private String alpha2Code;
+        private String cca2;
 
-        public String getAlpha2Code() {
-            return alpha2Code;
+        public String getCca2() {
+            return cca2;
         }
 
-        public void setAlpha2Code(String alpha2Code) {
-            this.alpha2Code = alpha2Code;
+        public void setCca2(String cca2) {
+            this.cca2 = cca2;
         }
     }
 

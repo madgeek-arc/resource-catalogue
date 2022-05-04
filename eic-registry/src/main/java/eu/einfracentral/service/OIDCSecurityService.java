@@ -1,15 +1,13 @@
 package eu.einfracentral.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.einfracentral.domain.CatalogueBundle;
 import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -33,6 +31,7 @@ import java.util.*;
 public class OIDCSecurityService implements SecurityService {
 
     private final ProviderManager providerManager;
+    private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingResourceService<InfraService> pendingServiceManager;
@@ -45,10 +44,11 @@ public class OIDCSecurityService implements SecurityService {
     private String projectEmail;
 
     @Autowired
-    OIDCSecurityService(ProviderManager providerManager,
-                    InfraServiceService<InfraService, InfraService> infraServiceService,
+    OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
+                        InfraServiceService<InfraService, InfraService> infraServiceService,
                         PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
         this.providerManager = providerManager;
+        this.catalogueManager = catalogueManager;
         this.infraServiceService = infraServiceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
@@ -68,17 +68,39 @@ public class OIDCSecurityService implements SecurityService {
         return adminAccess;
     }
 
+    @Override
+    public String getRoleName(Authentication authentication) {
+        String role;
+        if (hasRole(authentication, "ROLE_ADMIN")) {
+            role = "admin";
+        } else if (hasRole(authentication, "ROLE_EPOT")) {
+            role = "EPOT";
+        } else if (hasRole(authentication, "ROLE_PROVIDER")) {
+            role = "provider";
+        } else {
+            role = "user";
+        }
+        return role;
+    }
+
     public boolean hasRole(Authentication auth, String role) {
+        if (auth == null) return false;
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsProviderAdmin(user, providerId);
     }
 
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow) {
         if (auth == null && noThrow) {
+            return false;
+        }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
@@ -111,16 +133,66 @@ public class OIDCSecurityService implements SecurityService {
                     if (u.getId() != null) {
                         if (u.getEmail() != null) {
                             return u.getId().equals(user.getId())
-                                    || u.getEmail().equals(user.getEmail());
+                                    || u.getEmail().equalsIgnoreCase(user.getEmail());
                         }
                         return u.getId().equals(user.getId());
                     }
-                    return u.getEmail().equals(user.getEmail());
+                    return u.getEmail().equalsIgnoreCase(user.getEmail());
+                });
+    }
+
+    public boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsCatalogueAdmin(user, catalogueId);
+    }
+
+    public boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow) {
+        if (auth == null && noThrow) {
+            return false;
+        }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsCatalogueAdmin(user, catalogueId);
+    }
+
+    public boolean userIsCatalogueAdmin(User user, @NotNull String catalogueId) {
+        CatalogueBundle registeredCatalogue;
+        try {
+            registeredCatalogue = catalogueManager.get(catalogueId);
+        } catch (RuntimeException e) {
+            return false;
+        }
+        if (registeredCatalogue == null) {
+            throw new ResourceNotFoundException("Catalogue with id '" + catalogueId + "' does not exist.");
+        }
+        if (registeredCatalogue.getCatalogue().getUsers() == null) {
+            return false;
+        }
+        return registeredCatalogue.getCatalogue().getUsers()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .anyMatch(u -> {
+                    if (u.getId() != null) {
+                        if (u.getEmail() != null) {
+                            return u.getId().equals(user.getId())
+                                    || u.getEmail().equalsIgnoreCase(user.getEmail());
+                        }
+                        return u.getId().equals(user.getId());
+                    }
+                    return u.getEmail().equalsIgnoreCase(user.getEmail());
                 });
     }
 
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, String serviceId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, serviceId);
     }
@@ -130,12 +202,18 @@ public class OIDCSecurityService implements SecurityService {
         if (auth == null && noThrow) {
             return false;
         }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, serviceId);
     }
 
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, service);
     }
@@ -145,12 +223,18 @@ public class OIDCSecurityService implements SecurityService {
         if (auth == null && noThrow) {
             return false;
         }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, service);
     }
 
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, infraService);
     }
@@ -160,32 +244,11 @@ public class OIDCSecurityService implements SecurityService {
         if (auth == null && noThrow) {
             return false;
         }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, infraService);
-    }
-
-
-    @Override
-    public boolean userIsServiceProviderAdmin(User user, Map<String, JsonNode> json) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        eu.einfracentral.domain.Service service = null;
-        service = mapper.readValue(json.get("service").toString(), eu.einfracentral.domain.Service.class);
-        if (service == null) {
-            throw new ServiceException("Service is null");
-        }
-
-        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Resource Organisation");
-        }
-//        List<String> allProviders = service.getResourceProviders();
-//        allProviders.add(service.getResourceOrganisation());
-        List<String> allProviders = Collections.singletonList(service.getResourceOrganisation());
-        Optional<List<String>> providers = Optional.of(allProviders);
-        return providers
-                .get()
-                .stream()
-                .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(user, id));
     }
 
     @Override
@@ -214,7 +277,7 @@ public class OIDCSecurityService implements SecurityService {
         InfraService service;
         try {
             service = infraServiceService.get(serviceId);
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             try {
                 service = pendingServiceManager.get(serviceId);
             } catch (RuntimeException re) {
@@ -255,11 +318,9 @@ public class OIDCSecurityService implements SecurityService {
                 if (provider.getStatus() == null) {
                     throw new ServiceException("Provider status field is null");
                 }
-                if (provider.isActive() && provider.getStatus().equals(Provider.States.APPROVED.getKey())) {
-                    if (isProviderAdmin(auth, provider.getId())) {
-                        return true;
-                    }
-                } else if (provider.getStatus().equals(Provider.States.ST_SUBMISSION.getKey())) {
+                if (provider.isActive() && provider.getStatus().equals("approved provider")) {
+                    return true;
+                } else if (provider.getTemplateStatus().equals("no template status")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());
                     if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
@@ -270,33 +331,6 @@ public class OIDCSecurityService implements SecurityService {
             }
         }
         return false;
-    }
-
-    public boolean providerCanAddServices(Authentication auth, Map<String, JsonNode> json) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        eu.einfracentral.domain.Service service = null;
-        service = mapper.readValue(json.get("service").toString(), eu.einfracentral.domain.Service.class);
-        if (service == null) {
-            throw new ServiceException("Service is null");
-        }
-        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
-        }
-
-        return providerCanAddServices(auth, service);
-    }
-
-    @Deprecated
-    public boolean providerIsActive(String providerId) {
-        ProviderBundle provider = providerManager.get(providerId);
-        if (provider != null) {
-            if (!provider.isActive()) {
-                throw new ServiceException(String.format("Provider '%s' is not active.", provider.getProvider().getName()));
-            }
-            return true;
-        } else {
-            throw new ResourceNotFoundException(String.format("Provider with id '%s' does not exist.", providerId));
-        }
     }
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
