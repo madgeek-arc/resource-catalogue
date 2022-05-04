@@ -16,7 +16,7 @@ RUN if [[ -z "$profile" ]] ; then mvn package -U ; else mvn package -U -P $profi
 
 ### Deploy to Tomcat ###
 FROM tomcat:8.5-jre8-alpine
-MAINTAINER "***REMOVED***"
+MAINTAINER "spyroukon@gmail.com"
 RUN ["rm", "-fr", "/usr/local/tomcat/webapps/ROOT"]
 
 COPY --from=maven /tmp/eic-registry/target/eic-registry.war /usr/local/tomcat/webapps/eic-registry.war
