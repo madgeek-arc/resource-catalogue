@@ -258,10 +258,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public Paging<ResourceHistory> getHistory(String id) {
+    public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
         Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
-        Resource resource = getResource(id);
+        Resource resource = getResource(id, catalogueId);
         List<Version> versions = versionService.getVersionsByResource(resource.getId());
         versions.sort((version, t1) -> {
             if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
@@ -391,7 +391,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        ProviderBundle provider = get(id);
+        ProviderBundle provider = get(id, "eosc");
         provider.setStatus(vocabularyService.get(status).getId());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -439,7 +439,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
-        ProviderBundle provider = get(providerId);
+        ProviderBundle provider = get(providerId, "eosc");
         if ((provider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
                 provider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !provider.isActive()){
             throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", provider.getStatus()));
@@ -712,7 +712,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId);
+        ProviderBundle providerBundle = get(providerId, "eosc");
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
@@ -731,7 +731,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void adminAcceptedTerms(String providerId, Authentication auth) {
-        update(get(providerId), auth);
+        update(get(providerId), "eosc", auth);
     }
 
     public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
@@ -756,7 +756,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = get(providerId);
+        ProviderBundle provider = get(providerId, "eosc");
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
@@ -795,7 +795,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = get(providerId);
+        ProviderBundle provider = get(providerId, "eosc");
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (provider.getLoggingInfo() != null) {
@@ -855,8 +855,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
 //    @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
-        ProviderBundle providerBundle = get(id);
+    public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
+        ProviderBundle providerBundle = get(id, catalogueId);
         if (providerBundle.getLoggingInfo() != null){
             List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
@@ -1084,7 +1084,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<ProviderBundle> allProviders = getAll(ff, auth).getResults();
         for (ProviderBundle providerBundle : allProviders){
             List<LoggingInfo> historyToLogging = new ArrayList<>();
-            List<ResourceHistory> providerHistory = getHistory(providerBundle.getProvider().getId()).getResults();
+            List<ResourceHistory> providerHistory = getHistory(providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()).getResults();
             providerHistory.sort(Comparator.comparing(ResourceHistory::getModifiedAt));
             boolean earliestHistory = true;
             for (ResourceHistory history : providerHistory){
@@ -1194,7 +1194,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             LoggingInfo lastOnboard = null;
             List<LoggingInfo> loggingInfoList;
             try{
-                loggingInfoList = getLoggingInfoHistory(providerBundle.getProvider().getId()).getResults();
+                loggingInfoList = getLoggingInfoHistory(providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()).getResults();
             } catch (NullPointerException e){
                 continue;
             }

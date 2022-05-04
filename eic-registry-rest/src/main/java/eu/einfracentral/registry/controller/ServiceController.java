@@ -66,6 +66,10 @@ public class ServiceController {
         } else {
             service = infraService.get(id, catalogueId);
         }
+        // Block users of deleting Services of another Catalogue
+        if (!service.getService().getCatalogueId().equals("eosc")){
+            throw new ValidationException("You cannot delete a Service of a non EOSC Catalogue.");
+        }
         infraService.delete(service);
         logger.info("User '{}' deleted Resource '{}' with id: '{}' of the Catalogue: '{}'", auth.getName(), service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());

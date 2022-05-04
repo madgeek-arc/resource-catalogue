@@ -99,7 +99,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
 //        Resource existing = this.whereID(infraService.getId(), true);
-        Resource existing = this.getResource(infraService.getService().getId(), infraService.getService().getVersion());
+        Resource existing = this.getPendingResource(infraService.getService().getId(), infraService.getService().getVersion());
         // save existing resource with new payload
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);
@@ -166,7 +166,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         infraService = this.update(infraService, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
 //        Resource resource = this.getResource(infraService.getId());
-        Resource resource = this.getResource(infraService.getService().getId(), infraService.getService().getVersion());
+        Resource resource = this.getPendingResource(infraService.getService().getId(), infraService.getService().getVersion());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -220,7 +220,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
 //        Resource resource = this.getResource(serviceId);
-        Resource resource = this.getResource(serviceId, infraService.getService().getVersion());
+        Resource resource = this.getPendingResource(serviceId, infraService.getService().getVersion());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -250,7 +250,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
     }
 
-    public Resource getResource(String serviceId, String serviceVersion) {
+    public Resource getPendingResource(String serviceId, String serviceVersion) {
         Paging<Resource> resources;
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
@@ -276,5 +276,9 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         }
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+    }
+
+    public Resource getPendingResource(String providerId) {
+        return null;
     }
 }
