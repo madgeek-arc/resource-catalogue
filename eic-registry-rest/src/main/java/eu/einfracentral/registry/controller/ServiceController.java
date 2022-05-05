@@ -182,9 +182,8 @@ public class ServiceController {
     })
     @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
-        return ResponseEntity.ok(
-                infraService.getByIds(auth, ids) // FIXME: create method that returns Services instead of RichServices
-                        .stream().map(RichService::getService).collect(Collectors.toList()));
+        List<Service> services = Arrays.stream(ids).map(infraService::get).map(InfraService::getService).collect(Collectors.toList());
+        return ResponseEntity.ok(services);
     }
 
     // Get a list of RichServices based on a set of ids.

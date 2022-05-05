@@ -1,9 +1,12 @@
 package eu.einfracentral.controllers;
 
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.RichService;
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.dto.UiService;
 import eu.einfracentral.dto.Value;
 import eu.einfracentral.registry.controller.InfraServiceController;
+import eu.einfracentral.registry.controller.ServiceController;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.service.UiElementsService;
 import eu.einfracentral.ui.Field;
@@ -22,6 +25,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -93,7 +97,6 @@ public class UiElementsController {
             Paging<InfraService> services = servicesResponse.getBody();
             List<UiService> uiServiceList = services.getResults()
                     .stream()
-                    .parallel()
                     .map(uiElementsService::createUiService)
                     .collect(Collectors.toList());
             uiServicePaging = new Paging<>(services, uiServiceList);
@@ -127,6 +130,34 @@ public class UiElementsController {
         infra = infraServiceService.updateService(previous, comment, authentication);
 
         return uiElementsService.createUiService(infra);
+    }
+
+    // Get a list of UiServices based on a set of ids.
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
+    })
+    @GetMapping(path = "services/ids/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<UiService>> getSomeServices(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
+        List<InfraService> services = Arrays.stream(ids).map(infraServiceService::get).collect(Collectors.toList());
+        List<UiService> uiServices = services
+                .stream()
+                .map(uiElementsService::createUiService)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(uiServices);
+    }
+
+    // Get a list of UiService snippets based on a set of ids.
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
+    })
+    @GetMapping(path = "services/snippets/ids/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Map<String, Object>>> getSomeServicesSnippets(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
+        List<InfraService> services = Arrays.stream(ids).map(infraServiceService::get).collect(Collectors.toList());
+        List<Map<String, Object>> snippets = services
+                .stream()
+                .map(uiElementsService::createServiceSnippet)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(snippets);
     }
 
     // Snippets
