@@ -84,12 +84,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Gets the specific Service with extra fields like views and ratings
      *
      * @param id
-     * @param catalogueId
      * @param version
+     * @param catalogueId
      * @param auth
      * @return
      */
-    RichService getRichService(String id, String catalogueId, String version, Authentication auth);
+    RichService getRichService(String id, String version, String catalogueId, Authentication auth);
 
     /**
      * Creates a RichService for the specific Service
