@@ -310,7 +310,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 .map(id ->
                 {
                     try {
-                        return getRichService(id, "eosc", "latest", auth);
+                        return getRichService(id, "latest", "eosc", auth);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -512,7 +512,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public RichService getRichService(String id, String catalogueId, String version, Authentication auth) {
+    public RichService getRichService(String id, String version, String catalogueId, Authentication auth) {
         InfraService infraService;
         infraService = get(id, catalogueId, version);
         return createRichService(infraService, auth);

@@ -92,7 +92,8 @@ public class ServiceController {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version
         if ("rich".equals(id)) { // wrong controller (id = rich, version = serviceId)
-            return getRichService(id, catalogueId, "latest", auth);
+            id = version;
+            return getRichService(id, "latest", catalogueId, auth);
         }
         return new ResponseEntity<>(infraService.get(id, catalogueId, version).getService(), HttpStatus.OK);
     }
@@ -104,7 +105,7 @@ public class ServiceController {
     public ResponseEntity<RichService> getRichService(@PathVariable("id") String id, @PathVariable("version") String version,
                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                       @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(infraService.getRichService(id, catalogueId, version, auth), HttpStatus.OK);
+        return new ResponseEntity<>(infraService.getRichService(id, version, catalogueId, auth), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new Resource.")

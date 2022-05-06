@@ -7,6 +7,7 @@ import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.manager.AbstractServiceManager;
 import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
@@ -14,6 +15,8 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,8 @@ import java.util.*;
 
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
+
+    private static final Logger logger = LogManager.getLogger(OIDCSecurityService.class);
 
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
@@ -363,9 +368,9 @@ public class OIDCSecurityService implements SecurityService {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version
         if ("rich".equals(serviceId)) {
-            return serviceIsActive(version);
+            serviceId = version;
         }
-        InfraService service = infraServiceService.get(serviceId, catalogueId, version);
+        InfraService service = infraServiceService.get(serviceId, catalogueId, "latest");
         return service.isActive();
     }
 }
