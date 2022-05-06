@@ -405,17 +405,17 @@ public class Service implements Identifiable {
     /**
      * Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 42, required = true, example = "https://example.com")
-    @FieldValidation
+    @XmlElement
+    @ApiModelProperty(position = 42, example = "https://example.com")
+    @FieldValidation(nullable = true)
     private URL termsOfUse;
 
     /**
      * Link to the privacy policy applicable to the Resource.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 43, required = true, example = "https://example.com")
-    @FieldValidation
+    @XmlElement
+    @ApiModelProperty(position = 43, example = "https://example.com")
+    @FieldValidation(nullable = true)
     private URL privacyPolicy;
 
     /**
