@@ -4,6 +4,7 @@ import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -103,5 +104,22 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
 
     void adminAcceptedTerms(String providerId, Authentication authentication);
+
+    /**
+     * Get the service resource.
+     *
+     * @param serviceId
+     * @param version
+     * @return Resource
+     */
+    Resource getPendingResource(String serviceId, String version);
+
+    /**
+     * Get the provider resource.
+     *
+     * @param providerId
+     * @return Resource
+     */
+    Resource getPendingResource(String providerId);
 
 }

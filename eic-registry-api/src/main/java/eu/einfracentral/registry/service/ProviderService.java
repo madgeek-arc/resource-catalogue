@@ -3,6 +3,7 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.*;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
@@ -26,6 +27,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
 
     T get(String id, U auth);
+
+    T get(String id, String catalogueId, U auth);
 
 
     List<T> getServiceProviders(String email, U authentication);
@@ -65,9 +68,10 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * Get the History of the Provider with the specified id.
      *
      * @param id
+     * @param catalogueId
      * @return
      */
-    Paging<ResourceHistory> getHistory(String id);
+    Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
      * @param provider
@@ -103,9 +107,10 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * Get the History of the Provider with the specified id.
      *
      * @param id
+     * @param catalogueId
      * @return
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id);
+    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
 
     /**
      * @param auth
@@ -143,4 +148,15 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging, int quantity, int from);
 
     void initialCatRIsCatalogueSync();
+
+    /**
+     * Get the service resource.
+     *
+     * @param id
+     * @param catalogueId
+     * @return Resource
+     */
+    Resource getResource(String id, String catalogueId);
+
+    public void migrateProviderCatalogueId(Authentication authentication);
 }

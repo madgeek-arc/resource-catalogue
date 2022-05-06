@@ -41,17 +41,20 @@ public class InfraServiceController {
 
     @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version,
+                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                               @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         InfraService service;
         if (version.isPresent())
-            service = infraService.get(id, version.get());
+            service = infraService.get(id, catalogueId, version.get());
         else
-            service = infraService.get(id);
+            service = infraService.get(id, catalogueId);
         if (service == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         infraService.delete(service);
-        logger.info("User '{}' deleted InfraService '{}' with id: '{}'", authentication, service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' deleted InfraService '{}' with id: '{}' of the Catalogue: '{}'", authentication, service.getService().getName(),
+                service.getService().getId(), service.getService().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -77,15 +80,19 @@ public class InfraServiceController {
 
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(infraService.get(id), HttpStatus.OK);
+    public ResponseEntity<InfraService> get(@PathVariable("id") String id,
+                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                            @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(infraService.get(id, catalogueId), HttpStatus.OK);
     }
 
     @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    public ResponseEntity<InfraService> get(@PathVariable("id") String id, @PathVariable("version") String version,
+    public ResponseEntity<InfraService> get(@PathVariable("id") String id,
+                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                            @PathVariable("version") String version,
                                             Authentication auth) {
-        InfraService ret = infraService.get(id, version);
+        InfraService ret = infraService.get(id, catalogueId, version);
         return new ResponseEntity<>(ret, ret != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
