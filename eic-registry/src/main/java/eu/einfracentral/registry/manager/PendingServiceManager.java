@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -63,8 +64,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         ff.setQuantity(1000);
         List<InfraService> resourceList = infraServiceService.getAll(ff, auth).getResults();
         for (InfraService existingResource : resourceList){
-            if (service.getService().getId().equals(existingResource.getService().getId())) {
-                throw new ValidationException("Resource with the specific id already exists. Please refactor your 'name' field.");
+            if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals("eosc")) {
+                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' field.");
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
@@ -80,6 +81,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
             service.setLoggingInfo(loggingInfoList);
         }
 
+        service.getService().setCatalogueId("eosc");
         service.setActive(false);
         service.setLatest(true);
 
@@ -91,10 +93,13 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
+        // block catalogueId updates from Provider Admins
+        infraService.getService().setCatalogueId("eosc");
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, infraService.getId());
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
-        Resource existing = this.whereID(infraService.getId(), true);
+//        Resource existing = this.whereID(infraService.getId(), true);
+        Resource existing = this.getPendingResource(infraService.getService().getId(), infraService.getService().getVersion());
         // save existing resource with new payload
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);
@@ -114,7 +119,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
         InfraService infraService = infraServiceService.get(serviceId);
-        Resource resource = infraServiceService.getResource(infraService.getService().getId(), infraService.getService().getVersion());
+        Resource resource = infraServiceService.getResource(infraService.getService().getId(), "eosc", infraService.getService().getVersion());
         resource.setResourceTypeName("infra_service");
         resourceService.changeResourceType(resource, resourceType);
         return infraService;
@@ -160,7 +165,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
         infraService = this.update(infraService, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-        Resource resource = this.getResource(infraService.getId());
+//        Resource resource = this.getResource(infraService.getId());
+        Resource resource = this.getPendingResource(infraService.getService().getId(), infraService.getService().getVersion());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -213,7 +219,8 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-        Resource resource = this.getResource(serviceId);
+//        Resource resource = this.getResource(serviceId);
+        Resource resource = this.getPendingResource(serviceId, infraService.getService().getVersion());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -241,5 +248,37 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     public void adminAcceptedTerms(String providerId, Authentication auth){
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
+    }
+
+    public Resource getPendingResource(String serviceId, String serviceVersion) {
+        Paging<Resource> resources;
+        if (serviceVersion == null || "".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\"", serviceId),
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+            // return the latest modified resource that does not contain a version attribute
+            for (Resource resource : resources.getResults()) {
+                if (!resource.getPayload().contains("<tns:version>")) {
+                    return resource;
+                }
+            }
+            if (resources.getTotal() > 0) {
+                return resources.getResults().get(0);
+            }
+            return null;
+        } else if ("latest".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\" AND latest = true", serviceId),
+                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
+        } else {
+            resources = searchService
+                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\" AND version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
+        }
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+    }
+
+    public Resource getPendingResource(String providerId) {
+        return null;
     }
 }

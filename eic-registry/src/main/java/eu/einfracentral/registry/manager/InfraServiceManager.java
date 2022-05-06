@@ -172,10 +172,10 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         try { // try to find a service with the same id and version
-            existingService = get(infraService.getService().getId(), infraService.getService().getVersion());
+            existingService = get(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion());
         } catch (ResourceNotFoundException e) {
             // if a service with version = infraService.getVersion() does not exist, get the latest service
-            existingService = get(infraService.getService().getId());
+            existingService = get(infraService.getService().getId(), infraService.getService().getCatalogueId());
         }
         if ("".equals(existingService.getService().getVersion())) {
             existingService.getService().setVersion(null);
@@ -231,6 +231,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
 
+        // block catalogueId updates from Provider Admins
+        if (!securityService.hasRole(auth, "ROLE_ADMIN")){
+            if (!existingService.getService().getCatalogueId().equals(infraService.getService().getCatalogueId())){
+                throw new ValidationException("You cannot change catalogueId");
+            }
+        }
+
         if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
                 || infraService.getService().getVersion() != null
                 && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
@@ -266,6 +273,53 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         return ret;
+    }
+
+    @Override
+    public InfraService get(String id, String catalogueId, String version) {
+        Resource resource = getResource(id, catalogueId, version);
+        if (resource == null) {
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s, version: %s and catalogueId: %s", id, version, catalogueId));
+        }
+        return deserialize(resource);
+    }
+
+    @Override
+    public InfraService get(String id) {
+        return get(id, "eosc", "latest");
+    }
+
+    @Override
+    public InfraService get(String id, String catalogueId) {
+        return get(id, catalogueId, "latest");
+    }
+
+    public Resource getResource(String serviceId, String catalogueId, String serviceVersion) {
+        Paging<Resource> resources;
+        if (serviceVersion == null || "".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueId),
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+            // return the latest modified resource that does not contain a version attribute
+            for (Resource resource : resources.getResults()) {
+                if (!resource.getPayload().contains("<tns:version>")) {
+                    return resource;
+                }
+            }
+            if (resources.getTotal() > 0) {
+                return resources.getResults().get(0);
+            }
+            return null;
+        } else if ("latest".equals(serviceVersion)) {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND latest = true", serviceId, catalogueId),
+                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
+        } else {
+            resources = searchService
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND version = \"%s\"", serviceId, catalogueId, serviceVersion), resourceType.getName());
+        }
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
     @Override
@@ -389,7 +443,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 validate(infraService);
                 validateCategories(infraService.getService().getCategories());
                 validateScientificDomains(infraService.getService().getScientificDomains());
-                InfraService existingService = get(infraService.getService().getId());
+                InfraService existingService = get(infraService.getService().getId(), infraService.getService().getCatalogueId());
 
                 // update existing service serviceMetadata
                 infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), projectName));
@@ -428,9 +482,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         InfraService service;
         String activeProvider = "";
         if (version == null || "".equals(version)) {
-            service = this.get(serviceId);
+            service = this.get(serviceId, "eosc");
         } else {
-            service = this.get(serviceId, version);
+            service = this.get(serviceId, "eosc", version);
         }
 
         if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
@@ -499,7 +553,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
 
     public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        InfraService service = get(serviceId);
+        InfraService service = get(serviceId, "eosc");
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (service.getLoggingInfo() != null) {
@@ -565,6 +619,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<InfraService> getInfraServices(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, auth).getResults();
@@ -575,6 +630,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ProviderBundle providerBundle = resourceManager.get(providerId);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -597,6 +653,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -608,6 +665,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraService getServiceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         List<InfraService> allProviderServices = getAll(ff, auth).getResults();
         for (InfraService infraService : allProviderServices){
             if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId())){
@@ -621,6 +679,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<Service> getActiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
@@ -632,6 +691,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<InfraService> getInactiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", "eosc");
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
@@ -652,11 +712,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
 //    @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
+    public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         InfraService infraService = new InfraService();
         try{
-            infraService = get(id);
-            List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+            infraService = get(id, catalogueId);
+            List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId(), infraService.getService().getCatalogueId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
             for (Resource resource : allResources){
@@ -681,7 +741,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     public InfraService changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
-        InfraService infraService = get(resourceId);
+        InfraService infraService = get(resourceId, "eosc");
         ProviderBundle newProvider = resourceManager.get(newProviderId);
         ProviderBundle oldProvider =  resourceManager.get(infraService.getService().getResourceOrganisation());
 
@@ -718,7 +778,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // add Resource, delete the old one
         add(infraService, auth);
-        delete(get(resourceId));
+        delete(get(resourceId, "eosc"));
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService, auth);
@@ -736,7 +796,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         List<InfraService> allInfraServices = getAll(ff, securityService.getAdminAccess()).getResults();
         List<Resource> allResources;
         for (InfraService infraService : allInfraServices) {
-            allResources = getResourcesWithServiceId(infraService.getService().getId()); // get all versions of a specific Service
+            allResources = getResourcesWithServiceId(infraService.getService().getId(), infraService.getService().getCatalogueId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             boolean firstResource = true;
             boolean broke = false;
@@ -894,7 +954,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             LoggingInfo lastOnboard = null;
             List<LoggingInfo> loggingInfoList = null;
             try {
-                loggingInfoList = getLoggingInfoHistory(infraService.getService().getId()).getResults();
+                loggingInfoList = getLoggingInfoHistory(infraService.getService().getId(), infraService.getService().getCatalogueId()).getResults();
             } catch (NullPointerException e){
                 logger.info(e);
                 continue;
@@ -1193,6 +1253,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             }
         }
         return createCorrectQuantityFacets(ret, retPaging, quantity, from);
+    }
+
+    public void migrateServiceCatalogueId(Authentication authentication){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<InfraService> allServices = getAll(ff, authentication).getResults();
+        for (InfraService infraService : allServices){
+            if (infraService.getService().getCatalogueId() == null){
+                infraService.getService().setCatalogueId("eosc");
+                super.update(infraService, authentication);
+            }
+        }
     }
 
     //logic for migrating our data to release schema; can be a no-op when outside of migratory period
