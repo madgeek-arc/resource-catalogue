@@ -356,7 +356,8 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-    //FIXME: query doesn't work when auditState != null.
+    // TODO: beautify this
+    // FIXME: query doesn't work when auditState != null.
     //    @ApiOperation(value = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
