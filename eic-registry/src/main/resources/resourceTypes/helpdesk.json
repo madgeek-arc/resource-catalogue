@@ -1,0 +1,79 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "helpdesk_id",
+      "path": "//*[local-name()='helpdesk']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "service_id",
+      "label": "Service ID",
+      "path": "//*[local-name()='service']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "type",
+      "label": "Type",
+      "path": "//*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "group",
+      "label": "Group",
+      "path": "//*[local-name()='group']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "organisation",
+      "label": "Organisation",
+      "path": "//*[local-name()='organisation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "email",
+      "label": "Email",
+      "path": "//*[local-name()='email']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "agent",
+      "label": "Agent",
+      "path": "//*[local-name()='agent']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "signature",
+      "label": "Signature",
+      "path": "//*[local-name()='signature']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "ticket_preservation",
+      "label": "Ticket Preservation",
+      "path": "//*[local-name()='ticketPreservation']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "webform",
+      "label": "Webform",
+      "path": "//*[local-name()='webform']/text()",
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "helpdesk",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/feature/serviceExtensions/eic-registry-model/src/main/resources/schema1.xsd"
+}

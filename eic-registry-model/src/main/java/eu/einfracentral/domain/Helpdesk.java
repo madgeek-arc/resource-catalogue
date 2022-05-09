@@ -11,39 +11,43 @@ import javax.xml.bind.annotation.XmlType;
 public class Helpdesk {
 
     @XmlElement
-    @ApiModelProperty(position = 1, notes = "Service ID")
+    @ApiModelProperty(position = 1, notes = "Helpdesk ID")
+    private String id;
+
+    @XmlElement
+    @ApiModelProperty(position = 2, notes = "Service ID")
     private String service;
 
     @XmlElement
-    @ApiModelProperty(position = 1, notes = "Service ID")
+    @ApiModelProperty(position = 3, notes = "Unique identifier of the helpdesk type")
     private HelpdeskType type;
 
     @XmlElement
-    @ApiModelProperty(position = 2, notes = "Support group to be created in the helpdesk for the provider")
+    @ApiModelProperty(position = 4, notes = "Support group to be created in the helpdesk for the provider")
     private String group;
 
     @XmlElement
-    @ApiModelProperty(position = 3, notes = "Name of organisation")
+    @ApiModelProperty(position = 5, notes = "Name of organisation")
     private String organisation;
 
     @XmlElement
-    @ApiModelProperty(position = 4, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
+    @ApiModelProperty(position = 6, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
     private String email;
 
     @XmlElement
-    @ApiModelProperty(position = 5, notes = "Person involved in ticket management")
+    @ApiModelProperty(position = 7, notes = "Person involved in ticket management")
     private String agent;
 
     @XmlElement
-    @ApiModelProperty(position = 6, notes = "Automatic signature to be used in the answers to the tickets")
+    @ApiModelProperty(position = 8, notes = "Automatic signature to be used in the answers to the tickets")
     private String signature;
 
     @XmlElement
-    @ApiModelProperty(position = 7, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
+    @ApiModelProperty(position = 9, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
     private Boolean ticketPreservation;
 
     @XmlElement
-    @ApiModelProperty(position = 8, notes = "Webform required to generate ticket directly on webpage")
+    @ApiModelProperty(position = 10, notes = "Webform required to generate ticket directly on webpage")
     private Boolean webform;
 
 
