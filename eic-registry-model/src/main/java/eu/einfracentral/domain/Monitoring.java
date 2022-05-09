@@ -12,27 +12,31 @@ import java.net.URL;
 public class Monitoring {
 
     @XmlElement
-    @ApiModelProperty(position = 1, notes = "Service ID")
+    @ApiModelProperty(position = 1, notes = "Monitoring ID")
+    private String id;
+
+    @XmlElement
+    @ApiModelProperty(position = 2, notes = "Service ID")
     private String service;
 
     @XmlElement
-    @ApiModelProperty(position = 2, notes = "Unique identifier of the service type")
+    @ApiModelProperty(position = 3, notes = "Unique identifier of the service type")
     private String serviceType;
 
     @XmlElement
-    @ApiModelProperty(position = 3, notes = "Who is responsible for the monitoring of this Service")
+    @ApiModelProperty(position = 4, notes = "Who is responsible for the monitoring of this Service")
     private String monitoredBy;
 
     @XmlElement
-    @ApiModelProperty(position = 4, notes = "Url of the endpoint of the service")
+    @ApiModelProperty(position = 5, notes = "Url of the endpoint of the service")
     private URL endpoint;
 
     @XmlElement
-    @ApiModelProperty(position = 5, notes = "Url to the repository hosting the code")
+    @ApiModelProperty(position = 6, notes = "Url to the repository hosting the code")
     private URL probe;
 
     @XmlElement
-    @ApiModelProperty(position = 6)
+    @ApiModelProperty(position = 7)
     private URL metric;
 
 
