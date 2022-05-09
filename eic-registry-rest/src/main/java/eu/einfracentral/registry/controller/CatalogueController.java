@@ -52,6 +52,7 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Creates a new Catalogue")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Catalogue> addCatalogue(@RequestBody Catalogue catalogue, @ApiIgnore Authentication auth) {
@@ -69,7 +70,7 @@ public class CatalogueController {
     }
 
     //    @Override
-    @ApiOperation(value = "Updates the Catalogue assigned the given id with the given Catalogue, keeping a version of revisions.")
+    @ApiOperation(value = "Updates a specific Catalogue")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#provider.id)")
     public ResponseEntity<Catalogue> updateCatalogue(@RequestBody Catalogue catalogue, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -91,7 +92,7 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogueBundle, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Catalogues in the Catalogue.")
+    @ApiOperation(value = "Get a list of all Catalogues in the Portal.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -209,7 +210,7 @@ public class CatalogueController {
     }
 
     //SECTION: PROVIDER
-    @ApiOperation(value = "Returns the Provider with the given id.")
+    @ApiOperation(value = "Returns the Provider of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> getCatalogueProvider(@PathVariable("catalogueId") String catalogueId, @PathVariable("providerId") String providerId, @ApiIgnore Authentication auth) {
         Provider provider = catalogueProviderManager.getCatalogueProvider(catalogueId, providerId, auth).getProvider();
@@ -278,7 +279,7 @@ public class CatalogueController {
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
+    @ApiOperation(value = "Updates the Provider of the specific Catalogue")
     @PutMapping(path = "{catalogueId}/provider/", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -301,7 +302,7 @@ public class CatalogueController {
     }
 
     //SECTION: RESOURCE
-    @ApiOperation(value = "Returns the Resource with the given id.")
+    @ApiOperation(value = "Returns the Resource of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
         Service resource = catalogueServiceManager.getCatalogueService(catalogueId, resourceId, auth).getService();
@@ -325,7 +326,7 @@ public class CatalogueController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
+    @ApiOperation(value = "Updates the Resource of the specific Catalogue.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth,#service)")
     @PutMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
