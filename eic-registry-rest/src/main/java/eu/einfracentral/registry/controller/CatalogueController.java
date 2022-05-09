@@ -261,6 +261,7 @@ public class CatalogueController {
         return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Creates a new Provider for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/provider/", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
@@ -315,7 +316,7 @@ public class CatalogueController {
         }
     }
 
-    @ApiOperation(value = "Creates a new Resource.")
+    @ApiOperation(value = "Creates a new Resource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
