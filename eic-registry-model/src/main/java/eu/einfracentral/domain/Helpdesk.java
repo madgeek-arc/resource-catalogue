@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://eosc-portal.eu")
-public class Helpdesk {
+public class Helpdesk implements Identifiable {
 
     @XmlElement
     @ApiModelProperty(position = 1, notes = "Helpdesk ID")
@@ -57,6 +57,16 @@ public class Helpdesk {
         FULL_INTEGRATION,
         TICKET_REDIRECTION,
         DIRECT_USAGE
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getService() {

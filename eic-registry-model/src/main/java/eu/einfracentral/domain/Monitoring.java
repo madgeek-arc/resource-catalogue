@@ -9,7 +9,7 @@ import java.net.URL;
 
 @XmlType
 @XmlRootElement(namespace = "http://eosc-portal.eu")
-public class Monitoring {
+public class Monitoring implements Identifiable {
 
     @XmlElement
     @ApiModelProperty(position = 1, notes = "Monitoring ID")
@@ -41,6 +41,16 @@ public class Monitoring {
 
 
     public Monitoring() {}
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getService() {
         return service;
