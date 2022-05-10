@@ -33,6 +33,8 @@ public class CacheConfig {
     public static final String CACHE_VISITS = "visits";
     public static final String CACHE_CATALOGUES = "catalogues";
     public static final String CACHE_DATASOURCES = "datasources";
+    public static final String CACHE_HELPDESKS = "helpdesks";
+    public static final String CACHE_MONITORINGS = "monitorings";
 
     protected RestTemplate restTemplate;
 
@@ -53,6 +55,8 @@ public class CacheConfig {
                 new ConcurrentMapCache(CACHE_VOCABULARY_MAP),
                 new ConcurrentMapCache(CACHE_VOCABULARY_TREE),
                 new ConcurrentMapCache(CACHE_CATALOGUES),
+                new ConcurrentMapCache(CACHE_HELPDESKS),
+                new ConcurrentMapCache(CACHE_MONITORINGS),
 
                 // NEEDED FOR registry-core
                 new ConcurrentMapCache("resourceTypes"),
