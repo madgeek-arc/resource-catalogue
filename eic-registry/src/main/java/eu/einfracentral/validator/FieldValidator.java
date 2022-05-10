@@ -27,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class FieldValidator {
@@ -37,6 +38,11 @@ public class FieldValidator {
     private final ProviderManager providerService;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
+    private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
+    private static final String NULL_OBJECT = "Attempt to validate null object..";
+
+    private Deque<String> validationLocation;
+
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
@@ -46,9 +52,18 @@ public class FieldValidator {
         this.infraServiceService = infraServiceService;
     }
 
-    public void validateFields(Object o) throws IllegalAccessException {
+    private String getCurrentLocation() {
+        return validationLocation.stream().filter(Objects::nonNull).collect(Collectors.joining("->"));
+    }
+
+    public void validate(Object o) throws IllegalAccessException {
+        validationLocation = new ArrayDeque<>();
+        validateFields(o);
+    }
+
+    private void validateFields(Object o) throws IllegalAccessException {
         if (o == null) {
-            throw new ValidationException("Attempt to validate null object..");
+            throw new ValidationException(NULL_OBJECT);
         }
 
         // get declared fields of class
@@ -56,13 +71,15 @@ public class FieldValidator {
 
         // validate every field
         for (Field field : declaredFields) {
+            validationLocation.addLast(field.getName());
             validateField(field, o);
+            validationLocation.removeLast();
         }
     }
 
-    public void validateField(Field field, Object o) throws IllegalAccessException {
+    private void validateField(Field field, Object o) throws IllegalAccessException {
         if (o == null) { // parent object here
-            throw new ValidationException("Attempt to validate null object..");
+            throw new ValidationException(NULL_OBJECT);
         }
 
         // email validation
@@ -87,42 +104,40 @@ public class FieldValidator {
         validateField(field, o, (FieldValidation) annotation);
     }
 
-    public void validatePhone(Field field, Object o, PhoneValidation annotation) throws IllegalAccessException {
+    private void validatePhone(Field field, Object o, PhoneValidation annotation) throws IllegalAccessException {
         field.setAccessible(true);
         o = field.get(o);
         if (annotation.nullable() && o == null) {
             return;
         } else if (o == null) {
-            throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
+            throw new ValidationException(String.format(MANDATORY_FIELD, getCurrentLocation()));
         }
         Pattern phonePattern = Pattern.compile("^(((\\+)|(00))\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
         if (!phonePattern.matcher(o.toString()).matches()) {
-            throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field [%s]", o, field.getName()));
+            throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field [%s]", o, getCurrentLocation()));
         }
     }
 
-    public void validateEmail(Field field, Object o, EmailValidation annotation) throws IllegalAccessException {
+    private void validateEmail(Field field, Object o, EmailValidation annotation) throws IllegalAccessException {
         field.setAccessible(true);
         o = field.get(o);
         if (annotation.nullable() && o == null) {
             return;
         } else if (o == null) {
-            throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
+            throw new ValidationException(String.format(MANDATORY_FIELD, getCurrentLocation()));
         }
         EmailValidator emailValidator = EmailValidator.getInstance();
         if (!emailValidator.isValid(o.toString())) {
-            throw new ValidationException(String.format("Email [%s] is not valid. Found in field [%s]", o, field.getName()));
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field [%s]", o, getCurrentLocation()));
         }
     }
 
-    public void validateField(Field field, Object o, FieldValidation annotation) throws IllegalAccessException {
+    private void validateField(Field field, Object o, FieldValidation annotation) throws IllegalAccessException {
         if (o == null) {
-            throw new ValidationException("Attempt to validate null object..");
+            throw new ValidationException(NULL_OBJECT);
         }
 
         if (annotation != null) {
-
-            FieldValidation validationAnnotation = (FieldValidation) annotation;
 
             field.setAccessible(true);
 
@@ -142,16 +157,16 @@ public class FieldValidator {
                 }
             }
 
-            if (!validationAnnotation.nullable() && isNullOrEmpty(fieldValue, clazz)) {
-                throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
+            if (!annotation.nullable() && isNullOrEmpty(fieldValue, clazz)) {
+                throw new ValidationException(String.format(MANDATORY_FIELD, getCurrentLocation()));
             }
 
-            validateMaxLength(field, fieldValue, validationAnnotation);
+            validateMaxLength(field, fieldValue, annotation);
             validateUrlValidity(field, fieldValue);
             validateDuplicates(field, fieldValue);
 
-            if (validationAnnotation.containsId()) {
-                validateIds(field, fieldValue, validationAnnotation);
+            if (annotation.containsId()) {
+                validateIds(field, fieldValue, annotation);
             } else if (fieldValue != null && fieldValue.getClass().getCanonicalName().startsWith("eu.einfracentral.")) {
                 validateFields(fieldValue);
             } else if (fieldValue != null && Collection.class.isAssignableFrom(fieldValue.getClass())) {
@@ -162,7 +177,7 @@ public class FieldValidator {
         }
     }
 
-    public boolean isNullOrEmpty(Object o, Class clazz) {
+    private boolean isNullOrEmpty(Object o, Class clazz) {
         if (o == null)
             return true;
         else if (String.class.equals(clazz) && "".equals((String) o))
@@ -174,7 +189,7 @@ public class FieldValidator {
         return false;
     }
 
-    public void validateMaxLength(Field field, Object o, FieldValidation annotation) {
+    private void validateMaxLength(Field field, Object o, FieldValidation annotation) {
         if (annotation.maxLength() > 0 && o != null) {
             Class clazz = o.getClass();
             if (String.class.equals(clazz) || URL.class.equals(clazz)) {
@@ -193,7 +208,7 @@ public class FieldValidator {
         }
     }
 
-    public void validateUrlValidity(Field field, Object o) {
+    private void validateUrlValidity(Field field, Object o) {
         if (o != null) {
             Class clazz = o.getClass();
             if (URL.class.equals(clazz)) {
@@ -239,7 +254,7 @@ public class FieldValidator {
     }
 
     // TODO: find a better way to get resources by id
-    public void validateIds(Field field, Object o, FieldValidation annotation) {
+    private void validateIds(Field field, Object o, FieldValidation annotation) {
         if (o != null && annotation.containsId()) {
             if (Collection.class.isAssignableFrom(o.getClass())) {
                 for (Object entry : ((Collection) o)) {
@@ -296,7 +311,7 @@ public class FieldValidator {
         }
     }
 
-    public void validateDuplicates(Field field, Object o) {
+    private void validateDuplicates(Field field, Object o) {
         Set<String> duplicateEntries = new HashSet<>();
         String subField = field.toString().substring(field.toString().lastIndexOf(".") + 1);
         if (o != null) {
