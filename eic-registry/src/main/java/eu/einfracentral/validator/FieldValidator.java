@@ -61,16 +61,19 @@ public class FieldValidator {
     }
 
     public void validateField(Field field, Object o) throws IllegalAccessException {
+        if (o == null) { // parent object here
+            throw new ValidationException("Attempt to validate null object..");
+        }
 
         // email validation
         if (field.getAnnotation(EmailValidation.class) != null) {
-            validateField(field, o, field.getAnnotation(EmailValidation.class));
+            validateEmail(field, o, field.getAnnotation(EmailValidation.class));
             return;
         }
 
         // phone validation
         if (field.getAnnotation(PhoneValidation.class) != null) {
-            validateField(field, o, field.getAnnotation(PhoneValidation.class));
+            validatePhone(field, o, field.getAnnotation(PhoneValidation.class));
             return;
         }
 
@@ -84,7 +87,9 @@ public class FieldValidator {
         validateField(field, o, (FieldValidation) annotation);
     }
 
-    public void validateField(Field field, Object o, PhoneValidation annotation) {
+    public void validatePhone(Field field, Object o, PhoneValidation annotation) throws IllegalAccessException {
+        field.setAccessible(true);
+        o = field.get(o);
         if (annotation.nullable() && o == null) {
             return;
         } else if (o == null) {
@@ -96,7 +101,9 @@ public class FieldValidator {
         }
     }
 
-    public void validateField(Field field, Object o, EmailValidation annotation) {
+    public void validateEmail(Field field, Object o, EmailValidation annotation) throws IllegalAccessException {
+        field.setAccessible(true);
+        o = field.get(o);
         if (annotation.nullable() && o == null) {
             return;
         } else if (o == null) {
