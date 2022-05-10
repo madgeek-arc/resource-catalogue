@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Arrays;
 
 @XmlType
 @XmlRootElement(namespace = "http://eosc-portal.eu")
@@ -54,9 +55,30 @@ public class Helpdesk implements Identifiable {
     public Helpdesk() {}
 
     public enum HelpdeskType {
-        FULL_INTEGRATION,
-        TICKET_REDIRECTION,
-        DIRECT_USAGE
+        FULL_INTEGRATION("Full integration"),
+        TICKET_REDIRECTION("Ticket redirection"),
+        DIRECT_USAGE("Direct usage");
+
+        private final String helpdeskType;
+
+        HelpdeskType(final String helpdeskType) {
+            this.helpdeskType = helpdeskType;
+        }
+
+        public String getKey() {
+            return helpdeskType;
+        }
+
+        /**
+         * @return the Enum representation for the given string.
+         * @throws IllegalArgumentException if unknown string.
+         */
+        public static Helpdesk.HelpdeskType fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(Helpdesk.HelpdeskType.values())
+                    .filter(v -> v.helpdeskType.equals(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
     }
 
     @Override
