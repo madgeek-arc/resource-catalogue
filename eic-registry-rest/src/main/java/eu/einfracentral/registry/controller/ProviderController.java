@@ -392,6 +392,14 @@ public class ProviderController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
+    @ApiOperation(value = "Validates the Provider without actually changing the repository.")
+    @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Boolean> validate(@RequestBody Provider provider) {
+        ResponseEntity<Boolean> ret = ResponseEntity.ok(providerManager.validate(new ProviderBundle(provider)) != null);
+        logger.info("Validated Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
+        return ret;
+    }
+
 //    @PutMapping(path = "providerHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public Map<String, List<LoggingInfo>> migrateProviderHistory(@ApiIgnore Authentication authentication) {
