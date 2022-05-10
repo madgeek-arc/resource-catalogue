@@ -246,7 +246,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         logger.debug("Validating Catalogue with id: {}", catalogue.getId());
 
         try {
-            fieldValidator.validateFields(catalogue.getCatalogue());
+            fieldValidator.validate(catalogue.getCatalogue());
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
