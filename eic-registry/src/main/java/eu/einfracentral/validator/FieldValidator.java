@@ -1,15 +1,16 @@
 package eu.einfracentral.validator;
 
-import eu.einfracentral.annotation.FieldValidation;
-import eu.einfracentral.annotation.VocabularyValidation;
-import eu.einfracentral.annotation.GeoLocationVocValidation;
-import eu.einfracentral.domain.*;
+import eu.einfracentral.annotation.*;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,9 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class FieldValidator {
@@ -57,8 +57,17 @@ public class FieldValidator {
     }
 
     public void validateField(Field field, Object o) throws IllegalAccessException {
-        if (o == null) {
-            throw new ValidationException("Attempt to validate null object..");
+
+        // email validation
+        if (field.getAnnotation(EmailValidation.class) != null) {
+            validateField(field, o, field.getAnnotation(EmailValidation.class));
+            return;
+        }
+
+        // phone validation
+        if (field.getAnnotation(PhoneValidation.class) != null) {
+            validateField(field, o, field.getAnnotation(PhoneValidation.class));
+            return;
         }
 
         // check if FieldValidation annotation exists
@@ -71,6 +80,38 @@ public class FieldValidator {
         // region/countries validation
         if (geoLocationVocValidation != null && annotation == null) {
             annotation = geoLocationVocValidation.annotationType().getAnnotation(FieldValidation.class);
+        }
+
+        validateField(field, o, (FieldValidation) annotation);
+    }
+
+    public void validateField(Field field, Object o, PhoneValidation annotation) {
+        if (annotation.nullable() && o == null) {
+            return;
+        } else if (o == null) {
+            throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
+        }
+        Pattern phonePattern = Pattern.compile("^(((\\+)|(00))\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
+        if (!phonePattern.matcher(o.toString()).matches()) {
+            throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field [%s]", o, field.getName()));
+        }
+    }
+
+    public void validateField(Field field, Object o, EmailValidation annotation) {
+        if (annotation.nullable() && o == null) {
+            return;
+        } else if (o == null) {
+            throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
+        }
+        EmailValidator emailValidator = EmailValidator.getInstance();
+        if (!emailValidator.isValid(o.toString())) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field [%s]", o, field.getName()));
+        }
+    }
+
+    public void validateField(Field field, Object o, FieldValidation annotation) throws IllegalAccessException {
+        if (o == null) {
+            throw new ValidationException("Attempt to validate null object..");
         }
 
         if (annotation != null) {
