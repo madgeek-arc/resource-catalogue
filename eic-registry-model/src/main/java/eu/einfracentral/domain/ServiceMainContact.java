@@ -1,6 +1,8 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.EmailValidation;
 import eu.einfracentral.annotation.FieldValidation;
+import eu.einfracentral.annotation.PhoneValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -35,7 +37,7 @@ public class ServiceMainContact {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, required = true)
-    @FieldValidation
+    @EmailValidation
     private String email;
 
     /**
@@ -43,7 +45,7 @@ public class ServiceMainContact {
      */
     @XmlElement
     @ApiModelProperty(position = 4)
-    @FieldValidation(nullable = true)
+    @PhoneValidation(nullable = true)
     private String phone;
 
     /**

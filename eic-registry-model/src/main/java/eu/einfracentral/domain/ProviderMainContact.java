@@ -1,4 +1,5 @@
 package eu.einfracentral.domain;
+import eu.einfracentral.annotation.EmailValidation;
 import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -32,7 +33,7 @@ public class ProviderMainContact {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, required = true)
-    @FieldValidation
+    @EmailValidation
     private String email;
 
     /**
@@ -40,7 +41,7 @@ public class ProviderMainContact {
      */
     @XmlElement
     @ApiModelProperty(position = 4)
-    @FieldValidation(nullable = true)
+    @EmailValidation(nullable = true)
     private String phone;
 
     /**
