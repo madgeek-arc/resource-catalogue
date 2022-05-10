@@ -33,14 +33,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import javax.sql.DataSource;
-
-import static org.junit.Assert.assertTrue;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -623,7 +620,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Validating Provider with id: {}", provider.getId());
 
         try {
-            fieldValidator.validateFields(provider.getProvider());
+            fieldValidator.validate(provider.getProvider());
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
@@ -1239,7 +1236,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public void validateEmailsAndPhoneNumbers(ProviderBundle providerBundle){
         EmailValidator validator = EmailValidator.getInstance();
-        Pattern pattern = Pattern.compile("^(\\+\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
+        Pattern phonePattern = Pattern.compile("^(((\\+)|(00))\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
         // main contact email
         String mainContactEmail = providerBundle.getProvider().getMainContact().getEmail();
         if (!validator.isValid(mainContactEmail)) {
@@ -1248,10 +1245,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // main contact phone
         if (providerBundle.getProvider().getMainContact().getPhone() != null && !providerBundle.getProvider().getMainContact().getPhone().equals("")){
             String mainContactPhone = providerBundle.getProvider().getMainContact().getPhone();
-            Matcher mainContactPhoneMatcher = pattern.matcher(mainContactPhone);
-            try {
-                assertTrue(mainContactPhoneMatcher.matches());
-            } catch(AssertionError e){
+            if (!phonePattern.matcher(mainContactPhone).matches()) {
                 throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Main Contact Phone", mainContactPhone));
             }
         }
@@ -1267,10 +1261,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             // public contact phone
             if (providerPublicContact.getPhone() != null && !providerPublicContact.getPhone().equals("")){
                 String publicContactPhone = providerPublicContact.getPhone();
-                Matcher publicContactPhoneMatcher = pattern.matcher(publicContactPhone);
-                try {
-                    assertTrue(publicContactPhoneMatcher.matches());
-                } catch(AssertionError e){
+                if (!phonePattern.matcher(publicContactPhone).matches()) {
                     throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Public Contact Phone", publicContactPhone));
                 }
             }
