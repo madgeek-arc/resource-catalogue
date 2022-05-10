@@ -620,7 +620,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Validating Provider with id: {}", provider.getId());
 
         try {
-            fieldValidator.validateFields(provider.getProvider());
+            fieldValidator.validate(provider.getProvider());
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }

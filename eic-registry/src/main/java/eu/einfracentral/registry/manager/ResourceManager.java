@@ -130,7 +130,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public T validate(T t) {
         logger.debug("Validating Resource '{}' using FieldValidator", t);
         try {
-            fieldValidator.validateFields(t);
+            fieldValidator.validate(t);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
