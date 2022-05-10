@@ -1,14 +1,20 @@
 package eu.einfracentral.validator;
 
+
+import eu.einfracentral.annotation.EmailValidation;
 import eu.einfracentral.annotation.FieldValidation;
+import eu.einfracentral.annotation.PhoneValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.VocabularyService;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +24,9 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class FieldValidator {
@@ -56,8 +61,17 @@ public class FieldValidator {
     }
 
     public void validateField(Field field, Object o) throws IllegalAccessException {
-        if (o == null) {
-            throw new ValidationException("Attempt to validate null object..");
+
+        // email validation
+        if (field.getAnnotation(EmailValidation.class) != null) {
+            validateField(field, o, field.getAnnotation(EmailValidation.class));
+            return;
+        }
+
+        // phone validation
+        if (field.getAnnotation(PhoneValidation.class) != null) {
+            validateField(field, o, field.getAnnotation(PhoneValidation.class));
+            return;
         }
 
         // check if FieldValidation annotation exists
@@ -65,6 +79,38 @@ public class FieldValidator {
         Annotation annotation = field.getAnnotation(FieldValidation.class);
         if (vocabularyValidation != null && annotation == null) {
             annotation = vocabularyValidation.annotationType().getAnnotation(FieldValidation.class);
+        }
+
+        validateField(field, o, (FieldValidation) annotation);
+    }
+
+    public void validateField(Field field, Object o, PhoneValidation annotation) {
+        if (annotation.nullable() && o == null) {
+            return;
+        } else if (o == null) {
+            throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
+        }
+        Pattern phonePattern = Pattern.compile("^(((\\+)|(00))\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
+        if (!phonePattern.matcher(o.toString()).matches()) {
+            throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field [%s]", o, field.getName()));
+        }
+    }
+
+    public void validateField(Field field, Object o, EmailValidation annotation) {
+        if (annotation.nullable() && o == null) {
+            return;
+        } else if (o == null) {
+            throw new ValidationException("Field '" + field.getName() + "' is mandatory.");
+        }
+        EmailValidator emailValidator = EmailValidator.getInstance();
+        if (!emailValidator.isValid(o.toString())) {
+            throw new ValidationException(String.format("Email [%s] is not valid. Found in field [%s]", o, field.getName()));
+        }
+    }
+
+    public void validateField(Field field, Object o, FieldValidation annotation) throws IllegalAccessException {
+        if (o == null) {
+            throw new ValidationException("Attempt to validate null object..");
         }
 
         if (annotation != null) {
@@ -146,9 +192,9 @@ public class FieldValidator {
             if (URL.class.equals(clazz)) {
                 URL url = (URL) o;
                 validateUrl(field, url);
-              //FIXME: List<URL> with a single empty String value never enters.
-            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())){
-                for (int i=0; i<((ArrayList) o).size(); i++) {
+                //FIXME: List<URL> with a single empty String value never enters.
+            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())) {
+                for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     URL url = (URL) ((ArrayList) o).get(i);
                     validateUrl(field, url);
                 }
@@ -156,7 +202,7 @@ public class FieldValidator {
         }
     }
 
-    public void validateUrl(Field field, URL urlForValidation){
+    public void validateUrl(Field field, URL urlForValidation) {
         HttpsTrustManager.allowAllSSL();
         HttpURLConnection huc;
         int statusCode = 0;
@@ -176,11 +222,11 @@ public class FieldValidator {
             logger.trace(e.getMessage());
         }
 
-        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405 && statusCode != 503){
-            if (field == null){
+        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405 && statusCode != 503) {
+            if (field == null) {
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
             } else {
-                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation ,field.getName()));
+                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation, field.getName()));
             }
         }
     }
@@ -245,11 +291,11 @@ public class FieldValidator {
 
     public void validateDuplicates(Field field, Object o) {
         Set<String> duplicateEntries = new HashSet<>();
-        String subField = field.toString().substring(field.toString().lastIndexOf(".")+1);
+        String subField = field.toString().substring(field.toString().lastIndexOf(".") + 1);
         if (o != null) {
             Class clazz = o.getClass();
             if (ArrayList.class.equals(clazz)) {
-                for (int i=0; i<((ArrayList) o).size(); i++) {
+                for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     if (!duplicateEntries.add(((ArrayList) o).get(i).toString())) {
                         throw new ValidationException(String.format("Duplicate value found '%s' on field '%s'", ((ArrayList) o).get(i).toString(), subField));
                     }
