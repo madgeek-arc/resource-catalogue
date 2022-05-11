@@ -21,7 +21,7 @@ public class Helpdesk implements Identifiable {
 
     @XmlElement
     @ApiModelProperty(position = 3, notes = "Unique identifier of the helpdesk type")
-    private HelpdeskType type;
+    private HelpdeskType helpdeskType;
 
     @XmlElement
     @ApiModelProperty(position = 4, notes = "Support group to be created in the helpdesk for the provider")
@@ -99,12 +99,12 @@ public class Helpdesk implements Identifiable {
         this.service = service;
     }
 
-    public HelpdeskType getType() {
-        return type;
+    public HelpdeskType getHelpdeskType() {
+        return helpdeskType;
     }
 
-    public void setType(HelpdeskType type) {
-        this.type = type;
+    public void setHelpdeskType(HelpdeskType helpdeskType) {
+        this.helpdeskType = helpdeskType;
     }
 
     public String getGroup() {
