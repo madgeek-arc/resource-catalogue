@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
 
 @XmlType
-@XmlRootElement(namespace = "http://eosc-portal.eu")
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Helpdesk implements Identifiable {
 
     @XmlElement
@@ -51,13 +51,25 @@ public class Helpdesk implements Identifiable {
     @ApiModelProperty(position = 10, notes = "Webform required to generate ticket directly on webpage")
     private Boolean webform;
 
-
     public Helpdesk() {}
 
+    public Helpdesk(String id, String service, String helpdeskType, String group, String organisation, String email, String agent, String signature, Boolean ticketPreservation, Boolean webform) {
+        this.id = id;
+        this.service = service;
+        this.helpdeskType = helpdeskType;
+        this.group = group;
+        this.organisation = organisation;
+        this.email = email;
+        this.agent = agent;
+        this.signature = signature;
+        this.ticketPreservation = ticketPreservation;
+        this.webform = webform;
+    }
+
     public enum HelpdeskType {
-        FULL_INTEGRATION("Full integration"),
-        TICKET_REDIRECTION("Ticket redirection"),
-        DIRECT_USAGE("Direct usage");
+        FULL_INTEGRATION("full integration"),
+        TICKET_REDIRECTION("ticket redirection"),
+        DIRECT_USAGE("direct usage");
 
         private final String helpdeskType;
 
@@ -79,6 +91,22 @@ public class Helpdesk implements Identifiable {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Helpdesk{" +
+                "id='" + id + '\'' +
+                ", service='" + service + '\'' +
+                ", helpdeskType='" + helpdeskType + '\'' +
+                ", group='" + group + '\'' +
+                ", organisation='" + organisation + '\'' +
+                ", email='" + email + '\'' +
+                ", agent='" + agent + '\'' +
+                ", signature='" + signature + '\'' +
+                ", ticketPreservation=" + ticketPreservation +
+                ", webform=" + webform +
+                '}';
     }
 
     @Override

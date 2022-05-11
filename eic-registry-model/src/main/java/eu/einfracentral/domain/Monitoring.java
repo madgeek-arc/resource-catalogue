@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 
 @XmlType
-@XmlRootElement(namespace = "http://eosc-portal.eu")
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Monitoring implements Identifiable {
 
     @XmlElement
@@ -39,8 +39,30 @@ public class Monitoring implements Identifiable {
     @ApiModelProperty(position = 7)
     private URL metric;
 
-
     public Monitoring() {}
+
+    public Monitoring(String id, String service, String serviceType, String monitoredBy, URL endpoint, URL probe, URL metric) {
+        this.id = id;
+        this.service = service;
+        this.serviceType = serviceType;
+        this.monitoredBy = monitoredBy;
+        this.endpoint = endpoint;
+        this.probe = probe;
+        this.metric = metric;
+    }
+
+    @Override
+    public String toString() {
+        return "Monitoring{" +
+                "id='" + id + '\'' +
+                ", service='" + service + '\'' +
+                ", serviceType='" + serviceType + '\'' +
+                ", monitoredBy='" + monitoredBy + '\'' +
+                ", endpoint=" + endpoint +
+                ", probe=" + probe +
+                ", metric=" + metric +
+                '}';
+    }
 
     @Override
     public String getId() {
