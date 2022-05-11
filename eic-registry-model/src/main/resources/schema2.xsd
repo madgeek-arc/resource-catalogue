@@ -1108,7 +1108,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       <xs:element minOccurs="0" name="agent" type="xs:string"/>
       <xs:element minOccurs="0" name="email" type="xs:string"/>
       <xs:element minOccurs="0" name="group" type="xs:string"/>
-      <xs:element minOccurs="0" name="helpdeskType" type="helpdeskType"/>
+      <xs:element minOccurs="0" name="helpdeskType" type="xs:string"/>
       <xs:element minOccurs="0" name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="organisation" type="xs:string"/>
       <xs:element minOccurs="0" name="service" type="xs:string"/>
