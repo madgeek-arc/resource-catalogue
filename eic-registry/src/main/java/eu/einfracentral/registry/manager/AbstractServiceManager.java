@@ -241,13 +241,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
 
-        // for CatRIs history migration
-//        try{
-//            resourceService.updateResource(existing);
-//        } catch (ServiceException e){
-//            logger.info("Service Exception");
-//        }
-
         jmsTopicTemplate.convertAndSend("resource.update", infraService);
 
         synchronizerService.syncUpdate(infraService.getService());
@@ -439,24 +432,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return parserPool.deserialize(resource, InfraService.class);
     }
 
-    public InfraService getOrNull(String id) {
-        Resource serviceResource = getResource(id, "eosc", "latest");
-        if (serviceResource != null) {
-            return parserPool.deserialize(serviceResource, InfraService.class);
-        } else {
-            return null;
-        }
-    }
-
-    public InfraService getOrNull(String id, String catalogueId) {
-        Resource serviceResource = getResource(id, catalogueId, "latest");
-        if (serviceResource != null) {
-            return parserPool.deserialize(serviceResource, InfraService.class);
-        } else {
-            return null;
-        }
-    }
-
     private boolean exists(InfraService infraService) {
         if (infraService.getService().getVersion() != null) {
             return getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion()) != null;
@@ -577,7 +552,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
      * @param specialCharacters
      * @return
      */
-    public InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
+    protected InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
         return infraService;
     }

@@ -130,8 +130,6 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService transformToActive(InfraService infraService, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, infraService.getId());
         infraServiceService.validate(infraService);
-        infraServiceService.validateCategories(infraService.getService().getCategories());
-        infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
 
         // update loggingInfo
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
@@ -185,8 +183,6 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
         InfraService infraService = this.get(serviceId);
         infraServiceService.validate(infraService);
-        infraServiceService.validateCategories(infraService.getService().getCategories());
-        infraServiceService.validateScientificDomains(infraService.getService().getScientificDomains());
 
         // update loggingInfo
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
