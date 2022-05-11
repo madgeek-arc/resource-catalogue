@@ -36,20 +36,11 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     List<T> getMyServiceProviders(U authentication);
 
-
-    void validateScientificDomains(List<ServiceProviderDomain> scientificDomains);
-
-
-    void validateMerilScientificDomains(List<ProviderMerilDomain> merilScientificDomains);
-
-
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
 
     void adminAcceptedTerms(String providerId, U authentication);
 
     boolean validateUrl(URL urlForValidation) throws Throwable;
-
-    void validateEmailsAndPhoneNumbers(ProviderBundle providerBundle);
 
     void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider);
 
@@ -98,12 +89,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
-     * @param auth
-     * @return
-     */
-    Map<String, List<LoggingInfo>> migrateProviderHistory(Authentication auth);
-
-    /**
      * Get the History of the Provider with the specified id.
      *
      * @param id
@@ -111,13 +96,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
-
-    /**
-     * @param auth
-     * @return
-     */
-    Map<String, List<LoggingInfo>> migrateLatestProviderHistory(Authentication auth);
-
 
     /**
      * @param auditState
@@ -147,8 +125,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      */
     Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging, int quantity, int from);
 
-    void initialCatRIsCatalogueSync();
-
     /**
      * Get the service resource.
      *
@@ -157,6 +133,4 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return Resource
      */
     Resource getResource(String id, String catalogueId);
-
-    public void migrateProviderCatalogueId(Authentication authentication);
 }

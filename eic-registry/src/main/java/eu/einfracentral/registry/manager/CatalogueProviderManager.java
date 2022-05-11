@@ -150,13 +150,7 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
         logger.trace("User '{}' is attempting to add a new Provider: {} on Catalogue: {}", auth, provider, catalogueId);
         addAuthenticatedUser(provider.getProvider(), auth);
         providerService.validate(provider);
-        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
-            providerService.validateScientificDomains(provider.getProvider().getScientificDomains());
-        }
-        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
-            providerService.validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
-        }
-        providerService.validateEmailsAndPhoneNumbers(provider);
+
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
@@ -191,13 +185,7 @@ public class CatalogueProviderManager extends ResourceManager<ProviderBundle> im
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
         checkCatalogueIdConsistency(provider, catalogueId);
         providerService.validate(provider);
-        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
-            providerService.validateScientificDomains(provider.getProvider().getScientificDomains());
-        }
-        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
-            providerService.validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
-        }
-        providerService.validateEmailsAndPhoneNumbers(provider);
+
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;
