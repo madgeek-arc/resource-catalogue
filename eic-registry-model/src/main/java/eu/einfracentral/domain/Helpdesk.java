@@ -1,67 +1,79 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
+import java.util.List;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement(namespace = "http://eosc-portal.eu")
 public class Helpdesk implements Identifiable {
 
     @XmlElement
-    @ApiModelProperty(position = 1, notes = "Helpdesk ID")
+    @ApiModelProperty(position = 1, notes = "Monitoring ID")
     private String id;
 
-    @XmlElement
+    @XmlElementWrapper(name = "services")
+    @XmlElement(name = "service")
     @ApiModelProperty(position = 2, notes = "Service ID")
-    private String service;
+    private List<String> services;
 
     @XmlElement
     @ApiModelProperty(position = 3, notes = "Unique identifier of the helpdesk type")
     private String helpdeskType;
 
-    @XmlElement
+    @XmlElementWrapper(name = "supportGroups")
+    @XmlElement(name = "supportGroup")
     @ApiModelProperty(position = 4, notes = "Support group to be created in the helpdesk for the provider")
-    private String supportGroup;
+    private List<String> supportGroups;
 
     @XmlElement
     @ApiModelProperty(position = 5, notes = "Name of organisation")
+    @FieldValidation(nullable = true)
     private String organisation;
 
-    @XmlElement
+    @XmlElementWrapper(name = "emails")
+    @XmlElement(name = "email")
     @ApiModelProperty(position = 6, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
-    private String email;
+    private List<String> emails;
 
-    @XmlElement
+    @XmlElementWrapper(name = "agents")
+    @XmlElement(name = "agent")
     @ApiModelProperty(position = 7, notes = "Person involved in ticket management")
-    private String agent;
+    private List<String> agents;
 
-    @XmlElement
+    @XmlElementWrapper(name = "signatures")
+    @XmlElement(name = "signature")
     @ApiModelProperty(position = 8, notes = "Automatic signature to be used in the answers to the tickets")
-    private String signature;
+    @FieldValidation(nullable = true)
+    private List<String> signatures;
 
     @XmlElement
     @ApiModelProperty(position = 9, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
+    @FieldValidation(nullable = true)
     private Boolean ticketPreservation;
 
     @XmlElement
     @ApiModelProperty(position = 10, notes = "Webform required to generate ticket directly on webpage")
+    @FieldValidation(nullable = true)
     private Boolean webform;
 
     public Helpdesk() {}
 
-    public Helpdesk(String id, String service, String helpdeskType, String supportGroup, String organisation, String email, String agent, String signature, Boolean ticketPreservation, Boolean webform) {
+    public Helpdesk(String id, List<String> services, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
         this.id = id;
-        this.service = service;
+        this.services = services;
         this.helpdeskType = helpdeskType;
-        this.supportGroup = supportGroup;
+        this.supportGroups = supportGroups;
         this.organisation = organisation;
-        this.email = email;
-        this.agent = agent;
-        this.signature = signature;
+        this.emails = emails;
+        this.agents = agents;
+        this.signatures = signatures;
         this.ticketPreservation = ticketPreservation;
         this.webform = webform;
     }
@@ -97,13 +109,13 @@ public class Helpdesk implements Identifiable {
     public String toString() {
         return "Helpdesk{" +
                 "id='" + id + '\'' +
-                ", service='" + service + '\'' +
+                ", services=" + services +
                 ", helpdeskType='" + helpdeskType + '\'' +
-                ", supportGroup='" + supportGroup + '\'' +
+                ", supportGroups=" + supportGroups +
                 ", organisation='" + organisation + '\'' +
-                ", email='" + email + '\'' +
-                ", agent='" + agent + '\'' +
-                ", signature='" + signature + '\'' +
+                ", emails=" + emails +
+                ", agents=" + agents +
+                ", signatures=" + signatures +
                 ", ticketPreservation=" + ticketPreservation +
                 ", webform=" + webform +
                 '}';
@@ -119,12 +131,12 @@ public class Helpdesk implements Identifiable {
         this.id = id;
     }
 
-    public String getService() {
-        return service;
+    public List<String> getServices() {
+        return services;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServices(List<String> services) {
+        this.services = services;
     }
 
     public String getHelpdeskType() {
@@ -135,12 +147,12 @@ public class Helpdesk implements Identifiable {
         this.helpdeskType = helpdeskType;
     }
 
-    public String getSupportGroup() {
-        return supportGroup;
+    public List<String> getSupportGroups() {
+        return supportGroups;
     }
 
-    public void setSupportGroup(String supportGroup) {
-        this.supportGroup = supportGroup;
+    public void setSupportGroups(List<String> supportGroups) {
+        this.supportGroups = supportGroups;
     }
 
     public String getOrganisation() {
@@ -151,28 +163,28 @@ public class Helpdesk implements Identifiable {
         this.organisation = organisation;
     }
 
-    public String getEmail() {
-        return email;
+    public List<String> getEmails() {
+        return emails;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmails(List<String> emails) {
+        this.emails = emails;
     }
 
-    public String getAgent() {
-        return agent;
+    public List<String> getAgents() {
+        return agents;
     }
 
-    public void setAgent(String agent) {
-        this.agent = agent;
+    public void setAgents(List<String> agents) {
+        this.agents = agents;
     }
 
-    public String getSignature() {
-        return signature;
+    public List<String> getSignatures() {
+        return signatures;
     }
 
-    public void setSignature(String signature) {
-        this.signature = signature;
+    public void setSignatures(List<String> signatures) {
+        this.signatures = signatures;
     }
 
     public Boolean getTicketPreservation() {
@@ -190,5 +202,4 @@ public class Helpdesk implements Identifiable {
     public void setWebform(Boolean webform) {
         this.webform = webform;
     }
-
 }

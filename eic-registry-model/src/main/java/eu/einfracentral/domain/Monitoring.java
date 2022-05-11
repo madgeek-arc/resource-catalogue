@@ -1,54 +1,62 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
+import java.util.List;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement(namespace = "http://eosc-portal.eu")
 public class Monitoring implements Identifiable {
 
-    @XmlElement
-    @ApiModelProperty(position = 1, notes = "Monitoring ID")
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 1, notes = "Monitoring ID", required = true)
     private String id;
 
-    @XmlElement
-    @ApiModelProperty(position = 2, notes = "Service ID")
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 2, notes = "Service ID", required = true)
+    @FieldValidation(containsId = true, idClass = Service.class)
     private String service;
 
-    @XmlElement
-    @ApiModelProperty(position = 3, notes = "Unique identifier of the service type")
-    private String serviceType;
-
-    @XmlElement
-    @ApiModelProperty(position = 4, notes = "Who is responsible for the monitoring of this Service")
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 3, notes = "Who is responsible for the monitoring of this Service", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.MONITORING_MONITORED_BY)
     private String monitoredBy;
 
-    @XmlElement
-    @ApiModelProperty(position = 5, notes = "Url of the endpoint of the service")
-    private URL endpoint;
+    @XmlElementWrapper(name = "monitoringGroups", required = true)
+    @XmlElement(name = "monitoringGroup")
+    @ApiModelProperty(position = 4, notes = "Unique identifier of the service type", required = true)
+    @FieldValidation
+    private List<MonitoringGroup> monitoringGroups;
 
-    @XmlElement
-    @ApiModelProperty(position = 6, notes = "Url to the repository hosting the code")
-    private URL probe;
+    @XmlElementWrapper(name = "probes")
+    @XmlElement(name = "probe")
+    @ApiModelProperty(position = 5, notes = "Url to the repository hosting the code")
+    @FieldValidation(nullable = true)
+    private List<URL> probes;
 
-    @XmlElement
-    @ApiModelProperty(position = 7)
-    private URL metric;
+    @XmlElementWrapper(name = "metrics")
+    @XmlElement(name = "metric")
+    @ApiModelProperty(position = 6)
+    @FieldValidation(nullable = true)
+    private List<URL> metrics;
 
     public Monitoring() {}
 
-    public Monitoring(String id, String service, String serviceType, String monitoredBy, URL endpoint, URL probe, URL metric) {
+    public Monitoring(String id, String service, String monitoredBy, List<MonitoringGroup> monitoringGroups, List<URL> probes, List<URL> metrics) {
         this.id = id;
         this.service = service;
-        this.serviceType = serviceType;
         this.monitoredBy = monitoredBy;
-        this.endpoint = endpoint;
-        this.probe = probe;
-        this.metric = metric;
+        this.monitoringGroups = monitoringGroups;
+        this.probes = probes;
+        this.metrics = metrics;
     }
 
     @Override
@@ -56,11 +64,10 @@ public class Monitoring implements Identifiable {
         return "Monitoring{" +
                 "id='" + id + '\'' +
                 ", service='" + service + '\'' +
-                ", serviceType='" + serviceType + '\'' +
                 ", monitoredBy='" + monitoredBy + '\'' +
-                ", endpoint=" + endpoint +
-                ", probe=" + probe +
-                ", metric=" + metric +
+                ", monitoringGroups=" + monitoringGroups +
+                ", probes=" + probes +
+                ", metrics=" + metrics +
                 '}';
     }
 
@@ -82,14 +89,6 @@ public class Monitoring implements Identifiable {
         this.service = service;
     }
 
-    public String getServiceType() {
-        return serviceType;
-    }
-
-    public void setServiceType(String serviceType) {
-        this.serviceType = serviceType;
-    }
-
     public String getMonitoredBy() {
         return monitoredBy;
     }
@@ -98,27 +97,27 @@ public class Monitoring implements Identifiable {
         this.monitoredBy = monitoredBy;
     }
 
-    public URL getEndpoint() {
-        return endpoint;
+    public List<MonitoringGroup> getMonitoringGroups() {
+        return monitoringGroups;
     }
 
-    public void setEndpoint(URL endpoint) {
-        this.endpoint = endpoint;
+    public void setMonitoringGroups(List<MonitoringGroup> monitoringGroups) {
+        this.monitoringGroups = monitoringGroups;
     }
 
-    public URL getProbe() {
-        return probe;
+    public List<URL> getProbes() {
+        return probes;
     }
 
-    public void setProbe(URL probe) {
-        this.probe = probe;
+    public void setProbes(List<URL> probes) {
+        this.probes = probes;
     }
 
-    public URL getMetric() {
-        return metric;
+    public List<URL> getMetrics() {
+        return metrics;
     }
 
-    public void setMetric(URL metric) {
-        this.metric = metric;
+    public void setMetrics(List<URL> metrics) {
+        this.metrics = metrics;
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.UUID;
 
 import static eu.einfracentral.config.CacheConfig.*;
@@ -43,7 +44,7 @@ public class HelpdeskManager extends ResourceManager<Helpdesk> implements Helpde
     public Helpdesk add(Helpdesk helpdesk, Authentication auth) {
 
         // check if Service exists
-        serviceConsistency(helpdesk.getService());
+        serviceConsistency(helpdesk.getServices());
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -92,12 +93,14 @@ public class HelpdeskManager extends ResourceManager<Helpdesk> implements Helpde
 
     }
 
-    public void serviceConsistency(String serviceId){
-        try{
-            infraServiceService.get(serviceId);
-        } catch(ResourceNotFoundException e){
-            //TODO: check if a Monitoring can belong to different than EOSC Catalogues (catalogueId)
-            throw new ValidationException(String.format("There is no Service with id '%s' in the EOSC Catalogue", serviceId));
+    public void serviceConsistency(List<String> serviceIds){
+        for (String serviceId : serviceIds){
+            try{
+                infraServiceService.get(serviceId);
+            } catch(ResourceNotFoundException e){
+                //TODO: check if a Monitoring can belong to different than EOSC Catalogues (catalogueId)
+                throw new ValidationException(String.format("There is no Service with id '%s' in the EOSC Catalogue", serviceId));
+            }
         }
     }
 }
