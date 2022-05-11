@@ -71,13 +71,6 @@ public class InfraServiceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping(path = {"updateFields/all"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<InfraService>> updateFields(InfraService service, Authentication authentication) {
-        return new ResponseEntity<>(infraService.eInfraCentralUpdate(service), HttpStatus.OK);
-    }
-
-
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> get(@PathVariable("id") String id,
@@ -160,9 +153,4 @@ public class InfraServiceController {
         return ResponseEntity.ok(infraService.update(service, auth));
     }
 
-//    @GetMapping(path = "emailPhoneProblematicIds", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void emailPhoneProblematicIds(){
-        infraService.emailPhoneValidityCheck();
-    }
 }

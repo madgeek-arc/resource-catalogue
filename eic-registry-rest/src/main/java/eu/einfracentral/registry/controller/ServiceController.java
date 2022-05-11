@@ -567,27 +567,4 @@ public class ServiceController {
         return ResponseEntity.ok(infraService.getAll(ff, null));
     }
 
-//    @PutMapping(path = "resourceHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication authentication) {
-        try{
-            return infraService.migrateResourceHistory(authentication);
-        } catch (UnexpectedRollbackException e){
-            logger.warn("Rollback");
-            return null;
-        }
-    }
-
-//    @PutMapping(path = "resourceLatestHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication authentication) {
-        return infraService.migrateLatestResourceHistory(authentication);
-    }
-
-//    @PutMapping(path = "migrateServiceCatalogueId", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void migrateServiceCatalogueId(Authentication authentication){
-        infraService.migrateServiceCatalogueId(authentication);
-    }
-
 }

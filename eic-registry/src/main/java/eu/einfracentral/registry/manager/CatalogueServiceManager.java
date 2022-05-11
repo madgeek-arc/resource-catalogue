@@ -127,7 +127,6 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
             infraService.getService().setId(id);
         }
         infraServiceService.validate(infraService);
-        infraServiceService.validateEmailsAndPhoneNumbers(infraService);
         infraService.setActive(true);
         infraService.setLatest(true);
 
@@ -166,7 +165,6 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
                 infraService.getService().getCatalogueId());
         checkCatalogueIdConsistency(infraService, catalogueId);
         infraServiceService.validate(infraService);
-        infraServiceService.validateEmailsAndPhoneNumbers(infraService);
         InfraService existingService;
 
         // if service version is empty set it null

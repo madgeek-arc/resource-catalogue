@@ -30,8 +30,6 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
 
     List<T> getInactive();
 
-    void validateScientificDomains(List<ServiceProviderDomain> scientificDomains);
-
     T verifyCatalogue(String id, String status, Boolean active, U auth);
 
     CatalogueBundle publish(String catalogueId, Boolean active, Authentication auth);
