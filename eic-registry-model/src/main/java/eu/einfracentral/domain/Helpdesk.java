@@ -25,7 +25,7 @@ public class Helpdesk implements Identifiable {
 
     @XmlElement
     @ApiModelProperty(position = 4, notes = "Support group to be created in the helpdesk for the provider")
-    private String group;
+    private String supportGroup;
 
     @XmlElement
     @ApiModelProperty(position = 5, notes = "Name of organisation")
@@ -53,11 +53,11 @@ public class Helpdesk implements Identifiable {
 
     public Helpdesk() {}
 
-    public Helpdesk(String id, String service, String helpdeskType, String group, String organisation, String email, String agent, String signature, Boolean ticketPreservation, Boolean webform) {
+    public Helpdesk(String id, String service, String helpdeskType, String supportGroup, String organisation, String email, String agent, String signature, Boolean ticketPreservation, Boolean webform) {
         this.id = id;
         this.service = service;
         this.helpdeskType = helpdeskType;
-        this.group = group;
+        this.supportGroup = supportGroup;
         this.organisation = organisation;
         this.email = email;
         this.agent = agent;
@@ -99,7 +99,7 @@ public class Helpdesk implements Identifiable {
                 "id='" + id + '\'' +
                 ", service='" + service + '\'' +
                 ", helpdeskType='" + helpdeskType + '\'' +
-                ", group='" + group + '\'' +
+                ", supportGroup='" + supportGroup + '\'' +
                 ", organisation='" + organisation + '\'' +
                 ", email='" + email + '\'' +
                 ", agent='" + agent + '\'' +
@@ -135,12 +135,12 @@ public class Helpdesk implements Identifiable {
         this.helpdeskType = helpdeskType;
     }
 
-    public String getGroup() {
-        return group;
+    public String getSupportGroup() {
+        return supportGroup;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setSupportGroup(String supportGroup) {
+        this.supportGroup = supportGroup;
     }
 
     public String getOrganisation() {

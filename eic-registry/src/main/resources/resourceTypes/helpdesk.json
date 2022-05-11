@@ -16,9 +16,9 @@
     },
     {
       "multivalued": false,
-      "name": "helpdesk_type",
-      "label": "Helpdesk Type",
-      "path": "//*[local-name()='helpdeskType']/text()",
+      "name": "support_group",
+      "label": "Support Group",
+      "path": "//*[local-name()='supportGroup']/text()",
       "type": "java.lang.String"
     },
     {
