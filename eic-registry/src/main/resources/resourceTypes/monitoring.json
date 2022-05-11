@@ -16,16 +16,16 @@
     },
     {
       "multivalued": false,
-      "name": "service_type",
-      "label": "Service Type",
-      "path": "//*[local-name()='serviceType']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "monitored_by",
       "label": "Monitored by",
       "path": "//*[local-name()='monitoredBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "service_type",
+      "label": "Service Type",
+      "path": "//*[local-name()='monitoringGroup']/*[local-name()='serviceType']/text()",
       "type": "java.lang.String"
     }
   ],
