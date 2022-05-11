@@ -156,12 +156,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Provider with id '{}' to Active", auth, providerBundle.getId());
         providerManager.validate(providerBundle);
-        if (providerBundle.getProvider().getScientificDomains() != null && !providerBundle.getProvider().getScientificDomains().isEmpty()) {
-            providerManager.validateScientificDomains(providerBundle.getProvider().getScientificDomains());
-        }
-        if (providerBundle.getProvider().getMerilScientificDomains() != null && !providerBundle.getProvider().getMerilScientificDomains().isEmpty()){
-            providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
-        }
         if (providerManager.exists(providerBundle)) {
             throw new ResourceException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()), HttpStatus.CONFLICT);
         }
@@ -213,12 +207,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
             throw new ResourceException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()), HttpStatus.CONFLICT);
         }
         providerManager.validate(providerBundle);
-        if (providerBundle.getProvider().getScientificDomains() != null && !providerBundle.getProvider().getScientificDomains().isEmpty()) {
-            providerManager.validateScientificDomains(providerBundle.getProvider().getScientificDomains());
-        }
-        if (providerBundle.getProvider().getMerilScientificDomains() != null && !providerBundle.getProvider().getMerilScientificDomains().isEmpty()){
-            providerManager.validateMerilScientificDomains(providerBundle.getProvider().getMerilScientificDomains());
-        }
 
         // update loggingInfo
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),

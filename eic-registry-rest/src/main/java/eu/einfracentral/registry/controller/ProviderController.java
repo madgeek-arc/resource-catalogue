@@ -442,28 +442,4 @@ public class ProviderController {
         logger.info("Validated Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
         return ret;
     }
-
-//    @PutMapping(path = "providerHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateProviderHistory(@ApiIgnore Authentication authentication) {
-        return providerManager.migrateProviderHistory(authentication);
-    }
-
-//    @PutMapping(path = "providerLatestHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateLatestProviderHistory(@ApiIgnore Authentication authentication) {
-        return providerManager.migrateLatestProviderHistory(authentication);
-    }
-
-//    @PostMapping(path = "initialCatRIsCatalogueSync", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void initialCatRIsCatalogueSync(@ApiIgnore Authentication authentication) {
-        providerManager.initialCatRIsCatalogueSync();
-    }
-
-//    @PutMapping(path = "migrateProviderCatalogueId", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void migrateProviderCatalogueId(Authentication authentication){
-        providerManager.migrateProviderCatalogueId(authentication);
-    }
 }
