@@ -16,16 +16,16 @@
     },
     {
       "multivalued": false,
-      "name": "support_group",
-      "label": "Support Group",
-      "path": "//*[local-name()='supportGroup']/text()",
+      "name": "helpdesk_type",
+      "label": "Helpdesk Type",
+      "path": "//*[local-name()='helpdeskType']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "group",
-      "label": "Group",
-      "path": "//*[local-name()='group']/text()",
+      "name": "support_group",
+      "label": "Support Group",
+      "path": "//*[local-name()='supportGroup']/text()",
       "type": "java.lang.String"
     },
     {
