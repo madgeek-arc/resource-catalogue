@@ -16,9 +16,9 @@
     },
     {
       "multivalued": false,
-      "name": "type",
-      "label": "Type",
-      "path": "//*[local-name()='type']/text()",
+      "name": "helpdesk_type",
+      "label": "Helpdesk Type",
+      "path": "//*[local-name()='helpdeskType']/text()",
       "type": "java.lang.String"
     },
     {
