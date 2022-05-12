@@ -101,7 +101,7 @@ public class Helpdesk implements Identifiable {
             return Arrays.stream(Helpdesk.HelpdeskType.values())
                     .filter(v -> v.helpdeskType.equals(s))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown value [%s] found in field 'helpdeskType'" + s)));
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown value [%s] found in field 'helpdeskType'", s)));
         }
     }
 
