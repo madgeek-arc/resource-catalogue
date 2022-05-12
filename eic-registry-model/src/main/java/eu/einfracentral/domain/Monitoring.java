@@ -12,7 +12,7 @@ import java.net.URL;
 import java.util.List;
 
 @XmlType
-@XmlRootElement(namespace = "http://eosc-portal.eu")
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Monitoring implements Identifiable {
 
     @XmlElement(required = true)
