@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://einfracentral.eu" targetNamespace="http://eosc-portal.eu" version="1.0">
-
+    
   <xs:import namespace="http://einfracentral.eu" schemaLocation="schema2.xsd"/>
-
+    
   <xs:element name="helpdesk" type="ns1:helpdesk"/>
-
+    
   <xs:element name="monitoring" type="ns1:monitoring"/>
-
-
+  
 </xs:schema>
