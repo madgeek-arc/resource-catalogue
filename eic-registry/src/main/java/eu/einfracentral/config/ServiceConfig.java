@@ -28,7 +28,7 @@ import java.util.Random;
         "eu.einfracentral.manager",
         "eu.einfracentral.registry.manager",
         "eu.einfracentral.utils",
-        "eu.einfracentral.validator",
+        "eu.einfracentral.validators",
         "eu.einfracentral.service",
         "eu.einfracentral.matomo",
         "eu.einfracentral.recdb"})

@@ -1,4 +1,4 @@
-package eu.einfracentral.validator;
+package eu.einfracentral.validators;
 
 import eu.einfracentral.annotation.*;
 import eu.einfracentral.domain.InfraService;

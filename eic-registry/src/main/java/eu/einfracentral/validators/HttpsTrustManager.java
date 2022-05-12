@@ -1,4 +1,4 @@
-package eu.einfracentral.validator;
+package eu.einfracentral.validators;
 
 import javax.net.ssl.*;
 import java.security.KeyManagementException;
