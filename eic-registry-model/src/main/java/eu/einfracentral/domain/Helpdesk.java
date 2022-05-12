@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @XmlType
-@XmlRootElement(namespace = "http://eosc-portal.eu")
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Helpdesk implements Identifiable {
 
     @XmlElement
