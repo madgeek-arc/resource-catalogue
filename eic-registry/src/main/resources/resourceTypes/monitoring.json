@@ -16,6 +16,13 @@
     },
     {
       "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "monitored_by",
       "label": "Monitored by",
       "path": "//*[local-name()='monitoredBy']/text()",
