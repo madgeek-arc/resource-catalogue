@@ -44,7 +44,7 @@ public class HelpdeskManager extends ResourceManager<Helpdesk> implements Helpde
     public Helpdesk add(Helpdesk helpdesk, Authentication auth) {
 
         // check if Service exists
-        serviceConsistency(helpdesk.getServices());
+        serviceConsistency(helpdesk.getServices(), helpdesk.getCatalogueId());
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -93,13 +93,12 @@ public class HelpdeskManager extends ResourceManager<Helpdesk> implements Helpde
 
     }
 
-    public void serviceConsistency(List<String> serviceIds){
+    public void serviceConsistency(List<String> serviceIds, String catalogueId){
         for (String serviceId : serviceIds){
             try{
-                infraServiceService.get(serviceId);
+                infraServiceService.get(serviceId, catalogueId);
             } catch(ResourceNotFoundException e){
-                //TODO: check if a Monitoring can belong to different than EOSC Catalogues (catalogueId)
-                throw new ValidationException(String.format("There is no Service with id '%s' in the EOSC Catalogue", serviceId));
+                throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
             }
         }
     }

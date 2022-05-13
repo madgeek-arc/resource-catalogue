@@ -44,7 +44,7 @@ public class MonitoringManager extends ResourceManager<Monitoring> implements Mo
     public Monitoring add(Monitoring monitoring, Authentication auth) {
 
         // check if Service exists
-        serviceConsistency(monitoring.getService());
+        serviceConsistency(monitoring.getService(), monitoring.getCatalogueId());
 
         monitoring.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Monitoring: {}", auth, monitoring);
@@ -93,12 +93,11 @@ public class MonitoringManager extends ResourceManager<Monitoring> implements Mo
 
     }
 
-    public void serviceConsistency(String serviceId){
+    public void serviceConsistency(String serviceId, String catalogueId){
         try{
-            infraServiceService.get(serviceId);
+            infraServiceService.get(serviceId, catalogueId);
         } catch(ResourceNotFoundException e){
-            //TODO: check if a Monitoring can belong to different than EOSC Catalogues (catalogueId)
-            throw new ValidationException(String.format("There is no Service with id '%s' in the EOSC Catalogue", serviceId));
+            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
         }
     }
 }
