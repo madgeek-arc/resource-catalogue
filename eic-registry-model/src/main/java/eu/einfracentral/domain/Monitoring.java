@@ -15,8 +15,8 @@ import java.util.List;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Monitoring implements Identifiable {
 
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 1, notes = "Monitoring ID", required = true)
+    @XmlElement()
+    @ApiModelProperty(position = 1, notes = "Monitoring ID")
     private String id;
 
     @XmlElement(required = true)
