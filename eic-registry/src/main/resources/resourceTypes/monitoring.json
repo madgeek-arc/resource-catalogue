@@ -1,0 +1,44 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "monitoring_id",
+      "path": "//*[local-name()='monitoring']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "service_id",
+      "label": "Service ID",
+      "path": "//*[local-name()='service']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "monitored_by",
+      "label": "Monitored by",
+      "path": "//*[local-name()='monitoredBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "service_type",
+      "label": "Service Type",
+      "path": "//*[local-name()='monitoringGroups']/*[local-name()='serviceType']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "monitoring",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/feature/serviceExtensions/eic-registry-model/src/main/resources/schema1.xsd"
+}

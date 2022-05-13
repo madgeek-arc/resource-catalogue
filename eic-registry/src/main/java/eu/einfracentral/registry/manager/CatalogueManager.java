@@ -8,12 +8,11 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
-import eu.einfracentral.validator.FieldValidator;
+import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +29,10 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_CATALOGUES;
+import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 import static org.junit.Assert.assertTrue;
 
 @Service("catalogueManager")
@@ -156,10 +154,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         logger.trace("User '{}' is attempting to add a new Catalogue: {}", auth, catalogue);
         addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
-        if (catalogue.getCatalogue().getScientificDomains() != null && !catalogue.getCatalogue().getScientificDomains().isEmpty()) {
-            validateScientificDomains(catalogue.getCatalogue().getScientificDomains());
-        }
-        validateEmailsAndPhoneNumbers(catalogue);
         catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
@@ -193,10 +187,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogue);
         validate(catalogue);
-        if (catalogue.getCatalogue().getScientificDomains() != null && !catalogue.getCatalogue().getScientificDomains().isEmpty()) {
-            validateScientificDomains(catalogue.getCatalogue().getScientificDomains());
-        }
-        validateEmailsAndPhoneNumbers(catalogue);
         catalogue.setMetadata(Metadata.updateMetadata(catalogue.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;
@@ -244,6 +234,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public CatalogueBundle validate(CatalogueBundle catalogue) {
         logger.debug("Validating Catalogue with id: {}", catalogue.getId());
+
+        if (catalogue.getCatalogue().getScientificDomains() != null && !catalogue.getCatalogue().getScientificDomains().isEmpty()) {
+            validateScientificDomains(catalogue.getCatalogue().getScientificDomains());
+        }
 
         try {
             fieldValidator.validate(catalogue.getCatalogue());
@@ -308,66 +302,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
                 users.add(authUser);
                 provider.setUsers(users);
-            }
-        }
-    }
-
-    public void validateScientificDomains(List<ServiceProviderDomain> scientificDomains) {
-        for (ServiceProviderDomain catalogueScientificDomain : scientificDomains) {
-            String[] parts = catalogueScientificDomain.getScientificSubdomain().split("-");
-            String scientificDomain = "scientific_domain-" + parts[1];
-            if (!catalogueScientificDomain.getScientificDomain().equals(scientificDomain)) {
-                throw new ValidationException("Scientific Subdomain '" + catalogueScientificDomain.getScientificSubdomain() +
-                        "' should have as Scientific Domain the value '" + scientificDomain + "'");
-            }
-        }
-    }
-
-    public void validateEmailsAndPhoneNumbers(CatalogueBundle catalogueBundle){
-        EmailValidator validator = EmailValidator.getInstance();
-        Pattern pattern = Pattern.compile("^(\\+\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
-        // main contact email
-        String mainContactEmail = catalogueBundle.getCatalogue().getMainContact().getEmail();
-        if (!validator.isValid(mainContactEmail)) {
-            throw new ValidationException(String.format("Email [%s] is not valid. Found in field Main Contact Email", mainContactEmail));
-        }
-        // main contact phone
-        if (catalogueBundle.getCatalogue().getMainContact().getPhone() != null && !catalogueBundle.getCatalogue().getMainContact().getPhone().equals("")){
-            String mainContactPhone = catalogueBundle.getCatalogue().getMainContact().getPhone();
-            Matcher mainContactPhoneMatcher = pattern.matcher(mainContactPhone);
-            try {
-                assertTrue(mainContactPhoneMatcher.matches());
-            } catch(AssertionError e){
-                throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Main Contact Phone", mainContactPhone));
-            }
-        }
-        // public contact
-        for (ProviderPublicContact providerPublicContact : catalogueBundle.getCatalogue().getPublicContacts()){
-            // public contact email
-            if (providerPublicContact.getEmail() != null && !providerPublicContact.getEmail().equals("")){
-                String publicContactEmail = providerPublicContact.getEmail();
-                if (!validator.isValid(publicContactEmail)) {
-                    throw new ValidationException(String.format("Email [%s] is not valid. Found in field Public Contact Email", publicContactEmail));
-                }
-            }
-            // public contact phone
-            if (providerPublicContact.getPhone() != null && !providerPublicContact.getPhone().equals("")){
-                String publicContactPhone = providerPublicContact.getPhone();
-                Matcher publicContactPhoneMatcher = pattern.matcher(publicContactPhone);
-                try {
-                    assertTrue(publicContactPhoneMatcher.matches());
-                } catch(AssertionError e){
-                    throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field Public Contact Phone", publicContactPhone));
-                }
-            }
-        }
-        // user email
-        for (User user : catalogueBundle.getCatalogue().getUsers()){
-            if (user.getEmail() != null && !user.getEmail().equals("")){
-                String userEmail = user.getEmail();
-                if (!validator.isValid(userEmail)) {
-                    throw new ValidationException(String.format("Email [%s] is not valid. Found in field User Email", userEmail));
-                }
             }
         }
     }

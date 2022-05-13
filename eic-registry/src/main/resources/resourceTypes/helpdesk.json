@@ -1,0 +1,86 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "helpdesk_id",
+      "path": "//*[local-name()='helpdesk']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": true,
+      "name": "service_id",
+      "label": "Service ID",
+      "path": "//*[local-name()='service']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "helpdesk_type",
+      "label": "Helpdesk Type",
+      "path": "//*[local-name()='helpdeskType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "support_group",
+      "label": "Support Group",
+      "path": "//*[local-name()='supportGroup']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "organisation",
+      "label": "Organisation",
+      "path": "//*[local-name()='organisation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "email",
+      "label": "Email",
+      "path": "//*[local-name()='email']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "agent",
+      "label": "Agent",
+      "path": "//*[local-name()='agent']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "signature",
+      "label": "Signature",
+      "path": "//*[local-name()='signature']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "ticket_preservation",
+      "label": "Ticket Preservation",
+      "path": "//*[local-name()='ticketPreservation']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "webform",
+      "label": "Webform",
+      "path": "//*[local-name()='webform']/text()",
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "helpdesk",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/feature/serviceExtensions/eic-registry-model/src/main/resources/schema1.xsd"
+}

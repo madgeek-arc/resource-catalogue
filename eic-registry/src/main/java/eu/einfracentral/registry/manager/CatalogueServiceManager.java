@@ -10,7 +10,7 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.SortUtils;
-import eu.einfracentral.validator.FieldValidator;
+import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -92,7 +92,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (infraService == null) {
             throw new ResourceNotFoundException(
-                    String.format("Could not find Service with id: %s", infraService));
+                    String.format("Could not find Service with id: %s", serviceId));
         }
         if (catalogueBundle == null) {
             throw new ResourceNotFoundException(
@@ -127,7 +127,6 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
             infraService.getService().setId(id);
         }
         infraServiceService.validate(infraService);
-        infraServiceService.validateEmailsAndPhoneNumbers(infraService);
         infraService.setActive(true);
         infraService.setLatest(true);
 
@@ -166,7 +165,6 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
                 infraService.getService().getCatalogueId());
         checkCatalogueIdConsistency(infraService, catalogueId);
         infraServiceService.validate(infraService);
-        infraServiceService.validateEmailsAndPhoneNumbers(infraService);
         InfraService existingService;
 
         // if service version is empty set it null
