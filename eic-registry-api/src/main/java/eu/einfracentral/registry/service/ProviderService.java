@@ -16,6 +16,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     @Override
     T add(T provider, Authentication authentication);
 
+    T add(T provider, String catalogueId, Authentication authentication);
+
     /**
      * Deletes the provider and all the corresponding services.
      * (Does not delete services that have other providers as well)
@@ -71,6 +73,15 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return
      */
     ProviderBundle update(ProviderBundle provider, String comment, Authentication auth);
+
+    /**
+     * @param provider
+     * @param catalogueId
+     * @param comment
+     * @param auth
+     * @return
+     */
+    ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth);
 
     /**
      * @param providerId
