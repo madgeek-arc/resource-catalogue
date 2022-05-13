@@ -25,7 +25,7 @@
       "multivalued": true,
       "name": "service_type",
       "label": "Service Type",
-      "path": "//*[local-name()='monitoringGroup']/*[local-name()='serviceType']/text()",
+      "path": "//*[local-name()='monitoringGroups']/*[local-name()='serviceType']/text()",
       "type": "java.lang.String"
     }
   ],

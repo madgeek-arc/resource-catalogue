@@ -84,7 +84,7 @@ public class ServiceExtensionsController {
 
     @ApiOperation(value = "Creates a new Monitoring.")
     @PostMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring, @ApiIgnore Authentication auth) {
         monitoringService.add(monitoring, auth);
         logger.info("User '{}' added the Monitoring with id '{}'", auth.getName(), monitoring.getId());
