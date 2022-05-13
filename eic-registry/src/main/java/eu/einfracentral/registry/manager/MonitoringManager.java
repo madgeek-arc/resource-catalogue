@@ -65,7 +65,6 @@ public class MonitoringManager extends ResourceManager<Monitoring> implements Mo
     @CacheEvict(value = CACHE_MONITORINGS, allEntries = true)
     public Monitoring update(Monitoring monitoring, Authentication auth) {
 
-        monitoring.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to update the Monitoring with id '{}'", auth, monitoring.getId());
         //TODO: metadata
         //TODO: loggingInfo
