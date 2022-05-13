@@ -18,6 +18,6 @@ public class MonitoringValidator implements Validator {
     public void validate(Object target, Errors errors) {
         ValidationUtils.rejectIfEmpty(errors, "service", "service.empty", mandatoryField("service"));
         ValidationUtils.rejectIfEmpty(errors, "monitoredBy", "monitoredBy.empty", mandatoryField("monitoredBy"));
-        ValidationUtils.rejectIfEmpty(errors, "monitoringGroup", "monitoringGroup.empty", mandatoryField("monitoringGroup"));
+        ValidationUtils.rejectIfEmpty(errors, "monitoringGroups", "monitoringGroups.empty", mandatoryField("monitoringGroups"));
     }
 }
