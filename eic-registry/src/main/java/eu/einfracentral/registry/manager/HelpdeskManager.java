@@ -65,7 +65,6 @@ public class HelpdeskManager extends ResourceManager<Helpdesk> implements Helpde
     @CacheEvict(value = CACHE_HELPDESKS, allEntries = true)
     public Helpdesk update(Helpdesk helpdesk, Authentication auth) {
 
-        helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdesk.getId());
         //TODO: metadata
         //TODO: loggingInfo

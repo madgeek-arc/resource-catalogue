@@ -92,7 +92,7 @@ public class CatalogueServiceManager extends ResourceManager<InfraService> imple
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (infraService == null) {
             throw new ResourceNotFoundException(
-                    String.format("Could not find Service with id: %s", infraService));
+                    String.format("Could not find Service with id: %s", serviceId));
         }
         if (catalogueBundle == null) {
             throw new ResourceNotFoundException(
