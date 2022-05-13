@@ -495,7 +495,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         InfraService service = get(serviceId, "eosc");
-        LoggingInfo loggingInfo;
+        LoggingInfo loggingInfo; // TODO: extract method
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (service.getLoggingInfo() != null) {
             loggingInfoList = service.getLoggingInfo();

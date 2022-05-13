@@ -2,10 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -55,6 +52,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
         " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
@@ -73,7 +71,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            JmsTemplate jmsTopicTemplate, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
                            SynchronizerService<Provider> synchronizerServiceProvider,
-                           SynchronizerService<Service> synchronizerServiceResource) {
+                           SynchronizerService<Service> synchronizerServiceResource,
+                           CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
@@ -87,6 +86,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.dataSource = dataSource;
         this.synchronizerServiceProvider = synchronizerServiceProvider;
         this.synchronizerServiceResource = synchronizerServiceResource;
+        this.catalogueService = catalogueService;
     }
 
 
@@ -96,36 +96,26 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
+    public ProviderBundle add(ProviderBundle provider, Authentication authentication) {
+        return add(provider, null, authentication);
+    }
+
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle add(ProviderBundle provider, Authentication auth) {
+    public ProviderBundle add(ProviderBundle provider, String catalogueId, Authentication auth) {
+        logger.trace("User '{}' is attempting to add a new Provider: {} on Catalogue: {}", auth, provider, catalogueId);
+
+        provider = onboard(provider, catalogueId, auth);
 
         provider.setId(idCreator.createProviderId(provider.getProvider()));
-        logger.trace("User '{}' is attempting to add a new Provider: {}", auth, provider);
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add((loggingInfo));
-        provider.setLoggingInfo(loggingInfoList);
-        provider.setActive(false);
-        provider.setStatus(vocabularyService.get("pending provider").getId());
-        provider.setTemplateStatus(vocabularyService.get("no template status").getId());
-
-        // catalogueId
-        provider.getProvider().setCatalogueId("eosc");
-
-        // latestOnboardingInfo
-        provider.setLatestOnboardingInfo(loggingInfo);
-
-        if (provider.getProvider().getParticipatingCountries() != null && !provider.getProvider().getParticipatingCountries().isEmpty()){
-            provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
-        }
+        sortFields(provider);
 
         ProviderBundle ret;
         ret = super.add(provider, null);
-        logger.debug("Adding Provider: {}", provider);
+        logger.debug("Adding Provider: {} of Catalogue: {}", provider, catalogueId);
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
@@ -139,7 +129,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     //    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, String comment, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Provider with id '{}'", auth, provider);
+        return update(provider, null, comment, auth);
+    }
+
+    //    @Override
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
+        checkCatalogueIdConsistency(provider, catalogueId);
         validate(provider);
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -160,20 +157,25 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         Resource existing = whereID(provider.getId(), true);
         ProviderBundle ex = deserialize(existing);
+
+        // block catalogueId updates from Provider Admins
+        if (!securityService.hasRole(auth, "ROLE_ADMIN") && !ex.getProvider().getCatalogueId().equals(provider.getProvider().getCatalogueId())) {
+            throw new ValidationException("You cannot change catalogueId");
+        }
         provider.setActive(ex.isActive());
         provider.setStatus(ex.getStatus());
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating Provider: {}", provider);
+        logger.debug("Updating Provider: {} of Catalogue: {}", provider, provider.getProvider().getCatalogueId());
 
         // Send emails to newly added or deleted Admins
         adminDifferences(provider, ex);
 
         // send notification emails to Portal Admins
         if (provider.getLatestAuditInfo() != null && provider.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(provider.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(provider.getLatestUpdateInfo().getDate());
+            long latestAudit = Long.parseLong(provider.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(provider.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && provider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
                 registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
             }
@@ -192,9 +194,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
      * @param id
      * @return
      */
-    @Override
-    @Cacheable(value = CACHE_PROVIDERS)
-    public ProviderBundle get(String id, String catalogueId) {
+    private ProviderBundle getWithCatalogue(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
             throw new eu.einfracentral.exception.ResourceNotFoundException(String.format("Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
@@ -203,8 +203,51 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Cacheable(value = CACHE_PROVIDERS)
+    public ProviderBundle getCatalogueProvider(String id, String catalogueId, Authentication auth) {
+        ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
+        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
+        if (providerBundle == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("Could not find provider with id: %s", id));
+        }
+        if (catalogueBundle == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("Could not find catalogue with id: %s", catalogueId));
+        }
+        if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
+            throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", id, catalogueId));
+        }
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            //TODO: userIsCatalogueAdmin -> transcationRollback error
+            // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+                    securityService.userIsProviderAdmin(user, id)) {
+                return providerBundle;
+            }
+        }
+        // else return the Provider ONLY if he is active
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+            return providerBundle;
+        }
+        throw new ValidationException("You cannot view the specific Provider");
+    }
+
+    @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle get(String id, String catalogueId, Authentication auth) {
-        ProviderBundle providerBundle = get(id, catalogueId);
+        ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
+        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
+        if (providerBundle == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("Could not find provider with id: %s", id));
+        }
+        if (catalogueBundle == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("Could not find catalogue with id: %s", catalogueId));
+        }
+        if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
+            throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", id, catalogueId));
+        }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
@@ -1028,4 +1071,53 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
+    private void sortFields(ProviderBundle provider) {
+        if (provider.getProvider().getParticipatingCountries() != null && !provider.getProvider().getParticipatingCountries().isEmpty()){
+            provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+        }
+    }
+
+    private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
+        LoggingInfo loggingInfo;
+        if (catalogueId == null) {
+            // set catalogueId = eosc
+            provider.getProvider().setCatalogueId("eosc");
+            provider.setActive(false);
+            provider.setStatus(vocabularyService.get("pending provider").getId());
+            provider.setTemplateStatus(vocabularyService.get("no template status").getId());
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+        } else {
+            checkCatalogueIdConsistency(provider, catalogueId);
+            provider.setActive(true);
+            provider.setStatus(vocabularyService.get("approved provider").getId());
+            provider.setTemplateStatus(vocabularyService.get("approved template").getId());
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+        }
+
+        // create LoggingInfo
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        loggingInfoList.add(loggingInfo);
+        provider.setLoggingInfo(loggingInfoList);
+        // latestOnboardingInfo
+        provider.setLatestOnboardingInfo(loggingInfo);
+
+        return provider;
+    }
+
+    private void checkCatalogueIdConsistency(ProviderBundle provider, String catalogueId){
+        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
+        if (catalogueBundle == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("Could not find catalogue with id: %s", catalogueId));
+        }
+        if (provider.getProvider().getCatalogueId() == null || provider.getProvider().getCatalogueId().equals("")){
+            throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
+        } else{
+            if (!provider.getProvider().getCatalogueId().equals(catalogueId)){
+                throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
+            }
+        }
+    }
 }
