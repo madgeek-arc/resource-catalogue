@@ -1078,40 +1078,34 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
-        LoggingInfo loggingInfo;
+        // create LoggingInfo
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey()));
+        provider.setLoggingInfo(loggingInfoList);
         if (catalogueId == null) {
             // set catalogueId = eosc
             provider.getProvider().setCatalogueId("eosc");
             provider.setActive(false);
             provider.setStatus(vocabularyService.get("pending provider").getId());
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
         } else {
             checkCatalogueIdConsistency(provider, catalogueId);
             provider.setActive(true);
             provider.setStatus(vocabularyService.get("approved provider").getId());
             provider.setTemplateStatus(vocabularyService.get("approved template").getId());
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey()));
         }
 
-        // create LoggingInfo
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add(loggingInfo);
-        provider.setLoggingInfo(loggingInfoList);
         // latestOnboardingInfo
-        provider.setLatestOnboardingInfo(loggingInfo);
+        provider.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size()-1));
 
         return provider;
     }
 
     private void checkCatalogueIdConsistency(ProviderBundle provider, String catalogueId){
-        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        if (catalogueBundle == null) {
-            throw new eu.einfracentral.exception.ResourceNotFoundException(
-                    String.format("Could not find catalogue with id: %s", catalogueId));
-        }
+        catalogueService.existsOrElseThrow(catalogueId);
         if (provider.getProvider().getCatalogueId() == null || provider.getProvider().getCatalogueId().equals("")){
             throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
         } else{

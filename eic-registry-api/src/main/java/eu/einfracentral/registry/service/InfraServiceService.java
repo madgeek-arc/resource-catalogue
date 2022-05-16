@@ -26,6 +26,15 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     T addService(T service, Authentication auth);
 
     /**
+     * Method to add a new service from external catalogue.
+     * @param service
+     * @param catalogueId
+     * @param auth
+     * @return
+     */
+    T addService(T service, String catalogueId, Authentication auth);
+
+    /**
      * Method to update a service.
      *
      * @param service
@@ -35,6 +44,20 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @throws ResourceNotFoundException
      */
     T updateService(T service, String comment, Authentication auth) throws ResourceNotFoundException;
+
+    /**
+     * Method to update a service.
+     *
+     * @param service
+     * @param catalogueId
+     * @param comment
+     * @param auth
+     * @return
+     * @throws ResourceNotFoundException
+     */
+    T updateService(T service, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
+
+    InfraService getCatalogueService(String catalogueId, String serviceId, Authentication auth);
 
     /**
      * Returns the Service with the specified id and version.
@@ -209,8 +232,22 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
-
+    /**
+     *
+     * @param providerId
+     * @param auth
+     * @return
+     */
     List<InfraService> getInfraServices(String providerId, Authentication auth);
+
+    /**
+     *
+     * @param providerId
+     * @param catalogueId
+     * @param auth
+     * @return
+     */
+    Paging<InfraService> getInfraServices(String providerId, String catalogueId, Authentication auth);
 
     List<Service> getServices(String providerId, Authentication auth);
 

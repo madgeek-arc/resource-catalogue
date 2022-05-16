@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_CATALOGUES;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
-import static org.junit.Assert.assertTrue;
 
 @Service("catalogueManager")
 public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService<CatalogueBundle, Authentication> {
@@ -98,6 +97,15 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             return catalogueBundle;
         }
         throw new ValidationException("You cannot view the specific Catalogue");
+    }
+
+    @Override
+    public void existsOrElseThrow(String id) {
+        CatalogueBundle catalogueBundle = get(id);
+        if (catalogueBundle == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not find catalogue with id: %s", id));
+        }
     }
 
     @Override
