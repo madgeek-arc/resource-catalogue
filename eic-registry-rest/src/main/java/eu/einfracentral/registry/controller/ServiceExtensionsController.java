@@ -59,8 +59,10 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Creates a new Helpdesk.")
     @PostMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #helpdesk.services)")
-    public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk, @ApiIgnore Authentication auth) {
-        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk), auth);
+    public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
+                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                @ApiIgnore Authentication auth) {
+        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk), catalogueId, auth);
         logger.info("User '{}' added the Helpdesk with id '{}'", auth.getName(), helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
@@ -88,8 +90,10 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Creates a new Monitoring.")
     @PostMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #monitoring.services)")
-    public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring, @ApiIgnore Authentication auth) {
-        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring), auth);
+    public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring,
+                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                    @ApiIgnore Authentication auth) {
+        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring), catalogueId, auth);
         logger.info("User '{}' added the Monitoring with id '{}'", auth.getName(), monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }

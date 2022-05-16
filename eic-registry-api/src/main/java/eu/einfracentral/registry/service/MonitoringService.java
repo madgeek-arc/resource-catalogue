@@ -4,6 +4,5 @@ import org.springframework.security.core.Authentication;
 
 public interface MonitoringService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
-    @Override
-    T add(T monitoring, Authentication authentication);
+    T add(T monitoring, String catalogueId, Authentication authentication);
 }

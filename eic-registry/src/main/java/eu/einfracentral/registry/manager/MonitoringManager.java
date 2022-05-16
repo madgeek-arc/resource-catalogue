@@ -51,10 +51,10 @@ public class MonitoringManager<T extends Identifiable> extends ResourceManager<M
 
     @Override
     @CacheEvict(value = CACHE_MONITORINGS, allEntries = true)
-    public MonitoringBundle add(MonitoringBundle monitoring, Authentication auth) {
+    public MonitoringBundle add(MonitoringBundle monitoring, String catalogueId, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(monitoring.getMonitoring().getService(), monitoring.getCatalogueId());
+        serviceConsistency(monitoring.getMonitoring().getService(), catalogueId);
 
         // validate serviceType
         serviceTypeValidation(monitoring.getMonitoring());
@@ -71,6 +71,8 @@ public class MonitoringManager<T extends Identifiable> extends ResourceManager<M
         monitoring.setActive(true);
         // latestOnboardingInfo
         monitoring.setLatestOnboardingInfo(loggingInfo);
+        // catalogueId
+        monitoring.setCatalogueId(catalogueId);
 
         MonitoringBundle ret;
         ret = super.add(monitoring, null);
