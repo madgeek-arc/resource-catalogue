@@ -21,7 +21,7 @@ public class Provider implements Identifiable {
      * A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @ApiModelProperty(position = 1, required = true, example = "(required on PUT only)")
 //    @FieldValidation
     private String id;
 

@@ -16,7 +16,7 @@ import java.util.List;
 public class Monitoring implements Identifiable {
 
     @XmlElement()
-    @ApiModelProperty(position = 1, notes = "Monitoring ID")
+    @ApiModelProperty(position = 1, notes = "Monitoring ID", example = "(required on PUT only)")
     private String id;
 
     @XmlElement(required = true)
