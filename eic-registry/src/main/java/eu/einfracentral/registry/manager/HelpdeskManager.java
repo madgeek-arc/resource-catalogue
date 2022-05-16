@@ -47,10 +47,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     @Override
     @CacheEvict(value = CACHE_HELPDESKS, allEntries = true)
-    public HelpdeskBundle add(HelpdeskBundle helpdesk, Authentication auth) {
+    public HelpdeskBundle add(HelpdeskBundle helpdesk, String catalogueId, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(helpdesk.getHelpdesk().getServices(), helpdesk.getCatalogueId());
+        serviceConsistency(helpdesk.getHelpdesk().getServices(), catalogueId);
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -64,6 +64,8 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         helpdesk.setActive(true);
         // latestOnboardingInfo
         helpdesk.setLatestOnboardingInfo(loggingInfo);
+        // catalogueId
+        helpdesk.setCatalogueId(catalogueId);
 
         HelpdeskBundle ret;
         ret = super.add(helpdesk, null);
