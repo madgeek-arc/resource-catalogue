@@ -4,7 +4,9 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
@@ -37,20 +39,20 @@ import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateCategories;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
-import static org.junit.Assert.assertTrue;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
-    private final ResourceManager<ProviderBundle> resourceManager;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final Random randomNumberGenerator;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final DataSource dataSource;
     private final String columnsOfInterest = "infra_service_id, name, abbreviation, resource_organisation, resource_providers, subcategories," +
             "scientific_subdomains, access_types, access_modes, language_availabilities, geographical_availabilities, resource_geographic_locations," +
@@ -64,14 +66,15 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private VersionService versionService;
 
     @Autowired
-    public InfraServiceManager(@Qualifier("providerManager") ResourceManager<ProviderBundle> resourceManager,
+    public InfraServiceManager(ProviderService<ProviderBundle, Authentication> providerService,
                                Random randomNumberGenerator, IdCreator idCreator,
                                @Lazy FieldValidator fieldValidator,
                                @Lazy SecurityService securityService,
                                @Lazy RegistrationMailService registrationMailService,
-                               @Lazy VocabularyService vocabularyService, @Lazy DataSource dataSource) {
+                               @Lazy VocabularyService vocabularyService, @Lazy DataSource dataSource,
+                               CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(InfraService.class);
-        this.resourceManager = resourceManager; // for providers
+        this.providerService = providerService; // for providers
         this.randomNumberGenerator = randomNumberGenerator;
         this.idCreator = idCreator;
         this.fieldValidator = fieldValidator;
@@ -79,6 +82,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
+        this.catalogueService = catalogueService;
     }
 
     @Override
@@ -90,42 +94,58 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService addService(InfraService infraService, Authentication auth) {
+        return addService(infraService, null, auth);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public InfraService addService(InfraService infraService, String catalogueId, Authentication auth) {
+        if (catalogueId == null) { // add catalogue provider
+            infraService.getService().setCatalogueId("eosc");
+        } else { // add provider from external catalogue
+            checkCatalogueIdConsistency(infraService, catalogueId);
+        }
+
+        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), infraService.getService().getCatalogueId(), auth);
+        if (providerBundle == null) {
+            throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", infraService.getService().getResourceOrganisation(), infraService.getService().getCatalogueId()));
+        }
         // check if Provider is approved
-        if (!resourceManager.get(infraService.getService().getResourceOrganisation()).getStatus().equals(vocabularyService.get("approved provider").getId())){
+        if (!providerBundle.getStatus().equals("approved provider")){
             throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
                     infraService.getService().getResourceOrganisation()));
         }
 
+        // create ID if not exists
         if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
             String id = idCreator.createServiceId(infraService.getService());
             infraService.getService().setId(id);
         }
         validate(infraService);
 
-        if (resourceManager.get(infraService.getService().getResourceOrganisation()).getTemplateStatus().equals(vocabularyService.get("approved template").getId())){
-            infraService.setActive(true);
-        } else{
-            infraService.setActive(false);
-        }
+        boolean active = providerBundle
+                .getTemplateStatus()
+                .equals("approved template");
+        infraService.setActive(active);
         infraService.setLatest(true);
 
+        // create new Metadata if not exists
         if (infraService.getMetadata() == null) {
             infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add(loggingInfo);
 
         // latestOnboardingInfo
         infraService.setLatestOnboardingInfo(loggingInfo);
 
-        infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
-        infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
+        sortFields(infraService);
 
         // resource status & extra loggingInfo for Approval
-        ProviderBundle providerBundle = resourceManager.get(infraService.getService().getResourceOrganisation());
         if (providerBundle.getTemplateStatus().equals("approved template")){
             infraService.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
@@ -141,9 +161,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // LoggingInfo
         infraService.setLoggingInfo(loggingInfoList);
 
-        // catalogueId
-        infraService.getService().setCatalogueId("eosc");
-
         logger.info("Adding Service: {}", infraService);
         InfraService ret;
         ret = super.add(infraService, auth);
@@ -151,12 +168,28 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return ret;
     }
 
-    //    @Override
+    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
+        return updateService(infraService, null, comment, auth);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public InfraService updateService(InfraService infraService, String catalogueId, String comment, Authentication auth) {
         InfraService ret;
+
+        if (catalogueId == null) {
+            infraService.getService().setCatalogueId("eosc");
+        } else {
+            checkCatalogueIdConsistency(infraService, catalogueId);
+        }
+
+        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, infraService.getService().getId(), infraService.getService().getCatalogueId());
         validate(infraService);
+        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), infraService.getService().getCatalogueId(), auth);
         InfraService existingService;
 
         // if service version is empty set it null
@@ -201,20 +234,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // latestUpdateInfo
         infraService.setLatestUpdateInfo(loggingInfo);
         infraService.setActive(existingService.isActive());
-        infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
-        infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
+        sortFields(infraService);
 
         // set status
         infraService.setStatus(existingService.getStatus());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())){
-            ProviderBundle providerBundle = resourceManager.get(infraService.getService().getResourceOrganisation());
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())){
                 infraService.setStatus(vocabularyService.get("pending resource").getId());
                 infraService.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
-                resourceManager.update(providerBundle, auth);
+                providerService.update(providerBundle, infraService.getService().getCatalogueId(), auth);
             }
         }
 
@@ -266,6 +297,36 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         }
 
         return ret;
+    }
+
+    public InfraService getCatalogueService(String catalogueId, String serviceId, Authentication auth) {
+        InfraService infraService = get(serviceId, catalogueId);
+        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
+        if (infraService == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not find Service with id: %s", serviceId));
+        }
+        if (catalogueBundle == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not find Catalogue with id: %s", catalogueId));
+        }
+        if (!infraService.getService().getCatalogueId().equals(catalogueId)){
+            throw new ValidationException(String.format("Service with id [%s] does not belong to the catalogue with id [%s]", serviceId, catalogueId));
+        }
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            //TODO: userIsCatalogueAdmin -> transcationRollback error
+            // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+                    securityService.userIsServiceProviderAdmin(user, serviceId)) {
+                return infraService;
+            }
+        }
+        // else return the Service ONLY if it is active
+        if (infraService.getStatus().equals(vocabularyService.get("approved resource").getId())){
+            return infraService;
+        }
+        throw new ValidationException("You cannot view the specific Service");
     }
 
     @Override
@@ -341,7 +402,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
         }
         infraService.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = resourceManager.get(infraService.getService().getResourceOrganisation());
+        ProviderBundle resourceProvider = providerService.get(infraService.getService().getResourceOrganisation());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
@@ -389,7 +450,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 break;
         }
         logger.info("Verifying Resource: {}", infraService);
-        resourceManager.update(resourceProvider, auth);
+        try {
+            providerService.update(resourceProvider, auth);
+        } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
+        }
         return super.update(infraService, auth);
     }
 
@@ -409,7 +474,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providers = resourceManager.getAll(ff, null).getResults();
+        List<ProviderBundle> providers = providerService.getAll(ff, null).getResults();
         List<Service> featuredServices = new ArrayList<>();
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
@@ -456,7 +521,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ValidationException(String.format("You cannot activate this Resource, because it's Inactive with status = [%s]", service.getStatus()));
         }
 
-        ProviderBundle providerBundle = resourceManager.get(service.getService().getResourceOrganisation());
+        ProviderBundle providerBundle = providerService.get(service.getService().getResourceOrganisation());
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
@@ -495,7 +560,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         InfraService service = get(serviceId, "eosc");
-        LoggingInfo loggingInfo;
+        LoggingInfo loggingInfo; // TODO: extract method
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (service.getLoggingInfo() != null) {
             loggingInfoList = service.getLoggingInfo();
@@ -567,8 +632,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
+    public Paging<InfraService> getInfraServices(String providerId, String catalogueId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setQuantity(maxQuantity);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return this.getAll(ff, auth);
+    }
+
+    @Override
     public List<Service> getServices(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = resourceManager.get(providerId);
+        ProviderBundle providerBundle = providerService.get(providerId);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", "eosc");
@@ -675,16 +750,16 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth){
-        String providerId = resourceManager.get(get(resourceId).getService().getResourceOrganisation()).getId();
-        String providerName = resourceManager.get(get(resourceId).getService().getResourceOrganisation()).getProvider().getName();
+        String providerId = providerService.get(get(resourceId).getService().getResourceOrganisation()).getId();
+        String providerName = providerService.get(get(resourceId).getService().getResourceOrganisation()).getProvider().getName();
         logger.info(String.format("Mailing provider [%s]-[%s] for outdated Resources", providerId, providerName));
         registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
     public InfraService changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
         InfraService infraService = get(resourceId, "eosc");
-        ProviderBundle newProvider = resourceManager.get(newProviderId);
-        ProviderBundle oldProvider =  resourceManager.get(infraService.getService().getResourceOrganisation());
+        ProviderBundle newProvider = providerService.get(newProviderId);
+        ProviderBundle oldProvider =  providerService.get(infraService.getService().getResourceOrganisation());
 
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
@@ -725,6 +800,22 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService, auth);
 
         return infraService;
+    }
+
+    private void checkCatalogueIdConsistency(InfraService infraService, String catalogueId){
+        catalogueService.existsOrElseThrow(catalogueId);
+        if (infraService.getService().getCatalogueId() == null || infraService.getService().getCatalogueId().equals("")){
+            throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
+        } else{
+            if (!infraService.getService().getCatalogueId().equals(catalogueId)){
+                throw new ValidationException("Parameter 'catalogueId' and Service's 'catalogueId' don't match");
+            }
+        }
+    }
+
+    private void sortFields(InfraService infraService) {
+        infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
+        infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
     }
 
 }

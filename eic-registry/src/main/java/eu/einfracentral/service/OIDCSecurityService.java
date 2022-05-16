@@ -1,18 +1,15 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.CatalogueBundle;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.AbstractServiceManager;
 import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
@@ -40,6 +37,8 @@ public class OIDCSecurityService implements SecurityService {
     private final PendingProviderManager pendingProviderManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingResourceService<InfraService> pendingServiceManager;
+    private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
+    private final ResourceService<MonitoringBundle, Authentication> monitoringService;
     private OIDCAuthenticationToken adminAccess;
 
     @Value("${project.name:}")
@@ -51,12 +50,15 @@ public class OIDCSecurityService implements SecurityService {
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
                         InfraServiceService<InfraService, InfraService> infraServiceService,
-                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
+                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager,
+                        ResourceService<HelpdeskBundle, Authentication> helpdeskService, ResourceService<MonitoringBundle, Authentication> monitoringService) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.infraServiceService = infraServiceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
 
         // create admin access
         List<GrantedAuthority> roles = new ArrayList<>();
@@ -203,6 +205,26 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
+    public boolean isHelpdeskProviderAdmin(Authentication auth, String helpdeskId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        List<String> serviceIds = helpdeskService.get(helpdeskId).getHelpdesk().getServices();
+        return userIsServiceProviderAdmin(user, serviceIds);
+    }
+
+    @Override
+    public boolean isMonitoringProviderAdmin(Authentication auth, String monitoringId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        String serviceId = monitoringService.get(monitoringId).getMonitoring().getService();
+        return userIsServiceProviderAdmin(user, serviceId);
+    }
+
+    @Override
     public boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow) {
         if (auth == null && noThrow) {
             return false;
@@ -297,6 +319,35 @@ public class OIDCSecurityService implements SecurityService {
 //        List<String> allProviders = service.getService().getResourceProviders();
 //        allProviders.add(service.getService().getResourceOrganisation());
         List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
+        Optional<List<String>> providers = Optional.of(allProviders);
+        return providers
+                .get()
+                .stream()
+                .filter(Objects::nonNull)
+                .anyMatch(id -> userIsProviderAdmin(user, id));
+    }
+
+    @Override
+    public boolean userIsServiceProviderAdmin(@NotNull User user, List<String> serviceIds) {
+        InfraService service;
+        List<String> allProviders = new ArrayList<>();
+        for (String serviceId : serviceIds){
+            try {
+                service = infraServiceService.get(serviceId);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                try {
+                    service = pendingServiceManager.get(serviceId);
+                } catch (RuntimeException re) {
+                    return false;
+                }
+            } catch (RuntimeException e) {
+                return false;
+            }
+            if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
+                throw new ValidationException("Service has no Service Organisation");
+            }
+            allProviders.addAll(Collections.singletonList(service.getService().getResourceOrganisation()));
+        }
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()

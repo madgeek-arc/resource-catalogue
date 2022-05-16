@@ -9,11 +9,16 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface CatalogueService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
-    //SECTION: CATALOGUE
     T get(String id, U auth);
+
+    /**
+     * @param id
+     */
+    void existsOrElseThrow(String id);
 
     @Override
     T add(T catalogue, Authentication authentication);

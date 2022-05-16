@@ -55,7 +55,7 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
                 Service.class, User.class, InfraService.class, VocabularyCuration.class, VocabularyEntryRequest.class,
                 RangeValue.class, Vocabulary.class, ProviderMainContact.class, ProviderPublicContact.class,
                 ServiceMainContact.class, ServicePublicContact.class, ProviderLocation.class, ProviderRequest.class, ProviderBundle.class,
-                Helpdesk.class, Monitoring.class);
+                Helpdesk.class, Monitoring.class, HelpdeskBundle.class, MonitoringBundle.class);
 
     }
 
