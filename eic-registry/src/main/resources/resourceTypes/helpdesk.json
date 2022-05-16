@@ -16,13 +16,6 @@
     },
     {
       "multivalued": false,
-      "name": "catalogue_id",
-      "label": "Catalogue ID",
-      "path": "//*[local-name()='catalogueId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "helpdesk_type",
       "label": "Helpdesk Type",
       "path": "//*[local-name()='helpdeskType']/text()",
@@ -76,6 +69,13 @@
       "label": "Webform",
       "path": "//*[local-name()='webform']/text()",
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,

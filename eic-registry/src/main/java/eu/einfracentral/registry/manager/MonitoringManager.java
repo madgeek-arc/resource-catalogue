@@ -4,8 +4,8 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +26,7 @@ import java.util.UUID;
 import static eu.einfracentral.config.CacheConfig.CACHE_MONITORINGS;
 
 @org.springframework.stereotype.Service("monitoringManager")
-public class MonitoringManager<T extends Identifiable> extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
+public class MonitoringManager extends ResourceManager<MonitoringBundle> implements ResourceService<MonitoringBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
@@ -54,7 +54,7 @@ public class MonitoringManager<T extends Identifiable> extends ResourceManager<M
     public MonitoringBundle add(MonitoringBundle monitoring, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(monitoring.getMonitoring().getService(), monitoring.getMonitoring().getCatalogueId());
+        serviceConsistency(monitoring.getMonitoring().getService(), monitoring.getCatalogueId());
 
         // validate serviceType
         serviceTypeValidation(monitoring.getMonitoring());

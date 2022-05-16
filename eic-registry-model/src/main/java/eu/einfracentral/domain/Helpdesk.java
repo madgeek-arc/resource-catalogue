@@ -24,56 +24,50 @@ public class Helpdesk implements Identifiable {
     private List<String> services;
 
     @XmlElement
-    @ApiModelProperty(position = 3, notes = "Catalogue ID")
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
-    private String catalogueId;
-
-    @XmlElement
-    @ApiModelProperty(position = 4, notes = "Unique identifier of the helpdesk type")
+    @ApiModelProperty(position = 3, notes = "Unique identifier of the helpdesk type")
     private String helpdeskType;
 
     @XmlElementWrapper(name = "supportGroups")
     @XmlElement(name = "supportGroup")
-    @ApiModelProperty(position = 5, notes = "Support group to be created in the helpdesk for the provider")
+    @ApiModelProperty(position = 4, notes = "Support group to be created in the helpdesk for the provider")
     private List<String> supportGroups;
 
     @XmlElement
-    @ApiModelProperty(position = 6, notes = "Name of organisation")
+    @ApiModelProperty(position = 5, notes = "Name of organisation")
     @FieldValidation(nullable = true)
     private String organisation;
 
     @XmlElementWrapper(name = "emails")
     @XmlElement(name = "email")
-    @ApiModelProperty(position = 7, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
+    @ApiModelProperty(position = 6, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
     private List<String> emails;
 
     @XmlElementWrapper(name = "agents")
     @XmlElement(name = "agent")
-    @ApiModelProperty(position = 8, notes = "Person involved in ticket management")
+    @ApiModelProperty(position = 7, notes = "Person involved in ticket management")
     private List<String> agents;
 
     @XmlElementWrapper(name = "signatures")
     @XmlElement(name = "signature")
-    @ApiModelProperty(position = 9, notes = "Automatic signature to be used in the answers to the tickets")
+    @ApiModelProperty(position = 8, notes = "Automatic signature to be used in the answers to the tickets")
     @FieldValidation(nullable = true)
     private List<String> signatures;
 
     @XmlElement
-    @ApiModelProperty(position = 10, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
+    @ApiModelProperty(position = 9, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
     @FieldValidation(nullable = true)
     private Boolean ticketPreservation;
 
     @XmlElement
-    @ApiModelProperty(position = 11, notes = "Webform required to generate ticket directly on webpage")
+    @ApiModelProperty(position = 10, notes = "Webform required to generate ticket directly on webpage")
     @FieldValidation(nullable = true)
     private Boolean webform;
 
     public Helpdesk() {}
 
-    public Helpdesk(String id, List<String> services, String catalogueId, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
+    public Helpdesk(String id, List<String> services, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
         this.id = id;
         this.services = services;
-        this.catalogueId = catalogueId;
         this.helpdeskType = helpdeskType;
         this.supportGroups = supportGroups;
         this.organisation = organisation;
@@ -117,7 +111,6 @@ public class Helpdesk implements Identifiable {
         return "Helpdesk{" +
                 "id='" + id + '\'' +
                 ", services=" + services +
-                ", catalogueId='" + catalogueId + '\'' +
                 ", helpdeskType='" + helpdeskType + '\'' +
                 ", supportGroups=" + supportGroups +
                 ", organisation='" + organisation + '\'' +
@@ -145,14 +138,6 @@ public class Helpdesk implements Identifiable {
 
     public void setServices(List<String> services) {
         this.services = services;
-    }
-
-    public String getCatalogueId() {
-        return catalogueId;
-    }
-
-    public void setCatalogueId(String catalogueId) {
-        this.catalogueId = catalogueId;
     }
 
     public String getHelpdeskType() {
