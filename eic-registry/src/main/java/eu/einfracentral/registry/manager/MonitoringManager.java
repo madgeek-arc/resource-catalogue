@@ -54,7 +54,7 @@ public class MonitoringManager<T extends Identifiable> extends ResourceManager<M
     public MonitoringBundle add(MonitoringBundle monitoring, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(monitoring.getMonitoring().getService(), monitoring.getMonitoring().getCatalogueId());
+        serviceConsistency(monitoring.getMonitoring().getService(), monitoring.getCatalogueId());
 
         // validate serviceType
         serviceTypeValidation(monitoring.getMonitoring());

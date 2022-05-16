@@ -50,7 +50,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public HelpdeskBundle add(HelpdeskBundle helpdesk, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(helpdesk.getHelpdesk().getServices(), helpdesk.getHelpdesk().getCatalogueId());
+        serviceConsistency(helpdesk.getHelpdesk().getServices(), helpdesk.getCatalogueId());
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
