@@ -15,7 +15,7 @@ import java.util.List;
 public class Helpdesk implements Identifiable {
 
     @XmlElement
-    @ApiModelProperty(position = 1, notes = "Monitoring ID")
+    @ApiModelProperty(position = 1, notes = "Monitoring ID", example = "(required on PUT only)")
     private String id;
 
     @XmlElementWrapper(name = "services")
@@ -107,7 +107,8 @@ public class Helpdesk implements Identifiable {
             return Arrays.stream(Helpdesk.HelpdeskType.values())
                     .filter(v -> v.helpdeskType.equals(s))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown value [%s] found in field 'helpdeskType'", s)));
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown value [%s] found in field 'helpdeskType'. " +
+                            "Available values: ['full integration', 'ticket redirection' and 'direct usage']", s)));
         }
     }
 

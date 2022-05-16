@@ -5,6 +5,7 @@ import eu.einfracentral.domain.User;
 import org.springframework.security.core.Authentication;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public interface SecurityService {
 
@@ -43,6 +44,12 @@ public interface SecurityService {
     boolean userIsServiceProviderAdmin(User user, InfraService infraService);
 
     boolean userIsServiceProviderAdmin(User user, String serviceId);
+
+    boolean userIsServiceProviderAdmin(User user, List<String> serviceId);
+
+    boolean isHelpdeskProviderAdmin(Authentication auth, String helpdeskId);
+
+    boolean isMonitoringProviderAdmin(Authentication auth, String monitoringId);
 
     boolean providerCanAddServices(Authentication auth, InfraService service);
 
