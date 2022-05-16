@@ -1122,7 +1122,6 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
       <xs:element minOccurs="0" name="emails">
         <xs:complexType>
           <xs:sequence>
@@ -1163,6 +1162,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
     <xs:complexContent>
       <xs:extension base="tns:bundle">
         <xs:sequence>
+          <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
           <xs:element minOccurs="0" ref="tns:helpdesk"/>
         </xs:sequence>
       </xs:extension>
@@ -1183,7 +1183,6 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
 
   <xs:complexType name="monitoring">
     <xs:sequence>
-      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
       <xs:element minOccurs="0" name="id" type="xs:string"/>
       <xs:element minOccurs="0" name="metrics">
         <xs:complexType>
@@ -1222,6 +1221,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
     <xs:complexContent>
       <xs:extension base="tns:bundle">
         <xs:sequence>
+          <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
           <xs:element minOccurs="0" ref="tns:monitoring"/>
         </xs:sequence>
       </xs:extension>
