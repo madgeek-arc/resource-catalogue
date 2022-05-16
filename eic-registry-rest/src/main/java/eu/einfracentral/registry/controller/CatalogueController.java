@@ -3,7 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.CatalogueServiceService;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -33,15 +33,15 @@ public class CatalogueController {
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
-    private final CatalogueServiceService<InfraService, Authentication> catalogueServiceManager;
+    private final InfraServiceService<InfraService, Authentication> infraServiceService;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
-                        CatalogueServiceService<InfraService, Authentication> catalogueServiceManager) {
+                        InfraServiceService<InfraService, Authentication> infraServiceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
-        this.catalogueServiceManager = catalogueServiceManager;
+        this.infraServiceService = infraServiceService;
     }
 
     //SECTION: CATALOGUE
@@ -305,7 +305,7 @@ public class CatalogueController {
     @ApiOperation(value = "Returns the Resource of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-        Service resource = catalogueServiceManager.getCatalogueService(catalogueId, resourceId, auth).getService();
+        Service resource = infraServiceService.getCatalogueService(catalogueId, resourceId, auth).getService();
         if (resource.getCatalogueId() == null){
             throw new ValidationException("Service's catalogueId cannot be null");
         } else {
@@ -321,7 +321,7 @@ public class CatalogueController {
     @PostMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
-        InfraService ret = this.catalogueServiceManager.addCatalogueService(new InfraService(service), catalogueId, auth);
+        InfraService ret = this.infraServiceService.addService(new InfraService(service), catalogueId, auth);
         logger.info("User '{}' added the Service with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
@@ -330,7 +330,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth,#service)")
     @PutMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService ret = this.catalogueServiceManager.updateCatalogueService(new InfraService(service), catalogueId, comment, auth);
+        InfraService ret = this.infraServiceService.updateService(new InfraService(service), catalogueId, comment, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
@@ -339,7 +339,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<InfraService>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
-        Paging<InfraService> infraServices = catalogueServiceManager.getProviderServices(catalogueId, providerId, auth);
+        Paging<InfraService> infraServices = infraServiceService.getInfraServices(catalogueId, providerId, auth);
         return new ResponseEntity<>(infraServices, HttpStatus.OK);
     }
 }
