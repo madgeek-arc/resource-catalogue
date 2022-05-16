@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -8,11 +10,21 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class MonitoringBundle extends Bundle<Monitoring> {
 
+    @XmlElement
+    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
     public MonitoringBundle() {
     }
 
     public MonitoringBundle(Monitoring monitoring) {
         this.setMonitoring(monitoring);
+        this.setMetadata(null);
+    }
+
+    public MonitoringBundle(Monitoring monitoring, String catalogueId) {
+        this.setMonitoring(monitoring);
+        this.catalogueId = catalogueId;
         this.setMetadata(null);
     }
 
@@ -28,5 +40,13 @@ public class MonitoringBundle extends Bundle<Monitoring> {
 
     public void setMonitoring(Monitoring monitoring) {
         this.setPayload(monitoring);
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
     }
 }

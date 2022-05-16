@@ -4,14 +4,12 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.AbstractServiceManager;
 import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
@@ -39,8 +37,8 @@ public class OIDCSecurityService implements SecurityService {
     private final PendingProviderManager pendingProviderManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingResourceService<InfraService> pendingServiceManager;
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
+    private final ResourceService<MonitoringBundle, Authentication> monitoringService;
     private OIDCAuthenticationToken adminAccess;
 
     @Value("${project.name:}")
@@ -53,7 +51,7 @@ public class OIDCSecurityService implements SecurityService {
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
                         InfraServiceService<InfraService, InfraService> infraServiceService,
                         PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager,
-                        HelpdeskService<HelpdeskBundle, Authentication> helpdeskService, MonitoringService<MonitoringBundle, Authentication> monitoringService) {
+                        ResourceService<HelpdeskBundle, Authentication> helpdeskService, ResourceService<MonitoringBundle, Authentication> monitoringService) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.infraServiceService = infraServiceService;

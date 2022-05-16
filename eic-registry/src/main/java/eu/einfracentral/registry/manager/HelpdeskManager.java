@@ -3,13 +3,14 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
@@ -22,7 +23,7 @@ import java.util.UUID;
 import static eu.einfracentral.config.CacheConfig.*;
 
 @org.springframework.stereotype.Service("helpdeskManager")
-public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService<HelpdeskBundle, Authentication> {
+public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements ResourceService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
@@ -30,6 +31,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
 
+    @Autowired
     public HelpdeskManager(InfraServiceService<InfraService, InfraService> infraServiceService,
                            ProviderService<ProviderBundle, Authentication> providerService,
                            JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService) {
@@ -50,7 +52,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public HelpdeskBundle add(HelpdeskBundle helpdesk, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(helpdesk.getHelpdesk().getServices(), helpdesk.getHelpdesk().getCatalogueId());
+        serviceConsistency(helpdesk.getHelpdesk().getServices(), helpdesk.getCatalogueId());
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -65,14 +67,13 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         // latestOnboardingInfo
         helpdesk.setLatestOnboardingInfo(loggingInfo);
 
-        HelpdeskBundle ret;
-        ret = super.add(helpdesk, null);
+        super.add(helpdesk, null);
         logger.debug("Adding Helpdesk: {}", helpdesk);
 
         //TODO: send emails
         jmsTopicTemplate.convertAndSend("helpdesk.create", helpdesk);
 
-        return ret;
+        return helpdesk;
     }
 
     @Override
