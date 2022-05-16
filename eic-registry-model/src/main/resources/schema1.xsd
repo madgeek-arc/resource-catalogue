@@ -19,6 +19,8 @@
 
   <xs:element name="helpdesk" type="tns:helpdesk"/>
 
+  <xs:element name="helpdeskBundle" type="tns:helpdeskBundle"/>
+
   <xs:element name="identifier" type="tns:identifier"/>
 
   <xs:element name="infraService" type="tns:infraService"/>
@@ -30,6 +32,8 @@
   <xs:element name="migrationStatus" type="tns:migrationStatus"/>
 
   <xs:element name="monitoring" type="tns:monitoring"/>
+
+  <xs:element name="monitoringBundle" type="tns:monitoringBundle"/>
 
   <xs:element name="monitoringGroup" type="tns:monitoringGroup"/>
 
@@ -1155,6 +1159,16 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="helpdeskBundle">
+    <xs:complexContent>
+      <xs:extension base="tns:bundle">
+        <xs:sequence>
+          <xs:element minOccurs="0" ref="tns:helpdesk"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="infraService">
     <xs:complexContent>
       <xs:extension base="tns:bundle">
@@ -1202,6 +1216,16 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       <xs:element name="endpoint" type="xs:anyURI"/>
       <xs:element name="serviceType" type="xs:string"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="monitoringBundle">
+    <xs:complexContent>
+      <xs:extension base="tns:bundle">
+        <xs:sequence>
+          <xs:element minOccurs="0" ref="tns:monitoring"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="provider">
