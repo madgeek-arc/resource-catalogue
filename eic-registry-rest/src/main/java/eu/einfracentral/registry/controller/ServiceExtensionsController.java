@@ -1,8 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.registry.service.HelpdeskService;
-import eu.einfracentral.registry.service.MonitoringService;
+import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.validators.HelpdeskValidator;
 import eu.einfracentral.validators.MonitoringValidator;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -28,8 +27,8 @@ import javax.validation.Valid;
 public class ServiceExtensionsController {
 
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
+    private final ResourceService<MonitoringBundle, Authentication> monitoringService;
 
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
@@ -42,7 +41,7 @@ public class ServiceExtensionsController {
     }
 
     @Autowired
-    ServiceExtensionsController(HelpdeskService<HelpdeskBundle, Authentication> helpdeskService, MonitoringService<MonitoringBundle, Authentication> monitoringService) {
+    ServiceExtensionsController(ResourceService<HelpdeskBundle, Authentication> helpdeskService, ResourceService<MonitoringBundle, Authentication> monitoringService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
     }
@@ -62,7 +61,7 @@ public class ServiceExtensionsController {
     public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                 @ApiIgnore Authentication auth) {
-        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk), catalogueId, auth);
+        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), auth);
         logger.info("User '{}' added the Helpdesk with id '{}'", auth.getName(), helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
@@ -93,7 +92,7 @@ public class ServiceExtensionsController {
     public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                     @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                     @ApiIgnore Authentication auth) {
-        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring), catalogueId, auth);
+        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), auth);
         logger.info("User '{}' added the Monitoring with id '{}'", auth.getName(), monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }

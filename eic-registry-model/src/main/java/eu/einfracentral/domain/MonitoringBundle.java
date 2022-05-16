@@ -22,6 +22,12 @@ public class MonitoringBundle extends Bundle<Monitoring> {
         this.setMetadata(null);
     }
 
+    public MonitoringBundle(Monitoring monitoring, String catalogueId) {
+        this.setMonitoring(monitoring);
+        this.catalogueId = catalogueId;
+        this.setMetadata(null);
+    }
+
     public MonitoringBundle(Monitoring monitoring, Metadata metadata) {
         this.setMonitoring(monitoring);
         this.setMetadata(metadata);
