@@ -1,7 +1,6 @@
 package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -20,6 +19,12 @@ public class HelpdeskBundle extends Bundle<Helpdesk>{
 
     public HelpdeskBundle(Helpdesk helpdesk) {
         this.setHelpdesk(helpdesk);
+        this.setMetadata(null);
+    }
+
+    public HelpdeskBundle(Helpdesk helpdesk, String catalogueId) {
+        this.setHelpdesk(helpdesk);
+        this.catalogueId = catalogueId;
         this.setMetadata(null);
     }
 
