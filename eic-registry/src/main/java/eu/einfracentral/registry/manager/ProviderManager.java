@@ -416,7 +416,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        ProviderBundle provider = get(id, "eosc");
+        ProviderBundle provider = get(id, "eosc", auth);
         provider.setStatus(vocabularyService.get(status).getId());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -721,7 +721,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId, "eosc");
+        ProviderBundle providerBundle = get(providerId, "eosc", auth);
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
