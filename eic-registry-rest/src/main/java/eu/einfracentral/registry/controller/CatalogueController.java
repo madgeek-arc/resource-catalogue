@@ -33,12 +33,12 @@ public class CatalogueController {
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
-    private final InfraServiceService<InfraService, Authentication> infraServiceService;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
-                        InfraServiceService<InfraService, Authentication> infraServiceService) {
+                        InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.infraServiceService = infraServiceService;

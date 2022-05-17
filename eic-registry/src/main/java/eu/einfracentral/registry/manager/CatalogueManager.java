@@ -50,9 +50,11 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             "scientific_subdomains, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
     @Autowired
-    public CatalogueManager(@Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                            IdCreator idCreator, JmsTemplate jmsTopicTemplate, ProviderService<ProviderBundle, Authentication> providerService,
-                            FieldValidator fieldValidator, DataSource dataSource, @Lazy RegistrationMailService registrationMailService) {
+    public CatalogueManager(IdCreator idCreator, JmsTemplate jmsTopicTemplate, DataSource dataSource,
+                            @Lazy FieldValidator fieldValidator,
+                            @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                            @Lazy ProviderService<ProviderBundle, Authentication> providerService,
+                            @Lazy RegistrationMailService registrationMailService) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
