@@ -172,7 +172,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
-        return updateService(infraService, null, comment, auth);
+        return updateService(infraService, infraService.getService().getCatalogueId(), comment, auth);
     }
 
     @Override

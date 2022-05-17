@@ -288,7 +288,7 @@ public class CatalogueController {
         if (comment == null || comment.equals("")) {
             comment = "no comment";
         }
-        providerBundle = providerManager.update(providerBundle, catalogueId, comment, auth);
+        providerBundle = providerManager.update(providerBundle, comment, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), catalogueId);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }

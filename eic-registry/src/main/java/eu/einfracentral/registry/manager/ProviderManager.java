@@ -129,14 +129,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     //    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, String comment, Authentication auth) {
-        return update(provider, null, comment, auth);
+        return update(provider, provider.getProvider().getCatalogueId(), comment, auth);
     }
 
     //    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
-        checkCatalogueIdConsistency(provider, catalogueId);
+
+        if (catalogueId == null) {
+            provider.getProvider().setCatalogueId("eosc");
+        } else {
+            checkCatalogueIdConsistency(provider, catalogueId);
+        }
+
         validate(provider);
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
