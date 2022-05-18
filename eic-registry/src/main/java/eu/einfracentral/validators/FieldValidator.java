@@ -108,7 +108,7 @@ public class FieldValidator {
     private void validatePhone(Field field, Object o, PhoneValidation annotation) throws IllegalAccessException {
         field.setAccessible(true);
         o = field.get(o);
-        if (annotation.nullable() && o == null) {
+        if (annotation.nullable() && (o == null || o.equals(""))) {
             return;
         } else if (o == null) {
             throw new ValidationException(String.format(MANDATORY_FIELD, getCurrentLocation()));
@@ -122,7 +122,7 @@ public class FieldValidator {
     private void validateEmail(Field field, Object o, EmailValidation annotation) throws IllegalAccessException {
         field.setAccessible(true);
         o = field.get(o);
-        if (annotation.nullable() && o == null) {
+        if (annotation.nullable() && (o == null || o.equals(""))) {
             return;
         } else if (o == null) {
             throw new ValidationException(String.format(MANDATORY_FIELD, getCurrentLocation()));
