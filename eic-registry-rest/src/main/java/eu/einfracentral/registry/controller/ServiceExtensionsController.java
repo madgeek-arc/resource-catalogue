@@ -55,6 +55,16 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
+//    @ApiOperation(value = "Returns the Helpdesk of the given Service of the given Catalogue.")
+//    @GetMapping(path = "/helpdesk/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isHelpdeskProviderAdmin(#auth, #id)")
+//    public ResponseEntity<Helpdesk> getHelpdesk(@PathVariable("serviceId") String serviceId,
+//                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+//                                                @ApiIgnore Authentication auth) {
+//        Helpdesk helpdesk = helpdeskService.getCatalogueServiceHelpdesk(serviceId, catalogueId).getHelpdesk();
+//        return new ResponseEntity<>(helpdesk, HttpStatus.OK);
+//    }
+
     @ApiOperation(value = "Creates a new Helpdesk.")
     @PostMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #helpdesk.services)")
