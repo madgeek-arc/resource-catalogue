@@ -8,7 +8,6 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,6 +103,12 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         helpdesk.setActive(ex.isActive());
         existing.setPayload(serialize(helpdesk));
         existing.setResourceType(resourceType);
+
+        // block user from updating serviceId
+        if (!helpdesk.getHelpdesk().getServiceId().equals(ex.getHelpdesk().getServiceId())){
+            throw new ValidationException("You cannot change the Service Id with which this Helpdesk is related");
+        }
+
         resourceService.updateResource(existing);
         logger.debug("Updating Helpdesk: {}", helpdesk);
 

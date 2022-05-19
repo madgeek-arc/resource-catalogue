@@ -109,6 +109,12 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         monitoring.setActive(ex.isActive());
         existing.setPayload(serialize(monitoring));
         existing.setResourceType(resourceType);
+
+        // block user from updating serviceId
+        if (!monitoring.getMonitoring().getServiceId().equals(ex.getMonitoring().getServiceId())){
+            throw new ValidationException("You cannot change the Service Id with which this Monitoring is related");
+        }
+
         resourceService.updateResource(existing);
         logger.debug("Updating Monitoring: {}", monitoring);
 
