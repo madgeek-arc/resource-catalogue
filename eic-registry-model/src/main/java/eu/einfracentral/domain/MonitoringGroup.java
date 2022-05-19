@@ -35,16 +35,18 @@ public class MonitoringGroup {
     public MonitoringGroup() {
     }
 
-    public MonitoringGroup(String serviceType, String endpoint) {
+    public MonitoringGroup(String serviceType, String endpoint, List<Metric> metrics) {
         this.serviceType = serviceType;
         this.endpoint = endpoint;
+        this.metrics = metrics;
     }
 
     @Override
     public String toString() {
         return "MonitoringGroup{" +
                 "serviceType='" + serviceType + '\'' +
-                ", endpoint=" + endpoint +
+                ", endpoint='" + endpoint + '\'' +
+                ", metrics=" + metrics +
                 '}';
     }
 
@@ -62,5 +64,13 @@ public class MonitoringGroup {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public List<Metric> getMetrics() {
+        return metrics;
+    }
+
+    public void setMetrics(List<Metric> metrics) {
+        this.metrics = metrics;
     }
 }
