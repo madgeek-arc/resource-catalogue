@@ -29,6 +29,8 @@
     
   <xs:element name="metadata" type="tns:metadata"/>
     
+  <xs:element name="metric" type="tns:metric"/>
+    
   <xs:element name="migrationStatus" type="tns:migrationStatus"/>
     
   <xs:element name="monitoring" type="tns:monitoring"/>
@@ -2007,25 +2009,23 @@ c) list of customers, communities, users, etc. using the Resource.]]>
       
   </xs:complexType>
     
+  <xs:complexType name="metric">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="metric" type="xs:anyURI"/>
+            
+      <xs:element minOccurs="0" name="probe" type="xs:anyURI"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
   <xs:complexType name="monitoring">
         
     <xs:sequence>
             
       <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="metrics">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="metric" type="xs:anyURI"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
             
       <xs:element name="monitoredBy" type="xs:string"/>
             
@@ -2043,20 +2043,6 @@ c) list of customers, communities, users, etc. using the Resource.]]>
               
       </xs:element>
             
-      <xs:element minOccurs="0" name="probes">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="probe" type="xs:anyURI"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
       <xs:element name="serviceId" type="xs:string"/>
           
     </xs:sequence>
@@ -2067,7 +2053,21 @@ c) list of customers, communities, users, etc. using the Resource.]]>
         
     <xs:sequence>
             
-      <xs:element name="endpoint" type="xs:anyURI"/>
+      <xs:element name="endpoint" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="metrics">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:metric"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
             
       <xs:element name="serviceType" type="xs:string"/>
           

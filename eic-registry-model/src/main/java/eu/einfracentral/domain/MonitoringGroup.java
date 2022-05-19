@@ -5,9 +5,11 @@ import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
+import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -22,12 +24,18 @@ public class MonitoringGroup {
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Url of the endpoint of the service", required = true)
     @FieldValidation
-    private URL endpoint;
+    private String endpoint;
+
+    @XmlElementWrapper(name = "metrics")
+    @XmlElement(name = "metric")
+    @ApiModelProperty(position = 3)
+    @FieldValidation(nullable = true)
+    private List<Metric> metrics;
 
     public MonitoringGroup() {
     }
 
-    public MonitoringGroup(String serviceType, URL endpoint) {
+    public MonitoringGroup(String serviceType, String endpoint) {
         this.serviceType = serviceType;
         this.endpoint = endpoint;
     }
@@ -48,11 +56,11 @@ public class MonitoringGroup {
         this.serviceType = serviceType;
     }
 
-    public URL getEndpoint() {
+    public String getEndpoint() {
         return endpoint;
     }
 
-    public void setEndpoint(URL endpoint) {
+    public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
     }
 }

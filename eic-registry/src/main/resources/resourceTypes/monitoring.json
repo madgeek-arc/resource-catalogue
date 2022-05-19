@@ -22,10 +22,17 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
+      "multivalued": false,
       "name": "service_type",
       "label": "Service Type",
       "path": "//*[local-name()='monitoringGroups']/*[local-name()='serviceType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "endpoint",
+      "label": "Endpoint",
+      "path": "//*[local-name()='monitoringGroups']/*[local-name()='endpoint']/text()",
       "type": "java.lang.String"
     },
     {
