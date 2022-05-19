@@ -1,9 +1,11 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.validators.HelpdeskValidator;
 import eu.einfracentral.validators.MonitoringValidator;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("service-extensions")
@@ -29,6 +32,7 @@ public class ServiceExtensionsController {
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
     private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
     private final ResourceService<MonitoringBundle, Authentication> monitoringService;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
@@ -41,9 +45,11 @@ public class ServiceExtensionsController {
     }
 
     @Autowired
-    ServiceExtensionsController(ResourceService<HelpdeskBundle, Authentication> helpdeskService, ResourceService<MonitoringBundle, Authentication> monitoringService) {
+    ServiceExtensionsController(ResourceService<HelpdeskBundle, Authentication> helpdeskService, ResourceService<MonitoringBundle, Authentication> monitoringService,
+                                InfraServiceService<InfraService, InfraService> infraServiceService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.infraServiceService = infraServiceService;
     }
 
     //SECTION: HELPDESK
@@ -55,15 +61,22 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Returns the Helpdesk of the given Service of the given Catalogue.")
-//    @GetMapping(path = "/helpdesk/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isHelpdeskProviderAdmin(#auth, #id)")
-//    public ResponseEntity<Helpdesk> getHelpdesk(@PathVariable("serviceId") String serviceId,
-//                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-//                                                @ApiIgnore Authentication auth) {
-//        Helpdesk helpdesk = helpdeskService.getCatalogueServiceHelpdesk(serviceId, catalogueId).getHelpdesk();
-//        return new ResponseEntity<>(helpdesk, HttpStatus.OK);
-//    }
+    @ApiOperation(value = "Returns the Helpdesk of the given Service of the given Catalogue.")
+    @GetMapping(path = "/helpdesk/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isHelpdeskProviderAdmin(#auth, #id)")
+    public ResponseEntity<HelpdeskBundle> getHelpdeskByServiceId(@PathVariable("serviceId") String serviceId,
+                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
+        for (HelpdeskBundle helpdesk : allHelpdesks){
+            if (helpdesk.getCatalogueId().equals(catalogueId) && helpdesk.getHelpdesk().getServiceId().equals(serviceId)){
+                return new ResponseEntity<>(helpdesk, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     @ApiOperation(value = "Creates a new Helpdesk.")
     @PostMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -94,6 +107,23 @@ public class ServiceExtensionsController {
     public ResponseEntity<Monitoring> getMonitoring(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         Monitoring monitoring = monitoringService.get(id).getMonitoring();
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Returns the Monitoring of the given Service of the given Catalogue.")
+    @GetMapping(path = "/monitoring/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isMonitoringProviderAdmin(#auth, #id)")
+    public ResponseEntity<MonitoringBundle> getMonitoringByServiceId(@PathVariable("serviceId") String serviceId,
+                                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                 @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
+        for (MonitoringBundle monitoring : allMonitorings){
+            if (monitoring.getCatalogueId().equals(catalogueId) && monitoring.getMonitoring().getServiceId().equals(serviceId)){
+                return new ResponseEntity<>(monitoring, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @ApiOperation(value = "Creates a new Monitoring.")

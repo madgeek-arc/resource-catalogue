@@ -1913,6 +1913,8 @@ c) list of customers, communities, users, etc. using the Resource.]]>
             
       <xs:element minOccurs="0" name="organisation" type="xs:string"/>
             
+      <xs:element name="serviceId" type="xs:string"/>
+            
       <xs:element minOccurs="0" name="services">
                 
         <xs:complexType>
@@ -2055,7 +2057,7 @@ c) list of customers, communities, users, etc. using the Resource.]]>
               
       </xs:element>
             
-      <xs:element name="service" type="xs:string"/>
+      <xs:element name="serviceId" type="xs:string"/>
           
     </xs:sequence>
       

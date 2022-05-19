@@ -22,7 +22,7 @@ public class Monitoring implements Identifiable {
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Service ID", required = true)
     @FieldValidation(containsId = true, idClass = Service.class)
-    private String service;
+    private String serviceId;
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, notes = "Who is responsible for the monitoring of this Service", required = true)
@@ -50,9 +50,9 @@ public class Monitoring implements Identifiable {
 
     public Monitoring() {}
 
-    public Monitoring(String id, String service, String monitoredBy, List<MonitoringGroup> monitoringGroups, List<URL> probes, List<URL> metrics) {
+    public Monitoring(String id, String serviceId, String monitoredBy, List<MonitoringGroup> monitoringGroups, List<URL> probes, List<URL> metrics) {
         this.id = id;
-        this.service = service;
+        this.serviceId = serviceId;
         this.monitoredBy = monitoredBy;
         this.monitoringGroups = monitoringGroups;
         this.probes = probes;
@@ -63,7 +63,7 @@ public class Monitoring implements Identifiable {
     public String toString() {
         return "Monitoring{" +
                 "id='" + id + '\'' +
-                ", service='" + service + '\'' +
+                ", serviceId='" + serviceId + '\'' +
                 ", monitoredBy='" + monitoredBy + '\'' +
                 ", monitoringGroups=" + monitoringGroups +
                 ", probes=" + probes +
@@ -81,12 +81,12 @@ public class Monitoring implements Identifiable {
         this.id = id;
     }
 
-    public String getService() {
-        return service;
+    public String getServiceId() {
+        return serviceId;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     public String getMonitoredBy() {

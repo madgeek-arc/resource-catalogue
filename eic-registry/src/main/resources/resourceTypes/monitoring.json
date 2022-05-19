@@ -11,7 +11,7 @@
       "multivalued": false,
       "name": "service_id",
       "label": "Service ID",
-      "path": "//*[local-name()='service']/text()",
+      "path": "//*[local-name()='serviceId']/text()",
       "type": "java.lang.String"
     },
     {
