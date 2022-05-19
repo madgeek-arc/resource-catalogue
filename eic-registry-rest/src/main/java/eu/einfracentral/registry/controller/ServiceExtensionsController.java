@@ -62,7 +62,7 @@ public class ServiceExtensionsController {
     }
 
     @ApiOperation(value = "Returns the Helpdesk of the given Service of the given Catalogue.")
-    @GetMapping(path = "/helpdesk/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/helpdesk/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isHelpdeskProviderAdmin(#auth, #id)")
     public ResponseEntity<HelpdeskBundle> getHelpdeskByServiceId(@PathVariable("serviceId") String serviceId,
                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
@@ -110,7 +110,7 @@ public class ServiceExtensionsController {
     }
 
     @ApiOperation(value = "Returns the Monitoring of the given Service of the given Catalogue.")
-    @GetMapping(path = "/monitoring/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isMonitoringProviderAdmin(#auth, #id)")
     public ResponseEntity<MonitoringBundle> getMonitoringByServiceId(@PathVariable("serviceId") String serviceId,
                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
