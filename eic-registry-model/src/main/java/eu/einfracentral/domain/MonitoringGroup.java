@@ -17,8 +17,7 @@ public class MonitoringGroup {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 1, notes = "Unique identifier of the service type", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.MONITORING_SERVICE_TYPE)
+    @FieldValidation
     private String serviceType;
 
     @XmlElement(required = true)

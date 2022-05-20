@@ -6,8 +6,8 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -32,18 +32,18 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
+    private final RegistrationMailService registrationMailService;
 
     public MonitoringManager(InfraServiceService<InfraService, InfraService> infraServiceService,
-                             ProviderService<ProviderBundle, Authentication> providerService,
-                             JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService) {
+                             JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
+                             @Lazy RegistrationMailService registrationMailService) {
         super(MonitoringBundle.class);
         this.infraServiceService = infraServiceService;
-        this.providerService = providerService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
+        this.registrationMailService = registrationMailService;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         ret = super.add(monitoring, null);
         logger.debug("Adding Monitoring: {}", monitoring);
 
-        //TODO: send emails
+//        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "post");
         jmsTopicTemplate.convertAndSend("monitoring.create", monitoring);
 
         return ret;
@@ -121,7 +121,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         resourceService.updateResource(existing);
         logger.debug("Updating Monitoring: {}", monitoring);
 
-        //TODO: send emails
+//        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "put");
         jmsTopicTemplate.convertAndSend("monitoring.update", monitoring);
 
         return monitoring;

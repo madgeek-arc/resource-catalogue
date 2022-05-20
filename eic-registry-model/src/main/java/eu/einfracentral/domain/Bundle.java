@@ -19,7 +19,6 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private T payload;
 
     @XmlElement(name = "metadata")
-    @FieldValidation
     private Metadata metadata;
 
     @XmlElement
