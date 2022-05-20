@@ -18,18 +18,23 @@ public class MatomoInterceptor extends HandlerInterceptorAdapter {
 
     private static Logger logger = Logger.getLogger(MatomoInterceptor.class);
 
-    @Value("${apitracking.matomo.site}")
+    @Value("${apitracking.matomo.site:#{null}}")
     private Integer siteId;
 
-    @Value("${apitracking.matomo.host}")
+    @Value("${apitracking.matomo.host:#{null}}")
     private String matomoUrl;
 
     private PiwikTracker piwikTracker = null;
 
     @PostConstruct
     public void init() {
-        if (matomoUrl != null)
+        if (matomoUrl != null && !"".equals(matomoUrl)) {
             this.piwikTracker = new PiwikTracker(matomoUrl);
+            if (siteId == null) {
+                logger.warn("'apitracking.matomo.site' is undefined. Using default value 1");
+                siteId = 1;
+            }
+        }
     }
 
     @Override
