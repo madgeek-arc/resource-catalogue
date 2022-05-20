@@ -1,6 +1,7 @@
 package eu.einfracentral.validators;
 
 import eu.einfracentral.annotation.*;
+import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Vocabulary;
@@ -15,10 +16,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -55,6 +58,16 @@ public class FieldValidator {
     public void validate(Object o) throws IllegalAccessException {
         validationLocation = new ArrayDeque<>();
         validateFields(o);
+        if (o.getClass().getSuperclass() != null && o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle")) {
+            try {
+                Field payload = Bundle.class.getDeclaredField("payload");
+                payload.setAccessible(true);
+                o = payload.get(o);
+            } catch (NoSuchFieldException e) {
+                logger.error("Could not find field 'payload'", e);
+            }
+            validateFields(o);
+        }
     }
 
     private void validateFields(Object o) throws IllegalAccessException {
@@ -64,10 +77,6 @@ public class FieldValidator {
 
         // get declared fields of class
         List<Field> declaredFields = new ArrayList<>(Arrays.asList(o.getClass().getDeclaredFields()));
-        if (o.getClass().getSuperclass() != null
-                && o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral")) {
-            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
-        }
 
         // validate every field
         for (Field field : declaredFields) {

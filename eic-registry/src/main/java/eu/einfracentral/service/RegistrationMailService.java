@@ -956,4 +956,16 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, recipient);
     }
 
+//    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String action){
+//        Map<String, Object> root = new HashMap<>();
+//        root.put("project", projectName);
+//        root.put("endpoint", endpoint);
+//        root.put("monitoringBundle", monitoringBundle);
+//
+//        // send email to help@eosc-future.eu
+//        String subject = String.format("[%s Portal] The Service [%s] has created a new Helpdesk Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
+//        String recipient = "admin";
+//        sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, recipient);
+//    }
+
 }
