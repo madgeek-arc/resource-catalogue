@@ -18,55 +18,61 @@ public class Helpdesk implements Identifiable {
     @ApiModelProperty(position = 1, notes = "Monitoring ID", example = "(required on PUT only)")
     private String id;
 
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 2, notes = "Service ID", required = true)
+    @FieldValidation(containsId = true, idClass = Service.class)
+    private String serviceId;
+
     @XmlElementWrapper(name = "services")
     @XmlElement(name = "service")
-    @ApiModelProperty(position = 2, notes = "Service ID")
+    @ApiModelProperty(position = 3, notes = "free text")
     private List<String> services;
 
     @XmlElement
-    @ApiModelProperty(position = 3, notes = "Unique identifier of the helpdesk type")
+    @ApiModelProperty(position = 4, notes = "Unique identifier of the helpdesk type")
     private String helpdeskType;
 
     @XmlElementWrapper(name = "supportGroups")
     @XmlElement(name = "supportGroup")
-    @ApiModelProperty(position = 4, notes = "Support group to be created in the helpdesk for the provider")
+    @ApiModelProperty(position = 5, notes = "Support group to be created in the helpdesk for the provider")
     private List<String> supportGroups;
 
     @XmlElement
-    @ApiModelProperty(position = 5, notes = "Name of organisation")
+    @ApiModelProperty(position = 6, notes = "Name of organisation")
     @FieldValidation(nullable = true)
     private String organisation;
 
     @XmlElementWrapper(name = "emails")
     @XmlElement(name = "email")
-    @ApiModelProperty(position = 6, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
+    @ApiModelProperty(position = 7, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
     private List<String> emails;
 
     @XmlElementWrapper(name = "agents")
     @XmlElement(name = "agent")
-    @ApiModelProperty(position = 7, notes = "Person involved in ticket management")
+    @ApiModelProperty(position = 8, notes = "Person involved in ticket management")
     private List<String> agents;
 
     @XmlElementWrapper(name = "signatures")
     @XmlElement(name = "signature")
-    @ApiModelProperty(position = 8, notes = "Automatic signature to be used in the answers to the tickets")
+    @ApiModelProperty(position = 9, notes = "Automatic signature to be used in the answers to the tickets")
     @FieldValidation(nullable = true)
     private List<String> signatures;
 
     @XmlElement
-    @ApiModelProperty(position = 9, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
+    @ApiModelProperty(position = 10, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
     @FieldValidation(nullable = true)
     private Boolean ticketPreservation;
 
     @XmlElement
-    @ApiModelProperty(position = 10, notes = "Webform required to generate ticket directly on webpage")
+    @ApiModelProperty(position = 11, notes = "Webform required to generate ticket directly on webpage")
     @FieldValidation(nullable = true)
     private Boolean webform;
 
     public Helpdesk() {}
 
-    public Helpdesk(String id, List<String> services, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
+    public Helpdesk(String id, String serviceId, List<String> services, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
         this.id = id;
+        this.serviceId = serviceId;
         this.services = services;
         this.helpdeskType = helpdeskType;
         this.supportGroups = supportGroups;
@@ -110,6 +116,7 @@ public class Helpdesk implements Identifiable {
     public String toString() {
         return "Helpdesk{" +
                 "id='" + id + '\'' +
+                ", serviceId=" + serviceId +
                 ", services=" + services +
                 ", helpdeskType='" + helpdeskType + '\'' +
                 ", supportGroups=" + supportGroups +
@@ -130,6 +137,14 @@ public class Helpdesk implements Identifiable {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     public List<String> getServices() {

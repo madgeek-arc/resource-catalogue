@@ -16,7 +16,7 @@ public class HelpdeskValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        ValidationUtils.rejectIfEmpty(errors, "services", "services.empty", mandatoryField("services"));
+        ValidationUtils.rejectIfEmpty(errors, "serviceId", "serviceId.empty", mandatoryField("serviceId"));
 
         Helpdesk helpdesk = (Helpdesk) target;
         switch (Helpdesk.HelpdeskType.fromString(helpdesk.getHelpdeskType())) {

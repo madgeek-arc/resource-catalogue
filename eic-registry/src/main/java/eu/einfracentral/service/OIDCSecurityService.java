@@ -220,7 +220,7 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
         User user = User.of(auth);
-        String serviceId = monitoringService.get(monitoringId).getMonitoring().getService();
+        String serviceId = monitoringService.get(monitoringId).getMonitoring().getServiceId();
         return userIsServiceProviderAdmin(user, serviceId);
     }
 

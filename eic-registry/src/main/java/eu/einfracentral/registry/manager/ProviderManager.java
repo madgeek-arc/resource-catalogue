@@ -847,7 +847,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
 //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        ProviderBundle providerBundle = get(id, catalogueId);
+        ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
         if (providerBundle.getLoggingInfo() != null){
             List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());

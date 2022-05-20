@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,8 +52,8 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     @CacheEvict(value = CACHE_HELPDESKS, allEntries = true)
     public HelpdeskBundle add(HelpdeskBundle helpdesk, Authentication auth) {
 
-        // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(helpdesk.getHelpdesk().getServices(), helpdesk.getCatalogueId());
+        // check if Service exists and if it has already a Helpdesk registered
+        serviceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -102,6 +103,12 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         helpdesk.setActive(ex.isActive());
         existing.setPayload(serialize(helpdesk));
         existing.setResourceType(resourceType);
+
+        // block user from updating serviceId
+        if (!helpdesk.getHelpdesk().getServiceId().equals(ex.getHelpdesk().getServiceId())){
+            throw new ValidationException("You cannot change the Service Id with which this Helpdesk is related");
+        }
+
         resourceService.updateResource(existing);
         logger.debug("Updating Helpdesk: {}", helpdesk);
 
@@ -123,13 +130,21 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     }
 
-    public void serviceConsistency(List<String> serviceIds, String catalogueId){
+    public void serviceConsistency(String serviceId, String catalogueId){
         // check if Service exists
-        for (String serviceId : serviceIds){
-            try{
-                infraServiceService.get(serviceId, catalogueId);
-            } catch(ResourceNotFoundException e){
-                throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+        try{
+            infraServiceService.get(serviceId, catalogueId);
+        } catch(ResourceNotFoundException e){
+            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+        }
+        // check if Service has already a Helpdesk registered
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<HelpdeskBundle> allHelpdesks = getAll(ff, null).getResults();
+        for (HelpdeskBundle helpdesk : allHelpdesks){
+            if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){
+                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Helpdesk " +
+                        "registered, with id: [%s]", serviceId, catalogueId, helpdesk.getId()));
             }
         }
     }

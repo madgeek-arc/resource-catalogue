@@ -22,7 +22,7 @@ public class Monitoring implements Identifiable {
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Service ID", required = true)
     @FieldValidation(containsId = true, idClass = Service.class)
-    private String service;
+    private String serviceId;
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, notes = "Who is responsible for the monitoring of this Service", required = true)
@@ -36,38 +36,22 @@ public class Monitoring implements Identifiable {
     @FieldValidation
     private List<MonitoringGroup> monitoringGroups;
 
-    @XmlElementWrapper(name = "probes")
-    @XmlElement(name = "probe")
-    @ApiModelProperty(position = 5, notes = "Url to the repository hosting the code")
-    @FieldValidation(nullable = true)
-    private List<URL> probes;
-
-    @XmlElementWrapper(name = "metrics")
-    @XmlElement(name = "metric")
-    @ApiModelProperty(position = 6)
-    @FieldValidation(nullable = true)
-    private List<URL> metrics;
-
     public Monitoring() {}
 
-    public Monitoring(String id, String service, String monitoredBy, List<MonitoringGroup> monitoringGroups, List<URL> probes, List<URL> metrics) {
+    public Monitoring(String id, String serviceId, String monitoredBy, List<MonitoringGroup> monitoringGroups) {
         this.id = id;
-        this.service = service;
+        this.serviceId = serviceId;
         this.monitoredBy = monitoredBy;
         this.monitoringGroups = monitoringGroups;
-        this.probes = probes;
-        this.metrics = metrics;
     }
 
     @Override
     public String toString() {
         return "Monitoring{" +
                 "id='" + id + '\'' +
-                ", service='" + service + '\'' +
+                ", serviceId='" + serviceId + '\'' +
                 ", monitoredBy='" + monitoredBy + '\'' +
                 ", monitoringGroups=" + monitoringGroups +
-                ", probes=" + probes +
-                ", metrics=" + metrics +
                 '}';
     }
 
@@ -81,12 +65,12 @@ public class Monitoring implements Identifiable {
         this.id = id;
     }
 
-    public String getService() {
-        return service;
+    public String getServiceId() {
+        return serviceId;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     public String getMonitoredBy() {
@@ -103,21 +87,5 @@ public class Monitoring implements Identifiable {
 
     public void setMonitoringGroups(List<MonitoringGroup> monitoringGroups) {
         this.monitoringGroups = monitoringGroups;
-    }
-
-    public List<URL> getProbes() {
-        return probes;
-    }
-
-    public void setProbes(List<URL> probes) {
-        this.probes = probes;
-    }
-
-    public List<URL> getMetrics() {
-        return metrics;
-    }
-
-    public void setMetrics(List<URL> metrics) {
-        this.metrics = metrics;
     }
 }

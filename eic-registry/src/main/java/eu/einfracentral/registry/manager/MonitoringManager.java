@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +55,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public MonitoringBundle add(MonitoringBundle monitoring, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(monitoring.getMonitoring().getService(), monitoring.getCatalogueId());
+        serviceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId());
 
         // validate serviceType
         serviceTypeValidation(monitoring.getMonitoring());
@@ -108,6 +109,12 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         monitoring.setActive(ex.isActive());
         existing.setPayload(serialize(monitoring));
         existing.setResourceType(resourceType);
+
+        // block user from updating serviceId
+        if (!monitoring.getMonitoring().getServiceId().equals(ex.getMonitoring().getServiceId())){
+            throw new ValidationException("You cannot change the Service Id with which this Monitoring is related");
+        }
+
         resourceService.updateResource(existing);
         logger.debug("Updating Monitoring: {}", monitoring);
 
@@ -135,6 +142,16 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
             infraServiceService.get(serviceId, catalogueId);
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+        }
+        // check if Service has already a Monitoring registered
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
+        for (MonitoringBundle monitoring : allMonitorings){
+            if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){
+                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Monitoring " +
+                        "registered, with id: [%s]", serviceId, catalogueId, monitoring.getId()));
+            }
         }
     }
 

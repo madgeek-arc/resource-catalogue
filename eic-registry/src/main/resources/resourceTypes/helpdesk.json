@@ -8,9 +8,16 @@
       "primaryKey": true
     },
     {
-      "multivalued": true,
+      "multivalued": false,
       "name": "service_id",
       "label": "Service ID",
+      "path": "//*[local-name()='serviceId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "services",
+      "label": "Services",
       "path": "//*[local-name()='service']/text()",
       "type": "java.lang.String"
     },
