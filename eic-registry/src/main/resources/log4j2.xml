@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
+<!--<Configuration status="INFO">-->
+<Configuration monitorInterval="30" status="DEBUG">
     <Properties>
         <Property name="baseDir">logs</Property>
         <Property name="syncBaseDir">syncLogs</Property>
