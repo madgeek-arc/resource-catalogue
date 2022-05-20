@@ -53,7 +53,7 @@ public class MatomoInterceptor extends HandlerInterceptorAdapter {
                 try {
                     piwikRequest.setReferrerUrl(new URL(request.getHeader("Referer")));
                 } catch (Exception e) {
-                    logger.error("Error setting referer", e);
+                    logger.error("Error setting referer: " + e.getMessage());
                 }
 
 
