@@ -956,16 +956,40 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, recipient);
     }
 
-//    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String action){
-//        Map<String, Object> root = new HashMap<>();
-//        root.put("project", projectName);
-//        root.put("endpoint", endpoint);
-//        root.put("monitoringBundle", monitoringBundle);
-//
-//        // send email to help@eosc-future.eu
-//        String subject = String.format("[%s Portal] The Service [%s] has created a new Helpdesk Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
-//        String recipient = "admin";
-//        sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, recipient);
-//    }
+    public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String action){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("helpdeskBundle", helpdeskBundle);
+        root.put("action", action);
+
+        // send email to help@eosc-future.eu
+        String recipient = "admin";
+        String subject = "";
+        if (action.equals("post")){
+            subject = String.format("[%s Portal] The Service [%s] has created a new Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
+        } else{
+            subject = String.format("[%s Portal] The Service [%s] updated its Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
+        }
+        sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, "help@eosc-future.eu", recipient);
+    }
+
+    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String action){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("monitoringBundle", monitoringBundle);
+        root.put("action", action);
+
+        // send email to argo@einfra.grnet.gr
+        String recipient = "admin";
+        String subject = "";
+        if (action.equals("post")){
+            subject = String.format("[%s Portal] The Service [%s] has created a new Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
+        } else{
+            subject = String.format("[%s Portal] The Service [%s] updated its Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
+        }
+        sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, "argo@einfra.grnet.gr", recipient);
+    }
 
 }

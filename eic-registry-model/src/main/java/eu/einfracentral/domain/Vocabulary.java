@@ -87,9 +87,7 @@ public class Vocabulary implements Identifiable {
         DS_CLASSIFICATION("Classification"),
         DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
         // Monitoring
-        MONITORING_MONITORED_BY("Monitored by"),
-        MONITORING_SERVICE_TYPE("Service type");
-
+        MONITORING_MONITORED_BY("Monitored by");
         private final String type;
 
         Type(final String type) {

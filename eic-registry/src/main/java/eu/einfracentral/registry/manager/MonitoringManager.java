@@ -79,7 +79,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         ret = super.add(monitoring, null);
         logger.debug("Adding Monitoring: {}", monitoring);
 
-//        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "post");
+        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "post");
         jmsTopicTemplate.convertAndSend("monitoring.create", monitoring);
 
         return ret;
@@ -121,7 +121,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         resourceService.updateResource(existing);
         logger.debug("Updating Monitoring: {}", monitoring);
 
-//        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "put");
+        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "put");
         jmsTopicTemplate.convertAndSend("monitoring.update", monitoring);
 
         return monitoring;

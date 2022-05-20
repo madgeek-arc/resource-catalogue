@@ -1,13 +1,19 @@
 package eu.einfracentral.validators;
 
 import eu.einfracentral.domain.Helpdesk;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import java.lang.reflect.Field;
+
 import static eu.einfracentral.validators.ValidationMessagesUtils.mandatoryField;
 
 public class HelpdeskValidator implements Validator {
+
+    private static final Logger logger = LogManager.getLogger(HelpdeskValidator.class);
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -21,17 +27,52 @@ public class HelpdeskValidator implements Validator {
         Helpdesk helpdesk = (Helpdesk) target;
         switch (Helpdesk.HelpdeskType.fromString(helpdesk.getHelpdeskType())) {
             case DIRECT_USAGE:
-            case FULL_INTEGRATION:
-                // group
+                // Check for unwanted fields: ticketPreservation
+                rejectNotAcceptableField(target, errors, "ticketPreservation", helpdesk.getHelpdeskType());
+
+                // Check for mandatory fields: group, agents
                 ValidationUtils.rejectIfEmpty(errors, "supportGroups", "supportGroups.empty", mandatoryField("supportGroups"));
-                // agent
                 ValidationUtils.rejectIfEmpty(errors, "agents", "agents.empty", mandatoryField("agents"));
                 break;
+
+            case FULL_INTEGRATION:
+                // Check for unwanted fields: ticketPreservation
+                rejectNotAcceptableField(target, errors, "ticketPreservation", helpdesk.getHelpdeskType());
+                rejectNotAcceptableField(target, errors, "signatures", helpdesk.getHelpdeskType());
+
+                // Check for mandatory fields: group, agents
+                ValidationUtils.rejectIfEmpty(errors, "supportGroups", "supportGroups.empty", mandatoryField("supportGroups"));
+                ValidationUtils.rejectIfEmpty(errors, "agents", "agents.empty", mandatoryField("agents"));
+                break;
+
             case TICKET_REDIRECTION:
-                // email
+                // Check for unwanted fields: supportGroups, agents, signatures
+                rejectNotAcceptableField(target, errors, "supportGroups", helpdesk.getHelpdeskType());
+                rejectNotAcceptableField(target, errors, "agents", helpdesk.getHelpdeskType());
+                rejectNotAcceptableField(target, errors, "signatures", helpdesk.getHelpdeskType());
+
+                // Check for mandatory fields: email
                 ValidationUtils.rejectIfEmpty(errors, "emails", "emails.empty", mandatoryField("emails"));
                 break;
             default:
         }
+    }
+
+    public void rejectNotAcceptableField(Object target, Errors errors, String fieldName, String type) {
+        Field field = null;
+        try {
+            field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Object fieldValue = field.get(target);
+            if (fieldValue != null && !fieldValue.equals("")) {
+                errors.rejectValue(fieldName, fieldName + ".non-empty", notAcceptableField(fieldName, type));
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            logger.error(e);
+        }
+    }
+
+    public static String notAcceptableField(String field, String serviceType) {
+        return String.format("Field '%s' is not acceptable for serviceType '%s'", field, serviceType);
     }
 }

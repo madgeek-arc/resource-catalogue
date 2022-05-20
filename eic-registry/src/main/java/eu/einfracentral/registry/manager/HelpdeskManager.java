@@ -6,6 +6,7 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -31,16 +32,19 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
+    private final RegistrationMailService registrationMailService;
 
     @Autowired
     public HelpdeskManager(InfraServiceService<InfraService, InfraService> infraServiceService,
                            ProviderService<ProviderBundle, Authentication> providerService,
-                           JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService) {
+                           JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
+                           @Lazy RegistrationMailService registrationMailService) {
         super(HelpdeskBundle.class);
         this.infraServiceService = infraServiceService;
         this.providerService = providerService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
+        this.registrationMailService = registrationMailService;
     }
 
     @Override
@@ -72,7 +76,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         super.add(helpdesk, null);
         logger.debug("Adding Helpdesk: {}", helpdesk);
 
-        //TODO: send emails
+        registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "post");
         jmsTopicTemplate.convertAndSend("helpdesk.create", helpdesk);
 
         return helpdesk;
@@ -114,7 +118,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         resourceService.updateResource(existing);
         logger.debug("Updating Helpdesk: {}", helpdesk);
 
-        //TODO: send emails
+        registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "put");
         jmsTopicTemplate.convertAndSend("helpdesk.update", helpdesk);
 
         return helpdesk;
