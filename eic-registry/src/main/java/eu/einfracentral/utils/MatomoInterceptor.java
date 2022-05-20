@@ -50,12 +50,7 @@ public class MatomoInterceptor extends HandlerInterceptorAdapter {
 
                 piwikRequest.setActionName(request.getRequestURI());
                 piwikRequest.setUserId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-                try {
-                    piwikRequest.setReferrerUrl(new URL(request.getHeader("Referer")));
-                } catch (Exception e) {
-                    logger.error("Error setting referer: " + e.getMessage());
-                }
-
+                piwikRequest.setReferrerUrl(null);
 
                 piwikTracker.sendRequestAsync(piwikRequest);
             } else {
