@@ -54,6 +54,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
         // check if Service exists and if it has already a Helpdesk registered
         serviceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
+        validate(helpdesk);
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -82,6 +83,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public HelpdeskBundle update(HelpdeskBundle helpdesk, Authentication auth) {
 
         logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdesk.getId());
+        validate(helpdesk);
         helpdesk.setMetadata(Metadata.updateMetadata(helpdesk.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;

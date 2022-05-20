@@ -495,7 +495,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         logger.debug("Validating Service with id: {}", service.getId());
 
         try {
-            fieldValidator.validate(infraService.getService());
+            fieldValidator.validate(infraService);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }

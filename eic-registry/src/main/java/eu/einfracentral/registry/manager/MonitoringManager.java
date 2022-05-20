@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -56,6 +57,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         // check if Service exists and if User belongs to Service's Provider Admins
         serviceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId());
+        validate(monitoring);
 
         // validate serviceType
         serviceTypeValidation(monitoring.getMonitoring());
@@ -88,6 +90,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public MonitoringBundle update(MonitoringBundle monitoring, Authentication auth) {
 
         logger.trace("User '{}' is attempting to update the Monitoring with id '{}'", auth, monitoring.getId());
+        validate(monitoring);
         monitoring.setMetadata(Metadata.updateMetadata(monitoring.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;

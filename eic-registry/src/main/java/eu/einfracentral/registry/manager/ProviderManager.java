@@ -659,7 +659,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
         try {
-            fieldValidator.validate(provider.getProvider());
+            fieldValidator.validate(provider);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }

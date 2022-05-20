@@ -250,7 +250,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         try {
-            fieldValidator.validate(catalogue.getCatalogue());
+            fieldValidator.validate(catalogue);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
