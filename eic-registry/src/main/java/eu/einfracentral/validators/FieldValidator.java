@@ -63,7 +63,11 @@ public class FieldValidator {
         }
 
         // get declared fields of class
-        Field[] declaredFields = o.getClass().getDeclaredFields();
+        List<Field> declaredFields = new ArrayList<>(Arrays.asList(o.getClass().getDeclaredFields()));
+        if (o.getClass().getSuperclass() != null
+                && o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral")) {
+            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
+        }
 
         // validate every field
         for (Field field : declaredFields) {
