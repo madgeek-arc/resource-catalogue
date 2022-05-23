@@ -75,8 +75,7 @@ public class ServiceExtensionsController {
                 return new ResponseEntity<>(helpdesk, HttpStatus.OK);
             }
         }
-        throw new eu.einfracentral.exception.ResourceNotFoundException(String.format("Service with id [%s] of the Catalogue [%s] does " +
-                "not have a Helpdesk enabled.", serviceId, catalogueId), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new Helpdesk.")
@@ -124,8 +123,7 @@ public class ServiceExtensionsController {
                 return new ResponseEntity<>(monitoring, HttpStatus.OK);
             }
         }
-        throw new eu.einfracentral.exception.ResourceNotFoundException(String.format("Service with id [%s] of the Catalogue [%s] does " +
-                "not have a Monitoring enabled.", serviceId, catalogueId), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new Monitoring.")
