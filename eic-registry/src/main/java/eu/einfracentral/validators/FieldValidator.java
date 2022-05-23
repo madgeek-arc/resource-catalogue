@@ -16,12 +16,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -228,9 +226,9 @@ public class FieldValidator {
             if (URL.class.equals(clazz)) {
                 URL url = (URL) o;
                 validateUrl(field, url);
-              //FIXME: List<URL> with a single empty String value never enters.
-            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())){
-                for (int i=0; i<((ArrayList) o).size(); i++) {
+                //FIXME: List<URL> with a single empty String value never enters.
+            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())) {
+                for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     URL url = (URL) ((ArrayList) o).get(i);
                     validateUrl(field, url);
                 }
@@ -238,7 +236,7 @@ public class FieldValidator {
         }
     }
 
-    public void validateUrl(Field field, URL urlForValidation){
+    public void validateUrl(Field field, URL urlForValidation) {
         HttpsTrustManager.allowAllSSL();
         HttpURLConnection huc;
         int statusCode = 0;
@@ -259,11 +257,11 @@ public class FieldValidator {
         }
 
         if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 308
-                && statusCode != 403 && statusCode != 405 && statusCode != 503){
-            if (field == null){
+                && statusCode != 403 && statusCode != 405 && statusCode != 503) {
+            if (field == null) {
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
             } else {
-                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation ,field.getName()));
+                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation, field.getName()));
             }
         }
     }
@@ -338,11 +336,11 @@ public class FieldValidator {
 
     private void validateDuplicates(Field field, Object o) {
         Set<String> duplicateEntries = new HashSet<>();
-        String subField = field.toString().substring(field.toString().lastIndexOf(".")+1);
+        String subField = field.toString().substring(field.toString().lastIndexOf(".") + 1);
         if (o != null) {
             Class clazz = o.getClass();
             if (ArrayList.class.equals(clazz)) {
-                for (int i=0; i<((ArrayList) o).size(); i++) {
+                for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     if (!duplicateEntries.add(((ArrayList) o).get(i).toString())) {
                         throw new ValidationException(String.format("Duplicate value found '%s' on field '%s'", ((ArrayList) o).get(i).toString(), subField));
                     }
