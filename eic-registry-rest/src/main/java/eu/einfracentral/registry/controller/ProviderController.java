@@ -442,4 +442,11 @@ public class ProviderController {
         logger.info("Validated Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
         return ret;
     }
+
+    @ApiOperation(value = "Send a 1 time email to all Provider Admins")
+    @PostMapping(path = "sendEmailToAllProviderAdmins", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public void sendEmailsToAllProviderAdmins(Authentication auth){
+        providerManager.sendEmailsToAllProviderAdmins(auth);
+    }
 }
