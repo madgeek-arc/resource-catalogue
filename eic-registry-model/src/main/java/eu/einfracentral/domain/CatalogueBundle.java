@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 public class CatalogueBundle extends Bundle<Catalogue>{
 
     @XmlElement
-    @VocabularyValidation(type = Vocabulary.Type.CATALOGUE_STATE)
+//    @VocabularyValidation(type = Vocabulary.Type.CATALOGUE_STATE)
     private String status;
 
     public CatalogueBundle() {

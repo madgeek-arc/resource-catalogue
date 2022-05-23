@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlType;
 public class ProviderBundle extends Bundle<Provider> {
 
     @XmlElement
-    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
+//    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
     private String status;
 
     @XmlElement
-    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
+//    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
 
     public ProviderBundle() {

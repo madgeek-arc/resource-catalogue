@@ -14,7 +14,7 @@ public class InfraService extends Bundle<Service> {
     private boolean latest;
 
     @XmlElement
-    @VocabularyValidation(type = Vocabulary.Type.RESOURCE_STATE)
+//    @VocabularyValidation(type = Vocabulary.Type.RESOURCE_STATE)
     private String status;
 
     public InfraService() {
