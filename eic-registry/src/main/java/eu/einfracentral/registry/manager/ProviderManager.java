@@ -1120,19 +1120,4 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
     }
-
-    public void sendEmailsToAllProviderAdmins(Authentication auth){
-        List<String> allProviderEmails = new ArrayList<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        List<ProviderBundle> allProviders = getAll(ff, auth).getResults();
-        for (ProviderBundle providerBundle : allProviders){
-            for (User user : providerBundle.getProvider().getUsers()){
-                if (!allProviderEmails.contains(user.getEmail())){
-                    allProviderEmails.add(user.getEmail());
-                }
-            }
-        }
-        registrationMailService.sendEmailsToAllProviderAdmins(allProviderEmails);
-    }
 }

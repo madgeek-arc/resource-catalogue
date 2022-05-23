@@ -144,6 +144,4 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return Resource
      */
     Resource getResource(String id, String catalogueId);
-
-    void sendEmailsToAllProviderAdmins(Authentication auth);
 }

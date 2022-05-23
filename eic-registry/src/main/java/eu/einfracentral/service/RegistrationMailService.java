@@ -991,34 +991,4 @@ public class RegistrationMailService {
         }
         sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, "argo@einfra.grnet.gr", recipient);
     }
-
-    public void sendEmailsToAllProviderAdmins(List<String> allProviderEmails){
-        //TODO: check if the emails fails to be delivered
-        List<String> cc = new ArrayList<>();
-//        cc.add("***REMOVED***");
-//        cc.add("***REMOVED***");
-//        cc.add("***REMOVED***");
-        cc.add("***REMOVED***");
-        cc.add("***REMOVED***");
-        List<String> emails = new ArrayList<>();
-        emails.add("***REMOVED***");
-        emails.add("***REMOVED***");
-        Map<String, Object> root = new HashMap<>();
-        String templateName = "emailToAllProviderAdmins.ftl";
-        String subject = "June 2022 Enhancements to the EOSC Platform, Migrating Profiles from v3.00 to v4.00";
-        try (StringWriter out = new StringWriter()) {
-            Template temp = cfg.getTemplate(templateName);
-            temp.process(root, out);
-            String mailBody = out.getBuffer().toString();
-            mailService.sendMail(emails, cc, subject, mailBody);
-            logger.info("\nRecipients: {}\nCC: {}\nTitle: {}\nMail body: \n{}", String.join(", ", emails), String.join(", ", cc), subject, mailBody);
-        } catch (IOException e) {
-            logger.error("Error finding mail template '{}'", templateName, e);
-        } catch (TemplateException e) {
-            logger.error("ERROR", e);
-        }
-        catch (MessagingException e) {
-            logger.error("Could not send mail", e);
-        }
-    }
 }
