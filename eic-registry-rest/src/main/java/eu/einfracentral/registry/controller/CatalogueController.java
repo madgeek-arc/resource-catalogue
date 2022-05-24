@@ -263,7 +263,7 @@ public class CatalogueController {
     }
 
     @ApiOperation(value = "Creates a new Provider for the specific Catalogue.")
-    @PostMapping(path = "{catalogueId}/provider/", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "{catalogueId}/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
         ProviderBundle providerBundle = providerManager.add(new ProviderBundle(provider), catalogueId, auth);
@@ -280,7 +280,7 @@ public class CatalogueController {
     }
 
     @ApiOperation(value = "Updates the Provider of the specific Catalogue")
-    @PutMapping(path = "{catalogueId}/provider/", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "{catalogueId}/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.get(catalogueId, provider.getId(), auth);
@@ -318,7 +318,7 @@ public class CatalogueController {
     }
 
     @ApiOperation(value = "Creates a new Resource for the specific Catalogue.")
-    @PostMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
         InfraService ret = this.infraServiceService.addService(new InfraService(service), catalogueId, auth);
@@ -328,7 +328,7 @@ public class CatalogueController {
 
     @ApiOperation(value = "Updates the Resource of the specific Catalogue.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth,#service)")
-    @PutMapping(path = "{catalogueId}/resource/", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService ret = this.infraServiceService.updateService(new InfraService(service), catalogueId, comment, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
