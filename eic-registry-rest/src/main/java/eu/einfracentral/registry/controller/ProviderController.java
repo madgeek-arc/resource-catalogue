@@ -86,7 +86,7 @@ public class ProviderController {
     public ResponseEntity<Provider> get(@PathVariable("id") String id,
                                         @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                         @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.get(id, catalogueId, auth).getProvider();
+        Provider provider = providerManager.get(catalogueId, id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -116,7 +116,7 @@ public class ProviderController {
                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                            @RequestParam(required = false) String comment,
                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle providerBundle = providerManager.get(provider.getId(), catalogueId, auth);
+        ProviderBundle providerBundle = providerManager.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
         if (comment == null || comment.equals("")) {
             comment = "no comment";
@@ -179,7 +179,7 @@ public class ProviderController {
     public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id,
                                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                             @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(providerManager.get(id, catalogueId, auth), HttpStatus.OK);
+        return new ResponseEntity<>(providerManager.get(catalogueId, id, auth), HttpStatus.OK);
     }
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
@@ -337,7 +337,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle provider = providerManager.get(id, "eosc", auth);
+        ProviderBundle provider = providerManager.get("eosc", id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
         }

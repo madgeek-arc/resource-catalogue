@@ -240,25 +240,25 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Cacheable(value = CACHE_PROVIDERS)
-    public ProviderBundle get(String id, String catalogueId, Authentication auth) {
-        ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
+    public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
+        ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (providerBundle == null) {
             throw new eu.einfracentral.exception.ResourceNotFoundException(
-                    String.format("Could not find provider with id: %s", id));
+                    String.format("Could not find provider with id: %s", providerId));
         }
         if (catalogueBundle == null) {
             throw new eu.einfracentral.exception.ResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
         }
         if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
-            throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", id, catalogueId));
+            throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", providerId, catalogueId));
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, id)) {
+                    securityService.userIsProviderAdmin(user, providerId)) {
                 return providerBundle;
             }
         }
@@ -422,7 +422,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        ProviderBundle provider = get(id, "eosc", auth);
+        ProviderBundle provider = get("eosc", id, auth);
         provider.setStatus(vocabularyService.get(status).getId());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -727,7 +727,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId, "eosc", auth);
+        ProviderBundle providerBundle = get("eosc", providerId, auth);
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
@@ -771,7 +771,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = get(providerId, "eosc");
+        ProviderBundle provider = getWithCatalogue(providerId, "eosc");
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));

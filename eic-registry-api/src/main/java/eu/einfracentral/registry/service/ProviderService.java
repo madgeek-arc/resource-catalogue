@@ -30,7 +30,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     T get(String id, U auth);
 
-    T get(String id, String catalogueId, U auth);
+    T get(String catalogueId, String providerId, U auth);
 
 
     List<T> getServiceProviders(String email, U authentication);

@@ -107,7 +107,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             checkCatalogueIdConsistency(infraService, catalogueId);
         }
 
-        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), infraService.getService().getCatalogueId(), auth);
+        ProviderBundle providerBundle = providerService.get(infraService.getService().getCatalogueId(), infraService.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
             throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", infraService.getService().getResourceOrganisation(), infraService.getService().getCatalogueId()));
         }
@@ -189,7 +189,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, infraService.getService().getId(), infraService.getService().getCatalogueId());
         validate(infraService);
-        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), infraService.getService().getCatalogueId(), auth);
+        ProviderBundle providerBundle = providerService.get(infraService.getService().getCatalogueId(), infraService.getService().getResourceOrganisation(), auth);
         InfraService existingService;
 
         // if service version is empty set it null
@@ -632,7 +632,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    public Paging<InfraService> getInfraServices(String providerId, String catalogueId, Authentication auth) {
+    public Paging<InfraService> getInfraServices(String catalogueId, String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);

@@ -247,7 +247,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auth
      * @return
      */
-    Paging<InfraService> getInfraServices(String providerId, String catalogueId, Authentication auth);
+    Paging<InfraService> getInfraServices(String catalogueId, String providerId, Authentication auth);
 
     List<Service> getServices(String providerId, Authentication auth);
 
