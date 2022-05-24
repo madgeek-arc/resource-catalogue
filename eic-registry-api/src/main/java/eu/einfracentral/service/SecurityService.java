@@ -29,6 +29,8 @@ public interface SecurityService {
 
     boolean isServiceProviderAdmin(Authentication auth, String serviceId);
 
+    boolean isServiceProviderAdmin(Authentication auth, String serviceId, String catalogueId);
+
     boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow);
 
     boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service);
@@ -45,11 +47,7 @@ public interface SecurityService {
 
     boolean userIsServiceProviderAdmin(User user, String serviceId);
 
-    boolean userIsServiceProviderAdmin(User user, List<String> serviceId);
-
-    boolean isHelpdeskProviderAdmin(Authentication auth, String helpdeskId);
-
-    boolean isMonitoringProviderAdmin(Authentication auth, String monitoringId);
+    boolean userIsServiceProviderAdmin(User user, String serviceId, String catalogueId);
 
     boolean providerCanAddServices(Authentication auth, InfraService service);
 

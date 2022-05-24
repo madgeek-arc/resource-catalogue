@@ -205,23 +205,12 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean isHelpdeskProviderAdmin(Authentication auth, String helpdeskId) {
+    public boolean isServiceProviderAdmin(Authentication auth, String serviceId, String catalogueId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        List<String> serviceIds = helpdeskService.get(helpdeskId).getHelpdesk().getServices();
-        return userIsServiceProviderAdmin(user, serviceIds);
-    }
-
-    @Override
-    public boolean isMonitoringProviderAdmin(Authentication auth, String monitoringId) {
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
-            return false;
-        }
-        User user = User.of(auth);
-        String serviceId = monitoringService.get(monitoringId).getMonitoring().getServiceId();
-        return userIsServiceProviderAdmin(user, serviceId);
+        return userIsServiceProviderAdmin(user, serviceId, catalogueId);
     }
 
     @Override
@@ -328,26 +317,24 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean userIsServiceProviderAdmin(@NotNull User user, List<String> serviceIds) {
+    public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId, String catalogueId) {
         InfraService service;
-        List<String> allProviders = new ArrayList<>();
-        for (String serviceId : serviceIds){
+        try {
+            service = infraServiceService.get(serviceId, catalogueId);
+        } catch (ResourceException | ResourceNotFoundException e) {
             try {
-                service = infraServiceService.get(serviceId);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                try {
-                    service = pendingServiceManager.get(serviceId);
-                } catch (RuntimeException re) {
-                    return false;
-                }
-            } catch (RuntimeException e) {
+                service = pendingServiceManager.get(serviceId);
+            } catch (RuntimeException re) {
                 return false;
             }
-            if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
-                throw new ValidationException("Service has no Service Organisation");
-            }
-            allProviders.addAll(Collections.singletonList(service.getService().getResourceOrganisation()));
+        } catch (RuntimeException e) {
+            return false;
         }
+        if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
+            throw new ValidationException("Service has no Service Organisation");
+        }
+
+        List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
