@@ -1,14 +1,12 @@
 package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
-import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.net.URL;
 import java.util.List;
 
 @XmlType
@@ -21,7 +19,7 @@ public class MonitoringGroup {
     private String serviceType;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, notes = "Url of the endpoint of the service", required = true)
+    @ApiModelProperty(position = 2, notes = "Εndpoint of the service", required = true)
     @FieldValidation
     private String endpoint;
 
