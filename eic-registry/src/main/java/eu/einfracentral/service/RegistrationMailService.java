@@ -54,6 +54,12 @@ public class RegistrationMailService {
     @Value("${project.registration.email:registration@catalogue.eu}")
     private String registrationEmail;
 
+    @Value("${project.helpdesk.email}")
+    private String helpdeskEmail;
+
+    @Value("${project.monitoring.email}")
+    private String monitoringEmail;
+
     @Value("${emails.send.admin.notifications}")
     private boolean enableEmailAdminNotifications;
 
@@ -971,7 +977,7 @@ public class RegistrationMailService {
         } else{
             subject = String.format("[%s Portal] The Service [%s] updated its Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
         }
-        sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, "help@eosc-future.eu", recipient);
+        sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, helpdeskEmail, recipient);
     }
 
     public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String action){
@@ -989,6 +995,6 @@ public class RegistrationMailService {
         } else{
             subject = String.format("[%s Portal] The Service [%s] updated its Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
         }
-        sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, "argo@einfra.grnet.gr", recipient);
+        sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, monitoringEmail, recipient);
     }
 }
