@@ -4,8 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -28,7 +27,7 @@ import java.util.UUID;
 import static eu.einfracentral.config.CacheConfig.CACHE_MONITORINGS;
 
 @org.springframework.stereotype.Service("monitoringManager")
-public class MonitoringManager extends ResourceManager<MonitoringBundle> implements ResourceService<MonitoringBundle, Authentication> {
+public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
@@ -158,7 +157,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
     }
 
-    public void serviceTypeValidation(Monitoring monitoring){
+    public List<String> getAvailableServiceTypes() {
         List<String> serviceTypeList = new ArrayList<>();
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -168,11 +167,15 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
         String response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
         JSONObject obj = new JSONObject(response);
-        JSONArray arr =  obj.getJSONArray("data");
-        for (int i = 0; i < arr.length(); i++)
-        {
+        JSONArray arr = obj.getJSONArray("data");
+        for (int i = 0; i < arr.length(); i++) {
             serviceTypeList.add(arr.getJSONObject(i).getString("name"));
         }
+        return serviceTypeList;
+    }
+
+    public void serviceTypeValidation(Monitoring monitoring){
+        List<String> serviceTypeList = getAvailableServiceTypes();
         for (MonitoringGroup monitoringGroup : monitoring.getMonitoringGroups()){
             String serviceType = monitoringGroup.getServiceType();
             if (!serviceTypeList.contains(serviceType)){
