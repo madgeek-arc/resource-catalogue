@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -188,5 +189,18 @@ public class Metadata {
 
     public void setTerms(List<String> terms) {
         this.terms = terms;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Metadata metadata = (Metadata) o;
+        return Objects.equals(registeredBy, metadata.registeredBy) && Objects.equals(registeredAt, metadata.registeredAt) && Objects.equals(modifiedBy, metadata.modifiedBy) && Objects.equals(modifiedAt, metadata.modifiedAt) && Objects.equals(source, metadata.source) && Objects.equals(originalId, metadata.originalId) && Objects.equals(terms, metadata.terms);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(registeredBy, registeredAt, modifiedBy, modifiedAt, source, originalId, terms);
     }
 }

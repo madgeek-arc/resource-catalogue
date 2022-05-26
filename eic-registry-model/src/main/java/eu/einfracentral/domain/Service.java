@@ -559,58 +559,7 @@ public class Service implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Service service = (Service) o;
-        return Objects.equals(id, service.id) &&
-                Objects.equals(abbreviation, service.abbreviation) &&
-                Objects.equals(name, service.name) &&
-                Objects.equals(resourceOrganisation, service.resourceOrganisation) &&
-                Objects.equals(resourceProviders, service.resourceProviders) &&
-                Objects.equals(webpage, service.webpage) &&
-                Objects.equals(description, service.description) &&
-                Objects.equals(tagline, service.tagline) &&
-                Objects.equals(logo, service.logo) &&
-                Objects.equals(multimedia, service.multimedia) &&
-                Objects.equals(useCases, service.useCases) &&
-                Objects.equals(scientificDomains, service.scientificDomains) &&
-                Objects.equals(categories, service.categories) &&
-                Objects.equals(targetUsers, service.targetUsers) &&
-                Objects.equals(accessTypes, service.accessTypes) &&
-                Objects.equals(accessModes, service.accessModes) &&
-                Objects.equals(tags, service.tags) &&
-                Objects.equals(geographicalAvailabilities, service.geographicalAvailabilities) &&
-                Objects.equals(languageAvailabilities, service.languageAvailabilities) &&
-                Objects.equals(resourceGeographicLocations, service.resourceGeographicLocations) &&
-                Objects.equals(mainContact, service.mainContact) &&
-                Objects.equals(publicContacts, service.publicContacts) &&
-                Objects.equals(helpdeskEmail, service.helpdeskEmail) &&
-                Objects.equals(securityContactEmail, service.securityContactEmail) &&
-                Objects.equals(trl, service.trl) &&
-                Objects.equals(lifeCycleStatus, service.lifeCycleStatus) &&
-                Objects.equals(certifications, service.certifications) &&
-                Objects.equals(standards, service.standards) &&
-                Objects.equals(openSourceTechnologies, service.openSourceTechnologies) &&
-                Objects.equals(version, service.version) &&
-                Objects.equals(lastUpdate, service.lastUpdate) &&
-                Objects.equals(changeLog, service.changeLog) &&
-                Objects.equals(requiredResources, service.requiredResources) &&
-                Objects.equals(relatedResources, service.relatedResources) &&
-                Objects.equals(relatedPlatforms, service.relatedPlatforms) &&
-                Objects.equals(catalogueId, service.catalogueId) &&
-                Objects.equals(fundingBody, service.fundingBody) &&
-                Objects.equals(fundingPrograms, service.fundingPrograms) &&
-                Objects.equals(grantProjectNames, service.grantProjectNames) &&
-                Objects.equals(helpdeskPage, service.helpdeskPage) &&
-                Objects.equals(userManual, service.userManual) &&
-                Objects.equals(termsOfUse, service.termsOfUse) &&
-                Objects.equals(privacyPolicy, service.privacyPolicy) &&
-                Objects.equals(accessPolicy, service.accessPolicy) &&
-                Objects.equals(resourceLevel, service.resourceLevel) &&
-                Objects.equals(trainingInformation, service.trainingInformation) &&
-                Objects.equals(statusMonitoring, service.statusMonitoring) &&
-                Objects.equals(maintenance, service.maintenance) &&
-                Objects.equals(orderType, service.orderType) &&
-                Objects.equals(order, service.order) &&
-                Objects.equals(paymentModel, service.paymentModel) &&
-                Objects.equals(pricing, service.pricing);
+        return Objects.equals(id, service.id) && Objects.equals(abbreviation, service.abbreviation) && Objects.equals(name, service.name) && Objects.equals(resourceOrganisation, service.resourceOrganisation) && Objects.equals(resourceProviders, service.resourceProviders) && Objects.equals(webpage, service.webpage) && Objects.equals(description, service.description) && Objects.equals(tagline, service.tagline) && Objects.equals(logo, service.logo) && Objects.equals(multimedia, service.multimedia) && Objects.equals(useCases, service.useCases) && Objects.equals(scientificDomains, service.scientificDomains) && Objects.equals(categories, service.categories) && Objects.equals(targetUsers, service.targetUsers) && Objects.equals(accessTypes, service.accessTypes) && Objects.equals(accessModes, service.accessModes) && Objects.equals(tags, service.tags) && Objects.equals(geographicalAvailabilities, service.geographicalAvailabilities) && Objects.equals(languageAvailabilities, service.languageAvailabilities) && Objects.equals(resourceGeographicLocations, service.resourceGeographicLocations) && Objects.equals(mainContact, service.mainContact) && Objects.equals(publicContacts, service.publicContacts) && Objects.equals(helpdeskEmail, service.helpdeskEmail) && Objects.equals(securityContactEmail, service.securityContactEmail) && Objects.equals(trl, service.trl) && Objects.equals(lifeCycleStatus, service.lifeCycleStatus) && Objects.equals(certifications, service.certifications) && Objects.equals(standards, service.standards) && Objects.equals(openSourceTechnologies, service.openSourceTechnologies) && Objects.equals(version, service.version) && Objects.equals(lastUpdate, service.lastUpdate) && Objects.equals(changeLog, service.changeLog) && Objects.equals(requiredResources, service.requiredResources) && Objects.equals(relatedResources, service.relatedResources) && Objects.equals(relatedPlatforms, service.relatedPlatforms) && Objects.equals(catalogueId, service.catalogueId) && Objects.equals(fundingBody, service.fundingBody) && Objects.equals(fundingPrograms, service.fundingPrograms) && Objects.equals(grantProjectNames, service.grantProjectNames) && Objects.equals(helpdeskPage, service.helpdeskPage) && Objects.equals(userManual, service.userManual) && Objects.equals(termsOfUse, service.termsOfUse) && Objects.equals(privacyPolicy, service.privacyPolicy) && Objects.equals(accessPolicy, service.accessPolicy) && Objects.equals(resourceLevel, service.resourceLevel) && Objects.equals(trainingInformation, service.trainingInformation) && Objects.equals(statusMonitoring, service.statusMonitoring) && Objects.equals(maintenance, service.maintenance) && Objects.equals(orderType, service.orderType) && Objects.equals(order, service.order) && Objects.equals(paymentModel, service.paymentModel) && Objects.equals(pricing, service.pricing);
     }
 
     @Override
@@ -1140,4 +1089,5 @@ public class Service implements Identifiable {
     public void setPricing(URL pricing) {
         this.pricing = pricing;
     }
+
 }

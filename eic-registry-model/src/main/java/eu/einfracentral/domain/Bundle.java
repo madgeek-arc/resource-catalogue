@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -150,5 +151,18 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", latestOnboardingInfo=" + latestOnboardingInfo +
                 ", latestUpdateInfo=" + latestUpdateInfo +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Bundle)) return false;
+        Bundle<?> bundle = (Bundle<?>) o;
+        return active == bundle.active && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(payload, metadata, active, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo);
     }
 }

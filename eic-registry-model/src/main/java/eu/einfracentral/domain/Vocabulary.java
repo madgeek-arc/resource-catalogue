@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement
@@ -170,5 +171,18 @@ public class Vocabulary implements Identifiable {
 
     public void setExtras(Map<String, String> extras) {
         this.extras = extras;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vocabulary that = (Vocabulary) o;
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(parentId, that.parentId) && Objects.equals(type, that.type) && Objects.equals(extras, that.extras);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, parentId, type, extras);
     }
 }
