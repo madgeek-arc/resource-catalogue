@@ -131,7 +131,9 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Updates the Helpdesk with the given id.")
     @PutMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
-    public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
+                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         helpdeskBundle.setHelpdesk(helpdesk);
         helpdeskBundle = helpdeskService.update(helpdeskBundle, auth);
@@ -238,7 +240,9 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Updates the Monitoring with the given id.")
     @PutMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
-    public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring,
+                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                       @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         monitoringBundle.setMonitoring(monitoring);
         monitoringBundle = monitoringService.update(monitoringBundle, auth);
