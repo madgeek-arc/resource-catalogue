@@ -207,15 +207,17 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             existingService.getService().setVersion(null);
         }
 
+        User user = User.of(auth);
+
         // update existing service serviceMetadata
-        infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), User.of(auth).getFullName()));
+        infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
         // update VS version update
         if (((infraService.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
                 (infraService.getService().getVersion().equals(existingService.getService().getVersion()))){
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED.getKey(), comment);
             if (existingService.getLoggingInfo() != null){
                 loggingInfoList = existingService.getLoggingInfo();
@@ -225,7 +227,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 loggingInfoList.add(loggingInfo);
             }
         } else{
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
             loggingInfoList.add(loggingInfo);
         }
@@ -406,10 +408,12 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
+        User user = User.of(auth);
+
         if (infraService.getLoggingInfo() != null) {
             loggingInfoList = infraService.getLoggingInfo();
         } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
             loggingInfoList.add(oldProviderRegistration);
         }
@@ -420,7 +424,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 break;
             case "approved resource":
                 infraService.setActive(active);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                         LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
@@ -434,7 +438,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 break;
             case "rejected resource":
                 infraService.setActive(false);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                         LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
@@ -529,13 +533,15 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
         }
         service.setActive(active);
+
+        User user = User.of(auth);
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;
         if (active){
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
         } else{
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
         }
         if (service.getLoggingInfo() != null){
@@ -543,7 +549,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             loggingInfoList.add(loggingInfo);
         }
         else{
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
             loggingInfoList.add(oldServiceRegistration);
             loggingInfoList.add(loggingInfo);
@@ -560,17 +566,18 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         InfraService service = get(serviceId, "eosc");
+        User user = User.of(auth);
         LoggingInfo loggingInfo; // TODO: extract method
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (service.getLoggingInfo() != null) {
             loggingInfoList = service.getLoggingInfo();
         } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
             loggingInfoList.add(oldServiceRegistration);
         }
 
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
         loggingInfoList.add(loggingInfo);
         service.setLoggingInfo(loggingInfoList);
 
@@ -761,14 +768,16 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ProviderBundle newProvider = providerService.get(newProviderId);
         ProviderBundle oldProvider =  providerService.get(infraService.getService().getResourceOrganisation());
 
+        User user = User.of(auth);
+
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
         LoggingInfo loggingInfo;
         if (comment == null || comment == ""){
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
         } else{
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
         }
         loggingInfoList.add(loggingInfo);
@@ -777,7 +786,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         // update metadata
         Metadata metadata = infraService.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy( User.of(auth).getFullName());
+        metadata.setModifiedBy(user.getFullName());
         metadata.setTerms(null);
         infraService.setMetadata(metadata);
 

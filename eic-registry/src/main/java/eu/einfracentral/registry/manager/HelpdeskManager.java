@@ -53,7 +53,6 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    @CacheEvict(value = CACHE_HELPDESKS, allEntries = true)
     public HelpdeskBundle add(HelpdeskBundle helpdesk, Authentication auth) {
 
         // check if Service exists and if it has already a Helpdesk registered
@@ -83,7 +82,6 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    @CacheEvict(value = CACHE_HELPDESKS, allEntries = true)
     public HelpdeskBundle update(HelpdeskBundle helpdesk, Authentication auth) {
 
         logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdesk.getId());
@@ -124,7 +122,6 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         return helpdesk;
     }
 
-    @CacheEvict(value = CACHE_HELPDESKS, allEntries = true)
     public void delete(HelpdeskBundle helpdesk, Authentication auth) {
         logger.trace("User '{}' is attempting to delete the Helpdesk with id '{}'", auth, helpdesk.getId());
 

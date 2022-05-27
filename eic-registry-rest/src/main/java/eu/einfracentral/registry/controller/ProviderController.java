@@ -217,8 +217,7 @@ public class ProviderController {
         if (catalogue_id != null) {
             ff.addFilter("catalogue_id", catalogue_id);
         }
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
+
         List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
         Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
@@ -228,9 +227,9 @@ public class ProviderController {
             }
         }
         if (auditState == null){
-            return ResponseEntity.ok(providerManager.createCorrectQuantityFacets(ret, retPaging, quantity, from));
+            return ResponseEntity.ok(providerManager.createCorrectQuantityFacets(ret, retPaging, ff.getQuantity(), ff.getFrom()));
         } else{
-            Paging<ProviderBundle> retWithAuditState = providerManager.determineAuditState(auditState, ff, quantity, from, ret, auth);
+            Paging<ProviderBundle> retWithAuditState = providerManager.determineAuditState(auditState, ff, ret, auth);
             return ResponseEntity.ok(retWithAuditState);
         }
     }

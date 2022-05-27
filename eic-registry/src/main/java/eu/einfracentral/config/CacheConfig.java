@@ -31,10 +31,7 @@ public class CacheConfig {
     public static final String CACHE_EVENTS = "events";
     public static final String CACHE_SERVICE_EVENTS = "service_events";
     public static final String CACHE_VISITS = "visits";
-    public static final String CACHE_CATALOGUES = "catalogues";
     public static final String CACHE_DATASOURCES = "datasources";
-    public static final String CACHE_HELPDESKS = "helpdesks";
-    public static final String CACHE_MONITORINGS = "monitorings";
 
     protected RestTemplate restTemplate;
 
@@ -47,16 +44,19 @@ public class CacheConfig {
                 new ConcurrentMapCache(CACHE_VISITS,
                         CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(2000).build().asMap(), false),
                 new ConcurrentMapCache(CACHE_FEATURED,
-                        CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).maximumSize(50).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_PROVIDERS),
-                new ConcurrentMapCache(CACHE_EVENTS),
-                new ConcurrentMapCache(CACHE_SERVICE_EVENTS),
-                new ConcurrentMapCache(CACHE_VOCABULARIES),
-                new ConcurrentMapCache(CACHE_VOCABULARY_MAP),
-                new ConcurrentMapCache(CACHE_VOCABULARY_TREE),
-                new ConcurrentMapCache(CACHE_CATALOGUES),
-                new ConcurrentMapCache(CACHE_HELPDESKS),
-                new ConcurrentMapCache(CACHE_MONITORINGS),
+                        CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).maximumSize(5).build().asMap(), false),
+                new ConcurrentMapCache(CACHE_PROVIDERS,
+                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(10).build().asMap(), false),
+                new ConcurrentMapCache(CACHE_EVENTS,
+                        CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).maximumSize(1000).build().asMap(), false),
+                new ConcurrentMapCache(CACHE_SERVICE_EVENTS,
+                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(1000).build().asMap(), false),
+                new ConcurrentMapCache(CACHE_VOCABULARIES,
+                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(50).build().asMap(), false),
+                new ConcurrentMapCache(CACHE_VOCABULARY_MAP,
+                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(50).build().asMap(), false),
+                new ConcurrentMapCache(CACHE_VOCABULARY_TREE,
+                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(50).build().asMap(), false),
 
                 // NEEDED FOR registry-core
                 new ConcurrentMapCache("resourceTypes"),

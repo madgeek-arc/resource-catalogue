@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_MONITORINGS;
 
 @org.springframework.stereotype.Service("monitoringManager")
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
@@ -51,7 +50,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     @Override
-    @CacheEvict(value = CACHE_MONITORINGS, allEntries = true)
     public MonitoringBundle add(MonitoringBundle monitoring, Authentication auth) {
 
         // check if Service exists and if User belongs to Service's Provider Admins
@@ -85,7 +83,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     @Override
-    @CacheEvict(value = CACHE_MONITORINGS, allEntries = true)
     public MonitoringBundle update(MonitoringBundle monitoring, Authentication auth) {
 
         logger.trace("User '{}' is attempting to update the Monitoring with id '{}'", auth, monitoring.getId());
@@ -126,7 +123,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         return monitoring;
     }
 
-    @CacheEvict(value = CACHE_MONITORINGS, allEntries = true)
     public void delete(MonitoringBundle monitoring, Authentication auth) {
         logger.trace("User '{}' is attempting to delete the Monitoring with id '{}'", auth, monitoring.getId());
 

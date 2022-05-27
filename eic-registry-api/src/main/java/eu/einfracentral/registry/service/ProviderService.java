@@ -111,13 +111,11 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * @param auditState
      * @param ff
-     * @param quantity
-     * @param from
      * @param ret
      * @param auth
      * @return
      */
-    Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, int quantity, int from, List<ProviderBundle> ret, Authentication auth);
+    Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, List<ProviderBundle> ret, Authentication auth);
 
     /**
      * @param ff

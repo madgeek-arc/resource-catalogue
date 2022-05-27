@@ -208,38 +208,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return deserialize(resource);
     }
 
-    @Cacheable(value = CACHE_PROVIDERS)
-    public ProviderBundle getCatalogueProvider(String id, String catalogueId, Authentication auth) {
-        ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
-        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        if (providerBundle == null) {
-            throw new eu.einfracentral.exception.ResourceNotFoundException(
-                    String.format("Could not find provider with id: %s", id));
-        }
-        if (catalogueBundle == null) {
-            throw new eu.einfracentral.exception.ResourceNotFoundException(
-                    String.format("Could not find catalogue with id: %s", catalogueId));
-        }
-        if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
-            throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", id, catalogueId));
-        }
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            //TODO: userIsCatalogueAdmin -> transcationRollback error
-            // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, id)) {
-                return providerBundle;
-            }
-        }
-        // else return the Provider ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
-            return providerBundle;
-        }
-        throw new ValidationException("You cannot view the specific Provider");
-    }
-
-    @Cacheable(value = CACHE_PROVIDERS)
+    @Cacheable(value = CACHE_PROVIDERS, key = "#catalogueId+#providerId+(#auth!=null?#auth:'')")
     public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
@@ -270,7 +239,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
+    @Cacheable(value = CACHE_PROVIDERS, key = "#id+(#auth!=null?#auth:'')")
     public ProviderBundle get(String id, Authentication auth) {
         ProviderBundle providerBundle = get(id);
         if (auth != null && auth.isAuthenticated()) {
@@ -335,7 +304,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
+    @Cacheable(value = CACHE_PROVIDERS, key="#ff.hashCode()+(#auth!=null?#auth.hashCode():0)")
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> userProviders = null;
         List<ProviderBundle> retList = new ArrayList<>();
@@ -519,7 +488,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
+    @Cacheable(value = CACHE_PROVIDERS, key = "#email+(#auth!=null?#auth:'')")
     public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
@@ -551,7 +520,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
+    @Cacheable(value = CACHE_PROVIDERS, key = "(#auth!=null?#auth:'')")
     public List<ProviderBundle> getMyServiceProviders(Authentication auth) {
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
@@ -812,7 +781,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return super.update(provider, auth);
     }
 
-    @Cacheable(value = CACHE_PROVIDERS)
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
@@ -856,7 +824,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return null;
     }
 
-    public Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, int quantity, int from, List<ProviderBundle> providers, Authentication auth) {
+    public Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, List<ProviderBundle> providers, Authentication auth) {
         List<ProviderBundle> valid = new ArrayList<>();
         List<ProviderBundle> notAudited = new ArrayList<>();
         List<ProviderBundle> invalidAndUpdated = new ArrayList<>();
@@ -908,10 +876,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
             }
         }
-        return createCorrectQuantityFacets(ret, retPaging, quantity, from);
+        return createCorrectQuantityFacets(ret, retPaging, ff.getQuantity(), ff.getFrom());
     }
 
-    @Cacheable(value = CACHE_PROVIDERS)
     public Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging,
                                                         int quantity, int from){
         if (!providerBundle.isEmpty()) {
@@ -965,7 +932,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providerBundlePaging;
     }
 
-    @Cacheable(value = CACHE_PROVIDERS)
+    // TODO: refactor / delete?...
     public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff, String orderDirection, String orderField){
         String keyword = ff.getKeyword();
         Map<String, Object> order = ff.getOrderBy();

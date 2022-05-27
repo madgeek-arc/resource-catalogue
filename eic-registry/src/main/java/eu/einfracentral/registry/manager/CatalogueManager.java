@@ -31,7 +31,6 @@ import javax.sql.DataSource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static eu.einfracentral.config.CacheConfig.CACHE_CATALOGUES;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @Service("catalogueManager")
@@ -43,7 +42,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final IdCreator idCreator;
     private final JmsTemplate jmsTopicTemplate;
     private final FieldValidator fieldValidator;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
     private final String columnsOfInterest = "catalogue_id, name, abbreviation, affiliations, tags, networks," +
@@ -53,7 +51,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueManager(IdCreator idCreator, JmsTemplate jmsTopicTemplate, DataSource dataSource,
                             @Lazy FieldValidator fieldValidator,
                             @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                            @Lazy ProviderService<ProviderBundle, Authentication> providerService,
                             @Lazy RegistrationMailService registrationMailService) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
@@ -61,7 +58,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.idCreator = idCreator;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.fieldValidator = fieldValidator;
-        this.providerService = providerService;
         this.dataSource = dataSource;
         this.registrationMailService = registrationMailService;
     }
@@ -72,7 +68,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_CATALOGUES)
     public CatalogueBundle get(String id) {
         CatalogueBundle catalogue = super.get(id);
         if (catalogue == null) {
@@ -83,7 +78,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_CATALOGUES)
     public CatalogueBundle get(String id, Authentication auth) {
         CatalogueBundle catalogueBundle = get(id);
         if (auth != null && auth.isAuthenticated()) {
@@ -111,7 +105,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_CATALOGUES)
     public Browsing<CatalogueBundle> getAll(FacetFilter ff, Authentication auth) {
         List<CatalogueBundle> userCatalogues = null;
         List<CatalogueBundle> retList = new ArrayList<>();
@@ -155,7 +148,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @CacheEvict(value = CACHE_CATALOGUES, allEntries = true)
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
         if (catalogue.getId() == null || catalogue.getId().equals("")){
@@ -193,7 +185,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return ret;
     }
 
-    @CacheEvict(value = CACHE_CATALOGUES, allEntries = true)
     public CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogue);
         validate(catalogue);
@@ -259,7 +250,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_CATALOGUES)
     public List<CatalogueBundle> getMyCatalogues(Authentication auth) {
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
@@ -366,7 +356,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @CacheEvict(value = CACHE_CATALOGUES, allEntries = true)
     public CatalogueBundle verifyCatalogue(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Catalogue state")) {
@@ -419,7 +408,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    @CacheEvict(value = CACHE_CATALOGUES, allEntries = true)
     public CatalogueBundle publish(String catalogueId, Boolean active, Authentication auth) {
         CatalogueBundle catalogue = get(catalogueId);
         if ((catalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
@@ -462,7 +450,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return super.update(catalogue, auth);
     }
 
-    @Cacheable(value = CACHE_CATALOGUES)
     public List<Map<String, Object>> createQueryForCatalogueFilters (FacetFilter ff, String orderDirection, String orderField){
         String keyword = ff.getKeyword();
         Map<String, Object> order = ff.getOrderBy();
@@ -519,7 +506,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
-    @Cacheable(value = CACHE_CATALOGUES)
     public Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging,
                                                               int quantity, int from){
         if (!catalogueBundle.isEmpty()) {
