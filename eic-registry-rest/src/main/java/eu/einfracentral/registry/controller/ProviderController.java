@@ -55,7 +55,7 @@ public class ProviderController {
     public ResponseEntity<Provider> delete(@PathVariable("id") String id,
                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                            @ApiIgnore Authentication auth) {
-        ProviderBundle provider = providerManager.get(id, catalogueId);
+        ProviderBundle provider = providerManager.get(catalogueId, id, auth);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
