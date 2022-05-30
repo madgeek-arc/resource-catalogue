@@ -278,8 +278,8 @@ public class RegistrationMailService {
                 root.put("providerBundle", providerBundle);
                 for (User user : providerBundle.getProvider().getUsers()) {
                     root.put("user", user);
-                    String recipient = "provider";
-                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), recipient);
+                    String userRole = "provider";
+                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), userRole);
                 }
             }
         }
@@ -299,8 +299,8 @@ public class RegistrationMailService {
         root.put("infraService", infraService);
         for (User user : providerBundle.getProvider().getUsers()) {
             root.put("user", user);
-            String recipient = "provider";
-            sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), recipient);
+            String userRole = "provider";
+            sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
         }
     }
 
@@ -316,7 +316,7 @@ public class RegistrationMailService {
         }
         String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, infraService.getService().getName(),
                 oldProvider.getProvider().getName(), newProvider.getProvider().getName());
-        String recipient = "provider";
+        String userRole = "provider";
         root.put("oldProvider", oldProvider);
         root.put("newProvider", newProvider);
         root.put("infraService", infraService);
@@ -325,22 +325,22 @@ public class RegistrationMailService {
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail(), recipient);
+            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
         }
 //        root.remove("user");
 
         // emails to new Provider's Users
         for (User user : newProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail(), recipient);
+            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
         }
 
         // emails to Admins
-        recipient = "admin";
+        userRole = "admin";
         root.put("adminFullName", User.of(auth).getFullName());
         root.put("adminEmail", User.of(auth).getEmail());
         root.put("adminRole", securityService.getRoleName(auth));
-        sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, recipient);
+        sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
     }
 
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
@@ -368,8 +368,8 @@ public class RegistrationMailService {
 
         String subject = String.format("[%s] Some new Providers are pending for your approval", projectName);
         if (!providersWaitingForInitialApproval.isEmpty() || !providersWaitingForSTApproval.isEmpty()) {
-            String recipient = "admin";
-            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail, recipient);
+            String userRole = "admin";
+            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail, userRole);
         }
     }
 
@@ -501,16 +501,24 @@ public class RegistrationMailService {
         root.put("loggingInfoServiceMap", loggingInfoServiceMap);
 
         String subject = String.format("[%s] Daily Notification - Changes to Resources", projectName);
-        String recipient = "admin";
-        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail, recipient);
+        String userRole = "admin";
+        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail, userRole);
     }
 
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, String recipient) {
-        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), recipient);
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, String userRole) {
+        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), userRole);
     }
 
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails, String recipient) {
-        if (emails == null || emails.isEmpty()) {
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, List<String> cc, String userRole) {
+        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), cc, userRole);
+    }
+
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails, String userRole) {
+        sendMailsFromTemplate(templateName, root, subject, emails, null, userRole);
+    }
+
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> to, List<String> cc, String userRole) {
+        if (to == null || to.isEmpty()) {
             logger.error("emails empty or null");
             return;
         }
@@ -519,17 +527,17 @@ public class RegistrationMailService {
             temp.process(root, out);
             String mailBody = out.getBuffer().toString();
 
-            if (enableEmailAdminNotifications && recipient.equals("admin")) {
-                if (root.get("cc") != null){
-                    mailService.sendMail(emails, Collections.singletonList(root.get("cc").toString()), subject, mailBody);
+            if (enableEmailAdminNotifications && userRole.equals("admin")) {
+                if (cc != null && !cc.isEmpty()){
+                    mailService.sendMail(to, cc, subject, mailBody);
                 } else{
-                    mailService.sendMail(emails, subject, mailBody);
+                    mailService.sendMail(to, subject, mailBody);
                 }
             }
-            if (enableEmailProviderNotifications && recipient.equals("provider")) {
-                mailService.sendMail(emails, subject, mailBody);
+            if (enableEmailProviderNotifications && userRole.equals("provider")) {
+                mailService.sendMail(to, subject, mailBody);
             }
-            logger.info("\nRecipients: {}\nTitle: {}\nMail body: \n{}", String.join(", ", emails), subject, mailBody);
+            logger.info("\nRecipients: {}\nCC: {}\nTitle: {}\nMail body: \n{}", String.join(", ", to), cc, subject, mailBody);
 
         } catch (IOException e) {
             logger.error("Error finding mail template '{}'", templateName, e);
@@ -754,15 +762,15 @@ public class RegistrationMailService {
         if (admins == null){
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
-                String recipient = "provider";
-                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), recipient);
+                String userRole = "provider";
+                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
             }
         } else {
             for (User user : providerBundle.getProvider().getUsers()) {
                 if (admins.contains(user.getEmail())){
                     root.put("user", user);
-                    String recipient = "provider";
-                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), recipient);
+                    String userRole = "provider";
+                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
                 }
             }
         }
@@ -780,8 +788,8 @@ public class RegistrationMailService {
         for (User user : providerBundle.getProvider().getUsers()) {
             if (admins.contains(user.getEmail())){
                 root.put("user", user);
-                String recipient = "provider";
-                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail(), recipient);
+                String userRole = "provider";
+                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
             }
         }
     }
@@ -798,15 +806,15 @@ public class RegistrationMailService {
         if (admins == null){
             for (User user : catalogueBundle.getCatalogue().getUsers()) {
                 root.put("user", user);
-                String recipient = "provider";
-                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), recipient);
+                String userRole = "provider";
+                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
             }
         } else {
             for (User user : catalogueBundle.getCatalogue().getUsers()) {
                 if (admins.contains(user.getEmail())){
                     root.put("user", user);
-                    String recipient = "provider";
-                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), recipient);
+                    String userRole = "provider";
+                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
                 }
             }
         }
@@ -824,8 +832,8 @@ public class RegistrationMailService {
         for (User user : catalogueBundle.getCatalogue().getUsers()) {
             if (admins.contains(user.getEmail())){
                 root.put("user", user);
-                String recipient = "provider";
-                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail(), recipient);
+                String userRole = "provider";
+                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
             }
         }
     }
@@ -837,8 +845,8 @@ public class RegistrationMailService {
         root.put("providerBundle", provider);
 
         String subject = String.format("[%s] Provider Deletion Request", projectName);
-        String recipient = "admin";
-        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail, recipient);
+        String userRole = "admin";
+        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail, userRole);
     }
 
     public void notifyProviderAdmins(ProviderBundle provider){
@@ -850,8 +858,8 @@ public class RegistrationMailService {
                 provider.getProvider().getId(), provider.getProvider().getName());
         for (User user : provider.getProvider().getUsers()){
             root.put("user", user);
-            String recipient = "provider";
-            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail(), recipient);
+            String userRole = "provider";
+            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail(), userRole);
         }
     }
 
@@ -865,14 +873,14 @@ public class RegistrationMailService {
         // send email to User
         String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        String recipient = "provider";
-        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
+        String userRole = "provider";
+        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
 
         // send email to Admins
         String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        recipient = "admin";
-        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail, recipient);
+        userRole = "admin";
+        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail, userRole);
     }
 
     public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration){
@@ -885,14 +893,14 @@ public class RegistrationMailService {
             // send email of Approval
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            String recipient = "provider";
-            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
+            String userRole = "provider";
+            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
         } else{
             // send email of Rejection
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            String recipient = "provider";
-            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), recipient);
+            String userRole = "provider";
+            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
         }
     }
 
@@ -907,8 +915,8 @@ public class RegistrationMailService {
 
         for (User user : providerBundle.getProvider().getUsers()) {
             root.put("user", user);
-            String recipient = "provider";
-            sendMailsFromTemplate("providerAudit.ftl", root, subject, user.getEmail(), recipient);
+            String userRole = "provider";
+            sendMailsFromTemplate("providerAudit.ftl", root, subject, user.getEmail(), userRole);
         }
     }
 
@@ -925,8 +933,8 @@ public class RegistrationMailService {
 
         for (User user : providerBundle.getProvider().getUsers()) {
             root.put("user", user);
-            String recipient = "provider";
-            sendMailsFromTemplate("resourceAudit.ftl", root, subject, user.getEmail(), recipient);
+            String userRole = "provider";
+            sendMailsFromTemplate("resourceAudit.ftl", root, subject, user.getEmail(), userRole);
         }
     }
 
@@ -939,8 +947,8 @@ public class RegistrationMailService {
 
         // send email to Admins
         String subject = String.format("[%s Portal] The Provider [%s] previously marked as [invalid] has been updated", projectName, providerBundle.getProvider().getName());
-        String recipient = "admin";
-        sendMailsFromTemplate("invalidProviderUpdate.ftl", root, subject, registrationEmail, recipient);
+        String userRole = "admin";
+        sendMailsFromTemplate("invalidProviderUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
     public void notifyPortalAdminsForInvalidCatalogueUpdate(CatalogueBundle catalogueBundle) {
@@ -952,8 +960,8 @@ public class RegistrationMailService {
 
         // send email to Admins
         String subject = String.format("[%s Portal] The Catalogue [%s] previously marked as [invalid] has been updated", projectName, catalogueBundle.getCatalogue().getName());
-        String recipient = "admin";
-        sendMailsFromTemplate("invalidCatalogueUpdate.ftl", root, subject, registrationEmail, recipient);
+        String userRole = "admin";
+        sendMailsFromTemplate("invalidCatalogueUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
     public void notifyPortalAdminsForInvalidResourceUpdate(InfraService infraService) {
@@ -965,8 +973,8 @@ public class RegistrationMailService {
 
         // send email to Admins
         String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, infraService.getService().getName());
-        String recipient = "admin";
-        sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, recipient);
+        String userRole = "admin";
+        sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
     public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String action){
@@ -974,18 +982,17 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         root.put("helpdeskBundle", helpdeskBundle);
-        root.put("cc", helpdeskCC);
         root.put("action", action);
 
         // send email to help@eosc-future.eu
-        String recipient = "admin";
+        String userRole = "admin";
         String subject = "";
         if (action.equals("post")){
             subject = String.format("[%s Portal] The Service [%s] has created a new Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
         } else{
             subject = String.format("[%s Portal] The Service [%s] updated its Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
         }
-        sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, helpdeskEmail, recipient);
+        sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, helpdeskEmail, Collections.singletonList(helpdeskCC), userRole);
     }
 
     public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String action){
@@ -996,13 +1003,13 @@ public class RegistrationMailService {
         root.put("action", action);
 
         // send email to argo@einfra.grnet.gr
-        String recipient = "admin";
+        String userRole = "admin";
         String subject = "";
         if (action.equals("post")){
             subject = String.format("[%s Portal] The Service [%s] has created a new Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
         } else{
             subject = String.format("[%s Portal] The Service [%s] updated its Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
         }
-        sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, monitoringEmail, recipient);
+        sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, monitoringEmail, userRole);
     }
 }
