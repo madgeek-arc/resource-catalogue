@@ -57,6 +57,9 @@ public class RegistrationMailService {
     @Value("${project.helpdesk.email}")
     private String helpdeskEmail;
 
+    @Value("${project.helpdesk.cc}")
+    private String helpdeskCC;
+
     @Value("${project.monitoring.email}")
     private String monitoringEmail;
 
@@ -517,7 +520,11 @@ public class RegistrationMailService {
             String mailBody = out.getBuffer().toString();
 
             if (enableEmailAdminNotifications && recipient.equals("admin")) {
-                mailService.sendMail(emails, subject, mailBody);
+                if (root.get("cc") != null){
+                    mailService.sendMail(emails, Collections.singletonList(root.get("cc").toString()), subject, mailBody);
+                } else{
+                    mailService.sendMail(emails, subject, mailBody);
+                }
             }
             if (enableEmailProviderNotifications && recipient.equals("provider")) {
                 mailService.sendMail(emails, subject, mailBody);
@@ -967,6 +974,7 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         root.put("helpdeskBundle", helpdeskBundle);
+        root.put("cc", helpdeskCC);
         root.put("action", action);
 
         // send email to help@eosc-future.eu
