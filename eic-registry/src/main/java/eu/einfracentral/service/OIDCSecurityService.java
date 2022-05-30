@@ -44,7 +44,7 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${project.name:}")
     private String projectName;
 
-    @Value("${mail.smtp.user:}")
+    @Value("${mail.smtp.from:}")
     private String projectEmail;
 
     @Autowired

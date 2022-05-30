@@ -29,6 +29,9 @@ public class SimpleMailService implements MailService {
     @Value("${mail.smtp.host}")
     String host;
 
+    @Value("${mail.smtp.from}")
+    String from;
+
     @Value("${mail.smtp.user}")
     String user;
 
@@ -57,6 +60,7 @@ public class SimpleMailService implements MailService {
         sessionProps.setProperty("mail.smtp.port", port);
         sessionProps.setProperty("mail.smtp.ssl.enable", ssl);
         sessionProps.setProperty("mail.smtp.user", user);
+        sessionProps.setProperty("mail.smtp.from", from);
         session = Session.getInstance(sessionProps, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -72,7 +76,7 @@ public class SimpleMailService implements MailService {
             Transport transport = null;
             try {
                 transport = session.getTransport();
-                InternetAddress sender = new InternetAddress(user);
+                InternetAddress sender = new InternetAddress(from);
                 Message message = new MimeMessage(session);
                 message.setFrom(sender);
                 if (to != null) {
