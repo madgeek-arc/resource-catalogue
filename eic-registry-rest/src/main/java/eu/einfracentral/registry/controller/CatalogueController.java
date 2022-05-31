@@ -301,6 +301,21 @@ public class CatalogueController {
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Deletes the Provider of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<Provider> deleteCatalogueProvider(@PathVariable("catalogueId") String catalogueId,
+                                           @PathVariable("id") String id,
+                                           @ApiIgnore Authentication auth) {
+        ProviderBundle provider = providerManager.get(catalogueId, id, auth);
+        if (provider == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        providerManager.delete(provider);
+        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
+        return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
+    }
+
     //SECTION: RESOURCE
     @ApiOperation(value = "Returns the Resource of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -341,5 +356,20 @@ public class CatalogueController {
     public ResponseEntity<Paging<InfraService>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
         Paging<InfraService> infraServices = infraServiceService.getInfraServices(catalogueId, providerId, auth);
         return new ResponseEntity<>(infraServices, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Deletes the Service of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
+                                           @PathVariable("id") String id,
+                                           @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InfraService infraService = infraServiceService.get(id, catalogueId);
+        if (infraService == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        infraServiceService.delete(infraService);
+        logger.info("User '{}' deleted the Service with name '{}' and id '{}'", auth.getName(), infraService.getService().getName(), infraService.getId());
+        return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
     }
 }

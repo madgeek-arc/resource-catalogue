@@ -63,7 +63,7 @@ public class ProviderController {
         if (!provider.getProvider().getCatalogueId().equals("eosc")){
             throw new ValidationException("You cannot delete a Provider of a non EOSC Catalogue.");
         }
-        logger.info("Deleting provider: {} of the catalogues: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
+        logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
         // delete all Provider's services
         List<InfraService> allProviderServices = infraServiceService.getInfraServices(id, auth);

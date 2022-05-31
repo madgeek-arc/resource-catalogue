@@ -140,10 +140,11 @@ public class ServiceExtensionsController {
         logger.info("User '{}' updated the Helpdesk with id '{}'", auth.getName(), helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
-    // Deletes the Helpdesk of the given Service ID of the given Catalogue.
+
+    // Deletes the Helpdesk with the specific ID.
     @DeleteMapping(path = "/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Helpdesk> deleteHelpdeskById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (helpdeskBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -154,6 +155,27 @@ public class ServiceExtensionsController {
         logger.info("User '{}' deleted the Helpdesk with id '{}' of the Catalogue '{}'", auth.getName(), helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
+
+    // Deletes the Helpdesk of the specific Service of the specific Catalogue.
+    @ApiOperation(value = "Deletes the Helpdesk of the specific Service of the specific Catalogue.")
+    @DeleteMapping(path = "/helpdesk/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("catalogueId") String catalogueId,
+                                                   @PathVariable("serviceId") String serviceId,
+                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        Helpdesk helpdesk = getHelpdeskByServiceId(serviceId, catalogueId, auth).getBody();
+        assert helpdesk != null;
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
+        if (helpdeskBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        logger.info("Deleting Helpdesk: {} of the Catalogue: {}", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
+        // delete Helpdesk
+        helpdeskService.delete(helpdeskBundle);
+        logger.info("User '{}' deleted the Helpdesk with id '{}' of the Catalogue '{}'", auth.getName(), helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
+        return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
+    }
+
 
 
     //SECTION: MONITORING
@@ -253,8 +275,28 @@ public class ServiceExtensionsController {
     // Deletes the Helpdesk of the given Service ID of the given Catalogue.
     @DeleteMapping(path = "/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Monitoring> deleteMonitoringById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         MonitoringBundle monitoringBundle = monitoringService.get(id);
+        if (monitoringBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        logger.info("Deleting Monitoring: {} of the Catalogue: {}", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
+        // delete Monitoring
+        monitoringService.delete(monitoringBundle);
+        logger.info("User '{}' deleted the Monitoring with id '{}' of the Catalogue '{}'", auth.getName(), monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
+        return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
+    }
+
+    // Deletes the Monitoring of the specific Service of the specific Catalogue.
+    @ApiOperation(value = "Deletes the Monitoring of the specific Service of the specific Catalogue.")
+    @DeleteMapping(path = "/monitoring/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,
+                                                   @PathVariable("serviceId") String serviceId,
+                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        Monitoring monitoring = getMonitoringByServiceId(serviceId, catalogueId, auth).getBody();
+        assert monitoring != null;
+        MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         if (monitoringBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

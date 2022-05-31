@@ -8,6 +8,8 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static eu.einfracentral.validators.ValidationMessagesUtils.mandatoryField;
 
@@ -65,7 +67,13 @@ public class HelpdeskValidator implements Validator {
             field.setAccessible(true);
             Object fieldValue = field.get(target);
             if (fieldValue != null && !fieldValue.equals("")) {
-                errors.rejectValue(fieldName, fieldName + ".non-empty", notAcceptableField(fieldName, type));
+                if (fieldValue instanceof ArrayList){ // front may return a 0 items list (non-empty)
+                    if (!((ArrayList<?>) fieldValue).isEmpty()){
+                        errors.rejectValue(fieldName, fieldName + ".non-empty", notAcceptableField(fieldName, type));
+                    }
+                } else{
+                    errors.rejectValue(fieldName, fieldName + ".non-empty", notAcceptableField(fieldName, type));
+                }
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             logger.error(e);
