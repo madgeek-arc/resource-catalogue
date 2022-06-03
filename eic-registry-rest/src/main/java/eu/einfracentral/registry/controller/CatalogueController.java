@@ -72,7 +72,7 @@ public class CatalogueController {
     //    @Override
     @ApiOperation(value = "Updates a specific Catalogue")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#provider.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#catalogue.id)")
     public ResponseEntity<Catalogue> updateCatalogue(@RequestBody Catalogue catalogue, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         CatalogueBundle catalogueBundle = catalogueManager.get(catalogue.getId(), auth);
         catalogueBundle.setCatalogue(catalogue);
@@ -207,6 +207,20 @@ public class CatalogueController {
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public void adminAcceptedTerms(@RequestParam String catalogueId, @ApiIgnore Authentication authentication) {
         catalogueManager.adminAcceptedTerms(catalogueId, authentication);
+    }
+
+    @ApiOperation(value = "Deletes the Catalogue with the given id.")
+    @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Catalogue> deleteCatalogue(@PathVariable("id") String id,
+                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        CatalogueBundle catalogueBundle = getCatalogueBundle(id, auth).getBody();
+        if (catalogueBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        catalogueManager.delete(catalogueBundle);
+        logger.info("User '{}' deleted the Catalogue with name '{}' and id '{}'", auth.getName(), catalogueBundle.getCatalogue().getName(), catalogueBundle.getId());
+        return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
     //SECTION: PROVIDER
