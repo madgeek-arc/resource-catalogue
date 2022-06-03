@@ -90,36 +90,6 @@ public abstract class AbstractDataSourceManager extends AbstractGenericService<D
     private List<String> browseBy;
     private Map<String, String> labels;
 
-    @PostConstruct
-    void initLabels() {
-        resourceType = resourceTypeService.getResourceType(getResourceType());
-        Set<String> browseSet = new HashSet<>();
-        Map<String, Set<String>> sets = new HashMap<>();
-        labels = new HashMap<>();
-        labels.put("resourceType", "Resource Type");
-        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
-            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
-            labels.put(f.getName(), f.getLabel());
-            if (f.getLabel() != null) {
-                sets.get(f.getResourceType().getName()).add(f.getName());
-            }
-        }
-        boolean flag = true;
-        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
-            if (flag) {
-                browseSet.addAll(entry.getValue());
-                flag = false;
-            } else {
-                browseSet.retainAll(entry.getValue());
-            }
-        }
-        browseBy = new ArrayList<>();
-        browseBy.addAll(browseSet);
-        browseBy.add("resourceType");
-        java.util.Collections.sort(browseBy);
-        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
-    }
-
     @Override
     public String getResourceType() {
         return resourceType.getName();
