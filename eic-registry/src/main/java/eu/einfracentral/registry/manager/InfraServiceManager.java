@@ -53,10 +53,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
-    private final DataSource dataSource;
-    private final String columnsOfInterest = "infra_service_id, name, abbreviation, resource_organisation, resource_providers, subcategories," +
-            "scientific_subdomains, access_types, access_modes, language_availabilities, geographical_availabilities, resource_geographic_locations," +
-            "trl, life_cycle_status, funding_body, funding_programs, tagline, open_source_technologies, order_type, catalogue_id";
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
 
     @Value("${project.name:}")
@@ -71,7 +70,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                                @Lazy FieldValidator fieldValidator,
                                @Lazy SecurityService securityService,
                                @Lazy RegistrationMailService registrationMailService,
-                               @Lazy VocabularyService vocabularyService, @Lazy DataSource dataSource,
+                               @Lazy VocabularyService vocabularyService,
                                CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(InfraService.class);
         this.providerService = providerService; // for providers
@@ -81,7 +80,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
-        this.dataSource = dataSource;
         this.catalogueService = catalogueService;
     }
 
@@ -102,7 +100,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService addService(InfraService infraService, String catalogueId, Authentication auth) {
         if (catalogueId == null) { // add catalogue provider
-            infraService.getService().setCatalogueId("eosc");
+            infraService.getService().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
             checkCatalogueIdConsistency(infraService, catalogueId);
         }
@@ -182,7 +180,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         InfraService ret;
 
         if (catalogueId == null) {
-            infraService.getService().setCatalogueId("eosc");
+            infraService.getService().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(infraService, catalogueId);
         }
