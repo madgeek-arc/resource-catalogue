@@ -6,7 +6,7 @@ import org.piwik.java.tracking.PiwikTracker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 
 @Component
-public class MatomoInterceptor extends HandlerInterceptorAdapter {
+public class MatomoInterceptor implements AsyncHandlerInterceptor {
 
     private static Logger logger = Logger.getLogger(MatomoInterceptor.class);
 
@@ -39,7 +39,6 @@ public class MatomoInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        super.afterCompletion(request, response, handler, ex);
 
         if (piwikTracker != null) {
 

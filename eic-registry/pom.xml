@@ -230,7 +230,7 @@
         <dependency>
             <groupId>org.piwik.java.tracking</groupId>
             <artifactId>matomo-java-tracker</artifactId>
-            <version>1.5</version>
+            <version>1.7</version>
         </dependency>
       
         <dependency>
