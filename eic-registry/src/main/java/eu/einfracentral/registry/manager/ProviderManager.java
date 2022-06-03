@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -61,6 +62,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Qualifier("serviceSync")
     private final SynchronizerService<Service> synchronizerServiceResource;
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -139,7 +143,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
 
         if (catalogueId == null) {
-            provider.getProvider().setCatalogueId("eosc");
+            provider.getProvider().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(provider, catalogueId);
         }
@@ -1059,7 +1063,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setLoggingInfo(loggingInfoList);
         if (catalogueId == null) {
             // set catalogueId = eosc
-            provider.getProvider().setCatalogueId("eosc");
+            provider.getProvider().setCatalogueId(catalogueName);
             provider.setActive(false);
             provider.setStatus(vocabularyService.get("pending provider").getId());
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());

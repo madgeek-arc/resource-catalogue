@@ -18,6 +18,7 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -43,6 +44,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
@@ -100,7 +104,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         loggingInfoList.add(loggingInfo);
         providerBundle.setLoggingInfo(loggingInfoList);
 
-        providerBundle.getProvider().setCatalogueId("eosc");
+        providerBundle.getProvider().setCatalogueId(catalogueName);
 
         super.add(providerBundle, auth);
 
@@ -112,7 +116,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
         // block catalogueId updates from Provider Admins
-        providerBundle.getProvider().setCatalogueId("eosc");
+        providerBundle.getProvider().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         // get existing resource

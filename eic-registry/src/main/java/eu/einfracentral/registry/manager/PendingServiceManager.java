@@ -15,6 +15,7 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -35,6 +36,9 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final ProviderManager providerManager;
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -81,7 +85,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
             service.setLoggingInfo(loggingInfoList);
         }
 
-        service.getService().setCatalogueId("eosc");
+        service.getService().setCatalogueId(catalogueName);
         service.setActive(false);
         service.setLatest(true);
 
@@ -94,7 +98,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InfraService update(InfraService infraService, Authentication auth) {
         // block catalogueId updates from Provider Admins
-        infraService.getService().setCatalogueId("eosc");
+        infraService.getService().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, infraService.getId());
         infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
