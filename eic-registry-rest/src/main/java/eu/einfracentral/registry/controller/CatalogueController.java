@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -218,8 +219,37 @@ public class CatalogueController {
         if (catalogueBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(5000);
+        // Get all Catalogue's Providers
+        List<ProviderBundle> allProviders = providerManager.getAll(ff, auth).getResults();
+        List<ProviderBundle> allCatalogueProviders = new ArrayList<>();
+        for (ProviderBundle providerBundle : allProviders){
+            if (providerBundle.getProvider().getCatalogueId().equals(id)){
+                allCatalogueProviders.add(providerBundle);
+            }
+        }
+        // Get all Catalogue's Services
+        List<InfraService> allServices = infraServiceService.getAll(ff, auth).getResults();
+        List<InfraService> allCatalogueServices = new ArrayList<>();
+        for (InfraService infraService : allServices){
+            if (infraService.getService().getCatalogueId().equals(id)){
+                allCatalogueServices.add(infraService);
+            }
+        }
+        // Delete Catalogue along with all its related Resources
+        logger.info("Deleting all Catalogue's Providers...");
+        for (ProviderBundle providerBundle: allCatalogueProviders){
+            deleteCatalogueProvider(id, providerBundle.getId(), auth);
+        }
+        logger.info("Deleting all Catalogue's Services...");
+        for (InfraService infraService : allCatalogueServices){
+            deleteCatalogueService(id, infraService.getId(), auth);
+        }
+        logger.info("Deleting Catalogue...");
         catalogueManager.delete(catalogueBundle);
-        logger.info("User '{}' deleted the Catalogue with name '{}' and id '{}'", auth.getName(), catalogueBundle.getCatalogue().getName(), catalogueBundle.getId());
+        logger.info("User '{}' deleted the Catalogue with id '{}' and name '{} along with all its related Providers and Services'",
+                auth.getName(), catalogueBundle.getCatalogue().getId(), catalogueBundle.getCatalogue().getName());
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
