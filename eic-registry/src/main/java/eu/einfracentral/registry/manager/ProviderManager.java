@@ -60,9 +60,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private final SynchronizerService<Provider> synchronizerServiceProvider;
 
-    @Qualifier("serviceSync")
-    private final SynchronizerService<Service> synchronizerServiceResource;
-
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
@@ -75,7 +72,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            JmsTemplate jmsTopicTemplate, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
                            SynchronizerService<Provider> synchronizerServiceProvider,
-                           SynchronizerService<Service> synchronizerServiceResource,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ProviderBundle.class);
         this.infraServiceService = infraServiceService;
@@ -89,7 +85,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
         this.synchronizerServiceProvider = synchronizerServiceProvider;
-        this.synchronizerServiceResource = synchronizerServiceResource;
         this.catalogueService = catalogueService;
     }
 

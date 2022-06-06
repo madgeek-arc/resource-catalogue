@@ -13,7 +13,6 @@ import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
@@ -29,19 +28,16 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
     @Autowired
     public HelpdeskManager(InfraServiceService<InfraService, InfraService> infraServiceService,
-                           ProviderService<ProviderBundle, Authentication> providerService,
                            JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService) {
         super(HelpdeskBundle.class);
         this.infraServiceService = infraServiceService;
-        this.providerService = providerService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;

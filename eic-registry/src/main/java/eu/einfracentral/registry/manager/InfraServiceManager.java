@@ -16,11 +16,9 @@ import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
-import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
-import javax.sql.DataSource;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -56,13 +53,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
-
-
-    @Value("${project.name:}")
-    private String projectName;
-
-    @Autowired
-    private VersionService versionService;
 
     @Autowired
     public InfraServiceManager(ProviderService<ProviderBundle, Authentication> providerService,
