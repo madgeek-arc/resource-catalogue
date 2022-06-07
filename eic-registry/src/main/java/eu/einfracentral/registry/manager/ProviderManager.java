@@ -1002,6 +1002,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         // keyword on search bar
         if (keyword != null && !keyword.equals("")){
+            // escape single quote
+            keyword = keyword.replaceAll("'", "''");
             if (firstTime){
                 query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
             } else{
