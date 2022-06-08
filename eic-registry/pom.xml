@@ -1,15 +1,14 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>eu.einfracentral</groupId>
         <artifactId>eic</artifactId>
-        <version>3.0.1-SNAPSHOT</version>
+        <version>3.0.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>eic-registry</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.1</version>
     <packaging>war</packaging>
 
     <licenses>
@@ -23,7 +22,8 @@
         <connection>scm:git:git://github.com/eInfraCentral/eic-registry.git</connection>
         <developerConnection>scm:git:ssh://github.com/eInfraCentral/eic-registry.git</developerConnection>
         <url>https://github.com/eInfraCentral/eic-registry</url>
-    </scm>
+      <tag>v3.0.1</tag>
+  </scm>
 
     <properties>
         <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
@@ -36,7 +36,7 @@
                 <dependency>
                     <groupId>eu.einfracentral</groupId>
                     <artifactId>matomo-data-parser</artifactId>
-                    <version>3.0.1-SNAPSHOT</version>
+                    <version>3.0.1</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -46,7 +46,7 @@
                 <dependency>
                     <groupId>eu.einfracentral</groupId>
                     <artifactId>catris-recdb</artifactId>
-                    <version>3.0.1-SNAPSHOT</version>
+                    <version>3.0.1</version>
                 </dependency>
             </dependencies>
         </profile>

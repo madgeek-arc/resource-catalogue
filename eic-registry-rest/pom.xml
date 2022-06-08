@@ -1,15 +1,14 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>eu.einfracentral</groupId>
         <artifactId>eic</artifactId>
-        <version>3.0.1-SNAPSHOT</version>
+        <version>3.0.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>eic-registry-rest</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.1</version>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -20,7 +19,8 @@
         <connection>scm:git:git://github.com/eInfraCentral/eic-registry-rest.git</connection>
         <developerConnection>scm:git:ssh://github.com/eInfraCentral/eic-registry-rest.git</developerConnection>
         <url>https://github.com/eInfraCentral/eic-registry-rest.git</url>
-    </scm>
+      <tag>v3.0.1</tag>
+  </scm>
     <dependencies>
         <dependency>
             <groupId>eu.einfracentral</groupId>
