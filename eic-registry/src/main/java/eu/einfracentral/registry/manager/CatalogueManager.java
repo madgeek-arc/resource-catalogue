@@ -86,7 +86,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 return catalogueBundle;
             }
         }
-        // else return the Provider ONLY if he is active
+        // else return the Catalogue ONLY if it is active
         if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId())){
             return catalogueBundle;
         }

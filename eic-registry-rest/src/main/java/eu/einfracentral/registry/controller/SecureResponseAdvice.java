@@ -78,6 +78,10 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyRichService(t, auth);
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
+        } else if (t instanceof Catalogue) {
+            modifyCatalogue(t, auth);
+        } else if (t instanceof CatalogueBundle) {
+            modifyCatalogueBundle(t, auth);
         }
     }
 
@@ -128,6 +132,27 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             ((ProviderBundle) bundle).getProvider().setMainContact(null);
             ((ProviderBundle) bundle).getProvider().setUsers(null);
             ((ProviderBundle) bundle).getMetadata().setTerms(null);
+        }
+    }
+
+    private void modifyCatalogue(T catalogue, Authentication auth) {
+        if(!this.securityService.isCatalogueAdmin(auth, ((Catalogue) catalogue).getId(), true)) {
+            ((Catalogue) catalogue).setMainContact(null);
+            ((Catalogue) catalogue).setUsers(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyCatalogueBundle(T bundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((CatalogueBundle) bundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestOnboardingInfo());
+
+        if(!this.securityService.isCatalogueAdmin(auth, ((CatalogueBundle) bundle).getId(), true)) {
+            ((CatalogueBundle) bundle).getCatalogue().setMainContact(null);
+            ((CatalogueBundle) bundle).getCatalogue().setUsers(null);
+            ((CatalogueBundle) bundle).getMetadata().setTerms(null);
         }
     }
 

@@ -9,11 +9,8 @@ import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.PendingResourceService;
-import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +26,6 @@ import java.util.*;
 
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
-
-    private static final Logger logger = LogManager.getLogger(OIDCSecurityService.class);
 
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;

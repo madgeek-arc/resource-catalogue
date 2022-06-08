@@ -1,8 +1,11 @@
 package eu.einfracentral.config.security;
 
 import com.nimbusds.jwt.JWT;
+import eu.einfracentral.domain.Catalogue;
+import eu.einfracentral.domain.CatalogueBundle;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AuthoritiesMapper;
@@ -38,6 +41,8 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
     private final int maxQuantity;
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
+
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PendingResourceService<ProviderBundle> pendingProviderService;
     private final SecurityService securityService;
 
@@ -46,9 +51,11 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
                                 @Value("${project.admins.epot}") String epotAdmins,
                                 @Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                 ProviderService<ProviderBundle, Authentication> manager,
+                                CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 PendingResourceService<ProviderBundle> pendingProviderService,
                                 SecurityService securityService) {
         this.providerService = manager;
+        this.catalogueService = catalogueService;
         this.pendingProviderService = pendingProviderService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
@@ -143,6 +150,35 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
                             .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
         } catch (Exception e) {
             logger.warn("There are no Provider entries in DB");
+        }
+
+        try {
+            List<CatalogueBundle> catalogueAdmins = catalogueService.getAll(ff, securityService.getAdminAccess()).getResults();
+            userRolesMap = catalogueAdmins
+                    .stream()
+                    .distinct()
+                    .map(catalogueBundle -> {
+                        if (catalogueBundle.getCatalogue() != null && catalogueBundle.getCatalogue().getUsers() != null) {
+                            return catalogueBundle.getCatalogue();
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .flatMap((Function<Catalogue, Stream<String>>) catalogue -> catalogue.getUsers()
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .map(u -> {
+                                if (u.getId() != null && !"".equals(u.getId())) {
+                                    return u.getId();
+                                }
+                                return u.getEmail().toLowerCase();
+                            }))
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors
+                            .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_CATALOGUE_ADMIN")));
+        } catch (Exception e) {
+            logger.warn("There are no Catalogue entries in DB");
         }
 
         userRolesMap.putAll(Arrays.stream(epotAdmins.replace(" ", "").split(","))
