@@ -3,12 +3,12 @@
     <parent>
         <groupId>eu.einfracentral</groupId>
         <artifactId>eic</artifactId>
-        <version>3.0.1</version>
+        <version>3.0.2-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>eic-registry</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <licenses>
@@ -19,10 +19,10 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/eInfraCentral/eic-registry.git</connection>
-        <developerConnection>scm:git:ssh://github.com/eInfraCentral/eic-registry.git</developerConnection>
-        <url>https://github.com/eInfraCentral/eic-registry</url>
-      <tag>v3.0.1</tag>
+        <connection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</developerConnection>
+        <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
+      <tag>HEAD</tag>
   </scm>
 
     <properties>
@@ -36,7 +36,7 @@
                 <dependency>
                     <groupId>eu.einfracentral</groupId>
                     <artifactId>matomo-data-parser</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.0.2-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -46,7 +46,7 @@
                 <dependency>
                     <groupId>eu.einfracentral</groupId>
                     <artifactId>catris-recdb</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.0.2-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
