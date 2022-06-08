@@ -18,7 +18,6 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
 import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,9 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
-import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.*;

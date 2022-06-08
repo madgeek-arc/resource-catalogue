@@ -5,7 +5,6 @@ import eu.einfracentral.domain.User;
 import org.springframework.security.core.Authentication;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 public interface SecurityService {
 

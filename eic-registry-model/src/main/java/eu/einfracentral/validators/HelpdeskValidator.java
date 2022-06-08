@@ -9,7 +9,6 @@ import org.springframework.validation.Validator;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import static eu.einfracentral.validators.ValidationMessagesUtils.mandatoryField;
 

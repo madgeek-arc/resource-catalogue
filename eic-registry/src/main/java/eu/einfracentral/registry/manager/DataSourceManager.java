@@ -16,8 +16,6 @@ import static eu.einfracentral.config.CacheConfig.*;
 @org.springframework.stereotype.Service("dataSourceService")
 public class DataSourceManager extends AbstractDataSourceManager implements DataSourceService<DataSourceBundle, DataSourceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(DataSourceManager.class);
-
     @Autowired
     public DataSourceManager(@Qualifier("providerManager") ResourceManager<ProviderBundle> resourceManager) {
         super(DataSourceBundle.class);

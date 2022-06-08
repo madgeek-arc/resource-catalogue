@@ -28,19 +28,17 @@ public class ProviderManagementAspect {
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final InfraServiceService infraServiceService;
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
                                     RegistrationMailService registrationMailService, InfraServiceService infraServiceService,
-                                    SecurityService securityService, CatalogueService catalogueService) {
+                                    SecurityService securityService) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
-        this.catalogueService = catalogueService;
     }
 
 

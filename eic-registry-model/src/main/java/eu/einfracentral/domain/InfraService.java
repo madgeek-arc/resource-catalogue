@@ -1,7 +1,5 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.annotation.VocabularyValidation;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;

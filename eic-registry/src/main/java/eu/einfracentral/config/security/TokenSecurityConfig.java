@@ -1,7 +1,5 @@
 package eu.einfracentral.config.security;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.client.service.ServerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,6 @@ import org.springframework.web.filter.GenericFilterBean;
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 @Order(1)
 public class TokenSecurityConfig extends WebSecurityConfigurerAdapter {
-
-    private static final Logger logger = LogManager.getLogger(TokenSecurityConfig.class);
 
     @Autowired
     OIDCAuthenticationProvider openIdConnectAuthenticationProvider;

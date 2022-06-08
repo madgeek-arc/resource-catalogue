@@ -2,8 +2,6 @@ package eu.einfracentral.config;
 
 import eu.einfracentral.domain.*;
 import freemarker.template.TemplateExceptionHandler;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.jms.annotation.EnableJms;
@@ -39,8 +37,6 @@ import java.util.Random;
 @EnableAsync
 @EnableJms
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
-
-    private static final Logger logger = LogManager.getLogger(ServiceConfig.class);
 
     @Value("${jms.host}")
     private String jmsHost;

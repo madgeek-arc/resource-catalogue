@@ -2,7 +2,6 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 

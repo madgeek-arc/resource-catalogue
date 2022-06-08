@@ -37,8 +37,6 @@ public class OIDCSecurityService implements SecurityService {
     private final PendingProviderManager pendingProviderManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingResourceService<InfraService> pendingServiceManager;
-    private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
-    private final ResourceService<MonitoringBundle, Authentication> monitoringService;
     private OIDCAuthenticationToken adminAccess;
 
     @Value("${project.name:}")
@@ -50,15 +48,12 @@ public class OIDCSecurityService implements SecurityService {
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
                         InfraServiceService<InfraService, InfraService> infraServiceService,
-                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager,
-                        ResourceService<HelpdeskBundle, Authentication> helpdeskService, ResourceService<MonitoringBundle, Authentication> monitoringService) {
+                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.infraServiceService = infraServiceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
-        this.helpdeskService = helpdeskService;
-        this.monitoringService = monitoringService;
 
         // create admin access
         List<GrantedAuthority> roles = new ArrayList<>();
