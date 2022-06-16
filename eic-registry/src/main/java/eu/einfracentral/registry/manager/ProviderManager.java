@@ -62,6 +62,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
+    @Value("${sync.enable}")
+    private boolean enableSyncing;
+
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService,
@@ -91,6 +94,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     public String getResourceType() {
         return "provider";
+    }
+
+    @Override
+    public boolean exists(ProviderBundle providerBundle) {
+        return getResource(providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()) != null;
     }
 
     @Override
