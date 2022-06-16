@@ -3,6 +3,7 @@ package eu.einfracentral.service;
 import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.Vocabulary;
 
 public interface IdCreator {
 
@@ -29,4 +30,11 @@ public interface IdCreator {
      * @return
      */
     String createCatalogueId(Catalogue catalogue);
+
+    /**
+     * *
+     * @param providerName
+     * @return
+     */
+    String createHostingLegalEntityId(String providerName);
 }
