@@ -160,7 +160,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
 
-        Resource existing = whereID(provider.getId(), true);
+        Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle ex = deserialize(existing);
 
         // block catalogueId updates from Provider Admins
