@@ -164,6 +164,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             } else if (authoritiesMapper.isEPOT(((LoggingInfo) loggingInfo).getUserEmail())) {
                 ((LoggingInfo) loggingInfo).setUserEmail(epotEmail);
                 ((LoggingInfo) loggingInfo).setUserFullName("EPOT");
+            } else {
+                ((LoggingInfo) loggingInfo).setUserEmail(null);
             }
 
             ((LoggingInfo) loggingInfo).setUserRole(null);
