@@ -69,9 +69,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @Cacheable(value = CACHE_PROVIDERS)
     public ProviderBundle get(String id) {
-//        ProviderBundle provider = super.get(id);
-        Resource resource = getPendingResource(id);
-        ProviderBundle provider = deserialize(resource);
+        ProviderBundle provider = super.get(id);
         if (provider == null) {
             throw new eu.einfracentral.exception.ResourceNotFoundException(
                     String.format("Could not find pending provider with id: %s", id));
