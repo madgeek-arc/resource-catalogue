@@ -282,9 +282,10 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         }
     }
 
-//        @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
 //    @Scheduled(initialDelay = 0, fixedRate = 120000)
+    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void updateHostingLegalEntityValues(){
+        logger.info("Checking for possible new Hosting Legal Entity entries..");
         List<Vocabulary> hostingLegalEntities = getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         List<String> hostingLegalEntityNames = new ArrayList<>();
         for (Vocabulary hostingLegalEntity : hostingLegalEntities){
@@ -306,6 +307,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
                 newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(providerName));
                 newHostingLegalEntity.setName(providerName);
                 newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+                logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s]", newHostingLegalEntity.getId()));
 //                add(newHostingLegalEntity, null);
             }
         }
