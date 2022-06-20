@@ -207,7 +207,7 @@ public class Service implements Identifiable {
     @XmlElement(name = "resourceGeographicLocation")
     @ApiModelProperty(position = 20, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @GeoLocationVocValidation(region = Vocabulary.Type.REGION, country = Vocabulary.Type.COUNTRY)
+    @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> resourceGeographicLocations;
 
 
