@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.EmailValidation;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.GeoLocationVocValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
@@ -234,7 +235,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 23, required = true)
-    @FieldValidation
+    @EmailValidation
     private String helpdeskEmail;
 
     /**
@@ -242,7 +243,7 @@ public class Service implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 24, required = true)
-    @FieldValidation
+    @EmailValidation
     private String securityContactEmail;
 
 
