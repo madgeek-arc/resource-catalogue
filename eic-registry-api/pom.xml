@@ -1,15 +1,14 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>eu.einfracentral</groupId>
         <artifactId>eic</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>3.0.2-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>eic-registry-api</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>3.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <licenses>
         <license>
@@ -18,10 +17,11 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:git://github.com/eInfraCentral/eic-registry-api.git</connection>
-        <developerConnection>scm:git:ssh://github.com/eInfraCentral/eic-registry-api.git</developerConnection>
-        <url>https://github.com/eInfraCentral/eic-registry-api.git</url>
-    </scm>
+        <connection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</developerConnection>
+        <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
+      <tag>HEAD</tag>
+  </scm>
     <dependencies>
         <dependency>
             <groupId>eu.einfracentral</groupId>
