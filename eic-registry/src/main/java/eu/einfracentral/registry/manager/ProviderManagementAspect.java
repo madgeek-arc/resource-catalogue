@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.CatalogueBundle;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.service.CatalogueService;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
@@ -27,6 +27,8 @@ public class ProviderManagementAspect {
     private static final Logger logger = LogManager.getLogger(ProviderManagementAspect.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
+
+    private final PublicProviderManager publicProviderManager;
     private final InfraServiceService infraServiceService;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
@@ -34,11 +36,12 @@ public class ProviderManagementAspect {
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
                                     RegistrationMailService registrationMailService, InfraServiceService infraServiceService,
-                                    SecurityService securityService) {
+                                    SecurityService securityService, PublicProviderManager publicProviderManager) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
+        this.publicProviderManager = publicProviderManager;
     }
 
 
@@ -91,6 +94,38 @@ public class ProviderManagementAspect {
         ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation());
         logger.trace("Sending Registration emails");
         registrationMailService.sendProviderMails(providerBundle);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager." +
+            "add(eu.einfracentral.domain.ProviderBundle, String, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String, String, Boolean, " +
+            "org.springframework.security.core.Authentication))))",
+            returning = "providerBundle")
+    public void addProviderAsPublic(ProviderBundle providerBundle) {
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()){
+            publicProviderManager.add(providerBundle, null);
+        }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, String, org.springframework.security.core.Authentication)))",
+            returning = "providerBundle")
+    public void updatePublicProvider(ProviderBundle providerBundle) {
+        try{
+            publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        } catch (ResourceNotFoundException e){
+            throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
+                    providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        }
+        publicProviderManager.update(providerBundle, null);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.delete(org.springframework.security.core.Authentication, eu.einfracentral.domain.ProviderBundle)))",
+            returning = "providerBundle")
+    public void deletePublicProvider(ProviderBundle providerBundle) {
+        publicProviderManager.delete(providerBundle);
     }
 
     //TODO: Probably no needed
