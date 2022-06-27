@@ -126,9 +126,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
-        jmsTopicTemplate.convertAndSend("provider.create", provider);
-
-        synchronizerServiceProvider.syncAdd(provider.getProvider());
+        if (enableSyncing){
+            synchronizerServiceProvider.syncAdd(provider.getProvider());
+        }
 
         return ret;
     }
@@ -194,9 +194,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
 
-        jmsTopicTemplate.convertAndSend("provider.update", provider);
-
-        synchronizerServiceProvider.syncUpdate(provider.getProvider());
+        if (enableSyncing) {
+            synchronizerServiceProvider.syncUpdate(provider.getProvider());
+        }
 
         return provider;
     }
@@ -386,7 +386,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         super.delete(provider);
         registrationMailService.notifyProviderAdmins(provider);
 
-        synchronizerServiceProvider.syncDelete(provider.getProvider());
+        if (enableSyncing){
+            synchronizerServiceProvider.syncDelete(provider.getProvider());
+        }
 
     }
 
