@@ -8,10 +8,7 @@ import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.registry.service.InfraServiceService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
@@ -27,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
@@ -93,6 +91,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private List<String> browseBy;
     private Map<String, String> labels;
 
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
+
     @PostConstruct
     void initLabels() {
         resourceType = resourceTypeService.getResourceType(getResourceType());
@@ -128,18 +129,22 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return resourceType.getName();
     }
 
-    @Override
-    public InfraService get(String id, String version) {
-        Resource resource = getResource(id, version);
+//    @Override
+    public InfraService get(String id, String catalogueId, String version) {
+        Resource resource = getResource(id, catalogueId, version);
         if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find service with id: %s and version: %s", id, version));
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s, version: %s and catalogueId: %s", id, version, catalogueId));
         }
         return deserialize(resource);
     }
 
-    @Override
+//    @Override
     public InfraService get(String id) {
-        return get(id, "latest");
+        return get(id, catalogueName, "latest");
+    }
+
+    public InfraService get(String id, String catalogueId) {
+        return get(id, catalogueId, "latest");
     }
 
 
@@ -228,7 +233,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if ("".equals(infraService.getService().getVersion())) {
             infraService.getService().setVersion(null);
         }
-        Resource existing = getResource(infraService.getService().getId(), infraService.getService().getVersion());
+        Resource existing = getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion());
         if (existing == null) {
             throw new ResourceNotFoundException(
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
@@ -239,13 +244,6 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-
-        // for CatRIs history migration
-//        try{
-//            resourceService.updateResource(existing);
-//        } catch (ServiceException e){
-//            logger.info("Service Exception");
-//        }
 
         jmsTopicTemplate.convertAndSend("resource.update", infraService);
 
@@ -262,7 +260,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             throw new ServiceException("You cannot delete a null service or service with null id field");
         }
 
-        resourceService.deleteResource(getResource(infraService.getService().getId(), infraService.getService().getVersion()).getId());
+        resourceService.deleteResource(getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion()).getId());
 
         jmsTopicTemplate.convertAndSend("resource.delete", infraService);
 
@@ -309,7 +307,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 .map(id ->
                 {
                     try {
-                        return getRichService(id, "latest", auth);
+                        return getRichService(id, "latest", catalogueName, auth);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -333,11 +331,11 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Browsing<ResourceHistory> getHistory(String serviceId) {
+    public Browsing<ResourceHistory> getHistory(String serviceId, String catalogueId) {
         Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
         // get all resources with the specified Service id
-        List<Resource> resources = getResourcesWithServiceId(serviceId);
+        List<Resource> resources = getResourcesWithServiceId(serviceId, catalogueId);
 
         // for each resource (InfraService), get its versions
         if (resources != null) {
@@ -399,15 +397,15 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public Service getVersionHistory(String serviceId, String versionId) {
-        List<Resource> resources = getResourcesWithServiceId(serviceId);
+    public Service getVersionHistory(String resourceId, String catalogueId, String versionId) {
+        List<Resource> resources = getResourcesWithServiceId(resourceId, catalogueId);
         Service service = new Service();
         List<Version> versions;
         List<Version> allVersions = new ArrayList<>();
 
         if (resources != null) {
             for (Resource resource : resources) {
-                versions = versionService.getVersionsByResource(resource.getId());
+                versions = versionService.getVersionsByResource(resource.getId()); //FIXME -> catalogueId needed
                 allVersions.addAll(versions);
             }
             for (Version version : allVersions) {
@@ -420,7 +418,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             }
             return service;
         } else {
-            throw new ValidationException("Service with id '" + serviceId + "' does not exist.");
+            throw new ValidationException("Service with id '" + resourceId + "' does not exist.");
         }
     }
 
@@ -438,20 +436,11 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return parserPool.deserialize(resource, InfraService.class);
     }
 
-    public InfraService getOrNull(String id) {
-        Resource serviceResource = getResource(id, "latest");
-        if (serviceResource != null) {
-            return parserPool.deserialize(serviceResource, InfraService.class);
-        } else {
-            return null;
-        }
-    }
-
     private boolean exists(InfraService infraService) {
         if (infraService.getService().getVersion() != null) {
-            return getResource(infraService.getService().getId(), infraService.getService().getVersion()) != null;
+            return getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion()) != null;
         }
-        return getResource(infraService.getService().getId(), null) != null;
+        return getResource(infraService.getService().getId(), infraService.getService().getCatalogueId(), null) != null;
     }
 
     public Resource getResourceById(String resourceId) {
@@ -463,11 +452,11 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         return resource.get(0);
     }
 
-    public Resource getResource(String serviceId, String serviceVersion) {
+    public Resource getResource(String serviceId, String catalogueId, String serviceVersion) {
         Paging<Resource> resources;
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\"", serviceId),
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueId),
                             resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
             // return the latest modified resource that does not contain a version attribute
             for (Resource resource : resources.getResults()) {
@@ -481,20 +470,20 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
             return null;
         } else if ("latest".equals(serviceVersion)) {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\" AND latest = true", serviceId),
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND latest = true", serviceId, catalogueId),
                             resourceType.getName(), 1, 0, "modifiedAt", "DESC");
         } else {
             resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\" AND version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
+                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND version = \"%s\"", serviceId, catalogueId, serviceVersion), resourceType.getName());
         }
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    public List<Resource> getResourcesWithServiceId(String infraServiceId) {
+    public List<Resource> getResourcesWithServiceId(String infraServiceId, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("infra_service_id = \"%s\"", infraServiceId),
+                .cqlQuery(String.format("infra_service_id = \"%s\"  AND catalogue_id = \"%s\"", infraServiceId, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
 
         assert resources != null;
@@ -502,9 +491,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     }
 
     @Override
-    public RichService getRichService(String id, String version, Authentication auth) {
+    public RichService getRichService(String id, String version, String catalogueId, Authentication auth) {
         InfraService infraService;
-        infraService = get(id, version);
+        infraService = get(id, catalogueId, version);
         return createRichService(infraService, auth);
     }
 
@@ -567,7 +556,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
      * @param specialCharacters
      * @return
      */
-    private InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
+    protected InfraService prettifyServiceTextFields(InfraService infraService, String specialCharacters) {
         infraService.getService().setTagline(TextUtils.prettifyText(infraService.getService().getTagline(), specialCharacters));
         return infraService;
     }
@@ -893,6 +882,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
         orderedBrowseBy.add("resource_organisation");   // resource_organisation
         orderedBrowseBy.add("active");                  // active
+        orderedBrowseBy.add("catalogue_id");            // catalogueId
 
         filter.setBrowseBy(orderedBrowseBy);
 

@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement
@@ -43,10 +44,13 @@ public class Vocabulary implements Identifiable {
     }
 
     public enum Type {
+        // Resource
         SUPERCATEGORY("Supercategory"),
         CATEGORY("Category"),
         SUBCATEGORY("Subcategory"),
         LANGUAGE("Language"),
+        GEOGRAPHIC_LOCATION("Geographic location"),
+        REGION("Region"),
         COUNTRY("Country"),
         TRL("Technology readiness level"),
         SCIENTIFIC_DOMAIN("Scientific domain"),
@@ -58,9 +62,12 @@ public class Vocabulary implements Identifiable {
         FUNDING_BODY("Funding body"),
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
+        RELATED_PLATFORM("Related platform"),
+        // Provider
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
         PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
+        PROVIDER_HOSTING_LEGAL_ENTITY("Provider hosting legal entity"),
         PROVIDER_LEGAL_STATUS("Provider legal status"),
         PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
         PROVIDER_NETWORK("Provider network"),
@@ -68,11 +75,20 @@ public class Vocabulary implements Identifiable {
         PROVIDER_STRUCTURE_TYPE("Provider structure type"),
         PROVIDER_MERIL_SCIENTIFIC_DOMAIN("Provider meril scientific domain"),
         PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN("Provider meril scientific subdomain"),
+        // States
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
-        AUDIT_STATE("Audit state");
-
+        AUDIT_STATE("Audit state"),
+        CATALOGUE_STATE("Catalogue state"),
+        // DataSource
+        DS_RESEARCH_ENTITY_TYPE("Research entity type"),
+        DS_PERSISTENT_IDENTITY_SCHEME("Persistent identity scheme"),
+        DS_JURISDICTION("Jurisdiction"),
+        DS_CLASSIFICATION("Classification"),
+        DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
+        // Monitoring
+        MONITORING_MONITORED_BY("Monitored by");
         private final String type;
 
         Type(final String type) {
@@ -155,5 +171,18 @@ public class Vocabulary implements Identifiable {
 
     public void setExtras(Map<String, String> extras) {
         this.extras = extras;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vocabulary that = (Vocabulary) o;
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(parentId, that.parentId) && Objects.equals(type, that.type) && Objects.equals(extras, that.extras);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, parentId, type, extras);
     }
 }

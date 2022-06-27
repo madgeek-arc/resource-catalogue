@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -103,4 +104,18 @@ public class ProviderPublicContact {
     public void setPosition(String position) {
         this.position = position;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProviderPublicContact that = (ProviderPublicContact) o;
+        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(email, that.email) && Objects.equals(phone, that.phone) && Objects.equals(position, that.position);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName, email, phone, position);
+    }
 }
+

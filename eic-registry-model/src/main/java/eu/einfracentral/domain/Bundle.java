@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -19,11 +20,19 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     private T payload;
 
     @XmlElement(name = "metadata")
-    @FieldValidation
     private Metadata metadata;
 
     @XmlElement
     private boolean active;
+
+    @XmlElement
+    private boolean suspended;
+
+    @XmlElement
+    private Identifier identifier;
+
+    @XmlElement
+    private MigrationStatus migrationStatus;
 
     @XmlElement
     private List<LoggingInfo> loggingInfo;
@@ -74,6 +83,30 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.active = active;
     }
 
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
+    }
+
+    public MigrationStatus getMigrationStatus() {
+        return migrationStatus;
+    }
+
+    public void setMigrationStatus(MigrationStatus migrationStatus) {
+        this.migrationStatus = migrationStatus;
+    }
+
     public List<LoggingInfo> getLoggingInfo() {
         return loggingInfo;
     }
@@ -112,10 +145,24 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 "payload=" + payload +
                 ", metadata=" + metadata +
                 ", active=" + active +
+                ", suspended=" + suspended +
                 ", loggingInfo=" + loggingInfo +
                 ", latestAuditInfo=" + latestAuditInfo +
                 ", latestOnboardingInfo=" + latestOnboardingInfo +
                 ", latestUpdateInfo=" + latestUpdateInfo +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Bundle)) return false;
+        Bundle<?> bundle = (Bundle<?>) o;
+        return active == bundle.active && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(payload, metadata, active, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo);
     }
 }

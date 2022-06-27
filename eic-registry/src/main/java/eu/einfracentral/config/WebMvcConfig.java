@@ -1,5 +1,7 @@
 package eu.einfracentral.config;
 
+import eu.einfracentral.utils.MatomoInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -48,5 +50,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertyConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
+    }
+
+    @Autowired
+    MatomoInterceptor matomoInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(matomoInterceptor);
     }
 }

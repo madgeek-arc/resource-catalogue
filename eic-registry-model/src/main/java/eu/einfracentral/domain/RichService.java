@@ -7,11 +7,13 @@ import eu.einfracentral.dto.ScientificDomain;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.util.List;
+import java.util.Objects;
 
 @XmlTransient
 public class RichService {
 
     private Service service;
+    private DataSource dataSourceBundle;
     private Metadata metadata;
 
     private List<String> languageAvailabilityNames;
@@ -49,6 +51,11 @@ public class RichService {
     public RichService(InfraService service) {
         this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = service.getMetadata();
+    }
+
+    public RichService(DataSourceBundle dataSourceBundle) {
+        this.dataSourceBundle = dataSourceBundle.getDataSource(); // copy constructor is needed to 'hide' infraService fields
+        this.metadata = dataSourceBundle.getMetadata();
     }
 
     public Service getService() {
@@ -228,5 +235,18 @@ public class RichService {
 
     public void setProviderInfo(List<ProviderInfo> providerInfo) {
         this.providerInfo = providerInfo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RichService that = (RichService) o;
+        return Float.compare(that.views, views) == 0 && Float.compare(that.ratings, ratings) == 0 && Float.compare(that.userRate, userRate) == 0 && Float.compare(that.hasRate, hasRate) == 0 && Float.compare(that.favourites, favourites) == 0 && Float.compare(that.isFavourite, isFavourite) == 0 && Objects.equals(service, that.service) && Objects.equals(metadata, that.metadata) && Objects.equals(languageAvailabilityNames, that.languageAvailabilityNames) && Objects.equals(geographicAvailabilityNames, that.geographicAvailabilityNames) && Objects.equals(trlName, that.trlName) && Objects.equals(phaseName, that.phaseName) && Objects.equals(lifeCycleStatusName, that.lifeCycleStatusName) && Objects.equals(targetUsersNames, that.targetUsersNames) && Objects.equals(accessTypeNames, that.accessTypeNames) && Objects.equals(accessModeNames, that.accessModeNames) && Objects.equals(fundingBodyNames, that.fundingBodyNames) && Objects.equals(fundingProgramNames, that.fundingProgramNames) && Objects.equals(orderTypeName, that.orderTypeName) && Objects.equals(categories, that.categories) && Objects.equals(domains, that.domains) && Objects.equals(providerInfo, that.providerInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(service, metadata, languageAvailabilityNames, geographicAvailabilityNames, trlName, phaseName, lifeCycleStatusName, targetUsersNames, accessTypeNames, accessModeNames, fundingBodyNames, fundingProgramNames, orderTypeName, views, ratings, userRate, hasRate, favourites, isFavourite, categories, domains, providerInfo);
     }
 }

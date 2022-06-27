@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -260,5 +261,18 @@ public class LoggingInfo {
 
     public void setActionType(String actionType) {
         this.actionType = actionType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LoggingInfo)) return false;
+        LoggingInfo that = (LoggingInfo) o;
+        return Objects.equals(date, that.date) && Objects.equals(userEmail, that.userEmail) && Objects.equals(userFullName, that.userFullName) && Objects.equals(userRole, that.userRole) && Objects.equals(type, that.type) && Objects.equals(comment, that.comment) && Objects.equals(actionType, that.actionType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, userEmail, userFullName, userRole, type, comment, actionType);
     }
 }

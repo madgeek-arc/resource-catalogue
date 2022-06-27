@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -38,6 +39,9 @@ public class ProviderController {
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
+
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
@@ -51,12 +55,18 @@ public class ProviderController {
     // Deletes the Provider with the given id.
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Provider> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        ProviderBundle provider = providerManager.get(id);
+    public ResponseEntity<Provider> delete(@PathVariable("id") String id,
+                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                           @ApiIgnore Authentication auth) {
+        ProviderBundle provider = providerManager.get(catalogueId, id, auth);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting provider: {}", provider.getProvider().getName());
+        // Block users of deleting Providers of another Catalogue
+        if (!provider.getProvider().getCatalogueId().equals(catalogueName)){
+            throw new ValidationException("You cannot delete a Provider of a non EOSC Catalogue.");
+        }
+        logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
         // delete all Provider's services
         List<InfraService> allProviderServices = infraServiceService.getInfraServices(id, auth);
@@ -76,8 +86,10 @@ public class ProviderController {
 
     @ApiOperation(value = "Returns the Provider with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = providerManager.get(id, auth).getProvider();
+    public ResponseEntity<Provider> get(@PathVariable("id") String id,
+                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                        @ApiIgnore Authentication auth) {
+        Provider provider = providerManager.get(catalogueId, id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -103,8 +115,11 @@ public class ProviderController {
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
-    public ResponseEntity<Provider> update(@RequestBody Provider provider, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle providerBundle = providerManager.get(provider.getId(), auth);
+    public ResponseEntity<Provider> update(@RequestBody Provider provider,
+                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                           @RequestParam(required = false) String comment,
+                                           @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ProviderBundle providerBundle = providerManager.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
         if (comment == null || comment.equals("")) {
             comment = "no comment";
@@ -131,7 +146,13 @@ public class ProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                   @ApiIgnore Authentication auth) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
+        if (catalogueIds != null && catalogueIds.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -158,8 +179,10 @@ public class ProviderController {
 
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id)")
-    public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(providerManager.get(id, auth), HttpStatus.OK);
+    public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id,
+                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                            @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(providerManager.get(catalogueId, id, auth), HttpStatus.OK);
     }
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
@@ -174,7 +197,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
                                                                         @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
-                                                                        @RequestParam(required = false) Set<String> auditState) {
+                                                                        @RequestParam(required = false) Set<String> auditState, @RequestParam(required = false) Set<String> catalogue_id) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -194,8 +217,10 @@ public class ProviderController {
         if (templateStatus != null) {
             ff.addFilter("templateStatus", templateStatus);
         }
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
+        if (catalogue_id != null) {
+            ff.addFilter("catalogue_id", catalogue_id);
+        }
+
         List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
         Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
@@ -205,9 +230,9 @@ public class ProviderController {
             }
         }
         if (auditState == null){
-            return ResponseEntity.ok(providerManager.createCorrectQuantityFacets(ret, retPaging, quantity, from));
+            return ResponseEntity.ok(providerManager.createCorrectQuantityFacets(ret, retPaging, ff.getQuantity(), ff.getFrom()));
         } else{
-            Paging<ProviderBundle> retWithAuditState = providerManager.determineAuditState(auditState, ff, quantity, from, ret, auth);
+            Paging<ProviderBundle> retWithAuditState = providerManager.determineAuditState(auditState, ff, ret, auth);
             return ResponseEntity.ok(retWithAuditState);
         }
     }
@@ -222,6 +247,23 @@ public class ProviderController {
     @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(infraServiceService.getFeaturedService(id), HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
+    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
+                                                                          @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
+                                                                          @RequestParam(required = false) Set<String> auditState, @PathVariable String id) {
+        Set<String> catalogueId = new LinkedHashSet<>();
+        catalogueId.add(id);
+        return getAllProviderBundles(allRequestParams, auth, status, templateStatus, auditState, catalogueId);
     }
 
     // Get a list of Providers in which the given user is admin.
@@ -299,13 +341,14 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle provider = providerManager.get(id);
+        ProviderBundle provider = providerManager.get(catalogueName, id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("resource_organisation", id);
+        ff.addFilter("catalogue_id", catalogueName);
         List<InfraService> services = infraServiceService.getAll(ff, auth).getResults();
         for (InfraService service : services) {
             service.setActive(active);
@@ -348,8 +391,10 @@ public class ProviderController {
 
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Paging<ResourceHistory> history = this.providerManager.getHistory(id);
+    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
+                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                           @ApiIgnore Authentication auth) {
+        Paging<ResourceHistory> history = this.providerManager.getHistory(id, catalogueId);
         return ResponseEntity.ok(history);
     }
 
@@ -387,8 +432,10 @@ public class ProviderController {
 
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id, @ApiIgnore Authentication auth) {
-        Paging<LoggingInfo> loggingInfoHistory = this.providerManager.getLoggingInfoHistory(id);
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
+                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                  @ApiIgnore Authentication auth) {
+        Paging<LoggingInfo> loggingInfoHistory = this.providerManager.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -398,23 +445,5 @@ public class ProviderController {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(providerManager.validate(new ProviderBundle(provider)) != null);
         logger.info("Validated Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
         return ret;
-    }
-
-//    @PutMapping(path = "providerHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateProviderHistory(@ApiIgnore Authentication authentication) {
-        return providerManager.migrateProviderHistory(authentication);
-    }
-
-//    @PutMapping(path = "providerLatestHistoryMigration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public Map<String, List<LoggingInfo>> migrateLatestProviderHistory(@ApiIgnore Authentication authentication) {
-        return providerManager.migrateLatestProviderHistory(authentication);
-    }
-
-//    @PostMapping(path = "initialCatRIsCatalogueSync", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void initialCatRIsCatalogueSync(@ApiIgnore Authentication authentication) {
-        providerManager.initialCatRIsCatalogueSync();
     }
 }

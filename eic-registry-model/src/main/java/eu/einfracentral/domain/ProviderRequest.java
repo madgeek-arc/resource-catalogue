@@ -5,6 +5,7 @@ import eu.einfracentral.annotation.FieldValidation;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -92,5 +93,18 @@ public class ProviderRequest implements Identifiable {
 
     public void setRead(boolean read) {
         this.isRead = read;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProviderRequest that = (ProviderRequest) o;
+        return isRead == that.isRead && Objects.equals(id, that.id) && Objects.equals(message, that.message) && Objects.equals(date, that.date) && Objects.equals(providerId, that.providerId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, message, date, providerId, isRead);
     }
 }

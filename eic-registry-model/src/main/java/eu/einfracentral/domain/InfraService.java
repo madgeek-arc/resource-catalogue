@@ -1,10 +1,9 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.annotation.VocabularyValidation;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -14,7 +13,7 @@ public class InfraService extends Bundle<Service> {
     private boolean latest;
 
     @XmlElement
-    @VocabularyValidation(type = Vocabulary.Type.RESOURCE_STATE)
+//    @VocabularyValidation(type = Vocabulary.Type.RESOURCE_STATE)
     private String status;
 
     public InfraService() {
@@ -65,5 +64,18 @@ public class InfraService extends Bundle<Service> {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        InfraService service = (InfraService) o;
+        return latest == service.latest && Objects.equals(status, service.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), latest, status);
     }
 }

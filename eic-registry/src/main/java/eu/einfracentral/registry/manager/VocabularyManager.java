@@ -1,10 +1,12 @@
 package eu.einfracentral.registry.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.dto.VocabularyTree;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -12,7 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -33,10 +37,16 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     private Map<String, Region> regions = new HashMap<>();
 
-    public VocabularyManager() {
+    private ProviderManager providerManager;
+
+    private IdCreator idCreator;
+
+    public VocabularyManager(@Lazy ProviderManager providerManager, @Lazy IdCreator idCreator) {
         super(Vocabulary.class);
         regions.put("EU", new Region("https://restcountries.com/v3.1/region/europe?fields=cca2"));
         regions.put("WW", new Region("https://restcountries.com/v3.1/all?fields=cca2"));
+        this.providerManager = providerManager;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -120,7 +130,11 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            add(vocabulary, auth);
+            try {
+                add(vocabulary, auth);
+            } catch (ResourceException e){
+                logger.info(String.format("Vocabulary [%s] already exists", vocabulary.getId()));
+            }
         }
     }
 
@@ -265,6 +279,37 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
         public String getSource() {
             return source;
+        }
+    }
+
+//    @Scheduled(initialDelay = 0, fixedRate = 120000)
+    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
+    public void updateHostingLegalEntityVocabularyList(){
+        logger.info("Checking for possible new Hosting Legal Entity entries..");
+        List<Vocabulary> hostingLegalEntities = getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        List<String> hostingLegalEntityNames = new ArrayList<>();
+        for (Vocabulary hostingLegalEntity : hostingLegalEntities){
+            hostingLegalEntityNames.add(hostingLegalEntity.getName());
+        }
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved provider");
+        List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, null).getResults();
+        List<String> providerNames = new ArrayList<>();
+        for (ProviderBundle providerBundle : allActiveAndApprovedProviders){
+            providerNames.add(providerBundle.getProvider().getName());
+        }
+
+        for (String providerName : providerNames) {
+            if (hostingLegalEntityNames.stream().noneMatch(s -> s.matches(providerName))) {
+                Vocabulary newHostingLegalEntity = new Vocabulary();
+                newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(providerName));
+                newHostingLegalEntity.setName(providerName);
+                newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+                logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s]", newHostingLegalEntity.getId()));
+//                add(newHostingLegalEntity, null);
+            }
         }
     }
 }

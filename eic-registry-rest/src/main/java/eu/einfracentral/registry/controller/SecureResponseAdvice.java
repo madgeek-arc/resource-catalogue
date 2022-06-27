@@ -78,6 +78,10 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyRichService(t, auth);
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
+        } else if (t instanceof Catalogue) {
+            modifyCatalogue(t, auth);
+        } else if (t instanceof CatalogueBundle) {
+            modifyCatalogueBundle(t, auth);
         }
     }
 
@@ -131,6 +135,27 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         }
     }
 
+    private void modifyCatalogue(T catalogue, Authentication auth) {
+        if(!this.securityService.isCatalogueAdmin(auth, ((Catalogue) catalogue).getId(), true)) {
+            ((Catalogue) catalogue).setMainContact(null);
+            ((Catalogue) catalogue).setUsers(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyCatalogueBundle(T bundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((CatalogueBundle) bundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestOnboardingInfo());
+
+        if(!this.securityService.isCatalogueAdmin(auth, ((CatalogueBundle) bundle).getId(), true)) {
+            ((CatalogueBundle) bundle).getCatalogue().setMainContact(null);
+            ((CatalogueBundle) bundle).getCatalogue().setUsers(null);
+            ((CatalogueBundle) bundle).getMetadata().setTerms(null);
+        }
+    }
+
     private void modifyLoggingInfo(T loggingInfo) {
         if (loggingInfo != null) {
             if (authoritiesMapper.isAdmin(((LoggingInfo) loggingInfo).getUserEmail())) {
@@ -139,6 +164,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             } else if (authoritiesMapper.isEPOT(((LoggingInfo) loggingInfo).getUserEmail())) {
                 ((LoggingInfo) loggingInfo).setUserEmail(epotEmail);
                 ((LoggingInfo) loggingInfo).setUserFullName("EPOT");
+            } else {
+                ((LoggingInfo) loggingInfo).setUserEmail(null);
             }
 
             ((LoggingInfo) loggingInfo).setUserRole(null);

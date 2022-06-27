@@ -1,0 +1,179 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "helpdesk_id",
+      "path": "//*[local-name()='helpdesk']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "service_id",
+      "label": "Service ID",
+      "path": "//*[local-name()='serviceId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "services",
+      "label": "Services",
+      "path": "//*[local-name()='service']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "helpdesk_type",
+      "label": "Helpdesk Type",
+      "path": "//*[local-name()='helpdeskType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "support_group",
+      "label": "Support Group",
+      "path": "//*[local-name()='supportGroup']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "organisation",
+      "label": "Organisation",
+      "path": "//*[local-name()='organisation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "email",
+      "label": "Email",
+      "path": "//*[local-name()='email']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "agent",
+      "label": "Agent",
+      "path": "//*[local-name()='agent']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "signature",
+      "label": "Signature",
+      "path": "//*[local-name()='signature']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "ticket_preservation",
+      "label": "Ticket Preservation",
+      "path": "//*[local-name()='ticketPreservation']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "webform",
+      "label": "Webform",
+      "path": "//*[local-name()='webform']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateActionType",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateDate",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateType",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateUserEmail",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingActionType",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingDate",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingType",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingUserEmail",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "active",
+      "path": "//*[local-name()='active']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "helpdesk",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
+}

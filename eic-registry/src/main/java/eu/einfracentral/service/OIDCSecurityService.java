@@ -1,11 +1,10 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.User;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -29,6 +28,7 @@ import java.util.*;
 public class OIDCSecurityService implements SecurityService {
 
     private final ProviderManager providerManager;
+    private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final PendingResourceService<InfraService> pendingServiceManager;
@@ -37,14 +37,15 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${project.name:}")
     private String projectName;
 
-    @Value("${mail.smtp.user:}")
+    @Value("${mail.smtp.from:}")
     private String projectEmail;
 
     @Autowired
-    OIDCSecurityService(ProviderManager providerManager,
+    OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
                         InfraServiceService<InfraService, InfraService> infraServiceService,
                         PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
         this.providerManager = providerManager;
+        this.catalogueManager = catalogueManager;
         this.infraServiceService = infraServiceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
@@ -137,6 +138,53 @@ public class OIDCSecurityService implements SecurityService {
                 });
     }
 
+    public boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsCatalogueAdmin(user, catalogueId);
+    }
+
+    public boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow) {
+        if (auth == null && noThrow) {
+            return false;
+        }
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsCatalogueAdmin(user, catalogueId);
+    }
+
+    public boolean userIsCatalogueAdmin(User user, @NotNull String catalogueId) {
+        CatalogueBundle registeredCatalogue;
+        try {
+            registeredCatalogue = catalogueManager.get(catalogueId);
+        } catch (RuntimeException e) {
+            return false;
+        }
+        if (registeredCatalogue == null) {
+            throw new ResourceNotFoundException("Catalogue with id '" + catalogueId + "' does not exist.");
+        }
+        if (registeredCatalogue.getCatalogue().getUsers() == null) {
+            return false;
+        }
+        return registeredCatalogue.getCatalogue().getUsers()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .anyMatch(u -> {
+                    if (u.getId() != null) {
+                        if (u.getEmail() != null) {
+                            return u.getId().equals(user.getId())
+                                    || u.getEmail().equalsIgnoreCase(user.getEmail());
+                        }
+                        return u.getId().equals(user.getId());
+                    }
+                    return u.getEmail().equalsIgnoreCase(user.getEmail());
+                });
+    }
+
     @Override
     public boolean isServiceProviderAdmin(Authentication auth, String serviceId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
@@ -144,6 +192,15 @@ public class OIDCSecurityService implements SecurityService {
         }
         User user = User.of(auth);
         return userIsServiceProviderAdmin(user, serviceId);
+    }
+
+    @Override
+    public boolean isServiceProviderAdmin(Authentication auth, String serviceId, String catalogueId) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsServiceProviderAdmin(user, serviceId, catalogueId);
     }
 
     @Override
@@ -249,6 +306,33 @@ public class OIDCSecurityService implements SecurityService {
                 .anyMatch(id -> userIsProviderAdmin(user, id));
     }
 
+    @Override
+    public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId, String catalogueId) {
+        InfraService service;
+        try {
+            service = infraServiceService.get(serviceId, catalogueId);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            try {
+                service = pendingServiceManager.get(serviceId);
+            } catch (RuntimeException re) {
+                return false;
+            }
+        } catch (RuntimeException e) {
+            return false;
+        }
+        if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
+            throw new ValidationException("Service has no Service Organisation");
+        }
+
+        List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
+        Optional<List<String>> providers = Optional.of(allProviders);
+        return providers
+                .get()
+                .stream()
+                .filter(Objects::nonNull)
+                .anyMatch(id -> userIsProviderAdmin(user, id));
+    }
+
     public boolean providerCanAddServices(Authentication auth, String serviceId) {
         return providerCanAddServices(auth, infraServiceService.get(serviceId));
     }
@@ -303,13 +387,18 @@ public class OIDCSecurityService implements SecurityService {
         return service.isActive();
     }
 
-    public boolean serviceIsActive(String serviceId, String version) {
+    public boolean serviceIsActive(String serviceId, String catalogueId) {
+        InfraService service = infraServiceService.get(serviceId, catalogueId);
+        return service.isActive();
+    }
+
+    public boolean serviceIsActive(String serviceId, String catalogueId, String version) {
         // FIXME: serviceId is equal to 'rich' and version holds the service ID
         //  when searching for a Rich Service without providing a version
         if ("rich".equals(serviceId)) {
-            return serviceIsActive(version);
+            serviceId = version;
         }
-        InfraService service = infraServiceService.get(serviceId, version);
+        InfraService service = infraServiceService.get(serviceId, catalogueId, "latest");
         return service.isActive();
     }
 }

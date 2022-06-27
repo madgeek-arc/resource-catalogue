@@ -26,6 +26,15 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     T addService(T service, Authentication auth);
 
     /**
+     * Method to add a new service from external catalogue.
+     * @param service
+     * @param catalogueId
+     * @param auth
+     * @return
+     */
+    T addService(T service, String catalogueId, Authentication auth);
+
+    /**
      * Method to update a service.
      *
      * @param service
@@ -37,14 +46,36 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     T updateService(T service, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
+     * Method to update a service.
+     *
+     * @param service
+     * @param catalogueId
+     * @param comment
+     * @param auth
+     * @return
+     * @throws ResourceNotFoundException
+     */
+    T updateService(T service, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
+
+    InfraService getCatalogueService(String catalogueId, String serviceId, Authentication auth);
+
+    /**
      * Returns the Service with the specified id and version.
      * If the version is null, empty or "latest" the method returns the latest service.
      *
-     * @param id      of the Service.
-     * @param version of the Service.
+     * @param id          of the Service.
+     * @param catalogueId
+     * @param version     of the Service.
      * @return service.
      */
-    R get(String id, String version);
+    R get(String id, String catalogueId, String version);
+
+    /**
+     * @param id          of the Service.
+     * @param catalogueId
+     * @return service.
+     */
+    R get(String id, String catalogueId);
 
     /**
      * Get InfraServices by a specific field.
@@ -75,10 +106,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Gets the specific Service with extra fields like views and ratings
      *
      * @param id
+     * @param version
+     * @param catalogueId
      * @param auth
      * @return
      */
-    RichService getRichService(String id, String version, Authentication auth);
+    RichService getRichService(String id, String version, String catalogueId, Authentication auth);
 
     /**
      * Creates a RichService for the specific Service
@@ -107,27 +140,30 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Get the service resource.
      *
      * @param id
+     * @param catalogueId
      * @param version
      * @return Resource
      */
-    Resource getResource(String id, String version);
+    Resource getResource(String id, String catalogueId, String version);
 
     /**
      * Get the History of the InfraService with the specified id.
      *
      * @param id
+     * @param catalogueId
      * @return
      */
-    Paging<ResourceHistory> getHistory(String id);
+    Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
      * Get the History of a specific resource version of the InfraService with the specified id.
      *
-     * @param serviceId
+     * @param resourceId
+     * @param catalogueId
      * @param versionId
      * @return
      */
-    Service getVersionHistory(String serviceId, String versionId);
+    Service getVersionHistory(String resourceId, String catalogueId, String versionId);
 
     /**
      * Get inactive Services.
@@ -135,13 +171,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     Paging<R> getInactiveServices();
-
-    /**
-     * Makes bulk updates on all services.
-     *
-     * @return
-     */
-    List<R> eInfraCentralUpdate(T service);
 
     /**
      * Validates the given service.
@@ -157,14 +186,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     List<Service> createFeaturedServices();
-
-    /**
-     * Gets the InfraService or returns null (no throws).
-     *
-     * @param id
-     * @return
-     */
-    InfraService getOrNull(String id);
 
     /**
      * Sets a Service as active/inactive.
@@ -186,20 +207,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @return
      */
     List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
-
-    /**
-     * Validates Service's categories/subcategories
-     *
-     * @param categories
-     */
-    void validateCategories(List<ServiceCategory> categories);
-
-    /**
-     * Validates Service's scientificDomains/scientificSubdomains
-     *
-     * @param scientificDomains
-     */
-    void validateScientificDomains(List<ServiceProviderDomain> scientificDomains);
 
     /**
      * Gets all Services for Admins Page
@@ -225,8 +232,22 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
-
+    /**
+     *
+     * @param providerId
+     * @param auth
+     * @return
+     */
     List<InfraService> getInfraServices(String providerId, Authentication auth);
+
+    /**
+     *
+     * @param providerId
+     * @param catalogueId
+     * @param auth
+     * @return
+     */
+    Paging<InfraService> getInfraServices(String catalogueId, String providerId, Authentication auth);
 
     List<Service> getServices(String providerId, Authentication auth);
 
@@ -245,24 +266,13 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
 
     /**
-     * @param auth
-     * @return
-     */
-    Map<String, List<LoggingInfo>> migrateResourceHistory(Authentication auth);
-
-    /**
      * Get the History of the Resource with the specified id.
      *
      * @param id
+     * @param catalogueId
      * @return
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id);
-
-    /**
-     * @param auth
-     * @return
-     */
-    Map<String, List<LoggingInfo>> migrateLatestResourceHistory(Authentication auth);
+    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
 
     /**
      * @param id
@@ -281,5 +291,4 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     InfraService changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
-    void emailPhoneValidityCheck();
 }

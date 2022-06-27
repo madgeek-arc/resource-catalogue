@@ -1,0 +1,312 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "data_source_id",
+      "path": "//*[local-name()='service']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "name",
+      "label": "DataSource Name",
+      "path": "//*[local-name()='service']/*[local-name()='name']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "abbreviation",
+      "label": "Abbreviation",
+      "path": "//*[local-name()='abbreviation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "version",
+      "label": "Version",
+      "path": "//*[local-name()='service']/*[local-name()='version']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "resource_organisation",
+      "label": "Resource Organisation",
+      "path": "//*[local-name()='service']/*[local-name()='resourceOrganisation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "resource_providers",
+      "label": "Resource Provider",
+      "path": "//*[local-name()='service']//*[local-name()='resourceProvider']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "subcategories",
+      "label": "Subcategory",
+      "path": "//*[local-name()='category']/*[local-name()='subcategory']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "label": "Scientific Subdomain",
+      "path": "//*[local-name()='scientificDomain']/*[local-name()='scientificSubdomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "target_users",
+      "label": "Target User",
+      "path": "//*[local-name()='service']//*[local-name()='targetUser']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "access_types",
+      "label": "Access Type",
+      "path": "//*[local-name()='service']//*[local-name()='accessType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "access_modes",
+      "label": "Access Mode",
+      "path": "//*[local-name()='service']//*[local-name()='accessMode']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "language_availabilities",
+      "label": "Language Availability",
+      "path": "//*[local-name()='service']//*[local-name()='languageAvailability']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "geographical_availabilities",
+      "label": "Geographical Availability",
+      "path": "//*[local-name()='service']//*[local-name()='geographicalAvailability']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "resource_geographic_locations",
+      "label": "Resource Geographic Location",
+      "path": "//*[local-name()='service']//*[local-name()='resourceGeographicLocation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "trl",
+      "label": "TRL",
+      "path": "//*[local-name()='service']/*[local-name()='trl']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "life_cycle_status",
+      "label": "Life Cycle Status",
+      "path": "//*[local-name()='service']//*[local-name()='lifeCycleStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_body",
+      "label": "Funding Body",
+      "path": "//*[local-name()='service']//*[local-name()='fundingBody']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_programs",
+      "label": "Funding Program",
+      "path": "//*[local-name()='service']//*[local-name()='fundingProgram']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "description",
+      "label": "Description",
+      "path": "//*[local-name()='service']/*[local-name()='description']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "tagline",
+      "label": "Tagline",
+      "path": "//*[local-name()='service']/*[local-name()='tagline']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "use_cases",
+      "label": "Use Case",
+      "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "open_source_technologies",
+      "label": "Open Source Technology",
+      "path": "//*[local-name()='service']//*[local-name()='openSourceTechnology']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "tags",
+      "label": "Tag",
+      "path": "//*[local-name()='service']//*[local-name()='tag']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "order_type",
+      "label": "Order Type",
+      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='metadata']/*[local-name()='originalId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditActionType",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditDate",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditType",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditUserEmail",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateActionType",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateDate",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateType",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateUserEmail",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingActionType",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingDate",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingType",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingUserEmail",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "active",
+      "defaultValue": false,
+      "path": "//*[local-name()='infraService']/*[local-name()='active']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "status",
+      "path": "//*[local-name()='infraService']/*[local-name()='status']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latest",
+      "path": "//*[local-name()='infraService']/*[local-name()='latest']/text()",
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "data_source",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/dataSource/eic-registry-model/src/main/resources/schema1.xsd"
+}

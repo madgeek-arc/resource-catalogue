@@ -2,8 +2,6 @@ package eu.einfracentral.config;
 
 import eu.einfracentral.domain.*;
 import freemarker.template.TemplateExceptionHandler;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.jms.annotation.EnableJms;
@@ -28,7 +26,7 @@ import java.util.Random;
         "eu.einfracentral.manager",
         "eu.einfracentral.registry.manager",
         "eu.einfracentral.utils",
-        "eu.einfracentral.validator",
+        "eu.einfracentral.validators",
         "eu.einfracentral.service",
         "eu.einfracentral.matomo",
         "eu.einfracentral.recdb"})
@@ -40,8 +38,6 @@ import java.util.Random;
 @EnableJms
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
-    private static final Logger logger = LogManager.getLogger(ServiceConfig.class);
-
     @Value("${jms.host}")
     private String jmsHost;
 
@@ -51,10 +47,11 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {
-        return JAXBContext.newInstance(Event.class, Provider.class,
+        return JAXBContext.newInstance(Event.class, Provider.class, Catalogue.class, CatalogueBundle.class,
                 Service.class, User.class, InfraService.class, VocabularyCuration.class, VocabularyEntryRequest.class,
                 RangeValue.class, Vocabulary.class, ProviderMainContact.class, ProviderPublicContact.class,
-                ServiceMainContact.class, ServicePublicContact.class, ProviderLocation.class, ProviderRequest.class, ProviderBundle.class);
+                ServiceMainContact.class, ServicePublicContact.class, ProviderLocation.class, ProviderRequest.class, ProviderBundle.class,
+                Helpdesk.class, Monitoring.class, HelpdeskBundle.class, MonitoringBundle.class, Metric.class);
 
     }
 

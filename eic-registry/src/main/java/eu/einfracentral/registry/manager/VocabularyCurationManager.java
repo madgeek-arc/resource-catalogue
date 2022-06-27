@@ -13,7 +13,6 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.domain.index.IndexField;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +23,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,36 +49,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;
-
-    @PostConstruct
-    void initLabels() {
-        resourceType = resourceTypeService.getResourceType(getResourceType());
-        Set<String> browseSet = new HashSet<>();
-        Map<String, Set<String>> sets = new HashMap<>();
-        labels = new HashMap<>();
-        labels.put("resourceType", "Resource Type");
-        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
-            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
-            labels.put(f.getName(), f.getLabel());
-            if (f.getLabel() != null) {
-                sets.get(f.getResourceType().getName()).add(f.getName());
-            }
-        }
-        boolean flag = true;
-        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
-            if (flag) {
-                browseSet.addAll(entry.getValue());
-                flag = false;
-            } else {
-                browseSet.retainAll(entry.getValue());
-            }
-        }
-        browseBy = new ArrayList<>();
-        browseBy.addAll(browseSet);
-        browseBy.add("resourceType");
-        java.util.Collections.sort(browseBy);
-        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
-    }
 
 
     @Autowired

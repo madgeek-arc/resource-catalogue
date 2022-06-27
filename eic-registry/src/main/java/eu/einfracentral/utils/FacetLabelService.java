@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class FacetLabelService {
@@ -52,9 +51,11 @@ public class FacetLabelService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
 //        ff.addFilter("active", "true");
-        Map<String, String> providerNames = providerService.getAll(ff, null)
-                .getResults()
-                .stream().collect(Collectors.toMap(ProviderBundle::getId, p -> p.getProvider().getName()));
+        // TODO: get all final providers (after deduplication process)
+        List<ProviderBundle> allProviders = providerService.getAll(ff, null).getResults();
+        Map<String, String> providerNames = new TreeMap<>();
+        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), p.getProvider().getName()));
+
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
         Facet superCategories;

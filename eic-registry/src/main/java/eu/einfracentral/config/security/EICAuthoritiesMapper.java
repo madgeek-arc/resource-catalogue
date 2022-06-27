@@ -1,8 +1,8 @@
 package eu.einfracentral.config.security;
 
 import com.nimbusds.jwt.JWT;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.*;
+import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.AuthoritiesMapper;
@@ -25,19 +25,20 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
-    private Map<String, SimpleGrantedAuthority> userRolesMap;
+    private Map<String, List<SimpleGrantedAuthority>> userRolesMap;
     private final String admins;
     private String epotAdmins;
     private final int maxQuantity;
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
+
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PendingResourceService<ProviderBundle> pendingProviderService;
     private final SecurityService securityService;
 
@@ -46,9 +47,11 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
                                 @Value("${project.admins.epot}") String epotAdmins,
                                 @Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                 ProviderService<ProviderBundle, Authentication> manager,
+                                CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 PendingResourceService<ProviderBundle> pendingProviderService,
                                 SecurityService securityService) {
         this.providerService = manager;
+        this.catalogueService = catalogueService;
         this.pendingProviderService = pendingProviderService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
@@ -67,19 +70,19 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
             throw new UnauthorizedUserException("token is not valid or it has expired");
         }
 
-        SimpleGrantedAuthority authority;
+        List<SimpleGrantedAuthority> authorities;
         out.add(new SimpleGrantedAuthority("ROLE_USER"));
         if (userRolesMap.get(userInfo.getSub()) != null) {
             if (userRolesMap.get(userInfo.getEmail()) != null) { // if there is also an email entry then user must be admin
-                authority = userRolesMap.get(userInfo.getEmail().toLowerCase());
+                authorities = userRolesMap.get(userInfo.getEmail().toLowerCase());
             } else {
-                authority = userRolesMap.get(userInfo.getSub());
+                authorities = userRolesMap.get(userInfo.getSub());
             }
         } else {
-            authority = userRolesMap.get(userInfo.getEmail().toLowerCase());
+            authorities = userRolesMap.get(userInfo.getEmail().toLowerCase());
         }
-        if (authority != null) {
-            out.add(authority);
+        if (authorities != null) {
+            out.addAll(authorities);
         }
 
         String authoritiesString = out.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
@@ -92,7 +95,9 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         if (!userRolesMap.containsKey(email)) {
             return false;
         } else {
-            return userRolesMap.get(email).getAuthority().equals("ROLE_ADMIN");
+            return userRolesMap.get(email)
+                    .stream()
+                    .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_ADMIN"));
         }
     }
 
@@ -101,7 +106,8 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         if (!userRolesMap.containsKey(email)) {
             return false;
         } else {
-            return userRolesMap.get(email).getAuthority().equals("ROLE_EPOT");
+            return userRolesMap.get(email).stream()
+                    .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_EPOT"));
         }
     }
 
@@ -118,45 +124,92 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         try {
             List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
             providers.addAll(pendingProviderService.getAll(ff, null).getResults());
-            userRolesMap = providers
-                    .stream()
-                    .distinct()
-                    .map(providerBundle -> {
-                        if (providerBundle.getProvider() != null && providerBundle.getProvider().getUsers() != null) {
-                            return providerBundle.getProvider();
-                        }
-                        return null;
-                    })
-                    .filter(Objects::nonNull)
-                    .flatMap((Function<Provider, Stream<String>>) provider -> provider.getUsers()
-                            .stream()
-                            .filter(Objects::nonNull)
-                            .map(u -> {
-                                if (u.getId() != null && !"".equals(u.getId())) {
-                                    return u.getId();
-                                }
-                                return u.getEmail().toLowerCase();
-                            }))
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .collect(Collectors
-                            .toMap(Function.identity(), a -> new SimpleGrantedAuthority("ROLE_PROVIDER")));
+            List<User> users = getProviderUsers(providers);
+            mergeRoles(createUserRoles(users, "ROLE_PROVIDER"));
+
         } catch (Exception e) {
             logger.warn("There are no Provider entries in DB");
         }
 
-        userRolesMap.putAll(Arrays.stream(epotAdmins.replace(" ", "").split(","))
+        try {
+            List<CatalogueBundle> catalogueAdmins = catalogueService.getAll(ff, securityService.getAdminAccess()).getResults();
+            List<User> users = getCatalogueUsers(catalogueAdmins);
+            mergeRoles(createUserRoles(users, "ROLE_CATALOGUE_ADMIN"));
+        } catch (Exception e) {
+            logger.warn("There are no Catalogue entries in DB");
+        }
+
+        mergeRoles(Arrays.stream(epotAdmins.replace(" ", "").split(","))
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_EPOT"))
                 ));
 
-        userRolesMap.putAll(Arrays.stream(admins.replace(" ", "").split(","))
+        mergeRoles(Arrays.stream(admins.replace(" ", "").split(","))
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
                 ));
+    }
+
+    private List<User> getProviderUsers(List<ProviderBundle> providers) {
+        return providers
+                .stream()
+                .distinct()
+                .map(providerBundle -> {
+                    if (providerBundle.getProvider() != null && providerBundle.getProvider().getUsers() != null) {
+                        return providerBundle.getProvider();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .map(Provider::getUsers)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private List<User> getCatalogueUsers(List<CatalogueBundle> providers) {
+        return providers
+                .stream()
+                .distinct()
+                .map(providerBundle -> {
+                    if (providerBundle.getCatalogue() != null && providerBundle.getCatalogue().getUsers() != null) {
+                        return providerBundle.getCatalogue();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .map(Catalogue::getUsers)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, SimpleGrantedAuthority> createUserRoles(List<User> users, String role) {
+        return users
+                .stream()
+                .map(user -> {
+                    if (user.getId() != null && !"".equals(user.getId())) {
+                        return user.getId();
+                    }
+                    return user.getEmail().toLowerCase();
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors
+                        .toMap(Function.identity(), a -> new SimpleGrantedAuthority(role)));
+    }
+
+    private void mergeRoles(Map<String, SimpleGrantedAuthority> newRoles) {
+        for (Map.Entry<String, SimpleGrantedAuthority> role : newRoles.entrySet()) {
+            if (!userRolesMap.containsKey(role.getKey())){
+                userRolesMap.put(role.getKey(), new ArrayList<>());
+                userRolesMap.get(role.getKey()).add(role.getValue());
+            }
+            if (userRolesMap.containsKey(role.getKey()) && !userRolesMap.get(role.getKey()).contains(role.getValue())) {
+                userRolesMap.get(role.getKey()).add(role.getValue());
+            }
+        }
     }
 }

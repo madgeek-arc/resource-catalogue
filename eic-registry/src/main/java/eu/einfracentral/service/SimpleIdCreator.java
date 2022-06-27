@@ -1,6 +1,8 @@
 package eu.einfracentral.service;
 
+import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.exception.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,6 @@ public class SimpleIdCreator implements IdCreator {
 
     SimpleIdCreator() {
     }
-
 
     @Override
     public String createProviderId(Provider provider) {
@@ -36,6 +37,29 @@ public class SimpleIdCreator implements IdCreator {
 
     }
 
+    @Override
+    public String createCatalogueId(Catalogue catalogue) {
+        String catalogueId;
+        if (catalogue.getId() == null || "".equals(catalogue.getId())) {
+            if (catalogue.getAbbreviation() != null && !"".equals(catalogue.getAbbreviation()) && !"null".equals(catalogue.getAbbreviation())) {
+                catalogueId = catalogue.getAbbreviation();
+            } else if (catalogue.getName() != null && !"".equals(catalogue.getName()) && !"null".equals(catalogue.getName())) {
+                catalogueId = catalogue.getName();
+            } else {
+                throw new ValidationException("Catalogue must have an acronym or name.");
+            }
+        } else {
+            catalogueId = catalogue.getId();
+        }
+        return StringUtils
+                .stripAccents(catalogueId)
+                .replaceAll("[\\n\\t\\s]+", " ")
+                .replaceAll("\\s+$", "")
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase();
+
+    }
 
     @Override
     public String createServiceId(eu.einfracentral.domain.Service service) {
@@ -53,5 +77,17 @@ public class SimpleIdCreator implements IdCreator {
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_")
                 .toLowerCase());
+    }
+
+    @Override
+    public String createHostingLegalEntityId(String providerName) {
+        return StringUtils
+                .stripAccents(providerName)
+                .replaceAll("[\\n\\t\\s]+", " ")
+                .replaceAll("\\s+$", "")
+                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
+                .replace(" ", "_")
+                .toLowerCase();
+
     }
 }

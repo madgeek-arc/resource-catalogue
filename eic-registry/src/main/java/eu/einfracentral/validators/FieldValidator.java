@@ -1,10 +1,7 @@
-package eu.einfracentral.validator;
+package eu.einfracentral.validators;
 
-
-import eu.einfracentral.annotation.EmailValidation;
-import eu.einfracentral.annotation.FieldValidation;
-import eu.einfracentral.annotation.PhoneValidation;
-import eu.einfracentral.annotation.VocabularyValidation;
+import eu.einfracentral.annotation.*;
+import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Vocabulary;
@@ -59,6 +56,16 @@ public class FieldValidator {
     public void validate(Object o) throws IllegalAccessException {
         validationLocation = new ArrayDeque<>();
         validateFields(o);
+        if (o.getClass().getSuperclass() != null && o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle")) {
+            try {
+                Field payload = Bundle.class.getDeclaredField("payload");
+                payload.setAccessible(true);
+                o = payload.get(o);
+            } catch (NoSuchFieldException e) {
+                logger.error("Could not find field 'payload'", e);
+            }
+            validateFields(o);
+        }
     }
 
     private void validateFields(Object o) throws IllegalAccessException {
@@ -67,7 +74,7 @@ public class FieldValidator {
         }
 
         // get declared fields of class
-        Field[] declaredFields = o.getClass().getDeclaredFields();
+        List<Field> declaredFields = new ArrayList<>(Arrays.asList(o.getClass().getDeclaredFields()));
 
         // validate every field
         for (Field field : declaredFields) {
@@ -96,9 +103,14 @@ public class FieldValidator {
 
         // check if FieldValidation annotation exists
         Annotation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
+        Annotation geoLocationVocValidation = field.getAnnotation(GeoLocationVocValidation.class);
         Annotation annotation = field.getAnnotation(FieldValidation.class);
         if (vocabularyValidation != null && annotation == null) {
             annotation = vocabularyValidation.annotationType().getAnnotation(FieldValidation.class);
+        }
+        // region/countries validation
+        if (geoLocationVocValidation != null && annotation == null) {
+            annotation = geoLocationVocValidation.annotationType().getAnnotation(FieldValidation.class);
         }
 
         validateField(field, o, (FieldValidation) annotation);
@@ -244,7 +256,8 @@ public class FieldValidator {
             logger.trace(e.getMessage());
         }
 
-        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 403 && statusCode != 405 && statusCode != 503) {
+        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 308
+                && statusCode != 403 && statusCode != 405 && statusCode != 503) {
             if (field == null) {
                 throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
             } else {
@@ -265,11 +278,21 @@ public class FieldValidator {
                     if (Vocabulary.class.equals(annotation.idClass())) {
                         Vocabulary voc = vocabularyService.get(o.toString());
                         VocabularyValidation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
+                        GeoLocationVocValidation geoLocationVocValidation = field.getAnnotation(GeoLocationVocValidation.class);
                         if (vocabularyValidation != null) {
                             if (voc == null || Vocabulary.Type.fromString(voc.getType()) != vocabularyValidation.type()) {
                                 throw new ValidationException(
                                         String.format("Field '%s' should contain the ID of a type '%s' Vocabulary",
                                                 field.getName(), vocabularyValidation.type()));
+                            }
+                        }
+                        // region/countries validation
+                        if (geoLocationVocValidation != null) {
+                            if (voc == null || (Vocabulary.Type.fromString(voc.getType()) != geoLocationVocValidation.region()
+                                    && Vocabulary.Type.fromString(voc.getType()) != geoLocationVocValidation.country())) {
+                                throw new ValidationException(
+                                        String.format("Field '%s' should contain the ID of either one of the types '%s' or '%s' Vocabularies",
+                                                field.getName(), geoLocationVocValidation.region(), geoLocationVocValidation.country()));
                             }
                         }
                     } else if (Provider.class.equals(annotation.idClass())

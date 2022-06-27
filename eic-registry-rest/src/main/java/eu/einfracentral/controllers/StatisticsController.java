@@ -6,7 +6,6 @@ import eu.einfracentral.dto.PlaceCount;
 import eu.einfracentral.dto.Value;
 import eu.einfracentral.service.StatisticsService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

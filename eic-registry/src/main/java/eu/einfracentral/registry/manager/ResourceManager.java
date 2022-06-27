@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
-import eu.einfracentral.validator.FieldValidator;
+import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;

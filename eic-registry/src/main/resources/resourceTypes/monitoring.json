@@ -1,0 +1,137 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "monitoring_id",
+      "path": "//*[local-name()='monitoring']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "service_id",
+      "label": "Service ID",
+      "path": "//*[local-name()='serviceId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "monitored_by",
+      "label": "Monitored by",
+      "path": "//*[local-name()='monitoredBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "service_type",
+      "label": "Service Type",
+      "path": "//*[local-name()='monitoringGroups']/*[local-name()='serviceType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "endpoint",
+      "label": "Endpoint",
+      "path": "//*[local-name()='monitoringGroups']/*[local-name()='endpoint']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateActionType",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateDate",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateType",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestUpdateUserEmail",
+      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingActionType",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingDate",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingType",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestOnboardingUserEmail",
+      "path": "//*[local-name()='latestOnboardingInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "active",
+      "path": "//*[local-name()='active']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "monitoring",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
+}
