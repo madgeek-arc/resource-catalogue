@@ -398,7 +398,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        ProviderBundle provider = get("eosc", id, auth);
+        ProviderBundle provider = get(catalogueName, id, auth);
         provider.setStatus(vocabularyService.get(status).getId());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -446,7 +446,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
-        ProviderBundle provider = get(providerId, "eosc");
+        ProviderBundle provider = get(providerId, catalogueName);
         if ((provider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
                 provider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !provider.isActive()){
             throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", provider.getStatus()));
@@ -703,7 +703,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get("eosc", providerId, auth);
+        ProviderBundle providerBundle = get(catalogueName, providerId, auth);
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
@@ -722,7 +722,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void adminAcceptedTerms(String providerId, Authentication auth) {
-        update(get(providerId), "eosc", auth);
+        update(get(providerId), catalogueName, auth);
     }
 
     public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
@@ -747,7 +747,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(providerId, "eosc");
+        ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
@@ -762,7 +762,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = get(providerId, "eosc");
+        ProviderBundle provider = get(providerId, catalogueName);
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (provider.getLoggingInfo() != null) {

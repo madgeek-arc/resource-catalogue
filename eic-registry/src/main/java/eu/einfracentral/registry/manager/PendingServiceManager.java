@@ -68,7 +68,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         ff.setQuantity(1000);
         List<InfraService> resourceList = infraServiceService.getAll(ff, auth).getResults();
         for (InfraService existingResource : resourceList){
-            if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals("eosc")) {
+            if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
                 throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' field.");
             }
         }
@@ -123,7 +123,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     public InfraService transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
         InfraService infraService = infraServiceService.get(serviceId);
-        Resource resource = infraServiceService.getResource(infraService.getService().getId(), "eosc", infraService.getService().getVersion());
+        Resource resource = infraServiceService.getResource(infraService.getService().getId(), catalogueName, infraService.getService().getVersion());
         resource.setResourceTypeName("infra_service");
         resourceService.changeResourceType(resource, resourceType);
         return infraService;

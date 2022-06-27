@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
@@ -90,6 +91,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
     private List<String> browseBy;
     private Map<String, String> labels;
 
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
+
     @PostConstruct
     void initLabels() {
         resourceType = resourceTypeService.getResourceType(getResourceType());
@@ -136,7 +140,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
 //    @Override
     public InfraService get(String id) {
-        return get(id, "eosc", "latest");
+        return get(id, catalogueName, "latest");
     }
 
     public InfraService get(String id, String catalogueId) {
@@ -303,7 +307,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                 .map(id ->
                 {
                     try {
-                        return getRichService(id, "latest", "eosc", auth);
+                        return getRichService(id, "latest", catalogueName, auth);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }

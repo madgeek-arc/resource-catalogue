@@ -330,7 +330,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
     @Override
     public InfraService get(String id) {
-        return get(id, "eosc", "latest");
+        return get(id, catalogueName, "latest");
     }
 
     @Override
@@ -503,9 +503,9 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         InfraService service;
         String activeProvider = "";
         if (version == null || "".equals(version)) {
-            service = this.get(serviceId, "eosc");
+            service = this.get(serviceId, catalogueName);
         } else {
-            service = this.get(serviceId, "eosc", version);
+            service = this.get(serviceId, catalogueName, version);
         }
 
         if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
@@ -553,7 +553,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        InfraService service = get(serviceId, "eosc");
+        InfraService service = get(serviceId, catalogueName);
         User user = User.of(auth);
         LoggingInfo loggingInfo; // TODO: extract method
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -620,7 +620,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<InfraService> getInfraServices(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", "eosc");
+        ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, auth).getResults();
@@ -641,7 +641,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ProviderBundle providerBundle = providerService.get(providerId);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", "eosc");
+        ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -664,7 +664,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<Service> getServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", "eosc");
+        ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -676,7 +676,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public InfraService getServiceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", "eosc");
+        ff.addFilter("catalogue_id", catalogueName);
         List<InfraService> allProviderServices = getAll(ff, auth).getResults();
         for (InfraService infraService : allProviderServices){
             if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId())){
@@ -690,7 +690,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<Service> getActiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", "eosc");
+        ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
@@ -702,7 +702,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     public List<InfraService> getInactiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", "eosc");
+        ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
@@ -752,7 +752,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     public InfraService changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
-        InfraService infraService = get(resourceId, "eosc");
+        InfraService infraService = get(resourceId, catalogueName);
         ProviderBundle newProvider = providerService.get(newProviderId);
         ProviderBundle oldProvider =  providerService.get(infraService.getService().getResourceOrganisation());
 
@@ -791,7 +791,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
         // add Resource, delete the old one
         add(infraService, auth);
-        delete(get(resourceId, "eosc"));
+        delete(get(resourceId, catalogueName));
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService, auth);
