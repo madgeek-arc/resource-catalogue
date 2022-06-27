@@ -39,6 +39,9 @@ public class ProviderController {
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
 
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
+
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
@@ -60,7 +63,7 @@ public class ProviderController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         // Block users of deleting Providers of another Catalogue
-        if (!provider.getProvider().getCatalogueId().equals("eosc")){
+        if (!provider.getProvider().getCatalogueId().equals(catalogueName)){
             throw new ValidationException("You cannot delete a Provider of a non EOSC Catalogue.");
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
@@ -338,14 +341,14 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle provider = providerManager.get("eosc", id, auth);
+        ProviderBundle provider = providerManager.get(catalogueName, id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("resource_organisation", id);
-        ff.addFilter("catalogue_id", "eosc");
+        ff.addFilter("catalogue_id", catalogueName);
         List<InfraService> services = infraServiceService.getAll(ff, auth).getResults();
         for (InfraService service : services) {
             service.setActive(active);

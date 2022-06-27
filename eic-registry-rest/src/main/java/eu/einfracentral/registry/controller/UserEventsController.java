@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,9 @@ public class UserEventsController {
 
     private EventService eventService;
     private InfraServiceService<InfraService, InfraService> infraServiceService;
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
 
     @Autowired
@@ -62,7 +66,7 @@ public class UserEventsController {
         }
         for (Map.Entry<String, Float> favouriteService : favouriteServices.entrySet()) {
             if (favouriteService.getValue() == 1) { // "1" is true
-                services.add(infraServiceService.getRichService(favouriteService.getKey(), "latest", "eosc", auth));
+                services.add(infraServiceService.getRichService(favouriteService.getKey(), "latest", catalogueName, auth));
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -84,7 +88,7 @@ public class UserEventsController {
             serviceRatings.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
-            services.add(infraServiceService.getRichService(serviceRating.getKey(), "latest", "eosc", auth));
+            services.add(infraServiceService.getRichService(serviceRating.getKey(), "latest", catalogueName, auth));
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

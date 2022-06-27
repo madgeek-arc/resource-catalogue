@@ -89,7 +89,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         ff.setQuantity(1000);
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList){
-            if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals("eosc")) {
+            if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueName)) {
                 throw new ValidationException("Provider with the specific id already exists on the EOSC Catalogue. Please refactor your 'abbreviation' field.");
             }
         }
@@ -146,7 +146,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Provider with id '{}' to Pending", auth, providerId);
-        Resource resource = providerManager.getResource(providerId, "eosc");
+        Resource resource = providerManager.getResource(providerId, catalogueName);
         resource.setResourceTypeName("provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
         return deserialize(resource);

@@ -44,6 +44,9 @@ public class RegistrationMailService {
     private final PendingServiceManager pendingServiceManager;
     private final SecurityService securityService;
 
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
+
 
     @Value("${webapp.homepage}")
     private String endpoint;
@@ -289,7 +292,7 @@ public class RegistrationMailService {
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        InfraService infraService = infraServiceManager.get(resourceId, "eosc");
+        InfraService infraService = infraServiceManager.get(resourceId, catalogueName);
         ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
         if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
