@@ -45,6 +45,10 @@ public class ServiceController {
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
+
+
     @Autowired
     ServiceController(InfraServiceService<InfraService, InfraService> service,
                       ProviderService<ProviderBundle, Authentication> provider,
@@ -66,7 +70,7 @@ public class ServiceController {
             service = infraService.get(id, catalogueId);
         }
         // Block users of deleting Services of another Catalogue
-        if (!service.getService().getCatalogueId().equals(catalogueId)){
+        if (!service.getService().getCatalogueId().equals(catalogueName)){
             throw new ValidationException("You cannot delete a Service of a non EOSC Catalogue.");
         }
         infraService.delete(service);
