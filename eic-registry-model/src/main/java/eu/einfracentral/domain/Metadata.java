@@ -34,6 +34,9 @@ public class Metadata {
     @XmlElement(name = "term")
     private List<String> terms;
 
+    @XmlElement(defaultValue = "false")
+    private boolean published = false;
+
 
     public Metadata() {
     }
@@ -46,6 +49,7 @@ public class Metadata {
         this.source = metadata.getSource();
         this.originalId = metadata.getOriginalId();
         this.terms = metadata.getTerms();
+        this.published = metadata.isPublished();
     }
 
     public static Metadata updateMetadata(Metadata metadata, String modifiedBy) {
@@ -132,6 +136,7 @@ public class Metadata {
                 ", source='" + source + '\'' +
                 ", originalId='" + originalId + '\'' +
                 ", terms=" + terms +
+                ", published=" + published +
                 '}';
     }
 
@@ -191,16 +196,27 @@ public class Metadata {
         this.terms = terms;
     }
 
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Metadata metadata = (Metadata) o;
-        return Objects.equals(registeredBy, metadata.registeredBy) && Objects.equals(registeredAt, metadata.registeredAt) && Objects.equals(modifiedBy, metadata.modifiedBy) && Objects.equals(modifiedAt, metadata.modifiedAt) && Objects.equals(source, metadata.source) && Objects.equals(originalId, metadata.originalId) && Objects.equals(terms, metadata.terms);
+        return Objects.equals(registeredBy, metadata.registeredBy) && Objects.equals(registeredAt, metadata.registeredAt)
+                && Objects.equals(modifiedBy, metadata.modifiedBy) && Objects.equals(modifiedAt, metadata.modifiedAt)
+                && Objects.equals(source, metadata.source) && Objects.equals(originalId, metadata.originalId)
+                && Objects.equals(terms, metadata.terms) && Objects.equals(published, metadata.published);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registeredBy, registeredAt, modifiedBy, modifiedAt, source, originalId, terms);
+        return Objects.hash(registeredBy, registeredAt, modifiedBy, modifiedAt, source, originalId, terms, published);
     }
 }
