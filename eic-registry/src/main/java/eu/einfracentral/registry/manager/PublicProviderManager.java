@@ -2,11 +2,14 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifier;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.registry.controller.PublicProviderController;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
@@ -20,6 +23,7 @@ import java.util.List;
 @Service("publicProviderManager")
 public class PublicProviderManager extends ResourceManager<ProviderBundle> implements ResourceCRUDService<ProviderBundle, Authentication> {
 
+    private static final Logger logger = LogManager.getLogger(PublicProviderManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
 
@@ -59,35 +63,40 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
+        String lowerLevelProviderId = providerBundle.getId();
         providerBundle.setIdentifier(Identifier.createIdentifier(providerBundle.getId()));
         providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         providerBundle.getMetadata().setPublished(true);
         ProviderBundle ret;
+        logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);
-        jmsTopicTemplate.convertAndSend("provider.create", providerBundle);
+        jmsTopicTemplate.convertAndSend("public_provider.create", providerBundle);
         return ret;
     }
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication authentication) {
+        ProviderBundle published = super.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         ProviderBundle ret = super.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         try {
-            BeanUtils.copyProperties(providerBundle, ret);
+            BeanUtils.copyProperties(ret, providerBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        providerBundle.getIdentifier().setOriginalId(providerBundle.getId());
-        providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        providerBundle.getMetadata().setPublished(true);
+        ret.setIdentifier(published.getIdentifier());
+        ret.setId(published.getId());
+        ret.setMetadata(published.getMetadata());
+        logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        jmsTopicTemplate.convertAndSend("provider.update", providerBundle);
+        jmsTopicTemplate.convertAndSend("public_provider.update", providerBundle);
         return ret;
     }
 
     @Override
     public void delete(ProviderBundle providerBundle) {
         ProviderBundle publicProviderBundle = get(String.format("%s.%s",providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
         super.delete(publicProviderBundle);
-        jmsTopicTemplate.convertAndSend("provider.delete", providerBundle);
+        jmsTopicTemplate.convertAndSend("public_provider.delete", providerBundle);
     }
 }

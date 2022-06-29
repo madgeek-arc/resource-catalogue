@@ -10,6 +10,8 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +111,8 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, String, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, String, org.springframework.security.core.Authentication)))",
             returning = "providerBundle")
     public void updatePublicProvider(ProviderBundle providerBundle) {
         try{
@@ -122,9 +125,9 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.delete(org.springframework.security.core.Authentication, eu.einfracentral.domain.ProviderBundle)))",
-            returning = "providerBundle")
-    public void deletePublicProvider(ProviderBundle providerBundle) {
+    @After("execution(* eu.einfracentral.registry.manager.ResourceManager.delete(eu.einfracentral.domain.ProviderBundle)))")
+    public void deletePublicProvider(JoinPoint joinPoint) {
+        ProviderBundle providerBundle = (ProviderBundle) joinPoint.getArgs()[1];
         publicProviderManager.delete(providerBundle);
     }
 
