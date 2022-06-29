@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,58 +39,29 @@ public class PublicProviderController {
 
     private static final Logger logger = LogManager.getLogger(PublicProviderController.class);
     private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final SecurityService securityService;
 
     @Autowired
     PublicProviderController(@Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
-                             SecurityService securityService) {
+                             ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService) {
         this.publicProviderManager = publicProviderManager;
+        this.providerService = providerService;
         this.securityService = securityService;
     }
 
     @ApiOperation(value = "Returns the published Provider with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = publicProviderManager.get(id).getProvider();
+        Provider provider = providerService.get(id).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-//    @Cacheable(value = CACHE_PROVIDERS, key="#ff.hashCode()+(#auth!=null?#auth.hashCode():0)")
+//    @ApiOperation(value = "Returns all published Providers.")
+//    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 //    public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
-//        List<ProviderBundle> userProviders = null;
 //        List<ProviderBundle> retList = new ArrayList<>();
-//
-//        // if user is ADMIN or EPOT return everything
-//        if (auth != null && auth.isAuthenticated()) {
-//            if (securityService.hasRole(auth, "ROLE_ADMIN") ||
-//                    securityService.hasRole(auth, "ROLE_EPOT")) {
-//                return super.getAll(ff, auth);
-//            }
-//            // if user is PROVIDER ADMIN return all his Providers (rejected, pending) with their sensitive data (Users, MainContact) too
-//            User user = User.of(auth);
-//            Browsing<ProviderBundle> providers = super.getAll(ff, auth);
-//            for (ProviderBundle providerBundle : providers.getResults()){
-//                if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
-//                        securityService.userIsProviderAdmin(user, providerBundle.getId())) {
-//                    retList.add(providerBundle);
-//                }
-//            }
-//            providers.setResults(retList);
-//            providers.setTotal(retList.size());
-//            providers.setTo(retList.size());
-//            userProviders = getMyServiceProviders(auth);
-//            if (userProviders != null) {
-//                // replace user providers having null users with complete provider entries
-//                userProviders.forEach(x -> {
-//                    providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
-//                    providers.getResults().add(x);
-//                });
-//            }
-//            return providers;
-//        }
-//
-//        // else return ONLY approved Providers
-//        ff.addFilter("status", "approved provider");
+//        ff.addFilter("published", true);
 //        Browsing<ProviderBundle> providers = super.getAll(ff, auth);
 //        retList.addAll(providers.getResults());
 //        providers.setResults(retList);

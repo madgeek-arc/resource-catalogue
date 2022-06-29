@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.Identifier;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.User;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -35,11 +35,6 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         return "provider";
     }
 
-//    @Override
-//    public ProviderBundle get(String s) {
-//        return super.get(s);
-//    }
-
     @Override
     public Browsing<ProviderBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
         return super.getAll(facetFilter, authentication);
@@ -50,12 +45,11 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         if (authentication == null) {
             throw new UnauthorizedUserException("Please log in.");
         }
-        User user = User.of(authentication);
 
         List<ProviderBundle> providerList = new ArrayList<>();
         Browsing<ProviderBundle> providerBundleBrowsing = super.getAll(facetFilter, authentication);
         for (ProviderBundle providerBundle : providerBundleBrowsing.getResults()) {
-            if (providerBundle.getProvider().getUsers().contains(user)) {
+            if (securityService.isProviderAdmin(authentication, providerBundle.getId()) &&  providerBundle.getMetadata().isPublished()) {
                 providerList.add(providerBundle);
             }
         }
@@ -65,7 +59,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
-        providerBundle.getIdentifier().setOriginalId(providerBundle.getId());
+        providerBundle.setIdentifier(Identifier.createIdentifier(providerBundle.getId()));
         providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         providerBundle.getMetadata().setPublished(true);
         ProviderBundle ret;

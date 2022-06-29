@@ -23,10 +23,10 @@ public class Identifier {
     public Identifier() {
     }
 
-    public Identifier(List<String> alternativeIdentifiers, boolean hidden, String originalId) {
-        this.alternativeIdentifiers = alternativeIdentifiers;
-        this.hidden = hidden;
-        this.originalId = originalId;
+    public Identifier(Identifier identifier) {
+        this.alternativeIdentifiers = identifier.getAlternativeIdentifiers();
+        this.hidden = identifier.isHidden();
+        this.originalId = identifier.getOriginalId();
     }
 
     @Override
@@ -36,6 +36,12 @@ public class Identifier {
                 ", hidden=" + hidden +
                 ", originalId='" + originalId + '\'' +
                 '}';
+    }
+
+    public static Identifier createIdentifier(String originalId){
+        Identifier ret = new Identifier();
+        ret.setOriginalId(originalId);
+        return ret;
     }
 
     public List<String> getAlternativeIdentifiers() {
