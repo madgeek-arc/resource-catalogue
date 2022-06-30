@@ -470,7 +470,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
                 loggingInfoList.add(loggingInfo);
                 provider.setLoggingInfo(loggingInfoList);
 
@@ -481,7 +482,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 deactivateServices(provider.getId(), auth);
                 logger.info("Deactivating Provider: {}", provider);
             } else {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
                 loggingInfoList.add(loggingInfo);
                 provider.setLoggingInfo(loggingInfoList);
 
