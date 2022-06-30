@@ -764,7 +764,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = get(providerId, catalogueName);
+        ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (provider.getLoggingInfo() != null) {
