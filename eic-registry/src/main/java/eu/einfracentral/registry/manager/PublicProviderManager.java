@@ -2,7 +2,6 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifier;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.controller.PublicProviderController;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;

@@ -3,14 +3,11 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
-import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.service.ResourceCRUDService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -19,12 +16,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -38,19 +32,29 @@ public class PublicProviderController {
 
     private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
     private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final SecurityService securityService;
+    private static final Logger logger = LogManager.getLogger(PublicProviderController.class);
 
     @Autowired
     PublicProviderController(@Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
-                             ProviderService<ProviderBundle, Authentication> providerService) {
+                             ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService) {
         this.publicProviderManager = publicProviderManager;
         this.providerService = providerService;
+        this.securityService = securityService;
     }
 
     @ApiOperation(value = "Returns the published Provider with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        Provider provider = providerService.get(id).getProvider();
-        return new ResponseEntity<>(provider, HttpStatus.OK);
+        ProviderBundle providerBundle = providerService.get(id);
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive() && providerBundle.getMetadata().isPublished()){
+            return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+        } else{
+            if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
+                return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @ApiOperation(value = "Filter a list of published Providers based on a set of filters or get a list of all published Providers in the Catalogue.")
@@ -84,6 +88,12 @@ public class PublicProviderController {
         }
         ff.setFilter(allRequestParams);
         ff.addFilter("published", true);
+        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
+            logger.info("Getting all published Providers for Admin/Epot");
+        } else{
+            ff.addFilter("active", true);
+            ff.addFilter("status", "approved provider");
+        }
         List<Provider> providerList = new LinkedList<>();
         Paging<ProviderBundle> providerBundlePaging = providerService.getAll(ff, auth);
         for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
