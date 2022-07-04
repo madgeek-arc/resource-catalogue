@@ -3,12 +3,12 @@
     <parent>
         <groupId>eu.einfracentral</groupId>
         <artifactId>eic</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>eic-registry-api</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <licenses>
         <license>
@@ -20,7 +20,7 @@
         <connection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</developerConnection>
         <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
-      <tag>eic-4.0.0</tag>
+      <tag>HEAD</tag>
   </scm>
     <dependencies>
         <dependency>
