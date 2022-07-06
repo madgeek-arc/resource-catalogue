@@ -87,7 +87,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        jmsTopicTemplate.convertAndSend("public_provider.update", providerBundle);
+        jmsTopicTemplate.convertAndSend("public_provider.update", ret);
         return ret;
     }
 
@@ -96,6 +96,6 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         ProviderBundle publicProviderBundle = get(String.format("%s.%s",providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
         super.delete(publicProviderBundle);
-        jmsTopicTemplate.convertAndSend("public_provider.delete", providerBundle);
+        jmsTopicTemplate.convertAndSend("public_provider.delete", publicProviderBundle);
     }
 }

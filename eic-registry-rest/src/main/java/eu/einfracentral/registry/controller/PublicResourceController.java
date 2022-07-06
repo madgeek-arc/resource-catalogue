@@ -1,8 +1,8 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.Service;
+import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -27,45 +27,50 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.*;
 
 @RestController
-@RequestMapping("publicProvider")
-@Api(value = "Get information about a published Provider")
-public class PublicProviderController {
+@RequestMapping("publicResource")
+@Api(value = "Get information about a published Resource")
+public class PublicResourceController {
 
-    private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ResourceService<InfraService, Authentication> publicResourceManager;
+    private final InfraServiceService<InfraService, InfraService> infraServiceService;
     private final SecurityService securityService;
-    private static final Logger logger = LogManager.getLogger(PublicProviderController.class);
+    private static final Logger logger = LogManager.getLogger(PublicResourceController.class);
 
     @Autowired
-    PublicProviderController(@Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
-                             ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService) {
-        this.publicProviderManager = publicProviderManager;
-        this.providerService = providerService;
+    PublicResourceController(@Qualifier("publicResourceManager") ResourceService<InfraService, Authentication> publicResourceManager,
+                             InfraServiceService<InfraService, InfraService> infraServiceService, SecurityService securityService) {
+        this.publicResourceManager = publicResourceManager;
+        this.infraServiceService = infraServiceService;
         this.securityService = securityService;
     }
 
-    @ApiOperation(value = "Returns the published Provider with the given id.")
+    @ApiOperation(value = "Returns the published Resource with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Provider> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        ProviderBundle providerBundle = providerService.get(id);
-        if (providerBundle.getMetadata().isPublished()){
-            return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+    public ResponseEntity<Service> get(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        InfraService infraService = infraServiceService.get(id);
+        if (infraService.getStatus().equals("approved resource") && infraService.isActive() && infraService.isLatest() && infraService.getMetadata().isPublished()){
+            return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
+        } else{
+            if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") ||
+                    securityService.hasRole(auth, "ROLE_EPOT")) && infraService.getMetadata().isPublished()) {
+                return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
+            }
         }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @ApiOperation(value = "Returns the published Provider bundle with the given id.")
-    @GetMapping(path = "/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id)")
-    public ResponseEntity<ProviderBundle> getBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        ProviderBundle providerBundle = providerService.get(id);
-        if (providerBundle.getMetadata().isPublished()){
-            return new ResponseEntity<>(providerBundle, HttpStatus.OK);
+    @ApiOperation(value = "Returns the published InfraService with the given id.")
+    @GetMapping(path = "/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    public ResponseEntity<InfraService> getInfraService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        InfraService infraService = infraServiceService.get(id);
+        if (infraService.getMetadata().isPublished()){
+            return new ResponseEntity<>(infraService, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @ApiOperation(value = "Filter a list of published Providers based on a set of filters or get a list of all published Providers in the Catalogue.")
+    @ApiOperation(value = "Filter a list of published Resources based on a set of filters or get a list of all published Resources in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -74,7 +79,7 @@ public class PublicProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<Service>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
                                                    @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
@@ -97,27 +102,28 @@ public class PublicProviderController {
         ff.setFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Providers for Admin/Epot");
+            logger.info("Getting all published Resources for Admin/Epot");
         } else{
             ff.addFilter("active", true);
+            ff.addFilter("latest", true);
             ff.addFilter("status", "approved provider");
         }
-        List<Provider> providerList = new LinkedList<>();
-        Paging<ProviderBundle> providerBundlePaging = providerService.getAll(ff, auth);
-        for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
-            providerList.add(providerBundle.getProvider());
+        List<Service> serviceList = new LinkedList<>();
+        Paging<InfraService> infraServicePaging = infraServiceService.getAll(ff, auth);
+        for (InfraService infraService : infraServicePaging.getResults()) {
+            serviceList.add(infraService.getService());
         }
-        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
-                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
-        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+        Paging<Service> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
+                infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
+        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 
-    @GetMapping(path = "getMyPublishedProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyPublishedProviders(@ApiIgnore Authentication auth) {
+    @GetMapping(path = "getMyPublishedResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<InfraService>> getMyPublishedResources(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return new ResponseEntity<>(publicProviderManager.getMy(ff, auth).getResults(), HttpStatus.OK);
+        return new ResponseEntity<>(publicResourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 }

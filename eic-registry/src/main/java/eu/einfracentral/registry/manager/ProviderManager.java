@@ -508,6 +508,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 securityService.hasRole(auth, "ROLE_EPOT")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
+            ff.addFilter("published", false);
             providers = super.getAll(ff, null).getResults();
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
             providers = getMyServiceProviders(auth);
@@ -539,6 +540,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
@@ -554,6 +556,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<ProviderBundle> getInactive() {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
+        ff.addFilter("published", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));

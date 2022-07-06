@@ -31,6 +31,7 @@ public class ProviderManagementAspect {
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
     private final PublicProviderManager publicProviderManager;
+    private final PublicResourceManager publicResourceManager;
     private final InfraServiceService infraServiceService;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
@@ -38,12 +39,14 @@ public class ProviderManagementAspect {
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
                                     RegistrationMailService registrationMailService, InfraServiceService infraServiceService,
-                                    SecurityService securityService, PublicProviderManager publicProviderManager) {
+                                    SecurityService securityService, PublicProviderManager publicProviderManager,
+                                    PublicResourceManager publicResourceManager) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
         this.infraServiceService = infraServiceService;
         this.securityService = securityService;
         this.publicProviderManager = publicProviderManager;
+        this.publicResourceManager = publicResourceManager;
     }
 
 
@@ -127,10 +130,61 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ResourceManager.delete(eu.einfracentral.domain.ProviderBundle)))")
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager." +
+            "verifyResource(String, String, Boolean, org.springframework.security.core.Authentication))))",
+            returning = "infraService")
+    public void updatePublicProviderTemplateStatus(InfraService infraService) {
+        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation());
+        try{
+            publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        } catch (ResourceNotFoundException e){
+            throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
+                    providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        }
+        publicProviderManager.update(providerBundle, null);
+    }
+
+    @Async
+    @After("execution(* eu.einfracentral.registry.manager.ProviderManager." +
+            "delete(org.springframework.security.core.Authentication, eu.einfracentral.domain.ProviderBundle)))")
     public void deletePublicProvider(JoinPoint joinPoint) {
         ProviderBundle providerBundle = (ProviderBundle) joinPoint.getArgs()[1];
         publicProviderManager.delete(providerBundle);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager." +
+            "addService(eu.einfracentral.domain.InfraService, String, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, String, Boolean, " +
+            "org.springframework.security.core.Authentication))))",
+            returning = "infraService")
+    public void addResourceAsPublic(InfraService infraService) {
+        if (infraService.getStatus().equals("approved resource") && infraService.isActive() && infraService.isLatest()){
+            publicResourceManager.add(infraService, null);
+        }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, String, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, String, String, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.auditResource(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
+            returning = "infraService")
+    public void updatePublicResource(InfraService infraService) {
+        try{
+            publicResourceManager.get(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
+        } catch (ResourceNotFoundException e){
+            throw new ResourceNotFoundException(String.format("Resource with id [%s.%s] is not yet published or does not exist",
+                    infraService.getService().getCatalogueId(), infraService.getId()));
+        }
+        publicResourceManager.update(infraService, null);
+    }
+
+    @Async
+    @After("execution(* eu.einfracentral.registry.manager.InfraServiceManager.delete(eu.einfracentral.domain.InfraService)))")
+    public void deletePublicResource(JoinPoint joinPoint) {
+        InfraService infraService = (InfraService) joinPoint.getArgs()[0];
+        publicResourceManager.delete(infraService);
     }
 
     //TODO: Probably no needed
@@ -148,7 +202,7 @@ public class ProviderManagementAspect {
             ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), (Authentication) null);
             if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        infraService.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending resource");
+                        infraService.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
                 infraServiceService.verifyResource(infraService.getService().getId(), "pending resource", false, securityService.getAdminAccess());
             }
         } catch (RuntimeException e) {

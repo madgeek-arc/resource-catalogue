@@ -79,7 +79,7 @@ public class ProviderController {
         }
 
         // delete Provider
-        providerManager.delete(provider);
+        providerManager.delete(auth, provider);
         logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
@@ -167,6 +167,7 @@ public class ProviderController {
             ff.setOrderBy(sort);
         }
         ff.setFilter(allRequestParams);
+        ff.addFilter("published", false);
         List<Provider> providerList = new LinkedList<>();
         Paging<ProviderBundle> providerBundlePaging = providerManager.getAll(ff, auth);
         for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
@@ -220,6 +221,7 @@ public class ProviderController {
         if (catalogue_id != null) {
             ff.addFilter("catalogue_id", catalogue_id);
         }
+        ff.addFilter("published", false);
 
         List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
@@ -420,6 +422,7 @@ public class ProviderController {
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
+        ff.addFilter("published", false);
         List<ProviderBundle> providerList = new LinkedList<>();
         Paging<ProviderBundle> providerBundlePaging = providerManager.getRandomProviders(ff, auditingInterval, auth);
         for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
