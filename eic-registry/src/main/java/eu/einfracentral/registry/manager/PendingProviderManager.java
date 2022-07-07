@@ -317,7 +317,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public Resource getPendingResource(String providerId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"eosc\"", providerId), resourceType.getName());
+                .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueName), resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
