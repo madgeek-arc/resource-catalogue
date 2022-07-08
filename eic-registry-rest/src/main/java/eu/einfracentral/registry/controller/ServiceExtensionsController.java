@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,9 @@ public class ServiceExtensionsController {
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
     private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
@@ -70,7 +74,8 @@ public class ServiceExtensionsController {
         ff.setQuantity(1000);
         List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
         for (HelpdeskBundle helpdesk : allHelpdesks){
-            if (helpdesk.getCatalogueId().equals(catalogueId) && helpdesk.getHelpdesk().getServiceId().equals(serviceId)){
+            if (helpdesk.getCatalogueId().equals(catalogueId) && (helpdesk.getHelpdesk().getServiceId().equals(serviceId)
+                    || (catalogueName+'.'+helpdesk.getHelpdesk().getServiceId()).equals(serviceId))){
                 return new ResponseEntity<>(helpdesk.getHelpdesk(), HttpStatus.OK);
             }
         }
@@ -195,7 +200,8 @@ public class ServiceExtensionsController {
         ff.setQuantity(1000);
         List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
         for (MonitoringBundle monitoring : allMonitorings){
-            if (monitoring.getCatalogueId().equals(catalogueId) && monitoring.getMonitoring().getServiceId().equals(serviceId)){
+            if (monitoring.getCatalogueId().equals(catalogueId) && (monitoring.getMonitoring().getServiceId().equals(serviceId)
+                    || (catalogueName+'.'+monitoring.getMonitoring().getServiceId()).equals(serviceId))){
                 return new ResponseEntity<>(monitoring.getMonitoring(), HttpStatus.OK);
             }
         }
