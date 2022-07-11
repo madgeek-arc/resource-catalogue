@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Identifier;
+import eu.einfracentral.domain.Identifiers;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
@@ -63,7 +63,7 @@ public class PublicResourceManager extends ResourceManager<InfraService> impleme
     @Override
     public InfraService add(InfraService infraService, Authentication authentication) {
         String lowerLevelResourceId = infraService.getId();
-        infraService.setIdentifier(Identifier.createIdentifier(infraService.getId()));
+        infraService.setIdentifiers(Identifiers.createIdentifier(infraService.getId()));
         infraService.setId(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
         infraService.getMetadata().setPublished(true);
         InfraService ret;
@@ -82,7 +82,7 @@ public class PublicResourceManager extends ResourceManager<InfraService> impleme
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        ret.setIdentifier(published.getIdentifier());
+        ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Resource with id [%s]", ret.getId()));

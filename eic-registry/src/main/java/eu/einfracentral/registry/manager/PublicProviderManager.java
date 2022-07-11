@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.Identifier;
+import eu.einfracentral.domain.Identifiers;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
@@ -63,7 +63,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
         String lowerLevelProviderId = providerBundle.getId();
-        providerBundle.setIdentifier(Identifier.createIdentifier(providerBundle.getId()));
+        providerBundle.setIdentifiers(Identifiers.createIdentifier(providerBundle.getId()));
         providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         providerBundle.getMetadata().setPublished(true);
         ProviderBundle ret;
@@ -82,7 +82,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        ret.setIdentifier(published.getIdentifier());
+        ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
