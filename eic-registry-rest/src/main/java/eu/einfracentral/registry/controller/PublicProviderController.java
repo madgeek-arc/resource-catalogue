@@ -54,7 +54,7 @@ public class PublicProviderController {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @ApiOperation(value = "Returns the published Provider bundle with the given id.")
+//    @ApiOperation(value = "Returns the published Provider bundle with the given id.")
     @GetMapping(path = "/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id)")
     public ResponseEntity<ProviderBundle> getBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {

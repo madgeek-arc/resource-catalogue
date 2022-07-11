@@ -37,9 +37,6 @@ public class ServiceExtensionsController {
     private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
 
-    @Value("${project.catalogue.name}")
-    private String catalogueName;
-
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
         binder.addValidators(new HelpdeskValidator());
@@ -75,7 +72,7 @@ public class ServiceExtensionsController {
         List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
         for (HelpdeskBundle helpdesk : allHelpdesks){
             if (helpdesk.getCatalogueId().equals(catalogueId) && (helpdesk.getHelpdesk().getServiceId().equals(serviceId)
-                    || (catalogueName+'.'+helpdesk.getHelpdesk().getServiceId()).equals(serviceId))){
+                    || (catalogueId+'.'+helpdesk.getHelpdesk().getServiceId()).equals(serviceId))){
                 return new ResponseEntity<>(helpdesk.getHelpdesk(), HttpStatus.OK);
             }
         }
@@ -201,7 +198,7 @@ public class ServiceExtensionsController {
         List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
         for (MonitoringBundle monitoring : allMonitorings){
             if (monitoring.getCatalogueId().equals(catalogueId) && (monitoring.getMonitoring().getServiceId().equals(serviceId)
-                    || (catalogueName+'.'+monitoring.getMonitoring().getServiceId()).equals(serviceId))){
+                    || (catalogueId+'.'+monitoring.getMonitoring().getServiceId()).equals(serviceId))){
                 return new ResponseEntity<>(monitoring.getMonitoring(), HttpStatus.OK);
             }
         }

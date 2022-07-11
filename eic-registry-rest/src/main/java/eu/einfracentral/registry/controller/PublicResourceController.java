@@ -59,7 +59,7 @@ public class PublicResourceController {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @ApiOperation(value = "Returns the published InfraService with the given id.")
+//    @ApiOperation(value = "Returns the published InfraService with the given id.")
     @GetMapping(path = "/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<InfraService> getInfraService(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
