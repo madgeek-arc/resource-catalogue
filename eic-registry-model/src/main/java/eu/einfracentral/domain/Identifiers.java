@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
@@ -9,8 +10,9 @@ import java.util.List;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class Identifiers {
 
-    @XmlElement()
-    private boolean hidden;
+    @XmlElementWrapper(name = "alternativeIdentifiers")
+    @XmlElement(name = "alternativeIdentifier")
+    private List<AlternativeIdentifier> alternativeIdentifiers;
 
     @XmlElement()
     private String originalId;
@@ -19,14 +21,14 @@ public class Identifiers {
     }
 
     public Identifiers(Identifiers identifiers) {
-        this.hidden = identifiers.isHidden();
+        this.alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
         this.originalId = identifiers.getOriginalId();
     }
 
     @Override
     public String toString() {
         return "Identifier{" +
-                ", hidden=" + hidden +
+                "alternativeIdentifiers=" + alternativeIdentifiers +
                 ", originalId='" + originalId + '\'' +
                 '}';
     }
@@ -37,12 +39,12 @@ public class Identifiers {
         return ret;
     }
 
-    public boolean isHidden() {
-        return hidden;
+    public List<AlternativeIdentifier> getAlternativeIdentifiers() {
+        return alternativeIdentifiers;
     }
 
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
+    public void setAlternativeIdentifiers(List<AlternativeIdentifier> alternativeIdentifiers) {
+        this.alternativeIdentifiers = alternativeIdentifiers;
     }
 
     public String getOriginalId() {
