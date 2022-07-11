@@ -165,14 +165,14 @@
     {
       "multivalued": false,
       "name": "originalId",
-      "path": "//*[local-name()='identifier']/*[local-name()='originalId']/text()",
+      "path": "//*[local-name()='identifiers']/*[local-name()='originalId']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "alternative_identifiers",
       "label": "Alternative Identifier",
-      "path": "//*[local-name()='identifier']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/text()",
+      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/text()",
       "type": "java.lang.String"
     },
     {
