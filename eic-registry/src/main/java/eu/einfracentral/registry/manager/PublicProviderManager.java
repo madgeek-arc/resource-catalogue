@@ -52,7 +52,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         List<ProviderBundle> providerList = new ArrayList<>();
         Browsing<ProviderBundle> providerBundleBrowsing = super.getAll(facetFilter, authentication);
         for (ProviderBundle providerBundle : providerBundleBrowsing.getResults()) {
-            if (securityService.isProviderAdmin(authentication, providerBundle.getId()) &&  providerBundle.getMetadata().isPublished()) {
+            if (securityService.isProviderAdmin(authentication, providerBundle.getId()) && providerBundle.getMetadata().isPublished()) {
                 providerList.add(providerBundle);
             }
         }

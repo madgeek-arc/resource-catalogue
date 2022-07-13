@@ -52,7 +52,7 @@ public class PublicResourceManager extends ResourceManager<InfraService> impleme
         List<InfraService> infraServiceList = new ArrayList<>();
         Browsing<InfraService> infraServiceBrowsing = super.getAll(facetFilter, authentication);
         for (InfraService infraService : infraServiceBrowsing.getResults()) {
-            if (securityService.isServiceProviderAdmin(authentication, infraService.getId()) &&  infraService.getMetadata().isPublished()) {
+            if (securityService.isServiceProviderAdmin(authentication, infraService.getId()) && infraService.getMetadata().isPublished()) {
                 infraServiceList.add(infraService);
             }
         }
