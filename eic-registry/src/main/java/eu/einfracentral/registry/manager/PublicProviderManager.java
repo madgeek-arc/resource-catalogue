@@ -2,6 +2,8 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiers;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -93,9 +95,12 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public void delete(ProviderBundle providerBundle) {
-        ProviderBundle publicProviderBundle = get(String.format("%s.%s",providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
-        super.delete(publicProviderBundle);
-        jmsTopicTemplate.convertAndSend("public_provider.delete", publicProviderBundle);
+        try{
+            ProviderBundle publicProviderBundle = get(String.format("%s.%s",providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+            logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
+            super.delete(publicProviderBundle);
+            jmsTopicTemplate.convertAndSend("public_provider.delete", publicProviderBundle);
+        } catch (ResourceException | ResourceNotFoundException ignore){
+        }
     }
 }

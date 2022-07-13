@@ -2,6 +2,8 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiers;
 import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -93,9 +95,12 @@ public class PublicResourceManager extends ResourceManager<InfraService> impleme
 
     @Override
     public void delete(InfraService infraService) {
-        InfraService publicInfraService = get(String.format("%s.%s",infraService.getService().getCatalogueId(), infraService.getId()));
-        logger.info(String.format("Deleting public Resource with id [%s]", publicInfraService.getId()));
-        super.delete(publicInfraService);
-        jmsTopicTemplate.convertAndSend("public_resource.delete", publicInfraService);
+        try{
+            InfraService publicInfraService = get(String.format("%s.%s",infraService.getService().getCatalogueId(), infraService.getId()));
+            logger.info(String.format("Deleting public Resource with id [%s]", publicInfraService.getId()));
+            super.delete(publicInfraService);
+            jmsTopicTemplate.convertAndSend("public_resource.delete", publicInfraService);
+        } catch (ResourceException | ResourceNotFoundException ignore){
+        }
     }
 }
