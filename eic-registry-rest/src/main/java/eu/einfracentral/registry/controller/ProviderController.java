@@ -218,8 +218,17 @@ public class ProviderController {
         if (templateStatus != null) {
             ff.addFilter("templateStatus", templateStatus);
         }
+        Set<String> catalogueNameToSet = new LinkedHashSet<>();
         if (catalogue_id != null) {
-            ff.addFilter("catalogue_id", catalogue_id);
+            if (catalogue_id.contains("all")) {
+                catalogueNameToSet.add("all");
+                ff.addFilter("catalogue_id", catalogueNameToSet);
+            } else{
+                ff.addFilter("catalogue_id", catalogue_id);
+            }
+        } else{
+            catalogueNameToSet.add(catalogueName);
+            ff.addFilter("catalogue_id", catalogueNameToSet);
         }
         ff.addFilter("published", false);
 
