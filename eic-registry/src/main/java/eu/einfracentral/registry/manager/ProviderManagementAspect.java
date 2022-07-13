@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.CatalogueBundle;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -79,7 +80,9 @@ public class ProviderManagementAspect {
             returning = "providerBundle")
     public void providerRegistrationEmails(ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle);
+        if (!providerBundle.getId().contains(providerBundle.getProvider().getCatalogueId()+".")){
+            registrationMailService.sendProviderMails(providerBundle);
+        }
     }
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.CatalogueManager.verifyCatalogue(String, " +
@@ -109,7 +112,11 @@ public class ProviderManagementAspect {
             returning = "providerBundle")
     public void addProviderAsPublic(ProviderBundle providerBundle) {
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()){
-            publicProviderManager.add(providerBundle, null);
+            try {
+                publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+            } catch (ResourceException | ResourceNotFoundException e){
+                publicProviderManager.add(providerBundle, null);
+            }
         }
     }
 
@@ -117,6 +124,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String, String, Boolean, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.auditProvider(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
             returning = "providerBundle")
     public void updatePublicProvider(ProviderBundle providerBundle) {
@@ -160,7 +168,11 @@ public class ProviderManagementAspect {
             returning = "infraService")
     public void addResourceAsPublic(InfraService infraService) {
         if (infraService.getStatus().equals("approved resource") && infraService.isActive() && infraService.isLatest()){
-            publicResourceManager.add(infraService, null);
+            try{
+                publicResourceManager.get(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
+            } catch (ResourceException | ResourceNotFoundException e){
+                publicResourceManager.add(infraService, null);
+            }
         }
     }
 
@@ -168,6 +180,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, String, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, String, Boolean, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.auditResource(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
             returning = "infraService")
     public void updatePublicResource(InfraService infraService) {
