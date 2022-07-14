@@ -130,11 +130,9 @@ public class ProviderManagementAspect {
     public void updatePublicProvider(ProviderBundle providerBundle) {
         try{
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        } catch (ResourceNotFoundException e){
-            throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
-                    providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+            publicProviderManager.update(providerBundle, null);
+        } catch (ResourceException | ResourceNotFoundException ignore){
         }
-        publicProviderManager.update(providerBundle, null);
     }
 
     @Async
@@ -145,7 +143,7 @@ public class ProviderManagementAspect {
         ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation());
         try{
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceException | ResourceNotFoundException e){
             throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
                     providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         }
@@ -186,11 +184,9 @@ public class ProviderManagementAspect {
     public void updatePublicResource(InfraService infraService) {
         try{
             publicResourceManager.get(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
-        } catch (ResourceNotFoundException e){
-            throw new ResourceNotFoundException(String.format("Resource with id [%s.%s] is not yet published or does not exist",
-                    infraService.getService().getCatalogueId(), infraService.getId()));
+            publicResourceManager.update(infraService, null);
+        } catch (ResourceException | ResourceNotFoundException ignore){
         }
-        publicResourceManager.update(infraService, null);
     }
 
     @Async
