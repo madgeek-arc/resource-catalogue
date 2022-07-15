@@ -185,7 +185,7 @@ public class PublicController {
         return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/provider/getMyPublicProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/provider/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyPublicProviders(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -330,7 +330,7 @@ public class PublicController {
         return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/resource/getMyPublicResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/resource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<InfraService>> getMyPublicResources(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
