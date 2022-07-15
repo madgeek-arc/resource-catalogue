@@ -140,7 +140,7 @@ public class PublicController {
                 providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
         return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
-    @ApiOperation(value = "Filter a list of Public Providers based on a set of filters or get a list of all Public Providers in the Catalogue.")
+
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -284,7 +284,6 @@ public class PublicController {
         return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Filter a list of Public Resources based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
