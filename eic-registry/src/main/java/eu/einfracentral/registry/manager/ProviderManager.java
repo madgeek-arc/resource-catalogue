@@ -63,9 +63,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
-    @Value("${sync.enable}")
-    private boolean enableSyncing;
-
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
                            @Lazy SecurityService securityService,
@@ -127,9 +124,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
-        if (enableSyncing){
-            synchronizerServiceProvider.syncAdd(provider.getProvider());
-        }
+        jmsTopicTemplate.convertAndSend("provider.create", provider);
+
+        synchronizerServiceProvider.syncAdd(provider.getProvider());
 
         return ret;
     }
@@ -195,9 +192,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
 
-        if (enableSyncing) {
-            synchronizerServiceProvider.syncUpdate(provider.getProvider());
-        }
+        jmsTopicTemplate.convertAndSend("provider.update", provider);
+
+        synchronizerServiceProvider.syncUpdate(provider.getProvider());
 
         return provider;
     }
@@ -389,9 +386,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         super.delete(provider);
         registrationMailService.notifyProviderAdmins(provider);
 
-        if (enableSyncing){
-            synchronizerServiceProvider.syncDelete(provider.getProvider());
-        }
+        synchronizerServiceProvider.syncDelete(provider.getProvider());
 
     }
 
