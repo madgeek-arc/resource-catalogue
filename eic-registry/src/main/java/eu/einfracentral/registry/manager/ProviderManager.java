@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import javax.sql.DataSource;
@@ -354,8 +355,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providers;
     }
 
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(Authentication authentication, ProviderBundle provider) {
+    public void delete(ProviderBundle provider) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<InfraService> services = infraServiceService.getInfraServices(provider.getId(), authentication);
         services.forEach(s -> {

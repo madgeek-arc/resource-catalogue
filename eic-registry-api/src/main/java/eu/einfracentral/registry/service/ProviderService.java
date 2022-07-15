@@ -27,8 +27,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     @Override
     void delete(T provider);
 
-    void delete(Authentication authentication, ProviderBundle provider);
-
     T get(String id, U auth);
 
     T get(String catalogueId, String providerId, U auth);

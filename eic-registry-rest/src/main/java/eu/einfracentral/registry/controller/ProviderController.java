@@ -79,7 +79,7 @@ public class ProviderController {
         }
 
         // delete Provider
-        providerManager.delete(auth, provider);
+        providerManager.delete(provider);
         logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
