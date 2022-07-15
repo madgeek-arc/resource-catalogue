@@ -167,6 +167,7 @@ public class ProviderController {
             ff.setOrderBy(sort);
         }
         ff.setFilter(allRequestParams);
+        ff.addFilter("published", false);
         List<Provider> providerList = new LinkedList<>();
         Paging<ProviderBundle> providerBundlePaging = providerManager.getAll(ff, auth);
         for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
@@ -217,9 +218,19 @@ public class ProviderController {
         if (templateStatus != null) {
             ff.addFilter("templateStatus", templateStatus);
         }
+        Set<String> catalogueNameToSet = new LinkedHashSet<>();
         if (catalogue_id != null) {
-            ff.addFilter("catalogue_id", catalogue_id);
+            if (catalogue_id.contains("all")) {
+                catalogueNameToSet.add("all");
+                ff.addFilter("catalogue_id", catalogueNameToSet);
+            } else{
+                ff.addFilter("catalogue_id", catalogue_id);
+            }
+        } else{
+            catalogueNameToSet.add(catalogueName);
+            ff.addFilter("catalogue_id", catalogueNameToSet);
         }
+        ff.addFilter("published", false);
 
         List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
@@ -420,6 +431,7 @@ public class ProviderController {
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
+        ff.addFilter("published", false);
         List<ProviderBundle> providerList = new LinkedList<>();
         Paging<ProviderBundle> providerBundlePaging = providerManager.getRandomProviders(ff, auditingInterval, auth);
         for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {

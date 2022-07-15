@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import javax.sql.DataSource;
@@ -61,9 +62,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
-
-    @Value("${sync.enable}")
-    private boolean enableSyncing;
 
     @Autowired
     public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
@@ -354,8 +352,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providers;
     }
 
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(Authentication authentication, ProviderBundle provider) {
+    public void delete(ProviderBundle provider) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<InfraService> services = infraServiceService.getInfraServices(provider.getId(), authentication);
         services.forEach(s -> {
@@ -468,7 +468,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
                 loggingInfoList.add(loggingInfo);
                 provider.setLoggingInfo(loggingInfoList);
 
@@ -479,7 +480,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 deactivateServices(provider.getId(), auth);
                 logger.info("Deactivating Provider: {}", provider);
             } else {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
                 loggingInfoList.add(loggingInfo);
                 provider.setLoggingInfo(loggingInfoList);
 
@@ -504,6 +506,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 securityService.hasRole(auth, "ROLE_EPOT")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
+            ff.addFilter("published", false);
             providers = super.getAll(ff, null).getResults();
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
             providers = getMyServiceProviders(auth);
@@ -535,6 +538,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
@@ -550,6 +554,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<ProviderBundle> getInactive() {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
+        ff.addFilter("published", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));

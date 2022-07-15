@@ -24,15 +24,12 @@ public class Metadata {
     @XmlElement(defaultValue = "null")
     private String modifiedAt;
 
-    @XmlElement(defaultValue = "null")
-    private String source;
-
-    @XmlElement(defaultValue = "null")
-    private String originalId;
-
     @XmlElementWrapper(name = "terms")
     @XmlElement(name = "term")
     private List<String> terms;
+
+    @XmlElement(defaultValue = "false")
+    private boolean published = false;
 
 
     public Metadata() {
@@ -43,9 +40,8 @@ public class Metadata {
         this.modifiedBy = metadata.getModifiedBy();
         this.registeredAt = metadata.getRegisteredAt();
         this.modifiedAt = metadata.getModifiedAt();
-        this.source = metadata.getSource();
-        this.originalId = metadata.getOriginalId();
         this.terms = metadata.getTerms();
+        this.published = metadata.isPublished();
     }
 
     public static Metadata updateMetadata(Metadata metadata, String modifiedBy) {
@@ -98,8 +94,6 @@ public class Metadata {
         metadata.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
         metadata.setModifiedBy(registeredBy);
         metadata.setModifiedAt(metadata.getRegisteredAt());
-        metadata.setOriginalId(originalId);
-        metadata.setSource(source);
         metadata.setTerms(terms);
         return metadata;
     }
@@ -129,9 +123,8 @@ public class Metadata {
                 ", registeredAt='" + registeredAt + '\'' +
                 ", modifiedBy='" + modifiedBy + '\'' +
                 ", modifiedAt='" + modifiedAt + '\'' +
-                ", source='" + source + '\'' +
-                ", originalId='" + originalId + '\'' +
                 ", terms=" + terms +
+                ", published=" + published +
                 '}';
     }
 
@@ -167,22 +160,6 @@ public class Metadata {
         this.modifiedAt = modifiedAt;
     }
 
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getOriginalId() {
-        return originalId;
-    }
-
-    public void setOriginalId(String originalId) {
-        this.originalId = originalId;
-    }
-
     public List<String> getTerms() {
         return terms;
     }
@@ -191,16 +168,26 @@ public class Metadata {
         this.terms = terms;
     }
 
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Metadata metadata = (Metadata) o;
-        return Objects.equals(registeredBy, metadata.registeredBy) && Objects.equals(registeredAt, metadata.registeredAt) && Objects.equals(modifiedBy, metadata.modifiedBy) && Objects.equals(modifiedAt, metadata.modifiedAt) && Objects.equals(source, metadata.source) && Objects.equals(originalId, metadata.originalId) && Objects.equals(terms, metadata.terms);
+        return Objects.equals(registeredBy, metadata.registeredBy) && Objects.equals(registeredAt, metadata.registeredAt)
+                && Objects.equals(modifiedBy, metadata.modifiedBy) && Objects.equals(modifiedAt, metadata.modifiedAt)
+                && Objects.equals(terms, metadata.terms) && Objects.equals(published, metadata.published);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registeredBy, registeredAt, modifiedBy, modifiedAt, source, originalId, terms);
+        return Objects.hash(registeredBy, registeredAt, modifiedBy, modifiedAt, terms, published);
     }
 }

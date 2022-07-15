@@ -73,6 +73,7 @@ public class ServiceController {
         if (!service.getService().getCatalogueId().equals(catalogueName)){
             throw new ValidationException("You cannot delete a Service of a non EOSC Catalogue.");
         }
+        //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
         infraService.delete(service);
         logger.info("User '{}' deleted Resource '{}' with id: '{}' of the Catalogue: '{}'", auth.getName(), service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());
@@ -188,6 +189,7 @@ public class ServiceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", true);
         ff.addFilter("latest", true);
+        ff.addFilter("published", false);
         Paging<RichService> services = infraService.getRichServices(ff, auth);
         return ResponseEntity.ok(services);
     }
@@ -383,6 +385,7 @@ public class ServiceController {
         }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("latest", true);
+        ff.addFilter("published", false);
 
         List<InfraService> valid = new ArrayList<>();
         List<InfraService> notAudited = new ArrayList<>();
@@ -514,6 +517,7 @@ public class ServiceController {
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
+        ff.addFilter("published", false);
         List<InfraService> serviceList = new LinkedList<>();
         Paging<InfraService> infraServicePaging = infraService.getRandomResources(ff, auditingInterval, auth);
         for (InfraService infraService : infraServicePaging.getResults()) {

@@ -8,50 +8,43 @@ import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Identifier {
+public class Identifiers {
 
     @XmlElementWrapper(name = "alternativeIdentifiers")
     @XmlElement(name = "alternativeIdentifier")
-    private List<String> alternativeIdentifiers;
-
-    @XmlElement()
-    private boolean hidden;
+    private List<AlternativeIdentifier> alternativeIdentifiers;
 
     @XmlElement()
     private String originalId;
 
-    public Identifier() {
+    public Identifiers() {
     }
 
-    public Identifier(List<String> alternativeIdentifiers, boolean hidden, String originalId) {
-        this.alternativeIdentifiers = alternativeIdentifiers;
-        this.hidden = hidden;
-        this.originalId = originalId;
+    public Identifiers(Identifiers identifiers) {
+        this.alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
+        this.originalId = identifiers.getOriginalId();
     }
 
     @Override
     public String toString() {
         return "Identifier{" +
                 "alternativeIdentifiers=" + alternativeIdentifiers +
-                ", hidden=" + hidden +
                 ", originalId='" + originalId + '\'' +
                 '}';
     }
 
-    public List<String> getAlternativeIdentifiers() {
+    public static Identifiers createIdentifier(String originalId){
+        Identifiers ret = new Identifiers();
+        ret.setOriginalId(originalId);
+        return ret;
+    }
+
+    public List<AlternativeIdentifier> getAlternativeIdentifiers() {
         return alternativeIdentifiers;
     }
 
-    public void setAlternativeIdentifiers(List<String> alternativeIdentifiers) {
+    public void setAlternativeIdentifiers(List<AlternativeIdentifier> alternativeIdentifiers) {
         this.alternativeIdentifiers = alternativeIdentifiers;
-    }
-
-    public boolean isHidden() {
-        return hidden;
-    }
-
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
     }
 
     public String getOriginalId() {

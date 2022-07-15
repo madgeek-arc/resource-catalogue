@@ -96,7 +96,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
         return this.getAll(ff, null)
                 .getResults()
                 .stream()
-                .collect(Collectors.toMap(Bundle::getId, r -> r.getMetadata().getOriginalId()));
+                .collect(Collectors.toMap(Bundle::getId, r -> r.getIdentifiers().getOriginalId()));
     }
 
     List<T> getMy(Authentication authentication);

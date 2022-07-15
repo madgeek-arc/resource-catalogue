@@ -254,7 +254,7 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         Paging<Resource> resources;
         if (serviceVersion == null || "".equals(serviceVersion)) {
             resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\"", serviceId),
+                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
                             resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
             // return the latest modified resource that does not contain a version attribute
             for (Resource resource : resources.getResults()) {
@@ -268,11 +268,11 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
             return null;
         } else if ("latest".equals(serviceVersion)) {
             resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\" AND latest = true", serviceId),
+                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\" AND latest = true", serviceId, catalogueName),
                             resourceType.getName(), 1, 0, "modifiedAt", "DESC");
         } else {
             resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\" AND version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
+                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\" AND version = \"%s\"", serviceId, catalogueName, serviceVersion), resourceType.getName());
         }
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);

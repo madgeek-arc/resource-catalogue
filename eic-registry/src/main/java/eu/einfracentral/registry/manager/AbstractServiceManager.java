@@ -154,6 +154,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         if (auth == null){
             filter.addFilter("active", true);
             filter.addFilter("latest", true);
+            filter.addFilter("published", false);
         }
         if (auth != null && auth.isAuthenticated()){
             // if user is Authorized with ROLE_USER, return active/latest ONLY
@@ -161,6 +162,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
                     !securityService.hasRole(auth, "ROLE_ADMIN")){
                 filter.addFilter("active", true);
                 filter.addFilter("latest", true);
+                filter.addFilter("published", false);
             }
         }
 
@@ -281,6 +283,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
 
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
         Browsing<InfraService> services = getAll(ff, auth);
 
         final Field f = serviceField;
