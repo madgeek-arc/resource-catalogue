@@ -157,6 +157,9 @@ public class PendingServiceController extends ResourceController<InfraService, A
             infraService = infraServiceService.addService(new InfraService(service), auth);
             logger.info("User '{}' added Resource:\n{}", auth.getName(), infraService);
         } else { // else update Pending Service and transform it to Active Service
+            if (infraService.getService().getVersion().equals("")){
+                infraService.getService().setVersion(null);
+            }
             infraService.setService(service); // important to keep other fields of InfraService
             infraService = pendingServiceManager.update(infraService, auth);
             logger.info("User '{}' updated Pending Resource:\n{}", auth.getName(), infraService);

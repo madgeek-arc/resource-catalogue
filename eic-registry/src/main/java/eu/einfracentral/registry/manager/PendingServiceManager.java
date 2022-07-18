@@ -104,6 +104,9 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         // get existing resource
 //        Resource existing = this.whereID(infraService.getId(), true);
         Resource existing = this.getPendingResource(infraService.getService().getId(), infraService.getService().getVersion());
+        if (existing == null){
+            existing = this.getPendingResource(infraService.getService().getId(), null);
+        }
         // save existing resource with new payload
         existing.setPayload(serialize(infraService));
         existing.setResourceType(resourceType);
