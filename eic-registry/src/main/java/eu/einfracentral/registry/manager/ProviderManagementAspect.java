@@ -162,7 +162,11 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager." +
             "addService(eu.einfracentral.domain.InfraService, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, String, Boolean, " +
-            "org.springframework.security.core.Authentication))))",
+            "org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
+            "org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.addService(String, " +
+            "org.springframework.security.core.Authentication))))", // pendingToInfra method
             returning = "infraService")
     public void addResourceAsPublic(InfraService infraService) {
         if (infraService.getStatus().equals("approved resource") && infraService.isActive() && infraService.isLatest()){
