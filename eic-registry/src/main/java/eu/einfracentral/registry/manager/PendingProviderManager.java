@@ -90,7 +90,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList){
             if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Provider with the specific id already exists on the EOSC Catalogue. Please refactor your 'abbreviation' field.");
+                throw new ValidationException("Provider with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
