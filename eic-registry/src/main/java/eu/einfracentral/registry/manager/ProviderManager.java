@@ -633,16 +633,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle validate(ProviderBundle provider) {
         logger.debug("Validating Provider with id: {}", provider.getId());
 
+        try {
+            fieldValidator.validate(provider);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
+
         if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
             validateScientificDomains(provider.getProvider().getScientificDomains());
         }
         if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
-        }
-        try {
-            fieldValidator.validate(provider);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
         }
 
         return provider;
