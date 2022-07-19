@@ -146,6 +146,8 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", metadata=" + metadata +
                 ", active=" + active +
                 ", suspended=" + suspended +
+                ", identifiers=" + identifiers +
+                ", migrationStatus=" + migrationStatus +
                 ", loggingInfo=" + loggingInfo +
                 ", latestAuditInfo=" + latestAuditInfo +
                 ", latestOnboardingInfo=" + latestOnboardingInfo +
@@ -158,11 +160,11 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         if (this == o) return true;
         if (!(o instanceof Bundle)) return false;
         Bundle<?> bundle = (Bundle<?>) o;
-        return active == bundle.active && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo);
+        return active == bundle.active && suspended == bundle.suspended && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers) && Objects.equals(migrationStatus, bundle.migrationStatus) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(payload, metadata, active, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo);
+        return Objects.hash(payload, metadata, active, suspended, identifiers, migrationStatus, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo);
     }
 }

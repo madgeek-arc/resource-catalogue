@@ -16,6 +16,9 @@ public class InfraService extends Bundle<Service> {
 //    @VocabularyValidation(type = Vocabulary.Type.RESOURCE_STATE)
     private String status;
 
+    @XmlElement
+    private InfraServiceExtras resourceExtras;
+
     public InfraService() {
         // No arg constructor
     }
@@ -33,11 +36,9 @@ public class InfraService extends Bundle<Service> {
     @Override
     public String toString() {
         return "InfraService{" +
-                "service=" + getService() +
-                ", metadata=" + getMetadata() +
-                ", active=" + isActive() +
-                ", status='" + getStatus() + '\'' +
-                ", latest=" + latest +
+                "latest=" + latest +
+                ", status='" + status + '\'' +
+                ", resourceExtras=" + resourceExtras +
                 '}';
     }
 
@@ -66,16 +67,24 @@ public class InfraService extends Bundle<Service> {
         this.status = status;
     }
 
+    public InfraServiceExtras getResourceExtras() {
+        return resourceExtras;
+    }
+
+    public void setResourceExtras(InfraServiceExtras resourceExtras) {
+        this.resourceExtras = resourceExtras;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         InfraService service = (InfraService) o;
-        return latest == service.latest && Objects.equals(status, service.status);
+        return latest == service.latest && Objects.equals(status, service.status) && Objects.equals(resourceExtras, service.resourceExtras);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), latest, status);
+        return Objects.hash(super.hashCode(), latest, status, resourceExtras);
     }
 }

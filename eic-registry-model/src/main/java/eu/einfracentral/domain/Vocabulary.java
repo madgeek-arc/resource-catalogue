@@ -88,7 +88,11 @@ public class Vocabulary implements Identifiable {
         DS_CLASSIFICATION("Classification"),
         DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
         // Monitoring
-        MONITORING_MONITORED_BY("Monitored by");
+        MONITORING_MONITORED_BY("Monitored by"),
+        // Bundle Extras
+        SEMANTIC_RELATIONSHIP("Semantic relationship"),
+        RESEARCH_CATEGORY("Research category");
+
         private final String type;
 
         Type(final String type) {
