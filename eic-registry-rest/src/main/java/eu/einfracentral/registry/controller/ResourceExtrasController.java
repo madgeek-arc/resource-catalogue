@@ -78,7 +78,7 @@ public class ServiceExtrasController {
     @ApiOperation(value = "Update a specific Resource's EOSC Interoperability Framework Guideline field")
     @PutMapping(path = "/update/eoscIFGuidelines", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InfraService> updateEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                              @RequestParam List<EOSCIFGuidelines> eoscIFGuidelines,
+                                                              @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
         List<EOSCIFGuidelines> oldEoscIFGuidenlines = infraService.getResourceExtras().getEoscIFGuidelines();
@@ -97,7 +97,7 @@ public class ServiceExtrasController {
     @ApiOperation(value = "Update a specific Resource's Research Categories field")
     @PutMapping(path = "/update/researchCategories", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InfraService> updateResearchCategories(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                                 @RequestParam List<String> researchCategories,
+                                                                 @RequestBody List<String> researchCategories,
                                                                  @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
         List<String> oldResearchCategories = infraService.getResourceExtras().getResearchCategories();
