@@ -19,11 +19,11 @@ public class EOSCIFGuidelines {
     private String label;
 
     @XmlElement()
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private URL url;
 
     @XmlElement()
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SEMANTIC_RELATIONSHIP)
     private String semanticRelationship;
 

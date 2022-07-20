@@ -14,6 +14,7 @@ import java.util.List;
 public class InfraServiceExtras {
 
     @XmlElement()
+    @FieldValidation(nullable = true)
     private List<EOSCIFGuidelines> eoscIFGuidelines;
 
     @XmlElement()
@@ -21,7 +22,7 @@ public class InfraServiceExtras {
 
     @XmlElementWrapper(name = "researchCategories")
     @XmlElement(name = "researchCategory")
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.RESEARCH_CATEGORY)
     private List<String> researchCategories;
 

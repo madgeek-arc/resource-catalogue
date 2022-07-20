@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -17,6 +19,7 @@ public class InfraService extends Bundle<Service> {
     private String status;
 
     @XmlElement
+    @FieldValidation(nullable = true)
     private InfraServiceExtras resourceExtras;
 
     public InfraService() {
