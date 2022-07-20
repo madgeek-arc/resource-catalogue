@@ -150,6 +150,8 @@
       <xs:enumeration value="DS_CLASSIFICATION"/>
       <xs:enumeration value="DS_COAR_ACCESS_RIGHTS_1_0"/>
       <xs:enumeration value="MONITORING_MONITORED_BY"/>
+      <xs:enumeration value="SEMANTIC_RELATIONSHIP"/>
+      <xs:enumeration value="RESEARCH_CATEGORY"/>
     </xs:restriction>
   </xs:simpleType>
 

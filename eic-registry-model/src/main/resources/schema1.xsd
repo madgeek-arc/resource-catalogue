@@ -17,6 +17,8 @@
 
   <xs:element name="emailMessage" type="tns:emailMessage"/>
 
+  <xs:element name="eoscifGuidelines" type="tns:eoscifGuidelines"/>
+
   <xs:element name="event" type="tns:event"/>
 
   <xs:element name="helpdesk" type="tns:helpdesk"/>
@@ -26,6 +28,8 @@
   <xs:element name="identifiers" type="tns:identifiers"/>
 
   <xs:element name="infraService" type="tns:infraService"/>
+
+  <xs:element name="infraServiceExtras" type="tns:infraServiceExtras"/>
 
   <xs:element name="loggingInfo" type="tns:loggingInfo"/>
 
@@ -1079,6 +1083,15 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="eoscifGuidelines">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="label" type="xs:string"/>
+      <xs:element minOccurs="0" name="pid" type="xs:string"/>
+      <xs:element minOccurs="0" name="semanticRelationship" type="xs:string"/>
+      <xs:element minOccurs="0" name="url" type="xs:anyURI"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="emailMessage">
     <xs:sequence>
       <xs:element minOccurs="0" name="message" type="xs:string"/>
@@ -1184,11 +1197,26 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       <xs:extension base="tns:bundle">
         <xs:sequence>
           <xs:element name="latest" type="xs:boolean"/>
+          <xs:element minOccurs="0" name="resourceExtras" type="tns:infraServiceExtras"/>
           <xs:element minOccurs="0" ref="tns:service"/>
           <xs:element minOccurs="0" name="status" type="xs:string"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="infraServiceExtras">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscIFGuidelines" type="tns:eoscifGuidelines"/>
+      <xs:element name="horizontalService" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="researchCategories">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="researchCategory" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="metric">
