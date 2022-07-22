@@ -57,10 +57,7 @@ public class ResourceExtrasController {
                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
         EOSCIFGuidelines eoscIFGuideline = new EOSCIFGuidelines(pid, label, url, semanticRelationship);
-        // block update if Service is published (Public API)
-        if (infraService.getMetadata().isPublished()){
-            throw new AccessDeniedException("You cannot directly update a Public Resource.");
-        }
+        blockUpdateIfResourceIsPublished(infraService);
         InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
         List<EOSCIFGuidelines> newEoscIFGuidenlines = new ArrayList<>();
         if (infraServiceExtras == null){
@@ -93,10 +90,7 @@ public class ResourceExtrasController {
                                                             @RequestParam String researchCategory,
                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        // block update if Service is published (Public API)
-        if (infraService.getMetadata().isPublished()){
-            throw new AccessDeniedException("You cannot directly update a Public Resource.");
-        }
+        blockUpdateIfResourceIsPublished(infraService);
         InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
         List<String> newResearchCategories = new ArrayList<>();
         if (infraServiceExtras == null){
@@ -129,10 +123,7 @@ public class ResourceExtrasController {
                                                               @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        // block update if Service is published (Public API)
-        if (infraService.getMetadata().isPublished()){
-            throw new AccessDeniedException("You cannot directly update a Public Resource.");
-        }
+        blockUpdateIfResourceIsPublished(infraService);
         InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
         List<EOSCIFGuidelines> newEoscIFGuidenlines = new ArrayList<>();
         if (infraServiceExtras == null){
@@ -165,10 +156,7 @@ public class ResourceExtrasController {
                                                                  @RequestBody List<String> researchCategories,
                                                                  @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        // block update if Service is published (Public API)
-        if (infraService.getMetadata().isPublished()){
-            throw new AccessDeniedException("You cannot directly update a Public Resource.");
-        }
+        blockUpdateIfResourceIsPublished(infraService);
         InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
         List<String> newResearchCategories = new ArrayList<>();
         if (infraServiceExtras == null){
@@ -201,10 +189,7 @@ public class ResourceExtrasController {
                                                                 @RequestParam boolean horizontalService,
                                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        // block update if Service is published (Public API)
-        if (infraService.getMetadata().isPublished()){
-            throw new AccessDeniedException("You cannot directly update a Public Resource.");
-        }
+        blockUpdateIfResourceIsPublished(infraService);
         InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
         if (infraServiceExtras == null){
             InfraServiceExtras newInfraServiceExtras = new InfraServiceExtras();
@@ -228,10 +213,7 @@ public class ResourceExtrasController {
                                                                @RequestParam String pid,
                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        // block update if Service is published (Public API)
-        if (infraService.getMetadata().isPublished()){
-            throw new AccessDeniedException("You cannot directly update a Public Resource.");
-        }
+        blockUpdateIfResourceIsPublished(infraService);
         List<EOSCIFGuidelines> existingEOSCIFGuidelines = infraService.getResourceExtras().getEoscIFGuidelines();
         if (existingEOSCIFGuidelines != null && !existingEOSCIFGuidelines.isEmpty()){
             existingEOSCIFGuidelines.removeIf(existingEOSCIFGuideline -> existingEOSCIFGuideline.getPid().equals(pid));
@@ -253,10 +235,7 @@ public class ResourceExtrasController {
                                                             @RequestParam String researchCategory,
                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        // block update if Service is published (Public API)
-        if (infraService.getMetadata().isPublished()){
-            throw new AccessDeniedException("You cannot directly update a Public Resource.");
-        }
+        blockUpdateIfResourceIsPublished(infraService);
         List<String> existingResourceCategories = infraService.getResourceExtras().getResearchCategories();
         if (existingResourceCategories != null && !existingResourceCategories.isEmpty()){
             existingResourceCategories.removeIf(existingResourceCategory -> existingResourceCategory.equals(researchCategory));
@@ -270,5 +249,11 @@ public class ResourceExtrasController {
         publicResourceManager.update(infraService, auth);
         jmsTopicTemplate.convertAndSend("resource.update", infraService);
         return new ResponseEntity<>(infraService, HttpStatus.OK);
+    }
+
+    private void blockUpdateIfResourceIsPublished(InfraService infraService){
+        if (infraService.getMetadata().isPublished()){
+            throw new AccessDeniedException("You cannot directly update a Public Resource.");
+        }
     }
 }
