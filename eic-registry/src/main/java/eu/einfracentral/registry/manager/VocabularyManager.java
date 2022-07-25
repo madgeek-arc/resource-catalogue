@@ -284,32 +284,46 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
 //    @Scheduled(initialDelay = 0, fixedRate = 120000)
     @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
-    public void updateHostingLegalEntityVocabularyList(){
+    public void updateHostingLegalEntityVocabularyList() {
         logger.info("Checking for possible new Hosting Legal Entity entries..");
         List<Vocabulary> hostingLegalEntities = getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         List<String> hostingLegalEntityNames = new ArrayList<>();
-        for (Vocabulary hostingLegalEntity : hostingLegalEntities){
+        for (Vocabulary hostingLegalEntity : hostingLegalEntities) {
             hostingLegalEntityNames.add(hostingLegalEntity.getName());
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("active", true);
         ff.addFilter("status", "approved provider");
+        ff.addFilter("published", "false");
         List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, null).getResults();
         List<String> providerNames = new ArrayList<>();
-        for (ProviderBundle providerBundle : allActiveAndApprovedProviders){
+        for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
             providerNames.add(providerBundle.getProvider().getName());
         }
 
-        for (String providerName : providerNames) {
-            if (hostingLegalEntityNames.stream().noneMatch(s -> s.matches(providerName))) {
-                Vocabulary newHostingLegalEntity = new Vocabulary();
-                newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(providerName));
-                newHostingLegalEntity.setName(providerName);
-                newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
-                logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s]", newHostingLegalEntity.getId()));
-//                add(newHostingLegalEntity, null);
+        for (Iterator<String> it = providerNames.iterator(); it.hasNext(); ) {
+            String providerName = it.next();
+            for (String hleName : hostingLegalEntityNames) {
+                if (hleName.contains(providerName)) {
+                    it.remove();
+                    break;
+                }
             }
         }
+        updateHLEVocabularyList(providerNames);
     }
+
+    private void updateHLEVocabularyList(List<String> providerNames){
+        for (String newHLE : providerNames){
+            Vocabulary newHostingLegalEntity = new Vocabulary();
+            newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(newHLE));
+            newHostingLegalEntity.setName(newHLE);
+            newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+            logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
+                    newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
+//                        add(newHostingLegalEntity, null);
+        }
+    }
+
 }

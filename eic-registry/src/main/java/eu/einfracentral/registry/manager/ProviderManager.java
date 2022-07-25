@@ -424,6 +424,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
                 // latestOnboardingInfo
                 provider.setLatestOnboardingInfo(loggingInfo);
+
+                // add Provider's Name as a HLE Vocabulary
+                addApprovedProviderToHLEVocabulary(provider);
                 break;
             case "rejected provider":
                 provider.setActive(false);
@@ -1099,5 +1102,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
             }
         }
+    }
+
+    private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle){
+        Vocabulary newHostingLegalEntity = new Vocabulary();
+        newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(providerBundle.getProvider().getName()));
+        newHostingLegalEntity.setName(providerBundle.getProvider().getName());
+        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
+                newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
+//                        add(newHostingLegalEntity, null);
     }
 }
