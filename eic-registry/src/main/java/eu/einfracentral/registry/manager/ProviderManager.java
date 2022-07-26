@@ -426,7 +426,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 provider.setLatestOnboardingInfo(loggingInfo);
 
                 // add Provider's Name as a HLE Vocabulary
-                addApprovedProviderToHLEVocabulary(provider);
+                if (provider.getProvider().isLegalEntity()){
+                    addApprovedProviderToHLEVocabulary(provider);
+                }
                 break;
             case "rejected provider":
                 provider.setActive(false);
