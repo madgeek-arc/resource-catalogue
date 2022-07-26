@@ -4,6 +4,7 @@ import eu.einfracentral.domain.EOSCIFGuidelines;
 import eu.einfracentral.domain.InfraService;
 import eu.einfracentral.domain.InfraServiceExtras;
 import eu.einfracentral.domain.User;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -56,6 +57,14 @@ public class ResourceExtrasController {
                                                            @RequestParam(required = false) URL url, @RequestParam(required = false) String semanticRelationship,
                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
+        // check PID uniqueness
+        List<EOSCIFGuidelines> existingEoscIFGuidelines = infraService.getResourceExtras().getEoscIFGuidelines();
+        for (EOSCIFGuidelines guideline : existingEoscIFGuidelines){
+            if (guideline.getPid().equals(pid)){
+                throw new ValidationException(String.format("There is already an EOSC IF Guideline with the same PID " +
+                        "registered for specific Resource - [%s]", serviceId));
+            }
+        }
         EOSCIFGuidelines eoscIFGuideline = new EOSCIFGuidelines(pid, label, url, semanticRelationship);
         blockUpdateIfResourceIsPublished(infraService);
         InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
@@ -117,34 +126,48 @@ public class ResourceExtrasController {
         return new ResponseEntity<>(infraService, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Update a specific Resource's EOSC Interoperability Framework Guideline field")
-    @PutMapping(path = "/update/eoscIFGuidelines", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ApiOperation(value = "Update a specific Resource's EOSC Interoperability Framework Guidelines given its ID")
+    @PutMapping(path = "/update/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InfraService> updateEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                              @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines,
+                                                              @RequestBody String pid, @RequestParam(required = false) String label,
+                                                              @RequestParam(required = false) URL url,
+                                                              @RequestParam(required = false) String semanticRelationship,
                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(infraService);
         InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
-        List<EOSCIFGuidelines> newEoscIFGuidenlines = new ArrayList<>();
+        boolean found = false;
         if (infraServiceExtras == null){
-            InfraServiceExtras newInfraServiceExtras = new InfraServiceExtras();
-            newEoscIFGuidenlines.addAll(eoscIFGuidelines);
-            newInfraServiceExtras.setEoscIFGuidelines(newEoscIFGuidenlines);
-            infraService.setResourceExtras(newInfraServiceExtras);
+            throw new ValidationException(String.format("Resource with id [%s] has no Resource Extras.", serviceId));
         } else{
-            List<EOSCIFGuidelines> oldEoscIFGuidenlines = infraServiceExtras.getEoscIFGuidelines();
-            if (oldEoscIFGuidenlines == null || oldEoscIFGuidenlines.isEmpty()){
-                newEoscIFGuidenlines.addAll(eoscIFGuidelines);
-                infraService.getResourceExtras().setEoscIFGuidelines(newEoscIFGuidenlines);
+            List<EOSCIFGuidelines> eoscIFGuidenlines = infraServiceExtras.getEoscIFGuidelines();
+            if (eoscIFGuidenlines == null || eoscIFGuidenlines.isEmpty()){
+                throw new ValidationException(String.format("Resource with id [%s] has no EOSC IF Guidelines.", serviceId));
             } else{
-                oldEoscIFGuidenlines.addAll(eoscIFGuidelines);
-                infraService.getResourceExtras().setEoscIFGuidelines(oldEoscIFGuidenlines);
+                for (EOSCIFGuidelines guideline : eoscIFGuidenlines){
+                    if (guideline.getPid().equals(pid)){
+                        found = true;
+                        if (label != null && !label.equals("")){
+                            guideline.setLabel(label);
+                        }
+                        if (url != null && !url.equals("")){
+                            guideline.setUrl(url);
+                        }
+                        if (semanticRelationship != null && !semanticRelationship.equals("")){
+                            guideline.setSemanticRelationship(semanticRelationship);
+                        }
+                    }
+                }
+                if (!found){
+                    throw new ValidationException(String.format("Resource with id [%s] has no EOSC IF Guideline with PID [%s]", serviceId, pid));
+                }
+                infraService.getResourceExtras().setEoscIFGuidelines(eoscIFGuidenlines);
             }
         }
         infraServiceService.validate(infraService);
         infraServiceService.update(infraService, auth);
-        logger.info(String.format("User [%s]-[%s] updated field eoscIFGuidelines of the Resource [%s] with value [%s]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, eoscIFGuidelines));
+        logger.info(String.format("User [%s]-[%s] updated field eoscIFGuideline of the Resource [%s] with PID [%s]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, pid));
         publicResourceManager.update(infraService, auth);
         jmsTopicTemplate.convertAndSend("resource.update", infraService);
         return new ResponseEntity<>(infraService, HttpStatus.OK);
@@ -217,6 +240,7 @@ public class ResourceExtrasController {
         List<EOSCIFGuidelines> existingEOSCIFGuidelines = infraService.getResourceExtras().getEoscIFGuidelines();
         if (existingEOSCIFGuidelines != null && !existingEOSCIFGuidelines.isEmpty()){
             existingEOSCIFGuidelines.removeIf(existingEOSCIFGuideline -> existingEOSCIFGuideline.getPid().equals(pid));
+            infraService.getResourceExtras().setEoscIFGuidelines(existingEOSCIFGuidelines);
         } else{
             throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
         }
@@ -239,6 +263,7 @@ public class ResourceExtrasController {
         List<String> existingResourceCategories = infraService.getResourceExtras().getResearchCategories();
         if (existingResourceCategories != null && !existingResourceCategories.isEmpty()){
             existingResourceCategories.removeIf(existingResourceCategory -> existingResourceCategory.equals(researchCategory));
+            infraService.getResourceExtras().setResearchCategories(existingResourceCategories);
         } else{
             throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
         }
