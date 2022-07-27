@@ -425,7 +425,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Infr
         }
     }
 
-    private String serialize(InfraService infraService) {
+    String serialize(InfraService infraService) {
         String serialized;
         serialized = parserPool.serialize(infraService, ParserService.ParserServiceTypes.XML);
         return serialized;
