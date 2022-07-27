@@ -4,6 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.MigrationService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -38,6 +39,7 @@ public class ProviderController {
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final MigrationService migrationService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -47,9 +49,11 @@ public class ProviderController {
 
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
-                       InfraServiceService<InfraService, InfraService> infraServiceService) {
+                       InfraServiceService<InfraService, InfraService> infraServiceService,
+                       MigrationService migrationService) {
         this.providerManager = service;
         this.infraServiceService = infraServiceService;
+        this.migrationService = migrationService;
     }
 
     // Deletes the Provider with the given id.
@@ -445,5 +449,14 @@ public class ProviderController {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(providerManager.validate(new ProviderBundle(provider)) != null);
         logger.info("Validated Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
         return ret;
+    }
+
+    @ApiOperation(value = "Change a Provider's and all its Resources Catalogue ID")
+    @PutMapping(path = "changeCatalogue", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<ProviderBundle> changeCatalogue(@RequestParam String catalogueId, @RequestParam String providerId,
+                                                          @RequestParam String newCatalogueId, @ApiIgnore Authentication authentication) {
+        ProviderBundle providerBundle = migrationService.changeProviderCatalogue(providerId, catalogueId, newCatalogueId, authentication);
+        return ResponseEntity.ok(providerBundle);
     }
 }
