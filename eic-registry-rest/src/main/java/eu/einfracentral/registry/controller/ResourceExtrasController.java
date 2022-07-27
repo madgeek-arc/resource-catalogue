@@ -53,8 +53,8 @@ public class ResourceExtrasController {
     @ApiOperation(value = "Add a new EOSC Interoperability Framework Guideline on a specific Resource")
     @PutMapping(path = "/add/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InfraService> addEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                           @RequestParam String pid, @RequestParam(required = false) String label,
-                                                           @RequestParam(required = false) URL url, @RequestParam(required = false) String semanticRelationship,
+                                                           @RequestParam String pid, @RequestParam String label,
+                                                           @RequestParam URL url, @RequestParam String semanticRelationship,
                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InfraService infraService = infraServiceService.get(serviceId, catalogueId);
         // check PID uniqueness
