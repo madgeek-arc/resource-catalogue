@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.MigrationService;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ResourceService;
@@ -35,8 +37,8 @@ public class MigrationManager implements MigrationService {
     }
 
     public ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        logger.info(String.format("User [%s] is updating the catalogueId of the Provider [%s] and all its Resources" +
-                " to [%s]", User.of(authentication).getFullName(), providerId, newCatalogueId));
+        logger.info("User [{}] is updating the catalogueId of the Provider [{}] and all its Resources to [{}]",
+                User.of(authentication).getFullName(), providerId, newCatalogueId);
         // Provider
         ProviderBundle providerBundle = providerService.get(catalogueId, providerId, authentication);
         providerBundle.getProvider().setCatalogueId(newCatalogueId);
@@ -48,16 +50,20 @@ public class MigrationManager implements MigrationService {
         jmsTopicTemplate.convertAndSend("provider.update", providerBundle);
 
         // Public Provider
-        ProviderBundle publicProviderBundle = providerService.get(catalogueId, catalogueId+"."+providerId, authentication);
-        String oldPublicId = publicProviderBundle.getProvider().getId();
-        publicProviderBundle.getProvider().setId(newCatalogueId+"."+providerId);
-        publicProviderBundle.getProvider().setCatalogueId(newCatalogueId);
+        try {
+            ProviderBundle publicProviderBundle = providerService.get(catalogueId, catalogueId + "." + providerId, authentication);
+            String oldPublicId = publicProviderBundle.getProvider().getId();
+            publicProviderBundle.getProvider().setId(newCatalogueId + "." + providerId);
+            publicProviderBundle.getProvider().setCatalogueId(newCatalogueId);
 
-        Resource publicResource = providerService.getResource(oldPublicId, catalogueId);
-        publicResource.setPayload(providerService.serialize(publicProviderBundle));
-        logger.info("Migrating Public Provider: {} from Catalogue: {} to Catalogue: {}", publicProviderBundle.getId(), catalogueId, newCatalogueId); // FIXME
-        resourceService.updateResource(publicResource);
-        jmsTopicTemplate.convertAndSend("public_provider.update", publicProviderBundle);
+            Resource publicResource = providerService.getResource(oldPublicId, catalogueId);
+            publicResource.setPayload(providerService.serialize(publicProviderBundle));
+            logger.info("Migrating Public Provider: {} from Catalogue: {} to Catalogue: {}", publicProviderBundle.getId(), catalogueId, newCatalogueId);
+            resourceService.updateResource(publicResource);
+            jmsTopicTemplate.convertAndSend("public_provider.update", publicProviderBundle);
+        } catch (RuntimeException e) {
+            logger.error("Error migrating Public Provider", e);
+        }
 
         // Update provider's resources' catalogue
         changeResourceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
@@ -74,7 +80,7 @@ public class MigrationManager implements MigrationService {
             if (infraService.getService().getId().startsWith(catalogueId)) {
                 // if Resource is Public, update its id
                 jmsTopic = "public_resource.update";
-                String id = infraService.getId().replaceFirst(catalogueId, newCatalogueId); // TODO: check for bugs
+                String id = infraService.getId().replaceFirst(catalogueId, newCatalogueId);
                 infraService.getService().setId(id);
             }
             infraService.getService().setCatalogueId(newCatalogueId);
