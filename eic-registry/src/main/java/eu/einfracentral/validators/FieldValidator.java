@@ -9,7 +9,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.VocabularyService;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +33,7 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
@@ -43,10 +43,10 @@ public class FieldValidator {
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService) {
+                          ResourceBundleService<ServiceBundle> resourceBundleService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
     }
 
     private String getCurrentLocation() {
@@ -302,7 +302,7 @@ public class FieldValidator {
                                         field.getName()));
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
                             || ServiceBundle.class.equals(annotation.idClass()))
-                            && infraServiceService.get(o.toString()) == null) {
+                            && resourceBundleService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
                                         field.getName()));

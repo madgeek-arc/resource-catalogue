@@ -8,7 +8,7 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
@@ -31,7 +31,7 @@ public class OIDCSecurityService implements SecurityService {
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private OIDCAuthenticationToken adminAccess;
 
@@ -43,11 +43,11 @@ public class OIDCSecurityService implements SecurityService {
 
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
-                        InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+                        ResourceBundleService<ServiceBundle> resourceBundleService,
                         PendingProviderManager pendingProviderManager, PendingResourceService<ServiceBundle> pendingServiceManager) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
 
@@ -283,7 +283,7 @@ public class OIDCSecurityService implements SecurityService {
     public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId) {
         ServiceBundle service;
         try {
-            service = infraServiceService.get(serviceId);
+            service = resourceBundleService.get(serviceId);
         } catch (ResourceException | ResourceNotFoundException e) {
             try {
                 service = pendingServiceManager.get(serviceId);
@@ -311,7 +311,7 @@ public class OIDCSecurityService implements SecurityService {
     public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId, String catalogueId) {
         ServiceBundle service;
         try {
-            service = infraServiceService.get(serviceId, catalogueId);
+            service = resourceBundleService.get(serviceId, catalogueId);
         } catch (ResourceException | ResourceNotFoundException e) {
             try {
                 service = pendingServiceManager.get(serviceId);
@@ -335,7 +335,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean providerCanAddServices(Authentication auth, String serviceId) {
-        return providerCanAddServices(auth, infraServiceService.get(serviceId));
+        return providerCanAddServices(auth, resourceBundleService.get(serviceId));
     }
 
     public boolean providerCanAddServices(Authentication auth, ServiceBundle serviceBundle) {
@@ -357,7 +357,7 @@ public class OIDCSecurityService implements SecurityService {
                 } else if (provider.getTemplateStatus().equals("no template status")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());
-                    if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                    if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                         return true;
                     }
                     throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
@@ -368,7 +368,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
-        ServiceBundle service = infraServiceService.get(serviceId);
+        ServiceBundle service = resourceBundleService.get(serviceId);
 //        List<String> providerIds = service.getService().getResourceProviders();
 //        providerIds.add(service.getService().getResourceOrganisation());
         List<String> providerIds = Collections.singletonList(service.getService().getResourceOrganisation());
@@ -384,12 +384,12 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean serviceIsActive(String serviceId) {
-        ServiceBundle service = infraServiceService.get(serviceId);
+        ServiceBundle service = resourceBundleService.get(serviceId);
         return service.isActive();
     }
 
     public boolean serviceIsActive(String serviceId, String catalogueId) {
-        ServiceBundle service = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle service = resourceBundleService.get(serviceId, catalogueId);
         return service.isActive();
     }
 }

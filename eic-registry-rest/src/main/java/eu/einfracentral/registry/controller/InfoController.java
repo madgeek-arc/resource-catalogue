@@ -1,10 +1,10 @@
 package eu.einfracentral.registry.controller;
 
 
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -26,12 +26,11 @@ import java.util.Map;
 @Api(value = "Get General Information")
 public class InfoController {
 
-    private static final String INFO = "general_INFO";
-    private InfraServiceService<ServiceBundle, ServiceBundle> infraService;
-    private ProviderService<ProviderBundle, Authentication> providerService;
+    private final ResourceBundleService<ServiceBundle> infraService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    InfoController(InfraServiceService<ServiceBundle, ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
+    InfoController(ResourceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
     }

@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -24,17 +24,17 @@ import java.util.UUID;
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements ResourceService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
     @Autowired
-    public HelpdeskManager(InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+    public HelpdeskManager(ResourceBundleService<ServiceBundle> resourceBundleService,
                            JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService) {
         super(HelpdeskBundle.class);
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -129,7 +129,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public void serviceConsistency(String serviceId, String catalogueId){
         // check if Service exists
         try{
-            infraServiceService.get(serviceId, catalogueId);
+            resourceBundleService.get(serviceId, catalogueId);
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
         }

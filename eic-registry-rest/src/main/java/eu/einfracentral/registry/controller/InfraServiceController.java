@@ -2,7 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.Metadata;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -31,10 +31,10 @@ import java.util.Map;
 public class InfraServiceController {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraService;
+    private final ResourceBundleService<ServiceBundle> infraService;
 
     @Autowired
-    InfraServiceController(InfraServiceService<ServiceBundle, ServiceBundle> service) {
+    InfraServiceController(ResourceBundleService<ServiceBundle> service) {
         this.infraService = service;
     }
 

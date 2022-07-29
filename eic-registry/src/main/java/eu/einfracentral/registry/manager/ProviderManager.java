@@ -44,7 +44,7 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientifi
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -65,7 +65,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private String catalogueName;
 
     @Autowired
-    public ProviderManager(@Lazy InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+    public ProviderManager(@Lazy ResourceBundleService<ServiceBundle> resourceBundleService,
                            @Lazy SecurityService securityService,
                            @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService,
@@ -75,7 +75,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            SynchronizerService<Provider> synchronizerServiceProvider,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ProviderBundle.class);
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.securityService = securityService;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
@@ -358,10 +358,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void delete(ProviderBundle provider) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = infraServiceService.getInfraServices(provider.getId(), authentication);
+        List<ServiceBundle> services = resourceBundleService.getInfraServices(provider.getId(), authentication);
         services.forEach(s -> {
             try {
-                infraServiceService.delete(s);
+                resourceBundleService.delete(s);
             } catch (ResourceNotFoundException e) {
                 logger.error("Error deleting Resource", e);
             }
@@ -568,7 +568,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<ServiceBundle> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getInfraServices(providerId, auth);
         logger.info("Activating all Resources of the Provider with id: {}", providerId);
         for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
@@ -594,7 +594,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
-                infraServiceService.update(service, null);
+                resourceBundleService.update(service, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }
@@ -602,7 +602,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<ServiceBundle> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getInfraServices(providerId, auth);
         logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
         for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
@@ -628,7 +628,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
-                infraServiceService.update(service, null);
+                resourceBundleService.update(service, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }

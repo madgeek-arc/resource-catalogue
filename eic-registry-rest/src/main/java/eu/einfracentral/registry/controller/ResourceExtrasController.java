@@ -5,7 +5,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ResourceExtras;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
@@ -39,14 +39,14 @@ public class ResourceExtrasController {
     @Autowired
     private JmsTemplate jmsTopicTemplate;
 
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
 
     @Autowired
     private final ResourceService<ServiceBundle, Authentication> publicResourceManager;
 
-    public ResourceExtrasController(InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+    public ResourceExtrasController(ResourceBundleService<ServiceBundle> resourceBundleService,
                                     @Qualifier("publicResourceManager") ResourceService<ServiceBundle, Authentication> publicResourceManager) {
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.publicResourceManager = publicResourceManager;
     }
 
@@ -56,7 +56,7 @@ public class ResourceExtrasController {
                                                             @RequestParam String pid, @RequestParam String label,
                                                             @RequestParam URL url, @RequestParam String semanticRelationship,
                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         // check PID uniqueness
         List<EOSCIFGuidelines> existingEoscIFGuidelines = serviceBundle.getResourceExtras().getEoscIFGuidelines();
         for (EOSCIFGuidelines guideline : existingEoscIFGuidelines){
@@ -84,8 +84,8 @@ public class ResourceExtrasController {
                 serviceBundle.getResourceExtras().setEoscIFGuidelines(oldEoscIFGuidenlines);
             }
         }
-        infraServiceService.validate(serviceBundle);
-        infraServiceService.update(serviceBundle, auth);
+        resourceBundleService.validate(serviceBundle);
+        resourceBundleService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] added a new eoscIFGuideline on the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, eoscIFGuideline));
         publicResourceManager.update(serviceBundle, auth);
@@ -98,7 +98,7 @@ public class ResourceExtrasController {
     public ResponseEntity<ServiceBundle> addResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                              @RequestParam String researchCategory,
                                                              @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(serviceBundle);
         ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         List<String> newResearchCategories = new ArrayList<>();
@@ -117,8 +117,8 @@ public class ResourceExtrasController {
                 serviceBundle.getResourceExtras().setResearchCategories(oldResearchCategories);
             }
         }
-        infraServiceService.validate(serviceBundle);
-        infraServiceService.update(serviceBundle, auth);
+        resourceBundleService.validate(serviceBundle);
+        resourceBundleService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] added a new researchCategory on the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategory));
         publicResourceManager.update(serviceBundle, auth);
@@ -133,7 +133,7 @@ public class ResourceExtrasController {
                                                                @RequestParam(required = false) URL url,
                                                                @RequestParam(required = false) String semanticRelationship,
                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(serviceBundle);
         ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         boolean found = false;
@@ -164,8 +164,8 @@ public class ResourceExtrasController {
                 serviceBundle.getResourceExtras().setEoscIFGuidelines(eoscIFGuidenlines);
             }
         }
-        infraServiceService.validate(serviceBundle);
-        infraServiceService.update(serviceBundle, auth);
+        resourceBundleService.validate(serviceBundle);
+        resourceBundleService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] updated field eoscIFGuideline of the Resource [%s] with PID [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, pid));
         publicResourceManager.update(serviceBundle, auth);
@@ -178,7 +178,7 @@ public class ResourceExtrasController {
     public ResponseEntity<ServiceBundle> updateResearchCategories(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                                   @RequestBody List<String> researchCategories,
                                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(serviceBundle);
         ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         List<String> newResearchCategories = new ArrayList<>();
@@ -197,8 +197,8 @@ public class ResourceExtrasController {
                 serviceBundle.getResourceExtras().setResearchCategories(oldResearchCategories);
             }
         }
-        infraServiceService.validate(serviceBundle);
-        infraServiceService.update(serviceBundle, auth);
+        resourceBundleService.validate(serviceBundle);
+        resourceBundleService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] updated field researchCategories of the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategories));
         publicResourceManager.update(serviceBundle, auth);
@@ -211,7 +211,7 @@ public class ResourceExtrasController {
     public ResponseEntity<ServiceBundle> updateHorizontalService(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                                  @RequestParam boolean horizontalService,
                                                                  @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(serviceBundle);
         ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         if (resourceExtras == null){
@@ -221,8 +221,8 @@ public class ResourceExtrasController {
         } else{
             resourceExtras.setHorizontalService(horizontalService);
         }
-        infraServiceService.validate(serviceBundle);
-        infraServiceService.update(serviceBundle, auth);
+        resourceBundleService.validate(serviceBundle);
+        resourceBundleService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] updated the field horizontalService of the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, horizontalService));
         publicResourceManager.update(serviceBundle, auth);
@@ -235,7 +235,7 @@ public class ResourceExtrasController {
     public ResponseEntity<ServiceBundle> deleteEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                                @RequestParam String pid,
                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(serviceBundle);
         List<EOSCIFGuidelines> existingEOSCIFGuidelines = serviceBundle.getResourceExtras().getEoscIFGuidelines();
         if (existingEOSCIFGuidelines != null && !existingEOSCIFGuidelines.isEmpty()){
@@ -244,8 +244,8 @@ public class ResourceExtrasController {
         } else{
             throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
         }
-        infraServiceService.validate(serviceBundle);
-        infraServiceService.update(serviceBundle, auth);
+        resourceBundleService.validate(serviceBundle);
+        resourceBundleService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] deleted the researchCategory of the Resource [%s] with pid [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, pid));
         publicResourceManager.update(serviceBundle, auth);
@@ -258,7 +258,7 @@ public class ResourceExtrasController {
     public ResponseEntity<ServiceBundle> deleteResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                                 @RequestParam String researchCategory,
                                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(serviceBundle);
         List<String> existingResourceCategories = serviceBundle.getResourceExtras().getResearchCategories();
         if (existingResourceCategories != null && !existingResourceCategories.isEmpty()){
@@ -267,8 +267,8 @@ public class ResourceExtrasController {
         } else{
             throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
         }
-        infraServiceService.validate(serviceBundle);
-        infraServiceService.update(serviceBundle, auth);
+        resourceBundleService.validate(serviceBundle);
+        resourceBundleService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] deleted the researchCategory of the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategory));
         publicResourceManager.update(serviceBundle, auth);

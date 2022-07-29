@@ -7,14 +7,14 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.TransformerCRUDService;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
 
-public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, Authentication> {
+public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authentication> {
 
     /**
      * Method to add a new service.
@@ -27,6 +27,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
 
     /**
      * Method to add a new service from external catalogue.
+     *
      * @param service
      * @param catalogueId
      * @param auth
@@ -62,11 +63,11 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     /**
      * Returns the Service with the specified id.
      *
-     * @param id of the Service.
+     * @param id          of the Service.
      * @param catalogueId
      * @return service.
      */
-    R get(String id, String catalogueId);
+    T get(String id, String catalogueId);
 
     /**
      * Get InfraServices by a specific field.
@@ -161,7 +162,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      *
      * @return
      */
-    Paging<R> getInactiveServices();
+    Paging<T> getInactiveServices();
 
     /**
      * Validates the given service.
@@ -224,7 +225,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     Paging<ServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
-     *
      * @param providerId
      * @param auth
      * @return
@@ -232,7 +232,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
     List<ServiceBundle> getInfraServices(String providerId, Authentication auth);
 
     /**
-     *
      * @param providerId
      * @param catalogueId
      * @param auth

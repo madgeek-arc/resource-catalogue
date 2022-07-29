@@ -4,7 +4,7 @@ import eu.einfracentral.domain.EmailMessage;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.ProviderRequest;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MailService;
 import eu.einfracentral.registry.service.ProviderRequestService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -31,7 +31,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
     private final MailService mailService;
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final SecurityService securityService;
     private final Configuration cfg;
@@ -41,12 +41,12 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     @Autowired
     public ProviderRequestManager(MailService mailService, Configuration cfg,
-                                  InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+                                  ResourceBundleService<ServiceBundle> resourceBundleService,
                                   ProviderService<ProviderBundle, Authentication> providerService,
                                   SecurityService securityService) {
         super(ProviderRequest.class);
         this.mailService = mailService;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.providerService = providerService;
         this.securityService = securityService;
         this.cfg = cfg;
@@ -96,7 +96,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         Map<String, String> providerContactNames = new LinkedHashMap<>();
         List<String> serviceNames = new ArrayList<>();
         for (String serviceId : serviceIds) {
-            ServiceBundle service = infraServiceService.get(serviceId);
+            ServiceBundle service = resourceBundleService.get(serviceId);
             serviceNames.add(service.getService().getName());
             List<String> providerIds = service.getService().getResourceProviders();
             providerIds.add(service.getService().getResourceOrganisation());

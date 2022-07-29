@@ -6,7 +6,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
@@ -39,7 +39,7 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateCategorie
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("infraServiceService")
-public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<ServiceBundle, ServiceBundle> {
+public class InfraServiceManager extends AbstractServiceManager implements ResourceBundleService<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 

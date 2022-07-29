@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.dto.Category;
 import eu.einfracentral.dto.ProviderInfo;
 import eu.einfracentral.dto.ScientificDomain;
@@ -9,12 +8,15 @@ import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.*;
+import eu.einfracentral.registry.service.EventService;
+import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.TextUtils;
@@ -42,7 +44,7 @@ import java.util.stream.Collectors;
 import static eu.einfracentral.config.CacheConfig.*;
 import static java.util.stream.Collectors.toList;
 
-public abstract class AbstractServiceManager extends AbstractGenericService<ServiceBundle> implements InfraServiceService<ServiceBundle, ServiceBundle> {
+public abstract class AbstractServiceManager extends AbstractGenericService<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(AbstractServiceManager.class);
 
@@ -130,7 +132,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         return resourceType.getName();
     }
 
-//    @Override
+    //    @Override
     public ServiceBundle get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
@@ -139,7 +141,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         return deserialize(resource);
     }
 
-//    @Override
+    //    @Override
     public ServiceBundle get(String id) {
         return get(id, catalogueName);
     }
@@ -148,14 +150,14 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
     @Override
     public Browsing<ServiceBundle> getAll(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
-        if (auth == null){
+        if (auth == null) {
             filter.addFilter("active", true);
             filter.addFilter("published", false);
         }
-        if (auth != null && auth.isAuthenticated()){
+        if (auth != null && auth.isAuthenticated()) {
             // if user is Authorized with ROLE_USER, return active/latest ONLY
             if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
-                    !securityService.hasRole(auth, "ROLE_ADMIN")){
+                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
                 filter.addFilter("active", true);
                 filter.addFilter("published", false);
             }
@@ -449,13 +451,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
 
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
-            resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-            if (resources.getTotal() > 0) {
-                return resources.getResults().get(0);
-            }
-            return null;
+        resources = searchService
+                .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
+                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+        if (resources.getTotal() > 0) {
+            return resources.getResults().get(0);
+        }
+        return null;
     }
 
     @Deprecated
@@ -505,9 +507,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             List<ProviderInfo> providerInfoList = new ArrayList<>();
             List<String> allProviders = new ArrayList<>();
             allProviders.add(richService.getService().getResourceOrganisation());
-            if (richService.getService().getResourceProviders() != null && !richService.getService().getResourceProviders().isEmpty()){
-                for (String provider : richService.getService().getResourceProviders()){
-                    if (!provider.equals(richService.getService().getResourceOrganisation())){
+            if (richService.getService().getResourceProviders() != null && !richService.getService().getResourceProviders().isEmpty()) {
+                for (String provider : richService.getService().getResourceProviders()) {
+                    if (!provider.equals(richService.getService().getResourceOrganisation())) {
                         allProviders.add(provider);
                     }
                 }
@@ -516,7 +518,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
                 if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
                     ProviderBundle providerBundle = providerService.get(provider, auth);
                     boolean isResourceOrganisation = false;
-                    if (provider.equals(richService.getService().getResourceOrganisation())){
+                    if (provider.equals(richService.getService().getResourceOrganisation())) {
                         isResourceOrganisation = true;
                     }
                     ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
@@ -689,7 +691,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
                         category.setSuperCategory(vocabularyService.get(supercategoryId));
                         category.setSubCategory(vocabularyService.get(serviceCategory.getSubcategory()));
                     } else {
-                        if (category.getSuperCategory() == null){
+                        if (category.getSuperCategory() == null) {
                             category.setSuperCategory(null);
                         }
                         category.setSubCategory(null);
@@ -817,7 +819,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         return new Browsing<>(paging, results, labels);
     }
 
-    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec){
+    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec) {
         //TODO: Refactor to a more proper way (sql JOIN OR elastic)
         List<String> finalResults = new ArrayList<>();
         List<String> allSub = new ArrayList<>();
@@ -831,25 +833,25 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             }
         }
         // Required step to fix joint subcategories (sub1,sub2,sub3) who passed as 1 value
-        for (String item : allSub){
-            if (item.contains(",")){
-                String [] itemParts = item.split(",");
+        for (String item : allSub) {
+            if (item.contains(",")) {
+                String[] itemParts = item.split(",");
                 correctedSubs.addAll(Arrays.asList(itemParts));
-            } else{
+            } else {
                 correctedSubs.add(item);
             }
         }
-        if (type.equalsIgnoreCase("SUPERCATEGORY") || type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")){
+        if (type.equalsIgnoreCase("SUPERCATEGORY") || type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")) {
             String[] parts = parent.split("-"); //supercategory-natural_sciences
-            for (String id : correctedSubs){
-                if (id.contains(parts[1])){
+            for (String id : correctedSubs) {
+                if (id.contains(parts[1])) {
                     finalResults.add(id);
                 }
             }
         } else {
             String[] parts = parent.split("-"); //category-natural_sciences-math
-            for (String id : correctedSubs){
-                if (id.contains(parts[2])){
+            for (String id : correctedSubs) {
+                if (id.contains(parts[2])) {
                     finalResults.add(id);
                 }
             }

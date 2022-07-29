@@ -4,7 +4,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -34,16 +34,16 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final IdCreator idCreator;
 
     @Autowired
     PendingServiceController(PendingResourceService<ServiceBundle> pendingServiceManager,
-                             InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+                             ResourceBundleService<ServiceBundle> resourceBundleService,
                              IdCreator idCreator) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
     }
 
@@ -154,7 +154,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         }
 
         if (serviceBundle == null) { // if existing Pending Service is null, create a new Active Service
-            serviceBundle = infraServiceService.addService(new ServiceBundle(service), auth);
+            serviceBundle = resourceBundleService.addService(new ServiceBundle(service), auth);
             logger.info("User '{}' added Resource:\n{}", auth.getName(), serviceBundle);
         } else { // else update Pending Service and transform it to Active Service
             if (serviceBundle.getService().getVersion().equals("")){

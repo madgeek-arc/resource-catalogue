@@ -3,7 +3,7 @@ package eu.einfracentral.recdb.managers;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.recdb.services.RecommendationService;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -23,11 +23,11 @@ import java.util.List;
 public class RecommendationManager implements RecommendationService<RichService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(RecommendationManager.class);
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraService;
+    private final ResourceBundleService<ServiceBundle> infraService;
     private final DataSource recdbDataSource;
 
     @Autowired
-    public RecommendationManager(InfraServiceService<ServiceBundle, ServiceBundle> infraService,
+    public RecommendationManager(ResourceBundleService<ServiceBundle> infraService,
                                  @Qualifier("recdbDataSource") DataSource recdbDataSource) {
         this.infraService = infraService;
         this.recdbDataSource = recdbDataSource;

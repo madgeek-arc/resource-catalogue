@@ -5,7 +5,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -33,18 +33,18 @@ public class ProviderManagementAspect {
 
     private final PublicProviderManager publicProviderManager;
     private final PublicResourceManager publicResourceManager;
-    private final InfraServiceService infraServiceService;
+    private final ResourceBundleService resourceBundleService;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
-                                    RegistrationMailService registrationMailService, InfraServiceService infraServiceService,
+                                    RegistrationMailService registrationMailService, ResourceBundleService resourceBundleService,
                                     SecurityService securityService, PublicProviderManager publicProviderManager,
                                     PublicResourceManager publicResourceManager) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.securityService = securityService;
         this.publicProviderManager = publicProviderManager;
         this.publicResourceManager = publicResourceManager;
@@ -216,7 +216,7 @@ public class ProviderManagementAspect {
             if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                         serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                infraServiceService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
+                resourceBundleService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
             }
         } catch (RuntimeException e) {
             logger.error(e);

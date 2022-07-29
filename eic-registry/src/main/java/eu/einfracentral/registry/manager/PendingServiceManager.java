@@ -2,7 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
@@ -31,7 +31,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
     private static final Logger logger = LogManager.getLogger(PendingServiceManager.class);
 
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
@@ -41,11 +41,11 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private String catalogueName;
 
     @Autowired
-    public PendingServiceManager(InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+    public PendingServiceManager(ResourceBundleService<ServiceBundle> resourceBundleService,
                                  IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
                                  @Lazy ProviderManager providerManager) {
         super(ServiceBundle.class);
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
@@ -66,7 +66,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         // Check if there is a Resource with the specific id
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
-        List<ServiceBundle> resourceList = infraServiceService.getAll(ff, auth).getResults();
+        List<ServiceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle existingResource : resourceList){
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
                 throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
@@ -124,8 +124,8 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
-        ServiceBundle serviceBundle = infraServiceService.get(serviceId);
-        Resource resource = infraServiceService.getResource(serviceBundle.getService().getId(), catalogueName);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId);
+        Resource resource = resourceBundleService.getResource(serviceBundle.getService().getId(), catalogueName);
         resource.setResourceTypeName("infra_service");
         resourceService.changeResourceType(resource, resourceType);
         return serviceBundle;
@@ -135,7 +135,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToActive(ServiceBundle serviceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceBundle.getId());
-        infraServiceService.validate(serviceBundle);
+        resourceBundleService.validate(serviceBundle);
 
         // update loggingInfo
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
@@ -175,7 +175,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         resourceService.changeResourceType(resource, infraResourceType);
 
         try {
-            serviceBundle = infraServiceService.update(serviceBundle, auth);
+            serviceBundle = resourceBundleService.update(serviceBundle, auth);
         } catch (ResourceNotFoundException e) {
             e.printStackTrace();
         }
@@ -188,7 +188,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     public ServiceBundle transformToActive(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
         ServiceBundle serviceBundle = this.get(serviceId);
-        infraServiceService.validate(serviceBundle);
+        resourceBundleService.validate(serviceBundle);
 
         // update loggingInfo
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
@@ -227,7 +227,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         resourceService.changeResourceType(resource, infraResourceType);
 
         try {
-            serviceBundle = infraServiceService.update(serviceBundle, auth);
+            serviceBundle = resourceBundleService.update(serviceBundle, auth);
         } catch (ResourceNotFoundException e) {
             e.printStackTrace();
         }
@@ -236,7 +236,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     }
 
     public Object getPendingRich(String id, Authentication auth) {
-        return infraServiceService.createRichService(get(id), auth);
+        return resourceBundleService.createRichService(get(id), auth);
     }
 
     public List<ServiceBundle> getMy(Authentication auth) {

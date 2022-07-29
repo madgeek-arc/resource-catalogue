@@ -3,7 +3,7 @@ package eu.einfracentral.registry.controller;
 import com.google.gson.Gson;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -30,14 +30,14 @@ import java.util.List;
 public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraService;
+    private final ResourceBundleService<ServiceBundle> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     @Autowired
-    CSVController(InfraServiceService<ServiceBundle, ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
+    CSVController(ResourceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
     }

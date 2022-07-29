@@ -3,7 +3,7 @@ package eu.einfracentral.registry.controller;
 import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
@@ -36,7 +36,7 @@ public class PublicController {
     private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final ResourceService<ServiceBundle, Authentication> publicResourceManager;
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final SecurityService securityService;
     private static final Gson gson = new Gson();
     private static final Logger logger = LogManager.getLogger(PublicController.class);
@@ -45,12 +45,12 @@ public class PublicController {
     PublicController(@Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
                      ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
                      @Qualifier("publicResourceManager") ResourceService<ServiceBundle, Authentication> publicResourceManager,
-                     InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService) {
+                     ResourceBundleService<ServiceBundle> resourceBundleService) {
         this.publicProviderManager = publicProviderManager;
         this.providerService = providerService;
         this.securityService = securityService;
         this.publicResourceManager = publicResourceManager;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
     }
 
     //SECTION: PROVIDER
@@ -201,7 +201,7 @@ public class PublicController {
     public ResponseEntity<?> getPublicResource(@PathVariable("id") String id,
                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
-        ServiceBundle serviceBundle = infraServiceService.get(id, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -222,7 +222,7 @@ public class PublicController {
     public ResponseEntity<?> getPublicInfraService(@PathVariable("id") String id,
                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
-        ServiceBundle serviceBundle = infraServiceService.get(id, catalogueId);
+        ServiceBundle serviceBundle = resourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -275,7 +275,7 @@ public class PublicController {
             ff.addFilter("status", "approved resource");
         }
         List<Service> serviceList = new LinkedList<>();
-        Paging<ServiceBundle> infraServicePaging = infraServiceService.getAll(ff, auth);
+        Paging<ServiceBundle> infraServicePaging = resourceBundleService.getAll(ff, auth);
         for (ServiceBundle serviceBundle : infraServicePaging.getResults()) {
             serviceList.add(serviceBundle.getService());
         }
@@ -321,7 +321,7 @@ public class PublicController {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
-        Paging<ServiceBundle> infraServicePaging = infraServiceService.getAll(ff, auth);
+        Paging<ServiceBundle> infraServicePaging = resourceBundleService.getAll(ff, auth);
         List<ServiceBundle> serviceList = new LinkedList<>(infraServicePaging.getResults());
         Paging<ServiceBundle> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
                 infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());

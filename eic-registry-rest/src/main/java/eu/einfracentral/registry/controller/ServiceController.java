@@ -3,7 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
-    private final InfraServiceService<ServiceBundle, ServiceBundle> infraService;
+    private final ResourceBundleService<ServiceBundle> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource dataSource;
 
@@ -51,7 +51,7 @@ public class ServiceController {
 
 
     @Autowired
-    ServiceController(InfraServiceService<ServiceBundle, ServiceBundle> service,
+    ServiceController(ResourceBundleService<ServiceBundle> service,
                       ProviderService<ProviderBundle, Authentication> provider,
                       DataSource dataSource) {
         this.infraService = service;

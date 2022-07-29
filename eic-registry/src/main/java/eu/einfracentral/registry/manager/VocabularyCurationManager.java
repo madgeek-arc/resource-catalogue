@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -35,7 +35,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private static final Logger logger = LogManager.getLogger(VocabularyCurationManager.class);
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
-    private final InfraServiceService infraServiceService;
+    private final ResourceBundleService resourceBundleService;
     private List<String> browseBy;
     private Map<String, String> labels;
 
@@ -54,11 +54,11 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
-                                     InfraServiceService infraServiceService, AbstractServiceManager abstractServiceManager) {
+                                     ResourceBundleService resourceBundleService, AbstractServiceManager abstractServiceManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.abstractServiceManager = abstractServiceManager;
     }
 
@@ -220,7 +220,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, auth).getResults();
-        List<ServiceBundle> allResources = infraServiceService.getAll(facetFilter, auth).getResults();
+        List<ServiceBundle> allResources = resourceBundleService.getAll(facetFilter, auth).getResults();
         List<String> providerIds = new ArrayList<>();
         List<String> resourceIds = new ArrayList<>();
         for (ProviderBundle provider : allProviders){

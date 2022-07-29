@@ -2,7 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.config.ServiceConfig;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.SecurityService;
@@ -39,7 +39,7 @@ public class ServiceProviderRegistrationIT {
     ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    ResourceBundleService<ServiceBundle, ServiceBundle> resourceBundleService;
 
     @Autowired
     VocabularyService vocabularyService;
@@ -80,13 +80,13 @@ public class ServiceProviderRegistrationIT {
 
             serviceBundle = new ServiceBundle(createService("WP4_TestService", provider.getProvider()));
 
-            serviceBundle = infraServiceService.addService(serviceBundle, securityService.getAdminAccess());
+            serviceBundle = resourceBundleService.addService(serviceBundle, securityService.getAdminAccess());
 
             assert serviceBundle != null;
 
             providerService.verifyProvider(providerId, "rejected template", false, securityService.getAdminAccess());
 
-            infraServiceService.updateService(serviceBundle, "woof", securityService.getAdminAccess());
+            resourceBundleService.updateService(serviceBundle, "woof", securityService.getAdminAccess());
 
             providerService.verifyProvider(providerId, "approved", true, securityService.getAdminAccess());
             providerService.verifyProvider(providerId, "approved", false, securityService.getAdminAccess());
