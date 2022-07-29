@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import com.google.gson.Gson;
 import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -141,18 +142,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @Override
     public String toString() {
-        return "Bundle{" +
-                "payload=" + payload +
-                ", metadata=" + metadata +
-                ", active=" + active +
-                ", suspended=" + suspended +
-                ", identifiers=" + identifiers +
-                ", migrationStatus=" + migrationStatus +
-                ", loggingInfo=" + loggingInfo +
-                ", latestAuditInfo=" + latestAuditInfo +
-                ", latestOnboardingInfo=" + latestOnboardingInfo +
-                ", latestUpdateInfo=" + latestUpdateInfo +
-                '}';
+        return new Gson().toJson(this);
     }
 
     @Override

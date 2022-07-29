@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
@@ -34,8 +35,8 @@ public class PublicController {
 
     private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceService<InfraService, Authentication> publicResourceManager;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceService<ServiceBundle, Authentication> publicResourceManager;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
     private final SecurityService securityService;
     private static final Gson gson = new Gson();
     private static final Logger logger = LogManager.getLogger(PublicController.class);
@@ -43,8 +44,8 @@ public class PublicController {
     @Autowired
     PublicController(@Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
                      ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
-                     @Qualifier("publicResourceManager") ResourceService<InfraService, Authentication> publicResourceManager,
-                     InfraServiceService<InfraService, InfraService> infraServiceService) {
+                     @Qualifier("publicResourceManager") ResourceService<ServiceBundle, Authentication> publicResourceManager,
+                     InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService) {
         this.publicProviderManager = publicProviderManager;
         this.providerService = providerService;
         this.securityService = securityService;
@@ -200,38 +201,38 @@ public class PublicController {
     public ResponseEntity<?> getPublicResource(@PathVariable("id") String id,
                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
-        InfraService infraService = infraServiceService.get(id, catalogueId);
+        ServiceBundle serviceBundle = infraServiceService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsServiceProviderAdmin(user, id)) {
-                return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
+                return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
             }
         }
-        if (infraService.getMetadata().isPublished() && infraService.isActive() && infraService.isLatest()
-                && infraService.getStatus().equals("approved resource")) {
-            return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
+        if (serviceBundle.getMetadata().isPublished() && serviceBundle.isActive()
+                && serviceBundle.getStatus().equals("approved resource")) {
+            return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Resource."));
     }
 
-    //    @ApiOperation(value = "Returns the Public InfraService with the given id.")
+    //    @ApiOperation(value = "Returns the Public ServiceBundle with the given id.")
     @GetMapping(path = "/resource/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getPublicInfraService(@PathVariable("id") String id,
                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
-        InfraService infraService = infraServiceService.get(id, catalogueId);
+        ServiceBundle serviceBundle = infraServiceService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsServiceProviderAdmin(user, id)) {
-                return new ResponseEntity<>(infraService, HttpStatus.OK);
+                return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
             }
         }
-        if (infraService.getMetadata().isPublished() && infraService.isActive() && infraService.isLatest()
-                && infraService.getStatus().equals("approved resource")) {
-            return new ResponseEntity<>(infraService, HttpStatus.OK);
+        if (serviceBundle.getMetadata().isPublished() && serviceBundle.isActive()
+                && serviceBundle.getStatus().equals("approved resource")) {
+            return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Resource."));
     }
@@ -271,13 +272,12 @@ public class PublicController {
             logger.info("Getting all published Resources for Admin/Epot");
         } else{
             ff.addFilter("active", true);
-            ff.addFilter("latest", true);
             ff.addFilter("status", "approved resource");
         }
         List<Service> serviceList = new LinkedList<>();
-        Paging<InfraService> infraServicePaging = infraServiceService.getAll(ff, auth);
-        for (InfraService infraService : infraServicePaging.getResults()) {
-            serviceList.add(infraService.getService());
+        Paging<ServiceBundle> infraServicePaging = infraServiceService.getAll(ff, auth);
+        for (ServiceBundle serviceBundle : infraServicePaging.getResults()) {
+            serviceList.add(serviceBundle.getService());
         }
         Paging<Service> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
                 infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
@@ -293,9 +293,9 @@ public class PublicController {
     })
     @GetMapping(path = "/resource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InfraService>> getAllPublicInfraServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
-                                                                 @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<ServiceBundle>> getAllPublicInfraServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                           @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -319,18 +319,17 @@ public class PublicController {
             logger.info("Getting all published Resources for Admin/Epot");
         } else{
             ff.addFilter("active", true);
-            ff.addFilter("latest", true);
             ff.addFilter("status", "approved resource");
         }
-        Paging<InfraService> infraServicePaging = infraServiceService.getAll(ff, auth);
-        List<InfraService> serviceList = new LinkedList<>(infraServicePaging.getResults());
-        Paging<InfraService> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
+        Paging<ServiceBundle> infraServicePaging = infraServiceService.getAll(ff, auth);
+        List<ServiceBundle> serviceList = new LinkedList<>(infraServicePaging.getResults());
+        Paging<ServiceBundle> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
                 infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
         return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 
     @GetMapping(path = "/resource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<InfraService>> getMyPublicResources(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<ServiceBundle>> getMyPublicResources(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);

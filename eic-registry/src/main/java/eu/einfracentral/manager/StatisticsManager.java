@@ -1,7 +1,7 @@
 package eu.einfracentral.manager;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.dto.MapValues;
@@ -596,11 +596,11 @@ public class StatisticsManager implements StatisticsService {
 
         Map<String, Set<String>> providerCountries = providerCountriesMap();
 
-        List<InfraService> allServices = infraServiceManager.getAll(ff, null).getResults();
-        for (InfraService infraService : allServices) {
-            Value value = new Value(infraService.getId(), infraService.getService().getName());
+        List<ServiceBundle> allServices = infraServiceManager.getAll(ff, null).getResults();
+        for (ServiceBundle serviceBundle : allServices) {
+            Value value = new Value(serviceBundle.getId(), serviceBundle.getService().getName());
 
-            Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
+            Set<String> countries = new HashSet<>(providerCountries.get(serviceBundle.getService().getResourceOrganisation()));
             for (String country : countries) {
                 if (mapValues.get(country) == null) {
                     continue;

@@ -6,9 +6,10 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class DataSourceBundle extends Bundle<DataSource>{
+public class DataSourceBundle extends ResourceBundle<DataSource>{
 
     public DataSourceBundle() {
+        // No arg constructor
     }
 
     public DataSourceBundle(DataSource dataSource) {

@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -27,11 +27,11 @@ import java.util.Map;
 public class InfoController {
 
     private static final String INFO = "general_INFO";
-    private InfraServiceService<InfraService, InfraService> infraService;
+    private InfraServiceService<ServiceBundle, ServiceBundle> infraService;
     private ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    InfoController(InfraServiceService<InfraService, InfraService> service, ProviderService<ProviderBundle, Authentication> provider) {
+    InfoController(InfraServiceService<ServiceBundle, ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
     }
@@ -43,8 +43,7 @@ public class InfoController {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", true);
         servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
-        ff.addFilter("latest", true);
-        Paging<InfraService> infraServices = infraService.getAll(ff, null);
+        Paging<ServiceBundle> infraServices = infraService.getAll(ff, null);
         servicesInfo.put("services", (long) infraServices.getTotal());
         for (Facet f : infraServices.getFacets()) {
             if (f.getField().equals("resourceType")) {

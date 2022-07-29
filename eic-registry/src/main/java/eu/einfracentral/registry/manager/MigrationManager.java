@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.MigrationService;
@@ -72,23 +72,23 @@ public class MigrationManager implements MigrationService {
     }
 
     private void changeResourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<InfraService> infraServices = infraServiceManager.getInfraServices(providerId, authentication);
+        List<ServiceBundle> serviceBundles = infraServiceManager.getInfraServices(providerId, authentication);
         // Resources
         String jmsTopic = "resource.update";
-        for (InfraService infraService : infraServices) {
-            String oldResourceId = infraService.getId();
-            if (infraService.getService().getId().startsWith(catalogueId)) {
+        for (ServiceBundle serviceBundle : serviceBundles) {
+            String oldResourceId = serviceBundle.getId();
+            if (serviceBundle.getService().getId().startsWith(catalogueId)) {
                 // if Resource is Public, update its id
                 jmsTopic = "public_resource.update";
-                String id = infraService.getId().replaceFirst(catalogueId, newCatalogueId);
-                infraService.getService().setId(id);
+                String id = serviceBundle.getId().replaceFirst(catalogueId, newCatalogueId);
+                serviceBundle.getService().setId(id);
             }
-            infraService.getService().setCatalogueId(newCatalogueId);
-            Resource resource = infraServiceManager.getResource(oldResourceId, catalogueId, infraService.getService().getVersion());
-            resource.setPayload(infraServiceManager.serialize(infraService));
-            logger.debug("Migrating Resource: {} of Catalogue: {} to Catalogue: {}", infraService.getId(), catalogueId, newCatalogueId);
+            serviceBundle.getService().setCatalogueId(newCatalogueId);
+            Resource resource = infraServiceManager.getResource(oldResourceId, catalogueId, serviceBundle.getService().getVersion());
+            resource.setPayload(infraServiceManager.serialize(serviceBundle));
+            logger.debug("Migrating Resource: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
-            jmsTopicTemplate.convertAndSend(jmsTopic, infraService);
+            jmsTopicTemplate.convertAndSend(jmsTopic, serviceBundle);
         }
     }
 }

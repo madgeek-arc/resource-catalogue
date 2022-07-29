@@ -1,8 +1,8 @@
 Dear ${user.name},
 
-Your Resource [${infraService.service.name}] has been audited by the EPOT team.
-It has been marked as [${infraService.latestAuditInfo.actionType}] with comment:
-"${infraService.latestAuditInfo.comment}"
+Your Resource [${serviceBundle.service.name}] has been audited by the EPOT team.
+It has been marked as [${serviceBundle.latestAuditInfo.actionType}] with comment:
+"${serviceBundle.latestAuditInfo.comment}"
 
 Best Regards,
 the ${project} Team

@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import com.google.gson.Gson;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -30,14 +30,14 @@ import java.util.List;
 public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
-    private final InfraServiceService<InfraService, InfraService> infraService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     @Autowired
-    CSVController(InfraServiceService<InfraService, InfraService> service, ProviderService<ProviderBundle, Authentication> provider) {
+    CSVController(InfraServiceService<ServiceBundle, ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
         this.infraService = service;
         this.providerService = provider;
     }
@@ -48,8 +48,7 @@ public class CSVController {
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.addFilter("latest", true);
-        Paging<InfraService> infraServices = infraService.getAll(ff, auth);
+        Paging<ServiceBundle> infraServices = infraService.getAll(ff, auth);
         String csvData = listServicesToCSV(infraServices.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
         return ResponseEntity.ok(csvData);
@@ -86,7 +85,7 @@ public class CSVController {
         return String.join("\n", rows);
     }
 
-    private static String listServicesToCSV(List<InfraService> list) {
+    private static String listServicesToCSV(List<ServiceBundle> list) {
         String resultCsv = listToCSV(list);
         String[] rows = resultCsv.split("\n");
         String[] header = rows[0].split(",");

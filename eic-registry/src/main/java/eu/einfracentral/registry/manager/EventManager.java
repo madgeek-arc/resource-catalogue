@@ -2,7 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -35,11 +35,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     private static final Logger logger = LogManager.getLogger(EventManager.class);
     private ParserService parserService;
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
 
     @Autowired
     public EventManager(ParserService parserService,
-                        @Lazy InfraServiceService<InfraService, InfraService> infraServiceService) {
+                        @Lazy InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService) {
         super(Event.class);
         this.parserService = parserService;
         this.infraServiceService = infraServiceService;

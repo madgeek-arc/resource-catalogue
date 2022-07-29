@@ -1,6 +1,7 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.InfraServiceManager;
@@ -292,14 +293,14 @@ public class RegistrationMailService {
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        InfraService infraService = infraServiceManager.get(resourceId, catalogueName);
-        ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
+        ServiceBundle serviceBundle = infraServiceManager.get(resourceId, catalogueName);
+        ProviderBundle providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
         if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
         }
         String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", projectName, providerBundle.getProvider().getName());
         root.put("providerBundle", providerBundle);
-        root.put("infraService", infraService);
+        root.put("infraService", serviceBundle);
         for (User user : providerBundle.getProvider().getUsers()) {
             root.put("user", user);
             String userRole = "provider";
@@ -307,7 +308,7 @@ public class RegistrationMailService {
         }
     }
 
-    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, InfraService infraService, Authentication auth){
+    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, ServiceBundle serviceBundle, Authentication auth){
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
@@ -317,13 +318,13 @@ public class RegistrationMailService {
         if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
         }
-        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, infraService.getService().getName(),
+        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, serviceBundle.getService().getName(),
                 oldProvider.getProvider().getName(), newProvider.getProvider().getName());
         String userRole = "provider";
         root.put("oldProvider", oldProvider);
         root.put("newProvider", newProvider);
-        root.put("infraService", infraService);
-        root.put("comment", infraService.getLoggingInfo().get(infraService.getLoggingInfo().size() - 1).getComment());
+        root.put("infraService", serviceBundle);
+        root.put("comment", serviceBundle.getLoggingInfo().get(serviceBundle.getLoggingInfo().size() - 1).getComment());
 
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
@@ -395,10 +396,10 @@ public class RegistrationMailService {
         ff.setQuantity(maxQuantity);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<InfraService> activeServices = infraServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<InfraService> pendingServices = pendingServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> activeServices = infraServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> pendingServices = pendingServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
-        List<InfraService> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
+        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
         List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
 
         // New & Updated Providers, Resources
@@ -464,11 +465,11 @@ public class RegistrationMailService {
                 loggingInfoProviderMap.put(providerBundle.getId(), loggingInfoProviderList);
             }
         }
-        for (InfraService infraService : activeServices) {
+        for (ServiceBundle serviceBundle : activeServices) {
             loggingInfoServiceList = new ArrayList<>();
             boolean serviceHasLoggingChanges = false;
-            if (infraService.getLoggingInfo() != null) {
-                List<LoggingInfo> serviceLoggingInfo = infraService.getLoggingInfo();
+            if (serviceBundle.getLoggingInfo() != null) {
+                List<LoggingInfo> serviceLoggingInfo = serviceBundle.getLoggingInfo();
                 for (int i=serviceLoggingInfo.size()-1; i>=0; i--){
                     timestamp = new Timestamp(Long.parseLong(serviceLoggingInfo.get(i).getDate()));
                     if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)){
@@ -483,7 +484,7 @@ public class RegistrationMailService {
                 continue;
             }
             if (serviceHasLoggingChanges){
-                loggingInfoServiceMap.put(infraService.getId(), loggingInfoServiceList);
+                loggingInfoServiceMap.put(serviceBundle.getId(), loggingInfoServiceList);
             }
         }
 
@@ -923,16 +924,16 @@ public class RegistrationMailService {
         }
     }
 
-    public void notifyProviderAdminsForResourceAuditing(InfraService infraService) {
+    public void notifyProviderAdminsForResourceAuditing(ServiceBundle serviceBundle) {
 
-        ProviderBundle providerBundle = providerManager.get(infraService.getService().getResourceOrganisation());
+        ProviderBundle providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
 
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        root.put("infraService", infraService);
+        root.put("infraService", serviceBundle);
 
-        String subject = String.format("[%s Portal] Your Resource '%s' has been audited by the EPOT team", projectName, infraService.getService().getName());
+        String subject = String.format("[%s Portal] Your Resource '%s' has been audited by the EPOT team", projectName, serviceBundle.getService().getName());
 
         for (User user : providerBundle.getProvider().getUsers()) {
             root.put("user", user);
@@ -967,15 +968,15 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidCatalogueUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void notifyPortalAdminsForInvalidResourceUpdate(InfraService infraService) {
+    public void notifyPortalAdminsForInvalidResourceUpdate(ServiceBundle serviceBundle) {
 
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        root.put("infraService", infraService);
+        root.put("infraService", serviceBundle);
 
         // send email to Admins
-        String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, infraService.getService().getName());
+        String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, serviceBundle.getService().getName());
         String userRole = "admin";
         sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }

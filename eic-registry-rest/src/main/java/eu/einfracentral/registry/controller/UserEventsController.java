@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -26,14 +26,14 @@ import java.util.Map;
 public class UserEventsController {
 
     private EventService eventService;
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
 
     @Autowired
-    UserEventsController(EventService eventService, InfraServiceService<InfraService, InfraService> infraServiceService) {
+    UserEventsController(EventService eventService, InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService) {
         this.eventService = eventService;
         this.infraServiceService = infraServiceService;
     }
@@ -55,8 +55,8 @@ public class UserEventsController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<String> serviceIds = new ArrayList<>();
-        for (InfraService infraService : infraServiceService.getAll(ff, auth).getResults()) {
-            serviceIds.add(infraService.getService().getId());
+        for (ServiceBundle serviceBundle : infraServiceService.getAll(ff, auth).getResults()) {
+            serviceIds.add(serviceBundle.getService().getId());
         }
 
         for (Event userEvent : userEvents) {
@@ -66,7 +66,7 @@ public class UserEventsController {
         }
         for (Map.Entry<String, Float> favouriteService : favouriteServices.entrySet()) {
             if (favouriteService.getValue() == 1) { // "1" is true
-                services.add(infraServiceService.getRichService(favouriteService.getKey(), "latest", catalogueName, auth));
+                services.add(infraServiceService.getRichService(favouriteService.getKey(), catalogueName, auth));
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -88,7 +88,7 @@ public class UserEventsController {
             serviceRatings.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
-            services.add(infraServiceService.getRichService(serviceRating.getKey(), "latest", catalogueName, auth));
+            services.add(infraServiceService.getRichService(serviceRating.getKey(), catalogueName, auth));
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

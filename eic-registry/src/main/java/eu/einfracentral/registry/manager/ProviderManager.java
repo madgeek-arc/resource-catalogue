@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
@@ -43,7 +44,7 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientifi
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -64,7 +65,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private String catalogueName;
 
     @Autowired
-    public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
+    public ProviderManager(@Lazy InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
                            @Lazy SecurityService securityService,
                            @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService,
@@ -357,7 +358,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void delete(ProviderBundle provider) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<InfraService> services = infraServiceService.getInfraServices(provider.getId(), authentication);
+        List<ServiceBundle> services = infraServiceService.getInfraServices(provider.getId(), authentication);
         services.forEach(s -> {
             try {
                 infraServiceService.delete(s);
@@ -567,9 +568,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = infraServiceService.getInfraServices(providerId, auth);
         logger.info("Activating all Resources of the Provider with id: {}", providerId);
-        for (InfraService service : services) {
+        for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
             if (service.getLoggingInfo() != null){
@@ -601,9 +602,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = infraServiceService.getInfraServices(providerId, auth);
         logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
-        for (InfraService service : services) {
+        for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
             if (service.getLoggingInfo() != null){

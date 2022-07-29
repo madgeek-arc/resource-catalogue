@@ -39,7 +39,7 @@ public class ServiceProviderRegistrationIT {
     ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    InfraServiceService<InfraService, InfraService> infraServiceService;
+    InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
 
     @Autowired
     VocabularyService vocabularyService;
@@ -67,7 +67,7 @@ public class ServiceProviderRegistrationIT {
     public void addUpdateAndDeleteProvider() throws ResourceNotFoundException, MalformedURLException {
         String providerId = "wp6";
         ProviderBundle provider;
-        InfraService infraService;
+        ServiceBundle serviceBundle;
 
         try {
 
@@ -78,15 +78,15 @@ public class ServiceProviderRegistrationIT {
 
             providerService.verifyProvider(providerId, "pending template submission", true, securityService.getAdminAccess());
 
-            infraService = new InfraService(createService("WP4_TestService", provider.getProvider()));
+            serviceBundle = new ServiceBundle(createService("WP4_TestService", provider.getProvider()));
 
-            infraService = infraServiceService.addService(infraService, securityService.getAdminAccess());
+            serviceBundle = infraServiceService.addService(serviceBundle, securityService.getAdminAccess());
 
-            assert infraService != null;
+            assert serviceBundle != null;
 
             providerService.verifyProvider(providerId, "rejected template", false, securityService.getAdminAccess());
 
-            infraServiceService.updateService(infraService, "woof", securityService.getAdminAccess());
+            infraServiceService.updateService(serviceBundle, "woof", securityService.getAdminAccess());
 
             providerService.verifyProvider(providerId, "approved", true, securityService.getAdminAccess());
             providerService.verifyProvider(providerId, "approved", false, securityService.getAdminAccess());

@@ -1,7 +1,7 @@
 Dear ${project} Portal Onboarding Team,
 
-The Resource [${infraService.service.name}] previously marked as [invalid] during an auditing process has been updated with comment:
-"${infraService.latestUpdateInfo.comment}"
+The Resource [${serviceBundle.service.name}] previously marked as [invalid] during an auditing process has been updated with comment:
+"${serviceBundle.latestUpdateInfo.comment}"
 
 Best Regards,
 the ${project} Team

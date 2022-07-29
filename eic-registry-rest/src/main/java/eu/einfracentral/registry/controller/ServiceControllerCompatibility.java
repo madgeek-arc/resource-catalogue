@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 public class ServiceControllerCompatibility extends ServiceController {
 
     @Autowired
-    ServiceControllerCompatibility(InfraServiceService<InfraService, InfraService> service,
+    ServiceControllerCompatibility(InfraServiceService<ServiceBundle, ServiceBundle> service,
                                    ProviderService<ProviderBundle, Authentication> provider,
                                    DataSource dataSource) {
         super(service, provider, dataSource);

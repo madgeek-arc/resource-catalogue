@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.CatalogueBundle;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -52,20 +52,20 @@ public class ProviderManagementAspect {
 
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, org.springframework.security.core.Authentication)) )",
-            returning = "infraService")
-    public void updateProviderState(InfraService infraService) {
+            "|| execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) )",
+            returning = "serviceBundle")
+    public void updateProviderState(ServiceBundle serviceBundle) {
         logger.trace("Updating Provider States");
-        updateServiceProviderStates(infraService);
+        updateServiceProviderStates(serviceBundle);
     }
 
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.addService(eu.einfracentral.domain.InfraService, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.InfraService, org.springframework.security.core.Authentication)) )" +
-            "&& args(infraService, auth)", argNames = "infraService,auth")
-    public void updateProviderState(InfraService infraService, Authentication auth) {
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.addService(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) " +
+            "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) )" +
+            "&& args(serviceBundle, auth)", argNames = "serviceBundle,auth")
+    public void updateProviderState(ServiceBundle serviceBundle, Authentication auth) {
         logger.trace("Updating Provider States");
-        updateServiceProviderStates(infraService);
+        updateServiceProviderStates(serviceBundle);
     }
 
 
@@ -97,9 +97,9 @@ public class ProviderManagementAspect {
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, " +
             "String, Boolean, org.springframework.security.core.Authentication)))",
-            returning = "infraService")
-    public void providerRegistrationEmails(InfraService infraService) {
-        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation());
+            returning = "serviceBundle")
+    public void providerRegistrationEmails(ServiceBundle serviceBundle) {
+        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
         logger.trace("Sending Registration emails");
         registrationMailService.sendProviderMails(providerBundle);
     }
@@ -138,9 +138,9 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager." +
             "verifyResource(String, String, Boolean, org.springframework.security.core.Authentication))))",
-            returning = "infraService")
-    public void updatePublicProviderTemplateStatus(InfraService infraService) {
-        ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation());
+            returning = "serviceBundle")
+    public void updatePublicProviderTemplateStatus(ServiceBundle serviceBundle) {
+        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
         try{
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         } catch (ResourceException | ResourceNotFoundException e){
@@ -160,44 +160,44 @@ public class ProviderManagementAspect {
 
     @Async
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager." +
-            "addService(eu.einfracentral.domain.InfraService, String, org.springframework.security.core.Authentication)))" +
+            "addService(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, String, Boolean, " +
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.addService(String, " +
             "org.springframework.security.core.Authentication))))", // pendingToInfra method
-            returning = "infraService")
-    public void addResourceAsPublic(InfraService infraService) {
-        if (infraService.getStatus().equals("approved resource") && infraService.isActive() && infraService.isLatest()){
+            returning = "serviceBundle")
+    public void addResourceAsPublic(ServiceBundle serviceBundle) {
+        if (serviceBundle.getStatus().equals("approved resource") && serviceBundle.isActive()){
             try{
-                publicResourceManager.get(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
+                publicResourceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e){
-                publicResourceManager.add(infraService, null);
+                publicResourceManager.add(serviceBundle, null);
             }
         }
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.InfraService, String, String, org.springframework.security.core.Authentication)))" +
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.updateService(eu.einfracentral.domain.ServiceBundle, String, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.verifyResource(String, String, Boolean, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InfraServiceManager.auditResource(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
-            returning = "infraService")
-    public void updatePublicResource(InfraService infraService) {
+            returning = "serviceBundle")
+    public void updatePublicResource(ServiceBundle serviceBundle) {
         try{
-            publicResourceManager.get(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
-            publicResourceManager.update(infraService, null);
+            publicResourceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+            publicResourceManager.update(serviceBundle, null);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.InfraServiceManager.delete(eu.einfracentral.domain.InfraService)))")
+    @After("execution(* eu.einfracentral.registry.manager.InfraServiceManager.delete(eu.einfracentral.domain.ServiceBundle)))")
     public void deletePublicResource(JoinPoint joinPoint) {
-        InfraService infraService = (InfraService) joinPoint.getArgs()[0];
-        publicResourceManager.delete(infraService);
+        ServiceBundle serviceBundle = (ServiceBundle) joinPoint.getArgs()[0];
+        publicResourceManager.delete(serviceBundle);
     }
 
     //TODO: Probably no needed
@@ -206,17 +206,17 @@ public class ProviderManagementAspect {
      * 'Provider.States.ST_SUBMISSION' or 'Provider.States.REJECTED_ST'
      * to status 'Provider.States.PENDING_2'
      *
-     * @param infraService
+     * @param serviceBundle
      */
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void updateServiceProviderStates(InfraService infraService) {
+    public void updateServiceProviderStates(ServiceBundle serviceBundle) {
         try {
-            ProviderBundle providerBundle = providerService.get(infraService.getService().getResourceOrganisation(), (Authentication) null);
+            ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), (Authentication) null);
             if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        infraService.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                infraServiceService.verifyResource(infraService.getService().getId(), "pending resource", false, securityService.getAdminAccess());
+                        serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
+                infraServiceService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
             }
         } catch (RuntimeException e) {
             logger.error(e);

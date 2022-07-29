@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiers;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicResourceManager")
-public class PublicResourceManager extends ResourceManager<InfraService> implements ResourceCRUDService<InfraService, Authentication> {
+public class PublicResourceManager extends ResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicResourceManager.class);
     private final JmsTemplate jmsTopicTemplate;
@@ -30,7 +30,7 @@ public class PublicResourceManager extends ResourceManager<InfraService> impleme
 
     @Autowired
     public PublicResourceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
-        super(InfraService.class);
+        super(ServiceBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
     }
@@ -41,46 +41,46 @@ public class PublicResourceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    public Browsing<InfraService> getAll(FacetFilter facetFilter, Authentication authentication) {
+    public Browsing<ServiceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
         return super.getAll(facetFilter, authentication);
     }
 
     @Override
-    public Browsing<InfraService> getMy(FacetFilter facetFilter, Authentication authentication) {
+    public Browsing<ServiceBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
         if (authentication == null) {
             throw new UnauthorizedUserException("Please log in.");
         }
 
-        List<InfraService> infraServiceList = new ArrayList<>();
-        Browsing<InfraService> infraServiceBrowsing = super.getAll(facetFilter, authentication);
-        for (InfraService infraService : infraServiceBrowsing.getResults()) {
-            if (securityService.isServiceProviderAdmin(authentication, infraService.getId()) && infraService.getMetadata().isPublished()) {
-                infraServiceList.add(infraService);
+        List<ServiceBundle> serviceBundleList = new ArrayList<>();
+        Browsing<ServiceBundle> infraServiceBrowsing = super.getAll(facetFilter, authentication);
+        for (ServiceBundle serviceBundle : infraServiceBrowsing.getResults()) {
+            if (securityService.isServiceProviderAdmin(authentication, serviceBundle.getId()) && serviceBundle.getMetadata().isPublished()) {
+                serviceBundleList.add(serviceBundle);
             }
         }
         return new Browsing<>(infraServiceBrowsing.getTotal(), infraServiceBrowsing.getFrom(),
-                infraServiceBrowsing.getTo(), infraServiceList, infraServiceBrowsing.getFacets());
+                infraServiceBrowsing.getTo(), serviceBundleList, infraServiceBrowsing.getFacets());
     }
 
     @Override
-    public InfraService add(InfraService infraService, Authentication authentication) {
-        String lowerLevelResourceId = infraService.getId();
-        infraService.setIdentifiers(Identifiers.createIdentifier(infraService.getId()));
-        infraService.setId(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
-        infraService.getMetadata().setPublished(true);
-        InfraService ret;
-        logger.info(String.format("Resource [%s] is being published with id [%s]", lowerLevelResourceId, infraService.getId()));
-        ret = super.add(infraService, null);
-        jmsTopicTemplate.convertAndSend("public_resource.create", infraService);
+    public ServiceBundle add(ServiceBundle serviceBundle, Authentication authentication) {
+        String lowerLevelResourceId = serviceBundle.getId();
+        serviceBundle.setIdentifiers(Identifiers.createIdentifier(serviceBundle.getId()));
+        serviceBundle.setId(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+        serviceBundle.getMetadata().setPublished(true);
+        ServiceBundle ret;
+        logger.info(String.format("Resource [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
+        ret = super.add(serviceBundle, null);
+        jmsTopicTemplate.convertAndSend("public_resource.create", serviceBundle);
         return ret;
     }
 
     @Override
-    public InfraService update(InfraService infraService, Authentication authentication) {
-        InfraService published = super.get(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
-        InfraService ret = super.get(String.format("%s.%s", infraService.getService().getCatalogueId(), infraService.getId()));
+    public ServiceBundle update(ServiceBundle serviceBundle, Authentication authentication) {
+        ServiceBundle published = super.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+        ServiceBundle ret = super.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
         try {
-            BeanUtils.copyProperties(ret, infraService);
+            BeanUtils.copyProperties(ret, serviceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
@@ -94,12 +94,12 @@ public class PublicResourceManager extends ResourceManager<InfraService> impleme
     }
 
     @Override
-    public void delete(InfraService infraService) {
+    public void delete(ServiceBundle serviceBundle) {
         try{
-            InfraService publicInfraService = get(String.format("%s.%s",infraService.getService().getCatalogueId(), infraService.getId()));
-            logger.info(String.format("Deleting public Resource with id [%s]", publicInfraService.getId()));
-            super.delete(publicInfraService);
-            jmsTopicTemplate.convertAndSend("public_resource.delete", publicInfraService);
+            ServiceBundle publicServiceBundle = get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+            logger.info(String.format("Deleting public Resource with id [%s]", publicServiceBundle.getId()));
+            super.delete(publicServiceBundle);
+            jmsTopicTemplate.convertAndSend("public_resource.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }

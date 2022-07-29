@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -219,13 +220,13 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, auth).getResults();
-        List<InfraService> allResources = infraServiceService.getAll(facetFilter, auth).getResults();
+        List<ServiceBundle> allResources = infraServiceService.getAll(facetFilter, auth).getResults();
         List<String> providerIds = new ArrayList<>();
         List<String> resourceIds = new ArrayList<>();
         for (ProviderBundle provider : allProviders){
             providerIds.add(provider.getId());
         }
-        for (InfraService resource : allResources){
+        for (ServiceBundle resource : allResources){
             resourceIds.add(resource.getId());
         }
         String providerId = vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId();

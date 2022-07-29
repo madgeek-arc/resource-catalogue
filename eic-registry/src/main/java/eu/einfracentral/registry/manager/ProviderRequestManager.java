@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.EmailMessage;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -31,7 +31,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
     private final MailService mailService;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final SecurityService securityService;
     private final Configuration cfg;
@@ -41,7 +41,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
 
     @Autowired
     public ProviderRequestManager(MailService mailService, Configuration cfg,
-                                  InfraServiceService<InfraService, InfraService> infraServiceService,
+                                  InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
                                   ProviderService<ProviderBundle, Authentication> providerService,
                                   SecurityService securityService) {
         super(ProviderRequest.class);
@@ -96,7 +96,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
         Map<String, String> providerContactNames = new LinkedHashMap<>();
         List<String> serviceNames = new ArrayList<>();
         for (String serviceId : serviceIds) {
-            InfraService service = infraServiceService.get(serviceId);
+            ServiceBundle service = infraServiceService.get(serviceId);
             serviceNames.add(service.getService().getName());
             List<String> providerIds = service.getService().getResourceProviders();
             providerIds.add(service.getService().getResourceOrganisation());

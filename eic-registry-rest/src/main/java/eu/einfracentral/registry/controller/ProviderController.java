@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -38,7 +39,7 @@ public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
     private final ProviderService<ProviderBundle, Authentication> providerManager;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
     private final MigrationService migrationService;
 
     @Value("${project.catalogue.name}")
@@ -49,7 +50,7 @@ public class ProviderController {
 
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
-                       InfraServiceService<InfraService, InfraService> infraServiceService,
+                       InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
                        MigrationService migrationService) {
         this.providerManager = service;
         this.infraServiceService = infraServiceService;
@@ -73,12 +74,12 @@ public class ProviderController {
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
         // delete all Provider's services
-        List<InfraService> allProviderServices = infraServiceService.getInfraServices(id, auth);
-        for (InfraService infraService : allProviderServices){
+        List<ServiceBundle> allProviderServices = infraServiceService.getInfraServices(id, auth);
+        for (ServiceBundle serviceBundle : allProviderServices){
             try {
-                infraServiceService.delete(infraService);
+                infraServiceService.delete(serviceBundle);
             } catch (ResourceNotFoundException e){
-                logger.info(String.format("Resource %s does not exist", infraService));
+                logger.info(String.format("Resource %s does not exist", serviceBundle));
             }
         }
 
@@ -258,7 +259,7 @@ public class ProviderController {
         return new ResponseEntity<>(infraServiceService.getServices(id, auth), HttpStatus.OK);
     }
 
-    // Get a featured InfraService offered by a Provider. // TODO enable in a future release
+    // Get a featured ServiceBundle offered by a Provider. // TODO enable in a future release
     @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
         return new ResponseEntity<>(infraServiceService.getFeaturedService(id), HttpStatus.OK);
@@ -300,7 +301,7 @@ public class ProviderController {
     // Get the pending services of the given Provider.
     @GetMapping(path = "services/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        List<Service> ret = infraServiceService.getInactiveServices(id).stream().map(InfraService::getService).collect(Collectors.toList());
+        List<Service> ret = infraServiceService.getInactiveServices(id).stream().map(ServiceBundle::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
@@ -313,8 +314,8 @@ public class ProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "services/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<InfraService>> getRejectedServices(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                    @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<ServiceBundle>> getRejectedServices(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                     @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("status", "rejected resource");
@@ -354,8 +355,8 @@ public class ProviderController {
     // Publish all Provider services.
     @PatchMapping(path = "publishServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<List<InfraService>> publishServices(@RequestParam String id, @RequestParam Boolean active,
-                                                              @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<List<ServiceBundle>> publishServices(@RequestParam String id, @RequestParam Boolean active,
+                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle provider = providerManager.get(catalogueName, id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
@@ -364,11 +365,10 @@ public class ProviderController {
         ff.setQuantity(1000);
         ff.addFilter("resource_organisation", id);
         ff.addFilter("catalogue_id", catalogueName);
-        List<InfraService> services = infraServiceService.getAll(ff, auth).getResults();
-        for (InfraService service : services) {
+        List<ServiceBundle> services = infraServiceService.getAll(ff, auth).getResults();
+        for (ServiceBundle service : services) {
             service.setActive(active);
 //            service.setStatus(status.getKey());
-            service.setLatest(active);
             Metadata metadata = service.getMetadata();
             metadata.setModifiedBy("system");
             metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));

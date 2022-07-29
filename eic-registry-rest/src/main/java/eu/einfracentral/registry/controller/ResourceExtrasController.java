@@ -1,8 +1,8 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.EOSCIFGuidelines;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.InfraServiceExtras;
+import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.domain.ResourceExtras;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -39,26 +39,26 @@ public class ResourceExtrasController {
     @Autowired
     private JmsTemplate jmsTopicTemplate;
 
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
 
     @Autowired
-    private final ResourceService<InfraService, Authentication> publicResourceManager;
+    private final ResourceService<ServiceBundle, Authentication> publicResourceManager;
 
-    public ResourceExtrasController(InfraServiceService<InfraService, InfraService> infraServiceService,
-                                    @Qualifier("publicResourceManager") ResourceService<InfraService, Authentication> publicResourceManager) {
+    public ResourceExtrasController(InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+                                    @Qualifier("publicResourceManager") ResourceService<ServiceBundle, Authentication> publicResourceManager) {
         this.infraServiceService = infraServiceService;
         this.publicResourceManager = publicResourceManager;
     }
 
     @ApiOperation(value = "Add a new EOSC Interoperability Framework Guideline on a specific Resource")
     @PutMapping(path = "/add/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InfraService> addEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                           @RequestParam String pid, @RequestParam String label,
-                                                           @RequestParam URL url, @RequestParam String semanticRelationship,
-                                                           @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(serviceId, catalogueId);
+    public ResponseEntity<ServiceBundle> addEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                            @RequestParam String pid, @RequestParam String label,
+                                                            @RequestParam URL url, @RequestParam String semanticRelationship,
+                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
         // check PID uniqueness
-        List<EOSCIFGuidelines> existingEoscIFGuidelines = infraService.getResourceExtras().getEoscIFGuidelines();
+        List<EOSCIFGuidelines> existingEoscIFGuidelines = serviceBundle.getResourceExtras().getEoscIFGuidelines();
         for (EOSCIFGuidelines guideline : existingEoscIFGuidelines){
             if (guideline.getPid().equals(pid)){
                 throw new ValidationException(String.format("There is already an EOSC IF Guideline with the same PID " +
@@ -66,81 +66,81 @@ public class ResourceExtrasController {
             }
         }
         EOSCIFGuidelines eoscIFGuideline = new EOSCIFGuidelines(pid, label, url, semanticRelationship);
-        blockUpdateIfResourceIsPublished(infraService);
-        InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
+        blockUpdateIfResourceIsPublished(serviceBundle);
+        ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         List<EOSCIFGuidelines> newEoscIFGuidenlines = new ArrayList<>();
-        if (infraServiceExtras == null){
-            InfraServiceExtras newInfraServiceExtras = new InfraServiceExtras();
+        if (resourceExtras == null){
+            ResourceExtras newResourceExtras = new ResourceExtras();
             newEoscIFGuidenlines.add(eoscIFGuideline);
-            newInfraServiceExtras.setEoscIFGuidelines(newEoscIFGuidenlines);
-            infraService.setResourceExtras(newInfraServiceExtras);
+            newResourceExtras.setEoscIFGuidelines(newEoscIFGuidenlines);
+            serviceBundle.setResourceExtras(newResourceExtras);
         } else{
-            List<EOSCIFGuidelines> oldEoscIFGuidenlines = infraServiceExtras.getEoscIFGuidelines();
+            List<EOSCIFGuidelines> oldEoscIFGuidenlines = resourceExtras.getEoscIFGuidelines();
             if (oldEoscIFGuidenlines == null || oldEoscIFGuidenlines.isEmpty()){
                 newEoscIFGuidenlines.add(eoscIFGuideline);
-                infraService.getResourceExtras().setEoscIFGuidelines(newEoscIFGuidenlines);
+                serviceBundle.getResourceExtras().setEoscIFGuidelines(newEoscIFGuidenlines);
             } else{
                 oldEoscIFGuidenlines.add(eoscIFGuideline);
-                infraService.getResourceExtras().setEoscIFGuidelines(oldEoscIFGuidenlines);
+                serviceBundle.getResourceExtras().setEoscIFGuidelines(oldEoscIFGuidenlines);
             }
         }
-        infraServiceService.validate(infraService);
-        infraServiceService.update(infraService, auth);
+        infraServiceService.validate(serviceBundle);
+        infraServiceService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] added a new eoscIFGuideline on the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, eoscIFGuideline));
-        publicResourceManager.update(infraService, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", infraService);
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        publicResourceManager.update(serviceBundle, auth);
+        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Add a new Research Category on a specific Resource")
     @PutMapping(path = "/add/researchCategory", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InfraService> addResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                            @RequestParam String researchCategory,
-                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(infraService);
-        InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
+    public ResponseEntity<ServiceBundle> addResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                             @RequestParam String researchCategory,
+                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        blockUpdateIfResourceIsPublished(serviceBundle);
+        ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         List<String> newResearchCategories = new ArrayList<>();
-        if (infraServiceExtras == null){
-            InfraServiceExtras newInfraServiceExtras = new InfraServiceExtras();
+        if (resourceExtras == null){
+            ResourceExtras newResourceExtras = new ResourceExtras();
             newResearchCategories.add(researchCategory);
-            newInfraServiceExtras.setResearchCategories(newResearchCategories);
-            infraService.setResourceExtras(newInfraServiceExtras);
+            newResourceExtras.setResearchCategories(newResearchCategories);
+            serviceBundle.setResourceExtras(newResourceExtras);
         } else{
-            List<String> oldResearchCategories = infraServiceExtras.getResearchCategories();
+            List<String> oldResearchCategories = resourceExtras.getResearchCategories();
             if (oldResearchCategories == null || oldResearchCategories.isEmpty()){
                 newResearchCategories.add(researchCategory);
-                infraService.getResourceExtras().setResearchCategories(newResearchCategories);
+                serviceBundle.getResourceExtras().setResearchCategories(newResearchCategories);
             } else{
                 oldResearchCategories.add(researchCategory);
-                infraService.getResourceExtras().setResearchCategories(oldResearchCategories);
+                serviceBundle.getResourceExtras().setResearchCategories(oldResearchCategories);
             }
         }
-        infraServiceService.validate(infraService);
-        infraServiceService.update(infraService, auth);
+        infraServiceService.validate(serviceBundle);
+        infraServiceService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] added a new researchCategory on the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategory));
-        publicResourceManager.update(infraService, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", infraService);
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        publicResourceManager.update(serviceBundle, auth);
+        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Update a specific Resource's EOSC Interoperability Framework Guidelines given its ID")
     @PutMapping(path = "/update/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InfraService> updateEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                              @RequestBody String pid, @RequestParam(required = false) String label,
-                                                              @RequestParam(required = false) URL url,
-                                                              @RequestParam(required = false) String semanticRelationship,
-                                                              @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(infraService);
-        InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
+    public ResponseEntity<ServiceBundle> updateEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                               @RequestBody String pid, @RequestParam(required = false) String label,
+                                                               @RequestParam(required = false) URL url,
+                                                               @RequestParam(required = false) String semanticRelationship,
+                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        blockUpdateIfResourceIsPublished(serviceBundle);
+        ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         boolean found = false;
-        if (infraServiceExtras == null){
+        if (resourceExtras == null){
             throw new ValidationException(String.format("Resource with id [%s] has no Resource Extras.", serviceId));
         } else{
-            List<EOSCIFGuidelines> eoscIFGuidenlines = infraServiceExtras.getEoscIFGuidelines();
+            List<EOSCIFGuidelines> eoscIFGuidenlines = resourceExtras.getEoscIFGuidelines();
             if (eoscIFGuidenlines == null || eoscIFGuidenlines.isEmpty()){
                 throw new ValidationException(String.format("Resource with id [%s] has no EOSC IF Guidelines.", serviceId));
             } else{
@@ -161,123 +161,123 @@ public class ResourceExtrasController {
                 if (!found){
                     throw new ValidationException(String.format("Resource with id [%s] has no EOSC IF Guideline with PID [%s]", serviceId, pid));
                 }
-                infraService.getResourceExtras().setEoscIFGuidelines(eoscIFGuidenlines);
+                serviceBundle.getResourceExtras().setEoscIFGuidelines(eoscIFGuidenlines);
             }
         }
-        infraServiceService.validate(infraService);
-        infraServiceService.update(infraService, auth);
+        infraServiceService.validate(serviceBundle);
+        infraServiceService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] updated field eoscIFGuideline of the Resource [%s] with PID [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, pid));
-        publicResourceManager.update(infraService, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", infraService);
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        publicResourceManager.update(serviceBundle, auth);
+        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Update a specific Resource's Research Categories field")
     @PutMapping(path = "/update/researchCategories", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InfraService> updateResearchCategories(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                                 @RequestBody List<String> researchCategories,
-                                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(infraService);
-        InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
+    public ResponseEntity<ServiceBundle> updateResearchCategories(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                                  @RequestBody List<String> researchCategories,
+                                                                  @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        blockUpdateIfResourceIsPublished(serviceBundle);
+        ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
         List<String> newResearchCategories = new ArrayList<>();
-        if (infraServiceExtras == null){
-            InfraServiceExtras newInfraServiceExtras = new InfraServiceExtras();
+        if (resourceExtras == null){
+            ResourceExtras newResourceExtras = new ResourceExtras();
             newResearchCategories.addAll(researchCategories);
-            newInfraServiceExtras.setResearchCategories(newResearchCategories);
-            infraService.setResourceExtras(newInfraServiceExtras);
+            newResourceExtras.setResearchCategories(newResearchCategories);
+            serviceBundle.setResourceExtras(newResourceExtras);
         } else{
-            List<String> oldResearchCategories = infraServiceExtras.getResearchCategories();
+            List<String> oldResearchCategories = resourceExtras.getResearchCategories();
             if (oldResearchCategories == null || oldResearchCategories.isEmpty()){
                 newResearchCategories.addAll(researchCategories);
-                infraService.getResourceExtras().setResearchCategories(newResearchCategories);
+                serviceBundle.getResourceExtras().setResearchCategories(newResearchCategories);
             } else{
                 oldResearchCategories.addAll(researchCategories);
-                infraService.getResourceExtras().setResearchCategories(oldResearchCategories);
+                serviceBundle.getResourceExtras().setResearchCategories(oldResearchCategories);
             }
         }
-        infraServiceService.validate(infraService);
-        infraServiceService.update(infraService, auth);
+        infraServiceService.validate(serviceBundle);
+        infraServiceService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] updated field researchCategories of the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategories));
-        publicResourceManager.update(infraService, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", infraService);
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        publicResourceManager.update(serviceBundle, auth);
+        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Update Service's Horizontal Service field")
     @PutMapping(path = "/update/horizontalService", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InfraService> updateHorizontalService(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                                @RequestParam boolean horizontalService,
-                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(infraService);
-        InfraServiceExtras infraServiceExtras = infraService.getResourceExtras();
-        if (infraServiceExtras == null){
-            InfraServiceExtras newInfraServiceExtras = new InfraServiceExtras();
-            newInfraServiceExtras.setHorizontalService(horizontalService);
-            infraService.setResourceExtras(newInfraServiceExtras);
+    public ResponseEntity<ServiceBundle> updateHorizontalService(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                                 @RequestParam boolean horizontalService,
+                                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        blockUpdateIfResourceIsPublished(serviceBundle);
+        ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
+        if (resourceExtras == null){
+            ResourceExtras newResourceExtras = new ResourceExtras();
+            newResourceExtras.setHorizontalService(horizontalService);
+            serviceBundle.setResourceExtras(newResourceExtras);
         } else{
-            infraServiceExtras.setHorizontalService(horizontalService);
+            resourceExtras.setHorizontalService(horizontalService);
         }
-        infraServiceService.validate(infraService);
-        infraServiceService.update(infraService, auth);
+        infraServiceService.validate(serviceBundle);
+        infraServiceService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] updated the field horizontalService of the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, horizontalService));
-        publicResourceManager.update(infraService, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", infraService);
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        publicResourceManager.update(serviceBundle, auth);
+        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes an existing Interoperability Framework Guideline of a specific Resource")
     @PutMapping(path = "/delete/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InfraService> deleteEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
+    public ResponseEntity<ServiceBundle> deleteEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                                @RequestParam String pid,
                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(infraService);
-        List<EOSCIFGuidelines> existingEOSCIFGuidelines = infraService.getResourceExtras().getEoscIFGuidelines();
+        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        blockUpdateIfResourceIsPublished(serviceBundle);
+        List<EOSCIFGuidelines> existingEOSCIFGuidelines = serviceBundle.getResourceExtras().getEoscIFGuidelines();
         if (existingEOSCIFGuidelines != null && !existingEOSCIFGuidelines.isEmpty()){
             existingEOSCIFGuidelines.removeIf(existingEOSCIFGuideline -> existingEOSCIFGuideline.getPid().equals(pid));
-            infraService.getResourceExtras().setEoscIFGuidelines(existingEOSCIFGuidelines);
+            serviceBundle.getResourceExtras().setEoscIFGuidelines(existingEOSCIFGuidelines);
         } else{
             throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
         }
-        infraServiceService.validate(infraService);
-        infraServiceService.update(infraService, auth);
+        infraServiceService.validate(serviceBundle);
+        infraServiceService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] deleted the researchCategory of the Resource [%s] with pid [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, pid));
-        publicResourceManager.update(infraService, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", infraService);
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        publicResourceManager.update(serviceBundle, auth);
+        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes an existing Research Category of a specific Resource")
     @PutMapping(path = "/delete/researchCategory", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InfraService> deleteResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                            @RequestParam String researchCategory,
-                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(infraService);
-        List<String> existingResourceCategories = infraService.getResourceExtras().getResearchCategories();
+    public ResponseEntity<ServiceBundle> deleteResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                                @RequestParam String researchCategory,
+                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = infraServiceService.get(serviceId, catalogueId);
+        blockUpdateIfResourceIsPublished(serviceBundle);
+        List<String> existingResourceCategories = serviceBundle.getResourceExtras().getResearchCategories();
         if (existingResourceCategories != null && !existingResourceCategories.isEmpty()){
             existingResourceCategories.removeIf(existingResourceCategory -> existingResourceCategory.equals(researchCategory));
-            infraService.getResourceExtras().setResearchCategories(existingResourceCategories);
+            serviceBundle.getResourceExtras().setResearchCategories(existingResourceCategories);
         } else{
             throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
         }
-        infraServiceService.validate(infraService);
-        infraServiceService.update(infraService, auth);
+        infraServiceService.validate(serviceBundle);
+        infraServiceService.update(serviceBundle, auth);
         logger.info(String.format("User [%s]-[%s] deleted the researchCategory of the Resource [%s] with value [%s]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategory));
-        publicResourceManager.update(infraService, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", infraService);
-        return new ResponseEntity<>(infraService, HttpStatus.OK);
+        publicResourceManager.update(serviceBundle, auth);
+        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
-    private void blockUpdateIfResourceIsPublished(InfraService infraService){
-        if (infraService.getMetadata().isPublished()){
+    private void blockUpdateIfResourceIsPublished(ServiceBundle serviceBundle){
+        if (serviceBundle.getMetadata().isPublished()){
             throw new AccessDeniedException("You cannot directly update a Public Resource.");
         }
     }

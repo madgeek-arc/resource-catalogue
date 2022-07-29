@@ -1,6 +1,6 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.registry.service.InfraServiceService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -24,7 +24,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("infraService")
@@ -32,39 +31,36 @@ import java.util.Optional;
 public class InfraServiceController {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
-    private final InfraServiceService<InfraService, InfraService> infraService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraService;
 
     @Autowired
-    InfraServiceController(InfraServiceService<InfraService, InfraService> service) {
+    InfraServiceController(InfraServiceService<ServiceBundle, ServiceBundle> service) {
         this.infraService = service;
     }
 
-    @DeleteMapping(path = {"{id}", "{id}/{version}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> delete(@PathVariable("id") String id, @PathVariable Optional<String> version,
-                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                               @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        InfraService service;
-        if (version.isPresent())
-            service = infraService.get(id, catalogueId, version.get());
-        else
-            service = infraService.get(id, catalogueId);
+    public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
+                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        ServiceBundle service;
+        service = infraService.get(id, catalogueId);
         if (service == null) {
-            return new ResponseEntity<>(HttpStatus.GONE);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         infraService.delete(service);
-        logger.info("User '{}' deleted InfraService '{}' with id: '{}' of the Catalogue: '{}'", authentication, service.getService().getName(),
+        logger.info("User '{}' deleted ServiceBundle '{}' with id: '{}' of the Catalogue: '{}'", authentication, service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.GONE);
     }
 
     @DeleteMapping(path = "delete/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<ServiceBundle> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<InfraService> services = infraService.getAll(ff, null).getResults();
-        for (InfraService service : services) {
+        List<ServiceBundle> services = infraService.getAll(ff, null).getResults();
+        for (ServiceBundle service : services) {
             logger.info("Deleting service with name: {}", service.getService().getName());
             infraService.delete(service);
         }
@@ -73,43 +69,33 @@ public class InfraServiceController {
 
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    public ResponseEntity<InfraService> get(@PathVariable("id") String id,
-                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                            @ApiIgnore Authentication auth) {
+    public ResponseEntity<ServiceBundle> get(@PathVariable("id") String id,
+                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                             @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id, catalogueId), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
-    public ResponseEntity<InfraService> get(@PathVariable("id") String id,
-                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                            @PathVariable("version") String version,
-                                            Authentication auth) {
-        InfraService ret = infraService.get(id, catalogueId, version);
-        return new ResponseEntity<>(ret, ret != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> add(@RequestBody InfraService service, Authentication authentication) {
-        ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' added InfraService '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
+    public ResponseEntity<ServiceBundle> add(@RequestBody ServiceBundle service, Authentication authentication) {
+        ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(infraService.add(service, authentication), HttpStatus.OK);
+        logger.info("User '{}' added ServiceBundle '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
         logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
         return ret;
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> update(@RequestBody InfraService service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        ResponseEntity<InfraService> ret = new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated InfraService '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
+    public ResponseEntity<ServiceBundle> update(@RequestBody ServiceBundle service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(infraService.update(service, authentication), HttpStatus.OK);
+        logger.info("User '{}' updated ServiceBundle '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
         return ret;
     }
 
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody InfraService service, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Boolean> validate(@RequestBody ServiceBundle service, @ApiIgnore Authentication auth) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(infraService.validate(service));
-        logger.info("Validating InfraService: {}", service.getService().getName());
+        logger.info("Validating ServiceBundle: {}", service.getService().getName());
         return ret;
     }
 
@@ -122,33 +108,32 @@ public class InfraServiceController {
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InfraService>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Paging<ServiceBundle>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         return ResponseEntity.ok(infraService.getAll(ff, authentication));
     }
 
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Map<String, List<InfraService>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
+    public ResponseEntity<Map<String, List<ServiceBundle>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(infraService.getBy(field, auth));
     }
 
     @PatchMapping(path = "publish/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InfraService> setActive(@PathVariable String id, @PathVariable String version,
-                                                  @RequestParam boolean active, @RequestParam Boolean latest,
-                                                  @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService service = infraService.get(id, version);
+    public ResponseEntity<ServiceBundle> setActive(@PathVariable String id, @PathVariable String version,
+                                                   @RequestParam boolean active,
+                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle service = infraService.get(id, version);
         service.setActive(active);
-        service.setLatest(latest);
         Metadata metadata = service.getMetadata();
         metadata.setModifiedBy("system");
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
         service.setMetadata(metadata);
         if (active) {
-            logger.info("User '{}' set InfraService '{}' with id: {} as active", auth.getName(), service.getService().getName(), service.getService().getId());
+            logger.info("User '{}' set ServiceBundle '{}' with id: {} as active", auth.getName(), service.getService().getName(), service.getService().getId());
         } else {
-            logger.info("User '{}' set InfraService '{}' with id: {} as inactive", auth.getName(), service.getService().getName(), service.getService().getId());
+            logger.info("User '{}' set ServiceBundle '{}' with id: {} as inactive", auth.getName(), service.getService().getName(), service.getService().getId());
         }
         return ResponseEntity.ok(infraService.update(service, auth));
     }

@@ -1,6 +1,6 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.User;
 import org.springframework.security.core.Authentication;
 
@@ -36,23 +36,21 @@ public interface SecurityService {
 
     boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService);
+    boolean isServiceProviderAdmin(Authentication auth, ServiceBundle serviceBundle);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow);
+    boolean isServiceProviderAdmin(Authentication auth, ServiceBundle serviceBundle, boolean noThrow);
 
     boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service);
 
-    boolean userIsServiceProviderAdmin(User user, InfraService infraService);
+    boolean userIsServiceProviderAdmin(User user, ServiceBundle serviceBundle);
 
     boolean userIsServiceProviderAdmin(User user, String serviceId);
 
     boolean userIsServiceProviderAdmin(User user, String serviceId, String catalogueId);
 
-    boolean providerCanAddServices(Authentication auth, InfraService service);
+    boolean providerCanAddServices(Authentication auth, ServiceBundle service);
 
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId);
 
     boolean serviceIsActive(String serviceId);
-
-    boolean serviceIsActive(String serviceId, String version);
 }

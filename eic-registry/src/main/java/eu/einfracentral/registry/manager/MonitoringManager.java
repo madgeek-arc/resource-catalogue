@@ -28,12 +28,12 @@ import java.util.UUID;
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
-    public MonitoringManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+    public MonitoringManager(InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
                              JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService) {
         super(MonitoringBundle.class);

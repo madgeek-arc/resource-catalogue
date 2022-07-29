@@ -1,6 +1,7 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -30,8 +31,8 @@ public class OIDCSecurityService implements SecurityService {
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final PendingResourceService<InfraService> pendingServiceManager;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
+    private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private OIDCAuthenticationToken adminAccess;
 
     @Value("${project.name:}")
@@ -42,8 +43,8 @@ public class OIDCSecurityService implements SecurityService {
 
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
-                        InfraServiceService<InfraService, InfraService> infraServiceService,
-                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
+                        InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
+                        PendingProviderManager pendingProviderManager, PendingResourceService<ServiceBundle> pendingServiceManager) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.infraServiceService = infraServiceService;
@@ -237,16 +238,16 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService) {
+    public boolean isServiceProviderAdmin(Authentication auth, ServiceBundle serviceBundle) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, infraService);
+        return userIsServiceProviderAdmin(user, serviceBundle);
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow) {
+    public boolean isServiceProviderAdmin(Authentication auth, ServiceBundle serviceBundle, boolean noThrow) {
         if (auth == null && noThrow) {
             return false;
         }
@@ -254,7 +255,7 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, infraService);
+        return userIsServiceProviderAdmin(user, serviceBundle);
     }
 
     @Override
@@ -274,13 +275,13 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean userIsServiceProviderAdmin(User user, InfraService infraService) {
-        return userIsServiceProviderAdmin(user, infraService.getService());
+    public boolean userIsServiceProviderAdmin(User user, ServiceBundle serviceBundle) {
+        return userIsServiceProviderAdmin(user, serviceBundle.getService());
     }
 
     @Override
     public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId) {
-        InfraService service;
+        ServiceBundle service;
         try {
             service = infraServiceService.get(serviceId);
         } catch (ResourceException | ResourceNotFoundException e) {
@@ -308,7 +309,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId, String catalogueId) {
-        InfraService service;
+        ServiceBundle service;
         try {
             service = infraServiceService.get(serviceId, catalogueId);
         } catch (ResourceException | ResourceNotFoundException e) {
@@ -337,8 +338,8 @@ public class OIDCSecurityService implements SecurityService {
         return providerCanAddServices(auth, infraServiceService.get(serviceId));
     }
 
-    public boolean providerCanAddServices(Authentication auth, InfraService infraService) {
-        return providerCanAddServices(auth, infraService.getService());
+    public boolean providerCanAddServices(Authentication auth, ServiceBundle serviceBundle) {
+        return providerCanAddServices(auth, serviceBundle.getService());
     }
 
     public boolean providerCanAddServices(Authentication auth, eu.einfracentral.domain.Service service) {
@@ -367,7 +368,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
+        ServiceBundle service = infraServiceService.get(serviceId);
 //        List<String> providerIds = service.getService().getResourceProviders();
 //        providerIds.add(service.getService().getResourceOrganisation());
         List<String> providerIds = Collections.singletonList(service.getService().getResourceOrganisation());
@@ -383,22 +384,12 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean serviceIsActive(String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
+        ServiceBundle service = infraServiceService.get(serviceId);
         return service.isActive();
     }
 
     public boolean serviceIsActive(String serviceId, String catalogueId) {
-        InfraService service = infraServiceService.get(serviceId, catalogueId);
-        return service.isActive();
-    }
-
-    public boolean serviceIsActive(String serviceId, String catalogueId, String version) {
-        // FIXME: serviceId is equal to 'rich' and version holds the service ID
-        //  when searching for a Rich Service without providing a version
-        if ("rich".equals(serviceId)) {
-            serviceId = version;
-        }
-        InfraService service = infraServiceService.get(serviceId, catalogueId, "latest");
+        ServiceBundle service = infraServiceService.get(serviceId, catalogueId);
         return service.isActive();
     }
 }

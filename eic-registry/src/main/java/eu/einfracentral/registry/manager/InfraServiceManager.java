@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -38,7 +39,7 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateCategorie
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("infraServiceService")
-public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<InfraService, InfraService> {
+public class InfraServiceManager extends AbstractServiceManager implements InfraServiceService<ServiceBundle, ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
 
@@ -62,7 +63,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                                @Lazy RegistrationMailService registrationMailService,
                                @Lazy VocabularyService vocabularyService,
                                CatalogueService<CatalogueBundle, Authentication> catalogueService) {
-        super(InfraService.class);
+        super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.randomNumberGenerator = randomNumberGenerator;
         this.idCreator = idCreator;
@@ -79,48 +80,47 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService addService(InfraService infraService, Authentication auth) {
-        return addService(infraService, null, auth);
+    public ServiceBundle addService(ServiceBundle serviceBundle, Authentication auth) {
+        return addService(serviceBundle, null, auth);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService addService(InfraService infraService, String catalogueId, Authentication auth) {
+    public ServiceBundle addService(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null) { // add catalogue provider
-            infraService.getService().setCatalogueId(catalogueName);
+            serviceBundle.getService().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
-            checkCatalogueIdConsistency(infraService, catalogueId);
+            checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
 
-        ProviderBundle providerBundle = providerService.get(infraService.getService().getCatalogueId(), infraService.getService().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", infraService.getService().getResourceOrganisation(), infraService.getService().getCatalogueId()));
+            throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
         }
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")){
             throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
-                    infraService.getService().getResourceOrganisation()));
+                    serviceBundle.getService().getResourceOrganisation()));
         }
 
         // create ID if not exists
-        if ((infraService.getService().getId() == null) || ("".equals(infraService.getService().getId()))) {
-            String id = idCreator.createServiceId(infraService.getService());
-            infraService.getService().setId(id);
+        if ((serviceBundle.getService().getId() == null) || ("".equals(serviceBundle.getService().getId()))) {
+            String id = idCreator.createServiceId(serviceBundle.getService());
+            serviceBundle.getService().setId(id);
         }
-        validate(infraService);
+        validate(serviceBundle);
 
         boolean active = providerBundle
                 .getTemplateStatus()
                 .equals("approved template");
-        infraService.setActive(active);
-        infraService.setLatest(true);
+        serviceBundle.setActive(active);
 
         // create new Metadata if not exists
-        if (infraService.getMetadata() == null) {
-            infraService.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+        if (serviceBundle.getMetadata() == null) {
+            serviceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -129,67 +129,67 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         loggingInfoList.add(loggingInfo);
 
         // latestOnboardingInfo
-        infraService.setLatestOnboardingInfo(loggingInfo);
+        serviceBundle.setLatestOnboardingInfo(loggingInfo);
 
-        sortFields(infraService);
+        sortFields(serviceBundle);
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")){
-            infraService.setStatus(vocabularyService.get("approved resource").getId());
+            serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
 
             // latestOnboardingInfo
-            infraService.setLatestOnboardingInfo(loggingInfoApproved);
+            serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);
         } else{
-            infraService.setStatus(vocabularyService.get("pending resource").getId());
+            serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
         }
 
         // LoggingInfo
-        infraService.setLoggingInfo(loggingInfoList);
+        serviceBundle.setLoggingInfo(loggingInfoList);
 
-        logger.info("Adding Service: {}", infraService);
-        InfraService ret;
-        ret = super.add(infraService, auth);
+        logger.info("Adding Service: {}", serviceBundle);
+        ServiceBundle ret;
+        ret = super.add(serviceBundle, auth);
 
         return ret;
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService updateService(InfraService infraService, String comment, Authentication auth) {
-        return updateService(infraService, infraService.getService().getCatalogueId(), comment, auth);
+    public ServiceBundle updateService(ServiceBundle serviceBundle, String comment, Authentication auth) {
+        return updateService(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #infraService)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService updateService(InfraService infraService, String catalogueId, String comment, Authentication auth) {
-        InfraService ret;
+    public ServiceBundle updateService(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
+        ServiceBundle ret;
 
         if (catalogueId == null) {
-            infraService.getService().setCatalogueId(catalogueName);
+            serviceBundle.getService().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(infraService, catalogueId);
+            checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
 
-        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, infraService.getService().getId(), infraService.getService().getCatalogueId());
-        validate(infraService);
-        ProviderBundle providerBundle = providerService.get(infraService.getService().getCatalogueId(), infraService.getService().getResourceOrganisation(), auth);
-        InfraService existingService;
+        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
+        validate(serviceBundle);
+        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        ServiceBundle existingService;
 
         // if service version is empty set it null
-        if ("".equals(infraService.getService().getVersion())) {
-            infraService.getService().setVersion(null);
+        if ("".equals(serviceBundle.getService().getVersion())) {
+            serviceBundle.getService().setVersion(null);
         }
 
         try { // try to find a service with the same id and version
-            existingService = get(infraService.getService().getId(), infraService.getService().getCatalogueId(), infraService.getService().getVersion());
+            existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         } catch (ResourceNotFoundException e) {
-            // if a service with version = infraService.getVersion() does not exist, get the latest service
-            existingService = get(infraService.getService().getId(), infraService.getService().getCatalogueId());
+            // if a service with version = serviceBundle.getVersion() does not exist, get the latest service
+            existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         }
         if ("".equals(existingService.getService().getVersion())) {
             existingService.getService().setVersion(null);
@@ -198,13 +198,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         User user = User.of(auth);
 
         // update existing service serviceMetadata
-        infraService.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
+        serviceBundle.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
         // update VS version update
-        if (((infraService.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
-                (infraService.getService().getVersion().equals(existingService.getService().getVersion()))){
+        if (((serviceBundle.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
+                (serviceBundle.getService().getVersion().equals(existingService.getService().getVersion()))){
             loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED.getKey(), comment);
             if (existingService.getLoggingInfo() != null){
@@ -219,80 +219,58 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
             loggingInfoList.add(loggingInfo);
         }
-        infraService.setLoggingInfo(loggingInfoList);
+        serviceBundle.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
-        infraService.setLatestUpdateInfo(loggingInfo);
-        infraService.setActive(existingService.isActive());
-        sortFields(infraService);
+        serviceBundle.setLatestUpdateInfo(loggingInfo);
+        serviceBundle.setActive(existingService.isActive());
+        sortFields(serviceBundle);
 
         // set status
-        infraService.setStatus(existingService.getStatus());
+        serviceBundle.setStatus(existingService.getStatus());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())){
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())){
-                infraService.setStatus(vocabularyService.get("pending resource").getId());
-                infraService.setActive(false);
+                serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
+                serviceBundle.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(providerBundle, infraService.getService().getCatalogueId(), auth);
+                providerService.update(providerBundle, serviceBundle.getService().getCatalogueId(), auth);
             }
         }
 
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
-        if (existingService.getService().getVersion() != null && infraService.getService().getVersion() == null) {
+        if (existingService.getService().getVersion() != null && serviceBundle.getService().getVersion() == null) {
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")){
-            if (!existingService.getService().getCatalogueId().equals(infraService.getService().getCatalogueId())){
+            if (!existingService.getService().getCatalogueId().equals(serviceBundle.getService().getCatalogueId())){
                 throw new ValidationException("You cannot change catalogueId");
             }
         }
 
-        if ((infraService.getService().getVersion() == null && existingService.getService().getVersion() == null)
-                || infraService.getService().getVersion() != null
-                && infraService.getService().getVersion().equals(existingService.getService().getVersion())) {
-            infraService.setLatest(existingService.isLatest());
-//            infraService.setStatus(existingService.getStatus());
-            ret = super.update(infraService, auth);
-            logger.info("Updating Service without version change: {}", infraService);
-            logger.info("Service Version: {}", infraService.getService().getVersion());
-
-        } else {
-            // create new service and AFTERWARDS update the previous one (in case the new service cannot be created)
-//                infraService.setStatus(); // TODO: enable this when services support the Status field
-
-            // set previous service not latest
-            existingService.setLatest(false);
-            super.update(existingService, auth);
-            logger.info("Updating Service with version change (super.update): {}", existingService);
-            logger.info("Service Version: {}", existingService.getService().getVersion());
-
-            // set new service as latest
-            infraService.setLatest(true);
-            ret = super.add(infraService, auth);
-            logger.info("Updating Service with version change (super.add): {}", infraService);
-        }
+        ret = super.update(serviceBundle, auth);
+        logger.info("Updating Service: {}", serviceBundle);
 
         // send notification emails to Portal Admins
-        if (infraService.getLatestAuditInfo() != null && infraService.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(infraService.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(infraService.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && infraService.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(infraService);
+        if (serviceBundle.getLatestAuditInfo() != null && serviceBundle.getLatestUpdateInfo() != null) {
+            Long latestAudit = Long.parseLong(serviceBundle.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(serviceBundle.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && serviceBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(serviceBundle);
             }
         }
 
         return ret;
     }
 
-    public InfraService getCatalogueService(String catalogueId, String serviceId, Authentication auth) {
-        InfraService infraService = get(serviceId, catalogueId);
+    public ServiceBundle getCatalogueService(String catalogueId, String serviceId, Authentication auth) {
+        ServiceBundle serviceBundle = get(serviceId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        if (infraService == null) {
+        if (serviceBundle == null) {
             throw new ResourceNotFoundException(
                     String.format("Could not find Service with id: %s", serviceId));
         }
@@ -300,7 +278,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             throw new ResourceNotFoundException(
                     String.format("Could not find Catalogue with id: %s", catalogueId));
         }
-        if (!infraService.getService().getCatalogueId().equals(catalogueId)){
+        if (!serviceBundle.getService().getCatalogueId().equals(catalogueId)){
             throw new ValidationException(String.format("Service with id [%s] does not belong to the catalogue with id [%s]", serviceId, catalogueId));
         }
         if (auth != null && auth.isAuthenticated()) {
@@ -309,33 +287,28 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
                     securityService.userIsServiceProviderAdmin(user, serviceId)) {
-                return infraService;
+                return serviceBundle;
             }
         }
         // else return the Service ONLY if it is active
-        if (infraService.getStatus().equals(vocabularyService.get("approved resource").getId())){
-            return infraService;
+        if (serviceBundle.getStatus().equals(vocabularyService.get("approved resource").getId())){
+            return serviceBundle;
         }
         throw new ValidationException("You cannot view the specific Service");
     }
 
     @Override
-    public InfraService get(String id, String catalogueId, String version) {
-        Resource resource = getResource(id, catalogueId, version);
+    public ServiceBundle get(String id, String catalogueId) {
+        Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find service with id: %s, version: %s and catalogueId: %s", id, version, catalogueId));
+            throw new ResourceNotFoundException(String.format("Could not find service with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
     }
 
     @Override
-    public InfraService get(String id) {
-        return get(id, catalogueName, "latest");
-    }
-
-    @Override
-    public InfraService get(String id, String catalogueId) {
-        return get(id, catalogueId, "latest");
+    public ServiceBundle get(String id) {
+        return get(id, catalogueName);
     }
 
     public Resource getResource(String serviceId, String catalogueId, String serviceVersion) {
@@ -367,13 +340,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    public void delete(InfraService infraService) {
-        logger.info("Deleting Service: {}", infraService);
-        super.delete(infraService);
+    public void delete(ServiceBundle serviceBundle) {
+        logger.info("Deleting Service: {}", serviceBundle);
+        super.delete(serviceBundle);
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService verifyResource(String id, String status, Boolean active, Authentication auth) {
+    public ServiceBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
@@ -381,25 +354,25 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         String[] parts = id.split("\\.");
         String providerId = parts[0];
-        InfraService infraService = null;
-        List<InfraService> infraServices = getInfraServices(providerId, auth);
-        for (InfraService service : infraServices){
+        ServiceBundle serviceBundle = null;
+        List<ServiceBundle> serviceBundles = getInfraServices(providerId, auth);
+        for (ServiceBundle service : serviceBundles){
             if (service.getService().getId().equals(id)){
-                infraService = service;
+                serviceBundle = service;
             }
         }
-        if (infraService == null){
+        if (serviceBundle == null){
             throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
         }
-        infraService.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerService.get(infraService.getService().getResourceOrganisation());
+        serviceBundle.setStatus(vocabularyService.get(status).getId());
+        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getResourceOrganisation());
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
         User user = User.of(auth);
 
-        if (infraService.getLoggingInfo() != null) {
-            loggingInfoList = infraService.getLoggingInfo();
+        if (serviceBundle.getLoggingInfo() != null) {
+            loggingInfoList = serviceBundle.getLoggingInfo();
         } else {
             LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
@@ -411,29 +384,29 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                 resourceProvider.setTemplateStatus("pending template");
                 break;
             case "approved resource":
-                infraService.setActive(active);
+                serviceBundle.setActive(active);
                 loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                         LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                infraService.setLoggingInfo(loggingInfoList);
+                serviceBundle.setLoggingInfo(loggingInfoList);
 
                 // latestOnboardingInfo
-                infraService.setLatestOnboardingInfo(loggingInfo);
+                serviceBundle.setLatestOnboardingInfo(loggingInfo);
 
                 // update Provider's templateStatus
                 resourceProvider.setTemplateStatus("approved template");
                 break;
             case "rejected resource":
-                infraService.setActive(false);
+                serviceBundle.setActive(false);
                 loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                         LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                infraService.setLoggingInfo(loggingInfoList);
+                serviceBundle.setLoggingInfo(loggingInfoList);
 
                 // latestOnboardingInfo
-                infraService.setLatestOnboardingInfo(loggingInfo);
+                serviceBundle.setLatestOnboardingInfo(loggingInfo);
 
                 // update Provider's templateStatus
                 resourceProvider.setTemplateStatus("rejected template");
@@ -441,17 +414,17 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             default:
                 break;
         }
-        logger.info("Verifying Resource: {}", infraService);
+        logger.info("Verifying Resource: {}", serviceBundle);
         try {
             providerService.update(resourceProvider, auth);
         } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
-        return super.update(infraService, auth);
+        return super.update(serviceBundle, auth);
     }
 
     @Override
-    public Paging<InfraService> getInactiveServices() {
+    public Paging<ServiceBundle> getInactiveServices() {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
         ff.setFrom(0);
@@ -481,31 +454,31 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    public boolean validate(InfraService infraService) {
-        Service service = infraService.getService();
+    public boolean validate(ServiceBundle serviceBundle) {
+        Service service = serviceBundle.getService();
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         logger.debug("Validating Service with id: {}", service.getId());
 
         try {
-            fieldValidator.validate(infraService);
+            fieldValidator.validate(serviceBundle);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
 
-        validateCategories(infraService.getService().getCategories());
-        validateScientificDomains(infraService.getService().getScientificDomains());
+        validateCategories(serviceBundle.getService().getCategories());
+        validateScientificDomains(serviceBundle.getService().getScientificDomains());
 
         return true;
     }
 
     @Override
-    public InfraService publish(String serviceId, String version, boolean active, Authentication auth) {
-        InfraService service;
+    public ServiceBundle publish(String serviceId, String version, boolean active, Authentication auth) {
+        ServiceBundle service;
         String activeProvider = "";
         if (version == null || "".equals(version)) {
             service = this.get(serviceId, catalogueName);
         } else {
-            service = this.get(serviceId, catalogueName, version);
+            service = this.get(serviceId, catalogueName);
         }
 
         if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
@@ -552,8 +525,8 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return service;
     }
 
-    public InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        InfraService service = get(serviceId, catalogueName);
+    public ServiceBundle auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        ServiceBundle service = get(serviceId, catalogueName);
         User user = User.of(auth);
         LoggingInfo loggingInfo; // TODO: extract method
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -579,25 +552,21 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         return super.update(service, auth);
     }
 
-    public Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
+    public Paging<ServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
         facetFilter.addFilter("active", true);
         facetFilter.addFilter("latest", true);
-        List<InfraService> serviceList = getAll(facetFilter, auth).getResults();
-        facetFilter.setQuantity(1000);
-        facetFilter.addFilter("active", true);
-        facetFilter.addFilter("latest", true);
-        Browsing<InfraService> serviceBrowsing = getAll(facetFilter, auth);
-        Browsing<InfraService> ret = serviceBrowsing;
+        Browsing<ServiceBundle> serviceBrowsing = getAll(facetFilter, auth);
+        Browsing<ServiceBundle> ret = serviceBrowsing;
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (InfraService infraService : serviceList) {
-            if (infraService.getLatestAuditInfo() != null) {
-                if (Long.parseLong(infraService.getLatestAuditInfo().getDate()) > interval) {
+        for (ServiceBundle serviceBundle : serviceBrowsing.getResults()) {
+            if (serviceBundle.getLatestAuditInfo() != null) {
+                if (Long.parseLong(serviceBundle.getLatestAuditInfo().getDate()) > interval) {
                     int index = 0;
                     for (int i=0; i<serviceBrowsing.getResults().size(); i++){
-                        if (serviceBrowsing.getResults().get(i).getService().getId().equals(infraService.getService().getId())){
+                        if (serviceBrowsing.getResults().get(i).getService().getId().equals(serviceBundle.getService().getId())){
                             index = i;
                             break;
                         }
@@ -617,7 +586,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    public List<InfraService> getInfraServices(String providerId, Authentication auth) {
+    public List<ServiceBundle> getInfraServices(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
@@ -627,7 +596,7 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
     }
 
     @Override
-    public Paging<InfraService> getInfraServices(String catalogueId, String providerId, Authentication auth) {
+    public Paging<ServiceBundle> getInfraServices(String catalogueId, String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
@@ -642,7 +611,6 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         if (auth != null && auth.isAuthenticated()) {
@@ -650,12 +618,12 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
                     securityService.userIsProviderAdmin(user, providerId)) {
-                return this.getAll(ff, auth).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+                return this.getAll(ff, auth).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
             }
         }
         // else return Provider's Services ONLY if he is active
         if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
-            return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+            return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
         }
         throw new ValidationException("You cannot view the Resources of the specific Provider");
     }
@@ -668,19 +636,19 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+        return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
     }
 
     // Different that the one called on migration methods!
     @Override
-    public InfraService getServiceTemplate(String providerId, Authentication auth) {
+    public ServiceBundle getServiceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        List<InfraService> allProviderServices = getAll(ff, auth).getResults();
-        for (InfraService infraService : allProviderServices){
-            if (infraService.getStatus().equals(vocabularyService.get("pending resource").getId())){
-                return infraService;
+        List<ServiceBundle> allProviderServices = getAll(ff, auth).getResults();
+        for (ServiceBundle serviceBundle : allProviderServices){
+            if (serviceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())){
+                return serviceBundle;
             }
         }
         return null;
@@ -695,11 +663,11 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults().stream().map(InfraService::getService).collect(Collectors.toList());
+        return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
     }
 
     @Override
-    public List<InfraService> getInactiveServices(String providerId) {
+    public List<ServiceBundle> getInactiveServices(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
@@ -724,14 +692,14 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
 
 //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        InfraService infraService = new InfraService();
+        ServiceBundle serviceBundle = new ServiceBundle();
         try{
-            infraService = get(id, catalogueId);
-            List<Resource> allResources = getResourcesWithServiceId(infraService.getService().getId(), infraService.getService().getCatalogueId()); // get all versions of a specific Service
+            serviceBundle = get(id, catalogueId);
+            List<Resource> allResources = getResources(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()); // get all versions of a specific Service
             allResources.sort(Comparator.comparing((Resource::getCreationDate)));
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
             for (Resource resource : allResources){
-                InfraService service = deserialize(resource);
+                ServiceBundle service = deserialize(resource);
                 if (service.getLoggingInfo() != null){
                     loggingInfoList.addAll(service.getLoggingInfo());
                 }
@@ -751,15 +719,15 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
         registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
-    public InfraService changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
-        InfraService infraService = get(resourceId, catalogueName);
+    public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
+        ServiceBundle serviceBundle = get(resourceId, catalogueName);
         ProviderBundle newProvider = providerService.get(newProviderId);
-        ProviderBundle oldProvider =  providerService.get(infraService.getService().getResourceOrganisation());
+        ProviderBundle oldProvider =  providerService.get(serviceBundle.getService().getResourceOrganisation());
 
         User user = User.of(auth);
 
         // update loggingInfo
-        List<LoggingInfo> loggingInfoList = infraService.getLoggingInfo();
+        List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
         if (comment == null || comment == ""){
             loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
@@ -769,50 +737,50 @@ public class InfraServiceManager extends AbstractServiceManager implements Infra
                     LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
         }
         loggingInfoList.add(loggingInfo);
-        infraService.setLoggingInfo(loggingInfoList);
+        serviceBundle.setLoggingInfo(loggingInfoList);
 
         // update metadata
-        Metadata metadata = infraService.getMetadata();
+        Metadata metadata = serviceBundle.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
         metadata.setModifiedBy(user.getFullName());
         metadata.setTerms(null);
-        infraService.setMetadata(metadata);
+        serviceBundle.setMetadata(metadata);
 
         // update id
-        String initialId = infraService.getId();
+        String initialId = serviceBundle.getId();
         String[] parts = initialId.split("\\.");
         String serviceId = parts[1];
         String newResourceId = newProvider.getId()+"."+serviceId;
-        infraService.setId(newResourceId);
-        infraService.getService().setId(newResourceId);
+        serviceBundle.setId(newResourceId);
+        serviceBundle.getService().setId(newResourceId);
 
         // update ResourceOrganisation
-        infraService.getService().setResourceOrganisation(newProvider.getId());
+        serviceBundle.getService().setResourceOrganisation(newProvider.getId());
 
         // add Resource, delete the old one
-        add(infraService, auth);
+        add(serviceBundle, auth);
         delete(get(resourceId, catalogueName));
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, infraService, auth);
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 
-        return infraService;
+        return serviceBundle;
     }
 
-    private void checkCatalogueIdConsistency(InfraService infraService, String catalogueId){
+    private void checkCatalogueIdConsistency(ServiceBundle serviceBundle, String catalogueId){
         catalogueService.existsOrElseThrow(catalogueId);
-        if (infraService.getService().getCatalogueId() == null || infraService.getService().getCatalogueId().equals("")){
+        if (serviceBundle.getService().getCatalogueId() == null || serviceBundle.getService().getCatalogueId().equals("")){
             throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
         } else{
-            if (!infraService.getService().getCatalogueId().equals(catalogueId)){
+            if (!serviceBundle.getService().getCatalogueId().equals(catalogueId)){
                 throw new ValidationException("Parameter 'catalogueId' and Service's 'catalogueId' don't match");
             }
         }
     }
 
-    private void sortFields(InfraService infraService) {
-        infraService.getService().setGeographicalAvailabilities(SortUtils.sort(infraService.getService().getGeographicalAvailabilities()));
-        infraService.getService().setResourceGeographicLocations(SortUtils.sort(infraService.getService().getResourceGeographicLocations()));
+    private void sortFields(ServiceBundle serviceBundle) {
+        serviceBundle.getService().setGeographicalAvailabilities(SortUtils.sort(serviceBundle.getService().getGeographicalAvailabilities()));
+        serviceBundle.getService().setResourceGeographicLocations(SortUtils.sort(serviceBundle.getService().getResourceGeographicLocations()));
     }
 
 }

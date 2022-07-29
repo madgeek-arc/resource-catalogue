@@ -57,21 +57,12 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      */
     T updateService(T service, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
 
-    InfraService getCatalogueService(String catalogueId, String serviceId, Authentication auth);
+    ServiceBundle getCatalogueService(String catalogueId, String serviceId, Authentication auth);
 
     /**
-     * Returns the Service with the specified id and version.
-     * If the version is null, empty or "latest" the method returns the latest service.
+     * Returns the Service with the specified id.
      *
-     * @param id          of the Service.
-     * @param catalogueId
-     * @param version     of the Service.
-     * @return service.
-     */
-    R get(String id, String catalogueId, String version);
-
-    /**
-     * @param id          of the Service.
+     * @param id of the Service.
      * @param catalogueId
      * @return service.
      */
@@ -106,26 +97,25 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * Gets the specific Service with extra fields like views and ratings
      *
      * @param id
-     * @param version
      * @param catalogueId
      * @param auth
      * @return
      */
-    RichService getRichService(String id, String version, String catalogueId, Authentication auth);
+    RichService getRichService(String id, String catalogueId, Authentication auth);
 
     /**
      * Creates a RichService for the specific Service
      *
      * @return
      */
-    RichService createRichService(InfraService infraService, Authentication auth);
+    RichService createRichService(ServiceBundle serviceBundle, Authentication auth);
 
     /**
      * Creates RichServices for a list of given Services
      *
      * @return
      */
-    List<RichService> createRichServices(List<InfraService> infraServiceList, Authentication auth);
+    List<RichService> createRichServices(List<ServiceBundle> serviceBundleList, Authentication auth);
 
 
     /**
@@ -141,28 +131,29 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      *
      * @param id
      * @param catalogueId
-     * @param version
      * @return Resource
      */
-    Resource getResource(String id, String catalogueId, String version);
+    Resource getResource(String id, String catalogueId);
 
     /**
-     * Get the History of the InfraService with the specified id.
+     * Get the History of the ServiceBundle with the specified id.
      *
      * @param id
      * @param catalogueId
      * @return
      */
+    @Deprecated
     Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
-     * Get the History of a specific resource version of the InfraService with the specified id.
+     * Get the History of a specific resource version of the ServiceBundle with the specified id.
      *
      * @param resourceId
      * @param catalogueId
      * @param versionId
      * @return
      */
+    @Deprecated
     Service getVersionHistory(String resourceId, String catalogueId, String versionId);
 
     /**
@@ -196,7 +187,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auth
      * @return
      */
-    InfraService publish(String serviceId, String version, boolean active, Authentication auth);
+    ServiceBundle publish(String serviceId, String version, boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies
@@ -214,7 +205,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param filter
      * @param auth
      */
-    Browsing<InfraService> getAllForAdmin(FacetFilter filter, Authentication auth);
+    Browsing<ServiceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
      * @param serviceId
@@ -222,7 +213,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auth
      * @return
      */
-    InfraService auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    ServiceBundle auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff
@@ -230,7 +221,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auditingInterval
      * @return
      */
-    Paging<InfraService> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
+    Paging<ServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
      *
@@ -238,7 +229,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auth
      * @return
      */
-    List<InfraService> getInfraServices(String providerId, Authentication auth);
+    List<ServiceBundle> getInfraServices(String providerId, Authentication auth);
 
     /**
      *
@@ -247,17 +238,17 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auth
      * @return
      */
-    Paging<InfraService> getInfraServices(String catalogueId, String providerId, Authentication auth);
+    Paging<ServiceBundle> getInfraServices(String catalogueId, String providerId, Authentication auth);
 
     List<Service> getServices(String providerId, Authentication auth);
 
     List<Service> getActiveServices(String providerId);
 
-    InfraService getServiceTemplate(String providerId, Authentication auth);
+    ServiceBundle getServiceTemplate(String providerId, Authentication auth);
 
     Service getFeaturedService(String providerId);
 
-    List<InfraService> getInactiveServices(String providerId);
+    List<ServiceBundle> getInactiveServices(String providerId);
 
     /**
      * @param resourceId
@@ -281,7 +272,7 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param auth
      * @return
      */
-    InfraService verifyResource(String id, String status, Boolean active, Authentication auth);
+    ServiceBundle verifyResource(String id, String status, Boolean active, Authentication auth);
 
     /**
      * @param resourceId
@@ -289,6 +280,6 @@ public interface InfraServiceService<T, R> extends TransformerCRUDService<T, R, 
      * @param comment
      * @param auth
      */
-    InfraService changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+    ServiceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
 }

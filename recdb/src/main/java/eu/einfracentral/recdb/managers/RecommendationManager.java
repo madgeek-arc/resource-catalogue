@@ -1,6 +1,6 @@
 package eu.einfracentral.recdb.managers;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.RichService;
 import eu.einfracentral.recdb.services.RecommendationService;
 import eu.einfracentral.registry.service.InfraServiceService;
@@ -23,11 +23,11 @@ import java.util.List;
 public class RecommendationManager implements RecommendationService<RichService, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(RecommendationManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraService;
     private final DataSource recdbDataSource;
 
     @Autowired
-    public RecommendationManager(InfraServiceService<InfraService, InfraService> infraService,
+    public RecommendationManager(InfraServiceService<ServiceBundle, ServiceBundle> infraService,
                                  @Qualifier("recdbDataSource") DataSource recdbDataSource) {
         this.infraService = infraService;
         this.recdbDataSource = recdbDataSource;

@@ -20,19 +20,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static eu.einfracentral.config.CacheConfig.*;
-
 @org.springframework.stereotype.Service("helpdeskManager")
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements ResourceService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
     @Autowired
-    public HelpdeskManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+    public HelpdeskManager(InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService,
                            JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService) {
         super(HelpdeskBundle.class);

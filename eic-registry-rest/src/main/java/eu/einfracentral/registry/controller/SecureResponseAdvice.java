@@ -70,7 +70,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyService(t, auth);
         } else if (t instanceof Provider) {
             modifyProvider(t, auth);
-        } else if (t instanceof InfraService) {
+        } else if (t instanceof ServiceBundle) {
             modifyInfraService(t, auth);
         } else if (t instanceof ProviderBundle) {
             modifyProviderBundle(t, auth);
@@ -94,15 +94,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
     @SuppressWarnings("unchecked")
     private void modifyInfraService(T infraService, Authentication auth) {
-        modifyLoggingInfoList((T) ((InfraService) infraService).getLoggingInfo());
-        modifyLoggingInfo((T) ((InfraService) infraService).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((InfraService) infraService).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((InfraService) infraService).getLatestOnboardingInfo());
+        modifyLoggingInfoList((T) ((ServiceBundle) infraService).getLoggingInfo());
+        modifyLoggingInfo((T) ((ServiceBundle) infraService).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((ServiceBundle) infraService).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((ServiceBundle) infraService).getLatestOnboardingInfo());
 
-        if (!this.securityService.isServiceProviderAdmin(auth, ((InfraService) infraService).getService().getId(), true)) {
-            ((InfraService) infraService).getService().setMainContact(null);
-            ((InfraService) infraService).getService().setSecurityContactEmail(null);
-            ((InfraService) infraService).getMetadata().setTerms(null);
+        if (!this.securityService.isServiceProviderAdmin(auth, ((ServiceBundle) infraService).getService().getId(), true)) {
+            ((ServiceBundle) infraService).getService().setMainContact(null);
+            ((ServiceBundle) infraService).getService().setSecurityContactEmail(null);
+            ((ServiceBundle) infraService).getMetadata().setTerms(null);
         }
     }
 

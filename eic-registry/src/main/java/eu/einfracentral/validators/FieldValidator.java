@@ -2,7 +2,7 @@ package eu.einfracentral.validators;
 
 import eu.einfracentral.annotation.*;
 import eu.einfracentral.domain.Bundle;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.exception.ResourceException;
@@ -33,7 +33,7 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
@@ -43,7 +43,7 @@ public class FieldValidator {
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          InfraServiceService<InfraService, InfraService> infraServiceService) {
+                          InfraServiceService<ServiceBundle, ServiceBundle> infraServiceService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.infraServiceService = infraServiceService;
@@ -301,7 +301,7 @@ public class FieldValidator {
                                 String.format("Field '%s' should contain the ID of an existing Provider",
                                         field.getName()));
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
-                            || InfraService.class.equals(annotation.idClass()))
+                            || ServiceBundle.class.equals(annotation.idClass()))
                             && infraServiceService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
