@@ -7,7 +7,7 @@ import eu.einfracentral.domain.Service;
 import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.dto.PlaceCount;
 import eu.einfracentral.dto.Value;
-import eu.einfracentral.registry.manager.InfraServiceManager;
+import eu.einfracentral.registry.manager.ServiceBundleManager;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
@@ -65,7 +65,7 @@ public class StatisticsManager implements StatisticsService {
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final SearchService searchService;
     private final ParserService parserService;
-    private final InfraServiceManager infraServiceManager;
+    private final ServiceBundleManager infraServiceManager;
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
 
@@ -79,7 +79,7 @@ public class StatisticsManager implements StatisticsService {
     StatisticsManager(RestHighLevelClient client, AnalyticsService analyticsService,
                       ProviderService<ProviderBundle, Authentication> providerService,
                       SearchService searchService, ParserService parserService,
-                      InfraServiceManager infraServiceManager, VocabularyService vocabularyService,
+                      ServiceBundleManager infraServiceManager, VocabularyService vocabularyService,
                       DataSource dataSource) {
         this.client = client;
         this.analyticsService = analyticsService;

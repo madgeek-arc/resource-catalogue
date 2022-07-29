@@ -13,7 +13,7 @@ import java.util.Objects;
 public class RichService {
 
     private Service service;
-    private DataSource dataSourceBundle;
+    private Datasource datasourceBundle;
     private Metadata metadata;
 
     private List<String> languageAvailabilityNames;
@@ -48,13 +48,18 @@ public class RichService {
         this.metadata = metadata;
     }
 
+    public RichService(ResourceBundle<?> resource) {
+        this.service = resource.getPayload(); // copy constructor is needed to 'hide' infraService fields
+        this.metadata = resource.getMetadata();
+    }
+
     public RichService(ServiceBundle service) {
         this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = service.getMetadata();
     }
 
-    public RichService(DataSourceBundle dataSourceBundle) {
-        this.dataSourceBundle = dataSourceBundle.getDataSource(); // copy constructor is needed to 'hide' infraService fields
+    public RichService(DatasourceBundle dataSourceBundle) {
+        this.datasourceBundle = dataSourceBundle.getDataSource(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = dataSourceBundle.getMetadata();
     }
 

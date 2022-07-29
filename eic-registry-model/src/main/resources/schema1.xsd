@@ -11,9 +11,9 @@
     
   <xs:element name="catalogueBundle" type="tns:catalogueBundle"/>
     
-  <xs:element name="dataSource" type="tns:dataSource"/>
+  <xs:element name="datasource" type="tns:datasource"/>
     
-  <xs:element name="dataSourceBundle" type="tns:dataSourceBundle"/>
+  <xs:element name="datasourceBundle" type="tns:datasourceBundle"/>
     
   <xs:element name="emailMessage" type="tns:emailMessage"/>
     
@@ -628,7 +628,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
       
   </xs:complexType>
     
-  <xs:complexType name="dataSource">
+  <xs:complexType name="datasource">
         
     <xs:complexContent>
             
@@ -636,7 +636,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
                 
         <xs:sequence>
                     
-          <xs:element name="dataSourceClassification" type="xs:string">
+          <xs:element name="datasourceClassification" type="xs:string">
             <xs:annotation>
               <xs:documentation><![CDATA[The specific type of the data source based on the vocabulary defined for this property]]></xs:documentation>
             </xs:annotation>
@@ -1551,7 +1551,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       
   </xs:complexType>
     
-  <xs:complexType name="dataSourceBundle">
+  <xs:complexType name="datasourceBundle">
         
     <xs:complexContent>
             
@@ -1559,7 +1559,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
                 
         <xs:sequence>
                     
-          <xs:element minOccurs="0" ref="tns:dataSource"/>
+          <xs:element minOccurs="0" ref="tns:datasource"/>
                   
         </xs:sequence>
               

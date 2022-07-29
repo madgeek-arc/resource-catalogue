@@ -29,7 +29,7 @@ public interface DataSourceService<T, R> extends TransformerCRUDService<T, R, Au
     T updateDataSource(T dataSource, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
-     * Returns the DataSource with the specified id and version.
+     * Returns the Datasource with the specified id and version.
      * If the version is null, empty or "latest" the method returns the latest dataSource.
      *
      * @param id      of the Service.

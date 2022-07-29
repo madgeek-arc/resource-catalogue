@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import com.google.gson.Gson;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class DataSource extends Service implements Identifiable{
+public class Datasource extends Service implements Identifiable{
 
     // Data Source Policies
     /**
@@ -71,7 +72,7 @@ public class DataSource extends Service implements Identifiable{
     @ApiModelProperty(position = 6, required = true)
     @FieldValidation()
     @VocabularyValidation(type = Vocabulary.Type.DS_CLASSIFICATION)
-    private String dataSourceClassification;
+    private String datasourceClassification;
 
     /**
      * The types of OpenAIRE entities managed by the data source, based on the vocabulary for this property
@@ -134,16 +135,16 @@ public class DataSource extends Service implements Identifiable{
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductMetadataAccessPolicies;
 
-    public DataSource() {
+    public Datasource() {
     }
 
-    public DataSource(URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String dataSourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
+    public Datasource(URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
         this.submissionPolicyURL = submissionPolicyURL;
         this.preservationPolicyURL = preservationPolicyURL;
         this.versionControl = versionControl;
         this.persistentIdentitySystems = persistentIdentitySystems;
         this.jurisdiction = jurisdiction;
-        this.dataSourceClassification = dataSourceClassification;
+        this.datasourceClassification = datasourceClassification;
         this.researchEntityTypes = researchEntityTypes;
         this.thematic = thematic;
         this.researchProductLicensings = researchProductLicensings;
@@ -152,14 +153,14 @@ public class DataSource extends Service implements Identifiable{
         this.researchProductMetadataAccessPolicies = researchProductMetadataAccessPolicies;
     }
 
-    public DataSource(String id, String abbreviation, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<MultimediaPair> multimedia, List<UseCasesPair> useCases, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, String catalogueId, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL resourceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing, URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String dataSourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
+    public Datasource(String id, String abbreviation, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<MultimediaPair> multimedia, List<UseCasesPair> useCases, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, XMLGregorianCalendar lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, String catalogueId, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL resourceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing, URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
         super(id, abbreviation, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, catalogueId, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, resourceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
         this.submissionPolicyURL = submissionPolicyURL;
         this.preservationPolicyURL = preservationPolicyURL;
         this.versionControl = versionControl;
         this.persistentIdentitySystems = persistentIdentitySystems;
         this.jurisdiction = jurisdiction;
-        this.dataSourceClassification = dataSourceClassification;
+        this.datasourceClassification = datasourceClassification;
         this.researchEntityTypes = researchEntityTypes;
         this.thematic = thematic;
         this.researchProductLicensings = researchProductLicensings;
@@ -170,20 +171,7 @@ public class DataSource extends Service implements Identifiable{
 
     @Override
     public String toString() {
-        return "DataSource{" +
-                "submissionPolicyURL=" + submissionPolicyURL +
-                ", preservationPolicyURL=" + preservationPolicyURL +
-                ", versionControl=" + versionControl +
-                ", persistentIdentitySystems=" + persistentIdentitySystems +
-                ", jurisdiction='" + jurisdiction + '\'' +
-                ", dataSourceClassification='" + dataSourceClassification + '\'' +
-                ", researchEntityTypes=" + researchEntityTypes +
-                ", thematic=" + thematic +
-                ", researchProductLicensings=" + researchProductLicensings +
-                ", researchProductAccessPolicies=" + researchProductAccessPolicies +
-                ", researchProductMetadataLicensing=" + researchProductMetadataLicensing +
-                ", researchProductMetadataAccessPolicies=" + researchProductMetadataAccessPolicies +
-                '}';
+        return new Gson().toJson(this);
     }
 
     public URL getSubmissionPolicyURL() {
@@ -226,12 +214,12 @@ public class DataSource extends Service implements Identifiable{
         this.jurisdiction = jurisdiction;
     }
 
-    public String getDataSourceClassification() {
-        return dataSourceClassification;
+    public String getDatasourceClassification() {
+        return datasourceClassification;
     }
 
-    public void setDataSourceClassification(String dataSourceClassification) {
-        this.dataSourceClassification = dataSourceClassification;
+    public void setDatasourceClassification(String datasourceClassification) {
+        this.datasourceClassification = datasourceClassification;
     }
 
     public List<String> getResearchEntityTypes() {

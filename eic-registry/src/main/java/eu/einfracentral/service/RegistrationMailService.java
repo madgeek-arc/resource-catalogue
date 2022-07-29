@@ -4,7 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.InfraServiceManager;
+import eu.einfracentral.registry.manager.ServiceBundleManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.PendingServiceManager;
 import eu.einfracentral.registry.manager.ProviderManager;
@@ -41,7 +41,7 @@ public class RegistrationMailService {
     private final Configuration cfg;
     private final ProviderManager providerManager;
     private final PendingProviderManager pendingProviderManager;
-    private final InfraServiceManager infraServiceManager;
+    private final ServiceBundleManager infraServiceManager;
     private final PendingServiceManager pendingServiceManager;
     private final SecurityService securityService;
 
@@ -81,7 +81,7 @@ public class RegistrationMailService {
     public RegistrationMailService(MailService mailService, Configuration cfg,
                                    ProviderManager providerManager,
                                    @Lazy PendingProviderManager pendingProviderManager,
-                                   InfraServiceManager infraServiceManager,
+                                   ServiceBundleManager infraServiceManager,
                                    PendingServiceManager pendingServiceManager,
                                    SecurityService securityService) {
         this.mailService = mailService;

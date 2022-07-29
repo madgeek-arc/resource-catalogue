@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.Category;
 import eu.einfracentral.dto.ProviderInfo;
@@ -44,18 +45,18 @@ import java.util.stream.Collectors;
 import static eu.einfracentral.config.CacheConfig.*;
 import static java.util.stream.Collectors.toList;
 
-public abstract class AbstractServiceManager extends AbstractGenericService<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
+public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>> extends AbstractGenericService<T> implements ResourceBundleService<T> {
 
-    private static final Logger logger = LogManager.getLogger(AbstractServiceManager.class);
+    private static final Logger logger = LogManager.getLogger(AbstractResourceBundleManager.class);
 
     @Autowired
     private SecurityService securityService;
 
-    public AbstractServiceManager(Class<ServiceBundle> typeParameterClass) {
+    public AbstractResourceBundleManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
     }
 
-    public AbstractServiceManager(Class<ServiceBundle> typeParameterClass, SecurityService securityService) {
+    public AbstractResourceBundleManager(Class<T> typeParameterClass, SecurityService securityService) {
         super(typeParameterClass);
         this.securityService = securityService;
     }
@@ -133,7 +134,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
     }
 
     //    @Override
-    public ServiceBundle get(String id, String catalogueId) {
+    public T get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
             throw new ResourceNotFoundException(String.format("Could not find service with id: %s and catalogueId: %s", id, catalogueId));
@@ -142,13 +143,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
     }
 
     //    @Override
-    public ServiceBundle get(String id) {
+    public T get(String id) {
         return get(id, catalogueName);
     }
 
 
     @Override
-    public Browsing<ServiceBundle> getAll(FacetFilter filter, Authentication auth) {
+    public Browsing<T> getAll(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
         if (auth == null) {
             filter.addFilter("active", true);
@@ -189,20 +190,20 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
     }
 
     @Override
-    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Browsing<T> getMy(FacetFilter filter, Authentication auth) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle add(ServiceBundle serviceBundle, Authentication auth) {
+    public T add(T serviceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Service: {}", auth, serviceBundle);
-        if (serviceBundle.getService().getId() == null) {
-            serviceBundle.getService().setId(idCreator.createServiceId(serviceBundle.getService()));
+        if (serviceBundle.getPayload().getId() == null) {
+            serviceBundle.getPayload().setId(idCreator.createServiceId(serviceBundle.getPayload()));
         }
         // if service version is empty set it null
-        if ("".equals(serviceBundle.getService().getVersion())) {
-            serviceBundle.getService().setVersion(null);
+        if ("".equals(serviceBundle.getPayload().getVersion())) {
+            serviceBundle.getPayload().setVersion(null);
         }
         if (exists(serviceBundle)) {
             throw new ResourceException("Service already exists!", HttpStatus.CONFLICT);
@@ -219,24 +220,24 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
 
         jmsTopicTemplate.convertAndSend("resource.create", serviceBundle);
 
-        synchronizerService.syncAdd(serviceBundle.getService());
+        synchronizerService.syncAdd(serviceBundle.getPayload());
 
         return serviceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
+    public T update(T serviceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Service: {}", auth, serviceBundle);
         // if service version is empty set it null
-        if ("".equals(serviceBundle.getService().getVersion())) {
-            serviceBundle.getService().setVersion(null);
+        if ("".equals(serviceBundle.getPayload().getVersion())) {
+            serviceBundle.getPayload().setVersion(null);
         }
-        Resource existing = getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
+        Resource existing = getResource(serviceBundle.getPayload().getId(), serviceBundle.getPayload().getCatalogueId());
         if (existing == null) {
             throw new ResourceNotFoundException(
                     String.format("Could not update service with id '%s' and version '%s', because it does not exist",
-                            serviceBundle.getService().getId(), serviceBundle.getService().getVersion()));
+                            serviceBundle.getPayload().getId(), serviceBundle.getPayload().getVersion()));
         }
 
         prettifyServiceTextFields(serviceBundle, ",");
@@ -246,29 +247,29 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
 
         jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
 
-        synchronizerService.syncUpdate(serviceBundle.getService());
+        synchronizerService.syncUpdate(serviceBundle.getPayload());
 
         return serviceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public void delete(ServiceBundle serviceBundle) {
+    public void delete(T serviceBundle) {
         logger.trace("User is attempting to delete the Service: {}", serviceBundle);
-        if (serviceBundle == null || serviceBundle.getService().getId() == null) {
+        if (serviceBundle == null || serviceBundle.getPayload().getId() == null) {
             throw new ServiceException("You cannot delete a null service or service with null id field");
         }
 
-        resourceService.deleteResource(getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()).getId());
+        resourceService.deleteResource(getResource(serviceBundle.getPayload().getId(), serviceBundle.getPayload().getCatalogueId()).getId());
 
         jmsTopicTemplate.convertAndSend("resource.delete", serviceBundle);
 
-        synchronizerService.syncDelete(serviceBundle.getService());
+        synchronizerService.syncDelete(serviceBundle.getPayload());
 
     }
 
     @Override
-    public Map<String, List<ServiceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
+    public Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException {
         Field serviceField = null;
         try {
             serviceField = Service.class.getDeclaredField(field);
@@ -281,13 +282,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
-        Browsing<ServiceBundle> services = getAll(ff, auth);
+        Browsing<T> services = getAll(ff, auth);
 
         final Field f = serviceField;
         final String undef = "undefined";
         return services.getResults().stream().collect(Collectors.groupingBy(service -> {
             try {
-                return f.get(service.getService()) != null ? f.get(service.getService()).toString() : undef;
+                return f.get(service.getPayload()) != null ? f.get(service.getPayload()).toString() : undef;
             } catch (IllegalAccessException | IllegalArgumentException e) {
                 logger.warn("Warning", e);
                 try {
@@ -297,7 +298,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
                 }
                 return undef;
             }
-        }, Collectors.mapping((ServiceBundle service) -> service, toList())));
+        }, Collectors.mapping((T service) -> service, toList())));
     }
 
     @Override
@@ -340,7 +341,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         // for each resource (ServiceBundle), get its versions
         if (resources != null) {
             for (Resource resource : resources) {
-                ServiceBundle service;
+                T service;
                 Resource tempResource = resource;
                 List<Version> versions = versionService.getVersionsByResource(resource.getId());
                 versions.sort((version, t1) -> {
@@ -374,7 +375,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
                         try {
                             historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ResourceHistory(service, version.getId(), false));
                         } catch (NullPointerException e) {
-                            logger.warn("ServiceBundle with id '{}' does not have Metadata", service.getService().getId());
+                            logger.warn("ServiceBundle with id '{}' does not have Metadata", service.getPayload().getId());
                         }
                     }
                 }
@@ -412,7 +413,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
                 if (version.getId().matches(versionId)) {
                     Resource tempResource = version.getResource();
                     tempResource.setPayload(version.getPayload());
-                    service = Objects.requireNonNull(deserialize(tempResource)).getService();
+                    service = Objects.requireNonNull(deserialize(tempResource)).getPayload();
                     break;
                 }
             }
@@ -422,22 +423,22 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         }
     }
 
-    String serialize(ServiceBundle serviceBundle) {
+    String serialize(T serviceBundle) {
         String serialized;
         serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.XML);
         return serialized;
     }
 
-    public ServiceBundle deserialize(Resource resource) {
+    public T deserialize(Resource resource) {
         if (resource == null) {
             logger.warn("attempt to deserialize null resource");
             return null;
         }
-        return parserPool.deserialize(resource, ServiceBundle.class);
+        return parserPool.deserialize(resource, typeParameterClass);
     }
 
-    private boolean exists(ServiceBundle serviceBundle) {
-        return getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()) != null;
+    private boolean exists(T serviceBundle) {
+        return getResource(serviceBundle.getPayload().getId(), serviceBundle.getPayload().getCatalogueId()) != null;
     }
 
     public Resource getResourceById(String resourceId) {
@@ -474,26 +475,26 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
 
     @Override
     public RichService getRichService(String id, String catalogueId, Authentication auth) {
-        ServiceBundle serviceBundle;
+        T serviceBundle;
         serviceBundle = get(id, catalogueId);
         return createRichService(serviceBundle, auth);
     }
 
     @Override
     public Browsing<RichService> getRichServices(FacetFilter ff, Authentication auth) {
-        Browsing<ServiceBundle> infraServices = getAll(ff, auth);
+        Browsing<T> infraServices = getAll(ff, auth);
         List<RichService> richServiceList = createRichServices(infraServices.getResults(), auth);
         return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(),
                 richServiceList, infraServices.getFacets());
     }
 
     @Override
-    public RichService createRichService(ServiceBundle serviceBundle, Authentication auth) {
+    public RichService createRichService(T serviceBundle, Authentication auth) {
         return createRichServices(Collections.singletonList(serviceBundle), auth).get(0);
     }
 
     @Override
-    public List<RichService> createRichServices(List<ServiceBundle> serviceBundles, Authentication auth) {
+    public List<RichService> createRichServices(List<T> serviceBundles, Authentication auth) {
         logger.trace("Creating RichServices from a list of InfraServices\nAuthentication: {}", auth);
         List<RichService> richServices = createRichVocabularies(serviceBundles);
         createRichStatistics(richServices, auth);
@@ -538,13 +539,13 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
      * @param specialCharacters
      * @return
      */
-    protected ServiceBundle prettifyServiceTextFields(ServiceBundle serviceBundle, String specialCharacters) {
-        serviceBundle.getService().setTagline(TextUtils.prettifyText(serviceBundle.getService().getTagline(), specialCharacters));
+    protected T prettifyServiceTextFields(T serviceBundle, String specialCharacters) {
+        serviceBundle.getPayload().setTagline(TextUtils.prettifyText(serviceBundle.getPayload().getTagline(), specialCharacters));
         return serviceBundle;
     }
 
-    private Browsing<ServiceBundle> getMatchingServices(FacetFilter ff) {
-        Browsing<ServiceBundle> services;
+    private Browsing<T> getMatchingServices(FacetFilter ff) {
+        Browsing<T> services;
 
         services = getResults(ff);
         if (!services.getResults().isEmpty() && !services.getFacets().isEmpty()) {
@@ -554,16 +555,16 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         return services;
     }
 
-    private List<RichService> createRichVocabularies(List<ServiceBundle> serviceBundles) {
+    private List<RichService> createRichVocabularies(List<T> serviceBundles) {
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
         List<RichService> richServices = new ArrayList<>();
 
-        for (ServiceBundle serviceBundle : serviceBundles) {
+        for (T serviceBundle : serviceBundles) {
             RichService richService = new RichService(serviceBundle);
 
             // LanguageAvailabilities Names
-            if (serviceBundle.getService().getLanguageAvailabilities() != null) {
-                richService.setLanguageAvailabilityNames(serviceBundle.getService().getLanguageAvailabilities()
+            if (serviceBundle.getPayload().getLanguageAvailabilities() != null) {
+                richService.setLanguageAvailabilityNames(serviceBundle.getPayload().getLanguageAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(l -> allVocabularies.get(l).getName())
@@ -572,8 +573,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             }
 
             // GeographicAvailabilities Names
-            if (serviceBundle.getService().getGeographicalAvailabilities() != null) {
-                richService.setGeographicAvailabilityNames(serviceBundle.getService().getGeographicalAvailabilities()
+            if (serviceBundle.getPayload().getGeographicalAvailabilities() != null) {
+                richService.setGeographicAvailabilityNames(serviceBundle.getPayload().getGeographicalAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -582,24 +583,24 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             }
 
             // TRL Name
-            if (serviceBundle.getService().getTrl() != null && !serviceBundle.getService().getTrl().equals("")) {
-                richService.setTrlName(allVocabularies.get(serviceBundle.getService().getTrl()).getName());
+            if (serviceBundle.getPayload().getTrl() != null && !serviceBundle.getPayload().getTrl().equals("")) {
+                richService.setTrlName(allVocabularies.get(serviceBundle.getPayload().getTrl()).getName());
             }
 
             // LifeCycleStatus Name
-            if (serviceBundle.getService().getLifeCycleStatus() != null && !serviceBundle.getService().getLifeCycleStatus().equals("")) {
-                richService.setLifeCycleStatusName(allVocabularies.get(serviceBundle.getService().getLifeCycleStatus()).getName());
+            if (serviceBundle.getPayload().getLifeCycleStatus() != null && !serviceBundle.getPayload().getLifeCycleStatus().equals("")) {
+                richService.setLifeCycleStatusName(allVocabularies.get(serviceBundle.getPayload().getLifeCycleStatus()).getName());
             }
 
             // OrderType Name
-            if (serviceBundle.getService().getOrderType() != null && !serviceBundle.getService().getOrderType().equals("")) {
-                richService.setOrderTypeName(allVocabularies.get(serviceBundle.getService().getOrderType()).getName());
+            if (serviceBundle.getPayload().getOrderType() != null && !serviceBundle.getPayload().getOrderType().equals("")) {
+                richService.setOrderTypeName(allVocabularies.get(serviceBundle.getPayload().getOrderType()).getName());
             }
 
             // TargetUsers Names
-            if (serviceBundle.getService().getTargetUsers() != null) {
-                serviceBundle.getService().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
-                richService.setTargetUsersNames(serviceBundle.getService().getTargetUsers()
+            if (serviceBundle.getPayload().getTargetUsers() != null) {
+                serviceBundle.getPayload().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
+                richService.setTargetUsersNames(serviceBundle.getPayload().getTargetUsers()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -608,9 +609,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             }
 
             // AccessTypes Names
-            if (serviceBundle.getService().getAccessTypes() != null) {
-                serviceBundle.getService().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
-                richService.setAccessTypeNames(serviceBundle.getService().getAccessTypes()
+            if (serviceBundle.getPayload().getAccessTypes() != null) {
+                serviceBundle.getPayload().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
+                richService.setAccessTypeNames(serviceBundle.getPayload().getAccessTypes()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -619,9 +620,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             }
 
             // AccessModes Names
-            if (serviceBundle.getService().getAccessModes() != null) {
-                serviceBundle.getService().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
-                richService.setAccessModeNames(serviceBundle.getService().getAccessModes()
+            if (serviceBundle.getPayload().getAccessModes() != null) {
+                serviceBundle.getPayload().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
+                richService.setAccessModeNames(serviceBundle.getPayload().getAccessModes()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -630,9 +631,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             }
 
             // FundingBodies Names
-            if (serviceBundle.getService().getFundingBody() != null) {
-                serviceBundle.getService().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
-                richService.setFundingBodyNames(serviceBundle.getService().getFundingBody()
+            if (serviceBundle.getPayload().getFundingBody() != null) {
+                serviceBundle.getPayload().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
+                richService.setFundingBodyNames(serviceBundle.getPayload().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -641,9 +642,9 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
             }
 
             // FundingPrograms Names
-            if (serviceBundle.getService().getFundingPrograms() != null) {
-                serviceBundle.getService().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
-                richService.setFundingProgramNames(serviceBundle.getService().getFundingPrograms()
+            if (serviceBundle.getPayload().getFundingPrograms() != null) {
+                serviceBundle.getPayload().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
+                richService.setFundingProgramNames(serviceBundle.getPayload().getFundingPrograms()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -653,8 +654,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
 
             // Domain Tree
             List<ScientificDomain> domains = new ArrayList<>();
-            if (serviceBundle.getService().getScientificDomains() != null) {
-                for (ServiceProviderDomain serviceProviderDomain : serviceBundle.getService().getScientificDomains()) {
+            if (serviceBundle.getPayload().getScientificDomains() != null) {
+                for (ServiceProviderDomain serviceProviderDomain : serviceBundle.getPayload().getScientificDomains()) {
                     ScientificDomain domain = new ScientificDomain();
                     if (serviceProviderDomain.getScientificDomain() != null && !serviceProviderDomain.getScientificDomain().equals("")) {
                         domain.setDomain(vocabularyService.get(serviceProviderDomain.getScientificDomain()));
@@ -673,8 +674,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
 
             // Category Tree
             List<Category> categories = new ArrayList<>();
-            if (serviceBundle.getService().getCategories() != null) {
-                for (ServiceCategory serviceCategory : serviceBundle.getService().getCategories()) {
+            if (serviceBundle.getPayload().getCategories() != null) {
+                for (ServiceCategory serviceCategory : serviceBundle.getPayload().getCategories()) {
                     Category category = new Category();
                     if (serviceCategory.getCategory() != null && !serviceCategory.getCategory().equals("")) {
                         String[] parts = serviceCategory.getCategory().split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
@@ -759,8 +760,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
     }
 
     @Override
-    protected Browsing<ServiceBundle> getResults(FacetFilter filter) {
-        Browsing<ServiceBundle> browsing;
+    protected Browsing<T> getResults(FacetFilter filter) {
+        Browsing<T> browsing;
         filter.setResourceType(getResourceType());
         browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
 
@@ -811,8 +812,8 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).collect(toList());
     }
 
-    private Browsing<ServiceBundle> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
-        List<ServiceBundle> results = paging.getResults()
+    private Browsing<T> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
+        List<T> results = paging.getResults()
                 .parallelStream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
@@ -859,7 +860,7 @@ public abstract class AbstractServiceManager extends AbstractGenericService<Serv
         return finalResults;
     }
 
-    public Browsing<ServiceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
+    public Browsing<T> getAllForAdmin(FacetFilter filter, Authentication auth) {
         List<String> orderedBrowseBy = new ArrayList<>();
 
         orderedBrowseBy.add("resource_organisation");   // resource_organisation

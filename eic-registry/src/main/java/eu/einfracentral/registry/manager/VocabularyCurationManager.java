@@ -46,7 +46,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private FacetLabelService facetLabelService;
 
     @Autowired
-    private AbstractServiceManager abstractServiceManager;
+    private AbstractResourceBundleManager abstractResourceBundleManager;
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;
@@ -54,12 +54,12 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
-                                     ResourceBundleService resourceBundleService, AbstractServiceManager abstractServiceManager) {
+                                     ResourceBundleService resourceBundleService, AbstractResourceBundleManager abstractResourceBundleManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.resourceBundleService = resourceBundleService;
-        this.abstractServiceManager = abstractServiceManager;
+        this.abstractResourceBundleManager = abstractResourceBundleManager;
     }
 
 
@@ -326,7 +326,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         filter.setResourceType(getResourceType());
         browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
 
-        browsing.setFacets(abstractServiceManager.createCorrectFacets(browsing.getFacets(), filter));
+        browsing.setFacets(abstractResourceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
         return browsing;
     }
 

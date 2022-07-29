@@ -20,13 +20,13 @@ public class MigrationManager implements MigrationService {
 
     private static final Logger logger = LogManager.getLogger(MigrationManager.class);
 
-    private final InfraServiceManager infraServiceManager;
+    private final ServiceBundleManager infraServiceManager;
     private final ProviderManager providerService;
     private final ResourceService resourceService;
     private final JmsTemplate jmsTopicTemplate;
 
     @Autowired
-    public MigrationManager(InfraServiceManager infraServiceManager,
+    public MigrationManager(ServiceBundleManager infraServiceManager,
                             ProviderManager providerService,
                             ResourceService resourceService,
                             JmsTemplate jmsTopicTemplate) {

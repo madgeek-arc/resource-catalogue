@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import com.google.gson.Gson;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
@@ -299,37 +300,7 @@ public class Provider implements Identifiable {
 
     @Override
     public String toString() {
-        return "Provider{" +
-                "id='" + id + '\'' +
-                ", abbreviation='" + abbreviation + '\'' +
-                ", name='" + name + '\'' +
-                ", website=" + website +
-                ", legalEntity=" + legalEntity +
-                ", legalStatus='" + legalStatus + '\'' +
-                ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
-                ", description='" + description + '\'' +
-                ", logo=" + logo +
-                ", multimedia=" + multimedia +
-                ", scientificDomains=" + scientificDomains +
-                ", tags=" + tags +
-                ", structureTypes=" + structureTypes +
-                ", location=" + location +
-                ", mainContact=" + mainContact +
-                ", publicContacts=" + publicContacts +
-                ", lifeCycleStatus='" + lifeCycleStatus + '\'' +
-                ", certifications=" + certifications +
-                ", participatingCountries=" + participatingCountries +
-                ", affiliations=" + affiliations +
-                ", networks=" + networks +
-                ", catalogueId='" + catalogueId + '\'' +
-                ", esfriDomains=" + esfriDomains +
-                ", esfriType='" + esfriType + '\'' +
-                ", merilScientificDomains=" + merilScientificDomains +
-                ", areasOfActivity=" + areasOfActivity +
-                ", societalGrandChallenges=" + societalGrandChallenges +
-                ", nationalRoadmaps=" + nationalRoadmaps +
-                ", users=" + users +
-                '}';
+        return new Gson().toJson(this);
     }
 
     @Override

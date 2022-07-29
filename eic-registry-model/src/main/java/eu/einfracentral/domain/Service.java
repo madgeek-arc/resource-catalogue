@@ -1,5 +1,6 @@
 package eu.einfracentral.domain;
 
+import com.google.gson.Gson;
 import eu.einfracentral.annotation.EmailValidation;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.GeoLocationVocValidation;
@@ -1091,4 +1092,8 @@ public class Service implements Identifiable {
         this.pricing = pricing;
     }
 
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

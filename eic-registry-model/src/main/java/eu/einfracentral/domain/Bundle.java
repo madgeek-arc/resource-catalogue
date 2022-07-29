@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.beans.Transient;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,10 +61,12 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.payload.setId(id);
     }
 
-    T getPayload() {
+    @Transient
+    public T getPayload() {
         return payload;
     }
 
+    @Transient
     void setPayload(T payload) {
         this.payload = payload;
     }

@@ -6,28 +6,28 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class DataSourceBundle extends ResourceBundle<DataSource>{
+public class DatasourceBundle extends ResourceBundle<Datasource>{
 
-    public DataSourceBundle() {
+    public DatasourceBundle() {
         // No arg constructor
     }
 
-    public DataSourceBundle(DataSource dataSource) {
+    public DatasourceBundle(Datasource dataSource) {
         this.setDataSource(dataSource);
         this.setMetadata(null);
     }
 
-    public DataSourceBundle(DataSource dataSource, Metadata metadata) {
+    public DatasourceBundle(Datasource dataSource, Metadata metadata) {
         this.setDataSource(dataSource);
         this.setMetadata(metadata);
     }
 
-    @XmlElement(name = "dataSource")
-    public DataSource getDataSource() {
+    @XmlElement(name = "datasource")
+    public Datasource getDataSource() {
         return this.getPayload();
     }
 
-    public void setDataSource(DataSource dataSource) {
+    public void setDataSource(Datasource dataSource) {
         this.setPayload(dataSource);
     }
 }

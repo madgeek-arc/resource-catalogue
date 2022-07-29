@@ -27,28 +27,15 @@ public class ResourceHistory extends Metadata {
         this.versionChange = versionChange;
     }
 
-    public ResourceHistory(ServiceBundle service, boolean versionChange) {
+    public ResourceHistory(ResourceBundle<?> service, boolean versionChange) {
         super(service.getMetadata());
-        this.version = service.getService().getVersion();
+        this.version = service.getPayload().getVersion();
         this.versionChange = versionChange;
     }
 
-    public ResourceHistory(ServiceBundle service, String coreVersionId, boolean versionChange) {
+    public ResourceHistory(ResourceBundle<?> service, String coreVersionId, boolean versionChange) {
         super(service.getMetadata());
-        this.version = service.getService().getVersion();
-        this.coreVersionId = coreVersionId;
-        this.versionChange = versionChange;
-    }
-
-    public ResourceHistory(DataSourceBundle dataSourceBundle, boolean versionChange) {
-        super(dataSourceBundle.getMetadata());
-        this.version = dataSourceBundle.getDataSource().getVersion();
-        this.versionChange = versionChange;
-    }
-
-    public ResourceHistory(DataSourceBundle dataSourceBundle, String coreVersionId, boolean versionChange) {
-        super(dataSourceBundle.getMetadata());
-        this.version = dataSourceBundle.getDataSource().getVersion();
+        this.version = service.getPayload().getVersion();
         this.coreVersionId = coreVersionId;
         this.versionChange = versionChange;
     }

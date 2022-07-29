@@ -58,7 +58,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      */
     T updateService(T service, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
 
-    ServiceBundle getCatalogueService(String catalogueId, String serviceId, Authentication auth);
+    T getCatalogueService(String catalogueId, String serviceId, Authentication auth);
 
     /**
      * Returns the Service with the specified id.
@@ -109,14 +109,14 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      *
      * @return
      */
-    RichService createRichService(ServiceBundle serviceBundle, Authentication auth);
+    RichService createRichService(T serviceBundle, Authentication auth);
 
     /**
      * Creates RichServices for a list of given Services
      *
      * @return
      */
-    List<RichService> createRichServices(List<ServiceBundle> serviceBundleList, Authentication auth);
+    List<RichService> createRichServices(List<T> serviceBundleList, Authentication auth);
 
 
     /**
@@ -137,7 +137,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Resource getResource(String id, String catalogueId);
 
     /**
-     * Get the History of the ServiceBundle with the specified id.
+     * Get the History of the ResourceBundle with the specified id.
      *
      * @param id
      * @param catalogueId
@@ -147,7 +147,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
-     * Get the History of a specific resource version of the ServiceBundle with the specified id.
+     * Get the History of a specific resource version of the ResourceBundle with the specified id.
      *
      * @param resourceId
      * @param catalogueId
@@ -188,7 +188,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    ServiceBundle publish(String serviceId, String version, boolean active, Authentication auth);
+    T publish(String serviceId, String version, boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies
@@ -206,7 +206,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param filter
      * @param auth
      */
-    Browsing<ServiceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
+    Browsing<T> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
      * @param serviceId
@@ -214,7 +214,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    ServiceBundle auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff
@@ -222,14 +222,14 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auditingInterval
      * @return
      */
-    Paging<ServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
+    Paging<T> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
      * @param providerId
      * @param auth
      * @return
      */
-    List<ServiceBundle> getInfraServices(String providerId, Authentication auth);
+    List<T> getInfraServices(String providerId, Authentication auth);
 
     /**
      * @param providerId
@@ -237,17 +237,17 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    Paging<ServiceBundle> getInfraServices(String catalogueId, String providerId, Authentication auth);
+    Paging<T> getInfraServices(String catalogueId, String providerId, Authentication auth);
 
     List<Service> getServices(String providerId, Authentication auth);
 
     List<Service> getActiveServices(String providerId);
 
-    ServiceBundle getServiceTemplate(String providerId, Authentication auth);
+    T getServiceTemplate(String providerId, Authentication auth);
 
     Service getFeaturedService(String providerId);
 
-    List<ServiceBundle> getInactiveServices(String providerId);
+    List<T> getInactiveServices(String providerId);
 
     /**
      * @param resourceId
@@ -271,7 +271,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    ServiceBundle verifyResource(String id, String status, Boolean active, Authentication auth);
+    T verifyResource(String id, String status, Boolean active, Authentication auth);
 
     /**
      * @param resourceId
@@ -279,6 +279,6 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param comment
      * @param auth
      */
-    ServiceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+    T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
 }

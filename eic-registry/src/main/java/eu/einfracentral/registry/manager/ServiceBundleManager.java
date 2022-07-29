@@ -39,9 +39,9 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateCategorie
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("infraServiceService")
-public class InfraServiceManager extends AbstractServiceManager implements ResourceBundleService<ServiceBundle> {
+public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(InfraServiceManager.class);
+    private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final Random randomNumberGenerator;
@@ -56,13 +56,13 @@ public class InfraServiceManager extends AbstractServiceManager implements Resou
     private String catalogueName;
 
     @Autowired
-    public InfraServiceManager(ProviderService<ProviderBundle, Authentication> providerService,
-                               Random randomNumberGenerator, IdCreator idCreator,
-                               @Lazy FieldValidator fieldValidator,
-                               @Lazy SecurityService securityService,
-                               @Lazy RegistrationMailService registrationMailService,
-                               @Lazy VocabularyService vocabularyService,
-                               CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+    public ServiceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
+                                Random randomNumberGenerator, IdCreator idCreator,
+                                @Lazy FieldValidator fieldValidator,
+                                @Lazy SecurityService securityService,
+                                @Lazy RegistrationMailService registrationMailService,
+                                @Lazy VocabularyService vocabularyService,
+                                CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.randomNumberGenerator = randomNumberGenerator;

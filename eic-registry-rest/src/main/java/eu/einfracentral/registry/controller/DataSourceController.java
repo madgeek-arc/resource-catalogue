@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.DataSourceBundle;
+import eu.einfracentral.domain.DatasourceBundle;
+import eu.einfracentral.domain.Datasource;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.registry.service.DataSourceService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -26,12 +27,12 @@ import javax.sql.DataSource;
 public class DataSourceController {
 
     private static final Logger logger = LogManager.getLogger(DataSourceController.class);
-    private final DataSourceService<DataSourceBundle, DataSourceBundle> dataSourceService;
+    private final DataSourceService<DatasourceBundle, DatasourceBundle> dataSourceService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource commonDataSource;
 
     @Autowired
-    DataSourceController(DataSourceService<DataSourceBundle, DataSourceBundle> service,
+    DataSourceController(DataSourceService<DatasourceBundle, DatasourceBundle> service,
                          ProviderService<ProviderBundle, Authentication> provider,
                          DataSource commonDataSource) {
         this.dataSourceService = service;
@@ -39,23 +40,23 @@ public class DataSourceController {
         this.commonDataSource = commonDataSource;
     }
 
-    @ApiOperation(value = "Creates a new DataSource.")
+    @ApiOperation(value = "Creates a new Datasource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<eu.einfracentral.domain.DataSource> addDataSource(@RequestBody eu.einfracentral.domain.DataSource dataSource, @ApiIgnore Authentication auth) {
-        DataSourceBundle ret = this.dataSourceService.addDataSource(new DataSourceBundle(dataSource), auth);
-        logger.info("User '{}' created a new DataSource with name '{}' and id '{}'", auth.getName(), dataSource.getName(), dataSource.getId());
+    public ResponseEntity<Datasource> addDataSource(@RequestBody Datasource dataSource, @ApiIgnore Authentication auth) {
+        DatasourceBundle ret = this.dataSourceService.addDataSource(new DatasourceBundle(dataSource), auth);
+        logger.info("User '{}' created a new Datasource with name '{}' and id '{}'", auth.getName(), dataSource.getName(), dataSource.getId());
         return new ResponseEntity<>(ret.getDataSource(), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the DataSource assigned the given id with the given DataSource, keeping a version of revisions.")
+    @ApiOperation(value = "Updates the Datasource assigned the given id with the given Datasource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<eu.einfracentral.domain.DataSource> updateService(@RequestBody eu.einfracentral.domain.DataSource dataSource,
-                                                                            @RequestParam(required = false) String comment,
-                                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        DataSourceBundle ret = this.dataSourceService.updateDataSource(new DataSourceBundle(dataSource), comment, auth);
-        logger.info("User '{}' updated DataSource with name '{}' and id '{}'", auth.getName(), dataSource.getName(), dataSource.getId());
+    public ResponseEntity<Datasource> updateService(@RequestBody Datasource dataSource,
+                                                    @RequestParam(required = false) String comment,
+                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        DatasourceBundle ret = this.dataSourceService.updateDataSource(new DatasourceBundle(dataSource), comment, auth);
+        logger.info("User '{}' updated Datasource with name '{}' and id '{}'", auth.getName(), dataSource.getName(), dataSource.getId());
         return new ResponseEntity<>(ret.getDataSource(), HttpStatus.OK);
     }
 
