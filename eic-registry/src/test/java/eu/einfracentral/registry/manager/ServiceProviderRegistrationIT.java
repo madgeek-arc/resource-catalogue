@@ -39,7 +39,7 @@ public class ServiceProviderRegistrationIT {
     ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    ResourceBundleService<ServiceBundle, ServiceBundle> resourceBundleService;
+    ResourceBundleService<ServiceBundle> resourceBundleService;
 
     @Autowired
     VocabularyService vocabularyService;
