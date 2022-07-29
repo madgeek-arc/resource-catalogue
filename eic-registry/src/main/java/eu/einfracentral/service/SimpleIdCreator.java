@@ -2,7 +2,6 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.exception.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -62,7 +61,7 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String createServiceId(eu.einfracentral.domain.Service service) {
+    public String createResourceId(eu.einfracentral.domain.Service service) {
         if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
             throw new ValidationException("Resource must have a Resource Organisation.");
         }

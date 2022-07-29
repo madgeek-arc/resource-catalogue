@@ -82,14 +82,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle addService(ServiceBundle serviceBundle, Authentication auth) {
-        return addService(serviceBundle, null, auth);
+    public ServiceBundle addResource(ServiceBundle serviceBundle, Authentication auth) {
+        return addResource(serviceBundle, null, auth);
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle addService(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
+    public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
@@ -108,7 +108,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // create ID if not exists
         if ((serviceBundle.getService().getId() == null) || ("".equals(serviceBundle.getService().getId()))) {
-            String id = idCreator.createServiceId(serviceBundle.getService());
+            String id = idCreator.createResourceId(serviceBundle.getService());
             serviceBundle.getService().setId(id);
         }
         validate(serviceBundle);
@@ -159,14 +159,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle updateService(ServiceBundle serviceBundle, String comment, Authentication auth) {
-        return updateService(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
+    public ServiceBundle updateResource(ServiceBundle serviceBundle, String comment, Authentication auth) {
+        return updateResource(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle updateService(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
+    public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
         ServiceBundle ret;
 
         if (catalogueId == null) {

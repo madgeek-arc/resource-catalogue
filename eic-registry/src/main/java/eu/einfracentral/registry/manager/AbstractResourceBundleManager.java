@@ -199,7 +199,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public T add(T serviceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Service: {}", auth, serviceBundle);
         if (serviceBundle.getPayload().getId() == null) {
-            serviceBundle.getPayload().setId(idCreator.createServiceId(serviceBundle.getPayload()));
+            serviceBundle.getPayload().setId(idCreator.createResourceId(serviceBundle.getPayload()));
         }
         // if service version is empty set it null
         if ("".equals(serviceBundle.getPayload().getVersion())) {

@@ -17,46 +17,46 @@ import java.util.Map;
 public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authentication> {
 
     /**
-     * Method to add a new service.
+     * Method to add a new resource.
      *
-     * @param service
+     * @param resource
      * @param auth
      * @return
      */
-    T addService(T service, Authentication auth);
+    T addResource(T resource, Authentication auth);
 
     /**
-     * Method to add a new service from external catalogue.
+     * Method to add a new resource from external catalogue.
      *
-     * @param service
+     * @param resource
      * @param catalogueId
      * @param auth
      * @return
      */
-    T addService(T service, String catalogueId, Authentication auth);
+    T addResource(T resource, String catalogueId, Authentication auth);
 
     /**
-     * Method to update a service.
+     * Method to update a resource.
      *
-     * @param service
+     * @param resource
      * @param comment
      * @param auth
      * @return
      * @throws ResourceNotFoundException
      */
-    T updateService(T service, String comment, Authentication auth) throws ResourceNotFoundException;
+    T updateResource(T resource, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
-     * Method to update a service.
+     * Method to update a resource.
      *
-     * @param service
+     * @param resource
      * @param catalogueId
      * @param comment
      * @param auth
      * @return
      * @throws ResourceNotFoundException
      */
-    T updateService(T service, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
+    T updateResource(T resource, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
 
     T getCatalogueService(String catalogueId, String serviceId, Authentication auth);
 

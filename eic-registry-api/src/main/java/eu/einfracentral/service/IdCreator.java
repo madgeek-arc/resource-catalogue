@@ -3,7 +3,6 @@ package eu.einfracentral.service;
 import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.Vocabulary;
 
 public interface IdCreator {
 
@@ -21,7 +20,7 @@ public interface IdCreator {
      * @param service
      * @return
      */
-    String createServiceId(Service service);
+    String createResourceId(Service service);
 
     /**
      * Creates id for {@link Catalogue}

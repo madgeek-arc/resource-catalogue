@@ -113,7 +113,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         ServiceBundle serviceBundle = new ServiceBundle();
         if (service.getId() == null || service.getId().equals("")) {
-            service.setId(idCreator.createServiceId(service));
+            service.setId(idCreator.createResourceId(service));
         }
         try {
             serviceBundle = pendingServiceManager.get(service.getId());
@@ -146,7 +146,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
         try { // check if service already exists
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(idCreator.createServiceId(service));
+                service.setId(idCreator.createResourceId(service));
             }
             serviceBundle = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
@@ -154,7 +154,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         }
 
         if (serviceBundle == null) { // if existing Pending Service is null, create a new Active Service
-            serviceBundle = resourceBundleService.addService(new ServiceBundle(service), auth);
+            serviceBundle = resourceBundleService.addResource(new ServiceBundle(service), auth);
             logger.info("User '{}' added Resource:\n{}", auth.getName(), serviceBundle);
         } else { // else update Pending Service and transform it to Active Service
             if (serviceBundle.getService().getVersion().equals("")){

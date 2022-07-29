@@ -80,13 +80,13 @@ public class ServiceProviderRegistrationIT {
 
             serviceBundle = new ServiceBundle(createService("WP4_TestService", provider.getProvider()));
 
-            serviceBundle = resourceBundleService.addService(serviceBundle, securityService.getAdminAccess());
+            serviceBundle = resourceBundleService.addResource(serviceBundle, securityService.getAdminAccess());
 
             assert serviceBundle != null;
 
             providerService.verifyProvider(providerId, "rejected template", false, securityService.getAdminAccess());
 
-            resourceBundleService.updateService(serviceBundle, "woof", securityService.getAdminAccess());
+            resourceBundleService.updateResource(serviceBundle, "woof", securityService.getAdminAccess());
 
             providerService.verifyProvider(providerId, "approved", true, securityService.getAdminAccess());
             providerService.verifyProvider(providerId, "approved", false, securityService.getAdminAccess());
