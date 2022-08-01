@@ -89,10 +89,10 @@ public class ServiceController {
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isServiceProviderAdmin(#auth, #id)")
-    public ResponseEntity<RichService> getRichService(@PathVariable("id") String id,
-                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                      @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(infraService.getRichService(id, catalogueId, auth), HttpStatus.OK);
+    public ResponseEntity<RichResource> getRichService(@PathVariable("id") String id,
+                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                       @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(infraService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new Resource.")
@@ -162,9 +162,9 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<RichService>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                               @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<RichResource>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -172,7 +172,7 @@ public class ServiceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", true);
         ff.addFilter("published", false);
-        Paging<RichService> services = infraService.getRichServices(ff, auth);
+        Paging<RichResource> services = infraService.getRichResources(ff, auth);
         return ResponseEntity.ok(services);
     }
 
@@ -203,7 +203,7 @@ public class ServiceController {
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(
                 infraService.getByIds(auth, ids) // FIXME: create method that returns Services instead of RichServices
-                        .stream().map(RichService::getService).collect(Collectors.toList()));
+                        .stream().map(RichResource::getService).collect(Collectors.toList()));
     }
 
     // Get a list of RichServices based on a set of ids.
@@ -211,7 +211,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
     @GetMapping(path = "rich/byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<RichService>> getSomeRichServices(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<RichResource>> getSomeRichServices(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(infraService.getByIds(auth, ids));
     }
 
@@ -293,8 +293,8 @@ public class ServiceController {
 
     // Get all featured Services.
     @GetMapping(path = "featured/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Service>> getFeaturedServices() {
-        return new ResponseEntity<>(infraService.createFeaturedServices(), HttpStatus.OK);
+    public ResponseEntity<List<? extends Service>> getFeaturedServices() {
+        return new ResponseEntity<>(infraService.createFeaturedResources(), HttpStatus.OK);
     }
 
     // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.
@@ -324,7 +324,7 @@ public class ServiceController {
     public ResponseEntity<ServiceBundle> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
                                                    @RequestParam Boolean active, @ApiIgnore Authentication auth) {
         logger.info("User '{}' attempts to save Resource with id '{}' and version '{}' as '{}'", auth, id, version, active);
-        return ResponseEntity.ok(infraService.publish(id, version, active, auth));
+        return ResponseEntity.ok(infraService.publish(id, active, auth));
     }
 
     // Get all pending Service Templates.
@@ -335,7 +335,7 @@ public class ServiceController {
         List<Service> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
             if (provider.getTemplateStatus().equals("pending template")) {
-                serviceTemplates.addAll(infraService.getInactiveServices(provider.getId()).stream().map(ServiceBundle::getService).collect(Collectors.toList()));
+                serviceTemplates.addAll(infraService.getInactiveResources(provider.getId()).stream().map(ServiceBundle::getService).collect(Collectors.toList()));
             }
         }
         Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
@@ -531,7 +531,7 @@ public class ServiceController {
     // Get the Service Template of a specific Provider (status = "pending provider" or "rejected provider")
     @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ServiceBundle getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {
-        return infraService.getServiceTemplate(id, auth);
+        return infraService.getResourceTemplate(id, auth);
     }
 
     // REVISE: returns ServiceBundle (sensitive data)

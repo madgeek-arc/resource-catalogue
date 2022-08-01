@@ -1,7 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.domain.RichService;
+import eu.einfracentral.domain.RichResource;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceBundleService;
@@ -62,8 +62,8 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<RichService> getPendingRich(@PathVariable("id") String id, Authentication auth) {
-        return new ResponseEntity<>((RichService) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
+    public ResponseEntity<RichResource> getPendingRich(@PathVariable("id") String id, Authentication auth) {
+        return new ResponseEntity<>((RichResource) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
     @ApiImplicitParams({

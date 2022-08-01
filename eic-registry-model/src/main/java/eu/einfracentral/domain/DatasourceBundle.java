@@ -12,22 +12,22 @@ public class DatasourceBundle extends ResourceBundle<Datasource>{
         // No arg constructor
     }
 
-    public DatasourceBundle(Datasource dataSource) {
-        this.setDataSource(dataSource);
+    public DatasourceBundle(Datasource datasource) {
+        this.setDatasource(datasource);
         this.setMetadata(null);
     }
 
-    public DatasourceBundle(Datasource dataSource, Metadata metadata) {
-        this.setDataSource(dataSource);
+    public DatasourceBundle(Datasource datasource, Metadata metadata) {
+        this.setDatasource(datasource);
         this.setMetadata(metadata);
     }
 
     @XmlElement(name = "datasource")
-    public Datasource getDataSource() {
+    public Datasource getDatasource() {
         return this.getPayload();
     }
 
-    public void setDataSource(Datasource dataSource) {
-        this.setPayload(dataSource);
+    public void setDatasource(Datasource datasource) {
+        this.setPayload(datasource);
     }
 }

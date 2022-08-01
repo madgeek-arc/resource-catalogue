@@ -1,7 +1,7 @@
 package eu.einfracentral.recdb.managers;
 
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.domain.RichService;
+import eu.einfracentral.domain.RichResource;
 import eu.einfracentral.recdb.services.RecommendationService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class RecommendationManager implements RecommendationService<RichService, Authentication> {
+public class RecommendationManager implements RecommendationService<RichResource, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(RecommendationManager.class);
     private final ResourceBundleService<ServiceBundle> infraService;
@@ -33,9 +33,9 @@ public class RecommendationManager implements RecommendationService<RichService,
         this.recdbDataSource = recdbDataSource;
     }
 
-    public ResponseEntity<List<RichService>> getRecommendedResources(int limit, Authentication authentication) {
+    public ResponseEntity<List<RichResource>> getRecommendedResources(int limit, Authentication authentication) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(recdbDataSource);
-        List<RichService> services = new ArrayList<>();
+        List<RichResource> services = new ArrayList<>();
 
         /* Get user id */
         int user_id = -1;

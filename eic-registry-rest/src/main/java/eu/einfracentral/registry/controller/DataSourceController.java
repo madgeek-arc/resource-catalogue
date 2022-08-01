@@ -46,7 +46,7 @@ public class DataSourceController {
     public ResponseEntity<Datasource> addDataSource(@RequestBody Datasource dataSource, @ApiIgnore Authentication auth) {
         DatasourceBundle ret = this.dataSourceService.addDataSource(new DatasourceBundle(dataSource), auth);
         logger.info("User '{}' created a new Datasource with name '{}' and id '{}'", auth.getName(), dataSource.getName(), dataSource.getId());
-        return new ResponseEntity<>(ret.getDataSource(), HttpStatus.CREATED);
+        return new ResponseEntity<>(ret.getDatasource(), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Updates the Datasource assigned the given id with the given Datasource, keeping a version of revisions.")
@@ -57,7 +57,7 @@ public class DataSourceController {
                                                     @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle ret = this.dataSourceService.updateDataSource(new DatasourceBundle(dataSource), comment, auth);
         logger.info("User '{}' updated Datasource with name '{}' and id '{}'", auth.getName(), dataSource.getName(), dataSource.getId());
-        return new ResponseEntity<>(ret.getDataSource(), HttpStatus.OK);
+        return new ResponseEntity<>(ret.getDatasource(), HttpStatus.OK);
     }
 
 }

@@ -74,7 +74,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyInfraService(t, auth);
         } else if (t instanceof ProviderBundle) {
             modifyProviderBundle(t, auth);
-        } else if (t instanceof RichService) {
+        } else if (t instanceof RichResource) {
             modifyRichService(t, auth);
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
@@ -107,10 +107,10 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyRichService(T richService, Authentication auth) {
-        if (!this.securityService.isServiceProviderAdmin(auth, ((RichService) richService).getService().getId(), true)) {
-            ((RichService) richService).getService().setMainContact(null);
-            ((RichService) richService).getService().setSecurityContactEmail(null);
-            ((RichService) richService).getMetadata().setTerms(null);
+        if (!this.securityService.isServiceProviderAdmin(auth, ((RichResource) richService).getService().getId(), true)) {
+            ((RichResource) richService).getService().setMainContact(null);
+            ((RichResource) richService).getService().setSecurityContactEmail(null);
+            ((RichResource) richService).getMetadata().setTerms(null);
         }
     }
 

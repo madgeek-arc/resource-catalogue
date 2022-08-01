@@ -13,8 +13,6 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
-import eu.einfracentral.utils.SortUtils;
-import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
@@ -35,8 +33,6 @@ import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
-import static eu.einfracentral.utils.VocabularyValidationUtils.validateCategories;
-import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("infraServiceService")
 public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
@@ -45,7 +41,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final Random randomNumberGenerator;
-    private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
@@ -58,7 +53,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     @Autowired
     public ServiceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
                                 Random randomNumberGenerator, IdCreator idCreator,
-                                @Lazy FieldValidator fieldValidator,
                                 @Lazy SecurityService securityService,
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
@@ -67,7 +61,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         this.providerService = providerService; // for providers
         this.randomNumberGenerator = randomNumberGenerator;
         this.idCreator = idCreator;
-        this.fieldValidator = fieldValidator;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
@@ -108,7 +101,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // create ID if not exists
         if ((serviceBundle.getService().getId() == null) || ("".equals(serviceBundle.getService().getId()))) {
-            String id = idCreator.createResourceId(serviceBundle.getService());
+            String id = idCreator.createResourceId(serviceBundle.getPayload());
             serviceBundle.getService().setId(id);
         }
         validate(serviceBundle);
@@ -185,14 +178,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             serviceBundle.getService().setVersion(null);
         }
 
-        try { // try to find a service with the same id and version
+        try { // try to find a Service with the same id
             existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         } catch (ResourceNotFoundException e) {
-            // if a service with version = serviceBundle.getVersion() does not exist, get the latest service
-            existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
-        }
-        if ("".equals(existingService.getService().getVersion())) {
-            existingService.getService().setVersion(null);
+            throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
+                    serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()));
         }
 
         User user = User.of(auth);
@@ -267,7 +257,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return ret;
     }
 
-    public ServiceBundle getCatalogueService(String catalogueId, String serviceId, Authentication auth) {
+    public ServiceBundle getCatalogueResource(String catalogueId, String serviceId, Authentication auth) {
         ServiceBundle serviceBundle = get(serviceId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (serviceBundle == null) {
@@ -355,7 +345,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         String[] parts = id.split("\\.");
         String providerId = parts[0];
         ServiceBundle serviceBundle = null;
-        List<ServiceBundle> serviceBundles = getInfraServices(providerId, auth);
+        List<ServiceBundle> serviceBundles = getResourceBundles(providerId, auth);
         for (ServiceBundle service : serviceBundles){
             if (service.getService().getId().equals(id)){
                 serviceBundle = service;
@@ -424,7 +414,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public Paging<ServiceBundle> getInactiveServices() {
+    public Paging<ServiceBundle> getInactiveResources() {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
         ff.setFrom(0);
@@ -434,7 +424,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     @Override
     @Cacheable(CACHE_FEATURED)
-    public List<Service> createFeaturedServices() {
+    public List<Service> createFeaturedResources() {
         logger.info("Creating and caching 'featuredServices'");
         // TODO: return featured services (for now, it returns a random infraService for each provider)
         FacetFilter ff = new FacetFilter();
@@ -444,7 +434,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         List<Service> services;
         for (int i = 0; i < providers.size(); i++) {
             int rand = randomNumberGenerator.nextInt(providers.size());
-            services = this.getActiveServices(providers.get(rand).getId());
+            services = this.getActiveResources(providers.get(rand).getId());
             providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
             if (!services.isEmpty()) {
                 featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
@@ -454,32 +444,10 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public boolean validate(ServiceBundle serviceBundle) {
-        Service service = serviceBundle.getService();
-        //If we want to reject bad vocab ids instead of silently accept, here's where we do it
-        logger.debug("Validating Service with id: {}", service.getId());
-
-        try {
-            fieldValidator.validate(serviceBundle);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
-        }
-
-        validateCategories(serviceBundle.getService().getCategories());
-        validateScientificDomains(serviceBundle.getService().getScientificDomains());
-
-        return true;
-    }
-
-    @Override
-    public ServiceBundle publish(String serviceId, String version, boolean active, Authentication auth) {
+    public ServiceBundle publish(String serviceId, boolean active, Authentication auth) {
         ServiceBundle service;
         String activeProvider = "";
-        if (version == null || "".equals(version)) {
-            service = this.get(serviceId, catalogueName);
-        } else {
-            service = this.get(serviceId, catalogueName);
-        }
+        service = this.get(serviceId, catalogueName);
 
         if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
                 service.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !service.isActive()){
@@ -586,7 +554,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public List<ServiceBundle> getInfraServices(String providerId, Authentication auth) {
+    public List<ServiceBundle> getResourceBundles(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
@@ -596,7 +564,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public Paging<ServiceBundle> getInfraServices(String catalogueId, String providerId, Authentication auth) {
+    public Paging<ServiceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
@@ -641,7 +609,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     // Different that the one called on migration methods!
     @Override
-    public ServiceBundle getServiceTemplate(String providerId, Authentication auth) {
+    public ServiceBundle getResourceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
@@ -655,7 +623,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public List<Service> getActiveServices(String providerId) {
+    public List<Service> getActiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
@@ -667,7 +635,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public List<ServiceBundle> getInactiveServices(String providerId) {
+    public List<ServiceBundle> getInactiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
@@ -765,22 +733,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 
         return serviceBundle;
-    }
-
-    private void checkCatalogueIdConsistency(ServiceBundle serviceBundle, String catalogueId){
-        catalogueService.existsOrElseThrow(catalogueId);
-        if (serviceBundle.getService().getCatalogueId() == null || serviceBundle.getService().getCatalogueId().equals("")){
-            throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
-        } else{
-            if (!serviceBundle.getService().getCatalogueId().equals(catalogueId)){
-                throw new ValidationException("Parameter 'catalogueId' and Service's 'catalogueId' don't match");
-            }
-        }
-    }
-
-    private void sortFields(ServiceBundle serviceBundle) {
-        serviceBundle.getService().setGeographicalAvailabilities(SortUtils.sort(serviceBundle.getService().getGeographicalAvailabilities()));
-        serviceBundle.getService().setResourceGeographicLocations(SortUtils.sort(serviceBundle.getService().getResourceGeographicLocations()));
     }
 
 }

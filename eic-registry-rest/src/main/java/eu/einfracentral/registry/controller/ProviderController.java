@@ -74,7 +74,7 @@ public class ProviderController {
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
         // delete all Provider's services
-        List<ServiceBundle> allProviderServices = resourceBundleService.getInfraServices(id, auth);
+        List<ServiceBundle> allProviderServices = resourceBundleService.getResourceBundles(id, auth);
         for (ServiceBundle serviceBundle : allProviderServices){
             try {
                 resourceBundleService.delete(serviceBundle);
@@ -255,7 +255,7 @@ public class ProviderController {
 
     @ApiOperation(value = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<? extends Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(resourceBundleService.getServices(id, auth), HttpStatus.OK);
     }
 
@@ -301,7 +301,7 @@ public class ProviderController {
     // Get the pending services of the given Provider.
     @GetMapping(path = "services/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        List<Service> ret = resourceBundleService.getInactiveServices(id).stream().map(ServiceBundle::getService).collect(Collectors.toList());
+        List<Service> ret = resourceBundleService.getInactiveResources(id).stream().map(ServiceBundle::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 

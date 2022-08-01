@@ -358,7 +358,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void delete(ProviderBundle provider) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = resourceBundleService.getInfraServices(provider.getId(), authentication);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getId(), authentication);
         services.forEach(s -> {
             try {
                 resourceBundleService.delete(s);
@@ -568,7 +568,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<ServiceBundle> services = resourceBundleService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
         logger.info("Activating all Resources of the Provider with id: {}", providerId);
         for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
@@ -602,7 +602,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<ServiceBundle> services = resourceBundleService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
         logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
         for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;

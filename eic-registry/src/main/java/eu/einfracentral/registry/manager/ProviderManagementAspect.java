@@ -60,7 +60,7 @@ public class ProviderManagementAspect {
     }
 
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) " +
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addService(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) " +
             "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) )" +
             "&& args(serviceBundle, auth)", argNames = "serviceBundle,auth")
     public void updateProviderState(ServiceBundle serviceBundle, Authentication auth) {
@@ -160,12 +160,12 @@ public class ProviderManagementAspect {
 
     @Async
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager." +
-            "addResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)))" +
+            "addService(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(String, String, Boolean, " +
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(String, " +
+            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addService(String, " +
             "org.springframework.security.core.Authentication))))", // pendingToInfra method
             returning = "serviceBundle")
     public void addResourceAsPublic(ServiceBundle serviceBundle) {

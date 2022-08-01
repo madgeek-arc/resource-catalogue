@@ -72,7 +72,7 @@ public class MigrationManager implements MigrationService {
     }
 
     private void changeResourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<ServiceBundle> serviceBundles = infraServiceManager.getInfraServices(providerId, authentication);
+        List<ServiceBundle> serviceBundles = infraServiceManager.getResourceBundles(providerId, authentication);
         // Resources
         String jmsTopic = "resource.update";
         for (ServiceBundle serviceBundle : serviceBundles) {

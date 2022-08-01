@@ -58,19 +58,19 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      */
     T updateResource(T resource, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
 
-    T getCatalogueService(String catalogueId, String serviceId, Authentication auth);
+    T getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
-     * Returns the Service with the specified id.
+     * Returns the Resource with the specified id.
      *
-     * @param id          of the Service.
+     * @param id of the Resource.
      * @param catalogueId
-     * @return service.
+     * @return resource.
      */
     T get(String id, String catalogueId);
 
     /**
-     * Get InfraServices by a specific field.
+     * Get ResourceBundles by a specific field.
      *
      * @param field
      * @param auth
@@ -79,48 +79,48 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
-     * Get RichServices with the specified ids.
+     * Get RichResources with the specified ids.
      *
      * @param ids
      * @return
      */
-    List<RichService> getByIds(Authentication authentication, String... ids);
+    List<RichResource> getByIds(Authentication authentication, String... ids);
 
     /**
-     * Gets all Services with extra fields like views and ratings
+     * Gets all Resources with extra fields like views and ratings
      *
      * @param ff
      * @return
      */
-    Paging<RichService> getRichServices(FacetFilter ff, Authentication auth);
+    Paging<RichResource> getRichResources(FacetFilter ff, Authentication auth);
 
     /**
-     * Gets the specific Service with extra fields like views and ratings
+     * Gets the specific Resource with extra fields like views and ratings
      *
      * @param id
      * @param catalogueId
      * @param auth
      * @return
      */
-    RichService getRichService(String id, String catalogueId, Authentication auth);
+    RichResource getRichResource(String id, String catalogueId, Authentication auth);
 
     /**
-     * Creates a RichService for the specific Service
+     * Creates a RichResource for the specific Resource
      *
      * @return
      */
-    RichService createRichService(T serviceBundle, Authentication auth);
+    RichResource createRichResource(T resourceBundle, Authentication auth);
 
     /**
-     * Creates RichServices for a list of given Services
+     * Creates RichResources for a list of given Resources
      *
      * @return
      */
-    List<RichService> createRichServices(List<T> serviceBundleList, Authentication auth);
+    List<RichResource> createRichResources(List<T> resourceBundleList, Authentication auth);
 
 
     /**
-     * Check if the Service exists.
+     * Check if the Resource exists.
      *
      * @param ids
      * @return
@@ -128,7 +128,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     boolean exists(SearchService.KeyValue... ids);
 
     /**
-     * Get the service resource.
+     * Get resource.
      *
      * @param id
      * @param catalogueId
@@ -158,37 +158,37 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Service getVersionHistory(String resourceId, String catalogueId, String versionId);
 
     /**
-     * Get inactive Services.
+     * Get inactive Resources.
      *
      * @return
      */
-    Paging<T> getInactiveServices();
+    Paging<T> getInactiveResources();
 
     /**
-     * Validates the given service.
+     * Validates the given resource.
      *
-     * @param service
+     * @param resource
      * @return
      */
-    boolean validate(T service);
+    boolean validate(T resource);
 
     /**
-     * Create a list of random services.
+     * Create a list of random resources.
      *
      * @return
      */
-    List<Service> createFeaturedServices();
+    @Deprecated
+    List<? extends Service> createFeaturedResources();
 
     /**
-     * Sets a Service as active/inactive.
+     * Sets a Resource as active/inactive.
      *
-     * @param serviceId
-     * @param version
+     * @param resourceId
      * @param active
      * @param auth
      * @return
      */
-    T publish(String serviceId, String version, boolean active, Authentication auth);
+    T publish(String resourceId, boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies
@@ -201,7 +201,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
 
     /**
-     * Gets all Services for Admins Page
+     * Gets all Resources for Admins Page
      *
      * @param filter
      * @param auth
@@ -209,12 +209,12 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Browsing<T> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
-     * @param serviceId
+     * @param resourceId
      * @param actionType
      * @param auth
      * @return
      */
-    T auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T auditResource(String resourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff
@@ -229,7 +229,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    List<T> getInfraServices(String providerId, Authentication auth);
+    List<T> getResourceBundles(String providerId, Authentication auth);
 
     /**
      * @param providerId
@@ -237,17 +237,17 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    Paging<T> getInfraServices(String catalogueId, String providerId, Authentication auth);
+    Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
-    List<Service> getServices(String providerId, Authentication auth);
+    List<? extends Service> getServices(String providerId, Authentication auth);
 
-    List<Service> getActiveServices(String providerId);
+    List<? extends Service> getActiveResources(String providerId);
 
-    T getServiceTemplate(String providerId, Authentication auth);
+    T getResourceTemplate(String providerId, Authentication auth);
 
     Service getFeaturedService(String providerId);
 
-    List<T> getInactiveServices(String providerId);
+    List<T> getInactiveResources(String providerId);
 
     /**
      * @param resourceId

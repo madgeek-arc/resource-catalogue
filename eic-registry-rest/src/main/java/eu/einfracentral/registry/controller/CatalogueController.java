@@ -364,7 +364,7 @@ public class CatalogueController {
     @ApiOperation(value = "Returns the Resource of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-        Service resource = resourceBundleService.getCatalogueService(catalogueId, resourceId, auth).getService();
+        Service resource = resourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getService();
         if (resource.getCatalogueId() == null){
             throw new ValidationException("Service's catalogueId cannot be null");
         } else {
@@ -398,7 +398,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ServiceBundle>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
-        Paging<ServiceBundle> infraServices = resourceBundleService.getInfraServices(catalogueId, providerId, auth);
+        Paging<ServiceBundle> infraServices = resourceBundleService.getResourceBundles(catalogueId, providerId, auth);
         return new ResponseEntity<>(infraServices, HttpStatus.OK);
     }
 

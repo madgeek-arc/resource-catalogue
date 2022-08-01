@@ -236,7 +236,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     }
 
     public Object getPendingRich(String id, Authentication auth) {
-        return resourceBundleService.createRichService(get(id), auth);
+        return resourceBundleService.createRichResource(get(id), auth);
     }
 
     public List<ServiceBundle> getMy(Authentication auth) {

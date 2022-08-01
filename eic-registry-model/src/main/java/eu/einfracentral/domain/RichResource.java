@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 @XmlTransient
-public class RichService {
+public class RichResource {
 
     private Service service;
     private Datasource datasourceBundle;
@@ -39,27 +39,27 @@ public class RichService {
     private List<ScientificDomain> domains;
     private List<ProviderInfo> providerInfo;
 
-    public RichService() {
+    public RichResource() {
         // No arg constructor
     }
 
-    public RichService(Service service, Metadata metadata) {
+    public RichResource(Service service, Metadata metadata) {
         this.service = service;
         this.metadata = metadata;
     }
 
-    public RichService(ResourceBundle<?> resource) {
+    public RichResource(ResourceBundle<?> resource) {
         this.service = resource.getPayload(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = resource.getMetadata();
     }
 
-    public RichService(ServiceBundle service) {
+    public RichResource(ServiceBundle service) {
         this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = service.getMetadata();
     }
 
-    public RichService(DatasourceBundle dataSourceBundle) {
-        this.datasourceBundle = dataSourceBundle.getDataSource(); // copy constructor is needed to 'hide' infraService fields
+    public RichResource(DatasourceBundle dataSourceBundle) {
+        this.datasourceBundle = dataSourceBundle.getDatasource(); // copy constructor is needed to 'hide' infraService fields
         this.metadata = dataSourceBundle.getMetadata();
     }
 
@@ -246,7 +246,7 @@ public class RichService {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RichService that = (RichService) o;
+        RichResource that = (RichResource) o;
         return Float.compare(that.views, views) == 0 && Float.compare(that.ratings, ratings) == 0 && Float.compare(that.userRate, userRate) == 0 && Float.compare(that.hasRate, hasRate) == 0 && Float.compare(that.favourites, favourites) == 0 && Float.compare(that.isFavourite, isFavourite) == 0 && Objects.equals(service, that.service) && Objects.equals(metadata, that.metadata) && Objects.equals(languageAvailabilityNames, that.languageAvailabilityNames) && Objects.equals(geographicAvailabilityNames, that.geographicAvailabilityNames) && Objects.equals(trlName, that.trlName) && Objects.equals(phaseName, that.phaseName) && Objects.equals(lifeCycleStatusName, that.lifeCycleStatusName) && Objects.equals(targetUsersNames, that.targetUsersNames) && Objects.equals(accessTypeNames, that.accessTypeNames) && Objects.equals(accessModeNames, that.accessModeNames) && Objects.equals(fundingBodyNames, that.fundingBodyNames) && Objects.equals(fundingProgramNames, that.fundingProgramNames) && Objects.equals(orderTypeName, that.orderTypeName) && Objects.equals(categories, that.categories) && Objects.equals(domains, that.domains) && Objects.equals(providerInfo, that.providerInfo);
     }
 
