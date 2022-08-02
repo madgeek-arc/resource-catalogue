@@ -256,13 +256,7 @@ public class ProviderController {
     @ApiOperation(value = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<? extends Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(resourceBundleService.getServices(id, auth), HttpStatus.OK);
-    }
-
-    // Get a featured ServiceBundle offered by a Provider. // TODO enable in a future release
-    @GetMapping(path = "featured/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Service> getFeaturedService(@PathVariable("id") String id) {
-        return new ResponseEntity<>(resourceBundleService.getFeaturedService(id), HttpStatus.OK);
+        return new ResponseEntity<>(resourceBundleService.getResources(id, auth), HttpStatus.OK);
     }
 
     @ApiImplicitParams({

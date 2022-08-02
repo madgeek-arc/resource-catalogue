@@ -84,7 +84,7 @@ public class MigrationManager implements MigrationService {
                 serviceBundle.getService().setId(id);
             }
             serviceBundle.getService().setCatalogueId(newCatalogueId);
-            Resource resource = infraServiceManager.getResource(oldResourceId, catalogueId, serviceBundle.getService().getVersion());
+            Resource resource = infraServiceManager.getResource(oldResourceId, catalogueId);
             resource.setPayload(infraServiceManager.serialize(serviceBundle));
             logger.debug("Migrating Resource: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);

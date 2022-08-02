@@ -205,7 +205,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsServiceProviderAdmin(user, id)) {
+                    || securityService.userIsResourceProviderAdmin(user, id)) {
                 return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
             }
         }
@@ -226,7 +226,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsServiceProviderAdmin(user, id)) {
+                    || securityService.userIsResourceProviderAdmin(user, id)) {
                 return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
             }
         }

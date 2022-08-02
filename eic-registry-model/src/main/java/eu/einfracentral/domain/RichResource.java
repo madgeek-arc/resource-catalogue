@@ -71,6 +71,14 @@ public class RichResource {
         this.service = service;
     }
 
+    public Datasource getDatasourceBundle() {
+        return datasourceBundle;
+    }
+
+    public void setDatasourceBundle(Datasource datasourceBundle) {
+        this.datasourceBundle = datasourceBundle;
+    }
+
     public Metadata getMetadata() {
         return metadata;
     }

@@ -20,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +39,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final Random randomNumberGenerator;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
@@ -52,14 +50,12 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     @Autowired
     public ServiceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
-                                Random randomNumberGenerator, IdCreator idCreator,
-                                @Lazy SecurityService securityService,
+                                IdCreator idCreator, @Lazy SecurityService securityService,
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
-        this.randomNumberGenerator = randomNumberGenerator;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -73,14 +69,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, Authentication auth) {
         return addResource(serviceBundle, null, auth);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null) { // add catalogue provider
@@ -101,7 +97,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // create ID if not exists
         if ((serviceBundle.getService().getId() == null) || ("".equals(serviceBundle.getService().getId()))) {
-            String id = idCreator.createResourceId(serviceBundle.getPayload());
+            String id = idCreator.createResourceId(serviceBundle);
             serviceBundle.getService().setId(id);
         }
         validate(serviceBundle);
@@ -150,14 +146,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String comment, Authentication auth) {
         return updateResource(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isServiceProviderAdmin(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
         ServiceBundle ret;
@@ -276,7 +272,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             //TODO: userIsCatalogueAdmin -> transcationRollback error
             // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsServiceProviderAdmin(user, serviceId)) {
+                    securityService.userIsResourceProviderAdmin(user, serviceId)) {
                 return serviceBundle;
             }
         }
@@ -285,48 +281,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             return serviceBundle;
         }
         throw new ValidationException("You cannot view the specific Service");
-    }
-
-    @Override
-    public ServiceBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find service with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
-    }
-
-    @Override
-    public ServiceBundle get(String id) {
-        return get(id, catalogueName);
-    }
-
-    public Resource getResource(String serviceId, String catalogueId, String serviceVersion) {
-        Paging<Resource> resources;
-        if (serviceVersion == null || "".equals(serviceVersion)) {
-            resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueId),
-                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-            // return the latest modified resource that does not contain a version attribute
-            for (Resource resource : resources.getResults()) {
-                if (!resource.getPayload().contains("<tns:version>")) {
-                    return resource;
-                }
-            }
-            if (resources.getTotal() > 0) {
-                return resources.getResults().get(0);
-            }
-            return null;
-        } else if ("latest".equals(serviceVersion)) {
-            resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND latest = true", serviceId, catalogueId),
-                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
-        } else {
-            resources = searchService
-                    .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\" AND version = \"%s\"", serviceId, catalogueId, serviceVersion), resourceType.getName());
-        }
-        assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
     @Override
@@ -420,27 +374,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
         return getAll(ff, null);
-    }
-
-    @Override
-    @Cacheable(CACHE_FEATURED)
-    public List<Service> createFeaturedResources() {
-        logger.info("Creating and caching 'featuredServices'");
-        // TODO: return featured services (for now, it returns a random infraService for each provider)
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providers = providerService.getAll(ff, null).getResults();
-        List<Service> featuredServices = new ArrayList<>();
-        List<Service> services;
-        for (int i = 0; i < providers.size(); i++) {
-            int rand = randomNumberGenerator.nextInt(providers.size());
-            services = this.getActiveResources(providers.get(rand).getId());
-            providers.remove(rand); // remove provider from list to avoid duplicate provider highlights
-            if (!services.isEmpty()) {
-                featuredServices.add(services.get(randomNumberGenerator.nextInt(services.size())));
-            }
-        }
-        return featuredServices;
     }
 
     @Override
@@ -574,7 +507,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public List<Service> getServices(String providerId, Authentication auth) {
+    public List<Service> getResources(String providerId, Authentication auth) {
         ProviderBundle providerBundle = providerService.get(providerId);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
@@ -593,11 +526,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
             return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
         }
-        throw new ValidationException("You cannot view the Resources of the specific Provider");
+        throw new ValidationException("You cannot view the Services of the specific Provider");
     }
 
     // for sendProviderMails on RegistrationMailService AND StatisticsManager
-    public List<Service> getServices(String providerId) {
+    public List<Service> getResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
@@ -644,18 +577,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, null).getResults();
-    }
-
-    //Gets random Services to be featured at the Carousel
-    @Override
-    public Service getFeaturedService(String providerId) {
-        // TODO: change this method
-        List<Service> services = getServices(providerId, null);
-        Service featuredService = null;
-        if (!services.isEmpty()) {
-            featuredService = services.get(randomNumberGenerator.nextInt(services.size()));
-        }
-        return featuredService;
     }
 
 //    @Override

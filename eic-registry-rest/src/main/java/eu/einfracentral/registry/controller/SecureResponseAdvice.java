@@ -85,10 +85,10 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         }
     }
 
-    private void modifyService(T service, Authentication auth) {
-        if (!this.securityService.isServiceProviderAdmin(auth, ((Service) service), true)) {
-            ((Service) service).setMainContact(null);
-            ((Service) service).setSecurityContactEmail(null);
+    private void modifyService(T resourceBundle, Authentication auth) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((ResourceBundle<?>) resourceBundle), true)) {
+            ((ResourceBundle<?>) resourceBundle).getPayload().setMainContact(null);
+            ((ResourceBundle<?>) resourceBundle).getPayload().setSecurityContactEmail(null);
         }
     }
 
@@ -99,7 +99,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ServiceBundle) infraService).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ServiceBundle) infraService).getLatestOnboardingInfo());
 
-        if (!this.securityService.isServiceProviderAdmin(auth, ((ServiceBundle) infraService).getService().getId(), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((ServiceBundle) infraService).getService().getId(), true)) {
             ((ServiceBundle) infraService).getService().setMainContact(null);
             ((ServiceBundle) infraService).getService().setSecurityContactEmail(null);
             ((ServiceBundle) infraService).getMetadata().setTerms(null);
@@ -107,7 +107,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyRichService(T richService, Authentication auth) {
-        if (!this.securityService.isServiceProviderAdmin(auth, ((RichResource) richService).getService().getId(), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richService).getService().getId(), true)) {
             ((RichResource) richService).getService().setMainContact(null);
             ((RichResource) richService).getService().setSecurityContactEmail(null);
             ((RichResource) richService).getMetadata().setTerms(null);

@@ -2,7 +2,7 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "data_source_id",
+      "name": "datasource_id",
       "path": "//*[local-name()='service']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
@@ -10,7 +10,7 @@
     {
       "multivalued": false,
       "name": "name",
-      "label": "DataSource Name",
+      "label": "Datasource Name",
       "path": "//*[local-name()='service']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
@@ -324,7 +324,7 @@
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "data_source",
+  "name": "datasource",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/identifiers_refactoring/eic-registry-model/src/main/resources/schema1.xsd"

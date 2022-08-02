@@ -16,12 +16,12 @@ public interface IdCreator {
     String createProviderId(Provider provider);
 
     /**
-     * Creates id for {@link Service}
+     * Creates id for {@link ResourceBundle}
      *
-     * @param service
+     * @param resource
      * @return
      */
-    String createResourceId(Service service);
+    String createResourceId(ResourceBundle<?> resource);
 
     /**
      * Creates id for {@link Catalogue}

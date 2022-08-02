@@ -2,6 +2,7 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.exception.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -61,23 +62,23 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String createResourceId(eu.einfracentral.domain.Service service) {
-        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
+    public String createResourceId(ResourceBundle<?> resource) {
+        if (resource.getPayload().getResourceOrganisation() == null || resource.getPayload().getResourceOrganisation().equals("")) {
             throw new ValidationException("Resource must have a Resource Organisation.");
         }
         String serviceId;
-        if (service.getId() == null || "".equals(service.getId())) {
-            if (service.getAbbreviation() != null && !"".equals(service.getAbbreviation()) && !"null".equals(service.getAbbreviation())) {
-                serviceId = service.getAbbreviation();
-            } else if (service.getName() != null && !"".equals(service.getName()) && !"null".equals(service.getName())) {
-                serviceId = service.getName();
+        if (resource.getPayload().getId() == null || "".equals(resource.getPayload().getId())) {
+            if (resource.getPayload().getAbbreviation() != null && !"".equals(resource.getPayload().getAbbreviation()) && !"null".equals(resource.getPayload().getAbbreviation())) {
+                serviceId = resource.getPayload().getAbbreviation();
+            } else if (resource.getPayload().getName() != null && !"".equals(resource.getPayload().getName()) && !"null".equals(resource.getPayload().getName())) {
+                serviceId = resource.getPayload().getName();
             } else {
                 throw new ValidationException("Resource must have an abbreviation or name.");
             }
         } else {
-            serviceId = service.getId();
+            serviceId = resource.getPayload().getId();
         }
-        String provider = service.getResourceOrganisation();
+        String provider = resource.getPayload().getResourceOrganisation();
         return String.format("%s.%s", provider, StringUtils
                 .stripAccents(serviceId)
                 .replaceAll("[\n\t\\s]+", " ")

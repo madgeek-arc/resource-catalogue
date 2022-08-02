@@ -173,14 +173,6 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     boolean validate(T resource);
 
     /**
-     * Create a list of random resources.
-     *
-     * @return
-     */
-    @Deprecated
-    List<? extends Service> createFeaturedResources();
-
-    /**
      * Sets a Resource as active/inactive.
      *
      * @param resourceId
@@ -239,13 +231,11 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      */
     Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
-    List<? extends Service> getServices(String providerId, Authentication auth);
+    List<? extends Service> getResources(String providerId, Authentication auth);
 
     List<? extends Service> getActiveResources(String providerId);
 
     T getResourceTemplate(String providerId, Authentication auth);
-
-    Service getFeaturedService(String providerId);
 
     List<T> getInactiveResources(String providerId);
 

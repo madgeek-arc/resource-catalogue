@@ -113,7 +113,7 @@ public class RegistrationMailService {
             throw new ResourceNotFoundException("Provider is null");
         }
 
-        List<Service> serviceList = infraServiceManager.getServices(providerBundle.getId());
+        List<Service> serviceList = infraServiceManager.getResources(providerBundle.getId());
         Service serviceTemplate = null;
         if (!serviceList.isEmpty()) {
             root.put("service", serviceList.get(0));
@@ -309,7 +309,7 @@ public class RegistrationMailService {
         }
     }
 
-    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, ServiceBundle serviceBundle, Authentication auth){
+    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, ResourceBundle<?> resourceBundle, Authentication auth){
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
@@ -319,13 +319,13 @@ public class RegistrationMailService {
         if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
         }
-        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, serviceBundle.getService().getName(),
+        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, resourceBundle.getPayload().getName(),
                 oldProvider.getProvider().getName(), newProvider.getProvider().getName());
         String userRole = "provider";
         root.put("oldProvider", oldProvider);
         root.put("newProvider", newProvider);
-        root.put("infraService", serviceBundle);
-        root.put("comment", serviceBundle.getLoggingInfo().get(serviceBundle.getLoggingInfo().size() - 1).getComment());
+        root.put("infraService", resourceBundle);
+        root.put("comment", resourceBundle.getLoggingInfo().get(resourceBundle.getLoggingInfo().size() - 1).getComment());
 
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
@@ -925,16 +925,16 @@ public class RegistrationMailService {
         }
     }
 
-    public void notifyProviderAdminsForResourceAuditing(ServiceBundle serviceBundle) {
+    public void notifyProviderAdminsForResourceAuditing(ResourceBundle<?> resourceBundle) {
 
-        ProviderBundle providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
+        ProviderBundle providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
 
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        root.put("infraService", serviceBundle);
+        root.put("infraService", resourceBundle);
 
-        String subject = String.format("[%s Portal] Your Resource '%s' has been audited by the EPOT team", projectName, serviceBundle.getService().getName());
+        String subject = String.format("[%s Portal] Your Resource '%s' has been audited by the EPOT team", projectName, resourceBundle.getPayload().getName());
 
         for (User user : providerBundle.getProvider().getUsers()) {
             root.put("user", user);

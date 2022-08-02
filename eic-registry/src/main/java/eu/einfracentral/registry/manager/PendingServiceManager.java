@@ -61,7 +61,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle add(ServiceBundle service, Authentication auth) {
 
-        service.setId(idCreator.createResourceId(service.getService()));
+        service.setId(idCreator.createResourceId(service));
 
         // Check if there is a Resource with the specific id
         FacetFilter ff = new FacetFilter();

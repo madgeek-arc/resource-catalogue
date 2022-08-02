@@ -1,6 +1,5 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.Category;
@@ -136,7 +135,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return get(id, catalogueName);
     }
 
-
     @Override
     public Browsing<T> getAll(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
@@ -175,7 +173,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         filter.setBrowseBy(orderedBrowseBy);
         filter.setResourceType(getResourceType());
 
-        return getMatchingServices(filter);
+        return getMatchingResources(filter);
     }
 
     @Override
@@ -188,7 +186,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public T add(T resourceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Resource: {}", auth, resourceBundle);
         if (resourceBundle.getPayload().getId() == null) {
-            resourceBundle.getPayload().setId(idCreator.createResourceId(resourceBundle.getPayload()));
+            resourceBundle.getPayload().setId(idCreator.createResourceId(resourceBundle));
         }
         // if Resource version is empty set it null
         if ("".equals(resourceBundle.getPayload().getVersion())) {
@@ -334,8 +332,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     @Override
     public List<RichResource> getByIds(Authentication auth, String... ids) {
-        List<RichResource> services;
-        services = Arrays.stream(ids)
+        List<RichResource> resources;
+        resources = Arrays.stream(ids)
                 .map(id ->
                 {
                     try {
@@ -347,7 +345,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
                 })
                 .filter(Objects::nonNull)
                 .collect(toList());
-        return services;
+        return resources;
     }
 
     @Override
@@ -363,11 +361,11 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     @Override
-    public Browsing<ResourceHistory> getHistory(String serviceId, String catalogueId) {
+    public Browsing<ResourceHistory> getHistory(String resourceId, String catalogueId) {
         Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
         // get all resources with the specified Service id
-        List<Resource> resources = getResources(serviceId, catalogueId);
+        List<Resource> resources = getResources(resourceId, catalogueId);
 
         // for each resource (ServiceBundle), get its versions
         if (resources != null) {
@@ -454,9 +452,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         }
     }
 
-    String serialize(T serviceBundle) {
+    String serialize(T resourceBundle) {
         String serialized;
-        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.XML);
+        serialized = parserPool.serialize(resourceBundle, ParserService.ParserServiceTypes.XML);
         return serialized;
     }
 
@@ -468,8 +466,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return parserPool.deserialize(resource, typeParameterClass);
     }
 
-    private boolean exists(T serviceBundle) {
-        return getResource(serviceBundle.getPayload().getId(), serviceBundle.getPayload().getCatalogueId()) != null;
+    private boolean exists(T resourceBundle) {
+        return getResource(resourceBundle.getPayload().getId(), resourceBundle.getPayload().getCatalogueId()) != null;
     }
 
     public Resource getResourceById(String resourceId) {
@@ -506,17 +504,17 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     @Override
     public RichResource getRichResource(String id, String catalogueId, Authentication auth) {
-        T serviceBundle;
-        serviceBundle = get(id, catalogueId);
-        return createRichResource(serviceBundle, auth);
+        T resourceBundle;
+        resourceBundle = get(id, catalogueId);
+        return createRichResource(resourceBundle, auth);
     }
 
     @Override
     public Browsing<RichResource> getRichResources(FacetFilter ff, Authentication auth) {
-        Browsing<T> infraServices = getAll(ff, auth);
-        List<RichResource> richResourceList = createRichResources(infraServices.getResults(), auth);
-        return new Browsing<>(infraServices.getTotal(), infraServices.getFrom(), infraServices.getTo(),
-                richResourceList, infraServices.getFacets());
+        Browsing<T> resourceBundles = getAll(ff, auth);
+        List<RichResource> richResourceList = createRichResources(resourceBundles.getResults(), auth);
+        return new Browsing<>(resourceBundles.getTotal(), resourceBundles.getFrom(), resourceBundles.getTo(),
+                richResourceList, resourceBundles.getFacets());
     }
 
     @Override
@@ -566,36 +564,36 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     /**
      * Adds spaces after ',' if they don't already exist and removes spaces before
      *
-     * @param serviceBundle
+     * @param resourceBundle
      * @param specialCharacters
      * @return
      */
-    protected T prettifyServiceTextFields(T serviceBundle, String specialCharacters) {
-        serviceBundle.getPayload().setTagline(TextUtils.prettifyText(serviceBundle.getPayload().getTagline(), specialCharacters));
-        return serviceBundle;
+    protected T prettifyServiceTextFields(T resourceBundle, String specialCharacters) {
+        resourceBundle.getPayload().setTagline(TextUtils.prettifyText(resourceBundle.getPayload().getTagline(), specialCharacters));
+        return resourceBundle;
     }
 
-    private Browsing<T> getMatchingServices(FacetFilter ff) {
-        Browsing<T> services;
+    private Browsing<T> getMatchingResources(FacetFilter ff) {
+        Browsing<T> resources;
 
-        services = getResults(ff);
-        if (!services.getResults().isEmpty() && !services.getFacets().isEmpty()) {
-            services.setFacets(facetLabelService.createLabels(services.getFacets()));
+        resources = getResults(ff);
+        if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
+            resources.setFacets(facetLabelService.createLabels(resources.getFacets()));
         }
 
-        return services;
+        return resources;
     }
 
-    private List<RichResource> createRichVocabularies(List<T> serviceBundles) {
+    private List<RichResource> createRichVocabularies(List<T> resourceBundles) {
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
         List<RichResource> richResources = new ArrayList<>();
 
-        for (T serviceBundle : serviceBundles) {
-            RichResource richResource = new RichResource(serviceBundle);
+        for (T resourceBundle : resourceBundles) {
+            RichResource richResource = new RichResource(resourceBundle);
 
             // LanguageAvailabilities Names
-            if (serviceBundle.getPayload().getLanguageAvailabilities() != null) {
-                richResource.setLanguageAvailabilityNames(serviceBundle.getPayload().getLanguageAvailabilities()
+            if (resourceBundle.getPayload().getLanguageAvailabilities() != null) {
+                richResource.setLanguageAvailabilityNames(resourceBundle.getPayload().getLanguageAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(l -> allVocabularies.get(l).getName())
@@ -604,8 +602,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // GeographicAvailabilities Names
-            if (serviceBundle.getPayload().getGeographicalAvailabilities() != null) {
-                richResource.setGeographicAvailabilityNames(serviceBundle.getPayload().getGeographicalAvailabilities()
+            if (resourceBundle.getPayload().getGeographicalAvailabilities() != null) {
+                richResource.setGeographicAvailabilityNames(resourceBundle.getPayload().getGeographicalAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -614,24 +612,24 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // TRL Name
-            if (serviceBundle.getPayload().getTrl() != null && !serviceBundle.getPayload().getTrl().equals("")) {
-                richResource.setTrlName(allVocabularies.get(serviceBundle.getPayload().getTrl()).getName());
+            if (resourceBundle.getPayload().getTrl() != null && !resourceBundle.getPayload().getTrl().equals("")) {
+                richResource.setTrlName(allVocabularies.get(resourceBundle.getPayload().getTrl()).getName());
             }
 
             // LifeCycleStatus Name
-            if (serviceBundle.getPayload().getLifeCycleStatus() != null && !serviceBundle.getPayload().getLifeCycleStatus().equals("")) {
-                richResource.setLifeCycleStatusName(allVocabularies.get(serviceBundle.getPayload().getLifeCycleStatus()).getName());
+            if (resourceBundle.getPayload().getLifeCycleStatus() != null && !resourceBundle.getPayload().getLifeCycleStatus().equals("")) {
+                richResource.setLifeCycleStatusName(allVocabularies.get(resourceBundle.getPayload().getLifeCycleStatus()).getName());
             }
 
             // OrderType Name
-            if (serviceBundle.getPayload().getOrderType() != null && !serviceBundle.getPayload().getOrderType().equals("")) {
-                richResource.setOrderTypeName(allVocabularies.get(serviceBundle.getPayload().getOrderType()).getName());
+            if (resourceBundle.getPayload().getOrderType() != null && !resourceBundle.getPayload().getOrderType().equals("")) {
+                richResource.setOrderTypeName(allVocabularies.get(resourceBundle.getPayload().getOrderType()).getName());
             }
 
             // TargetUsers Names
-            if (serviceBundle.getPayload().getTargetUsers() != null) {
-                serviceBundle.getPayload().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
-                richResource.setTargetUsersNames(serviceBundle.getPayload().getTargetUsers()
+            if (resourceBundle.getPayload().getTargetUsers() != null) {
+                resourceBundle.getPayload().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
+                richResource.setTargetUsersNames(resourceBundle.getPayload().getTargetUsers()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -640,9 +638,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // AccessTypes Names
-            if (serviceBundle.getPayload().getAccessTypes() != null) {
-                serviceBundle.getPayload().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
-                richResource.setAccessTypeNames(serviceBundle.getPayload().getAccessTypes()
+            if (resourceBundle.getPayload().getAccessTypes() != null) {
+                resourceBundle.getPayload().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
+                richResource.setAccessTypeNames(resourceBundle.getPayload().getAccessTypes()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -651,9 +649,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // AccessModes Names
-            if (serviceBundle.getPayload().getAccessModes() != null) {
-                serviceBundle.getPayload().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
-                richResource.setAccessModeNames(serviceBundle.getPayload().getAccessModes()
+            if (resourceBundle.getPayload().getAccessModes() != null) {
+                resourceBundle.getPayload().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
+                richResource.setAccessModeNames(resourceBundle.getPayload().getAccessModes()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -662,9 +660,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // FundingBodies Names
-            if (serviceBundle.getPayload().getFundingBody() != null) {
-                serviceBundle.getPayload().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
-                richResource.setFundingBodyNames(serviceBundle.getPayload().getFundingBody()
+            if (resourceBundle.getPayload().getFundingBody() != null) {
+                resourceBundle.getPayload().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
+                richResource.setFundingBodyNames(resourceBundle.getPayload().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -673,9 +671,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // FundingPrograms Names
-            if (serviceBundle.getPayload().getFundingPrograms() != null) {
-                serviceBundle.getPayload().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
-                richResource.setFundingProgramNames(serviceBundle.getPayload().getFundingPrograms()
+            if (resourceBundle.getPayload().getFundingPrograms() != null) {
+                resourceBundle.getPayload().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
+                richResource.setFundingProgramNames(resourceBundle.getPayload().getFundingPrograms()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -685,8 +683,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
             // Domain Tree
             List<ScientificDomain> domains = new ArrayList<>();
-            if (serviceBundle.getPayload().getScientificDomains() != null) {
-                for (ServiceProviderDomain serviceProviderDomain : serviceBundle.getPayload().getScientificDomains()) {
+            if (resourceBundle.getPayload().getScientificDomains() != null) {
+                for (ServiceProviderDomain serviceProviderDomain : resourceBundle.getPayload().getScientificDomains()) {
                     ScientificDomain domain = new ScientificDomain();
                     if (serviceProviderDomain.getScientificDomain() != null && !serviceProviderDomain.getScientificDomain().equals("")) {
                         domain.setDomain(vocabularyService.get(serviceProviderDomain.getScientificDomain()));
@@ -705,8 +703,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
             // Category Tree
             List<Category> categories = new ArrayList<>();
-            if (serviceBundle.getPayload().getCategories() != null) {
-                for (ServiceCategory serviceCategory : serviceBundle.getPayload().getCategories()) {
+            if (resourceBundle.getPayload().getCategories() != null) {
+                for (ServiceCategory serviceCategory : resourceBundle.getPayload().getCategories()) {
                     Category category = new Category();
                     if (serviceCategory.getCategory() != null && !serviceCategory.getCategory().equals("")) {
                         String[] parts = serviceCategory.getCategory().split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
@@ -739,9 +737,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     private List<RichResource> createRichStatistics(List<RichResource> richResources, Authentication auth) {
-        Map<String, Integer> serviceVisits = analyticsService.getAllServiceVisits();
-        Map<String, List<Float>> serviceFavourites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
-        Map<String, List<Float>> serviceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
+        Map<String, Integer> resourceVisits = analyticsService.getAllServiceVisits();
+        Map<String, List<Float>> resourceFavorites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
+        Map<String, List<Float>> resourceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
         for (RichResource richResource : richResources) {
 
@@ -766,21 +764,21 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
                 }
             }
 
-            if (serviceRatings.containsKey(richResource.getService().getId())) {
-                int ratings = serviceRatings.get(richResource.getService().getId()).size();
-                float rating = serviceRatings.get(richResource.getService().getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
+            if (resourceRatings.containsKey(richResource.getService().getId())) {
+                int ratings = resourceRatings.get(richResource.getService().getId()).size();
+                float rating = resourceRatings.get(richResource.getService().getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
                 richResource.setRatings(ratings);
                 richResource.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
 
             }
 
-            if (serviceFavourites.containsKey(richResource.getService().getId())) {
-                int favourites = serviceFavourites.get(richResource.getService().getId()).stream().mapToInt(Float::intValue).sum();
+            if (resourceFavorites.containsKey(richResource.getService().getId())) {
+                int favourites = resourceFavorites.get(richResource.getService().getId()).stream().mapToInt(Float::intValue).sum();
                 richResource.setFavourites(favourites);
             }
 
             // set visits
-            Integer views = serviceVisits.get(richResource.getService().getId());
+            Integer views = resourceVisits.get(richResource.getService().getId());
             if (views != null) {
                 richResource.setViews(views);
             } else {
@@ -901,6 +899,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         filter.setBrowseBy(orderedBrowseBy);
 
         filter.setResourceType(getResourceType());
-        return getMatchingServices(filter);
+        return getMatchingResources(filter);
     }
 }

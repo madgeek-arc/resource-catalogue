@@ -60,7 +60,7 @@ public class ServiceController {
     }
 
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -80,14 +80,14 @@ public class ServiceController {
 
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id, catalogueId).getService(), HttpStatus.OK);
     }
 
     // Get the specified version of a RichService providing the Service id and version.
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId, #version) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isServiceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichResource> getRichService(@PathVariable("id") String id,
                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
@@ -97,7 +97,7 @@ public class ServiceController {
 
     @ApiOperation(value = "Creates a new Resource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
         ServiceBundle ret = this.infraService.addResource(new ServiceBundle(service), auth);
         logger.info("User '{}' created a new Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
@@ -105,7 +105,7 @@ public class ServiceController {
     }
 
     @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth,#service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle ret = this.infraService.updateResource(new ServiceBundle(service), comment, auth);
@@ -289,12 +289,6 @@ public class ServiceController {
                                                      @PathVariable String versionId, @ApiIgnore Authentication auth) {
         Service service = infraService.getVersionHistory(resourceId, catalogueId, versionId);
         return ResponseEntity.ok(service);
-    }
-
-    // Get all featured Services.
-    @GetMapping(path = "featured/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<? extends Service>> getFeaturedServices() {
-        return new ResponseEntity<>(infraService.createFeaturedResources(), HttpStatus.OK);
     }
 
     // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.

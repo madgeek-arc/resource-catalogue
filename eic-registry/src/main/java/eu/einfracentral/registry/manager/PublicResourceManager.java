@@ -54,7 +54,7 @@ public class PublicResourceManager extends ResourceManager<ServiceBundle> implem
         List<ServiceBundle> serviceBundleList = new ArrayList<>();
         Browsing<ServiceBundle> infraServiceBrowsing = super.getAll(facetFilter, authentication);
         for (ServiceBundle serviceBundle : infraServiceBrowsing.getResults()) {
-            if (securityService.isServiceProviderAdmin(authentication, serviceBundle.getId()) && serviceBundle.getMetadata().isPublished()) {
+            if (securityService.isResourceProviderAdmin(authentication, serviceBundle.getId()) && serviceBundle.getMetadata().isPublished()) {
                 serviceBundleList.add(serviceBundle);
             }
         }
