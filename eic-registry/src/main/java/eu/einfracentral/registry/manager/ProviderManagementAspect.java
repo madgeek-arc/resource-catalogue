@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.CatalogueBundle;
+import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.exception.ResourceException;
@@ -33,18 +34,21 @@ public class ProviderManagementAspect {
 
     private final PublicProviderManager publicProviderManager;
     private final PublicResourceManager publicResourceManager;
-    private final ResourceBundleService resourceBundleService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
-                                    RegistrationMailService registrationMailService, ResourceBundleService resourceBundleService,
+                                    RegistrationMailService registrationMailService, ResourceBundleService<ServiceBundle> serviceBundleService,
+                                    ResourceBundleService<DatasourceBundle> datasourceBundleService,
                                     SecurityService securityService, PublicProviderManager publicProviderManager,
                                     PublicResourceManager publicResourceManager) {
         this.providerService = providerService;
         this.registrationMailService = registrationMailService;
-        this.resourceBundleService = resourceBundleService;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
         this.securityService = securityService;
         this.publicProviderManager = publicProviderManager;
         this.publicResourceManager = publicResourceManager;
@@ -60,7 +64,7 @@ public class ProviderManagementAspect {
     }
 
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addService(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) " +
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) " +
             "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) )" +
             "&& args(serviceBundle, auth)", argNames = "serviceBundle,auth")
     public void updateProviderState(ServiceBundle serviceBundle, Authentication auth) {
@@ -165,7 +169,7 @@ public class ProviderManagementAspect {
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addService(String, " +
+            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(String, " +
             "org.springframework.security.core.Authentication))))", // pendingToInfra method
             returning = "serviceBundle")
     public void addResourceAsPublic(ServiceBundle serviceBundle) {
@@ -216,7 +220,7 @@ public class ProviderManagementAspect {
             if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                 logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                         serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                resourceBundleService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
+                serviceBundleService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
             }
         } catch (RuntimeException e) {
             logger.error(e);

@@ -140,9 +140,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
-        ret = super.add(serviceBundle, auth);
+//        ret = super.add(serviceBundle, auth);
 
-        return ret;
+        return serviceBundle;
     }
 
     @Override

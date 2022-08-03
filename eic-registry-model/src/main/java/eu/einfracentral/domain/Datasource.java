@@ -61,7 +61,7 @@ public class Datasource extends Service implements Identifiable{
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 5, required = true)
-    @FieldValidation(nullable = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_JURISDICTION)
     private String jurisdiction;
 
@@ -70,7 +70,7 @@ public class Datasource extends Service implements Identifiable{
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 6, required = true)
-    @FieldValidation()
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_CLASSIFICATION)
     private String datasourceClassification;
 
@@ -80,7 +80,7 @@ public class Datasource extends Service implements Identifiable{
     @XmlElementWrapper(required = true, name = "researchEntityTypes")
     @XmlElement(name = "researchEntityType")
     @ApiModelProperty(position = 7, required = true)
-    @FieldValidation()
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_RESEARCH_ENTITY_TYPE)
     private List<String> researchEntityTypes;
 
@@ -110,7 +110,7 @@ public class Datasource extends Service implements Identifiable{
     @XmlElementWrapper(name = "researchProductAccessPolicies")
     @XmlElement(name = "researchProductAccessPolicy")
     @ApiModelProperty(position = 10)
-    @FieldValidation(nullable = true)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductAccessPolicies;
 
@@ -131,7 +131,7 @@ public class Datasource extends Service implements Identifiable{
     @XmlElementWrapper(name = "researchProductMetadataAccessPolicies")
     @XmlElement(name = "researchProductMetadataAccessPolicy")
     @ApiModelProperty(position = 12)
-    @FieldValidation(nullable = true)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductMetadataAccessPolicies;
 

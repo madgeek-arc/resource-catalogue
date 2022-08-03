@@ -35,7 +35,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private static final Logger logger = LogManager.getLogger(VocabularyCurationManager.class);
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
-    private final ResourceBundleService resourceBundleService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private List<String> browseBy;
     private Map<String, String> labels;
 
@@ -46,7 +47,10 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private FacetLabelService facetLabelService;
 
     @Autowired
-    private AbstractResourceBundleManager abstractResourceBundleManager;
+    private AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager;
+
+    @Autowired
+    private AbstractResourceBundleManager<DatasourceBundle> abstractDatasourceBundleManager;
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;
@@ -54,12 +58,16 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
-                                     ResourceBundleService resourceBundleService, AbstractResourceBundleManager abstractResourceBundleManager) {
+                                     ResourceBundleService<ServiceBundle> serviceBundleService, ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                                     AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager,
+                                     AbstractResourceBundleManager<DatasourceBundle> abstractDatasourceBundleManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
-        this.resourceBundleService = resourceBundleService;
-        this.abstractResourceBundleManager = abstractResourceBundleManager;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
+        this.abstractServiceBundleManager = abstractServiceBundleManager;
+        this.abstractDatasourceBundleManager = abstractDatasourceBundleManager;
     }
 
 
@@ -220,7 +228,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, auth).getResults();
-        List<ServiceBundle> allResources = resourceBundleService.getAll(facetFilter, auth).getResults();
+        List<ServiceBundle> allResources = serviceBundleService.getAll(facetFilter, auth).getResults();
         List<String> providerIds = new ArrayList<>();
         List<String> resourceIds = new ArrayList<>();
         for (ProviderBundle provider : allProviders){
@@ -326,7 +334,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         filter.setResourceType(getResourceType());
         browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
 
-        browsing.setFacets(abstractResourceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
+        browsing.setFacets(abstractServiceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
         return browsing;
     }
 

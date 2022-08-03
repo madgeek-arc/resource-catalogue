@@ -1,10 +1,7 @@
 package eu.einfracentral.validators;
 
 import eu.einfracentral.annotation.*;
-import eu.einfracentral.domain.Bundle;
-import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -56,7 +53,8 @@ public class FieldValidator {
     public void validate(Object o) throws IllegalAccessException {
         validationLocation = new ArrayDeque<>();
         validateFields(o);
-        if (o.getClass().getSuperclass() != null && o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle")) {
+        if (o.getClass().getSuperclass() != null && (o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle")
+                || o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.ResourceBundle"))) {
             try {
                 Field payload = Bundle.class.getDeclaredField("payload");
                 payload.setAccessible(true);
@@ -75,6 +73,9 @@ public class FieldValidator {
 
         // get declared fields of class
         List<Field> declaredFields = new ArrayList<>(Arrays.asList(o.getClass().getDeclaredFields()));
+        if (o instanceof Datasource){
+            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
+        }
 
         // validate every field
         for (Field field : declaredFields) {
@@ -306,7 +307,13 @@ public class FieldValidator {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
                                         field.getName()));
-                    }
+                    } else if ((eu.einfracentral.domain.Datasource.class.equals(annotation.idClass())
+                        || DatasourceBundle.class.equals(annotation.idClass()))
+                        && resourceBundleService.get(o.toString()) == null) {
+                    throw new ValidationException(
+                            String.format("Field '%s' should contain the ID of an existing Datasource",
+                                    field.getName()));
+                }
                 } catch (ResourceException | ResourceNotFoundException e) {
                     throw new ValidationException(
                             String.format("%s with ID '%s' does not exist. Found in field '%s'",

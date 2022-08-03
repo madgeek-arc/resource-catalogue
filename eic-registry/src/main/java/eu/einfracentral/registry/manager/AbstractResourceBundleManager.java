@@ -484,6 +484,12 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+        // try for datasource
+        if (resources.getResults().isEmpty()){
+            resources = searchService
+                    .cqlQuery(String.format("datasource_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+        }
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);
         }
@@ -496,6 +502,12 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         resources = searchService
                 .cqlQuery(String.format("infra_service_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+        // try for datasource
+        if (resources.getResults().isEmpty()){
+            resources = searchService
+                    .cqlQuery(String.format("datasource_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
+                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+        }
         if (resources != null) {
             return resources.getResults();
         }

@@ -41,7 +41,7 @@ public class ServiceController {
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final ResourceBundleService<ServiceBundle> infraService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final DataSource dataSource;
+    private final DataSource commonDataSource;
 
     @Value("${auditing.interval:6}")
     private String auditingInterval;
@@ -53,10 +53,10 @@ public class ServiceController {
     @Autowired
     ServiceController(ResourceBundleService<ServiceBundle> service,
                       ProviderService<ProviderBundle, Authentication> provider,
-                      DataSource dataSource) {
+                      DataSource commonDataSource) {
         this.infraService = service;
         this.providerService = provider;
-        this.dataSource = dataSource;
+        this.commonDataSource = commonDataSource;
     }
 
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -80,15 +80,15 @@ public class ServiceController {
 
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<Service> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(infraService.get(id, catalogueId).getService(), HttpStatus.OK);
     }
 
-    // Get the specified version of a RichService providing the Service id and version.
+    // Get the specified version of a RichService providing the Service id
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
-            "or @securityService.isServiceProviderAdmin(#auth, #id)")
+            "or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichResource> getRichService(@PathVariable("id") String id,
                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                        @ApiIgnore Authentication auth) {
@@ -178,7 +178,7 @@ public class ServiceController {
 
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(commonDataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
         String query = "";
         switch (type) {
