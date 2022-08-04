@@ -1,8 +1,6 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.domain.RichResource;
-import eu.einfracentral.domain.Service;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
@@ -112,9 +110,10 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         ServiceBundle serviceBundle = new ServiceBundle();
+        ServiceBundle toCreateId = new ServiceBundle();
+        toCreateId.setService(service);
         if (service.getId() == null || service.getId().equals("")) {
-//            service.setId(idCreator.createResourceId(service));
-            service.setId("1");
+            service.setId(idCreator.createResourceId(toCreateId));
         }
         try {
             serviceBundle = pendingServiceManager.get(service.getId());
@@ -146,9 +145,10 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         ServiceBundle serviceBundle = null;
 
         try { // check if service already exists
+            ServiceBundle toCreateId = new ServiceBundle();
+            toCreateId.setService(service);
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-//                service.setId(idCreator.createResourceId(service));
-                service.setId("1");
+                service.setId(idCreator.createResourceId(toCreateId));
             }
             serviceBundle = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {

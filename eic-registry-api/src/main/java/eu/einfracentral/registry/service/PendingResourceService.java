@@ -109,10 +109,9 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * Get the service resource.
      *
      * @param serviceId
-     * @param version
      * @return Resource
      */
-    Resource getPendingResource(String serviceId, String version);
+    Resource getPendingResourceViaServiceId(String serviceId);
 
     /**
      * Get the provider resource.
@@ -120,6 +119,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * @param providerId
      * @return Resource
      */
-    Resource getPendingResource(String providerId);
+    Resource getPendingResourceViaProviderId(String providerId);
 
 }

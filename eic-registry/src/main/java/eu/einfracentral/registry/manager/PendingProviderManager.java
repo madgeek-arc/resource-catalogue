@@ -184,7 +184,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = this.getPendingResource(providerBundle.getId());
+        Resource resource = this.getPendingResourceViaProviderId(providerBundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
 
@@ -232,7 +232,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = this.getPendingResource(providerId);
+        Resource resource = this.getPendingResourceViaProviderId(providerId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
 
@@ -314,7 +314,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         update(get(providerId), auth);
     }
 
-    public Resource getPendingResource(String providerId) {
+    public Resource getPendingResourceViaProviderId(String providerId) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueName), resourceType.getName());
@@ -322,7 +322,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    public Resource getPendingResource(String serviceId, String serviceVersion){
+    public Resource getPendingResourceViaServiceId(String serviceId){
         return null;
     }
 }
