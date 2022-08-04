@@ -26,12 +26,12 @@ import java.util.Map;
 @Api(value = "Get General Information")
 public class InfoController {
 
-    private final ResourceBundleService<ServiceBundle> infraService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
     InfoController(ResourceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
-        this.infraService = service;
+        this.resourceBundleService = service;
         this.providerService = provider;
     }
 
@@ -42,9 +42,9 @@ public class InfoController {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", true);
         servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
-        Paging<ServiceBundle> infraServices = infraService.getAll(ff, null);
-        servicesInfo.put("services", (long) infraServices.getTotal());
-        for (Facet f : infraServices.getFacets()) {
+        Paging<ServiceBundle> serviceBundles = resourceBundleService.getAll(ff, null);
+        servicesInfo.put("services", (long) serviceBundles.getTotal());
+        for (Facet f : serviceBundles.getFacets()) {
             if (f.getField().equals("resourceType")) {
                 continue;
             }

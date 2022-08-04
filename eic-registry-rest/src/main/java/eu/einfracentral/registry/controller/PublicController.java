@@ -218,7 +218,7 @@ public class PublicController {
 
     //    @ApiOperation(value = "Returns the Public ServiceBundle with the given id.")
     @GetMapping(path = "/resource/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getPublicInfraService(@PathVariable("id") String id,
                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
@@ -275,12 +275,12 @@ public class PublicController {
             ff.addFilter("status", "approved resource");
         }
         List<Service> serviceList = new LinkedList<>();
-        Paging<ServiceBundle> infraServicePaging = resourceBundleService.getAll(ff, auth);
-        for (ServiceBundle serviceBundle : infraServicePaging.getResults()) {
+        Paging<ServiceBundle> serviceBundlePaging = publicResourceManager.getAll(ff, auth);
+        for (ServiceBundle serviceBundle : serviceBundlePaging.getResults()) {
             serviceList.add(serviceBundle.getService());
         }
-        Paging<Service> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
-                infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
+        Paging<Service> servicePaging = new Paging<>(serviceBundlePaging.getTotal(), serviceBundlePaging.getFrom(),
+                serviceBundlePaging.getTo(), serviceList, serviceBundlePaging.getFacets());
         return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 
@@ -321,10 +321,10 @@ public class PublicController {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
-        Paging<ServiceBundle> infraServicePaging = resourceBundleService.getAll(ff, auth);
-        List<ServiceBundle> serviceList = new LinkedList<>(infraServicePaging.getResults());
-        Paging<ServiceBundle> servicePaging = new Paging<>(infraServicePaging.getTotal(), infraServicePaging.getFrom(),
-                infraServicePaging.getTo(), serviceList, infraServicePaging.getFacets());
+        Paging<ServiceBundle> serviceBundlePaging = resourceBundleService.getAll(ff, auth);
+        List<ServiceBundle> serviceList = new LinkedList<>(serviceBundlePaging.getResults());
+        Paging<ServiceBundle> servicePaging = new Paging<>(serviceBundlePaging.getTotal(), serviceBundlePaging.getFrom(),
+                serviceBundlePaging.getTo(), serviceList, serviceBundlePaging.getFacets());
         return new ResponseEntity<>(servicePaging, HttpStatus.OK);
     }
 

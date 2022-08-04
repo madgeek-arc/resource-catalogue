@@ -30,7 +30,7 @@ import java.util.List;
 public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
-    private final ResourceBundleService<ServiceBundle> infraService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
     @Value("${elastic.index.max_result_window:10000}")
@@ -38,7 +38,7 @@ public class CSVController {
 
     @Autowired
     CSVController(ResourceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
-        this.infraService = service;
+        this.resourceBundleService = service;
         this.providerService = provider;
     }
 
@@ -48,8 +48,8 @@ public class CSVController {
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        Paging<ServiceBundle> infraServices = infraService.getAll(ff, auth);
-        String csvData = listServicesToCSV(infraServices.getResults());
+        Paging<ServiceBundle> serviceBundles = resourceBundleService.getAll(ff, auth);
+        String csvData = listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
         return ResponseEntity.ok(csvData);
     }

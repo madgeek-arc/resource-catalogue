@@ -20,17 +20,17 @@ public class MigrationManager implements MigrationService {
 
     private static final Logger logger = LogManager.getLogger(MigrationManager.class);
 
-    private final ServiceBundleManager infraServiceManager;
+    private final ServiceBundleManager serviceBundleManager;
     private final ProviderManager providerService;
     private final ResourceService resourceService;
     private final JmsTemplate jmsTopicTemplate;
 
     @Autowired
-    public MigrationManager(ServiceBundleManager infraServiceManager,
+    public MigrationManager(ServiceBundleManager serviceBundleManager,
                             ProviderManager providerService,
                             ResourceService resourceService,
                             JmsTemplate jmsTopicTemplate) {
-        this.infraServiceManager = infraServiceManager;
+        this.serviceBundleManager = serviceBundleManager;
         this.providerService = providerService;
         this.resourceService = resourceService;
         this.jmsTopicTemplate = jmsTopicTemplate;
@@ -72,7 +72,7 @@ public class MigrationManager implements MigrationService {
     }
 
     private void changeResourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<ServiceBundle> serviceBundles = infraServiceManager.getResourceBundles(providerId, authentication);
+        List<ServiceBundle> serviceBundles = serviceBundleManager.getResourceBundles(providerId, authentication);
         // Resources
         String jmsTopic = "resource.update";
         for (ServiceBundle serviceBundle : serviceBundles) {
@@ -84,8 +84,8 @@ public class MigrationManager implements MigrationService {
                 serviceBundle.getService().setId(id);
             }
             serviceBundle.getService().setCatalogueId(newCatalogueId);
-            Resource resource = infraServiceManager.getResource(oldResourceId, catalogueId);
-            resource.setPayload(infraServiceManager.serialize(serviceBundle));
+            Resource resource = serviceBundleManager.getResource(oldResourceId, catalogueId);
+            resource.setPayload(serviceBundleManager.serialize(serviceBundle));
             logger.debug("Migrating Resource: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             jmsTopicTemplate.convertAndSend(jmsTopic, serviceBundle);

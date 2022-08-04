@@ -398,8 +398,8 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ServiceBundle>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
-        Paging<ServiceBundle> infraServices = resourceBundleService.getResourceBundles(catalogueId, providerId, auth);
-        return new ResponseEntity<>(infraServices, HttpStatus.OK);
+        Paging<ServiceBundle> serviceBundles = resourceBundleService.getResourceBundles(catalogueId, providerId, auth);
+        return new ResponseEntity<>(serviceBundles, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes the Service of the specific Catalogue with the given id.")
