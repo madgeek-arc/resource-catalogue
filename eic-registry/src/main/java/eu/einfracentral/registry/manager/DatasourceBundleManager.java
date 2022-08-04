@@ -659,4 +659,18 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
         return datasourceBundle;
     }
+
+    public List<Datasource> getOpenAIREDatasources(){
+        return null;
+    }
+
+    public Datasource getOpenAIREDatasourceById(){
+//        transformOpenAIREToEOSCDatasource();
+        return null;
+    }
+
+    public Datasource transformOpenAIREToEOSCDatasource(Datasource datasource){
+        return null;
+    }
+
 }
