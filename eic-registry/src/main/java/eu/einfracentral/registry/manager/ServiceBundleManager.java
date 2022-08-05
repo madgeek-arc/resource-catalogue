@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
-@org.springframework.stereotype.Service("infraServiceService")
+@org.springframework.stereotype.Service
 public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
@@ -65,7 +65,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     @Override
     public String getResourceType() {
-        return "infra_service";
+        return "service";
     }
 
     @Override

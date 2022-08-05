@@ -37,7 +37,7 @@ public class PublicResourceManager extends ResourceManager<ServiceBundle> implem
 
     @Override
     public String getResourceType() {
-        return "infra_service";
+        return "service";
     }
 
     @Override
@@ -52,14 +52,14 @@ public class PublicResourceManager extends ResourceManager<ServiceBundle> implem
         }
 
         List<ServiceBundle> serviceBundleList = new ArrayList<>();
-        Browsing<ServiceBundle> infraServiceBrowsing = super.getAll(facetFilter, authentication);
-        for (ServiceBundle serviceBundle : infraServiceBrowsing.getResults()) {
+        Browsing<ServiceBundle> serviceBundleBrowsing = super.getAll(facetFilter, authentication);
+        for (ServiceBundle serviceBundle : serviceBundleBrowsing.getResults()) {
             if (securityService.isResourceProviderAdmin(authentication, serviceBundle.getId()) && serviceBundle.getMetadata().isPublished()) {
                 serviceBundleList.add(serviceBundle);
             }
         }
-        return new Browsing<>(infraServiceBrowsing.getTotal(), infraServiceBrowsing.getFrom(),
-                infraServiceBrowsing.getTo(), serviceBundleList, infraServiceBrowsing.getFacets());
+        return new Browsing<>(serviceBundleBrowsing.getTotal(), serviceBundleBrowsing.getFrom(),
+                serviceBundleBrowsing.getTo(), serviceBundleList, serviceBundleBrowsing.getFacets());
     }
 
     @Override

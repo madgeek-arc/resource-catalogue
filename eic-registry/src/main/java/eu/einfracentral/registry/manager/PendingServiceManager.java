@@ -101,16 +101,12 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
-//        Resource existing = this.whereID(serviceBundle.getId(), true);
-        Resource existing = this.getPendingResource(serviceBundle.getService().getId(), serviceBundle.getService().getVersion());
-        if (existing == null){
-            existing = this.getPendingResource(serviceBundle.getService().getId(), null);
-        }
+        Resource existing = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
         // save existing resource with new payload
         existing.setPayload(serialize(serviceBundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating PendingService: {}", serviceBundle);
+        logger.debug("Updating Pending Service: {}", serviceBundle);
         return serviceBundle;
     }
 
@@ -126,7 +122,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
         ServiceBundle serviceBundle = resourceBundleService.get(serviceId);
         Resource resource = resourceBundleService.getResource(serviceBundle.getService().getId(), catalogueName);
-        resource.setResourceTypeName("infra_service");
+        resource.setResourceTypeName("service");
         resourceService.changeResourceType(resource, resourceType);
         return serviceBundle;
     }
@@ -168,9 +164,8 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         serviceBundle = this.update(serviceBundle, auth);
-        ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-//        Resource resource = this.getResource(serviceBundle.getId());
-        Resource resource = this.getPendingResource(serviceBundle.getService().getId(), serviceBundle.getService().getVersion());
+        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
+        Resource resource = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -220,9 +215,8 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-//        Resource resource = this.getResource(serviceId);
-        Resource resource = this.getPendingResource(serviceId, serviceBundle.getService().getVersion());
+        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
+        Resource resource = this.getPendingResourceViaServiceId(serviceId);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -252,35 +246,18 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
     }
 
-    public Resource getPendingResource(String serviceId, String serviceVersion) {
+    public Resource getPendingResourceViaServiceId(String serviceId) {
         Paging<Resource> resources;
-        if (serviceVersion == null || "".equals(serviceVersion)) {
-            resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
-                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-            // return the latest modified resource that does not contain a version attribute
-            for (Resource resource : resources.getResults()) {
-                if (!resource.getPayload().contains("<tns:version>")) {
-                    return resource;
-                }
-            }
-            if (resources.getTotal() > 0) {
-                return resources.getResults().get(0);
-            }
-            return null;
-        } else if ("latest".equals(serviceVersion)) {
-            resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\" AND latest = true", serviceId, catalogueName),
-                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
-        } else {
-            resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\" AND version = \"%s\"", serviceId, catalogueName, serviceVersion), resourceType.getName());
+        resources = searchService
+                .cqlQuery(String.format("service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
+                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+        if (resources.getTotal() > 0) {
+            return resources.getResults().get(0);
         }
-        assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return null;
     }
 
-    public Resource getPendingResource(String providerId) {
+    public Resource getPendingResourceViaProviderId(String providerId) {
         return null;
     }
 }

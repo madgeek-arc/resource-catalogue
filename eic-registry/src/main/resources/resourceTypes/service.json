@@ -315,10 +315,10 @@
       "name": "status",
       "path": "//*[local-name()='serviceBundle']/*[local-name()='status']/text()",
       "type": "java.lang.String"
-    },
+    }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "infra_service",
+  "name": "service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/identifiers_refactoring/eic-registry-model/src/main/resources/schema1.xsd"

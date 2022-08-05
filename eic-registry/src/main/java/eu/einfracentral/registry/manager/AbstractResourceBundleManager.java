@@ -482,7 +482,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("infra_service_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
+                .cqlQuery(String.format("service_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         // try for datasource
         if (resources.getResults().isEmpty()){
@@ -500,7 +500,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public List<Resource> getResources(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("infra_service_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
+                .cqlQuery(String.format("service_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         // try for datasource
         if (resources.getResults().isEmpty()){
@@ -536,7 +536,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     @Override
     public List<RichResource> createRichResources(List<T> resourceBundleList, Authentication auth) {
-        logger.trace("Creating RichServices from a list of InfraServices\nAuthentication: {}", auth);
+        logger.trace("Creating RichServices from a list of ResourceBundles\nAuthentication: {}", auth);
         List<RichResource> richResources = createRichVocabularies(resourceBundleList);
         createRichStatistics(richResources, auth);
         createProviderInfo(richResources, auth);

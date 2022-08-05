@@ -68,7 +68,7 @@ public class InfraServiceController {
     }
 
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<ServiceBundle> get(@PathVariable("id") String id,
                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                              @ApiIgnore Authentication auth) {
