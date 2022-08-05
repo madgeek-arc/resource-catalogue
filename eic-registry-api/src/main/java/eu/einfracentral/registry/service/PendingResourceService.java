@@ -15,16 +15,6 @@ import java.util.stream.Collectors;
 public interface PendingResourceService<T extends Bundle> extends ResourceService<T, Authentication> {
 
     /**
-     * Updates the resource and sets a new id.
-     *
-     * @param t
-     * @param auth
-     * @return
-     */
-    @Override
-    T update(T t, Authentication auth);
-
-    /**
      * Transforms the resource to pending.
      *
      * @param t

@@ -181,52 +181,8 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToActive(String serviceId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
         ServiceBundle serviceBundle = this.get(serviceId);
-        resourceBundleService.validate(serviceBundle);
-
-        // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (serviceBundle.getLoggingInfo() != null) {
-            loggingInfoList = serviceBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
-        serviceBundle.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfo);
-
-        // set resource status according to Provider's templateStatus
-        if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
-            serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
-            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
-            loggingInfoList.add(loggingInfoApproved);
-
-            // latestOnboardingInfo
-            serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);
-        } else{
-            serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
-        }
-
-        serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = this.getPendingResourceViaServiceId(serviceId);
-        resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, infraResourceType);
-
-        try {
-            serviceBundle = resourceBundleService.update(serviceBundle, auth);
-        } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return serviceBundle;
+        return transformToActive(serviceBundle, auth);
     }
 
     public Object getPendingRich(String id, Authentication auth) {

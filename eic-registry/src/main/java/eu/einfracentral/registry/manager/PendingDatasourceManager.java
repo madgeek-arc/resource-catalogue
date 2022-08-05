@@ -122,7 +122,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         logger.trace("User '{}' is attempting to transform the Active Datasource with id {} to Pending", auth, datasourceId);
         DatasourceBundle datasourceBundle = resourceBundleService.get(datasourceId);
         Resource resource = resourceBundleService.getResource(datasourceBundle.getDatasource().getId(), catalogueName);
-        resource.setResourceTypeName("service");
+        resource.setResourceTypeName("pending_datasource");
         resourceService.changeResourceType(resource, resourceType);
         return datasourceBundle;
     }
@@ -164,7 +164,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         datasourceBundle = this.update(datasourceBundle, auth);
-        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
+        ResourceType infraResourceType = resourceTypeService.getResourceType("datasource");
         Resource resource = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
@@ -181,52 +181,8 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle transformToActive(String datasourceId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Datasource with id {} to Active", auth, datasourceId);
         DatasourceBundle datasourceBundle = this.get(datasourceId);
-        resourceBundleService.validate(datasourceBundle);
-
-        // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (datasourceBundle.getLoggingInfo() != null) {
-            loggingInfoList = datasourceBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
-        datasourceBundle.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardInfo
-        datasourceBundle.setLatestOnboardingInfo(loggingInfo);
-
-        // set resource status according to Provider's templateStatus
-        if (providerManager.get(datasourceBundle.getDatasource().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
-            datasourceBundle.setStatus(vocabularyService.get("approved resource").getId());
-            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
-            loggingInfoList.add(loggingInfoApproved);
-
-            // latestOnboardingInfo
-            datasourceBundle.setLatestOnboardingInfo(loggingInfoApproved);
-        } else{
-            datasourceBundle.setStatus(vocabularyService.get("pending resource").getId());
-        }
-
-        datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = this.getPendingResourceViaServiceId(datasourceId);
-        resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, infraResourceType);
-
-        try {
-            datasourceBundle = resourceBundleService.update(datasourceBundle, auth);
-        } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return datasourceBundle;
+        return transformToActive(datasourceBundle, auth);
     }
 
     public Object getPendingRich(String id, Authentication auth) {

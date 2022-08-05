@@ -88,7 +88,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
 
     @PostMapping(path = "/updateDatasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource)")
-    public ResponseEntity<Datasource> updateDatasource(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Datasource> updateDatasource(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasourceBundle = pendingDatasourceManager.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
         return new ResponseEntity<>(pendingDatasourceManager.update(datasourceBundle, auth).getDatasource(), HttpStatus.OK);
@@ -119,7 +119,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
             datasourceBundle = pendingDatasourceManager.get(datasource.getId());
             datasourceBundle.setDatasource(datasource);
             datasourceBundle = pendingDatasourceManager.update(datasourceBundle, auth);
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             logger.debug("Pending Datasource with id '{}' does not exist. Creating it...", datasource.getId());
             datasourceBundle.setDatasource(datasource);
             datasourceBundle = pendingDatasourceManager.add(datasourceBundle, auth);
@@ -129,7 +129,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
 
     @PutMapping(path = "/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource)")
-    public ResponseEntity<Datasource> temporarySaveDatasource(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Datasource> temporarySaveDatasource(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         pendingDatasourceManager.transformToPending(datasource.getId(), auth);
         DatasourceBundle datasourceBundle = pendingDatasourceManager.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
@@ -138,7 +138,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
 
     @PutMapping(path = "/transform/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource)")
-    public ResponseEntity<Datasource> pendingToInfra(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Datasource> pendingToInfra(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         if (datasource == null) {
             throw new ServiceException("Cannot add a null Datasource");
         }

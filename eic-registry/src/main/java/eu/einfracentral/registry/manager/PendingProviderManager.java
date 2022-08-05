@@ -147,7 +147,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Provider with id '{}' to Pending", auth, providerId);
         Resource resource = providerManager.getResource(providerId, catalogueName);
-        resource.setResourceTypeName("provider"); //make sure that resource type is present
+        resource.setResourceTypeName("pending_provider"); //make sure that resource type is present
         resourceService.changeResourceType(resource, resourceType);
         return deserialize(resource);
     }
@@ -202,48 +202,8 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Provider with id {} to Active", auth, providerId);
         ProviderBundle providerBundle = get(providerId);
-
-        if (providerManager.exists(providerBundle)) {
-            throw new ResourceException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()), HttpStatus.CONFLICT);
-        }
-        providerManager.validate(providerBundle);
-
-        // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (providerBundle.getLoggingInfo() != null) {
-            loggingInfoList = providerBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
-        providerBundle.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardInfo
-        providerBundle.setLatestOnboardingInfo(loggingInfo);
-
-        // update providerStatus
-        providerBundle.setStatus(vocabularyService.get("pending provider").getId());
-        providerBundle.setTemplateStatus(vocabularyService.get("no template status").getId());
-
-        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = this.getPendingResourceViaProviderId(providerId);
-        resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, providerResourceType);
-
-        try {
-            providerBundle = providerManager.update(providerBundle, auth);
-        } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        registrationMailService.sendEmailsToNewlyAddedAdmins(providerBundle, null);
-        return providerBundle;
+        return transformToActive(providerBundle, auth);
     }
 
 
