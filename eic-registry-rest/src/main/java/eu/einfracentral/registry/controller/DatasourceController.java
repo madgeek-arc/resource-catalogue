@@ -26,13 +26,14 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping({"dataSource"})
-@Api(description = "Operations for DataSources")
-public class DataSourceController {
+@RequestMapping({"datasource"})
+@Api(description = "Operations for Datasources")
+public class DatasourceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final ResourceBundleService<DatasourceBundle> datasourceService;
@@ -46,7 +47,7 @@ public class DataSourceController {
     private String catalogueName;
 
     @Autowired
-    DataSourceController(ResourceBundleService<DatasourceBundle> datasourceService,
+    DatasourceController(ResourceBundleService<DatasourceBundle> datasourceService,
                          ProviderService<ProviderBundle, Authentication> provider,
                          DataSource commonDataSource) {
         this.datasourceService = datasourceService;
@@ -157,9 +158,9 @@ public class DataSourceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<RichResource>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<RichResource>> getRichDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                   @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -167,8 +168,17 @@ public class DataSourceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", true);
         ff.addFilter("published", false);
-        Paging<RichResource> services = datasourceService.getRichResources(ff, auth);
-        return ResponseEntity.ok(services);
+        Paging<RichResource> datasources = datasourceService.getRichResources(ff, auth);
+        return ResponseEntity.ok(datasources);
     }
 
+    @GetMapping(path = "/getOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String getOpenAIREDatasources() throws IOException {
+        return datasourceService.getOpenAIREDatasources();
+    }
+
+    @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
+        return datasourceService.getOpenAIREDatasourceById(datasourceId);
+    }
 }

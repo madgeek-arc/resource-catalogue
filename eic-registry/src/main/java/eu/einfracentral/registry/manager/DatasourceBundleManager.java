@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -19,19 +20,19 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
@@ -660,16 +661,41 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
-    public List<Datasource> getOpenAIREDatasources(){
-        return null;
+public String getOpenAIREDatasources() { //FIXME: response JSON structure is different than CURL's one (map, myArrayList)
+    RestTemplate restTemplate = new RestTemplate();
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("accept", "application/json");
+    headers.add("Content-Type", "application/json");
+    String url = "https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation";
+
+    String data = "{  \"country\": \"GR\"}";
+    HttpEntity<String> entity = new HttpEntity<>(data, headers);
+    String response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
+
+    if (response != null){
+        JSONObject obj = new JSONObject(response);
+        JSONArray arr = obj.getJSONArray("datasourceInfo");
+        return new Gson().toJson(arr);
+    }
+    return null;
+}
+
+    public String getOpenAIREDatasourceById(String datasourceId) {
+        String allOpenAIREDatasources = getOpenAIREDatasources();
+        JSONObject obj = new JSONObject(allOpenAIREDatasources);
+        JSONArray arr = obj.getJSONArray("myArrayList");
+        for(int i = 0; i < arr .length(); i++) {
+            JSONObject map = arr.getJSONObject(i);
+            JSONObject internalMap = map.getJSONObject("map");
+            if (internalMap.get("id").equals(datasourceId)){
+                return new Gson().toJson(arr.getJSONObject(i));
+            }
+        }
+//        transformOpenAIREToEOSCDatasource(); //TODO: There are no identical fields between an OpenAIRE and an EOSC datasource?
+        throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
     }
 
-    public Datasource getOpenAIREDatasourceById(){
-//        transformOpenAIREToEOSCDatasource();
-        return null;
-    }
-
-    public Datasource transformOpenAIREToEOSCDatasource(Datasource datasource){
+    public Datasource transformOpenAIREToEOSCDatasource(String openaireDatasource){
         return null;
     }
 
