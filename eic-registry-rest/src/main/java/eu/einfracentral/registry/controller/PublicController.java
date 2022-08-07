@@ -46,8 +46,8 @@ public class PublicController {
     @Autowired
     PublicController(@Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
                      ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
-                     @Qualifier("publicResourceServiceManager") ResourceService<ServiceBundle, Authentication> publicResourceServiceManager,
-                     @Qualifier("publicResourceDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicResourceDatasourceManager,
+                     @Qualifier("publicResourceManager") ResourceService<ServiceBundle, Authentication> publicResourceServiceManager,
+                     @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicResourceDatasourceManager,
                      ResourceBundleService<ServiceBundle> resourceBundleServiceService, ResourceBundleService<DatasourceBundle> resourceBundleDatasourceService) {
         this.publicProviderManager = publicProviderManager;
         this.providerService = providerService;
