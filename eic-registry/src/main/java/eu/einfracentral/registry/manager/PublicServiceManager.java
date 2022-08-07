@@ -22,14 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicResourceManager")
-public class PublicResourceManager extends ResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
+public class PublicServiceManager extends ResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(PublicResourceManager.class);
+    private static final Logger logger = LogManager.getLogger(PublicServiceManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
 
     @Autowired
-    public PublicResourceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicServiceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
         super(ServiceBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
