@@ -425,9 +425,9 @@ public class PublicController {
         for (DatasourceBundle datasourceBundle : datasourceBundlePaging.getResults()) {
             datasourceList.add(datasourceBundle.getDatasource());
         }
-        Paging<Datasource> servicePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
+        Paging<Datasource> datasourcePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
                 datasourceBundlePaging.getTo(), datasourceList, datasourceBundlePaging.getFacets());
-        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
+        return new ResponseEntity<>(datasourcePaging, HttpStatus.OK);
     }
 
     @ApiImplicitParams({

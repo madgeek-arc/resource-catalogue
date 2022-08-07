@@ -37,7 +37,7 @@ public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> i
 
     @Override
     public String getResourceType() {
-        return "service";
+        return "datasource";
     }
 
     @Override
