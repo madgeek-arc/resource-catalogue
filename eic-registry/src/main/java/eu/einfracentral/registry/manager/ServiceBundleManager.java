@@ -17,11 +17,13 @@ import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
@@ -655,11 +657,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return serviceBundle;
     }
 
-    public String getOpenAIREDatasources() {
+    public ResponseEntity<String> getOpenAIREDatasources() {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
-    public String getOpenAIREDatasourceById(String datasourceId) {
+    public ResponseEntity<String> getOpenAIREDatasourceById(String datasourceId) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 

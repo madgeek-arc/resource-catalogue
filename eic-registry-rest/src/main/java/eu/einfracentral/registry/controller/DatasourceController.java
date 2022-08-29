@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -172,13 +173,34 @@ public class DatasourceController {
         return ResponseEntity.ok(datasources);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+    public ResponseEntity<Paging<DatasourceBundle>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                       @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("resource_organisation", id);
+        return ResponseEntity.ok(datasourceService.getAll(ff, auth));
+    }
+
     @GetMapping(path = "/getOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public String getOpenAIREDatasources() throws IOException {
+    public ResponseEntity<String> getOpenAIREDatasources() throws IOException {
         return datasourceService.getOpenAIREDatasources();
     }
 
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public String getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
+    public ResponseEntity<String> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
         return datasourceService.getOpenAIREDatasourceById(datasourceId);
     }
 }

@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -661,12 +662,13 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
-public String getOpenAIREDatasources() { //FIXME: response JSON structure is different than CURL's one (map, myArrayList)
+public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON structure is different than CURL's one (map, myArrayList)
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.add("accept", "application/json");
     headers.add("Content-Type", "application/json");
-    String url = "https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation";
+    // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
+    String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation";
 
     String data = "{  \"country\": \"GR\"}";
     HttpEntity<String> entity = new HttpEntity<>(data, headers);
@@ -674,24 +676,29 @@ public String getOpenAIREDatasources() { //FIXME: response JSON structure is dif
 
     if (response != null){
         JSONObject obj = new JSONObject(response);
-        JSONArray arr = obj.getJSONArray("datasourceInfo");
-        return new Gson().toJson(arr);
+        Gson gson = new Gson();
+        JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+        jsonObj.getAsJsonObject().remove("header");
+        return new ResponseEntity<>(jsonObj.toString(), HttpStatus.OK);
     }
     return null;
 }
 
-    public String getOpenAIREDatasourceById(String datasourceId) {
-        String allOpenAIREDatasources = getOpenAIREDatasources();
-        JSONObject obj = new JSONObject(allOpenAIREDatasources);
-        JSONArray arr = obj.getJSONArray("myArrayList");
-        for(int i = 0; i < arr .length(); i++) {
-            JSONObject map = arr.getJSONObject(i);
-            JSONObject internalMap = map.getJSONObject("map");
-            if (internalMap.get("id").equals(datasourceId)){
-                return new Gson().toJson(arr.getJSONObject(i));
+    public ResponseEntity<String> getOpenAIREDatasourceById(String datasourceId) {
+        String allOpenAIREDatasources = getOpenAIREDatasources().getBody();
+        if (allOpenAIREDatasources != null){
+            JSONObject obj = new JSONObject(allOpenAIREDatasources);
+            JSONArray arr = obj.getJSONArray("datasourceInfo");
+            for(int i = 0; i < arr .length(); i++) {
+                JSONObject map = arr.getJSONObject(i);
+                if (map.get("id").equals(datasourceId)){
+                    Gson gson = new Gson();
+                    JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+//                    transformOpenAIREToEOSCDatasource(); //TODO: There are no identical fields between an OpenAIRE and an EOSC datasource?
+                    return new ResponseEntity<>(jsonObj.toString(), HttpStatus.OK);
+                }
             }
         }
-//        transformOpenAIREToEOSCDatasource(); //TODO: There are no identical fields between an OpenAIRE and an EOSC datasource?
         throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
     }
 
