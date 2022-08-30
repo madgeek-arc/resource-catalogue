@@ -69,7 +69,7 @@ public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> i
         datasourceBundle.setId(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
         datasourceBundle.getMetadata().setPublished(true);
         DatasourceBundle ret;
-        logger.info(String.format("Resource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
+        logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);
         jmsTopicTemplate.convertAndSend("public_resource.create", datasourceBundle);
         return ret;
@@ -87,7 +87,7 @@ public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> i
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
-        logger.info(String.format("Updating public Resource with id [%s]", ret.getId()));
+        logger.info(String.format("Updating public Datasource with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsTopicTemplate.convertAndSend("public_resource.update", ret);
         return ret;
@@ -97,7 +97,7 @@ public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> i
     public void delete(DatasourceBundle datasourceBundle) {
         try{
             DatasourceBundle publicDatasourceBundle = get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
-            logger.info(String.format("Deleting public Resource with id [%s]", publicDatasourceBundle.getId()));
+            logger.info(String.format("Deleting public Datasource with id [%s]", publicDatasourceBundle.getId()));
             super.delete(publicDatasourceBundle);
             jmsTopicTemplate.convertAndSend("public_resource.delete", publicDatasourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){

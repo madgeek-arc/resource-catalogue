@@ -69,7 +69,7 @@ public class PublicServiceManager extends ResourceManager<ServiceBundle> impleme
         serviceBundle.setId(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
         serviceBundle.getMetadata().setPublished(true);
         ServiceBundle ret;
-        logger.info(String.format("Resource [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
+        logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
         ret = super.add(serviceBundle, null);
         jmsTopicTemplate.convertAndSend("public_resource.create", serviceBundle);
         return ret;
@@ -87,7 +87,7 @@ public class PublicServiceManager extends ResourceManager<ServiceBundle> impleme
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
-        logger.info(String.format("Updating public Resource with id [%s]", ret.getId()));
+        logger.info(String.format("Updating public Service with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsTopicTemplate.convertAndSend("public_resource.update", ret);
         return ret;
@@ -97,7 +97,7 @@ public class PublicServiceManager extends ResourceManager<ServiceBundle> impleme
     public void delete(ServiceBundle serviceBundle) {
         try{
             ServiceBundle publicServiceBundle = get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
-            logger.info(String.format("Deleting public Resource with id [%s]", publicServiceBundle.getId()));
+            logger.info(String.format("Deleting public Service with id [%s]", publicServiceBundle.getId()));
             super.delete(publicServiceBundle);
             jmsTopicTemplate.convertAndSend("public_resource.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
