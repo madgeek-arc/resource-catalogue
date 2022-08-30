@@ -78,5 +78,8 @@
   "name": "vocabulary_curation",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
+  "properties": {
+    "class": "eu.einfracentral.domain.VocabularyCuration"
+  },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
 }

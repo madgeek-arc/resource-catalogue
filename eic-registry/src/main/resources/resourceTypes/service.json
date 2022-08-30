@@ -321,5 +321,8 @@
   "name": "service",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
+  "properties": {
+    "class": "eu.einfracentral.domain.ServiceBundle"
+  },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/identifiers_refactoring/eic-registry-model/src/main/resources/schema1.xsd"
 }

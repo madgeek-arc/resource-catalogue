@@ -243,5 +243,8 @@
   "name": "pending_datasource",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
+  "properties": {
+    "class": "eu.einfracentral.domain.DatasourceBundle"
+  },
   "schema": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://einfracentral.eu\" version=\"1.0\" xmlns:tns=\"http://einfracentral.eu\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n\t<xs:element name=\"serviceBundle\"/>\n</xs:schema>"
 }
