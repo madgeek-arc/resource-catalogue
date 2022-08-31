@@ -89,9 +89,9 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String createHostingLegalEntityId(String providerName) {
+    public String reformatId(String toBeReformatted) {
         return StringUtils
-                .stripAccents(providerName)
+                .stripAccents(toBeReformatted)
                 .replaceAll("[\\n\\t\\s]+", " ")
                 .replaceAll("\\s+$", "")
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")

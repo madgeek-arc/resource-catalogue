@@ -318,7 +318,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     private void updateHLEVocabularyList(List<String> providerNames){
         for (String newHLE : providerNames){
             Vocabulary newHostingLegalEntity = new Vocabulary();
-            newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(newHLE));
+            newHostingLegalEntity.setId(idCreator.reformatId(newHLE));
             newHostingLegalEntity.setName(newHLE);
             newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
             logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",

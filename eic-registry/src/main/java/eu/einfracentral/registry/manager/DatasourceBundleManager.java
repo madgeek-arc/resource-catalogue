@@ -100,10 +100,14 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                     datasourceBundle.getDatasource().getResourceOrganisation()));
         }
 
-        // create ID if not exists
-        if ((datasourceBundle.getDatasource().getId() == null) || ("".equals(datasourceBundle.getDatasource().getId()))) {
-            String id = idCreator.createResourceId(datasourceBundle);
-            datasourceBundle.getDatasource().setId(id);
+        if (catalogueId.equals(catalogueName)){
+            datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
+        } else{
+            if (datasourceBundle.getId() == null || "".equals(datasourceBundle.getId())) {
+                datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
+            } else{
+                datasourceBundle.setId(idCreator.reformatId(datasourceBundle.getId()));
+            }
         }
         validate(datasourceBundle);
 

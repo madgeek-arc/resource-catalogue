@@ -113,7 +113,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        provider.setId(idCreator.createProviderId(provider.getProvider()));
+        if (catalogueId.equals(catalogueName)){
+            provider.setId(idCreator.createProviderId(provider.getProvider()));
+        } else{
+            if (provider.getId() == null || "".equals(provider.getId())) {
+                provider.setId(idCreator.createProviderId(provider.getProvider()));
+            } else{
+                provider.setId(idCreator.reformatId(provider.getId()));
+            }
+        }
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
@@ -1109,7 +1117,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle){
         Vocabulary newHostingLegalEntity = new Vocabulary();
-        newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(providerBundle.getProvider().getName()));
+        newHostingLegalEntity.setId(idCreator.reformatId(providerBundle.getProvider().getName()));
         newHostingLegalEntity.setName(providerBundle.getProvider().getName());
         newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",

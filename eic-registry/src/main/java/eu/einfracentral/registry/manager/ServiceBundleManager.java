@@ -97,10 +97,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                     serviceBundle.getService().getResourceOrganisation()));
         }
 
-        // create ID if not exists
-        if ((serviceBundle.getService().getId() == null) || ("".equals(serviceBundle.getService().getId()))) {
-            String id = idCreator.createResourceId(serviceBundle);
-            serviceBundle.getService().setId(id);
+        if (catalogueId.equals(catalogueName)){
+            serviceBundle.setId(idCreator.createResourceId(serviceBundle));
+        } else{
+            if (serviceBundle.getId() == null || "".equals(serviceBundle.getId())) {
+                serviceBundle.setId(idCreator.createResourceId(serviceBundle));
+            } else{
+                serviceBundle.setId(idCreator.reformatId(serviceBundle.getId()));
+            }
         }
         validate(serviceBundle);
 
@@ -142,9 +146,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
-//        ret = super.add(serviceBundle, auth);
+        ret = super.add(serviceBundle, auth);
 
-        return serviceBundle;
+        return ret;
     }
 
     @Override
