@@ -25,8 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("resource-extras")
@@ -50,124 +49,29 @@ public class ResourceExtrasController {
         this.publicResourceManager = publicResourceManager;
     }
 
-    @ApiOperation(value = "Add a new EOSC Interoperability Framework Guideline on a specific Resource")
-    @PutMapping(path = "/add/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ServiceBundle> addEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                            @RequestParam String pid, @RequestParam String label,
-                                                            @RequestParam URL url, @RequestParam String semanticRelationship,
-                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
-        // check PID uniqueness
-        List<EOSCIFGuidelines> existingEoscIFGuidelines = serviceBundle.getResourceExtras().getEoscIFGuidelines();
-        for (EOSCIFGuidelines guideline : existingEoscIFGuidelines){
-            if (guideline.getPid().equals(pid)){
-                throw new ValidationException(String.format("There is already an EOSC IF Guideline with the same PID " +
-                        "registered for specific Resource - [%s]", serviceId));
-            }
-        }
-        EOSCIFGuidelines eoscIFGuideline = new EOSCIFGuidelines(pid, label, url, semanticRelationship);
-        blockUpdateIfResourceIsPublished(serviceBundle);
-        ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
-        List<EOSCIFGuidelines> newEoscIFGuidenlines = new ArrayList<>();
-        if (resourceExtras == null){
-            ResourceExtras newResourceExtras = new ResourceExtras();
-            newEoscIFGuidenlines.add(eoscIFGuideline);
-            newResourceExtras.setEoscIFGuidelines(newEoscIFGuidenlines);
-            serviceBundle.setResourceExtras(newResourceExtras);
-        } else{
-            List<EOSCIFGuidelines> oldEoscIFGuidenlines = resourceExtras.getEoscIFGuidelines();
-            if (oldEoscIFGuidenlines == null || oldEoscIFGuidenlines.isEmpty()){
-                newEoscIFGuidenlines.add(eoscIFGuideline);
-                serviceBundle.getResourceExtras().setEoscIFGuidelines(newEoscIFGuidenlines);
-            } else{
-                oldEoscIFGuidenlines.add(eoscIFGuideline);
-                serviceBundle.getResourceExtras().setEoscIFGuidelines(oldEoscIFGuidenlines);
-            }
-        }
-        resourceBundleService.validate(serviceBundle);
-        resourceBundleService.update(serviceBundle, auth);
-        logger.info(String.format("User [%s]-[%s] added a new eoscIFGuideline on the Resource [%s] with value [%s]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, eoscIFGuideline));
-        publicResourceManager.update(serviceBundle, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
-        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Add a new Research Category on a specific Resource")
-    @PutMapping(path = "/add/researchCategory", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ServiceBundle> addResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                             @RequestParam String researchCategory,
-                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(serviceBundle);
-        ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
-        List<String> newResearchCategories = new ArrayList<>();
-        if (resourceExtras == null){
-            ResourceExtras newResourceExtras = new ResourceExtras();
-            newResearchCategories.add(researchCategory);
-            newResourceExtras.setResearchCategories(newResearchCategories);
-            serviceBundle.setResourceExtras(newResourceExtras);
-        } else{
-            List<String> oldResearchCategories = resourceExtras.getResearchCategories();
-            if (oldResearchCategories == null || oldResearchCategories.isEmpty()){
-                newResearchCategories.add(researchCategory);
-                serviceBundle.getResourceExtras().setResearchCategories(newResearchCategories);
-            } else{
-                oldResearchCategories.add(researchCategory);
-                serviceBundle.getResourceExtras().setResearchCategories(oldResearchCategories);
-            }
-        }
-        resourceBundleService.validate(serviceBundle);
-        resourceBundleService.update(serviceBundle, auth);
-        logger.info(String.format("User [%s]-[%s] added a new researchCategory on the Resource [%s] with value [%s]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategory));
-        publicResourceManager.update(serviceBundle, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
-        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-    }
-
     @ApiOperation(value = "Update a specific Resource's EOSC Interoperability Framework Guidelines given its ID")
-    @PutMapping(path = "/update/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ServiceBundle> updateEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                               @RequestBody String pid, @RequestParam(required = false) String label,
-                                                               @RequestParam(required = false) URL url,
-                                                               @RequestParam(required = false) String semanticRelationship,
+    @PutMapping(path = "/update/eoscIFGuidelines", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ServiceBundle> updateEOSCIFGuidelines(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                               @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines,
                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
         blockUpdateIfResourceIsPublished(serviceBundle);
         ResourceExtras resourceExtras = serviceBundle.getResourceExtras();
-        boolean found = false;
         if (resourceExtras == null){
-            throw new ValidationException(String.format("Resource with id [%s] has no Resource Extras.", serviceId));
+            ResourceExtras newResourceExtras = new ResourceExtras();
+            List<EOSCIFGuidelines> newEOSCIFGuidelines = new ArrayList<>(eoscIFGuidelines);
+            newResourceExtras.setEoscIFGuidelines(newEOSCIFGuidelines);
+            serviceBundle.setResourceExtras(newResourceExtras);
         } else{
-            List<EOSCIFGuidelines> eoscIFGuidenlines = resourceExtras.getEoscIFGuidelines();
-            if (eoscIFGuidenlines == null || eoscIFGuidenlines.isEmpty()){
-                throw new ValidationException(String.format("Resource with id [%s] has no EOSC IF Guidelines.", serviceId));
-            } else{
-                for (EOSCIFGuidelines guideline : eoscIFGuidenlines){
-                    if (guideline.getPid().equals(pid)){
-                        found = true;
-                        if (label != null && !label.equals("")){
-                            guideline.setLabel(label);
-                        }
-                        if (url != null && !url.equals("")){
-                            guideline.setUrl(url);
-                        }
-                        if (semanticRelationship != null && !semanticRelationship.equals("")){
-                            guideline.setSemanticRelationship(semanticRelationship);
-                        }
-                    }
-                }
-                if (!found){
-                    throw new ValidationException(String.format("Resource with id [%s] has no EOSC IF Guideline with PID [%s]", serviceId, pid));
-                }
-                serviceBundle.getResourceExtras().setEoscIFGuidelines(eoscIFGuidenlines);
-            }
+            serviceBundle.getResourceExtras().setEoscIFGuidelines(eoscIFGuidelines);
         }
+        // check PID consistency
+        checkEOSCIFGuidelinesPIDConsistency(serviceBundle);
+
         resourceBundleService.validate(serviceBundle);
         resourceBundleService.update(serviceBundle, auth);
-        logger.info(String.format("User [%s]-[%s] updated field eoscIFGuideline of the Resource [%s] with PID [%s]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, pid));
+        logger.info(String.format("User [%s]-[%s] updated field eoscIFGuidelines of the Resource [%s]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId));
         publicResourceManager.update(serviceBundle, auth);
         jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
         return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
@@ -230,55 +134,20 @@ public class ResourceExtrasController {
         return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Deletes an existing Interoperability Framework Guideline of a specific Resource")
-    @PutMapping(path = "/delete/eoscIFGuideline", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ServiceBundle> deleteEOSCIFGuideline(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                               @RequestParam String pid,
-                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(serviceBundle);
-        List<EOSCIFGuidelines> existingEOSCIFGuidelines = serviceBundle.getResourceExtras().getEoscIFGuidelines();
-        if (existingEOSCIFGuidelines != null && !existingEOSCIFGuidelines.isEmpty()){
-            existingEOSCIFGuidelines.removeIf(existingEOSCIFGuideline -> existingEOSCIFGuideline.getPid().equals(pid));
-            serviceBundle.getResourceExtras().setEoscIFGuidelines(existingEOSCIFGuidelines);
-        } else{
-            throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
-        }
-        resourceBundleService.validate(serviceBundle);
-        resourceBundleService.update(serviceBundle, auth);
-        logger.info(String.format("User [%s]-[%s] deleted the researchCategory of the Resource [%s] with pid [%s]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, pid));
-        publicResourceManager.update(serviceBundle, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
-        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Deletes an existing Research Category of a specific Resource")
-    @PutMapping(path = "/delete/researchCategory", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ServiceBundle> deleteResearchCategory(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                                @RequestParam String researchCategory,
-                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueId);
-        blockUpdateIfResourceIsPublished(serviceBundle);
-        List<String> existingResourceCategories = serviceBundle.getResourceExtras().getResearchCategories();
-        if (existingResourceCategories != null && !existingResourceCategories.isEmpty()){
-            existingResourceCategories.removeIf(existingResourceCategory -> existingResourceCategory.equals(researchCategory));
-            serviceBundle.getResourceExtras().setResearchCategories(existingResourceCategories);
-        } else{
-            throw new NullPointerException(String.format("The Resource [%s] has no EOSC IF Guidelines registered.", serviceId));
-        }
-        resourceBundleService.validate(serviceBundle);
-        resourceBundleService.update(serviceBundle, auth);
-        logger.info(String.format("User [%s]-[%s] deleted the researchCategory of the Resource [%s] with value [%s]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), serviceId, researchCategory));
-        publicResourceManager.update(serviceBundle, auth);
-        jmsTopicTemplate.convertAndSend("resource.update", serviceBundle);
-        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-    }
-
     private void blockUpdateIfResourceIsPublished(ServiceBundle serviceBundle){
         if (serviceBundle.getMetadata().isPublished()){
             throw new AccessDeniedException("You cannot directly update a Public Resource.");
+        }
+    }
+
+    private void checkEOSCIFGuidelinesPIDConsistency(ServiceBundle serviceBundle){
+        List<String> pidList = new ArrayList<>();
+        for (EOSCIFGuidelines eoscIFGuideline : serviceBundle.getResourceExtras().getEoscIFGuidelines()){
+            pidList.add(eoscIFGuideline.getPid());
+        }
+        Set<String> pidSet = new HashSet<String>(pidList);
+        if(pidSet.size() < pidList.size()){
+            throw new ValidationException("EOSCIFGuidelines cannot have duplicate PIDs.");
         }
     }
 }
