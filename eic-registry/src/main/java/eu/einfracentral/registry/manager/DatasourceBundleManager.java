@@ -100,7 +100,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                     datasourceBundle.getDatasource().getResourceOrganisation()));
         }
 
-        if (catalogueId.equals(catalogueName)){
+        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)){
             datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
         } else{
             if (datasourceBundle.getId() == null || "".equals(datasourceBundle.getId())) {
@@ -467,7 +467,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
         facetFilter.addFilter("active", true);
-        facetFilter.addFilter("latest", true);
         Browsing<DatasourceBundle> serviceBrowsing = getAll(facetFilter, auth);
         Browsing<DatasourceBundle> ret = serviceBrowsing;
         long todayEpochTime = System.currentTimeMillis();
@@ -544,7 +543,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
@@ -571,7 +569,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", true);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, null).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());

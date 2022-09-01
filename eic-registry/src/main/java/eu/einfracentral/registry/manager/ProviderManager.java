@@ -113,7 +113,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        if (catalogueId.equals(catalogueName)){
+        if (provider.getProvider().getCatalogueId().equals(catalogueName)){
             provider.setId(idCreator.createProviderId(provider.getProvider()));
         } else{
             if (provider.getId() == null || "".equals(provider.getId())) {
@@ -1117,11 +1117,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle){
         Vocabulary newHostingLegalEntity = new Vocabulary();
-        newHostingLegalEntity.setId(idCreator.reformatId(providerBundle.getProvider().getName()));
+        newHostingLegalEntity.setId("provider_hosting_legal_entity-"+providerBundle.getProvider().getId());
         newHostingLegalEntity.setName(providerBundle.getProvider().getName());
         newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                 newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
-//                        add(newHostingLegalEntity, null);
+        vocabularyService.add(newHostingLegalEntity, null);
     }
 }

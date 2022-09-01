@@ -448,7 +448,7 @@ public class StatisticsManager implements StatisticsService {
         MapSqlParameterSource in = new MapSqlParameterSource();
 
         in.addValue("resource_organisation", providerId);
-        String query = "SELECT unnest(geographical_availabilities) AS geographical_availability, count(unnest(geographical_availabilities)) AS count FROM service_view WHERE latest=true AND active = true ";
+        String query = "SELECT unnest(geographical_availabilities) AS geographical_availability, count(unnest(geographical_availabilities)) AS count FROM service_view WHERE active = true ";
 
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
@@ -495,7 +495,7 @@ public class StatisticsManager implements StatisticsService {
 
         in.addValue("resource_organisation", providerId);
         in.addValue("geographical_availabilities", place);
-        String query = "SELECT service_id, name FROM service_view WHERE latest=true AND active=true ";
+        String query = "SELECT service_id, name FROM service_view WHERE active=true ";
 
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
@@ -542,7 +542,7 @@ public class StatisticsManager implements StatisticsService {
         MapSqlParameterSource in = new MapSqlParameterSource();
         in.addValue("resource_organisation", providerId);
 
-        String query = "SELECT service_id, name, geographical_availabilities FROM service_view WHERE latest=true AND active=true ";
+        String query = "SELECT service_id, name, geographical_availabilities FROM service_view WHERE active=true ";
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
         }
@@ -623,7 +623,7 @@ public class StatisticsManager implements StatisticsService {
         in.addValue("resource_organisation", providerId);
 
         String query = "SELECT service_id, name, " + vocabulary.getKey()
-                + " FROM service_view WHERE latest=true AND active=true ";
+                + " FROM service_view WHERE active=true ";
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
         }

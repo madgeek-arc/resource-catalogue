@@ -97,7 +97,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                     serviceBundle.getService().getResourceOrganisation()));
         }
 
-        if (catalogueId.equals(catalogueName)){
+        if (serviceBundle.getService().getCatalogueId().equals(catalogueName)){
             serviceBundle.setId(idCreator.createResourceId(serviceBundle));
         } else{
             if (serviceBundle.getId() == null || "".equals(serviceBundle.getId())) {
@@ -462,7 +462,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
         facetFilter.addFilter("active", true);
-        facetFilter.addFilter("latest", true);
         Browsing<ServiceBundle> serviceBrowsing = getAll(facetFilter, auth);
         Browsing<ServiceBundle> ret = serviceBrowsing;
         long todayEpochTime = System.currentTimeMillis();
@@ -539,7 +538,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
@@ -566,7 +564,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", true);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
