@@ -1,7 +1,5 @@
 package eu.einfracentral.domain;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -146,11 +144,18 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @Override
     public String toString() {
-        try {
-            return new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return "Bundle{" +
+                "payload=" + payload +
+                ", metadata=" + metadata +
+                ", active=" + active +
+                ", suspended=" + suspended +
+                ", identifiers=" + identifiers +
+                ", migrationStatus=" + migrationStatus +
+                ", loggingInfo=" + loggingInfo +
+                ", latestAuditInfo=" + latestAuditInfo +
+                ", latestOnboardingInfo=" + latestOnboardingInfo +
+                ", latestUpdateInfo=" + latestUpdateInfo +
+                '}';
     }
 
     @Override

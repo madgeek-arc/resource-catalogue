@@ -1,12 +1,13 @@
 package eu.einfracentral.domain;
 
-import eu.einfracentral.annotation.FieldValidation;
+//import org.springframework.data.annotation.Id;
+//import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.Objects;
 
+//@Document
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ServiceBundle extends ResourceBundle<Service> {
@@ -34,4 +35,19 @@ public class ServiceBundle extends ResourceBundle<Service> {
         this.setPayload(service);
     }
 
+    //    @Id
+    @Override
+    public String getId() {
+        return this.getService().getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        this.getService().setId(id);
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceBundle{} " + super.toString();
+    }
 }

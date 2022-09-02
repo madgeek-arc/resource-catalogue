@@ -1,11 +1,10 @@
 package eu.einfracentral.domain;
 
-import com.google.gson.Gson;
 import eu.einfracentral.annotation.FieldValidation;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class ResourceBundle <T extends Service> extends Bundle<T> {
+public class ResourceBundle<T extends Service> extends Bundle<T> {
 
     @XmlElement
     private String status;
@@ -30,7 +29,10 @@ public class ResourceBundle <T extends Service> extends Bundle<T> {
 
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        return "ResourceBundle{" +
+                "status='" + status + '\'' +
+                ", resourceExtras=" + resourceExtras +
+                "} " + super.toString();
     }
 
     public String getStatus() {
@@ -47,6 +49,16 @@ public class ResourceBundle <T extends Service> extends Bundle<T> {
 
     public void setResourceExtras(ResourceExtras resourceExtras) {
         this.resourceExtras = resourceExtras;
+    }
+
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
     }
 
     @Override

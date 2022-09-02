@@ -1,12 +1,16 @@
 package eu.einfracentral.domain;
 
+//import org.springframework.data.annotation.Id;
+//import org.springframework.data.mongodb.core.mapping.Document;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+//@Document
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class DatasourceBundle extends ResourceBundle<Datasource>{
+public class DatasourceBundle extends ResourceBundle<Datasource> {
 
     public DatasourceBundle() {
         // No arg constructor
@@ -29,5 +33,16 @@ public class DatasourceBundle extends ResourceBundle<Datasource>{
 
     public void setDatasource(Datasource datasource) {
         this.setPayload(datasource);
+    }
+
+    //    @Id
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public String toString() {
+        return "DatasourceBundle{} " + super.toString();
     }
 }
