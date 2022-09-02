@@ -685,7 +685,7 @@ public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON 
     return null;
 }
 
-    public ResponseEntity<String> getOpenAIREDatasourceById(String datasourceId) {
+    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
         String allOpenAIREDatasources = getOpenAIREDatasources().getBody();
         if (allOpenAIREDatasources != null){
             JSONObject obj = new JSONObject(allOpenAIREDatasources);
@@ -695,16 +695,18 @@ public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON 
                 if (map.get("id").equals(datasourceId)){
                     Gson gson = new Gson();
                     JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-//                    transformOpenAIREToEOSCDatasource(); //TODO: There are no identical fields between an OpenAIRE and an EOSC datasource?
-                    return new ResponseEntity<>(jsonObj.toString(), HttpStatus.OK);
+                    return new ResponseEntity<>(transformOpenAIREToEOSCDatasource(jsonObj), HttpStatus.OK);
                 }
             }
         }
         throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
     }
 
-    public Datasource transformOpenAIREToEOSCDatasource(String openaireDatasource){
-        return null;
+    public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
+        Datasource datasource = new Datasource();
+        String name = String.valueOf(openaireDatasource.getAsJsonObject().get("officialname")).replaceAll("\"", "");
+        datasource.setName(name);
+        return datasource;
     }
 
 }

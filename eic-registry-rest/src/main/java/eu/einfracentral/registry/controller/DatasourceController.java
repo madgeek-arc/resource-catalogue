@@ -200,7 +200,7 @@ public class DatasourceController {
     }
 
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<String> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
+    public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
         return datasourceService.getOpenAIREDatasourceById(datasourceId);
     }
 }

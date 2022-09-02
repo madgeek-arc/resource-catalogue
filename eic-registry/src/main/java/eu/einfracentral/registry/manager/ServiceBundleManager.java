@@ -662,7 +662,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
-    public ResponseEntity<String> getOpenAIREDatasourceById(String datasourceId) {
+    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 

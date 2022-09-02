@@ -276,5 +276,5 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
 
     ResponseEntity<String> getOpenAIREDatasources() throws IOException;
 
-    ResponseEntity<String> getOpenAIREDatasourceById(String datasourceId) throws IOException;
+    ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) throws IOException;
 }
