@@ -100,10 +100,14 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                     datasourceBundle.getDatasource().getResourceOrganisation()));
         }
 
-        // create ID if not exists
-        if ((datasourceBundle.getDatasource().getId() == null) || ("".equals(datasourceBundle.getDatasource().getId()))) {
-            String id = idCreator.createResourceId(datasourceBundle);
-            datasourceBundle.getDatasource().setId(id);
+        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)){
+            datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
+        } else{
+            if (datasourceBundle.getId() == null || "".equals(datasourceBundle.getId())) {
+                datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
+            } else{
+                datasourceBundle.setId(idCreator.reformatId(datasourceBundle.getId()));
+            }
         }
         validate(datasourceBundle);
 
@@ -463,7 +467,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
         facetFilter.addFilter("active", true);
-        facetFilter.addFilter("latest", true);
         Browsing<DatasourceBundle> serviceBrowsing = getAll(facetFilter, auth);
         Browsing<DatasourceBundle> ret = serviceBrowsing;
         long todayEpochTime = System.currentTimeMillis();
@@ -540,7 +543,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
@@ -567,7 +569,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", true);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, null).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
@@ -684,7 +685,7 @@ public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON 
     return null;
 }
 
-    public ResponseEntity<String> getOpenAIREDatasourceById(String datasourceId) {
+    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
         String allOpenAIREDatasources = getOpenAIREDatasources().getBody();
         if (allOpenAIREDatasources != null){
             JSONObject obj = new JSONObject(allOpenAIREDatasources);
@@ -694,16 +695,18 @@ public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON 
                 if (map.get("id").equals(datasourceId)){
                     Gson gson = new Gson();
                     JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-//                    transformOpenAIREToEOSCDatasource(); //TODO: There are no identical fields between an OpenAIRE and an EOSC datasource?
-                    return new ResponseEntity<>(jsonObj.toString(), HttpStatus.OK);
+                    return new ResponseEntity<>(transformOpenAIREToEOSCDatasource(jsonObj), HttpStatus.OK);
                 }
             }
         }
         throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
     }
 
-    public Datasource transformOpenAIREToEOSCDatasource(String openaireDatasource){
-        return null;
+    public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
+        Datasource datasource = new Datasource();
+        String name = String.valueOf(openaireDatasource.getAsJsonObject().get("officialname")).replaceAll("\"", "");
+        datasource.setName(name);
+        return datasource;
     }
 
 }

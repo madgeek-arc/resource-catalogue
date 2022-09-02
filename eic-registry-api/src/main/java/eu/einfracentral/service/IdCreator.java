@@ -3,7 +3,6 @@ package eu.einfracentral.service;
 import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ResourceBundle;
-import eu.einfracentral.domain.Service;
 
 public interface IdCreator {
 
@@ -36,5 +35,5 @@ public interface IdCreator {
      * @param providerName
      * @return
      */
-    String createHostingLegalEntityId(String providerName);
+    String reformatId(String providerName);
 }

@@ -97,10 +97,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                     serviceBundle.getService().getResourceOrganisation()));
         }
 
-        // create ID if not exists
-        if ((serviceBundle.getService().getId() == null) || ("".equals(serviceBundle.getService().getId()))) {
-            String id = idCreator.createResourceId(serviceBundle);
-            serviceBundle.getService().setId(id);
+        if (serviceBundle.getService().getCatalogueId().equals(catalogueName)){
+            serviceBundle.setId(idCreator.createResourceId(serviceBundle));
+        } else{
+            if (serviceBundle.getId() == null || "".equals(serviceBundle.getId())) {
+                serviceBundle.setId(idCreator.createResourceId(serviceBundle));
+            } else{
+                serviceBundle.setId(idCreator.reformatId(serviceBundle.getId()));
+            }
         }
         validate(serviceBundle);
 
@@ -142,9 +146,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
-//        ret = super.add(serviceBundle, auth);
+        ret = super.add(serviceBundle, auth);
 
-        return serviceBundle;
+        return ret;
     }
 
     @Override
@@ -458,7 +462,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(1000);
         facetFilter.addFilter("active", true);
-        facetFilter.addFilter("latest", true);
         Browsing<ServiceBundle> serviceBrowsing = getAll(facetFilter, auth);
         Browsing<ServiceBundle> ret = serviceBrowsing;
         long todayEpochTime = System.currentTimeMillis();
@@ -535,7 +538,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
@@ -562,7 +564,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", true);
-        ff.addFilter("latest", true);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
@@ -661,7 +662,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
-    public ResponseEntity<String> getOpenAIREDatasourceById(String datasourceId) {
+    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
