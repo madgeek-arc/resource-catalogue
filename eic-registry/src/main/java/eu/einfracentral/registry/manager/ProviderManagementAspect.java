@@ -205,7 +205,7 @@ public class ProviderManagementAspect {
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(String, " +
+            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, " +
             "org.springframework.security.core.Authentication))))", // pendingToInfra method
             returning = "serviceBundle")
     public void addResourceAsPublic(ServiceBundle serviceBundle) {
@@ -225,7 +225,7 @@ public class ProviderManagementAspect {
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(String, " +
+            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, " +
             "org.springframework.security.core.Authentication))))", // pendingToInfra method
             returning = "datasourceBundle")
     public void addResourceAsPublic(DatasourceBundle datasourceBundle) {
