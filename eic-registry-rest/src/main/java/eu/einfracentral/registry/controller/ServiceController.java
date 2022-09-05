@@ -256,6 +256,7 @@ public class ServiceController {
         }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", id);
+        ff.addFilter("published", false);
         return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
     }
 
@@ -271,6 +272,7 @@ public class ServiceController {
     public ResponseEntity<Paging<ServiceBundle>> getServicesByCatalogue(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("catalogue_id", id);
+        ff.addFilter("published", false);
         return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
     }
 

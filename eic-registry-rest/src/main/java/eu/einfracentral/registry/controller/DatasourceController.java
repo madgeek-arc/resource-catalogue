@@ -191,6 +191,7 @@ public class DatasourceController {
         }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", id);
+        ff.addFilter("published", false);
         return ResponseEntity.ok(datasourceService.getAll(ff, auth));
     }
 
