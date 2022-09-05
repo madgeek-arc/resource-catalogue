@@ -969,9 +969,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = 'eosc'";
+            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"' AND published = 'false' AND";
         } else{
-            query = "SELECT provider_id FROM provider_view WHERE";
+            query = "SELECT provider_id FROM provider_view WHERE published = 'false' AND";
         }
 
         boolean firstTime = true;
