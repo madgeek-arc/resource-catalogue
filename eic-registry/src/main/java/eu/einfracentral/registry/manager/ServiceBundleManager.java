@@ -538,6 +538,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
@@ -658,7 +659,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return serviceBundle;
     }
 
-    public ResponseEntity<String> getOpenAIREDatasources() {
+    public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
@@ -667,6 +668,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     public Datasource transformOpenAIREToEOSCDatasource(String openaireDatasource){
+        throw new UnsupportedOperationException("Not yet Implemented");
+    }
+
+    public List<Datasource> getAllOpenAIREDatasources() {
+        throw new UnsupportedOperationException("Not yet Implemented");
+    }
+
+    public Paging<Datasource> createCustomFacetFilter(FacetFilter ff, List<Datasource> allDatasources){
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 

@@ -14,7 +14,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -195,13 +194,24 @@ public class DatasourceController {
         return ResponseEntity.ok(datasourceService.getAll(ff, auth));
     }
 
-    @GetMapping(path = "/getOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<String> getOpenAIREDatasources() throws IOException {
-        return datasourceService.getOpenAIREDatasources();
-    }
-
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
         return datasourceService.getOpenAIREDatasourceById(datasourceId);
     }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        List<Datasource> allDatasources = datasourceService.getAllOpenAIREDatasources();
+        Paging<Datasource> datasourcePaging = datasourceService.createCustomFacetFilter(ff, allDatasources);
+        return ResponseEntity.ok(new Paging<>(datasourcePaging.getTotal(), datasourcePaging.getFrom(), datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
+    }
+
 }

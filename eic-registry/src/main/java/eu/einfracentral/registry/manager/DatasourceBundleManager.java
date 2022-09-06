@@ -663,7 +663,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
-public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON structure is different than CURL's one (map, myArrayList)
+public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.add("accept", "application/json");
@@ -686,7 +686,7 @@ public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON 
 }
 
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
-        String allOpenAIREDatasources = getOpenAIREDatasources().getBody();
+        String allOpenAIREDatasources = getOpenAIREDatasourcesAsJSON().getBody();
         if (allOpenAIREDatasources != null){
             JSONObject obj = new JSONObject(allOpenAIREDatasources);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
@@ -702,11 +702,56 @@ public ResponseEntity<String> getOpenAIREDatasources() { //FIXME: response JSON 
         throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
     }
 
+    public List<Datasource> getAllOpenAIREDatasources() {
+        List<Datasource> allDatasources = new ArrayList<>();
+        String allOpenAIREDatasources = getOpenAIREDatasourcesAsJSON().getBody();
+        if (allOpenAIREDatasources != null){
+            JSONObject obj = new JSONObject(allOpenAIREDatasources);
+            JSONArray arr = obj.getJSONArray("datasourceInfo");
+            for(int i = 0; i < arr .length(); i++) {
+                JSONObject map = arr.getJSONObject(i);
+                Gson gson = new Gson();
+                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                allDatasources.add(transformOpenAIREToEOSCDatasource(jsonObj));
+            }
+            return allDatasources;
+        }
+        throw new ResourceNotFoundException("There are no OpenAIRE Datasources");
+    }
+
     public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
         Datasource datasource = new Datasource();
+        String id = String.valueOf(openaireDatasource.getAsJsonObject().get("id")).replaceAll("\"", "");
         String name = String.valueOf(openaireDatasource.getAsJsonObject().get("officialname")).replaceAll("\"", "");
+        datasource.setId(id);
         datasource.setName(name);
         return datasource;
+    }
+
+    public Paging<Datasource> createCustomFacetFilter(FacetFilter ff, List<Datasource> allDatasources){
+        Paging<Datasource> datasourcePaging = new Paging<>();
+        List<Datasource> ret = new ArrayList<>();
+        if (ff.getFrom()+ff.getQuantity() > allDatasources.size()){
+            ret.addAll(allDatasources);
+            datasourcePaging.setTotal(ret.size());
+            datasourcePaging.setTo(ret.size());
+            datasourcePaging.setFrom(0);
+        } else{
+            for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
+                ret.add(allDatasources.get(i));
+                datasourcePaging.setTotal(ff.getQuantity());
+                datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
+                datasourcePaging.setFrom(ff.getFrom());
+            }
+        }
+        Map<String, Object> order = (Map<String, Object>) ff.getOrderBy().get("name");
+        if (order.get("order").equals("asc") || order.get("order").equals("ASC")){
+            Collections.sort(ret, (u1, u2) -> u1.getName().compareTo(u2.getName()));
+        } else if (order.get("order").equals("desc") || order.get("order").equals("DESC")){
+            Collections.sort(ret, (u1, u2) -> u2.getName().compareTo(u1.getName()));
+        }
+        datasourcePaging.setResults(ret);
+        return datasourcePaging;
     }
 
 }
