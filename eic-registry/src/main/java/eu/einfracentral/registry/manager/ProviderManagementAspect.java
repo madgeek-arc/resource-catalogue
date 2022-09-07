@@ -140,6 +140,7 @@ public class ProviderManagementAspect {
             try {
                 publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e){
+                delayExecution();
                 publicProviderManager.add(providerBundle, null);
             }
         }
@@ -213,6 +214,7 @@ public class ProviderManagementAspect {
             try{
                 publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e){
+                delayExecution();
                 publicServiceManager.add(serviceBundle, null);
             }
         }
@@ -233,6 +235,7 @@ public class ProviderManagementAspect {
             try{
                 publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e){
+                delayExecution();
                 publicDatasourceManager.add(datasourceBundle, null);
             }
         }
@@ -317,6 +320,14 @@ public class ProviderManagementAspect {
             }
         } catch (RuntimeException e) {
             logger.error(e);
+        }
+    }
+
+    private void delayExecution(){
+        try {
+            Thread.sleep(10 * 1000); // 10 seconds
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
         }
     }
 }

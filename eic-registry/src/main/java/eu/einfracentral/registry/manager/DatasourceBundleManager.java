@@ -739,17 +739,19 @@ public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
         } else{
             for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
                 ret.add(allDatasources.get(i));
-                datasourcePaging.setTotal(ff.getQuantity());
+                datasourcePaging.setTotal(allDatasources.size());
                 datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
                 datasourcePaging.setFrom(ff.getFrom());
             }
         }
-        Map<String, Object> order = (Map<String, Object>) ff.getOrderBy().get("name");
-        if (order.get("order").equals("asc") || order.get("order").equals("ASC")){
-            Collections.sort(ret, (u1, u2) -> u1.getName().compareTo(u2.getName()));
-        } else if (order.get("order").equals("desc") || order.get("order").equals("DESC")){
-            Collections.sort(ret, (u1, u2) -> u2.getName().compareTo(u1.getName()));
-        }
+        try{
+            Map<String, Object> order = (Map<String, Object>) ff.getOrderBy().get("name");
+            if (order.get("order").equals("asc") || order.get("order").equals("ASC")){
+                Collections.sort(ret, (u1, u2) -> u1.getName().compareTo(u2.getName()));
+            } else if (order.get("order").equals("desc") || order.get("order").equals("DESC")){
+                Collections.sort(ret, (u1, u2) -> u2.getName().compareTo(u1.getName()));
+            }
+        } catch (NullPointerException e){}
         datasourcePaging.setResults(ret);
         return datasourcePaging;
     }
