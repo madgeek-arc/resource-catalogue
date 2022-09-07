@@ -325,7 +325,7 @@ public class ProviderManagementAspect {
 
     private void delayExecution(){
         try {
-            Thread.sleep(10 * 1000); // 10 seconds
+            Thread.sleep(20 * 1000); // 20sec
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }

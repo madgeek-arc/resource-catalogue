@@ -189,6 +189,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {} of Catalogue: {}", provider, provider.getProvider().getCatalogueId());
 
+        // check if Provider has become a Legal Entity
+        checkAndAddProviderToHLEVocabulary(provider);
+
         // Send emails to newly added or deleted Admins
         adminDifferences(provider, ex);
 
@@ -1123,5 +1126,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                 newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
         vocabularyService.add(newHostingLegalEntity, null);
+    }
+
+    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle){
+        boolean exists = false;
+        if (providerBundle.getProvider().isLegalEntity()){
+            List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+            for (Vocabulary voc : allHLE){
+                if (voc.getId().equals("provider_hosting_legal_entity-" + providerBundle.getProvider().getId())){
+                    exists = true;
+                }
+            }
+        }
+        if (!exists){
+            addApprovedProviderToHLEVocabulary(providerBundle);
+        }
     }
 }
