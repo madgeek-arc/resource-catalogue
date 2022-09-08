@@ -300,7 +300,7 @@
       "multivalued": false,
       "name": "active",
       "defaultValue": false,
-      "path": "//*[local-name()='serviceBundle']/*[local-name()='active']/text()",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='active']/text()",
       "type": "java.lang.Boolean"
     },
     {
@@ -313,7 +313,7 @@
     {
       "multivalued": false,
       "name": "status",
-      "path": "//*[local-name()='serviceBundle']/*[local-name()='status']/text()",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='status']/text()",
       "type": "java.lang.String"
     }
   ],
