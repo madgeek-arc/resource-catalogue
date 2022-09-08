@@ -57,7 +57,9 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @Override
     public void setId(String id) {
-        this.payload.setId(id);
+        if (this.payload != null) {
+            this.payload.setId(id);
+        }
     }
 
     @Transient

@@ -38,12 +38,12 @@ public class ServiceBundle extends ResourceBundle<Service> {
     //    @Id
     @Override
     public String getId() {
-        return this.getService().getId();
+        return super.getId();
     }
 
     @Override
     public void setId(String id) {
-        this.getService().setId(id);
+        super.setId(id);
     }
 
     @Override
