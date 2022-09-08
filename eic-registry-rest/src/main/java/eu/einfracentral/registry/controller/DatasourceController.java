@@ -81,6 +81,13 @@ public class DatasourceController {
         return new ResponseEntity<>(datasourceService.get(id, catalogueId).getDatasource(), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Get the most current version of a specific DatasourceBundle, providing the Resource id.")
+    @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    public ResponseEntity<DatasourceBundle> getDatasourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(datasourceService.get(id, catalogueId), HttpStatus.OK);
+    }
+
     // Get the specified version of a RichResource providing the Datasource id
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
