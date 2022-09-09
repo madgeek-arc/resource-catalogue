@@ -209,7 +209,13 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         } else {
             loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
-            loggingInfoList.add(loggingInfo);
+            if (existingService.getLoggingInfo() != null) {
+                loggingInfoList = existingService.getLoggingInfo();
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+            } else {
+                loggingInfoList.add(loggingInfo);
+            }
         }
         serviceBundle.setLoggingInfo(loggingInfoList);
 

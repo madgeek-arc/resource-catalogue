@@ -19,6 +19,7 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ServiceException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -212,7 +213,13 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         } else{
             loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
-            loggingInfoList.add(loggingInfo);
+            if (existingDatasource.getLoggingInfo() != null) {
+                loggingInfoList = existingDatasource.getLoggingInfo();
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+            } else {
+                loggingInfoList.add(loggingInfo);
+            }
         }
         datasourceBundle.setLoggingInfo(loggingInfoList);
 
@@ -729,19 +736,41 @@ public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
     }
 
     public Paging<Datasource> createCustomFacetFilter(FacetFilter ff, List<Datasource> allDatasources){
+        List<Datasource> datasourcesContainingKeyword = new ArrayList<>();
         Paging<Datasource> datasourcePaging = new Paging<>();
         List<Datasource> ret = new ArrayList<>();
-        if (ff.getFrom()+ff.getQuantity() > allDatasources.size()){
-            ret.addAll(allDatasources);
-            datasourcePaging.setTotal(ret.size());
-            datasourcePaging.setTo(ret.size());
-            datasourcePaging.setFrom(0);
+        if (ff.getKeyword() != null && !ff.getKeyword().equals("")){
+            for (Datasource datasource : allDatasources){
+                if (StringUtils.containsIgnoreCase(datasource.getName(), ff.getKeyword())){
+                    datasourcesContainingKeyword.add(datasource);
+                }
+            }
+            if (ff.getFrom()+ff.getQuantity() > datasourcesContainingKeyword.size()){
+                ret.addAll(datasourcesContainingKeyword);
+                datasourcePaging.setTotal(ret.size());
+                datasourcePaging.setTo(ret.size());
+                datasourcePaging.setFrom(0);
+            } else{
+                for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
+                    ret.add(datasourcesContainingKeyword.get(i));
+                    datasourcePaging.setTotal(datasourcesContainingKeyword.size());
+                    datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
+                    datasourcePaging.setFrom(ff.getFrom());
+                }
+            }
         } else{
-            for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
-                ret.add(allDatasources.get(i));
-                datasourcePaging.setTotal(allDatasources.size());
-                datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
-                datasourcePaging.setFrom(ff.getFrom());
+            if (ff.getFrom()+ff.getQuantity() > allDatasources.size()){
+                ret.addAll(allDatasources);
+                datasourcePaging.setTotal(ret.size());
+                datasourcePaging.setTo(ret.size());
+                datasourcePaging.setFrom(0);
+            } else{
+                for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
+                    ret.add(allDatasources.get(i));
+                    datasourcePaging.setTotal(allDatasources.size());
+                    datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
+                    datasourcePaging.setFrom(ff.getFrom());
+                }
             }
         }
         try{
