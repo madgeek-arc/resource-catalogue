@@ -97,7 +97,11 @@ public class ResourceExtrasController {
                 newResearchCategories.addAll(researchCategories);
                 serviceBundle.getResourceExtras().setResearchCategories(newResearchCategories);
             } else{
-                oldResearchCategories.addAll(researchCategories);
+                for (String researchCategory : researchCategories){
+                    if (!oldResearchCategories.contains(researchCategory)){
+                        oldResearchCategories.add(researchCategory);
+                    }
+                }
                 serviceBundle.getResourceExtras().setResearchCategories(oldResearchCategories);
             }
         }

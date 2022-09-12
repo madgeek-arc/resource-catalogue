@@ -486,6 +486,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         // try for datasource
         if (resources.getResults().isEmpty()){
+            resourceType.setName("datasource");
             resources = searchService
                     .cqlQuery(String.format("datasource_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                             resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
