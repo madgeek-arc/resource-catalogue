@@ -1,8 +1,9 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyCurationService;
 import eu.einfracentral.registry.service.VocabularyService;
@@ -36,7 +37,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private static final Logger logger = LogManager.getLogger(VocabularyCurationManager.class);
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
-    private final InfraServiceService infraServiceService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private List<String> browseBy;
     private Map<String, String> labels;
 
@@ -46,8 +48,9 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Autowired
     private FacetLabelService facetLabelService;
 
-    @Autowired
-    private AbstractServiceManager abstractServiceManager;
+    private final AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager;
+
+    private final AbstractResourceBundleManager<DatasourceBundle> abstractDatasourceBundleManager;
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;
@@ -55,12 +58,46 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
-                                     InfraServiceService infraServiceService, AbstractServiceManager abstractServiceManager) {
+                                     ResourceBundleService<ServiceBundle> serviceBundleService, ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                                     AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager,
+                                     AbstractResourceBundleManager<DatasourceBundle> abstractDatasourceBundleManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
-        this.infraServiceService = infraServiceService;
-        this.abstractServiceManager = abstractServiceManager;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
+        this.abstractServiceBundleManager = abstractServiceBundleManager;
+        this.abstractDatasourceBundleManager = abstractDatasourceBundleManager;
+    }
+
+    @PostConstruct
+    void initLabels() {
+        resourceType = resourceTypeService.getResourceType(getResourceType());
+        Set<String> browseSet = new HashSet<>();
+        Map<String, Set<String>> sets = new HashMap<>();
+        labels = new HashMap<>();
+        labels.put("resourceType", "Resource Type");
+        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
+            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
+            labels.put(f.getName(), f.getLabel());
+            if (f.getLabel() != null) {
+                sets.get(f.getResourceType().getName()).add(f.getName());
+            }
+        }
+        boolean flag = true;
+        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
+            if (flag) {
+                browseSet.addAll(entry.getValue());
+                flag = false;
+            } else {
+                browseSet.retainAll(entry.getValue());
+            }
+        }
+        browseBy = new ArrayList<>();
+        browseBy.addAll(browseSet);
+        browseBy.add("resourceType");
+        java.util.Collections.sort(browseBy);
+        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
     }
 
     @PostConstruct
@@ -251,13 +288,13 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, auth).getResults();
-        List<InfraService> allResources = infraServiceService.getAll(facetFilter, auth).getResults();
+        List<ServiceBundle> allResources = serviceBundleService.getAll(facetFilter, auth).getResults();
         List<String> providerIds = new ArrayList<>();
         List<String> resourceIds = new ArrayList<>();
         for (ProviderBundle provider : allProviders){
             providerIds.add(provider.getId());
         }
-        for (InfraService resource : allResources){
+        for (ServiceBundle resource : allResources){
             resourceIds.add(resource.getId());
         }
         String providerId = vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId();
@@ -357,7 +394,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         filter.setResourceType(getResourceType());
         browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
 
-        browsing.setFacets(abstractServiceManager.createCorrectFacets(browsing.getFacets(), filter));
+        browsing.setFacets(abstractServiceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
         return browsing;
     }
 

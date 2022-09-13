@@ -1,6 +1,6 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.User;
 import org.springframework.security.core.Authentication;
 
@@ -26,33 +26,25 @@ public interface SecurityService {
 
     boolean userIsCatalogueAdmin(@NotNull User user, @NotNull String catalogueId);
 
-    boolean isServiceProviderAdmin(Authentication auth, String serviceId);
+    boolean isResourceProviderAdmin(Authentication auth, String resourceId);
 
-    boolean isServiceProviderAdmin(Authentication auth, String serviceId, String catalogueId);
+    boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId);
 
-    boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow);
+    boolean isResourceProviderAdmin(Authentication auth, String resourceId, boolean noThrow);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service);
+    boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow);
+    boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService);
+    boolean userIsResourceProviderAdmin(User user, ResourceBundle<?> resourceBundle);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow);
+    boolean userIsResourceProviderAdmin(User user, String resourceId);
 
-    boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service);
+    boolean userIsResourceProviderAdmin(User user, String resourceId, String catalogueId);
 
-    boolean userIsServiceProviderAdmin(User user, InfraService infraService);
+    boolean providerCanAddResources(Authentication auth, ResourceBundle<?> resourceBundle);
 
-    boolean userIsServiceProviderAdmin(User user, String serviceId);
+    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
 
-    boolean userIsServiceProviderAdmin(User user, String serviceId, String catalogueId);
-
-    boolean providerCanAddServices(Authentication auth, InfraService service);
-
-    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId);
-
-    boolean serviceIsActive(String serviceId);
-
-    boolean serviceIsActive(String serviceId, String version);
+    boolean resourceIsActive(String resourceId);
 }

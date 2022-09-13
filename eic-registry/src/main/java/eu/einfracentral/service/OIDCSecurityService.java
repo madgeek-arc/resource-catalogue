@@ -1,13 +1,15 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
@@ -30,8 +32,8 @@ public class OIDCSecurityService implements SecurityService {
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final PendingResourceService<InfraService> pendingServiceManager;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private OIDCAuthenticationToken adminAccess;
 
     @Value("${project.name:}")
@@ -42,11 +44,11 @@ public class OIDCSecurityService implements SecurityService {
 
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
-                        InfraServiceService<InfraService, InfraService> infraServiceService,
-                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
+                        ResourceBundleService<ServiceBundle> resourceBundleService,
+                        PendingProviderManager pendingProviderManager, PendingResourceService<ServiceBundle> pendingServiceManager) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
 
@@ -186,25 +188,25 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, String serviceId) {
+    public boolean isResourceProviderAdmin(Authentication auth, String resourceId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, serviceId);
+        return userIsResourceProviderAdmin(user, resourceId);
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, String serviceId, String catalogueId) {
+    public boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, serviceId, catalogueId);
+        return userIsResourceProviderAdmin(user, resourceId, catalogueId);
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow) {
+    public boolean isResourceProviderAdmin(Authentication auth, String resourceId, boolean noThrow) {
         if (auth == null && noThrow) {
             return false;
         }
@@ -212,20 +214,20 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, serviceId);
+        return userIsResourceProviderAdmin(user, resourceId);
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
+    public boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, service);
+        return userIsResourceProviderAdmin(user, resourceBundle);
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow) {
+    public boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow) {
         if (auth == null && noThrow) {
             return false;
         }
@@ -233,38 +235,15 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, service);
+        return userIsResourceProviderAdmin(user, resourceBundle);
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService) {
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
-            return false;
+    public boolean userIsResourceProviderAdmin(User user, ResourceBundle<?> resourceBundle) {
+        if (resourceBundle.getPayload().getResourceOrganisation() == null || resourceBundle.getPayload().getResourceOrganisation().equals("")) {
+            throw new ValidationException("Resource has no Resource Organisation");
         }
-        User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, infraService);
-    }
-
-    @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow) {
-        if (auth == null && noThrow) {
-            return false;
-        }
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
-            return false;
-        }
-        User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, infraService);
-    }
-
-    @Override
-    public boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service) {
-        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
-        }
-//        List<String> allProviders = service.getResourceProviders();
-//        allProviders.add(service.getResourceOrganisation());
-        List<String> allProviders = Collections.singletonList(service.getResourceOrganisation());
+        List<String> allProviders = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
@@ -274,30 +253,23 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean userIsServiceProviderAdmin(User user, InfraService infraService) {
-        return userIsServiceProviderAdmin(user, infraService.getService());
-    }
-
-    @Override
-    public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId) {
-        InfraService service;
+    public boolean userIsResourceProviderAdmin(@NotNull User user, String resourceId) {
+        ResourceBundle<?> resourceBundle;
         try {
-            service = infraServiceService.get(serviceId);
+            resourceBundle = resourceBundleService.get(resourceId);
         } catch (ResourceException | ResourceNotFoundException e) {
             try {
-                service = pendingServiceManager.get(serviceId);
+                resourceBundle = pendingServiceManager.get(resourceId);
             } catch (RuntimeException re) {
                 return false;
             }
         } catch (RuntimeException e) {
             return false;
         }
-        if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
+        if (resourceBundle.getPayload().getResourceOrganisation() == null || resourceBundle.getPayload().getResourceOrganisation().equals("")) {
+            throw new ValidationException("Resource has no Resource Organisation");
         }
-//        List<String> allProviders = service.getService().getResourceProviders();
-//        allProviders.add(service.getService().getResourceOrganisation());
-        List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
+        List<String> allProviders = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
@@ -307,24 +279,24 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId, String catalogueId) {
-        InfraService service;
+    public boolean userIsResourceProviderAdmin(@NotNull User user, String resourceId, String catalogueId) {
+        ResourceBundle<?> resourceBundle;
         try {
-            service = infraServiceService.get(serviceId, catalogueId);
+            resourceBundle = resourceBundleService.get(resourceId, catalogueId);
         } catch (ResourceException | ResourceNotFoundException e) {
             try {
-                service = pendingServiceManager.get(serviceId);
+                resourceBundle = pendingServiceManager.get(resourceId);
             } catch (RuntimeException re) {
                 return false;
             }
         } catch (RuntimeException e) {
             return false;
         }
-        if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
+        if (resourceBundle.getPayload().getResourceOrganisation() == null || resourceBundle.getPayload().getResourceOrganisation().equals("")) {
+            throw new ValidationException("Resource has no Resource Organisation");
         }
 
-        List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
+        List<String> allProviders = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
         Optional<List<String>> providers = Optional.of(allProviders);
         return providers
                 .get()
@@ -333,18 +305,12 @@ public class OIDCSecurityService implements SecurityService {
                 .anyMatch(id -> userIsProviderAdmin(user, id));
     }
 
-    public boolean providerCanAddServices(Authentication auth, String serviceId) {
-        return providerCanAddServices(auth, infraServiceService.get(serviceId));
+    public boolean providerCanAddResources(Authentication auth, String resourceId) {
+        return this.providerCanAddResources(auth, resourceBundleService.get(resourceId));
     }
 
-    public boolean providerCanAddServices(Authentication auth, InfraService infraService) {
-        return providerCanAddServices(auth, infraService.getService());
-    }
-
-    public boolean providerCanAddServices(Authentication auth, eu.einfracentral.domain.Service service) {
-//        List<String> providerIds = service.getService().getResourceProviders();
-//        providerIds.add((service.getService().getResourceOrganisation()));
-        List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
+    public boolean providerCanAddResources(Authentication auth, ResourceBundle<?> resourceBundle) {
+        List<String> providerIds = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (isProviderAdmin(auth, provider.getId())) {
@@ -356,7 +322,7 @@ public class OIDCSecurityService implements SecurityService {
                 } else if (provider.getTemplateStatus().equals("no template status")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());
-                    if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                    if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                         return true;
                     }
                     throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
@@ -366,11 +332,9 @@ public class OIDCSecurityService implements SecurityService {
         return false;
     }
 
-    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
-//        List<String> providerIds = service.getService().getResourceProviders();
-//        providerIds.add(service.getService().getResourceOrganisation());
-        List<String> providerIds = Collections.singletonList(service.getService().getResourceOrganisation());
+    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId) {
+        ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId);
+        List<String> providerIds = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(providerId);
             if (provider != null && provider.isActive()) {
@@ -382,23 +346,13 @@ public class OIDCSecurityService implements SecurityService {
         return false;
     }
 
-    public boolean serviceIsActive(String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
-        return service.isActive();
+    public boolean resourceIsActive(String resourceId) {
+        ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId);
+        return resourceBundle.isActive();
     }
 
-    public boolean serviceIsActive(String serviceId, String catalogueId) {
-        InfraService service = infraServiceService.get(serviceId, catalogueId);
-        return service.isActive();
-    }
-
-    public boolean serviceIsActive(String serviceId, String catalogueId, String version) {
-        // FIXME: serviceId is equal to 'rich' and version holds the service ID
-        //  when searching for a Rich Service without providing a version
-        if ("rich".equals(serviceId)) {
-            serviceId = version;
-        }
-        InfraService service = infraServiceService.get(serviceId, catalogueId, "latest");
-        return service.isActive();
+    public boolean resourceIsActive(String resourceId, String catalogueId) {
+        ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId, catalogueId);
+        return resourceBundle.isActive();
     }
 }

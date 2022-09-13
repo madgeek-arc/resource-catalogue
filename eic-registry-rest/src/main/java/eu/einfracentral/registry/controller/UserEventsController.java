@@ -1,10 +1,10 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.InfraService;
-import eu.einfracentral.domain.RichService;
+import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.domain.RichResource;
 import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,17 +25,16 @@ import java.util.Map;
 @RequestMapping("userEvents")
 public class UserEventsController {
 
-    private EventService eventService;
-    private InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final EventService eventService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
-
     @Autowired
-    UserEventsController(EventService eventService, InfraServiceService<InfraService, InfraService> infraServiceService) {
+    UserEventsController(EventService eventService, ResourceBundleService<ServiceBundle> resourceBundleService) {
         this.eventService = eventService;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
     }
 
     /**
@@ -45,18 +44,18 @@ public class UserEventsController {
      * @return
      */
     @GetMapping(path = "favourites", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<RichService>> favourites(Authentication auth) {
+    public ResponseEntity<List<RichResource>> favourites(Authentication auth) {
 
             Map<String, Float> favouriteServices = new HashMap<>();
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), auth);
-        List<RichService> services = new ArrayList<>();
+        List<RichResource> services = new ArrayList<>();
 
         // Check if the serviceId exists and add it on the list, so to avoid errors
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<String> serviceIds = new ArrayList<>();
-        for (InfraService infraService : infraServiceService.getAll(ff, auth).getResults()) {
-            serviceIds.add(infraService.getService().getId());
+        for (ServiceBundle serviceBundle : resourceBundleService.getAll(ff, auth).getResults()) {
+            serviceIds.add(serviceBundle.getService().getId());
         }
 
         for (Event userEvent : userEvents) {
@@ -66,7 +65,7 @@ public class UserEventsController {
         }
         for (Map.Entry<String, Float> favouriteService : favouriteServices.entrySet()) {
             if (favouriteService.getValue() == 1) { // "1" is true
-                services.add(infraServiceService.getRichService(favouriteService.getKey(), "latest", catalogueName, auth));
+                services.add(resourceBundleService.getRichResource(favouriteService.getKey(), catalogueName, auth));
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -79,16 +78,16 @@ public class UserEventsController {
      * @return
      */
     @GetMapping(path = "ratings", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<RichService>> ratings(Authentication auth) {
+    public ResponseEntity<List<RichResource>> ratings(Authentication auth) {
 
         Map<String, Float> serviceRatings = new HashMap<>();
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.RATING.getKey(), auth);
-        List<RichService> services = new ArrayList<>();
+        List<RichResource> services = new ArrayList<>();
         for (Event userEvent : userEvents) {
             serviceRatings.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
-            services.add(infraServiceService.getRichService(serviceRating.getKey(), "latest", catalogueName, auth));
+            services.add(resourceBundleService.getRichResource(serviceRating.getKey(), catalogueName, auth));
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

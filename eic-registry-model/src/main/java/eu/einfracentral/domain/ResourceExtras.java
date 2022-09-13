@@ -11,7 +11,7 @@ import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class InfraServiceExtras {
+public class ResourceExtras {
 
     @XmlElement()
     @FieldValidation(nullable = true)
@@ -26,10 +26,10 @@ public class InfraServiceExtras {
     @VocabularyValidation(type = Vocabulary.Type.RESEARCH_CATEGORY)
     private List<String> researchCategories;
 
-    public InfraServiceExtras() {
+    public ResourceExtras() {
     }
 
-    public InfraServiceExtras(List<EOSCIFGuidelines> eoscIFGuidelines, boolean horizontalService, List<String> researchCategories) {
+    public ResourceExtras(List<EOSCIFGuidelines> eoscIFGuidelines, boolean horizontalService, List<String> researchCategories) {
         this.eoscIFGuidelines = eoscIFGuidelines;
         this.horizontalService = horizontalService;
         this.researchCategories = researchCategories;
@@ -37,7 +37,7 @@ public class InfraServiceExtras {
 
     @Override
     public String toString() {
-        return "InfraServiceExtras{" +
+        return "ResourceExtras{" +
                 "eoscIFGuidelines=" + eoscIFGuidelines +
                 ", horizontalService=" + horizontalService +
                 ", researchCategories=" + researchCategories +

@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.annotation.EmailValidation;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.GeoLocationVocValidation;
@@ -1091,4 +1093,12 @@ public class Service implements Identifiable {
         this.pricing = pricing;
     }
 
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

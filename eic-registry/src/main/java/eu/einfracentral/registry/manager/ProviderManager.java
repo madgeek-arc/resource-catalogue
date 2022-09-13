@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
@@ -43,7 +44,7 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientifi
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -64,7 +65,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private String catalogueName;
 
     @Autowired
-    public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
+    public ProviderManager(@Lazy ResourceBundleService<ServiceBundle> resourceBundleService,
                            @Lazy SecurityService securityService,
                            @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService,
@@ -74,7 +75,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            SynchronizerService<Provider> synchronizerServiceProvider,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ProviderBundle.class);
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.securityService = securityService;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
@@ -112,7 +113,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        provider.setId(idCreator.createProviderId(provider.getProvider()));
+        if (provider.getProvider().getCatalogueId().equals(catalogueName)){
+            provider.setId(idCreator.createProviderId(provider.getProvider()));
+        } else{
+            if (provider.getId() == null || "".equals(provider.getId())) {
+                provider.setId(idCreator.createProviderId(provider.getProvider()));
+            } else{
+                provider.setId(idCreator.reformatId(provider.getId()));
+            }
+        }
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
@@ -179,6 +188,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {} of Catalogue: {}", provider, provider.getProvider().getCatalogueId());
+
+        // check if Provider has become a Legal Entity
+        checkAndAddProviderToHLEVocabulary(provider);
 
         // Send emails to newly added or deleted Admins
         adminDifferences(provider, ex);
@@ -357,10 +369,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void delete(ProviderBundle provider) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<InfraService> services = infraServiceService.getInfraServices(provider.getId(), authentication);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getId(), authentication);
         services.forEach(s -> {
             try {
-                infraServiceService.delete(s);
+                resourceBundleService.delete(s);
             } catch (ResourceNotFoundException e) {
                 logger.error("Error deleting Resource", e);
             }
@@ -567,9 +579,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
         logger.info("Activating all Resources of the Provider with id: {}", providerId);
-        for (InfraService service : services) {
+        for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
             if (service.getLoggingInfo() != null){
@@ -593,7 +605,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
-                infraServiceService.update(service, null);
+                resourceBundleService.update(service, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }
@@ -601,9 +613,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
         logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
-        for (InfraService service : services) {
+        for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
             if (service.getLoggingInfo() != null){
@@ -627,7 +639,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
-                infraServiceService.update(service, null);
+                resourceBundleService.update(service, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }
@@ -960,9 +972,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = 'eosc'";
+            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"' AND published = 'false' AND";
         } else{
-            query = "SELECT provider_id FROM provider_view WHERE";
+            query = "SELECT provider_id FROM provider_view WHERE published = 'false' AND";
         }
 
         boolean firstTime = true;
@@ -1108,11 +1120,26 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle){
         Vocabulary newHostingLegalEntity = new Vocabulary();
-        newHostingLegalEntity.setId(idCreator.createHostingLegalEntityId(providerBundle.getProvider().getName()));
+        newHostingLegalEntity.setId("provider_hosting_legal_entity-"+providerBundle.getProvider().getId());
         newHostingLegalEntity.setName(providerBundle.getProvider().getName());
         newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                 newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
-//                        add(newHostingLegalEntity, null);
+        vocabularyService.add(newHostingLegalEntity, null);
+    }
+
+    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle){
+        boolean exists = false;
+        if (providerBundle.getProvider().isLegalEntity()){
+            List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+            for (Vocabulary voc : allHLE){
+                if (voc.getId().equals("provider_hosting_legal_entity-" + providerBundle.getProvider().getId())){
+                    exists = true;
+                }
+            }
+        }
+        if (!exists){
+            addApprovedProviderToHLEVocabulary(providerBundle);
+        }
     }
 }

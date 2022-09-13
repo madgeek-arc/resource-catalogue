@@ -1,9 +1,10 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -33,15 +34,15 @@ public class CatalogueController {
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
-                        InfraServiceService<InfraService, InfraService> infraServiceService) {
+                        ResourceBundleService<ServiceBundle> resourceBundleService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
     }
 
     //SECTION: CATALOGUE
@@ -229,11 +230,11 @@ public class CatalogueController {
             }
         }
         // Get all Catalogue's Services
-        List<InfraService> allServices = infraServiceService.getAll(ff, auth).getResults();
-        List<InfraService> allCatalogueServices = new ArrayList<>();
-        for (InfraService infraService : allServices){
-            if (infraService.getService().getCatalogueId().equals(id)){
-                allCatalogueServices.add(infraService);
+        List<ServiceBundle> allServices = resourceBundleService.getAll(ff, auth).getResults();
+        List<ServiceBundle> allCatalogueServices = new ArrayList<>();
+        for (ServiceBundle serviceBundle : allServices){
+            if (serviceBundle.getService().getCatalogueId().equals(id)){
+                allCatalogueServices.add(serviceBundle);
             }
         }
         // Delete Catalogue along with all its related Resources
@@ -242,8 +243,8 @@ public class CatalogueController {
             deleteCatalogueProvider(id, providerBundle.getId(), auth);
         }
         logger.info("Deleting all Catalogue's Services...");
-        for (InfraService infraService : allCatalogueServices){
-            deleteCatalogueService(id, infraService.getId(), auth);
+        for (ServiceBundle serviceBundle : allCatalogueServices){
+            deleteCatalogueService(id, serviceBundle.getId(), auth);
         }
         logger.info("Deleting Catalogue...");
         catalogueManager.delete(catalogueBundle);
@@ -363,7 +364,7 @@ public class CatalogueController {
     @ApiOperation(value = "Returns the Resource of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-        Service resource = infraServiceService.getCatalogueService(catalogueId, resourceId, auth).getService();
+        Service resource = resourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getService();
         if (resource.getCatalogueId() == null){
             throw new ValidationException("Service's catalogueId cannot be null");
         } else {
@@ -377,18 +378,18 @@ public class CatalogueController {
 
     @ApiOperation(value = "Creates a new Resource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddServices(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
-        InfraService ret = this.infraServiceService.addService(new InfraService(service), catalogueId, auth);
+        ServiceBundle ret = this.resourceBundleService.addResource(new ServiceBundle(service), catalogueId, auth);
         logger.info("User '{}' added the Service with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Updates the Resource of the specific Catalogue.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isServiceProviderAdmin(#auth,#service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
     @PutMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService ret = this.infraServiceService.updateService(new InfraService(service), catalogueId, comment, auth);
+        ServiceBundle ret = this.resourceBundleService.updateResource(new ServiceBundle(service), catalogueId, comment, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
@@ -396,9 +397,9 @@ public class CatalogueController {
     @ApiOperation(value = "Get all the Services of a specific Provider of a specific Catalogue")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<InfraService>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
-        Paging<InfraService> infraServices = infraServiceService.getInfraServices(catalogueId, providerId, auth);
-        return new ResponseEntity<>(infraServices, HttpStatus.OK);
+    public ResponseEntity<Paging<ServiceBundle>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
+        Paging<ServiceBundle> serviceBundles = resourceBundleService.getResourceBundles(catalogueId, providerId, auth);
+        return new ResponseEntity<>(serviceBundles, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deletes the Service of the specific Catalogue with the given id.")
@@ -407,12 +408,12 @@ public class CatalogueController {
     public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
                                            @PathVariable("id") String id,
                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        InfraService infraService = infraServiceService.get(id, catalogueId);
-        if (infraService == null) {
+        ServiceBundle serviceBundle = resourceBundleService.get(id, catalogueId);
+        if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        infraServiceService.delete(infraService);
-        logger.info("User '{}' deleted the Service with name '{}' and id '{}'", auth.getName(), infraService.getService().getName(), infraService.getId());
-        return new ResponseEntity<>(infraService.getService(), HttpStatus.OK);
+        resourceBundleService.delete(serviceBundle);
+        logger.info("User '{}' deleted the Service with name '{}' and id '{}'", auth.getName(), serviceBundle.getService().getName(), serviceBundle.getId());
+        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 }

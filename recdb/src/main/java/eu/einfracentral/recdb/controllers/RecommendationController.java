@@ -1,6 +1,6 @@
 package eu.einfracentral.recdb.controllers;
 
-import eu.einfracentral.domain.RichService;
+import eu.einfracentral.domain.RichResource;
 import eu.einfracentral.recdb.services.RecommendationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,16 +24,16 @@ import java.util.List;
 public class RecommendationController {
 
     private static final Logger logger = LogManager.getLogger(RecommendationController.class);
-    private final RecommendationService<RichService, Authentication> recommendationService;
+    private final RecommendationService<RichResource, Authentication> recommendationService;
 
     @Autowired
-    RecommendationController(RecommendationService<RichService, Authentication> recommendationService) {
+    RecommendationController(RecommendationService<RichResource, Authentication> recommendationService) {
         this.recommendationService = recommendationService;
     }
 
     @ApiOperation(value = "Given a specific user email, returns Service Recommendations.")
     @GetMapping(path = "getRecommendationServices/{limit}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<RichService>> getRecommendationServices(@PathVariable("limit") int limit, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<RichResource>> getRecommendationServices(@PathVariable("limit") int limit, @ApiIgnore Authentication auth) {
         logger.trace("Getting user recommended Services");
         return recommendationService.getRecommendedResources(limit, auth);
     }

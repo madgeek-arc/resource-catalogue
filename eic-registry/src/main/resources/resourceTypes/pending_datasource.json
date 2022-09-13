@@ -2,16 +2,16 @@
   "indexFields": [
     {
       "multivalued": false,
-      "name": "pending_service_id",
-      "path": "//*[local-name()='service']/*[local-name()='id']/text()",
+      "name": "pending_datasource_id",
+      "path": "//*[local-name()='datasource']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
     {
       "multivalued": false,
       "name": "name",
-      "label": "Service Name",
-      "path": "//*[local-name()='service']/*[local-name()='name']/text()",
+      "label": "Datasource Name",
+      "path": "//*[local-name()='datasource']/*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
@@ -25,21 +25,21 @@
       "multivalued": false,
       "name": "version",
       "label": "Version",
-      "path": "//*[local-name()='service']/*[local-name()='version']/text()",
+      "path": "//*[local-name()='datasource']/*[local-name()='version']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "resource_organisation",
       "label": "Resource Organisation",
-      "path": "//*[local-name()='service']/*[local-name()='resourceOrganisation']/text()",
+      "path": "//*[local-name()='datasource']/*[local-name()='resourceOrganisation']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "resource_providers",
       "label": "Resource Provider",
-      "path": "//*[local-name()='service']//*[local-name()='resourceProvider']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='resourceProvider']/text()",
       "type": "java.lang.String"
     },
     {
@@ -60,56 +60,56 @@
       "multivalued": true,
       "name": "target_users",
       "label": "Target User",
-      "path": "//*[local-name()='service']//*[local-name()='targetUser']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='targetUser']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "access_types",
       "label": "Access Type",
-      "path": "//*[local-name()='service']//*[local-name()='accessType']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='accessType']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "access_modes",
       "label": "Access Mode",
-      "path": "//*[local-name()='service']//*[local-name()='accessMode']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='accessMode']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "language_availabilities",
       "label": "Language Availability",
-      "path": "//*[local-name()='service']//*[local-name()='languageAvailability']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='languageAvailability']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "geographical_availabilities",
       "label": "Geographical Availability",
-      "path": "//*[local-name()='service']//*[local-name()='geographicalAvailability']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='geographicalAvailability']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "resource_geographic_locations",
       "label": "Resource Geographic Location",
-      "path": "//*[local-name()='service']//*[local-name()='resourceGeographicLocation']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='resourceGeographicLocation']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "trl",
       "label": "TRL",
-      "path": "//*[local-name()='service']/*[local-name()='trl']/text()",
+      "path": "//*[local-name()='datasource']/*[local-name()='trl']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "life_cycle_status",
       "label": "Life Cycle Status",
-      "path": "//*[local-name()='service']//*[local-name()='lifeCycleStatus']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='lifeCycleStatus']/text()",
       "type": "java.lang.String"
     },
     {
@@ -123,56 +123,56 @@
       "multivalued": true,
       "name": "funding_body",
       "label": "Funding Body",
-      "path": "//*[local-name()='service']//*[local-name()='fundingBody']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='fundingBody']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "funding_programs",
       "label": "Funding Program",
-      "path": "//*[local-name()='service']//*[local-name()='fundingProgram']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='fundingProgram']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "description",
       "label": "Description",
-      "path": "//*[local-name()='service']/*[local-name()='description']/text()",
+      "path": "//*[local-name()='datasource']/*[local-name()='description']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "tagline",
       "label": "Tagline",
-      "path": "//*[local-name()='service']/*[local-name()='tagline']/text()",
+      "path": "//*[local-name()='datasource']/*[local-name()='tagline']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "use_cases",
       "label": "Use Case",
-      "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='useCase']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "open_source_technologies",
       "label": "Open Source Technology",
-      "path": "//*[local-name()='service']//*[local-name()='openSourceTechnology']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='openSourceTechnology']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "tags",
       "label": "Tag",
-      "path": "//*[local-name()='service']//*[local-name()='tag']/text()",
+      "path": "//*[local-name()='datasource']//*[local-name()='tag']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "order_type",
       "label": "Order Type",
-      "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
+      "path": "//*[local-name()='datasource']/*[local-name()='orderType']/text()",
       "type": "java.lang.String"
     },
     {
@@ -222,7 +222,7 @@
       "multivalued": false,
       "name": "active",
       "defaultValue": false,
-      "path": "//*[local-name()='serviceBundle']/*[local-name()='active']/text()",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='active']/text()",
       "type": "java.lang.Boolean"
     },
     {
@@ -235,16 +235,16 @@
     {
       "multivalued": false,
       "name": "status",
-      "path": "//*[local-name()='serviceBundle']/*[local-name()='status']/text()",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='status']/text()",
       "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
-  "name": "pending_service",
+  "name": "pending_datasource",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
-    "class": "eu.einfracentral.domain.ServiceBundle"
+    "class": "eu.einfracentral.domain.DatasourceBundle"
   },
-  "schema": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://einfracentral.eu\" version=\"1.0\" xmlns:tns=\"http://einfracentral.eu\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n\t<xs:element name=\"serviceBundle\"/>\n</xs:schema>"
+  "schema": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://einfracentral.eu\" version=\"1.0\" xmlns:tns=\"http://einfracentral.eu\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n\t<xs:element name=\"datasourceBundle\"/>\n</xs:schema>"
 }

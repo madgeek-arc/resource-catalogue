@@ -2,8 +2,7 @@ package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Catalogue;
 import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.Service;
-import eu.einfracentral.domain.Vocabulary;
+import eu.einfracentral.domain.ResourceBundle;
 
 public interface IdCreator {
 
@@ -16,12 +15,12 @@ public interface IdCreator {
     String createProviderId(Provider provider);
 
     /**
-     * Creates id for {@link Service}
+     * Creates id for {@link ResourceBundle}
      *
-     * @param service
+     * @param resource
      * @return
      */
-    String createServiceId(Service service);
+    String createResourceId(ResourceBundle<?> resource);
 
     /**
      * Creates id for {@link Catalogue}
@@ -36,5 +35,5 @@ public interface IdCreator {
      * @param providerName
      * @return
      */
-    String createHostingLegalEntityId(String providerName);
+    String reformatId(String providerName);
 }

@@ -26,12 +26,12 @@ import java.util.List;
 
 import static eu.einfracentral.config.CacheConfig.*;
 
-@Service("pendingServiceManager")
-public class PendingServiceManager extends ResourceManager<ServiceBundle> implements PendingResourceService<ServiceBundle> {
+@Service("pendingDatasourceManager")
+public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> implements PendingResourceService<DatasourceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(PendingServiceManager.class);
+    private static final Logger logger = LogManager.getLogger(PendingDatasourceManager.class);
 
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> resourceBundleService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
@@ -41,10 +41,10 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private String catalogueName;
 
     @Autowired
-    public PendingServiceManager(ResourceBundleService<ServiceBundle> resourceBundleService,
+    public PendingDatasourceManager(ResourceBundleService<DatasourceBundle> resourceBundleService,
                                  IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
                                  @Lazy ProviderManager providerManager) {
-        super(ServiceBundle.class);
+        super(DatasourceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
         this.securityService = securityService;
@@ -54,143 +54,143 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
     @Override
     public String getResourceType() {
-        return "pending_service";
+        return "pending_datasource";
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle add(ServiceBundle service, Authentication auth) {
+    public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
 
-        service.setId(idCreator.createResourceId(service));
+        datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
 
         // Check if there is a Resource with the specific id
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
-        List<ServiceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
-        for (ServiceBundle existingResource : resourceList){
-            if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
+        List<DatasourceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
+        for (DatasourceBundle existingResource : resourceList){
+            if (datasourceBundle.getDatasource().getId().equals(existingResource.getDatasource().getId()) && existingResource.getDatasource().getCatalogueId().equals(catalogueName)) {
                 throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
             }
         }
-        logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
+        logger.trace("User '{}' is attempting to add a new Pending Datasource with id {}", auth, datasourceBundle.getId());
 
-        if (service.getMetadata() == null) {
-            service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+        if (datasourceBundle.getMetadata() == null) {
+            datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
-        if (service.getLoggingInfo() == null){
+        if (datasourceBundle.getLoggingInfo() == null){
             LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
             loggingInfoList.add(loggingInfo);
-            service.setLoggingInfo(loggingInfoList);
+            datasourceBundle.setLoggingInfo(loggingInfoList);
         }
 
-        service.getService().setCatalogueId(catalogueName);
-        service.setActive(false);
+        datasourceBundle.getDatasource().setCatalogueId(catalogueName);
+        datasourceBundle.setActive(false);
 
-        super.add(service, auth);
+        super.add(datasourceBundle, auth);
 
-        return service;
+        return datasourceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
+    public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication auth) {
         // block catalogueId updates from Provider Admins
-        serviceBundle.getService().setCatalogueId(catalogueName);
-        logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
-        serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
+        datasourceBundle.getDatasource().setCatalogueId(catalogueName);
+        logger.trace("User '{}' is attempting to update the Pending Datasource with id {}", auth, datasourceBundle.getId());
+        datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
-        Resource existing = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
+        Resource existing = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
         // save existing resource with new payload
-        existing.setPayload(serialize(serviceBundle));
+        existing.setPayload(serialize(datasourceBundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating Pending Service: {}", serviceBundle);
-        return serviceBundle;
+        logger.debug("Updating Pending Datasource: {}", datasourceBundle);
+        return datasourceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToPending(ServiceBundle serviceBundle, Authentication auth) {
-        return transformToPending(serviceBundle.getId(), auth);
+    public DatasourceBundle transformToPending(DatasourceBundle datasourceBundle, Authentication auth) {
+        return transformToPending(datasourceBundle.getId(), auth);
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToPending(String serviceId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
-        ServiceBundle serviceBundle = resourceBundleService.get(serviceId);
-        Resource resource = resourceBundleService.getResource(serviceBundle.getService().getId(), catalogueName);
-        resource.setResourceTypeName("service");
+    public DatasourceBundle transformToPending(String datasourceId, Authentication auth) {
+        logger.trace("User '{}' is attempting to transform the Active Datasource with id {} to Pending", auth, datasourceId);
+        DatasourceBundle datasourceBundle = resourceBundleService.get(datasourceId);
+        Resource resource = resourceBundleService.getResource(datasourceBundle.getDatasource().getId(), catalogueName);
+        resource.setResourceTypeName("datasource");
         resourceService.changeResourceType(resource, resourceType);
-        return serviceBundle;
+        return datasourceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToActive(ServiceBundle serviceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceBundle.getId());
-        resourceBundleService.validate(serviceBundle);
+    public DatasourceBundle transformToActive(DatasourceBundle datasourceBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to transform the Pending Datasource with id {} to Active", auth, datasourceBundle.getId());
+        resourceBundleService.validate(datasourceBundle);
 
         // update loggingInfo
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
         List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (serviceBundle.getLoggingInfo() != null) {
-            loggingInfoList = serviceBundle.getLoggingInfo();
+        if (datasourceBundle.getLoggingInfo() != null) {
+            loggingInfoList = datasourceBundle.getLoggingInfo();
             loggingInfoList.add(loggingInfo);
         } else {
             loggingInfoList.add(loggingInfo);
         }
-        serviceBundle.setLoggingInfo(loggingInfoList);
+        datasourceBundle.setLoggingInfo(loggingInfoList);
 
         // latestOnboardInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfo);
+        datasourceBundle.setLatestOnboardingInfo(loggingInfo);
 
         // set resource status according to Provider's templateStatus
-        if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
-            serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
+        if (providerManager.get(datasourceBundle.getDatasource().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
+            datasourceBundle.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
 
             // latestOnboardingInfo
-            serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);
+            datasourceBundle.setLatestOnboardingInfo(loggingInfoApproved);
         } else{
-            serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
+            datasourceBundle.setStatus(vocabularyService.get("pending resource").getId());
         }
 
-        serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        serviceBundle = this.update(serviceBundle, auth);
-        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
+        datasourceBundle = this.update(datasourceBundle, auth);
+        ResourceType infraResourceType = resourceTypeService.getResourceType("datasource");
+        Resource resource = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
         try {
-            serviceBundle = resourceBundleService.update(serviceBundle, auth);
+            datasourceBundle = resourceBundleService.update(datasourceBundle, auth);
         } catch (ResourceNotFoundException e) {
             e.printStackTrace();
         }
 
-        return serviceBundle;
+        return datasourceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToActive(String serviceId, Authentication auth) {
-        ServiceBundle serviceBundle = this.get(serviceId);
-        return transformToActive(serviceBundle, auth);
+    public DatasourceBundle transformToActive(String datasourceId, Authentication auth) {
+        DatasourceBundle datasourceBundle = this.get(datasourceId);
+        return transformToActive(datasourceBundle, auth);
     }
 
     public Object getPendingRich(String id, Authentication auth) {
         return resourceBundleService.createRichResource(get(id), auth);
     }
 
-    public List<ServiceBundle> getMy(Authentication auth) {
-        List<ServiceBundle> re = new ArrayList<>();
+    public List<DatasourceBundle> getMy(Authentication auth) {
+        List<DatasourceBundle> re = new ArrayList<>();
         return re;
     }
 
@@ -202,10 +202,10 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
     }
 
-    public Resource getPendingResourceViaServiceId(String serviceId) {
+    public Resource getPendingResourceViaServiceId(String datasourceId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
+                .cqlQuery(String.format("datasource_id = \"%s\" AND catalogue_id = \"%s\"", datasourceId, catalogueName),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);

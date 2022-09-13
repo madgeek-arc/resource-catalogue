@@ -17,6 +17,9 @@ public class ExtrasMapTypeAdapter extends XmlAdapter<ExtrasMapType, Map<String, 
 
     @Override
     public ExtrasMapType marshal(Map<String, String> map) {
+        if (map == null){
+            map = new HashMap<>();
+        }
         ExtrasMapType extrasMap = new ExtrasMapType();
 
         for (Map.Entry<String, String> entry : map.entrySet()) {
