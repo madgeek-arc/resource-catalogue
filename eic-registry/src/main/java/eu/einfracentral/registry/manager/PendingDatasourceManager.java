@@ -122,7 +122,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         logger.trace("User '{}' is attempting to transform the Active Datasource with id {} to Pending", auth, datasourceId);
         DatasourceBundle datasourceBundle = resourceBundleService.get(datasourceId);
         Resource resource = resourceBundleService.getResource(datasourceBundle.getDatasource().getId(), catalogueName);
-        resource.setResourceTypeName("pending_datasource");
+        resource.setResourceTypeName("datasource");
         resourceService.changeResourceType(resource, resourceType);
         return datasourceBundle;
     }

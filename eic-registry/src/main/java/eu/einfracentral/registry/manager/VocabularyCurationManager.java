@@ -48,11 +48,9 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Autowired
     private FacetLabelService facetLabelService;
 
-    @Autowired
-    private AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager;
+    private final AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager;
 
-    @Autowired
-    private AbstractResourceBundleManager<DatasourceBundle> abstractDatasourceBundleManager;
+    private final AbstractResourceBundleManager<DatasourceBundle> abstractDatasourceBundleManager;
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;

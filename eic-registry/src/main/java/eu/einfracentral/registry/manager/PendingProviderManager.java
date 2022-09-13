@@ -147,7 +147,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Provider with id '{}' to Pending", auth, providerId);
         Resource resource = providerManager.getResource(providerId, catalogueName);
-        resource.setResourceTypeName("pending_provider"); //make sure that resource type is present
+        resource.setResourceTypeName("provider");
         resourceService.changeResourceType(resource, resourceType);
         return deserialize(resource);
     }
