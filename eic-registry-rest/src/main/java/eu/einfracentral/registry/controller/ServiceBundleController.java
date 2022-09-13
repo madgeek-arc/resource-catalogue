@@ -26,15 +26,15 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("infraService")
+@RequestMapping({"infraService", "serviceBundle"})
 @Api(value = "Get Information about a Service")
-public class InfraServiceController {
+public class ServiceBundleController {
 
-    private static final Logger logger = LogManager.getLogger(InfraServiceController.class.getName());
+    private static final Logger logger = LogManager.getLogger(ServiceBundleController.class.getName());
     private final ResourceBundleService<ServiceBundle> infraService;
 
     @Autowired
-    InfraServiceController(ResourceBundleService<ServiceBundle> service) {
+    ServiceBundleController(ResourceBundleService<ServiceBundle> service) {
         this.infraService = service;
     }
 
