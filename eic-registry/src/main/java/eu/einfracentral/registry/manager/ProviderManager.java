@@ -45,6 +45,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -66,6 +67,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Autowired
     public ProviderManager(@Lazy ResourceBundleService<ServiceBundle> resourceBundleService,
+                           @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
                            @Lazy SecurityService securityService,
                            @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService,
@@ -76,6 +78,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ProviderBundle.class);
         this.resourceBundleService = resourceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
         this.securityService = securityService;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
@@ -374,10 +377,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             try {
                 resourceBundleService.delete(s);
             } catch (ResourceNotFoundException e) {
-                logger.error("Error deleting Resource", e);
+                logger.error("Error deleting Service", e);
             }
         });
-        logger.debug("Deleting Provider: {}", provider);
+        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getId(), authentication);
+        datasources.forEach(s -> {
+            try {
+                datasourceBundleService.delete(s);
+            } catch (ResourceNotFoundException e) {
+                logger.error("Error deleting Datasource", e);
+            }
+        });
+        logger.debug("Deleting Provider: {} and all his Resources", provider);
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(authentication).getEmail(), User.of(authentication).getEmail(), securityService.getRoleName(authentication),

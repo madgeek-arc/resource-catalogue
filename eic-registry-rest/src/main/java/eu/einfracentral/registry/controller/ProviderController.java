@@ -40,6 +40,7 @@ public class ProviderController {
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final MigrationService migrationService;
 
     @Value("${project.catalogue.name}")
@@ -51,9 +52,11 @@ public class ProviderController {
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
                        ResourceBundleService<ServiceBundle> resourceBundleService,
+                       ResourceBundleService<DatasourceBundle> datasourceBundleService,
                        MigrationService migrationService) {
         this.providerManager = service;
         this.resourceBundleService = resourceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
         this.migrationService = migrationService;
     }
 
@@ -72,16 +75,6 @@ public class ProviderController {
             throw new ValidationException("You cannot delete a Provider of a non EOSC Catalogue.");
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
-
-        // delete all Provider's services
-        List<ServiceBundle> allProviderServices = resourceBundleService.getResourceBundles(id, auth);
-        for (ServiceBundle serviceBundle : allProviderServices){
-            try {
-                resourceBundleService.delete(serviceBundle);
-            } catch (ResourceNotFoundException e){
-                logger.info(String.format("Resource %s does not exist", serviceBundle));
-            }
-        }
 
         // delete Provider
         providerManager.delete(provider);
@@ -259,6 +252,12 @@ public class ProviderController {
         return new ResponseEntity<>(resourceBundleService.getResources(id, auth), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Get a list of datasources offered by a Provider.")
+    @GetMapping(path = "datasources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<?>> getDatasources(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(datasourceBundleService.getResources(id, auth), HttpStatus.OK);
+    }
+
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -299,6 +298,12 @@ public class ProviderController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
+    @GetMapping(path = "datasources/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<Datasource>> getInactiveDatasources(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        List<Datasource> ret = datasourceBundleService.getInactiveResources(id).stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
     // Get the rejected services of the given Provider.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -314,6 +319,22 @@ public class ProviderController {
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("status", "rejected resource");
         return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "datasources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<DatasourceBundle>> getRejectedDatasources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                     @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("status", "rejected resource");
+        return ResponseEntity.ok(datasourceBundleService.getAll(ff, auth));
     }
 
     // Get all inactive Providers.
@@ -371,6 +392,32 @@ public class ProviderController {
                     auth.getName(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "publishDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<List<DatasourceBundle>> publishDatasources(@RequestParam String id, @RequestParam Boolean active,
+                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ProviderBundle provider = providerManager.get(catalogueName, id, auth);
+        if (provider == null) {
+            throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
+        }
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("resource_organisation", id);
+        ff.addFilter("catalogue_id", catalogueName);
+        List<DatasourceBundle> datasources = datasourceBundleService.getAll(ff, auth).getResults();
+        for (DatasourceBundle datasource : datasources) {
+            datasource.setActive(active);
+//            service.setStatus(status.getKey());
+            Metadata metadata = datasource.getMetadata();
+            metadata.setModifiedBy("system");
+            metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+            datasourceBundleService.update(datasource, auth);
+            logger.info("User '{}' published(updated) all Datasources of the Provider with name '{}'",
+                    auth.getName(), provider.getProvider().getName());
+        }
+        return new ResponseEntity<>(datasources, HttpStatus.OK);
     }
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
