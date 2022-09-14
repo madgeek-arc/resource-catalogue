@@ -746,10 +746,12 @@ public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
                 }
             }
             if (ff.getFrom()+ff.getQuantity() > datasourcesContainingKeyword.size()){
-                ret.addAll(datasourcesContainingKeyword);
-                datasourcePaging.setTotal(ret.size());
-                datasourcePaging.setTo(ret.size());
-                datasourcePaging.setFrom(0);
+                for (int i = ff.getFrom(); i < allDatasources.size(); i++){
+                    ret.add(allDatasources.get(i));
+                    datasourcePaging.setTotal(allDatasources.size());
+                    datasourcePaging.setTo(allDatasources.size());
+                    datasourcePaging.setFrom(ff.getFrom());
+                }
             } else{
                 for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
                     ret.add(datasourcesContainingKeyword.get(i));
@@ -760,10 +762,12 @@ public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
             }
         } else{
             if (ff.getFrom()+ff.getQuantity() > allDatasources.size()){
-                ret.addAll(allDatasources);
-                datasourcePaging.setTotal(ret.size());
-                datasourcePaging.setTo(ret.size());
-                datasourcePaging.setFrom(0);
+                for (int i = ff.getFrom(); i < allDatasources.size(); i++){
+                    ret.add(allDatasources.get(i));
+                    datasourcePaging.setTotal(allDatasources.size());
+                    datasourcePaging.setTo(allDatasources.size());
+                    datasourcePaging.setFrom(ff.getFrom());
+                }
             } else{
                 for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
                     ret.add(allDatasources.get(i));
