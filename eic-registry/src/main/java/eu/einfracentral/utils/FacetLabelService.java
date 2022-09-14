@@ -89,9 +89,7 @@ public class FacetLabelService {
                         else {
                             try {
                                 value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
-                            } catch (StringIndexOutOfBoundsException e){
-                                logger.info(e);
-                            }
+                            } catch (StringIndexOutOfBoundsException e){}
                         }
                 }
             }
