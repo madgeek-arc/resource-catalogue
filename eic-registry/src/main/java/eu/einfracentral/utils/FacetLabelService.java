@@ -101,9 +101,7 @@ public class FacetLabelService {
         // Swap position according to front-ends needs
         try{
             Collections.swap(enrichedFacets, 4, 5);
-        } catch(IndexOutOfBoundsException e) {
-            logger.info(e);
-        }
+        } catch(IndexOutOfBoundsException e) {}
         return enrichedFacets;
     }
 
