@@ -374,18 +374,22 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getId(), authentication);
         services.forEach(s -> {
-            try {
-                resourceBundleService.delete(s);
-            } catch (ResourceNotFoundException e) {
-                logger.error("Error deleting Service", e);
+            if (!s.getMetadata().isPublished()){
+                try {
+                    resourceBundleService.delete(s);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Error deleting Service", e);
+                }
             }
         });
         List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getId(), authentication);
         datasources.forEach(s -> {
-            try {
-                datasourceBundleService.delete(s);
-            } catch (ResourceNotFoundException e) {
-                logger.error("Error deleting Datasource", e);
+            if (!s.getMetadata().isPublished()){
+                try {
+                    datasourceBundleService.delete(s);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Error deleting Datasource", e);
+                }
             }
         });
         logger.debug("Deleting Provider: {} and all his Resources", provider);
