@@ -216,8 +216,12 @@ public class DatasourceController {
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        List<Datasource> allDatasources = datasourceService.getAllOpenAIREDatasources();
-        Paging<Datasource> datasourcePaging = datasourceService.createCustomFacetFilter(ff, allDatasources);
+        List<Datasource> allDatasources = datasourceService.getAllOpenAIREDatasources(ff);
+        Paging<Datasource> datasourcePaging = new Paging<>();
+        datasourcePaging.setTotal(104315); //FIXME
+        datasourcePaging.setFrom(ff.getFrom());
+        datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
+        datasourcePaging.setResults(allDatasources);
         return ResponseEntity.ok(new Paging<>(datasourcePaging.getTotal(), datasourcePaging.getFrom(), datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
     }
 

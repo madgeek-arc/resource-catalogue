@@ -665,7 +665,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return serviceBundle;
     }
 
-    public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
+    public ResponseEntity<String> getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
@@ -673,15 +673,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 
-    public Datasource transformOpenAIREToEOSCDatasource(String openaireDatasource){
-        throw new UnsupportedOperationException("Not yet Implemented");
-    }
-
-    public List<Datasource> getAllOpenAIREDatasources() {
-        throw new UnsupportedOperationException("Not yet Implemented");
-    }
-
-    public Paging<Datasource> createCustomFacetFilter(FacetFilter ff, List<Datasource> allDatasources){
+    public List<Datasource> getAllOpenAIREDatasources(FacetFilter ff) {
         throw new UnsupportedOperationException("Not yet Implemented");
     }
 

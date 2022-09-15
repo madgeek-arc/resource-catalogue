@@ -670,15 +670,40 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
-public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
+public ResponseEntity<String> getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
+    int page = 0;
+    int quantity = ff.getQuantity();
+    if (ff.getFrom() >= quantity){
+        page = ff.getFrom() / quantity;
+    } else {
+        page = ff.getFrom() / 10;
+    }
+    String ordering = "ASCENDING";
+    if (ff.getOrderBy() != null){
+        Map<String, Object> order = (Map<String, Object>) ff.getOrderBy().get("name");
+        if (order.get("order").equals("desc")){
+            ordering = "DESCENDING";
+        }
+    }
+    //    String data = "{  \"country\": \"GR\"}";
+    String data = "{}";
+    if (ff.getFilter() != null){
+        page = 0;
+        quantity = 999999;
+        if (ff.getFilter().containsKey("id")){
+            data = "{  \"id\": \""+ff.getFilter().get("id")+"\"}";
+        }
+    }
+    if (ff.getKeyword() != null && !ff.getKeyword().equals("")){
+        data = "{  \"officialname\": \""+ff.getKeyword()+"\"}";
+    }
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.add("accept", "application/json");
     headers.add("Content-Type", "application/json");
     // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
-    String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation";
+    String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
 
-    String data = "{  \"country\": \"GR\"}";
     HttpEntity<String> entity = new HttpEntity<>(data, headers);
     String response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
 
@@ -693,25 +718,27 @@ public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
 }
 
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
-        String allOpenAIREDatasources = getOpenAIREDatasourcesAsJSON().getBody();
-        if (allOpenAIREDatasources != null){
-            JSONObject obj = new JSONObject(allOpenAIREDatasources);
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("id", datasourceId);
+        String datasource = getOpenAIREDatasourcesAsJSON(ff).getBody();
+        if (datasource != null){
+            JSONObject obj = new JSONObject(datasource);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
-            for(int i = 0; i < arr .length(); i++) {
-                JSONObject map = arr.getJSONObject(i);
-                if (map.get("id").equals(datasourceId)){
-                    Gson gson = new Gson();
-                    JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                    return new ResponseEntity<>(transformOpenAIREToEOSCDatasource(jsonObj), HttpStatus.OK);
-                }
+            if (arr != null && arr.length() == 0){
+                throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
+            } else{
+                JSONObject map = arr.getJSONObject(0);
+                Gson gson = new Gson();
+                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                return new ResponseEntity<>(transformOpenAIREToEOSCDatasource(jsonObj), HttpStatus.OK);
             }
         }
         throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
     }
 
-    public List<Datasource> getAllOpenAIREDatasources() {
+    public List<Datasource> getAllOpenAIREDatasources(FacetFilter ff) {
         List<Datasource> allDatasources = new ArrayList<>();
-        String allOpenAIREDatasources = getOpenAIREDatasourcesAsJSON().getBody();
+        String allOpenAIREDatasources = getOpenAIREDatasourcesAsJSON(ff).getBody();
         if (allOpenAIREDatasources != null){
             JSONObject obj = new JSONObject(allOpenAIREDatasources);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
@@ -733,60 +760,6 @@ public ResponseEntity<String> getOpenAIREDatasourcesAsJSON() {
         datasource.setId(id);
         datasource.setName(name);
         return datasource;
-    }
-
-    public Paging<Datasource> createCustomFacetFilter(FacetFilter ff, List<Datasource> allDatasources){
-        List<Datasource> datasourcesContainingKeyword = new ArrayList<>();
-        Paging<Datasource> datasourcePaging = new Paging<>();
-        List<Datasource> ret = new ArrayList<>();
-        if (ff.getKeyword() != null && !ff.getKeyword().equals("")){
-            for (Datasource datasource : allDatasources){
-                if (StringUtils.containsIgnoreCase(datasource.getName(), ff.getKeyword())){
-                    datasourcesContainingKeyword.add(datasource);
-                }
-            }
-            if (ff.getFrom()+ff.getQuantity() > datasourcesContainingKeyword.size()){
-                for (int i = ff.getFrom(); i < allDatasources.size(); i++){
-                    ret.add(allDatasources.get(i));
-                    datasourcePaging.setTotal(allDatasources.size());
-                    datasourcePaging.setTo(allDatasources.size());
-                    datasourcePaging.setFrom(ff.getFrom());
-                }
-            } else{
-                for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
-                    ret.add(datasourcesContainingKeyword.get(i));
-                    datasourcePaging.setTotal(datasourcesContainingKeyword.size());
-                    datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
-                    datasourcePaging.setFrom(ff.getFrom());
-                }
-            }
-        } else{
-            if (ff.getFrom()+ff.getQuantity() > allDatasources.size()){
-                for (int i = ff.getFrom(); i < allDatasources.size(); i++){
-                    ret.add(allDatasources.get(i));
-                    datasourcePaging.setTotal(allDatasources.size());
-                    datasourcePaging.setTo(allDatasources.size());
-                    datasourcePaging.setFrom(ff.getFrom());
-                }
-            } else{
-                for (int i = ff.getFrom(); i < ff.getFrom()+ff.getQuantity(); i++){
-                    ret.add(allDatasources.get(i));
-                    datasourcePaging.setTotal(allDatasources.size());
-                    datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
-                    datasourcePaging.setFrom(ff.getFrom());
-                }
-            }
-        }
-        try{
-            Map<String, Object> order = (Map<String, Object>) ff.getOrderBy().get("name");
-            if (order.get("order").equals("asc") || order.get("order").equals("ASC")){
-                Collections.sort(ret, (u1, u2) -> u1.getName().compareTo(u2.getName()));
-            } else if (order.get("order").equals("desc") || order.get("order").equals("DESC")){
-                Collections.sort(ret, (u1, u2) -> u2.getName().compareTo(u1.getName()));
-            }
-        } catch (NullPointerException e){}
-        datasourcePaging.setResults(ret);
-        return datasourcePaging;
     }
 
 }
