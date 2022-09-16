@@ -35,14 +35,17 @@ public class CatalogueController {
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
-                        ResourceBundleService<ServiceBundle> resourceBundleService) {
+                        ResourceBundleService<ServiceBundle> resourceBundleService,
+                        ResourceBundleService<DatasourceBundle> datasourceBundleService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
     }
 
     //SECTION: CATALOGUE
@@ -360,10 +363,10 @@ public class CatalogueController {
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
-    //SECTION: RESOURCE
-    @ApiOperation(value = "Returns the Resource of the specific Catalogue with the given id.")
+    //SECTION: Service
+    @ApiOperation(value = "Returns the Service of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Service> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Service> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
         Service resource = resourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getService();
         if (resource.getCatalogueId() == null){
             throw new ValidationException("Service's catalogueId cannot be null");
@@ -371,12 +374,12 @@ public class CatalogueController {
             if (resource.getCatalogueId().equals(catalogueId)){
                 return new ResponseEntity<>(resource, HttpStatus.OK);
             } else{
-                throw new ValidationException(String.format("The Resource [%s] you requested does not belong to the specific Catalogue [%s]",  resourceId, catalogueId));
+                throw new ValidationException(String.format("The Service [%s] you requested does not belong to the specific Catalogue [%s]",  resourceId, catalogueId));
             }
         }
     }
 
-    @ApiOperation(value = "Creates a new Resource for the specific Catalogue.")
+    @ApiOperation(value = "Creates a new Service for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
@@ -385,12 +388,12 @@ public class CatalogueController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the Resource of the specific Catalogue.")
+    @ApiOperation(value = "Updates the Service of the specific Catalogue.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
     @PutMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> updateService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Service> updateCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle ret = this.resourceBundleService.updateResource(new ServiceBundle(service), catalogueId, comment, auth);
-        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
+        logger.info("User '{}' updated the Service with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 
@@ -415,5 +418,63 @@ public class CatalogueController {
         resourceBundleService.delete(serviceBundle);
         logger.info("User '{}' deleted the Service with name '{}' and id '{}'", auth.getName(), serviceBundle.getService().getName(), serviceBundle.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+    }
+
+
+    //SECTION: DATASOURCE
+    @ApiOperation(value = "Returns the Datasource of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/datasource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Datasource> getCatalogueDatasource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
+        Datasource datasource = datasourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getDatasource();
+        if (datasource.getCatalogueId() == null){
+            throw new ValidationException("Datasource's catalogueId cannot be null");
+        } else {
+            if (datasource.getCatalogueId().equals(catalogueId)){
+                return new ResponseEntity<>(datasource, HttpStatus.OK);
+            } else{
+                throw new ValidationException(String.format("The Datasource [%s] you requested does not belong to the specific Catalogue [%s]",  resourceId, catalogueId));
+            }
+        }
+    }
+
+    @ApiOperation(value = "Creates a new Datasource for the specific Catalogue.")
+    @PostMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #datasource)")
+    public ResponseEntity<Datasource> addCatalogueDatasource(@RequestBody Datasource datasource, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        DatasourceBundle ret = this.datasourceBundleService.addResource(new DatasourceBundle(datasource), catalogueId, auth);
+        logger.info("User '{}' added the Datasource with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), datasource.getName(), datasource.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getDatasource(), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Updates the Datasource of the specific Catalogue.")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#datasource)")
+    @PutMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Datasource> updateCatalogueDatasource(@RequestBody Datasource datasource, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        DatasourceBundle ret = this.datasourceBundleService.updateResource(new DatasourceBundle(datasource), catalogueId, comment, auth);
+        logger.info("User '{}' updated the Datasource with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), datasource.getName(), datasource.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getDatasource(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get all the Datasources of a specific Provider of a specific Catalogue")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "{catalogueId}/{providerId}/datasource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<DatasourceBundle>> getProviderDatasources(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
+        Paging<DatasourceBundle> datasourceBundles = datasourceBundleService.getResourceBundles(catalogueId, providerId, auth);
+        return new ResponseEntity<>(datasourceBundles, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Deletes the Datasource of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/datasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<Datasource> deleteCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
+                                                          @PathVariable("id") String id,
+                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
+        if (datasourceBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        datasourceBundleService.delete(datasourceBundle);
+        logger.info("User '{}' deleted the Datasource with name '{}' and id '{}'", auth.getName(), datasourceBundle.getDatasource().getName(), datasourceBundle.getId());
+        return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 }
