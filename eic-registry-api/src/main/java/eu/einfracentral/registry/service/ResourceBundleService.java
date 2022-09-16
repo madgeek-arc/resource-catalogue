@@ -9,11 +9,8 @@ import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.SearchService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -274,9 +271,4 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      */
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
-    ResponseEntity<String> getOpenAIREDatasourcesAsJSON(FacetFilter ff) throws IOException;
-
-    ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) throws IOException;
-
-    List<Datasource> getAllOpenAIREDatasources(FacetFilter ff) throws IOException;
 }

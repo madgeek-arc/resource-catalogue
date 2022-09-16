@@ -665,16 +665,4 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return serviceBundle;
     }
 
-    public ResponseEntity<String> getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
-        throw new UnsupportedOperationException("Not yet Implemented");
-    }
-
-    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
-        throw new UnsupportedOperationException("Not yet Implemented");
-    }
-
-    public List<Datasource> getAllOpenAIREDatasources(FacetFilter ff) {
-        throw new UnsupportedOperationException("Not yet Implemented");
-    }
-
 }

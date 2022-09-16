@@ -6,10 +6,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -19,7 +16,6 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ServiceException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -41,7 +37,7 @@ import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service
-public class DatasourceBundleManager extends AbstractResourceBundleManager<DatasourceBundle> implements ResourceBundleService<DatasourceBundle> {
+public class DatasourceBundleManager extends AbstractResourceBundleManager<DatasourceBundle> implements ResourceBundleService<DatasourceBundle>, DatasourceService<DatasourceBundle> {
 
     private static final Logger logger = LogManager.getLogger(DatasourceBundleManager.class);
 
@@ -670,57 +666,89 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
-public ResponseEntity<String> getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
-    int page = 0;
-    int quantity = ff.getQuantity();
-    if (ff.getFrom() >= quantity){
-        page = ff.getFrom() / quantity;
-    } else {
-        page = ff.getFrom() / 10;
-    }
-    String ordering = "ASCENDING";
-    if (ff.getOrderBy() != null){
-        Map<String, Object> order = (Map<String, Object>) ff.getOrderBy().get("name");
-        if (order.get("order").equals("desc")){
-            ordering = "DESCENDING";
+    public Map<Integer, List<Datasource>> getAllOpenAIREDatasources(FacetFilter ff) {
+        Map<Integer, List<Datasource>> datasourceMap = new HashMap<>();
+        List<Datasource> allDatasources = new ArrayList<>();
+        String[] datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff);
+        int total = Integer.parseInt(datasourcesAsJSON[0]);
+        String allOpenAIREDatasources = datasourcesAsJSON[1];
+        if (allOpenAIREDatasources != null){
+            JSONObject obj = new JSONObject(allOpenAIREDatasources);
+            JSONArray arr = obj.getJSONArray("datasourceInfo");
+            for(int i = 0; i < arr .length(); i++) {
+                JSONObject map = arr.getJSONObject(i);
+                Gson gson = new Gson();
+                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                allDatasources.add(transformOpenAIREToEOSCDatasource(jsonObj));
+            }
+            datasourceMap.put(total, allDatasources);
+            return datasourceMap;
         }
+        throw new ResourceNotFoundException("There are no OpenAIRE Datasources");
     }
-    //    String data = "{  \"country\": \"GR\"}";
-    String data = "{}";
-    if (ff.getFilter() != null){
-        page = 0;
-        quantity = 999999;
-        if (ff.getFilter().containsKey("id")){
-            data = "{  \"id\": \""+ff.getFilter().get("id")+"\"}";
+
+    public String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
+        String[] pagination = createPagination(ff);
+        int page = Integer.parseInt(pagination[0]);
+        int quantity = Integer.parseInt(pagination[1]);
+        String ordering = pagination[2];
+        String data = pagination[3];
+        // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
+        String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
+        String response = createHttpRequest(url, data);
+        if (response != null){
+            JSONObject obj = new JSONObject(response);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            String total = jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString();
+            jsonObj.getAsJsonObject().remove("header");
+            return new String[]{total, jsonObj.toString()};
         }
+        return new String[]{};
     }
-    if (ff.getKeyword() != null && !ff.getKeyword().equals("")){
-        data = "{  \"officialname\": \""+ff.getKeyword()+"\"}";
-    }
-    RestTemplate restTemplate = new RestTemplate();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("accept", "application/json");
-    headers.add("Content-Type", "application/json");
-    // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
-    String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
 
-    HttpEntity<String> entity = new HttpEntity<>(data, headers);
-    String response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
-
-    if (response != null){
-        JSONObject obj = new JSONObject(response);
-        Gson gson = new Gson();
-        JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
-        jsonObj.getAsJsonObject().remove("header");
-        return new ResponseEntity<>(jsonObj.toString(), HttpStatus.OK);
+    private String[] createPagination(FacetFilter ff){
+        int page;
+        int quantity = ff.getQuantity();
+        if (ff.getFrom() >= quantity){
+            page = ff.getFrom() / quantity;
+        } else {
+            page = ff.getFrom() / 10;
+        }
+        String ordering = "ASCENDING";
+        if (ff.getOrderBy() != null){
+            String order = ff.getOrderBy().get(ff.getOrderBy().keySet().toArray()[0]).toString();
+            if (order.contains("desc")){
+                ordering = "DESCENDING";
+            }
+        }
+        String data = "{}";
+        if (ff.getFilter() != null && !ff.getFilter().isEmpty()){
+            page = 0;
+            quantity = 10;
+            if (ff.getFilter().containsKey("id")){
+                data = "{  \"id\": \""+ff.getFilter().get("id")+"\"}";
+            }
+        }
+        if (ff.getKeyword() != null && !ff.getKeyword().equals("")){
+            data = "{  \"officialname\": \""+ff.getKeyword()+"\"}";
+        }
+        return new String[]{Integer.toString(page), Integer.toString(quantity), ordering, data};
     }
-    return null;
-}
+
+    public String createHttpRequest(String url, String data){
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("accept", "application/json");
+        headers.add("Content-Type", "application/json");
+        HttpEntity<String> entity = new HttpEntity<>(data, headers);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
+    }
 
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", datasourceId);
-        String datasource = getOpenAIREDatasourcesAsJSON(ff).getBody();
+        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
         if (datasource != null){
             JSONObject obj = new JSONObject(datasource);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
@@ -734,23 +762,6 @@ public ResponseEntity<String> getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
             }
         }
         throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
-    }
-
-    public List<Datasource> getAllOpenAIREDatasources(FacetFilter ff) {
-        List<Datasource> allDatasources = new ArrayList<>();
-        String allOpenAIREDatasources = getOpenAIREDatasourcesAsJSON(ff).getBody();
-        if (allOpenAIREDatasources != null){
-            JSONObject obj = new JSONObject(allOpenAIREDatasources);
-            JSONArray arr = obj.getJSONArray("datasourceInfo");
-            for(int i = 0; i < arr .length(); i++) {
-                JSONObject map = arr.getJSONObject(i);
-                Gson gson = new Gson();
-                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                allDatasources.add(transformOpenAIREToEOSCDatasource(jsonObj));
-            }
-            return allDatasources;
-        }
-        throw new ResourceNotFoundException("There are no OpenAIRE Datasources");
     }
 
     public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
