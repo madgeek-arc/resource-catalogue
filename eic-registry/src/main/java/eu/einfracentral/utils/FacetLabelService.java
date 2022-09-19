@@ -89,7 +89,9 @@ public class FacetLabelService {
                         else {
                             try {
                                 value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
-                            } catch (StringIndexOutOfBoundsException e){}
+                            } catch (StringIndexOutOfBoundsException e){
+                                logger.info(e);
+                            }
                         }
                 }
             }
@@ -99,7 +101,9 @@ public class FacetLabelService {
         // Swap position according to front-ends needs
         try{
             Collections.swap(enrichedFacets, 4, 5);
-        } catch(IndexOutOfBoundsException e) {}
+        } catch(IndexOutOfBoundsException e) {
+            logger.info(e);
+        }
         return enrichedFacets;
     }
 
