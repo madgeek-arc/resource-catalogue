@@ -143,6 +143,8 @@ public class RegistrationMailService {
                 User user = new User();
                 if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")){
                     user.setEmail(loggingInfo.getUserEmail());
+                } else{
+                    user.setEmail("no email provided");
                 }
                 if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")){
                     String[] parts = loggingInfo.getUserFullName().split(" ");
@@ -150,6 +152,9 @@ public class RegistrationMailService {
                     String surname = parts[1];
                     user.setName(name);
                     user.setSurname(surname);
+                } else{
+                    user.setName("Unknown");
+                    user.setSurname("Unknown");
                 }
                 root.put("user", user);
                 break;
