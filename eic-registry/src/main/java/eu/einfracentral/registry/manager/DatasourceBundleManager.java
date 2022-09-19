@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -773,4 +774,112 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasource;
     }
 
+    public Paging<DatasourceBundle> getAllForAdminWithAuditStates(FacetFilter ff, MultiValueMap<String, Object> allRequestParams, Set<String> auditState, Authentication auth){
+        List<DatasourceBundle> valid = new ArrayList<>();
+        List<DatasourceBundle> notAudited = new ArrayList<>();
+        List<DatasourceBundle> invalidAndUpdated = new ArrayList<>();
+        List<DatasourceBundle> invalidAndNotUpdated = new ArrayList<>();
+
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+        allRequestParams.remove("auditState");
+        FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff2.setQuantity(1000);
+        ff2.setFrom(0);
+        Paging<DatasourceBundle> retPaging = getAllForAdmin(ff, auth);
+        List<DatasourceBundle> allWithoutAuditFilterList =  getAllForAdmin(ff2, auth).getResults();
+        List<DatasourceBundle> ret = new ArrayList<>();
+        for (DatasourceBundle datasourceBundle : allWithoutAuditFilterList) {
+            String auditVocStatus;
+            try{
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(datasourceBundle.getLoggingInfo());
+            } catch (NullPointerException e){ // datasourceBundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus) {
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(datasourceBundle);
+                    break;
+                case "Not Audited":
+                    notAudited.add(datasourceBundle);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(datasourceBundle);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(datasourceBundle);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState) {
+            switch (state) {
+                case "Valid":
+                    ret.addAll(valid);
+                    break;
+                case "Not Audited":
+                    ret.addAll(notAudited);
+                    break;
+                case "Invalid and updated":
+                    ret.addAll(invalidAndUpdated);
+                    break;
+                case "Invalid and not updated":
+                    ret.addAll(invalidAndNotUpdated);
+                    break;
+                default:
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        if (!ret.isEmpty()) {
+            List<DatasourceBundle> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0){
+                if (quantity <= ret.size()){
+                    for (int i=from; i<=quantity-1; i++){
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(ret);
+                }
+                retPaging.setTo(retWithCorrectQuantity.size());
+            } else{
+                boolean indexOutOfBound = false;
+                if (quantity <= ret.size()){
+                    for (int i=from; i<quantity+from; i++){
+                        try{
+                            retWithCorrectQuantity.add(ret.get(i));
+                            if (quantity+from > ret.size()){
+                                retPaging.setTo(ret.size());
+                            } else{
+                                retPaging.setTo(quantity+from);
+                            }
+                        } catch (IndexOutOfBoundsException e){
+                            indexOutOfBound = true;
+                            continue;
+                        }
+                    }
+                    if (indexOutOfBound){
+                        retPaging.setTo(ret.size());
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(ret);
+                    if (quantity+from > ret.size()){
+                        retPaging.setTo(ret.size());
+                    } else{
+                        retPaging.setTo(quantity+from);
+                    }
+                }
+            }
+            retPaging.setFrom(from);
+            retPaging.setResults(retWithCorrectQuantity);
+            retPaging.setTotal(ret.size());
+        } else{
+            retPaging.setResults(ret);
+            retPaging.setTotal(0);
+            retPaging.setFrom(0);
+            retPaging.setTo(0);
+        }
+        return retPaging;
+    }
 }
