@@ -37,8 +37,7 @@ import java.util.stream.Collectors;
 public class DatasourceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
-    private final ResourceBundleService<DatasourceBundle> resourceBundleService;
-    private final DatasourceService<DatasourceBundle> dataSourceService;
+    private final DatasourceService<DatasourceBundle> resourceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource commonDataSource;
 
@@ -49,12 +48,10 @@ public class DatasourceController {
     private String catalogueName;
 
     @Autowired
-    DatasourceController(ResourceBundleService<DatasourceBundle> resourceBundleService,
-                         DatasourceService<DatasourceBundle> dataSourceService,
+    DatasourceController(DatasourceService<DatasourceBundle> resourceBundleService,
                          ProviderService<ProviderBundle, Authentication> provider,
                          DataSource commonDataSource) {
         this.resourceBundleService = resourceBundleService;
-        this.dataSourceService = dataSourceService;
         this.providerService = provider;
         this.commonDataSource = commonDataSource;
     }
@@ -207,7 +204,7 @@ public class DatasourceController {
 
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
-        return dataSourceService.getOpenAIREDatasourceById(datasourceId);
+        return resourceBundleService.getOpenAIREDatasourceById(datasourceId);
     }
 
     @ApiImplicitParams({
@@ -220,7 +217,7 @@ public class DatasourceController {
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        Map<Integer, List<Datasource>> datasourceMap =  dataSourceService.getAllOpenAIREDatasources(ff);
+        Map<Integer, List<Datasource>> datasourceMap =  resourceBundleService.getAllOpenAIREDatasources(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();
         datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());
         datasourcePaging.setFrom(ff.getFrom());

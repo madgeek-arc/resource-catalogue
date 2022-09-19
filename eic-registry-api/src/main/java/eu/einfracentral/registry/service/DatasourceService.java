@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public interface DatasourceService<T> extends ResourceCRUDService<T, Authentication> {
+public interface DatasourceService<T> extends ResourceBundleService<T>  {
 
     Map<Integer, List<Datasource>> getAllOpenAIREDatasources(FacetFilter ff) throws IOException;
 
