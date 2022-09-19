@@ -363,7 +363,7 @@ public class ProviderController {
     public ResponseEntity<ProviderBundle> publish(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                   @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.publish(id, active, auth);
-        logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getProvider().getName(), active);
+        logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -459,7 +459,8 @@ public class ProviderController {
     public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam(required = false) String comment,
                                                         @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.auditProvider(id, comment, actionType, auth);
-        logger.info("User '{}' audited Provider with name '{}' [actionType: {}]", auth, provider.getProvider().getName(), actionType);
+        logger.info("User '{}-{}' audited Provider with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                provider.getProvider().getName(), actionType);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 

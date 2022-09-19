@@ -229,4 +229,21 @@ public class DatasourceController {
         return ResponseEntity.ok(new Paging<>(datasourcePaging.getTotal(), datasourcePaging.getFrom(), datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
     }
 
+    // Providing the Datasource id, set the Datasource to active or inactive.
+    @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
+    public ResponseEntity<DatasourceBundle> setActive(@PathVariable String id, @RequestParam Boolean active, @ApiIgnore Authentication auth) {
+        logger.info("User '{}-{}' attempts to save Datasource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
+        return ResponseEntity.ok(resourceBundleService.publish(id, active, auth));
+    }
+
+    @PatchMapping(path = "auditDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+                                                       @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+        DatasourceBundle datasourceBundle = resourceBundleService.auditResource(id, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Datasource with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                datasourceBundle.getDatasource().getName(), actionType);
+        return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
+    }
 }
