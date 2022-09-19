@@ -313,12 +313,11 @@ public class ServiceController {
         return ResponseEntity.ok(new Paging<>(serviceBundles.getTotal(), serviceBundles.getFrom(), serviceBundles.getTo(), services, serviceBundles.getFacets()));
     }
 
-    // Providing the Service id and version, set the Service to active or inactive.
+    // Providing the Service id, set the Service to active or inactive.
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
-    public ResponseEntity<ServiceBundle> setActive(@PathVariable String id, @RequestParam(defaultValue = "") String version,
-                                                   @RequestParam Boolean active, @ApiIgnore Authentication auth) {
-        logger.info("User '{}' attempts to save Resource with id '{}' and version '{}' as '{}'", auth, id, version, active);
+    public ResponseEntity<ServiceBundle> setActive(@PathVariable String id, @RequestParam Boolean active, @ApiIgnore Authentication auth) {
+        logger.info("User '{}-{}' attempts to save Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
         return ResponseEntity.ok(resourceBundleService.publish(id, active, auth));
     }
 
@@ -472,7 +471,8 @@ public class ServiceController {
     public ResponseEntity<ServiceBundle> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
                                                        @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         ServiceBundle service = resourceBundleService.auditResource(id, comment, actionType, auth);
-        logger.info("User '{}' audited Provider with name '{}' [actionType: {}]", auth, service.getService().getName(), actionType);
+        logger.info("User '{}-{}' audited Service with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                service.getService().getName(), actionType);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 

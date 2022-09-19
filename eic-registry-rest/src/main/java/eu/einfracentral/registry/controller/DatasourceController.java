@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.DatasourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 public class DatasourceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
-    private final ResourceBundleService<DatasourceBundle> datasourceService;
+    private final DatasourceService<DatasourceBundle> resourceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource commonDataSource;
 
@@ -47,10 +48,10 @@ public class DatasourceController {
     private String catalogueName;
 
     @Autowired
-    DatasourceController(ResourceBundleService<DatasourceBundle> datasourceService,
+    DatasourceController(DatasourceService<DatasourceBundle> resourceBundleService,
                          ProviderService<ProviderBundle, Authentication> provider,
                          DataSource commonDataSource) {
-        this.datasourceService = datasourceService;
+        this.resourceBundleService = resourceBundleService;
         this.providerService = provider;
         this.commonDataSource = commonDataSource;
     }
@@ -61,14 +62,14 @@ public class DatasourceController {
                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasource;
-        datasource = datasourceService.get(id, catalogueId);
+        datasource = resourceBundleService.get(id, catalogueId);
 
         // Block users of deleting Datasources of another Catalogue
         if (!datasource.getDatasource().getCatalogueId().equals(catalogueName)){
             throw new ValidationException("You cannot delete a Datasource of a non EOSC Catalogue.");
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
-        datasourceService.delete(datasource);
+        resourceBundleService.delete(datasource);
         logger.info("User '{}' deleted Datasource '{}' with id: '{}' of the Catalogue: '{}'", auth.getName(), datasource.getDatasource().getName(),
                 datasource.getDatasource().getId(), datasource.getDatasource().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -78,14 +79,14 @@ public class DatasourceController {
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<Datasource> getDatasource(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(datasourceService.get(id, catalogueId).getDatasource(), HttpStatus.OK);
+        return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get the most current version of a specific DatasourceBundle, providing the Resource id.")
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<DatasourceBundle> getDatasourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(datasourceService.get(id, catalogueId), HttpStatus.OK);
+        return new ResponseEntity<>(resourceBundleService.get(id, catalogueId), HttpStatus.OK);
     }
 
     // Get the specified version of a RichResource providing the Datasource id
@@ -95,14 +96,14 @@ public class DatasourceController {
     public ResponseEntity<RichResource> getRichDatasource(@PathVariable("id") String id,
                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                           @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(datasourceService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
+        return new ResponseEntity<>(resourceBundleService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new Datasource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Datasource> addDatasource(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) {
-        DatasourceBundle ret = this.datasourceService.addResource(new DatasourceBundle(datasource), auth);
+        DatasourceBundle ret = this.resourceBundleService.addResource(new DatasourceBundle(datasource), auth);
         logger.info("User '{}' created a new Datasource with name '{}' and id '{}'", auth.getName(), datasource.getName(), datasource.getId());
         return new ResponseEntity<>(ret.getDatasource(), HttpStatus.CREATED);
     }
@@ -111,7 +112,7 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> updateDatasource(@RequestBody Datasource datasource, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        DatasourceBundle ret = this.datasourceService.updateResource(new DatasourceBundle(datasource), comment, auth);
+        DatasourceBundle ret = this.resourceBundleService.updateResource(new DatasourceBundle(datasource), comment, auth);
         logger.info("User '{}' updated Datasource with name '{}' and id '{}'", auth.getName(), datasource.getName(), datasource.getId());
         return new ResponseEntity<>(ret.getDatasource(), HttpStatus.OK);
     }
@@ -121,7 +122,7 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<DatasourceBundle> verifyDatasource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                         @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
-        DatasourceBundle resource = datasourceService.verifyResource(id, status, active, auth);
+        DatasourceBundle resource = resourceBundleService.verifyResource(id, status, active, auth);
         logger.info("User '{}' updated Datasource with name '{}' [status: {}] [active: {}]", auth, resource.getDatasource().getName(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
@@ -129,7 +130,7 @@ public class DatasourceController {
     @ApiOperation(value = "Validates the Datasource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Datasource datasource) {
-        ResponseEntity<Boolean> ret = ResponseEntity.ok(datasourceService.validate(new DatasourceBundle(datasource)));
+        ResponseEntity<Boolean> ret = ResponseEntity.ok(resourceBundleService.validate(new DatasourceBundle(datasource)));
         logger.info("Validated Resource with name '{}' and id '{}'", datasource.getName(), datasource.getId());
         return ret;
     }
@@ -151,7 +152,7 @@ public class DatasourceController {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        Paging<DatasourceBundle> datasourceBundles = datasourceService.getAll(ff, authentication);
+        Paging<DatasourceBundle> datasourceBundles = resourceBundleService.getAll(ff, authentication);
         List<Datasource> datasources = datasourceBundles.getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
         return ResponseEntity.ok(new Paging<>(datasourceBundles.getTotal(), datasourceBundles.getFrom(), datasourceBundles.getTo(), datasources, datasourceBundles.getFacets()));
     }
@@ -175,7 +176,7 @@ public class DatasourceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("active", true);
         ff.addFilter("published", false);
-        Paging<RichResource> datasources = datasourceService.getRichResources(ff, auth);
+        Paging<RichResource> datasources = resourceBundleService.getRichResources(ff, auth);
         return ResponseEntity.ok(datasources);
     }
 
@@ -198,12 +199,12 @@ public class DatasourceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", id);
         ff.addFilter("published", false);
-        return ResponseEntity.ok(datasourceService.getAll(ff, auth));
+        return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
     }
 
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
-        return datasourceService.getOpenAIREDatasourceById(datasourceId);
+        return resourceBundleService.getOpenAIREDatasourceById(datasourceId);
     }
 
     @ApiImplicitParams({
@@ -216,9 +217,30 @@ public class DatasourceController {
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        List<Datasource> allDatasources = datasourceService.getAllOpenAIREDatasources();
-        Paging<Datasource> datasourcePaging = datasourceService.createCustomFacetFilter(ff, allDatasources);
+        Map<Integer, List<Datasource>> datasourceMap =  resourceBundleService.getAllOpenAIREDatasources(ff);
+        Paging<Datasource> datasourcePaging = new Paging<>();
+        datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());
+        datasourcePaging.setFrom(ff.getFrom());
+        datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
+        datasourcePaging.setResults(datasourceMap.get(datasourcePaging.getTotal()));
         return ResponseEntity.ok(new Paging<>(datasourcePaging.getTotal(), datasourcePaging.getFrom(), datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
     }
 
+    // Providing the Datasource id, set the Datasource to active or inactive.
+    @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
+    public ResponseEntity<DatasourceBundle> setActive(@PathVariable String id, @RequestParam Boolean active, @ApiIgnore Authentication auth) {
+        logger.info("User '{}-{}' attempts to save Datasource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
+        return ResponseEntity.ok(resourceBundleService.publish(id, active, auth));
+    }
+
+    @PatchMapping(path = "auditDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+                                                       @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+        DatasourceBundle datasourceBundle = resourceBundleService.auditResource(id, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Datasource with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                datasourceBundle.getDatasource().getName(), actionType);
+        return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
+    }
 }

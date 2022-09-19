@@ -5,10 +5,7 @@ import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.manager.ServiceBundleManager;
-import eu.einfracentral.registry.manager.PendingProviderManager;
-import eu.einfracentral.registry.manager.PendingServiceManager;
-import eu.einfracentral.registry.manager.ProviderManager;
+import eu.einfracentral.registry.manager.*;
 import eu.einfracentral.registry.service.MailService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import freemarker.template.Configuration;
@@ -43,6 +40,8 @@ public class RegistrationMailService {
     private final ProviderManager providerManager;
     private final PendingProviderManager pendingProviderManager;
     private final ServiceBundleManager serviceBundleManager;
+
+    private final DatasourceBundleManager datasourceBundleManager;
     private final PendingServiceManager pendingServiceManager;
     private final SecurityService securityService;
 
@@ -83,6 +82,7 @@ public class RegistrationMailService {
                                    ProviderManager providerManager,
                                    @Lazy PendingProviderManager pendingProviderManager,
                                    ServiceBundleManager serviceBundleManager,
+                                   DatasourceBundleManager datasourceBundleManager,
                                    PendingServiceManager pendingServiceManager,
                                    SecurityService securityService) {
         this.mailService = mailService;
@@ -90,6 +90,7 @@ public class RegistrationMailService {
         this.providerManager = providerManager;
         this.pendingProviderManager = pendingProviderManager;
         this.serviceBundleManager = serviceBundleManager;
+        this.datasourceBundleManager = datasourceBundleManager;
         this.pendingServiceManager = pendingServiceManager;
         this.securityService = securityService;
     }
@@ -104,20 +105,25 @@ public class RegistrationMailService {
         String providerSubject;
         String regTeamSubject;
 
-        String serviceOrResource = "Resource";
-        if (projectName.equalsIgnoreCase("CatRIS")){
-            serviceOrResource = "Service";
-        }
+        String serviceOrDatasource = "Service";
 
         if (providerBundle == null || providerBundle.getProvider() == null) {
             throw new ResourceNotFoundException("Provider is null");
         }
 
         List<Service> serviceList = serviceBundleManager.getResources(providerBundle.getId());
+        List<Datasource> datasourceList = new ArrayList<>();
+        if (serviceList.isEmpty()){
+            serviceOrDatasource = "Datasource";
+            datasourceList = datasourceBundleManager.getResources(providerBundle.getId());
+        }
         Service serviceTemplate = null;
         if (!serviceList.isEmpty()) {
-            root.put("service", serviceList.get(0));
+            root.put("resource", serviceList.get(0));
             serviceTemplate = serviceList.get(0);
+        } else if (!datasourceList.isEmpty()){
+            root.put("resource", datasourceList.get(0));
+            serviceTemplate = datasourceList.get(0);
         } else {
             serviceTemplate = new Service();
             serviceTemplate.setName("");
@@ -126,7 +132,7 @@ public class RegistrationMailService {
         providerSubject = getProviderSubject(providerBundle, serviceTemplate);
         regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate);
 
-        root.put("serviceOrResource", serviceOrResource);
+        root.put("serviceOrDatasource", serviceOrDatasource);
         root.put("providerBundle", providerBundle);
         root.put("endpoint", endpoint);
         root.put("project", projectName);
@@ -137,6 +143,8 @@ public class RegistrationMailService {
                 User user = new User();
                 if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")){
                     user.setEmail(loggingInfo.getUserEmail());
+                } else{
+                    user.setEmail("no email provided");
                 }
                 if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")){
                     String[] parts = loggingInfo.getUserFullName().split(" ");
@@ -144,6 +152,9 @@ public class RegistrationMailService {
                     String surname = parts[1];
                     user.setName(name);
                     user.setSurname(surname);
+                } else{
+                    user.setName("Unknown");
+                    user.setSurname("Unknown");
                 }
                 root.put("user", user);
                 break;

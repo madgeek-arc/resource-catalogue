@@ -79,7 +79,6 @@ public class Vocabulary implements Identifiable {
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
-        AUDIT_STATE("Audit state"),
         CATALOGUE_STATE("Catalogue state"),
         // Datasource
         DS_RESEARCH_ENTITY_TYPE("Research entity type"),
