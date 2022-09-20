@@ -243,4 +243,32 @@ public class DatasourceController {
                 datasourceBundle.getDatasource().getName(), actionType);
         return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
     }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<DatasourceBundle>> getAllDatasourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                            @RequestParam(required = false) Set<String> auditState,
+                                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                            @ApiIgnore Authentication authentication) {
+
+        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("published", false);
+
+        if (auditState == null) {
+            return ResponseEntity.ok(resourceBundleService.getAllForAdmin(ff, authentication));
+        } else {
+            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, allRequestParams, auditState, authentication));
+        }
+    }
 }

@@ -17,15 +17,14 @@ import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -663,6 +662,115 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 
         return serviceBundle;
+    }
+
+    public Paging<ServiceBundle> getAllForAdminWithAuditStates(FacetFilter ff, MultiValueMap<String, Object> allRequestParams, Set<String> auditState, Authentication auth){
+        List<ServiceBundle> valid = new ArrayList<>();
+        List<ServiceBundle> notAudited = new ArrayList<>();
+        List<ServiceBundle> invalidAndUpdated = new ArrayList<>();
+        List<ServiceBundle> invalidAndNotUpdated = new ArrayList<>();
+
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+        allRequestParams.remove("auditState");
+        FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff2.setQuantity(1000);
+        ff2.setFrom(0);
+        Paging<ServiceBundle> retPaging = getAllForAdmin(ff, auth);
+        List<ServiceBundle> allWithoutAuditFilterList =  getAllForAdmin(ff2, auth).getResults();
+        List<ServiceBundle> ret = new ArrayList<>();
+        for (ServiceBundle serviceBundle : allWithoutAuditFilterList) {
+            String auditVocStatus;
+            try{
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(serviceBundle.getLoggingInfo());
+            } catch (NullPointerException e){ // serviceBundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus) {
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(serviceBundle);
+                    break;
+                case "Not Audited":
+                    notAudited.add(serviceBundle);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(serviceBundle);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(serviceBundle);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState) {
+            switch (state) {
+                case "Valid":
+                    ret.addAll(valid);
+                    break;
+                case "Not Audited":
+                    ret.addAll(notAudited);
+                    break;
+                case "Invalid and updated":
+                    ret.addAll(invalidAndUpdated);
+                    break;
+                case "Invalid and not updated":
+                    ret.addAll(invalidAndNotUpdated);
+                    break;
+                default:
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        if (!ret.isEmpty()) {
+            List<ServiceBundle> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0){
+                if (quantity <= ret.size()){
+                    for (int i=from; i<=quantity-1; i++){
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(ret);
+                }
+                retPaging.setTo(retWithCorrectQuantity.size());
+            } else{
+                boolean indexOutOfBound = false;
+                if (quantity <= ret.size()){
+                    for (int i=from; i<quantity+from; i++){
+                        try{
+                            retWithCorrectQuantity.add(ret.get(i));
+                            if (quantity+from > ret.size()){
+                                retPaging.setTo(ret.size());
+                            } else{
+                                retPaging.setTo(quantity+from);
+                            }
+                        } catch (IndexOutOfBoundsException e){
+                            indexOutOfBound = true;
+                            continue;
+                        }
+                    }
+                    if (indexOutOfBound){
+                        retPaging.setTo(ret.size());
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(ret);
+                    if (quantity+from > ret.size()){
+                        retPaging.setTo(ret.size());
+                    } else{
+                        retPaging.setTo(quantity+from);
+                    }
+                }
+            }
+            retPaging.setFrom(from);
+            retPaging.setResults(retWithCorrectQuantity);
+            retPaging.setTotal(ret.size());
+        } else{
+            retPaging.setResults(ret);
+            retPaging.setTotal(0);
+            retPaging.setFrom(0);
+            retPaging.setTo(0);
+        }
+        return retPaging;
     }
 
 }

@@ -336,9 +336,7 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-    // TODO: beautify this
     // FIXME: query doesn't work when auditState != null.
-    //    @ApiOperation(value = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -360,109 +358,10 @@ public class ServiceController {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("published", false);
 
-        List<ServiceBundle> valid = new ArrayList<>();
-        List<ServiceBundle> notAudited = new ArrayList<>();
-        List<ServiceBundle> invalidAndUpdated = new ArrayList<>();
-        List<ServiceBundle> invalidAndNotUpdated = new ArrayList<>();
         if (auditState == null) {
             return ResponseEntity.ok(resourceBundleService.getAllForAdmin(ff, authentication));
         } else {
-            int quantity = ff.getQuantity();
-            int from = ff.getFrom();
-            allRequestParams.remove("auditState");
-            FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-            ff2.setQuantity(1000);
-            ff2.setFrom(0);
-            Paging<ServiceBundle> retPaging = resourceBundleService.getAllForAdmin(ff, authentication);
-            List<ServiceBundle> allWithoutAuditFilterList =  resourceBundleService.getAllForAdmin(ff2, authentication).getResults();
-            List<ServiceBundle> ret = new ArrayList<>();
-            for (ServiceBundle serviceBundle : allWithoutAuditFilterList) {
-                String auditVocStatus;
-                try{
-                    auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(serviceBundle.getLoggingInfo());
-                } catch (NullPointerException e){ // serviceBundle has null loggingInfo
-                    continue;
-                }
-                switch (auditVocStatus) {
-                    case "Valid and updated":
-                    case "Valid and not updated":
-                        valid.add(serviceBundle);
-                        break;
-                    case "Not Audited":
-                        notAudited.add(serviceBundle);
-                        break;
-                    case "Invalid and updated":
-                        invalidAndUpdated.add(serviceBundle);
-                        break;
-                    case "Invalid and not updated":
-                        invalidAndNotUpdated.add(serviceBundle);
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-                }
-            }
-            for (String state : auditState) {
-                if (state.equals("Valid")) {
-                    ret.addAll(valid);
-                } else if (state.equals("Not Audited")) {
-                    ret.addAll(notAudited);
-                } else if (state.equals("Invalid and updated")) {
-                    ret.addAll(invalidAndUpdated);
-                } else if (state.equals("Invalid and not updated")) {
-                    ret.addAll(invalidAndNotUpdated);
-                } else {
-                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-                }
-            }
-            if (!ret.isEmpty()) {
-                List<ServiceBundle> retWithCorrectQuantity = new ArrayList<>();
-                if (from == 0){
-                    if (quantity <= ret.size()){
-                        for (int i=from; i<=quantity-1; i++){
-                            retWithCorrectQuantity.add(ret.get(i));
-                        }
-                    } else{
-                        retWithCorrectQuantity.addAll(ret);
-                    }
-                    retPaging.setTo(retWithCorrectQuantity.size());
-                } else{
-                    boolean indexOutOfBound = false;
-                    if (quantity <= ret.size()){
-                        for (int i=from; i<quantity+from; i++){
-                            try{
-                                retWithCorrectQuantity.add(ret.get(i));
-                                if (quantity+from > ret.size()){
-                                    retPaging.setTo(ret.size());
-                                } else{
-                                    retPaging.setTo(quantity+from);
-                                }
-                            } catch (IndexOutOfBoundsException e){
-                                indexOutOfBound = true;
-                                continue;
-                            }
-                        }
-                        if (indexOutOfBound){
-                            retPaging.setTo(ret.size());
-                        }
-                    } else{
-                        retWithCorrectQuantity.addAll(ret);
-                        if (quantity+from > ret.size()){
-                            retPaging.setTo(ret.size());
-                        } else{
-                            retPaging.setTo(quantity+from);
-                        }
-                    }
-                }
-                retPaging.setFrom(from);
-                retPaging.setResults(retWithCorrectQuantity);
-                retPaging.setTotal(ret.size());
-            } else{
-                retPaging.setResults(ret);
-                retPaging.setTotal(0);
-                retPaging.setFrom(0);
-                retPaging.setTo(0);
-            }
-            return ResponseEntity.ok(retPaging);
+            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, allRequestParams, auditState, authentication));
         }
     }
 

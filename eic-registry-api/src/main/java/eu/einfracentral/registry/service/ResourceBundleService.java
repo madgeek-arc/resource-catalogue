@@ -10,9 +10,11 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.SearchService;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authentication> {
 
@@ -270,5 +272,8 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      */
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+
+    Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, MultiValueMap<String, Object> allRequestParams,
+                                                                        Set<String> auditState, Authentication authentication);
 
 }
