@@ -151,6 +151,7 @@ public class DatasourceController {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("published", false);
         Paging<DatasourceBundle> datasourceBundles = resourceBundleService.getAll(ff, authentication);
         List<Datasource> datasources = datasourceBundles.getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
         return ResponseEntity.ok(new Paging<>(datasourceBundles.getTotal(), datasourceBundles.getFrom(), datasourceBundles.getTo(), datasources, datasourceBundles.getFacets()));
