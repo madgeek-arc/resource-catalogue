@@ -1,8 +1,11 @@
-package eu.einfracentral.registry.manager;
+package eu.einfracentral.aspects;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
+import eu.einfracentral.registry.manager.PublicDatasourceManager;
+import eu.einfracentral.registry.manager.PublicProviderManager;
+import eu.einfracentral.registry.manager.PublicServiceManager;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.RegistrationMailService;
@@ -327,7 +330,7 @@ public class ProviderManagementAspect {
         try {
             Thread.sleep(20 * 1000); // 20sec
         } catch (InterruptedException ex) {
-            ex.printStackTrace();
+            logger.error(ex);
         }
     }
 }

@@ -4,7 +4,6 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.DatasourceService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
