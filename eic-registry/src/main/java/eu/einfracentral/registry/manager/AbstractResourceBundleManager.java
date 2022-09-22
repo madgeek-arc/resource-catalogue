@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 
 import javax.annotation.PostConstruct;
@@ -912,5 +913,94 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
         filter.setResourceType(getResourceType());
         return getMatchingResources(filter);
+    }
+
+    @Override
+    public ResourceBundle<?> updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth) {
+        T bundle = get(resourceId, catalogueId);
+        blockUpdateIfResourceIsPublished(bundle);
+        ResourceExtras resourceExtras = bundle.getResourceExtras();
+        if (resourceExtras == null){
+            ResourceExtras newResourceExtras = new ResourceExtras();
+            List<EOSCIFGuidelines> newEOSCIFGuidelines = new ArrayList<>(eoscIFGuidelines);
+            newResourceExtras.setEoscIFGuidelines(newEOSCIFGuidelines);
+            bundle.setResourceExtras(newResourceExtras);
+        } else{
+            bundle.getResourceExtras().setEoscIFGuidelines(eoscIFGuidelines);
+        }
+        // check PID consistency
+        checkEOSCIFGuidelinesPIDConsistency(bundle);
+
+        validate(bundle);
+        update(bundle, auth);
+        logger.info("User '{}'-'{}' updated field eoscIFGuidelines of the Resource '{}'",
+                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId);
+        return bundle;
+    }
+
+    public ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth){
+        T bundle = get(resourceId, catalogueId);
+        blockUpdateIfResourceIsPublished(bundle);
+        ResourceExtras resourceExtras = bundle.getResourceExtras();
+        List<String> newResearchCategories = new ArrayList<>();
+        if (resourceExtras == null){
+            ResourceExtras newResourceExtras = new ResourceExtras();
+            newResearchCategories.addAll(researchCategories);
+            newResourceExtras.setResearchCategories(newResearchCategories);
+            bundle.setResourceExtras(newResourceExtras);
+        } else{
+            List<String> oldResearchCategories = resourceExtras.getResearchCategories();
+            if (oldResearchCategories == null || oldResearchCategories.isEmpty()){
+                newResearchCategories.addAll(researchCategories);
+                bundle.getResourceExtras().setResearchCategories(newResearchCategories);
+            } else{
+                for (String researchCategory : researchCategories){
+                    if (!oldResearchCategories.contains(researchCategory)){
+                        oldResearchCategories.add(researchCategory);
+                    }
+                }
+                bundle.getResourceExtras().setResearchCategories(oldResearchCategories);
+            }
+        }
+        validate(bundle);
+        update(bundle, auth);
+        logger.info("User '{}'-'{}' updated field researchCategories of the Resource '{}' with value '{}'",
+                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId, researchCategories);
+        return bundle;
+    }
+
+    public ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth){
+        T bundle = get(resourceId, catalogueId);
+        blockUpdateIfResourceIsPublished(bundle);
+        ResourceExtras resourceExtras = bundle.getResourceExtras();
+        if (resourceExtras == null){
+            ResourceExtras newResourceExtras = new ResourceExtras();
+            newResourceExtras.setHorizontalService(horizontalService);
+            bundle.setResourceExtras(newResourceExtras);
+        } else{
+            resourceExtras.setHorizontalService(horizontalService);
+        }
+        validate(bundle);
+        update(bundle, auth);
+        logger.info("User '{}'-'{}' updated the field horizontalService of the Resource '{}' with value '{}'",
+                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId, horizontalService);
+        return bundle;
+    }
+
+    private void blockUpdateIfResourceIsPublished(ResourceBundle<?> resourceBundle){ //FIXME: DOES NOT WORK AS INTENDED
+        if (resourceBundle.getMetadata().isPublished()){
+            throw new AccessDeniedException("You cannot directly update a Public Resource.");
+        }
+    }
+
+    private void checkEOSCIFGuidelinesPIDConsistency(ResourceBundle<?> resourceBundle){
+        List<String> pidList = new ArrayList<>();
+        for (EOSCIFGuidelines eoscIFGuideline : resourceBundle.getResourceExtras().getEoscIFGuidelines()){
+            pidList.add(eoscIFGuideline.getPid());
+        }
+        Set<String> pidSet = new HashSet<>(pidList);
+        if(pidSet.size() < pidList.size()){
+            throw new ValidationException("EOSCIFGuidelines cannot have duplicate PIDs.");
+        }
     }
 }
