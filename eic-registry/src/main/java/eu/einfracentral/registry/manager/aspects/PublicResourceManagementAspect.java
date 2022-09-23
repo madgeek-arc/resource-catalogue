@@ -1,4 +1,4 @@
-package eu.einfracentral.aspects;
+package eu.einfracentral.registry.manager.aspects;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.manager.PublicDatasourceManager;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class PublicResourceManagementAspect<T extends Bundle> {
+public class PublicResourceManagementAspect<T extends Bundle<?>> {
 
     private static final Logger logger = LogManager.getLogger(PublicResourceManagementAspect.class);
 

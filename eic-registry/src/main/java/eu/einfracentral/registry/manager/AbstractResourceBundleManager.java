@@ -483,15 +483,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("service_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
+                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        // try for datasource
-        if (resources.getResults().isEmpty()){
-            resourceType.setName("datasource");
-            resources = searchService
-                    .cqlQuery(String.format("datasource_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        }
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);
         }
@@ -502,14 +495,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public List<Resource> getResources(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("service_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
+                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        // try for datasource
-        if (resources.getResults().isEmpty()){
-            resources = searchService
-                    .cqlQuery(String.format("datasource_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        }
         if (resources != null) {
             return resources.getResults();
         }

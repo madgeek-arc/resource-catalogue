@@ -1,4 +1,4 @@
-package eu.einfracentral.aspects;
+package eu.einfracentral.registry.manager.aspects;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
