@@ -2,9 +2,7 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Datasource;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.service.ResourceCRUDService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 
 import java.io.IOException;
 import java.util.List;
