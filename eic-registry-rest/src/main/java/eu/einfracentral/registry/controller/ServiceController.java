@@ -148,6 +148,7 @@ public class ServiceController {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("published", false);
         Paging<ServiceBundle> serviceBundles = resourceBundleService.getAll(ff, authentication);
         List<Service> services = serviceBundles.getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
         return ResponseEntity.ok(new Paging<>(serviceBundles.getTotal(), serviceBundles.getFrom(), serviceBundles.getTo(), services, serviceBundles.getFacets()));

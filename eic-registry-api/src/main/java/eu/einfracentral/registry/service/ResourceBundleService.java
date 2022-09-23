@@ -276,4 +276,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, MultiValueMap<String, Object> allRequestParams,
                                                                         Set<String> auditState, Authentication authentication);
 
+    ResourceBundle<?> updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth);
+    ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth);
+    ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth);
 }
