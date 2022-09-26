@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Api(description = "Operations for Datasources")
 public class DatasourceController {
 
-    private static final Logger logger = LogManager.getLogger(ServiceController.class);
+    private static final Logger logger = LogManager.getLogger(DatasourceController.class);
     private final DatasourceService<DatasourceBundle> resourceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource commonDataSource;
@@ -76,7 +76,7 @@ public class DatasourceController {
 
     @ApiOperation(value = "Get the most current version of a specific Datasource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    @PreAuthorize("@securityService.datasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<Datasource> getDatasource(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK);
     }
@@ -90,7 +90,7 @@ public class DatasourceController {
 
     // Get the specified version of a RichResource providing the Datasource id
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("@securityService.datasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichResource> getRichDatasource(@PathVariable("id") String id,
                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
@@ -189,7 +189,7 @@ public class DatasourceController {
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
-    public ResponseEntity<Paging<DatasourceBundle>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<DatasourceBundle>> getDatasourcesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                        @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);

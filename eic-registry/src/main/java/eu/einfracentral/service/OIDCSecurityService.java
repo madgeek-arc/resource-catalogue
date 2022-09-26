@@ -9,6 +9,7 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
+import eu.einfracentral.registry.service.DatasourceService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -17,6 +18,7 @@ import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,6 +35,7 @@ public class OIDCSecurityService implements SecurityService {
     private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final DatasourceService<DatasourceBundle> datasourceService;
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private OIDCAuthenticationToken adminAccess;
 
@@ -45,10 +48,12 @@ public class OIDCSecurityService implements SecurityService {
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
+                        @Lazy DatasourceService<DatasourceBundle> datasourceService,
                         PendingProviderManager pendingProviderManager, PendingResourceService<ServiceBundle> pendingServiceManager) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.resourceBundleService = resourceBundleService;
+        this.datasourceService = datasourceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
 
@@ -353,6 +358,16 @@ public class OIDCSecurityService implements SecurityService {
 
     public boolean resourceIsActive(String resourceId, String catalogueId) {
         ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId, catalogueId);
+        return resourceBundle.isActive();
+    }
+
+    public boolean datasourceIsActive(String resourceId) {
+        ResourceBundle<?> resourceBundle = datasourceService.get(resourceId);
+        return resourceBundle.isActive();
+    }
+
+    public boolean datasourceIsActive(String resourceId, String catalogueId) {
+        ResourceBundle<?> resourceBundle = datasourceService.get(resourceId, catalogueId);
         return resourceBundle.isActive();
     }
 }

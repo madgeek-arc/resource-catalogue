@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> implements ResourceCRUDService<DatasourceBundle, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(PublicServiceManager.class);
+    private static final Logger logger = LogManager.getLogger(PublicDatasourceManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
 
