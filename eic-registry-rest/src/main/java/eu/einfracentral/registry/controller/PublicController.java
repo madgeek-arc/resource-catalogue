@@ -69,7 +69,11 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsProviderAdmin(user, id)) {
-                return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+                if (providerBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Provider does not consist a Public entity"));
+                }
             }
         }
         if (providerBundle.getMetadata().isPublished() && providerBundle.isActive()
@@ -90,7 +94,11 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsProviderAdmin(user, id)) {
-                return new ResponseEntity<>(providerBundle, HttpStatus.OK);
+                if (providerBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(providerBundle, HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Provider Bundle does not consist a Public entity"));
+                }
             }
         }
         if (providerBundle.getMetadata().isPublished() && providerBundle.isActive()
@@ -211,7 +219,11 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id)) {
-                return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+                if (serviceBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service does not consist a Public entity"));
+                }
             }
         }
         if (serviceBundle.getMetadata().isPublished() && serviceBundle.isActive()
@@ -224,15 +236,19 @@ public class PublicController {
     //    @ApiOperation(value = "Returns the Public ServiceBundle with the given id.")
     @GetMapping(path = "/resource/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<?> getPublicInfraService(@PathVariable("id") String id,
-                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                   @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicServiceBundle(@PathVariable("id") String id,
+                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                    @ApiIgnore Authentication auth) {
         ServiceBundle serviceBundle = resourceBundleServiceService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id)) {
-                return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
+                if (serviceBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service Bundle does not consist a Public entity"));
+                }
             }
         }
         if (serviceBundle.getMetadata().isPublished() && serviceBundle.isActive()
@@ -298,9 +314,9 @@ public class PublicController {
     })
     @GetMapping(path = "/resource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getAllPublicInfraServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
-                                                                           @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<ServiceBundle>> getAllPublicServiceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                            @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -353,7 +369,11 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id)) {
-                return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
+                if (datasourceBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Datasource does not consist a Public entity"));
+                }
             }
         }
         if (datasourceBundle.getMetadata().isPublished() && datasourceBundle.isActive()
@@ -373,7 +393,11 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id)) {
-                return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
+                if (datasourceBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Datasource Bundle does not consist a Public entity"));
+                }
             }
         }
         if (datasourceBundle.getMetadata().isPublished() && datasourceBundle.isActive()
