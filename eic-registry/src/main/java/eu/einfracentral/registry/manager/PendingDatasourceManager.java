@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +62,11 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
 
-        datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
+        try {
+            datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
 
         // Check if there is a Resource with the specific id
         FacetFilter ff = new FacetFilter();

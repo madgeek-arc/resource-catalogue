@@ -1,11 +1,16 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Catalogue;
+import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.exception.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @Service
 public class SimpleIdCreator implements IdCreator {
@@ -62,7 +67,7 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String createResourceId(ResourceBundle<?> resource) {
+    public String createServiceId(ResourceBundle<?> resource) {
         if (resource.getPayload().getResourceOrganisation() == null || resource.getPayload().getResourceOrganisation().equals("")) {
             throw new ValidationException("Resource must have a Resource Organisation.");
         }
@@ -86,6 +91,18 @@ public class SimpleIdCreator implements IdCreator {
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_")
                 .toLowerCase());
+    }
+
+    public String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException {
+        String datasourceName = resource.getPayload().getName();
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] messageDigest = md.digest(datasourceName.getBytes());
+        BigInteger no = new BigInteger(1, messageDigest);
+        String hashtext = no.toString(16);
+        while (hashtext.length() < 32) {
+            hashtext = "0" + hashtext;
+        }
+        return hashtext;
     }
 
     @Override
