@@ -23,11 +23,11 @@ public class PublicResourceManagementAspect<T extends Bundle<?>> {
         this.publicDatasourceManager = publicDatasourceManager;
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.AbstractResourceBundleManager.updateEOSCIFGuidelines(String, String, java.util.List<eu.einfracentral.domain.EOSCIFGuidelines>, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.AbstractResourceBundleManager.updateResearchCategories(String, String, java.util.List<String>, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.AbstractResourceBundleManager.updateHorizontalService(String, String, boolean, org.springframework.security.core.Authentication)))" +
-            "&& args(bundle)", argNames = "bundle")
-    public void updatePublicResourceAfterResourceExtrasUpdate(T bundle) {
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.AbstractResourceBundleManager.updateEOSCIFGuidelines(String, String, java.util.List<eu.einfracentral.domain.EOSCIFGuidelines>, org.springframework.security.core.Authentication)) " +
+            "|| execution(* eu.einfracentral.registry.manager.AbstractResourceBundleManager.updateResearchCategories(String, String, java.util.List<String>, org.springframework.security.core.Authentication)) " +
+            "|| execution(* eu.einfracentral.registry.manager.AbstractResourceBundleManager.updateHorizontalService(String, String, boolean, org.springframework.security.core.Authentication)))",
+            returning = "bundle")
+    public void updatePublicResourceAfterResourceExtrasUpdate(ResourceBundle<?> bundle) {
         if (bundle.getPayload() instanceof Datasource) {
             delayExecution();
             publicDatasourceManager.update((DatasourceBundle) bundle, null);
