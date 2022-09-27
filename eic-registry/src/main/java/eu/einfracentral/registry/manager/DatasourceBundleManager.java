@@ -29,6 +29,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -97,12 +98,24 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
                     datasourceBundle.getDatasource().getResourceOrganisation()));
         }
+        // check Provider's templateStatus
+        if (providerBundle.getTemplateStatus().equals("pending template")){
+            throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
+        }
 
         if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)){
-            datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
+            try {
+                datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
         } else{
             if (datasourceBundle.getId() == null || "".equals(datasourceBundle.getId())) {
-                datasourceBundle.setId(idCreator.createResourceId(datasourceBundle));
+                try {
+                    datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                }
             } else{
                 datasourceBundle.setId(idCreator.reformatId(datasourceBundle.getId()));
             }
@@ -621,6 +634,11 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     public DatasourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
         DatasourceBundle datasourceBundle = get(resourceId, catalogueName);
+        // check Datasource's status
+        if (!datasourceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
+                    "is not yet Approved", datasourceBundle.getId()));
+        }
         ProviderBundle newProvider = providerService.get(newProviderId);
         ProviderBundle oldProvider =  providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
 
@@ -680,7 +698,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                 JSONObject map = arr.getJSONObject(i);
                 Gson gson = new Gson();
                 JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                allDatasources.add(transformOpenAIREToEOSCDatasource(jsonObj));
+                Datasource datasource = transformOpenAIREToEOSCDatasource(jsonObj);
+                if (datasource != null){
+                    allDatasources.add(datasource);
+                }
             }
             datasourceMap.put(total, allDatasources);
             return datasourceMap;
@@ -766,9 +787,14 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     }
 
     public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
+        // remove specific eoscDatasourceTypes
+        String eoscDatasourceType = openaireDatasource.getAsJsonObject().get("eoscDatasourceType").getAsString();
+        if (eoscDatasourceType.equals("Journal archive") || eoscDatasourceType.equals("Publisher archive")){
+            return null;
+        }
         Datasource datasource = new Datasource();
-        String id = String.valueOf(openaireDatasource.getAsJsonObject().get("id")).replaceAll("\"", "");
-        String name = String.valueOf(openaireDatasource.getAsJsonObject().get("officialname")).replaceAll("\"", "");
+        String id = openaireDatasource.getAsJsonObject().get("id").getAsString().replaceAll("\"", "");
+        String name = openaireDatasource.getAsJsonObject().get("officialname").getAsString().replaceAll("\"", "");
         datasource.setId(id);
         datasource.setName(name);
         return datasource;

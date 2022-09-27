@@ -95,12 +95,16 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
                     serviceBundle.getService().getResourceOrganisation()));
         }
+        // check Provider's templateStatus
+        if (providerBundle.getTemplateStatus().equals("pending template")){
+            throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
+        }
 
         if (serviceBundle.getService().getCatalogueId().equals(catalogueName)){
-            serviceBundle.setId(idCreator.createResourceId(serviceBundle));
+            serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         } else{
             if (serviceBundle.getId() == null || "".equals(serviceBundle.getId())) {
-                serviceBundle.setId(idCreator.createResourceId(serviceBundle));
+                serviceBundle.setId(idCreator.createServiceId(serviceBundle));
             } else{
                 serviceBundle.setId(idCreator.reformatId(serviceBundle.getId()));
             }
@@ -618,6 +622,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
         ServiceBundle serviceBundle = get(resourceId, catalogueName);
+        // check Service's status
+        if (!serviceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
+                    "is not yet Approved", serviceBundle.getId()));
+        }
         ProviderBundle newProvider = providerService.get(newProviderId);
         ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getResourceOrganisation());
 
