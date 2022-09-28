@@ -103,6 +103,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
         }
 
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
+        checkOpenAIREIDExistance(datasourceBundle);
         try {
             datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
         } catch (NoSuchAlgorithmException e) {
@@ -690,12 +692,22 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         String data = pagination[3];
         // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
         String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
+        String dataOnlyArchives = "{\"eoscDatasourceType\": \"archive\"}";
+        String responseOnlyArchives = createHttpRequest(url, dataOnlyArchives);
+        int totalOnlyArchives = 0;
+        if (responseOnlyArchives != null){
+            JSONObject obj = new JSONObject(responseOnlyArchives);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            totalOnlyArchives = Integer.parseInt(jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString());
+        }
         String response = createHttpRequest(url, data);
         if (response != null){
             JSONObject obj = new JSONObject(response);
             Gson gson = new Gson();
             JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
-            String total = jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString();
+            int totalEverything = Integer.parseInt(jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString());
+            String total = String.valueOf(totalEverything - totalOnlyArchives);
             jsonObj.getAsJsonObject().remove("header");
             return new String[]{total, jsonObj.toString()};
         }
@@ -880,5 +892,44 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             retPaging.setTo(0);
         }
         return retPaging;
+    }
+
+    public DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
+        List<String> allOpenAIREDatasourceIDs = new ArrayList<>(); //TODO: PUT ALL OpenAIRE Datasource IDs
+        if (datasourceBundle.getId() != null && "".equals(datasourceBundle.getId())){
+            if (allOpenAIREDatasourceIDs.contains(datasourceBundle.getId())){
+                Identifiers datasourceIdentifiers = new Identifiers();
+                List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
+                AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
+                alternativeIdentifier.setType("openaire");
+                alternativeIdentifier.setValue(datasourceBundle.getId());
+                datasourceAlternativeIdentifiers.add(alternativeIdentifier);
+                datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
+                datasourceBundle.setIdentifiers(datasourceIdentifiers);
+            } else{
+                throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource"));
+            }
+        }
+        return datasourceBundle;
+    }
+
+    //TODO: Finish this
+    private boolean isDatasourceRegisteredOnOpenAIRE(String eoscId){
+        DatasourceBundle datasourceBundle = get(eoscId);
+        boolean found = false;
+        if (datasourceBundle != null){
+            Identifiers identifiers = datasourceBundle.getIdentifiers();
+            if (identifiers != null){
+                List<AlternativeIdentifier> alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
+                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()){
+                    for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers){
+                        if (alternativeIdentifier.getType().equals("openaire")){
+                            found = true;
+                        }
+                    }
+                }
+            }
+        }
+        return found;
     }
 }
