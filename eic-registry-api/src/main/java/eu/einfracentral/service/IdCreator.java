@@ -1,8 +1,11 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Catalogue;
+import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ResourceBundle;
+
+import java.security.NoSuchAlgorithmException;
 
 public interface IdCreator {
 
@@ -20,7 +23,15 @@ public interface IdCreator {
      * @param resource
      * @return
      */
-    String createResourceId(ResourceBundle<?> resource);
+    String createServiceId(ResourceBundle<?> resource);
+
+    /**
+     * Creates id for {@link ResourceBundle}
+     *
+     * @param resource
+     * @return
+     */
+    String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException;
 
     /**
      * Creates id for {@link Catalogue}

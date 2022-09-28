@@ -38,6 +38,7 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -187,7 +188,15 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public T add(T resourceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Resource: {}", auth, resourceBundle);
         if (resourceBundle.getPayload().getId() == null) {
-            resourceBundle.getPayload().setId(idCreator.createResourceId(resourceBundle));
+            if (resourceBundle.getPayload() instanceof Datasource){
+                try {
+                    resourceBundle.getPayload().setId(idCreator.createDatasourceId(resourceBundle));
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (resourceBundle.getPayload() instanceof Service){
+                resourceBundle.getPayload().setId(idCreator.createServiceId(resourceBundle));
+            }
         }
         // if Resource version is empty set it null
         if ("".equals(resourceBundle.getPayload().getVersion())) {
@@ -735,6 +744,20 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             richResources.add(richResource);
         }
         return (richResources);
+    }
+
+    @Override
+    public ResourceBundle<?> getResourceTemplate(String providerId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", catalogueName);
+        List<T> allProviderServices = getAll(ff, auth).getResults();
+        for (T resourceBundle : allProviderServices) {
+            if (resourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
+                return resourceBundle;
+            }
+        }
+        return null;
     }
 
     private List<RichResource> createRichStatistics(List<RichResource> richResources, Authentication auth) {

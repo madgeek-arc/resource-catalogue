@@ -25,6 +25,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.security.NoSuchAlgorithmException;
+
 @RestController
 @RequestMapping({"pendingDatasource"})
 @Api(description = "Operations for Pending Datasources", tags = {"pending-datasource-controller"})
@@ -108,11 +110,11 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource)")
-    public ResponseEntity<Datasource> temporarySavePending(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Datasource> temporarySavePending(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws NoSuchAlgorithmException {
         DatasourceBundle datasourceBundle = new DatasourceBundle();
         DatasourceBundle toCreateId = new DatasourceBundle();
         toCreateId.setDatasource(datasource);
-        datasource.setId(idCreator.createResourceId(toCreateId));
+        datasource.setId(idCreator.createDatasourceId(toCreateId));
 
         try {
             datasourceBundle = pendingDatasourceManager.get(datasource.getId());
@@ -137,7 +139,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
 
     @PutMapping(path = "/transform/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource)")
-    public ResponseEntity<Datasource> pendingToInfra(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Datasource> pendingToInfra(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws ResourceNotFoundException, NoSuchAlgorithmException {
         if (datasource == null) {
             throw new ServiceException("Cannot add a null Datasource");
         }
@@ -146,7 +148,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
         try { // check if Datasource already exists
             DatasourceBundle toCreateId = new DatasourceBundle();
             toCreateId.setDatasource(datasource);
-            datasource.setId(idCreator.createResourceId(toCreateId));
+            datasource.setId(idCreator.createDatasourceId(toCreateId));
             datasourceBundle = this.pendingDatasourceManager.get(datasource.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service

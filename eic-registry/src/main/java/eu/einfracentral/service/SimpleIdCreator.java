@@ -1,11 +1,16 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.Catalogue;
+import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.Provider;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.exception.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @Service
 public class SimpleIdCreator implements IdCreator {
@@ -16,16 +21,10 @@ public class SimpleIdCreator implements IdCreator {
     @Override
     public String createProviderId(Provider provider) {
         String providerId;
-        if (provider.getId() == null || "".equals(provider.getId())) {
-            if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation()) && !"null".equals(provider.getAbbreviation())) {
-                providerId = provider.getAbbreviation();
-            } else if (provider.getName() != null && !"".equals(provider.getName()) && !"null".equals(provider.getName())) {
-                providerId = provider.getName();
-            } else {
-                throw new ValidationException("Provider must have an abbreviation or name.");
-            }
+        if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation()) && !"null".equals(provider.getAbbreviation())) {
+            providerId = provider.getAbbreviation();
         } else {
-            providerId = provider.getId();
+            throw new ValidationException("Provider must have an abbreviation.");
         }
         return StringUtils
                 .stripAccents(providerId)
@@ -43,10 +42,8 @@ public class SimpleIdCreator implements IdCreator {
         if (catalogue.getId() == null || "".equals(catalogue.getId())) {
             if (catalogue.getAbbreviation() != null && !"".equals(catalogue.getAbbreviation()) && !"null".equals(catalogue.getAbbreviation())) {
                 catalogueId = catalogue.getAbbreviation();
-            } else if (catalogue.getName() != null && !"".equals(catalogue.getName()) && !"null".equals(catalogue.getName())) {
-                catalogueId = catalogue.getName();
             } else {
-                throw new ValidationException("Catalogue must have an abbreviation or name.");
+                throw new ValidationException("Catalogue must have an abbreviation.");
             }
         } else {
             catalogueId = catalogue.getId();
@@ -62,21 +59,15 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String createResourceId(ResourceBundle<?> resource) {
+    public String createServiceId(ResourceBundle<?> resource) {
         if (resource.getPayload().getResourceOrganisation() == null || resource.getPayload().getResourceOrganisation().equals("")) {
             throw new ValidationException("Resource must have a Resource Organisation.");
         }
         String serviceId;
-        if (resource.getPayload().getId() == null || "".equals(resource.getPayload().getId())) {
-            if (resource.getPayload().getAbbreviation() != null && !"".equals(resource.getPayload().getAbbreviation()) && !"null".equals(resource.getPayload().getAbbreviation())) {
-                serviceId = resource.getPayload().getAbbreviation();
-            } else if (resource.getPayload().getName() != null && !"".equals(resource.getPayload().getName()) && !"null".equals(resource.getPayload().getName())) {
-                serviceId = resource.getPayload().getName();
-            } else {
-                throw new ValidationException("Resource must have an abbreviation or name.");
-            }
+        if (resource.getPayload().getAbbreviation() != null && !"".equals(resource.getPayload().getAbbreviation()) && !"null".equals(resource.getPayload().getAbbreviation())) {
+            serviceId = resource.getPayload().getAbbreviation();
         } else {
-            serviceId = resource.getPayload().getId();
+            throw new ValidationException("Resource must have an abbreviation.");
         }
         String provider = resource.getPayload().getResourceOrganisation();
         return String.format("%s.%s", provider, StringUtils
@@ -86,6 +77,19 @@ public class SimpleIdCreator implements IdCreator {
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_")
                 .toLowerCase());
+    }
+
+    public String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException {
+        String resourceOrganisation = resource.getPayload().getResourceOrganisation();
+        String datasourceName = resource.getPayload().getName();
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] messageDigest = md.digest(datasourceName.getBytes());
+        BigInteger no = new BigInteger(1, messageDigest);
+        String hashtext = no.toString(16);
+        while (hashtext.length() < 32) {
+            hashtext = "0" + hashtext;
+        }
+        return resourceOrganisation+"."+hashtext;
     }
 
     @Override

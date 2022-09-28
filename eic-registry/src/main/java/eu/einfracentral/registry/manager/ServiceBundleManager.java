@@ -95,16 +95,12 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
                     serviceBundle.getService().getResourceOrganisation()));
         }
-
-        if (serviceBundle.getService().getCatalogueId().equals(catalogueName)){
-            serviceBundle.setId(idCreator.createResourceId(serviceBundle));
-        } else{
-            if (serviceBundle.getId() == null || "".equals(serviceBundle.getId())) {
-                serviceBundle.setId(idCreator.createResourceId(serviceBundle));
-            } else{
-                serviceBundle.setId(idCreator.reformatId(serviceBundle.getId()));
-            }
+        // check Provider's templateStatus
+        if (providerBundle.getTemplateStatus().equals("pending template")){
+            throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
         }
+
+        serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         validate(serviceBundle);
 
         boolean active = providerBundle
@@ -549,21 +545,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
     }
 
-    // Different that the one called on migration methods!
-    @Override
-    public ServiceBundle getResourceTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        List<ServiceBundle> allProviderServices = getAll(ff, auth).getResults();
-        for (ServiceBundle serviceBundle : allProviderServices) {
-            if (serviceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
-                return serviceBundle;
-            }
-        }
-        return null;
-    }
-
     @Override
     public List<Service> getActiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
@@ -618,6 +599,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
         ServiceBundle serviceBundle = get(resourceId, catalogueName);
+        // check Service's status
+        if (!serviceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
+                    "is not yet Approved", serviceBundle.getId()));
+        }
         ProviderBundle newProvider = providerService.get(newProviderId);
         ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getResourceOrganisation());
 
