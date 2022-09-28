@@ -105,25 +105,19 @@ public class RegistrationMailService {
         String providerSubject;
         String regTeamSubject;
 
-        String serviceOrDatasource = "Service";
-
         if (providerBundle == null || providerBundle.getProvider() == null) {
             throw new ResourceNotFoundException("Provider is null");
         }
 
         List<Service> serviceList = serviceBundleManager.getResources(providerBundle.getId());
-        List<Datasource> datasourceList = new ArrayList<>();
-        if (serviceList.isEmpty()){
-            serviceOrDatasource = "Datasource";
-            datasourceList = datasourceBundleManager.getResources(providerBundle.getId());
-        }
+        List<Datasource> datasourceList =datasourceBundleManager.getResources(providerBundle.getId());
         Service serviceTemplate = null;
-        if (!serviceList.isEmpty()) {
-            root.put("resource", serviceList.get(0));
-            serviceTemplate = serviceList.get(0);
-        } else if (!datasourceList.isEmpty()){
+        if (!datasourceList.isEmpty()) {
             root.put("resource", datasourceList.get(0));
             serviceTemplate = datasourceList.get(0);
+        } else if (!serviceList.isEmpty()){
+            root.put("resource", serviceList.get(0));
+            serviceTemplate = serviceList.get(0);
         } else {
             serviceTemplate = new Service();
             serviceTemplate.setName("");
@@ -132,7 +126,6 @@ public class RegistrationMailService {
         providerSubject = getProviderSubject(providerBundle, serviceTemplate);
         regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate);
 
-        root.put("serviceOrDatasource", serviceOrDatasource);
         root.put("providerBundle", providerBundle);
         root.put("endpoint", endpoint);
         root.put("project", projectName);
