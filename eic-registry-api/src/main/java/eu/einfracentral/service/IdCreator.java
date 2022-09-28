@@ -28,7 +28,7 @@ public interface IdCreator {
     /**
      * Creates id for {@link ResourceBundle}
      *
-     * @param datasourceBundle
+     * @param resource
      * @return
      */
     String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException;

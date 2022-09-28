@@ -103,22 +103,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
         }
 
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)){
-            try {
-                datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        } else{
-            if (datasourceBundle.getId() == null || "".equals(datasourceBundle.getId())) {
-                try {
-                    datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                }
-            } else{
-                datasourceBundle.setId(idCreator.reformatId(datasourceBundle.getId()));
-            }
+        try {
+            datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
         validate(datasourceBundle);
 
@@ -563,21 +551,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
-    }
-
-    // Different that the one called on migration methods!
-    @Override
-    public DatasourceBundle getResourceTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        List<DatasourceBundle> allProviderServices = getAll(ff, auth).getResults();
-        for (DatasourceBundle datasourceBundle : allProviderServices){
-            if (datasourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())){
-                return datasourceBundle;
-            }
-        }
-        return null;
     }
 
     @Override

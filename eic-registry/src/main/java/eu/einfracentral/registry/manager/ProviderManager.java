@@ -116,15 +116,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        if (provider.getProvider().getCatalogueId().equals(catalogueName)){
-            provider.setId(idCreator.createProviderId(provider.getProvider()));
-        } else{
-            if (provider.getId() == null || "".equals(provider.getId())) {
-                provider.setId(idCreator.createProviderId(provider.getProvider()));
-            } else{
-                provider.setId(idCreator.reformatId(provider.getId()));
-            }
-        }
+        provider.setId(idCreator.createProviderId(provider.getProvider()));
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));

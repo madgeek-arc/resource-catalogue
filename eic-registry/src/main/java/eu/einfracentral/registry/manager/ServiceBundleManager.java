@@ -100,15 +100,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
         }
 
-        if (serviceBundle.getService().getCatalogueId().equals(catalogueName)){
-            serviceBundle.setId(idCreator.createServiceId(serviceBundle));
-        } else{
-            if (serviceBundle.getId() == null || "".equals(serviceBundle.getId())) {
-                serviceBundle.setId(idCreator.createServiceId(serviceBundle));
-            } else{
-                serviceBundle.setId(idCreator.reformatId(serviceBundle.getId()));
-            }
-        }
+        serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         validate(serviceBundle);
 
         boolean active = providerBundle
@@ -551,21 +543,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
-    }
-
-    // Different that the one called on migration methods!
-    @Override
-    public ServiceBundle getResourceTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        List<ServiceBundle> allProviderServices = getAll(ff, auth).getResults();
-        for (ServiceBundle serviceBundle : allProviderServices) {
-            if (serviceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
-                return serviceBundle;
-            }
-        }
-        return null;
     }
 
     @Override
