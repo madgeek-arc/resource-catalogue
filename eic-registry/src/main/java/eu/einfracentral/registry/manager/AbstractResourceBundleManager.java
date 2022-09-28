@@ -746,6 +746,20 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return (richResources);
     }
 
+    @Override
+    public ResourceBundle<?> getResourceTemplate(String providerId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", catalogueName);
+        List<T> allProviderServices = getAll(ff, auth).getResults();
+        for (T resourceBundle : allProviderServices) {
+            if (resourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
+                return resourceBundle;
+            }
+        }
+        return null;
+    }
+
     private List<RichResource> createRichStatistics(List<RichResource> richResources, Authentication auth) {
         Map<String, Integer> resourceVisits = analyticsService.getAllServiceVisits();
         Map<String, List<Float>> resourceFavorites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);

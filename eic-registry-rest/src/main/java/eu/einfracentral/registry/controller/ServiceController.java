@@ -423,12 +423,6 @@ public class ServiceController {
         resourceBundleService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
-    // Get the Service Template of a specific Provider (status = "pending provider" or "rejected provider")
-    @GetMapping(path = {"getServiceTemplate/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ServiceBundle getServiceTemplate(@PathVariable String id, @ApiIgnore Authentication auth) {
-        return resourceBundleService.getResourceTemplate(id, auth);
-    }
-
     // REVISE: returns ServiceBundle (sensitive data)
     // Given a provider id, return all the Resources he is a resourceProvider
     @ApiImplicitParams({

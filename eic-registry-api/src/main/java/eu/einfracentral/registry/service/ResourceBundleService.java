@@ -237,7 +237,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
 
     List<? extends Service> getActiveResources(String providerId);
 
-    T getResourceTemplate(String providerId, Authentication auth);
+    ResourceBundle<?> getResourceTemplate(String providerId, Authentication auth);
 
     List<T> getInactiveResources(String providerId);
 
