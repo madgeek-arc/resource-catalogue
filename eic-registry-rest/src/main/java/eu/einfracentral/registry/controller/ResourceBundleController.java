@@ -13,7 +13,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping({"resourceBundles"})
-@Api(description = "Operations for Resource Bundles", tags = {"resourceBundles-controller"})
+@Api(description = "Operations for Resource Bundles", tags = {"resource-bundle-controller"})
 public class ResourceBundleController {
 
     private static final Logger logger = LogManager.getLogger(ResourceBundleController.class);

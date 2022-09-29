@@ -692,22 +692,23 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         String data = pagination[3];
         // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
         String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
-        String dataOnlyArchives = "{\"eoscDatasourceType\": \"archive\"}";
-        String responseOnlyArchives = createHttpRequest(url, dataOnlyArchives);
-        int totalOnlyArchives = 0;
-        if (responseOnlyArchives != null){
-            JSONObject obj = new JSONObject(responseOnlyArchives);
-            Gson gson = new Gson();
-            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
-            totalOnlyArchives = Integer.parseInt(jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString());
-        }
+//        String dataOnlyArchives = "{\"eoscDatasourceType\": \"archive\"}";
+//        String responseOnlyArchives = createHttpRequest(url, dataOnlyArchives);
+//        int totalOnlyArchives = 0;
+//        if (responseOnlyArchives != null){
+//            JSONObject obj = new JSONObject(responseOnlyArchives);
+//            Gson gson = new Gson();
+//            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+//            totalOnlyArchives = Integer.parseInt(jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString());
+//        }
         String response = createHttpRequest(url, data);
         if (response != null){
             JSONObject obj = new JSONObject(response);
             Gson gson = new Gson();
             JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
-            int totalEverything = Integer.parseInt(jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString());
-            String total = String.valueOf(totalEverything - totalOnlyArchives);
+//            int totalEverything = Integer.parseInt(jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString());
+//            String total = String.valueOf(totalEverything - totalOnlyArchives);
+            String total = jsonObj.getAsJsonObject().get("header").getAsJsonObject().get("total").toString();
             jsonObj.getAsJsonObject().remove("header");
             return new String[]{total, jsonObj.toString()};
         }
@@ -773,10 +774,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
         // remove specific eoscDatasourceTypes
-        String eoscDatasourceType = openaireDatasource.getAsJsonObject().get("eoscDatasourceType").getAsString();
-        if (eoscDatasourceType.equals("Journal archive") || eoscDatasourceType.equals("Publisher archive")){
-            return null;
-        }
+//        String eoscDatasourceType = openaireDatasource.getAsJsonObject().get("eoscDatasourceType").getAsString();
+//        if (eoscDatasourceType.equals("Journal archive") || eoscDatasourceType.equals("Publisher archive")){
+//            return null;
+//        }
         Datasource datasource = new Datasource();
         String id = openaireDatasource.getAsJsonObject().get("id").getAsString().replaceAll("\"", "");
         String name = openaireDatasource.getAsJsonObject().get("officialname").getAsString().replaceAll("\"", "");
@@ -895,7 +896,14 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     }
 
     public DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
-        List<String> allOpenAIREDatasourceIDs = new ArrayList<>(); //TODO: PUT ALL OpenAIRE Datasource IDs
+        List<String> allOpenAIREDatasourceIDs = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(100000);
+        Map<Integer, List<Datasource>> datasourceMap = getAllOpenAIREDatasources(ff);
+        List<Datasource> allOpenAIREDatasources = datasourceMap.get(datasourceMap.keySet().iterator().next());
+        for (Datasource datasource : allOpenAIREDatasources){
+            allOpenAIREDatasourceIDs.add(datasource.getId());
+        }
         if (datasourceBundle.getId() != null && "".equals(datasourceBundle.getId())){
             if (allOpenAIREDatasourceIDs.contains(datasourceBundle.getId())){
                 Identifiers datasourceIdentifiers = new Identifiers();
