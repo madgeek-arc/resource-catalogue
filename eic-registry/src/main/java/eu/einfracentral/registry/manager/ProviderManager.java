@@ -23,7 +23,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,7 +49,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final EventService eventService;
-    private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
@@ -68,11 +66,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Autowired
     public ProviderManager(@Lazy ResourceBundleService<ServiceBundle> resourceBundleService,
                            @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                           @Lazy SecurityService securityService,
-                           @Lazy FieldValidator fieldValidator,
-                           @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator, EventService eventService,
-                           JmsTemplate jmsTopicTemplate, VersionService versionService,
+                           @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
+                           @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
+                           EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
                            SynchronizerService<Provider> synchronizerServiceProvider,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService) {
@@ -84,7 +80,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.idCreator = idCreator;
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
-        this.jmsTopicTemplate = jmsTopicTemplate;
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
@@ -127,8 +122,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Adding Provider: {} of Catalogue: {}", provider, catalogueId);
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
-
-        jmsTopicTemplate.convertAndSend("provider.create", provider);
 
         synchronizerServiceProvider.syncAdd(provider.getProvider());
 
@@ -198,8 +191,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
             }
         }
-
-        jmsTopicTemplate.convertAndSend("provider.update", provider);
 
         synchronizerServiceProvider.syncUpdate(provider.getProvider());
 
@@ -399,8 +390,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
-
-        jmsTopicTemplate.convertAndSend("provider.delete", provider);
 
         super.delete(provider);
         registrationMailService.notifyProviderAdmins(provider);

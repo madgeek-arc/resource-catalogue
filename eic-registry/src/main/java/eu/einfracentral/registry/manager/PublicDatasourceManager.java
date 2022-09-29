@@ -71,7 +71,7 @@ public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> i
         DatasourceBundle ret;
         logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);
-        jmsTopicTemplate.convertAndSend("public_resource.create", datasourceBundle);
+        jmsTopicTemplate.convertAndSend("datasource.create", datasourceBundle);
         return ret;
     }
 
@@ -89,7 +89,7 @@ public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> i
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Datasource with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        jmsTopicTemplate.convertAndSend("public_resource.update", ret);
+        jmsTopicTemplate.convertAndSend("datasource.update", ret);
         return ret;
     }
 
@@ -99,7 +99,7 @@ public class PublicDatasourceManager extends ResourceManager<DatasourceBundle> i
             DatasourceBundle publicDatasourceBundle = get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
             logger.info(String.format("Deleting public Datasource with id [%s]", publicDatasourceBundle.getId()));
             super.delete(publicDatasourceBundle);
-            jmsTopicTemplate.convertAndSend("public_resource.delete", publicDatasourceBundle);
+            jmsTopicTemplate.convertAndSend("datasource.delete", publicDatasourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }

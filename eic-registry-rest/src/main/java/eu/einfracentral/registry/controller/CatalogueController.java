@@ -16,9 +16,11 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -36,16 +38,21 @@ public class CatalogueController {
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final JmsTemplate jmsTopicTemplate;
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
-                        ResourceBundleService<DatasourceBundle> datasourceBundleService) {
+                        ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                        JmsTemplate jmsTopicTemplate) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
     //SECTION: CATALOGUE
@@ -213,11 +220,16 @@ public class CatalogueController {
         catalogueManager.adminAcceptedTerms(catalogueId, authentication);
     }
 
+    // TODO: REFACTOR INTO MANAGER
     @ApiOperation(value = "Deletes the Catalogue with the given id.")
     @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Catalogue> deleteCatalogue(@PathVariable("id") String id,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        // Block accidental deletion of main Catalogue
+        if (id.equals(catalogueName)){
+            throw new ValidationException(String.format("You cannot delete [%s] Catalogue.", catalogueName));
+        }
         CatalogueBundle catalogueBundle = getCatalogueBundle(id, auth).getBody();
         if (catalogueBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -240,7 +252,15 @@ public class CatalogueController {
                 allCatalogueServices.add(serviceBundle);
             }
         }
-        // Delete Catalogue along with all its related Resources
+        // Get all Catalogue's Datasources
+        List<DatasourceBundle> allDatasources = datasourceBundleService.getAll(ff, auth).getResults();
+        List<DatasourceBundle> allCatalogueDatasources = new ArrayList<>();
+        for (DatasourceBundle datasourceBundle : allDatasources){
+            if (datasourceBundle.getDatasource().getCatalogueId().equals(id)){
+                allCatalogueDatasources.add(datasourceBundle);
+            }
+        }
+        // Delete Catalogue's along with all its related Resources
         logger.info("Deleting all Catalogue's Providers...");
         for (ProviderBundle providerBundle: allCatalogueProviders){
             deleteCatalogueProvider(id, providerBundle.getId(), auth);
@@ -249,10 +269,15 @@ public class CatalogueController {
         for (ServiceBundle serviceBundle : allCatalogueServices){
             deleteCatalogueService(id, serviceBundle.getId(), auth);
         }
+        logger.info("Deleting all Catalogue's Datasources...");
+        for (DatasourceBundle datasourceBundle : allCatalogueDatasources){
+            deleteCatalogueDatasource(id, datasourceBundle.getId(), auth);
+        }
         logger.info("Deleting Catalogue...");
         catalogueManager.delete(catalogueBundle);
-        logger.info("User '{}' deleted the Catalogue with id '{}' and name '{} along with all its related Providers and Services'",
+        logger.info("User '{}' deleted the Catalogue with id '{}' and name '{} along with all its related Resources'",
                 auth.getName(), catalogueBundle.getCatalogue().getId(), catalogueBundle.getCatalogue().getName());
+        jmsTopicTemplate.convertAndSend("catalogue.delete", catalogueBundle);
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
