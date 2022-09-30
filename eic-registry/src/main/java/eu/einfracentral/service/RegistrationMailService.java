@@ -298,14 +298,18 @@ public class RegistrationMailService {
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        ServiceBundle serviceBundle = serviceBundleManager.get(resourceId, catalogueName);
-        ProviderBundle providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
+        ResourceBundle<?> resourceBundle;
+        resourceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
+        if (resourceBundle == null){
+            resourceBundle = datasourceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
+        }
+        ProviderBundle providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
         if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
         }
         String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", projectName, providerBundle.getProvider().getName());
         root.put("providerBundle", providerBundle);
-        root.put("serviceBundle", serviceBundle);
+        root.put("resourceBundle", resourceBundle);
         for (User user : providerBundle.getProvider().getUsers()) {
             root.put("user", user);
             String userRole = "provider";
@@ -328,7 +332,7 @@ public class RegistrationMailService {
         String userRole = "provider";
         root.put("oldProvider", oldProvider);
         root.put("newProvider", newProvider);
-        root.put("serviceBundle", resourceBundle);
+        root.put("resourceBundle", resourceBundle);
         root.put("comment", resourceBundle.getLoggingInfo().get(resourceBundle.getLoggingInfo().size() - 1).getComment());
 
         // emails to old Provider's Users

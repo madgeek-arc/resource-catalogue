@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
@@ -139,7 +140,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
 
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             provider.getProvider().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(provider, catalogueId);
@@ -1082,7 +1083,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey()));
         provider.setLoggingInfo(loggingInfoList);
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             // set catalogueId = eosc
             provider.getProvider().setCatalogueId(catalogueName);
             provider.setActive(false);
@@ -1137,5 +1138,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!exists){
             addApprovedProviderToHLEVocabulary(providerBundle);
         }
+    }
+
+    public Paging<ResourceBundle> getRejectedResources(FacetFilter ff1, FacetFilter ff2, Authentication auth){
+        Browsing<ServiceBundle> providerRejectedServices = resourceBundleService.getAll(ff1, auth);
+        Browsing<DatasourceBundle> providerRejectedDatasources = datasourceBundleService.getAll(ff2, auth);
+        int total = providerRejectedServices.getTotal() + providerRejectedDatasources.getTotal();
+        int to = providerRejectedServices.getTo() + providerRejectedDatasources.getTo();
+        int from = providerRejectedServices.getFrom() + providerRejectedDatasources.getFrom();
+        List<Facet> allFacets = new ArrayList<>();
+        allFacets.addAll(providerRejectedServices.getFacets());
+        allFacets.addAll(providerRejectedDatasources.getFacets());
+        List<ResourceBundle> providerRejectedResources = new ArrayList<>();
+        providerRejectedResources.addAll(providerRejectedServices.getResults());
+        providerRejectedResources.addAll(providerRejectedDatasources.getResults());
+        return new Paging<>(total, from, to, providerRejectedResources, allFacets);
     }
 }

@@ -141,4 +141,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return Resource
      */
     Resource getResource(String id, String catalogueId);
+
+    Paging<ResourceBundle> getRejectedResources(FacetFilter ff1, FacetFilter ff2, Authentication auth);
 }

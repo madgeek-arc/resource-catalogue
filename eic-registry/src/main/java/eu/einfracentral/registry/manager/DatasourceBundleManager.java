@@ -83,7 +83,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #datasourceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle addResource(DatasourceBundle datasourceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null) { // add catalogue provider
+        if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
             checkCatalogueIdConsistency(datasourceBundle, catalogueId);
@@ -170,7 +170,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     public DatasourceBundle updateResource(DatasourceBundle datasourceBundle, String catalogueId, String comment, Authentication auth) {
         DatasourceBundle ret;
 
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(datasourceBundle, catalogueId);

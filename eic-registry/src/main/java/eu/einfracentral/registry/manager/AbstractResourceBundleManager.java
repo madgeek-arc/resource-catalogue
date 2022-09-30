@@ -10,10 +10,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
-import eu.einfracentral.service.AnalyticsService;
-import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -994,5 +991,15 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         if(pidSet.size() < pidList.size()){
             throw new ValidationException("EOSCIFGuidelines cannot have duplicate PIDs.");
         }
+    }
+
+    public ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId) {
+        ResourceBundle<?> resourceBundle;
+        try {
+            resourceBundle = get(id, catalogueId);
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
+        return resourceBundle;
     }
 }

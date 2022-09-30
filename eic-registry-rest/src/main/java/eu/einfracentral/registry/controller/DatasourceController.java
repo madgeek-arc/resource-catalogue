@@ -272,6 +272,20 @@ public class DatasourceController {
         }
     }
 
+    // Send emails to Providers whose Resources are outdated
+    @GetMapping(path = {"sendEmailForOutdatedResource/{resourceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public void sendEmailNotificationsToProvidersWithOutdatedResources(@PathVariable String resourceId, @ApiIgnore Authentication authentication) {
+        resourceBundleService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId, authentication);
+    }
+
+    // Move a Resource to another Provider
+    @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam String comment, @ApiIgnore Authentication authentication) {
+        resourceBundleService.changeProvider(resourceId, newProvider, comment, authentication);
+    }
+
     @GetMapping(path = "isDatasourceRegisteredOnOpenAIRE/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public boolean isDatasourceRegisteredOnOpenAIRE(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
