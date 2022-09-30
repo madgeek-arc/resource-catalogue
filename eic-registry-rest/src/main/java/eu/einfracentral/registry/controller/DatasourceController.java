@@ -100,7 +100,7 @@ public class DatasourceController {
 
     @ApiOperation(value = "Creates a new Datasource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #datasource)")
     public ResponseEntity<Datasource> addDatasource(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) {
         DatasourceBundle ret = this.resourceBundleService.addResource(new DatasourceBundle(datasource), auth);
         logger.info("User '{}' created a new Datasource with name '{}' and id '{}'", auth.getName(), datasource.getName(), datasource.getId());
@@ -108,7 +108,7 @@ public class DatasourceController {
     }
 
     @ApiOperation(value = "Updates the Datasource assigned the given id with the given Datasource, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#datasource)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> updateDatasource(@RequestBody Datasource datasource, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle ret = this.resourceBundleService.updateResource(new DatasourceBundle(datasource), comment, auth);
@@ -270,5 +270,11 @@ public class DatasourceController {
         } else {
             return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, allRequestParams, auditState, authentication));
         }
+    }
+
+    @GetMapping(path = "isDatasourceRegisteredOnOpenAIRE/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public boolean isDatasourceRegisteredOnOpenAIRE(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+        return resourceBundleService.isDatasourceRegisteredOnOpenAIRE(id);
     }
 }
