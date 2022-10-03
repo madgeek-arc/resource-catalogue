@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
@@ -312,13 +313,14 @@ public class ProviderController {
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @GetMapping(path = "services/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ServiceBundle>> getRejectedServices(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                     @ApiIgnore Authentication auth) {
+    @GetMapping(path = "resources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<ResourceBundle<?>>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                      @ApiIgnore Authentication auth) {
+        allRequestParams.add("resource_organisation", providerId);
+        allRequestParams.add("status", "rejected resource");
+        allRequestParams.add("published", "false");
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("status", "rejected resource");
-        return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
+        return ResponseEntity.ok(providerManager.getRejectedResources(ff, auth));
     }
 
     @ApiImplicitParams({

@@ -1,11 +1,10 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -36,16 +36,19 @@ public class CatalogueController {
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final JmsTemplate jmsTopicTemplate;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
-                        ResourceBundleService<DatasourceBundle> datasourceBundleService) {
+                        ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                        JmsTemplate jmsTopicTemplate) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
     //SECTION: CATALOGUE
@@ -146,7 +149,7 @@ public class CatalogueController {
     @PatchMapping(path = "verifyCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> verifyCatalogue(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                         @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
+                                                           @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         CatalogueBundle catalogue = catalogueManager.verifyCatalogue(id, status, active, auth);
         logger.info("User '{}' updated Catalogue with name '{}' [status: {}] [active: {}]", auth, catalogue.getCatalogue().getName(), status, active);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
@@ -156,7 +159,7 @@ public class CatalogueController {
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> publish(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                  @ApiIgnore Authentication auth) {
+                                                   @ApiIgnore Authentication auth) {
         CatalogueBundle catalogue = catalogueManager.publish(id, active, auth);
         logger.info("User '{}' updated Catalogue with name '{}' [status: {}] [active: {}]", auth, catalogue.getCatalogue().getName(), active);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
@@ -173,7 +176,7 @@ public class CatalogueController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
-                                                                        @RequestParam(required = false) Set<String> status) {
+                                                                          @RequestParam(required = false) Set<String> status) {
         FacetFilter ff = new FacetFilter();
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
@@ -195,8 +198,8 @@ public class CatalogueController {
         List<Map<String, Object>> records = catalogueManager.createQueryForCatalogueFilters(ff, orderDirection, orderField);
         List<CatalogueBundle> ret = new ArrayList<>();
         Paging<CatalogueBundle> retPaging = catalogueManager.getAll(ff, auth);
-        for (Map<String, Object> record : records){
-            for (Map.Entry<String, Object> entry : record.entrySet()){
+        for (Map<String, Object> record : records) {
+            for (Map.Entry<String, Object> entry : record.entrySet()) {
                 ret.add(catalogueManager.get((String) entry.getValue()));
             }
         }
@@ -217,41 +220,13 @@ public class CatalogueController {
     @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Catalogue> deleteCatalogue(@PathVariable("id") String id,
-                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        CatalogueBundle catalogueBundle = getCatalogueBundle(id, auth).getBody();
+                                                     @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        CatalogueBundle catalogueBundle = catalogueManager.get(id, auth);
         if (catalogueBundle == null) {
-            return new ResponseEntity<>(HttpStatus.GONE);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(5000);
-        // Get all Catalogue's Providers
-        List<ProviderBundle> allProviders = providerManager.getAll(ff, auth).getResults();
-        List<ProviderBundle> allCatalogueProviders = new ArrayList<>();
-        for (ProviderBundle providerBundle : allProviders){
-            if (providerBundle.getProvider().getCatalogueId().equals(id)){
-                allCatalogueProviders.add(providerBundle);
-            }
-        }
-        // Get all Catalogue's Services
-        List<ServiceBundle> allServices = resourceBundleService.getAll(ff, auth).getResults();
-        List<ServiceBundle> allCatalogueServices = new ArrayList<>();
-        for (ServiceBundle serviceBundle : allServices){
-            if (serviceBundle.getService().getCatalogueId().equals(id)){
-                allCatalogueServices.add(serviceBundle);
-            }
-        }
-        // Delete Catalogue along with all its related Resources
-        logger.info("Deleting all Catalogue's Providers...");
-        for (ProviderBundle providerBundle: allCatalogueProviders){
-            deleteCatalogueProvider(id, providerBundle.getId(), auth);
-        }
-        logger.info("Deleting all Catalogue's Services...");
-        for (ServiceBundle serviceBundle : allCatalogueServices){
-            deleteCatalogueService(id, serviceBundle.getId(), auth);
-        }
-        logger.info("Deleting Catalogue...");
         catalogueManager.delete(catalogueBundle);
-        logger.info("User '{}' deleted the Catalogue with id '{}' and name '{} along with all its related Providers and Services'",
+        logger.info("User '{}' deleted the Catalogue with id '{}' and name '{} along with all its related Resources'",
                 auth.getName(), catalogueBundle.getCatalogue().getId(), catalogueBundle.getCatalogue().getName());
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
@@ -261,13 +236,13 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> getCatalogueProvider(@PathVariable("catalogueId") String catalogueId, @PathVariable("providerId") String providerId, @ApiIgnore Authentication auth) {
         Provider provider = providerManager.get(catalogueId, providerId, auth).getProvider();
-        if (provider.getCatalogueId() == null){
+        if (provider.getCatalogueId() == null) {
             throw new ValidationException("Provider's catalogueId cannot be null");
         } else {
-            if (provider.getCatalogueId().equals(catalogueId)){
+            if (provider.getCatalogueId().equals(catalogueId)) {
                 return new ResponseEntity<>(provider, HttpStatus.OK);
-            } else{
-                throw new ValidationException(String.format("The Provider [%s] you requested does not belong to the specific Catalogue [%s]",  providerId, catalogueId));
+            } else {
+                throw new ValidationException(String.format("The Provider [%s] you requested does not belong to the specific Catalogue [%s]", providerId, catalogueId));
             }
         }
     }
@@ -296,7 +271,7 @@ public class CatalogueController {
             ff.setOrderBy(sort);
         }
         ff.setFilter(allRequestParams);
-        if (!catalogueId.equals("all")){
+        if (!catalogueId.equals("all")) {
             ff.addFilter("catalogue_id", catalogueId);
         }
         List<Provider> providerList = new LinkedList<>();
@@ -352,8 +327,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<Provider> deleteCatalogueProvider(@PathVariable("catalogueId") String catalogueId,
-                                           @PathVariable("id") String id,
-                                           @ApiIgnore Authentication auth) {
+                                                            @PathVariable("id") String id,
+                                                            @ApiIgnore Authentication auth) {
         ProviderBundle provider = providerManager.get(catalogueId, id, auth);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -368,13 +343,13 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Service> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
         Service resource = resourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getService();
-        if (resource.getCatalogueId() == null){
+        if (resource.getCatalogueId() == null) {
             throw new ValidationException("Service's catalogueId cannot be null");
         } else {
-            if (resource.getCatalogueId().equals(catalogueId)){
+            if (resource.getCatalogueId().equals(catalogueId)) {
                 return new ResponseEntity<>(resource, HttpStatus.OK);
-            } else{
-                throw new ValidationException(String.format("The Service [%s] you requested does not belong to the specific Catalogue [%s]",  resourceId, catalogueId));
+            } else {
+                throw new ValidationException(String.format("The Service [%s] you requested does not belong to the specific Catalogue [%s]", resourceId, catalogueId));
             }
         }
     }
@@ -409,8 +384,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
-                                           @PathVariable("id") String id,
-                                           @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                          @PathVariable("id") String id,
+                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle serviceBundle = resourceBundleService.get(id, catalogueId);
         if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -426,13 +401,13 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/datasource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Datasource> getCatalogueDatasource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
         Datasource datasource = datasourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getDatasource();
-        if (datasource.getCatalogueId() == null){
+        if (datasource.getCatalogueId() == null) {
             throw new ValidationException("Datasource's catalogueId cannot be null");
         } else {
-            if (datasource.getCatalogueId().equals(catalogueId)){
+            if (datasource.getCatalogueId().equals(catalogueId)) {
                 return new ResponseEntity<>(datasource, HttpStatus.OK);
-            } else{
-                throw new ValidationException(String.format("The Datasource [%s] you requested does not belong to the specific Catalogue [%s]",  resourceId, catalogueId));
+            } else {
+                throw new ValidationException(String.format("The Datasource [%s] you requested does not belong to the specific Catalogue [%s]", resourceId, catalogueId));
             }
         }
     }
@@ -467,8 +442,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/datasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<Datasource> deleteCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
-                                                          @PathVariable("id") String id,
-                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                @PathVariable("id") String id,
+                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);

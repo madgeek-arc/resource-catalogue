@@ -54,7 +54,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     private String catalogueName;
 
     public DatasourceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
-                                   IdCreator idCreator, @Lazy SecurityService securityService,
+                                   IdCreator idCreator,
+                                   @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService) {
@@ -83,7 +84,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #datasourceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle addResource(DatasourceBundle datasourceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null) { // add catalogue provider
+        if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
             checkCatalogueIdConsistency(datasourceBundle, catalogueId);
@@ -103,6 +104,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
         }
 
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
+        if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")){
+            checkOpenAIREIDExistance(datasourceBundle);
+        }
         try {
             datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
         } catch (NoSuchAlgorithmException e) {
@@ -166,7 +171,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     public DatasourceBundle updateResource(DatasourceBundle datasourceBundle, String catalogueId, String comment, Authentication auth) {
         DatasourceBundle ret;
 
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(datasourceBundle, catalogueId);
@@ -740,15 +745,15 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
     }
 
-    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) {
+    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String openaireDatasourceID) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("id", datasourceId);
+        ff.addFilter("id", openaireDatasourceID);
         String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
         if (datasource != null){
             JSONObject obj = new JSONObject(datasource);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
             if (arr != null && arr.length() == 0){
-                throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
+                throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
             } else{
                 JSONObject map = arr.getJSONObject(0);
                 Gson gson = new Gson();
@@ -756,21 +761,38 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                 return new ResponseEntity<>(transformOpenAIREToEOSCDatasource(jsonObj), HttpStatus.OK);
             }
         }
-        throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", datasourceId));
+        throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
     }
 
     public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
-        // remove specific eoscDatasourceTypes
-        String eoscDatasourceType = openaireDatasource.getAsJsonObject().get("eoscDatasourceType").getAsString();
-        if (eoscDatasourceType.equals("Journal archive") || eoscDatasourceType.equals("Publisher archive")){
-            return null;
-        }
         Datasource datasource = new Datasource();
         String id = openaireDatasource.getAsJsonObject().get("id").getAsString().replaceAll("\"", "");
         String name = openaireDatasource.getAsJsonObject().get("officialname").getAsString().replaceAll("\"", "");
         datasource.setId(id);
         datasource.setName(name);
         return datasource;
+    }
+
+    private String getOpenAIREDatasourceRegisterBy(String openaireDatasourceID) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("id", openaireDatasourceID);
+        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
+        String registerBy = null;
+        if (datasource != null){
+            JSONObject obj = new JSONObject(datasource);
+            JSONArray arr = obj.getJSONArray("datasourceInfo");
+            if (arr != null && arr.length() == 0){
+                throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
+            } else{
+                JSONObject map = arr.getJSONObject(0);
+                Gson gson = new Gson();
+                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                try{
+                    registerBy = jsonObj.getAsJsonObject().get("registeredby").getAsString();
+                }catch(UnsupportedOperationException e){}
+            }
+        }
+        return registerBy;
     }
 
     public Paging<DatasourceBundle> getAllForAdminWithAuditStates(FacetFilter ff, MultiValueMap<String, Object> allRequestParams, Set<String> auditState, Authentication auth){
@@ -880,5 +902,47 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             retPaging.setTo(0);
         }
         return retPaging;
+    }
+
+    public DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
+        Datasource datasource = getOpenAIREDatasourceById(datasourceBundle.getId()).getBody();
+        if (datasource != null){
+            Identifiers datasourceIdentifiers = new Identifiers();
+            List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
+            AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
+            alternativeIdentifier.setType("openaire");
+            alternativeIdentifier.setValue(datasourceBundle.getId());
+            datasourceAlternativeIdentifiers.add(alternativeIdentifier);
+            datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
+            datasourceBundle.setIdentifiers(datasourceIdentifiers);
+        } else{
+            throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource"));
+        }
+        return datasourceBundle;
+    }
+
+    public boolean isDatasourceRegisteredOnOpenAIRE(String eoscId){
+        DatasourceBundle datasourceBundle = get(eoscId);
+        boolean found = false;
+        String registerBy;
+        if (datasourceBundle != null){
+            Identifiers identifiers = datasourceBundle.getIdentifiers();
+            if (identifiers != null){
+                List<AlternativeIdentifier> alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
+                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()){
+                    for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers){
+                        if (alternativeIdentifier.getType().equals("openaire")){
+                            registerBy = getOpenAIREDatasourceRegisterBy(alternativeIdentifier.getValue());
+                            if(registerBy != null && !registerBy.equals("")){
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+        } else{
+            throw new ResourceNotFoundException(String.format("There is no Datasource with ID [%s]", eoscId));
+        }
+        return found;
     }
 }

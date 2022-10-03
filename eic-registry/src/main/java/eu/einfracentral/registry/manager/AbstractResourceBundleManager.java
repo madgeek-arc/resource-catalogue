@@ -10,10 +10,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
-import eu.einfracentral.service.AnalyticsService;
-import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -30,7 +27,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 
@@ -75,8 +71,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private SearchServiceEIC searchServiceEIC;
     @Autowired
     private IdCreator idCreator;
-    @Autowired
-    private JmsTemplate jmsTopicTemplate;
     private List<String> browseBy;
     private Map<String, String> labels;
     @Autowired
@@ -215,11 +209,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         created.setResourceType(resourceType);
 
         resourceService.addResource(created);
-        if (resourceBundle instanceof ServiceBundle){
-            jmsTopicTemplate.convertAndSend("resource.create", resourceBundle);
-        } else {
-            jmsTopicTemplate.convertAndSend("datasource.create", resourceBundle);
-        }
         synchronizerService.syncAdd(resourceBundle.getPayload());
 
         return resourceBundle;
@@ -245,11 +234,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         existing.setResourceType(resourceType);
 
         resourceService.updateResource(existing);
-        if (resourceBundle instanceof ServiceBundle){
-            jmsTopicTemplate.convertAndSend("resource.update", resourceBundle);
-        } else {
-            jmsTopicTemplate.convertAndSend("datasource.update", resourceBundle);
-        }
         synchronizerService.syncUpdate(resourceBundle.getPayload());
 
         return resourceBundle;
@@ -263,11 +247,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             throw new ServiceException("You cannot delete a null Resource or Resource with null id field");
         }
         resourceService.deleteResource(getResource(resourceBundle.getPayload().getId(), resourceBundle.getPayload().getCatalogueId()).getId());
-        if (resourceBundle instanceof ServiceBundle){
-            jmsTopicTemplate.convertAndSend("resource.delete", resourceBundle);
-        } else {
-            jmsTopicTemplate.convertAndSend("datasource.delete", resourceBundle);
-        }
         synchronizerService.syncDelete(resourceBundle.getPayload());
     }
 
@@ -1012,5 +991,15 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         if(pidSet.size() < pidList.size()){
             throw new ValidationException("EOSCIFGuidelines cannot have duplicate PIDs.");
         }
+    }
+
+    public ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId) {
+        ResourceBundle<?> resourceBundle;
+        try {
+            resourceBundle = get(id, catalogueId);
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
+        return resourceBundle;
     }
 }

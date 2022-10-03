@@ -3,6 +3,7 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.CatalogueBundle;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -55,4 +56,5 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      */
     Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging, int quantity, int from);
 
+    <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth);
 }

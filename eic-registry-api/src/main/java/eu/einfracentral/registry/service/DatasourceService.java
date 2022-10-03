@@ -18,4 +18,5 @@ public interface DatasourceService<T> extends ResourceBundleService<T>  {
 
     String createHttpRequest(String url, String data);
 
+    boolean isDatasourceRegisteredOnOpenAIRE(String eoscId);
 }

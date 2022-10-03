@@ -80,7 +80,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null) { // add catalogue provider
+        if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
             checkCatalogueIdConsistency(serviceBundle, catalogueId);
@@ -159,7 +159,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
         ServiceBundle ret;
 
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             serviceBundle.getService().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(serviceBundle, catalogueId);

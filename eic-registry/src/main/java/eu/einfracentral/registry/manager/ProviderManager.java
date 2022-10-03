@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
@@ -12,6 +13,7 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +25,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,7 +51,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final EventService eventService;
-    private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
@@ -68,11 +68,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Autowired
     public ProviderManager(@Lazy ResourceBundleService<ServiceBundle> resourceBundleService,
                            @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                           @Lazy SecurityService securityService,
-                           @Lazy FieldValidator fieldValidator,
-                           @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator, EventService eventService,
-                           JmsTemplate jmsTopicTemplate, VersionService versionService,
+                           @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
+                           @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
+                           EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
                            SynchronizerService<Provider> synchronizerServiceProvider,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService) {
@@ -84,7 +82,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.idCreator = idCreator;
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
-        this.jmsTopicTemplate = jmsTopicTemplate;
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
@@ -128,8 +125,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
-        jmsTopicTemplate.convertAndSend("provider.create", provider);
-
         synchronizerServiceProvider.syncAdd(provider.getProvider());
 
         return ret;
@@ -146,7 +141,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
 
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             provider.getProvider().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(provider, catalogueId);
@@ -198,8 +193,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
             }
         }
-
-        jmsTopicTemplate.convertAndSend("provider.update", provider);
 
         synchronizerServiceProvider.syncUpdate(provider.getProvider());
 
@@ -364,7 +357,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void delete(ProviderBundle provider) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getId(), authentication);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
         services.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {
@@ -374,7 +367,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 }
             }
         });
-        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getId(), authentication);
+        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
         datasources.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {
@@ -400,9 +393,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
 
-        jmsTopicTemplate.convertAndSend("provider.delete", provider);
+        Resource providerResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        resourceService.deleteResource(providerResource.getId());
+        logger.debug("Deleting Resource {}", providerResource);
 
-        super.delete(provider);
+        // TODO: move to aspect
         registrationMailService.notifyProviderAdmins(provider);
 
         synchronizerServiceProvider.syncDelete(provider.getProvider());
@@ -1093,7 +1088,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey()));
         provider.setLoggingInfo(loggingInfoList);
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             // set catalogueId = eosc
             provider.getProvider().setCatalogueId(catalogueName);
             provider.setActive(false);
@@ -1148,5 +1143,31 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!exists){
             addApprovedProviderToHLEVocabulary(providerBundle);
         }
+    }
+
+    public Paging<ResourceBundle<?>> getRejectedResources(FacetFilter ff, Authentication auth){
+        Browsing<ServiceBundle> providerRejectedServices = getResourceBundles(ff, resourceBundleService, auth);
+        Browsing<DatasourceBundle> providerRejectedDatasources = getResourceBundles(ff, datasourceBundleService, auth);
+        int total = providerRejectedServices.getTotal() + providerRejectedDatasources.getTotal();
+        int to = providerRejectedServices.getTo() + providerRejectedDatasources.getTo();
+        int from = providerRejectedServices.getFrom() + providerRejectedDatasources.getFrom();
+        List<Facet> allFacets = new ArrayList<>();
+        allFacets.addAll(providerRejectedServices.getFacets());
+        allFacets.addAll(providerRejectedDatasources.getFacets());
+        List<ResourceBundle<?>> providerRejectedResources = new ArrayList<>();
+        providerRejectedResources.addAll(providerRejectedServices.getResults());
+        providerRejectedResources.addAll(providerRejectedDatasources.getResults());
+        return new Paging<>(total, from, to, providerRejectedResources, allFacets);
+    }
+
+    private <T extends ResourceBundle<?>, I extends ResourceCRUDService<T, Authentication>> Browsing<T> getResourceBundles(FacetFilter ff, I service, Authentication auth) {
+        FacetFilter filter = new FacetFilter();
+        filter.setFrom(ff.getFrom());
+        filter.setQuantity(ff.getQuantity());
+        filter.setKeyword(ff.getKeyword());
+        filter.setFilter(ff.getFilter());
+        filter.setOrderBy(ff.getOrderBy());
+        // Get all Catalogue's Resources
+        return service.getAll(filter, auth);
     }
 }
