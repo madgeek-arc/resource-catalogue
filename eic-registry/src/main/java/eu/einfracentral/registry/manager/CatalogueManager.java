@@ -13,9 +13,11 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -42,13 +44,23 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
+    private final ProviderService<ProviderBundle, Authentication> providerManager;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final String columnsOfInterest = "catalogue_id, name, abbreviation, affiliations, tags, networks," +
             "scientific_subdomains, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
+
     @Autowired
     public CatalogueManager(IdCreator idCreator, JmsTemplate jmsTopicTemplate, DataSource dataSource,
+                            ProviderService<ProviderBundle, Authentication> providerManager,
+                            ResourceBundleService<ServiceBundle> serviceBundleService,
+                            ResourceBundleService<DatasourceBundle> datasourceBundleService,
                             @Lazy FieldValidator fieldValidator,
-                            @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                            @Lazy SecurityService securityService,
+                            @Lazy VocabularyService vocabularyService,
                             @Lazy RegistrationMailService registrationMailService) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
@@ -58,6 +70,9 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.fieldValidator = fieldValidator;
         this.dataSource = dataSource;
         this.registrationMailService = registrationMailService;
+        this.providerManager = providerManager;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
     }
 
     @Override
@@ -248,6 +263,31 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
+    public void delete(CatalogueBundle catalogueBundle) {
+        String id = catalogueBundle.getId();
+
+        // Block accidental deletion of main Catalogue
+        if (id.equals(catalogueName)){
+            throw new ValidationException(String.format("You cannot delete [%s] Catalogue.", catalogueName));
+        }
+
+        // Delete Catalogue along with all its related Resources
+        logger.info("Deleting all Catalogue's Providers...");
+        deleteCatalogueResources(id, providerManager, securityService.getAdminAccess());
+
+        logger.info("Deleting all Catalogue's Services...");
+        deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
+
+        logger.info("Deleting all Catalogue's Datasources...");
+        deleteCatalogueResources(id, datasourceBundleService, securityService.getAdminAccess());
+
+        logger.info("Deleting Catalogue...");
+        super.delete(catalogueBundle);
+
+        jmsTopicTemplate.convertAndSend("catalogue.delete", catalogueBundle);
+    }
+
+    @Override
     public List<CatalogueBundle> getMyCatalogues(Authentication auth) {
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
@@ -274,6 +314,23 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return getAll(ff, null).getResults();
+    }
+
+    @Override
+    public <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("catalogue_id", id);
+        // Get all Catalogue's Resources
+        List<T> allResources = service.getAll(ff, auth).getResults();
+        for (T resource : allResources){
+            try {
+                logger.info("Deleting resource: {}", resource);
+                service.delete(resource);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
     }
 
     private void addAuthenticatedUser(Object object, Authentication auth) {

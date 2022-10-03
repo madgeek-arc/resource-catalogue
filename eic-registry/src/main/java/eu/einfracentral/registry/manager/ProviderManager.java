@@ -356,7 +356,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void delete(ProviderBundle provider) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getId(), authentication);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
         services.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {
@@ -366,7 +366,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 }
             }
         });
-        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getId(), authentication);
+        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
         datasources.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {
@@ -392,7 +392,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
 
-        super.delete(provider);
+        Resource providerResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        resourceService.deleteResource(providerResource.getId());
+        logger.debug("Deleting Resource {}", providerResource);
+
+        // TODO: move to aspect
         registrationMailService.notifyProviderAdmins(provider);
 
         synchronizerServiceProvider.syncDelete(provider.getProvider());
