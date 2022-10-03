@@ -13,6 +13,7 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1144,18 +1145,29 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public Paging<ResourceBundle> getRejectedResources(FacetFilter ff1, FacetFilter ff2, Authentication auth){
-        Browsing<ServiceBundle> providerRejectedServices = resourceBundleService.getAll(ff1, auth);
-        Browsing<DatasourceBundle> providerRejectedDatasources = datasourceBundleService.getAll(ff2, auth);
+    public Paging<ResourceBundle<?>> getRejectedResources(FacetFilter ff, Authentication auth){
+        Browsing<ServiceBundle> providerRejectedServices = getResourceBundles(ff, resourceBundleService, auth);
+        Browsing<DatasourceBundle> providerRejectedDatasources = getResourceBundles(ff, datasourceBundleService, auth);
         int total = providerRejectedServices.getTotal() + providerRejectedDatasources.getTotal();
         int to = providerRejectedServices.getTo() + providerRejectedDatasources.getTo();
         int from = providerRejectedServices.getFrom() + providerRejectedDatasources.getFrom();
         List<Facet> allFacets = new ArrayList<>();
         allFacets.addAll(providerRejectedServices.getFacets());
         allFacets.addAll(providerRejectedDatasources.getFacets());
-        List<ResourceBundle> providerRejectedResources = new ArrayList<>();
+        List<ResourceBundle<?>> providerRejectedResources = new ArrayList<>();
         providerRejectedResources.addAll(providerRejectedServices.getResults());
         providerRejectedResources.addAll(providerRejectedDatasources.getResults());
         return new Paging<>(total, from, to, providerRejectedResources, allFacets);
+    }
+
+    private <T extends ResourceBundle<?>, I extends ResourceCRUDService<T, Authentication>> Browsing<T> getResourceBundles(FacetFilter ff, I service, Authentication auth) {
+        FacetFilter filter = new FacetFilter();
+        filter.setFrom(ff.getFrom());
+        filter.setQuantity(ff.getQuantity());
+        filter.setKeyword(ff.getKeyword());
+        filter.setFilter(ff.getFilter());
+        filter.setOrderBy(ff.getOrderBy());
+        // Get all Catalogue's Resources
+        return service.getAll(filter, auth);
     }
 }

@@ -314,13 +314,13 @@ public class ProviderController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "resources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ResourceBundle>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<ResourceBundle<?>>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                       @ApiIgnore Authentication auth) {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");
-        FacetFilter ff1 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        return ResponseEntity.ok(providerManager.getRejectedResources(ff1, ff2, auth));
+        allRequestParams.add("published", "false");
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        return ResponseEntity.ok(providerManager.getRejectedResources(ff, auth));
     }
 
     @ApiImplicitParams({

@@ -54,7 +54,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     private String catalogueName;
 
     public DatasourceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
-                                   IdCreator idCreator, @Lazy SecurityService securityService,
+                                   IdCreator idCreator,
+                                   @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService) {

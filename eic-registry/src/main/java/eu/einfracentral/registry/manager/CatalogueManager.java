@@ -55,9 +55,9 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     @Autowired
     public CatalogueManager(IdCreator idCreator, JmsTemplate jmsTopicTemplate, DataSource dataSource,
-                            ProviderService<ProviderBundle, Authentication> providerManager,
-                            ResourceBundleService<ServiceBundle> serviceBundleService,
-                            ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                            @Lazy ProviderService<ProviderBundle, Authentication> providerManager,
+                            @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
+                            @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
                             @Lazy FieldValidator fieldValidator,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
