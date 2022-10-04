@@ -114,6 +114,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new RuntimeException(e);
         }
         validate(datasourceBundle);
+        checkResourceProvidersAndRelatedRequiredResourcesConsistency(datasourceBundle);
 
         boolean active = providerBundle
                 .getTemplateStatus()
@@ -179,6 +180,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
         logger.trace("User '{}' is attempting to update the Datasource with id '{}' of the Catalogue '{}'", auth, datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
         validate(datasourceBundle);
+        checkResourceProvidersAndRelatedRequiredResourcesConsistency(datasourceBundle);
+
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
         DatasourceBundle existingDatasource;
 

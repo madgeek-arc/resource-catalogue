@@ -76,6 +76,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Adding Monitoring: {}", monitoring);
 
         registrationMailService.sendEmailsForMonitoringExtension(monitoring, "post");
+        logger.info("Sending JMS with topic 'monitoring.create'");
         jmsTopicTemplate.convertAndSend("monitoring.create", monitoring);
 
         return ret;
@@ -117,6 +118,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Updating Monitoring: {}", monitoring);
 
         registrationMailService.sendEmailsForMonitoringExtension(monitoring, "put");
+        logger.info("Sending JMS with topic 'monitoring.update'");
         jmsTopicTemplate.convertAndSend("monitoring.update", monitoring);
 
         return monitoring;
@@ -129,6 +131,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Deleting Monitoring: {}", monitoring);
 
         //TODO: send emails
+        logger.info("Sending JMS with topic 'monitoring.delete'");
         jmsTopicTemplate.convertAndSend("monitoring.delete", monitoring);
 
     }

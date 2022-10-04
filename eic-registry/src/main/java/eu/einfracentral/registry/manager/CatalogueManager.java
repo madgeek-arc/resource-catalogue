@@ -191,6 +191,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         registrationMailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
 
+        logger.info("Sending JMS with topic 'catalogue.create'");
         jmsTopicTemplate.convertAndSend("catalogue.create", catalogue);
 
 //        synchronizerServiceProvider.syncAdd(catalogue.getCatalogue());
@@ -237,7 +238,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(catalogue);
             }
         }
-
+        logger.info("Sending JMS with topic 'catalogue.update'");
         jmsTopicTemplate.convertAndSend("catalogue.update", catalogue);
 //
 //        synchronizerServiceProvider.syncUpdate(catalogue.getCatalogue());
@@ -284,6 +285,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         logger.info("Deleting Catalogue...");
         super.delete(catalogueBundle);
 
+        logger.info("Sending JMS with topic 'catalogue.delete'");
         jmsTopicTemplate.convertAndSend("catalogue.delete", catalogueBundle);
     }
 

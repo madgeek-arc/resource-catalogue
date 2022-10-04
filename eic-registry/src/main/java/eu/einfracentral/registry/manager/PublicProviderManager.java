@@ -71,6 +71,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);
+        logger.info("Sending JMS with topic 'provider.create'");
         jmsTopicTemplate.convertAndSend("provider.create", providerBundle);
         return ret;
     }
@@ -89,6 +90,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
         ret = super.update(ret, null);
+        logger.info("Sending JMS with topic 'provider.update'");
         jmsTopicTemplate.convertAndSend("provider.update", ret);
         return ret;
     }
@@ -99,6 +101,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             ProviderBundle publicProviderBundle = get(String.format("%s.%s",providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
             logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
             super.delete(publicProviderBundle);
+            logger.info("Sending JMS with topic 'provider.delete'");
             jmsTopicTemplate.convertAndSend("provider.delete", publicProviderBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }

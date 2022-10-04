@@ -182,13 +182,13 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public T add(T resourceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Resource: {}", auth, resourceBundle);
         if (resourceBundle.getPayload().getId() == null) {
-            if (resourceBundle.getPayload() instanceof Datasource){
+            if (resourceBundle.getPayload() instanceof Datasource) {
                 try {
                     resourceBundle.getPayload().setId(idCreator.createDatasourceId(resourceBundle));
                 } catch (NoSuchAlgorithmException e) {
                     throw new RuntimeException(e);
                 }
-            } else if (resourceBundle.getPayload() instanceof Service){
+            } else if (resourceBundle.getPayload() instanceof Service) {
                 resourceBundle.getPayload().setId(idCreator.createServiceId(resourceBundle));
             }
         }
@@ -250,13 +250,13 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         synchronizerService.syncDelete(resourceBundle.getPayload());
     }
 
-    public void checkCatalogueIdConsistency(T resourceBundle, String catalogueId){
+    public void checkCatalogueIdConsistency(T resourceBundle, String catalogueId) {
         catalogueService.existsOrElseThrow(catalogueId);
-        if (resourceBundle != null){
-            if (resourceBundle.getPayload().getCatalogueId() == null || resourceBundle.getPayload().getCatalogueId().equals("")){
+        if (resourceBundle != null) {
+            if (resourceBundle.getPayload().getCatalogueId() == null || resourceBundle.getPayload().getCatalogueId().equals("")) {
                 throw new ValidationException("Resource's 'catalogueId' cannot be null or empty");
-            } else{
-                if (!resourceBundle.getPayload().getCatalogueId().equals(catalogueId)){
+            } else {
+                if (!resourceBundle.getPayload().getCatalogueId().equals(catalogueId)) {
                     throw new ValidationException("Parameter 'catalogueId' and Resource's 'catalogueId' don't match");
                 }
             }
@@ -909,12 +909,12 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         T bundle = get(resourceId, catalogueId);
         blockUpdateIfResourceIsPublished(bundle);
         ResourceExtras resourceExtras = bundle.getResourceExtras();
-        if (resourceExtras == null){
+        if (resourceExtras == null) {
             ResourceExtras newResourceExtras = new ResourceExtras();
             List<EOSCIFGuidelines> newEOSCIFGuidelines = new ArrayList<>(eoscIFGuidelines);
             newResourceExtras.setEoscIFGuidelines(newEOSCIFGuidelines);
             bundle.setResourceExtras(newResourceExtras);
-        } else{
+        } else {
             bundle.getResourceExtras().setEoscIFGuidelines(eoscIFGuidelines);
         }
         // check PID consistency
@@ -927,24 +927,24 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return bundle;
     }
 
-    public ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth){
+    public ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth) {
         T bundle = get(resourceId, catalogueId);
         blockUpdateIfResourceIsPublished(bundle);
         ResourceExtras resourceExtras = bundle.getResourceExtras();
         List<String> newResearchCategories = new ArrayList<>();
-        if (resourceExtras == null){
+        if (resourceExtras == null) {
             ResourceExtras newResourceExtras = new ResourceExtras();
             newResearchCategories.addAll(researchCategories);
             newResourceExtras.setResearchCategories(newResearchCategories);
             bundle.setResourceExtras(newResourceExtras);
-        } else{
+        } else {
             List<String> oldResearchCategories = resourceExtras.getResearchCategories();
-            if (oldResearchCategories == null || oldResearchCategories.isEmpty()){
+            if (oldResearchCategories == null || oldResearchCategories.isEmpty()) {
                 newResearchCategories.addAll(researchCategories);
                 bundle.getResourceExtras().setResearchCategories(newResearchCategories);
-            } else{
-                for (String researchCategory : researchCategories){
-                    if (!oldResearchCategories.contains(researchCategory)){
+            } else {
+                for (String researchCategory : researchCategories) {
+                    if (!oldResearchCategories.contains(researchCategory)) {
                         oldResearchCategories.add(researchCategory);
                     }
                 }
@@ -958,15 +958,15 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return bundle;
     }
 
-    public ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth){
+    public ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth) {
         T bundle = get(resourceId, catalogueId);
         blockUpdateIfResourceIsPublished(bundle);
         ResourceExtras resourceExtras = bundle.getResourceExtras();
-        if (resourceExtras == null){
+        if (resourceExtras == null) {
             ResourceExtras newResourceExtras = new ResourceExtras();
             newResourceExtras.setHorizontalService(horizontalService);
             bundle.setResourceExtras(newResourceExtras);
-        } else{
+        } else {
             resourceExtras.setHorizontalService(horizontalService);
         }
         validate(bundle);
@@ -976,19 +976,19 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return bundle;
     }
 
-    private void blockUpdateIfResourceIsPublished(ResourceBundle<?> resourceBundle){ //FIXME: DOES NOT WORK AS INTENDED
-        if (resourceBundle.getMetadata().isPublished()){
+    private void blockUpdateIfResourceIsPublished(ResourceBundle<?> resourceBundle) { //FIXME: DOES NOT WORK AS INTENDED
+        if (resourceBundle.getMetadata().isPublished()) {
             throw new AccessDeniedException("You cannot directly update a Public Resource.");
         }
     }
 
-    private void checkEOSCIFGuidelinesPIDConsistency(ResourceBundle<?> resourceBundle){
+    private void checkEOSCIFGuidelinesPIDConsistency(ResourceBundle<?> resourceBundle) {
         List<String> pidList = new ArrayList<>();
-        for (EOSCIFGuidelines eoscIFGuideline : resourceBundle.getResourceExtras().getEoscIFGuidelines()){
+        for (EOSCIFGuidelines eoscIFGuideline : resourceBundle.getResourceExtras().getEoscIFGuidelines()) {
             pidList.add(eoscIFGuideline.getPid());
         }
         Set<String> pidSet = new HashSet<>(pidList);
-        if(pidSet.size() < pidList.size()){
+        if (pidSet.size() < pidList.size()) {
             throw new ValidationException("EOSCIFGuidelines cannot have duplicate PIDs.");
         }
     }
@@ -1002,4 +1002,34 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         }
         return resourceBundle;
     }
+
+    public void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
+        List<String> resourceProviders = resourceBundle.getPayload().getResourceProviders();
+        if (resourceProviders != null && !resourceProviders.isEmpty()) {
+            for (String resourceProvider : resourceProviders) {
+                if (!resourceProvider.contains(".")) { // user did not give a Public Provider ID
+                    try {
+                        providerService.get(resourceBundle.getPayload().getCatalogueId(), resourceProvider, null); // Resource Provider belongs to the same Catalogue
+                    } catch (ResourceNotFoundException e) {
+                        throw new ValidationException(String.format("You cannot have a Resource Provider that belongs to a different Catalogue -> [%s]", resourceProvider));
+                    }
+                }
+            }
+        }
+        List<String> relatedRequiredResources = resourceBundle.getPayload().getRelatedResources();
+        relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
+        if (!relatedRequiredResources.isEmpty()){
+            for (String relatedRequiredResource : relatedRequiredResources){
+                int count = relatedRequiredResource.length() - relatedRequiredResource.replaceAll("\\.","").length();
+                if (count <= 1){ // user did not give a Public Provider ID
+                    try{
+                        get(relatedRequiredResource, resourceBundle.getPayload().getCatalogueId()); // Related/Required Resource belongs to the same Catalogue
+                    } catch (ResourceNotFoundException e){
+                        throw new ValidationException(String.format("You cannot have a Related or Required Resource that belongs to a different Catalogue -> [%s]", relatedRequiredResource));
+                    }
+                }
+            }
+        }
+    }
+
 }
