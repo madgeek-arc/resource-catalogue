@@ -282,5 +282,4 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
 
     ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId);
 
-    void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle);
 }

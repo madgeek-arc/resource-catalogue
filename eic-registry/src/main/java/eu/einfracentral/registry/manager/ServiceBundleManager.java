@@ -102,7 +102,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         validate(serviceBundle);
-        checkResourceProvidersAndRelatedRequiredResourcesConsistency(serviceBundle);
 
         boolean active = providerBundle
                 .getTemplateStatus()
@@ -168,7 +167,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         validate(serviceBundle);
-        checkResourceProvidersAndRelatedRequiredResourcesConsistency(serviceBundle);
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         ServiceBundle existingService;

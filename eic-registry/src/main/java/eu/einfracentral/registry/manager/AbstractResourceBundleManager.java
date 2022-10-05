@@ -277,6 +277,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
         validateCategories(service.getCategories());
         validateScientificDomains(service.getScientificDomains());
+        checkResourceProvidersAndRelatedRequiredResourcesConsistency(resourceBundle);
 
         return true;
     }
@@ -1003,7 +1004,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return resourceBundle;
     }
 
-    public void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
+    // FIXME: refactor method
+    protected void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
         List<String> resourceProviders = resourceBundle.getPayload().getResourceProviders();
         if (resourceProviders != null && !resourceProviders.isEmpty()) {
             for (String resourceProvider : resourceProviders) {
