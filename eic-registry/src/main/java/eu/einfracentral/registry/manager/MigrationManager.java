@@ -63,6 +63,7 @@ public class MigrationManager implements MigrationService {
             publicResource.setPayload(providerService.serialize(publicProviderBundle));
             logger.info("Migrating Public Provider: {} from Catalogue: {} to Catalogue: {}", publicProviderBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(publicResource);
+            logger.info("Sending JMS with topic 'provider.update'");
             jmsTopicTemplate.convertAndSend("provider.update", publicProviderBundle);
         } catch (RuntimeException e) {
             logger.error("Error migrating Public Provider", e);
@@ -95,6 +96,7 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Service: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
+                logger.info("Sending JMS with topic 'service.update'");
                 jmsTopicTemplate.convertAndSend(jmsTopic, serviceBundle);
             }
         }
@@ -120,6 +122,7 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Datasource: {} of Catalogue: {} to Catalogue: {}", datasourceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
+                logger.info("Sending JMS with topic 'datasource.update'");
                 jmsTopicTemplate.convertAndSend(jmsTopic, datasourceBundle);
             }
         }

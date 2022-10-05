@@ -281,4 +281,5 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth);
 
     ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId);
+
 }

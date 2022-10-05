@@ -316,7 +316,7 @@ public class FieldValidator {
                     throw new ValidationException(
                             String.format("Field '%s' should contain the ID of an existing Datasource",
                                     field.getName()));
-                }
+                    }
                 } catch (ResourceException | ResourceNotFoundException e) {
                     throw new ValidationException(
                             String.format("%s with ID '%s' does not exist. Found in field '%s'",

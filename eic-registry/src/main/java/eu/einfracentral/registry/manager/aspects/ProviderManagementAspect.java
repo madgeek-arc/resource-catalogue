@@ -159,6 +159,7 @@ public class ProviderManagementAspect {
     public void updatePublicProvider(ProviderBundle providerBundle) {
         try{
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+            delayExecution();
             publicProviderManager.update(providerBundle, null);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
@@ -176,6 +177,7 @@ public class ProviderManagementAspect {
             throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
                     providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         }
+        delayExecution();
         publicProviderManager.update(providerBundle, null);
     }
 
@@ -191,6 +193,7 @@ public class ProviderManagementAspect {
             throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
                     providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         }
+        delayExecution();
         publicProviderManager.update(providerBundle, null);
     }
 
@@ -254,6 +257,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(ServiceBundle serviceBundle) {
         try{
             publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+            delayExecution();
             publicServiceManager.update(serviceBundle, null);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
@@ -269,6 +273,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(DatasourceBundle datasourceBundle) {
         try{
             publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
+            delayExecution();
             publicDatasourceManager.update(datasourceBundle, null);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }

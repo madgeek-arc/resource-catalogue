@@ -167,6 +167,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         validate(serviceBundle);
+
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         ServiceBundle existingService;
 

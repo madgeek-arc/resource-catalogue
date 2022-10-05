@@ -20,9 +20,10 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class PublicServiceManager extends ResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
+public class PublicServiceManager extends AbstractPublicResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicServiceManager.class);
     private final JmsTemplate jmsTopicTemplate;
@@ -67,10 +68,15 @@ public class PublicServiceManager extends ResourceManager<ServiceBundle> impleme
         String lowerLevelResourceId = serviceBundle.getId();
         serviceBundle.setIdentifiers(Identifiers.createIdentifier(serviceBundle.getId()));
         serviceBundle.setId(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+
+        // sets public ids to resource organisation, resource providers and related/required resources
+        updateResourceIdsToPublic(serviceBundle);
+
         serviceBundle.getMetadata().setPublished(true);
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
         ret = super.add(serviceBundle, null);
+        logger.info("Sending JMS with topic 'service.create'");
         jmsTopicTemplate.convertAndSend("service.create", serviceBundle);
         return ret;
     }
@@ -84,11 +90,16 @@ public class PublicServiceManager extends ResourceManager<ServiceBundle> impleme
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        // sets public ids to resource organisation, resource providers and related/required resources
+        updateResourceIdsToPublic(ret);
+
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Service with id [%s]", ret.getId()));
         ret = super.update(ret, null);
+        logger.info("Sending JMS with topic 'service.update'");
         jmsTopicTemplate.convertAndSend("service.update", ret);
         return ret;
     }
@@ -99,6 +110,7 @@ public class PublicServiceManager extends ResourceManager<ServiceBundle> impleme
             ServiceBundle publicServiceBundle = get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             logger.info(String.format("Deleting public Service with id [%s]", publicServiceBundle.getId()));
             super.delete(publicServiceBundle);
+            logger.info("Sending JMS with topic 'service.delete'");
             jmsTopicTemplate.convertAndSend("service.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
