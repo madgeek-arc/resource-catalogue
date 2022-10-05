@@ -315,12 +315,12 @@ public class ProviderController {
     })
     @GetMapping(path = "resources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ResourceBundle<?>>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                      @ApiIgnore Authentication auth) {
+                                                                          @RequestParam String resourceType, @ApiIgnore Authentication auth) {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");
         allRequestParams.add("published", "false");
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        return ResponseEntity.ok(providerManager.getRejectedResources(ff, auth));
+        return ResponseEntity.ok(providerManager.getRejectedResources(ff, resourceType, auth));
     }
 
     @ApiImplicitParams({

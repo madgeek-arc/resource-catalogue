@@ -30,14 +30,10 @@ public class ResourceBundleController {
 
     // Get the Provider's Template (status = "pending provider" or "rejected provider")
     @GetMapping(path = {"templates"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResourceBundle<?> getProviderTemplate(@RequestParam String id, @RequestParam String resourceType, @ApiIgnore Authentication auth) {
-        ResourceBundle<?> template;
-        if (resourceType.equals("service")){
-            template = serviceBundleService.getResourceTemplate(id, auth);
-        } else if (resourceType.equals("datasource")){
+    public ResourceBundle<?> getProviderTemplate(@RequestParam String id, @ApiIgnore Authentication auth) {
+        ResourceBundle<?> template = serviceBundleService.getResourceTemplate(id, auth);
+        if (template == null) {
             template = datasourceBundleService.getResourceTemplate(id, auth);
-        } else {
-            template = null;
         }
         return template;
     }
