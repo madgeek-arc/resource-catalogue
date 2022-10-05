@@ -1160,7 +1160,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return new Paging<>(total, from, to, providerRejectedResources, allFacets);
     }
 
-    private <T extends ResourceBundle<?>, I extends ResourceCRUDService<T, Authentication>> Browsing<T> getResourceBundles(FacetFilter ff, I service, Authentication auth) {
+    private <T extends Bundle<?>, I extends ResourceCRUDService<T, Authentication>> Browsing<T> getResourceBundles(FacetFilter ff, I service, Authentication auth) {
         FacetFilter filter = new FacetFilter();
         filter.setFrom(ff.getFrom());
         filter.setQuantity(ff.getQuantity());
