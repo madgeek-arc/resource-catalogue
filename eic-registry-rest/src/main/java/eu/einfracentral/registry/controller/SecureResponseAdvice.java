@@ -90,7 +90,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyService(T service, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((Service) service).getId(), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((Service) service).getId(), ((Service) service).getCatalogueId())) {
             ((Service) service).setMainContact(null);
             ((Service) service).setSecurityContactEmail(null);
         }
@@ -103,7 +103,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceProviderAdmin(auth, ((ServiceBundle) serviceBundle).getId(), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((ServiceBundle) serviceBundle).getId(), ((ResourceBundle<?>) serviceBundle).getPayload().getCatalogueId())) {
             ((ServiceBundle) serviceBundle).getService().setMainContact(null);
             ((ServiceBundle) serviceBundle).getService().setSecurityContactEmail(null);
             ((ServiceBundle) serviceBundle).getMetadata().setTerms(null);
@@ -111,7 +111,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyDatasource(T datasource, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((Datasource) datasource).getId(), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((Datasource) datasource).getId(), ((Datasource) datasource).getCatalogueId())) {
             ((Datasource) datasource).setMainContact(null);
             ((Datasource) datasource).setSecurityContactEmail(null);
         }
@@ -124,7 +124,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceProviderAdmin(auth, ((DatasourceBundle) datasourceBundle).getId(), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((DatasourceBundle) datasourceBundle).getId(), ((ResourceBundle<?>) datasourceBundle).getPayload().getCatalogueId())) {
             ((DatasourceBundle) datasourceBundle).getDatasource().setMainContact(null);
             ((DatasourceBundle) datasourceBundle).getDatasource().setSecurityContactEmail(null);
             ((DatasourceBundle) datasourceBundle).getMetadata().setTerms(null);
@@ -132,7 +132,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyRichService(T richService, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richService).getService().getId(), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richService).getService().getId(), ((RichResource) richService).getService().getCatalogueId())) {
             ((RichResource) richService).getService().setMainContact(null);
             ((RichResource) richService).getService().setSecurityContactEmail(null);
             ((RichResource) richService).getMetadata().setTerms(null);
@@ -140,7 +140,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyProvider(T provider, Authentication auth) {
-        if(!this.securityService.isProviderAdmin(auth, ((Provider) provider).getId(), true)) {
+        if(!this.securityService.isProviderAdmin(auth, ((Provider) provider).getId(), ((Provider) provider).getCatalogueId())) {
             ((Provider) provider).setMainContact(null);
             ((Provider) provider).setUsers(null);
         }
@@ -153,7 +153,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestOnboardingInfo());
 
-        if(!this.securityService.isProviderAdmin(auth, ((ProviderBundle) bundle).getId(), true)) {
+        if(!this.securityService.isProviderAdmin(auth, ((ProviderBundle) bundle).getId(), ((Bundle<Provider>) bundle).getPayload().getCatalogueId())) {
             ((ProviderBundle) bundle).getProvider().setMainContact(null);
             ((ProviderBundle) bundle).getProvider().setUsers(null);
             ((ProviderBundle) bundle).getMetadata().setTerms(null);

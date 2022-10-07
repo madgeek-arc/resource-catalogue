@@ -58,7 +58,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         List<DatasourceBundle> datasourceBundleList = new ArrayList<>();
         Browsing<DatasourceBundle> datasourceBundleBrowsing = super.getAll(facetFilter, authentication);
         for (DatasourceBundle datasourceBundle : datasourceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, datasourceBundle.getId()) && datasourceBundle.getMetadata().isPublished()) {
+            if (securityService.isResourceProviderAdmin(authentication, datasourceBundle.getId(), datasourceBundle.getPayload().getCatalogueId()) && datasourceBundle.getMetadata().isPublished()) {
                 datasourceBundleList.add(datasourceBundle);
             }
         }

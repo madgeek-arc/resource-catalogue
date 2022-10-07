@@ -232,7 +232,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerId)) {
+                    securityService.userIsProviderAdmin(user, providerBundle)) {
                 return providerBundle;
             }
         }
@@ -251,7 +251,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, id)) {
+                    securityService.userIsProviderAdmin(user, providerBundle)) {
                 return providerBundle;
             }
         }
@@ -325,7 +325,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
             for (ProviderBundle providerBundle : providers.getResults()){
                 if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
-                securityService.userIsProviderAdmin(user, providerBundle.getId())) {
+                securityService.userIsProviderAdmin(user, providerBundle)) {
                     retList.add(providerBundle);
                 }
             }
@@ -440,9 +440,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 provider.setLatestOnboardingInfo(loggingInfo);
 
                 // add Provider's Name as a HLE Vocabulary
-                if (provider.getProvider().isLegalEntity()){
-                    addApprovedProviderToHLEVocabulary(provider);
-                }
+                checkAndAddProviderToHLEVocabulary(provider);
                 break;
             case "rejected provider":
                 provider.setActive(false);
@@ -561,7 +559,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
-                    if (securityService.userIsProviderAdmin(user, p.getId())) {
+                    if (securityService.userIsProviderAdmin(user, p)) {
                         return p;
                     } else return null;
                 })
@@ -1131,17 +1129,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle){
-        boolean exists = false;
-        if (providerBundle.getProvider().isLegalEntity()){
-            List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
-            for (Vocabulary voc : allHLE){
-                if (voc.getId().equals("provider_hosting_legal_entity-" + providerBundle.getProvider().getId())){
-                    exists = true;
-                }
-            }
+        List<String> allHLEIDs = new ArrayList<>();
+        List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        for (Vocabulary voc : allHLE){
+            allHLEIDs.add(voc.getId());
         }
-        if (!exists){
-            addApprovedProviderToHLEVocabulary(providerBundle);
+        if (providerBundle.getProvider().isLegalEntity()){
+            if (!allHLEIDs.contains("provider_hosting_legal_entity-" + providerBundle.getProvider().getId())){
+                addApprovedProviderToHLEVocabulary(providerBundle);
+            }
         }
     }
 

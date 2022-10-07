@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -74,11 +75,11 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
     public ResponseEntity<Paging<DatasourceBundle>> getProviderPendingDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", id);
-        return new ResponseEntity<>(pendingDatasourceManager.getAll(ff, null), HttpStatus.OK);
+        return new ResponseEntity<>(pendingDatasourceManager.getAll(ff, auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/addDatasource", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -109,7 +110,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
     }
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource)")
+    @PostAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, returnObject.body)")
     public ResponseEntity<Datasource> temporarySavePending(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws NoSuchAlgorithmException {
         DatasourceBundle datasourceBundle = new DatasourceBundle();
         DatasourceBundle toCreateId = new DatasourceBundle();
@@ -158,7 +159,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
             datasourceBundle = resourceBundleService.addResource(new DatasourceBundle(datasource), auth);
             logger.info("User '{}' added Datasource:\n{}", auth.getName(), datasourceBundle);
         } else { // else update Pending Datasource and transform it to Active Datasource
-            if (datasourceBundle.getDatasource().getVersion().equals("")){
+            if (datasourceBundle.getDatasource().getVersion() != null && datasourceBundle.getDatasource().getVersion().equals("")){
                 datasourceBundle.getDatasource().setVersion(null);
             }
             datasourceBundle.setDatasource(datasource); // important to keep other fields of DatasourceBundle

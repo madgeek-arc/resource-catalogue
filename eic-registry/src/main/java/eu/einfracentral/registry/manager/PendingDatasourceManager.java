@@ -210,7 +210,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     public Resource getPendingResourceViaServiceId(String datasourceId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("datasource_id = \"%s\" AND catalogue_id = \"%s\"", datasourceId, catalogueName),
+                .cqlQuery(String.format("pending_datasource_id = \"%s\" AND catalogue_id = \"%s\"", datasourceId, catalogueName),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);

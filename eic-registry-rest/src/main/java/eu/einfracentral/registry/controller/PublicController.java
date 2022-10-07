@@ -68,7 +68,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, id)) {
+                    || securityService.userIsProviderAdmin(user, providerBundle)) {
                 if (providerBundle.getMetadata().isPublished()){
                     return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
                 } else{
@@ -85,7 +85,7 @@ public class PublicController {
 
 //    @ApiOperation(value = "Returns the Public Provider bundle with the given id.")
     @GetMapping(path = "/provider/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicProviderBundle(@PathVariable("id") String id,
                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                      @ApiIgnore Authentication auth) {
@@ -93,7 +93,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, id)) {
+                    || securityService.userIsProviderAdmin(user, providerBundle)) {
                 if (providerBundle.getMetadata().isPublished()){
                     return new ResponseEntity<>(providerBundle, HttpStatus.OK);
                 } else{
@@ -218,7 +218,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id)) {
+                    || securityService.userIsResourceProviderAdmin(user, id, serviceBundle.getPayload().getCatalogueId())) {
                 if (serviceBundle.getMetadata().isPublished()){
                     return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
                 } else{
@@ -235,7 +235,7 @@ public class PublicController {
 
     //    @ApiOperation(value = "Returns the Public ServiceBundle with the given id.")
     @GetMapping(path = "/resource/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicServiceBundle(@PathVariable("id") String id,
                                                     @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                     @ApiIgnore Authentication auth) {
@@ -243,7 +243,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id)) {
+                    || securityService.userIsResourceProviderAdmin(user, id, serviceBundle.getPayload().getCatalogueId())) {
                 if (serviceBundle.getMetadata().isPublished()){
                     return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
                 } else{
@@ -368,7 +368,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id)) {
+                    || securityService.userIsResourceProviderAdmin(user, id, datasourceBundle.getPayload().getCatalogueId())) {
                 if (datasourceBundle.getMetadata().isPublished()){
                     return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
                 } else{
@@ -384,7 +384,7 @@ public class PublicController {
     }
 
     @GetMapping(path = "/datasource/datasourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicDatasourceBundles(@PathVariable("id") String id,
                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
@@ -392,7 +392,7 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id)) {
+                    || securityService.userIsResourceProviderAdmin(user, id, datasourceBundle.getPayload().getCatalogueId())) {
                 if (datasourceBundle.getMetadata().isPublished()){
                     return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
                 } else{
