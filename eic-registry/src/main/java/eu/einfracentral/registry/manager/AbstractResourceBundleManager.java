@@ -115,6 +115,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
     }
 
+    protected abstract void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle);
+
     @Override
     public String getResourceType() {
         return resourceType.getName();
@@ -1146,36 +1148,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             return null;
         }
         return resourceBundle;
-    }
-
-    // FIXME: refactor method
-    protected void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
-        List<String> resourceProviders = resourceBundle.getPayload().getResourceProviders();
-        if (resourceProviders != null && !resourceProviders.isEmpty()) {
-            for (String resourceProvider : resourceProviders) {
-                if (!resourceProvider.contains(".")) { // user did not give a Public Provider ID
-                    try {
-                        providerService.get(resourceBundle.getPayload().getCatalogueId(), resourceProvider, null); // Resource Provider belongs to the same Catalogue
-                    } catch (ResourceNotFoundException e) {
-                        throw new ValidationException(String.format("You cannot have a Resource Provider that belongs to a different Catalogue -> [%s]", resourceProvider));
-                    }
-                }
-            }
-        }
-        List<String> relatedRequiredResources = resourceBundle.getPayload().getRelatedResources();
-        relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
-        if (!relatedRequiredResources.isEmpty()){
-            for (String relatedRequiredResource : relatedRequiredResources){
-                int count = relatedRequiredResource.length() - relatedRequiredResource.replaceAll("\\.","").length();
-                if (count <= 1){ // user did not give a Public Provider ID
-                    try{
-                        get(relatedRequiredResource, resourceBundle.getPayload().getCatalogueId()); // Related/Required Resource belongs to the same Catalogue
-                    } catch (ResourceNotFoundException e){
-                        throw new ValidationException(String.format("You cannot have a Related or Required Resource that belongs to a different Catalogue -> [%s]", relatedRequiredResource));
-                    }
-                }
-            }
-        }
     }
 
 }

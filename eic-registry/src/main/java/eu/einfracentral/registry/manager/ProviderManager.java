@@ -393,15 +393,19 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
 
-        Resource providerResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
-        resourceService.deleteResource(providerResource.getId());
-        logger.debug("Deleting Resource {}", providerResource);
+        deleteBundle(provider);
+        logger.debug("Deleting Resource {}", provider);
 
         // TODO: move to aspect
         registrationMailService.notifyProviderAdmins(provider);
 
         synchronizerServiceProvider.syncDelete(provider.getProvider());
 
+    }
+
+    private void deleteBundle(ProviderBundle providerBundle) {
+        logger.info("Deleting Provider: {}", providerBundle);
+        super.delete(providerBundle);
     }
 
     @Override
