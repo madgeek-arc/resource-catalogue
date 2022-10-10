@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -49,6 +50,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -58,7 +60,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                                    @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
-                                   CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+                                   CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                   ResourceBundleService<ServiceBundle> resourceBundleService) {
         super(DatasourceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -66,6 +69,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
+        this.resourceBundleService = resourceBundleService;
     }
 
     @Override
@@ -580,6 +584,36 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, null).getResults();
+    }
+
+    // FIXME: refactor method
+    protected void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
+        List<String> resourceProviders = resourceBundle.getPayload().getResourceProviders();
+        if (resourceProviders != null && !resourceProviders.isEmpty()) {
+            for (String resourceProvider : resourceProviders) {
+                if (!resourceProvider.contains(".")) { // user did not give a Public Provider ID
+                    try {
+                        providerService.get(resourceBundle.getPayload().getCatalogueId(), resourceProvider, null); // Resource Provider belongs to the same Catalogue
+                    } catch (ResourceNotFoundException e) {
+                        throw new ValidationException(String.format("You cannot have a Resource Provider that belongs to a different Catalogue -> [%s]", resourceProvider));
+                    }
+                }
+            }
+        }
+        List<String> relatedRequiredResources = resourceBundle.getPayload().getRelatedResources();
+        relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
+        if (!relatedRequiredResources.isEmpty()){
+            for (String relatedRequiredResource : relatedRequiredResources){
+                int count = relatedRequiredResource.length() - relatedRequiredResource.replaceAll("\\.","").length();
+                if (count <= 1){ // user did not give a Public Resource ID
+                    try{
+                        resourceBundleService.get(relatedRequiredResource, resourceBundle.getPayload().getCatalogueId()); // Related/Required Resource belongs to the same Catalogue
+                    } catch (ResourceNotFoundException e){
+                        throw new ValidationException(String.format("You cannot have a Related or Required Resource that belongs to a different Catalogue -> [%s]", relatedRequiredResource));
+                    }
+                }
+            }
+        }
     }
 
     //    @Override

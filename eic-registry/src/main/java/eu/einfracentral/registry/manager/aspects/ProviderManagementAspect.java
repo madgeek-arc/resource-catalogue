@@ -198,10 +198,9 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ProviderManager." +
-            "delete(org.springframework.security.core.Authentication, eu.einfracentral.domain.ProviderBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.ProviderManager.delete(eu.einfracentral.domain.ProviderBundle)))")
     public void deletePublicProvider(JoinPoint joinPoint) {
-        ProviderBundle providerBundle = (ProviderBundle) joinPoint.getArgs()[1];
+        ProviderBundle providerBundle = (ProviderBundle) joinPoint.getArgs()[0];
         publicProviderManager.delete(providerBundle);
     }
 
