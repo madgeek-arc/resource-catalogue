@@ -474,38 +474,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return super.update(resource, auth);
     }
 
-    public Paging<DatasourceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(1000);
-        facetFilter.addFilter("active", true);
-        Browsing<DatasourceBundle> serviceBrowsing = getAll(facetFilter, auth);
-        Browsing<DatasourceBundle> ret = serviceBrowsing;
-        long todayEpochTime = System.currentTimeMillis();
-        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (DatasourceBundle datasourceBundle : serviceBrowsing.getResults()) {
-            if (datasourceBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(datasourceBundle.getLatestAuditInfo().getDate()) > interval) {
-                    int index = 0;
-                    for (int i=0; i<serviceBrowsing.getResults().size(); i++){
-                        if (serviceBrowsing.getResults().get(i).getDatasource().getId().equals(datasourceBundle.getDatasource().getId())){
-                            index = i;
-                            break;
-                        }
-                    }
-                    ret.getResults().remove(index);
-                }
-            }
-        }
-        Collections.shuffle(ret.getResults());
-        for (int i = ret.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
-            ret.getResults().remove(i);
-        }
-        ret.setFrom(ff.getFrom());
-        ret.setTo(ret.getResults().size());
-        ret.setTotal(ret.getResults().size());
-        return ret;
-    }
-
     @Override
     public List<DatasourceBundle> getResourceBundles(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
@@ -626,10 +594,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = datasourceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
-        if (comment == null || comment == ""){
+        if (comment == null || "".equals(comment)) {
             loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
-        } else{
+        } else {
             loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
         }
@@ -746,20 +714,22 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
     }
 
-    public ResponseEntity<Datasource> getOpenAIREDatasourceById(String openaireDatasourceID) {
+    public Datasource getOpenAIREDatasourceById(String openaireDatasourceID) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", openaireDatasourceID);
         String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
         if (datasource != null){
             JSONObject obj = new JSONObject(datasource);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
-            if (arr != null && arr.length() == 0){
-                throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
-            } else{
-                JSONObject map = arr.getJSONObject(0);
-                Gson gson = new Gson();
-                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                return new ResponseEntity<>(transformOpenAIREToEOSCDatasource(jsonObj), HttpStatus.OK);
+            if (arr != null) {
+                if (arr.length() == 0) {
+                    throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
+                } else {
+                    JSONObject map = arr.getJSONObject(0);
+                    Gson gson = new Gson();
+                    JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                    return transformOpenAIREToEOSCDatasource(jsonObj);
+                }
             }
         }
         throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
@@ -782,131 +752,26 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         if (datasource != null){
             JSONObject obj = new JSONObject(datasource);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
-            if (arr != null && arr.length() == 0){
-                throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
-            } else{
-                JSONObject map = arr.getJSONObject(0);
-                Gson gson = new Gson();
-                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                try{
-                    registerBy = jsonObj.getAsJsonObject().get("registeredby").getAsString();
-                }catch(UnsupportedOperationException e){}
+            if (arr != null) {
+                if (arr.length() == 0) {
+                    throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
+                } else {
+                    JSONObject map = arr.getJSONObject(0);
+                    Gson gson = new Gson();
+                    JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                    try {
+                        registerBy = jsonObj.getAsJsonObject().get("registeredby").getAsString();
+                    } catch (UnsupportedOperationException e) {
+                        logger.error(e);
+                    }
+                }
             }
         }
         return registerBy;
     }
 
-    public Paging<DatasourceBundle> getAllForAdminWithAuditStates(FacetFilter ff, MultiValueMap<String, Object> allRequestParams, Set<String> auditState, Authentication auth){
-        List<DatasourceBundle> valid = new ArrayList<>();
-        List<DatasourceBundle> notAudited = new ArrayList<>();
-        List<DatasourceBundle> invalidAndUpdated = new ArrayList<>();
-        List<DatasourceBundle> invalidAndNotUpdated = new ArrayList<>();
-
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
-        allRequestParams.remove("auditState");
-        FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff2.setQuantity(1000);
-        ff2.setFrom(0);
-        Paging<DatasourceBundle> retPaging = getAllForAdmin(ff, auth);
-        List<DatasourceBundle> allWithoutAuditFilterList =  getAllForAdmin(ff2, auth).getResults();
-        List<DatasourceBundle> ret = new ArrayList<>();
-        for (DatasourceBundle datasourceBundle : allWithoutAuditFilterList) {
-            String auditVocStatus;
-            try{
-                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(datasourceBundle.getLoggingInfo());
-            } catch (NullPointerException e){ // datasourceBundle has null loggingInfo
-                continue;
-            }
-            switch (auditVocStatus) {
-                case "Valid and updated":
-                case "Valid and not updated":
-                    valid.add(datasourceBundle);
-                    break;
-                case "Not Audited":
-                    notAudited.add(datasourceBundle);
-                    break;
-                case "Invalid and updated":
-                    invalidAndUpdated.add(datasourceBundle);
-                    break;
-                case "Invalid and not updated":
-                    invalidAndNotUpdated.add(datasourceBundle);
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-            }
-        }
-        for (String state : auditState) {
-            switch (state) {
-                case "Valid":
-                    ret.addAll(valid);
-                    break;
-                case "Not Audited":
-                    ret.addAll(notAudited);
-                    break;
-                case "Invalid and updated":
-                    ret.addAll(invalidAndUpdated);
-                    break;
-                case "Invalid and not updated":
-                    ret.addAll(invalidAndNotUpdated);
-                    break;
-                default:
-                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-            }
-        }
-        if (!ret.isEmpty()) {
-            List<DatasourceBundle> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0){
-                if (quantity <= ret.size()){
-                    for (int i=from; i<=quantity-1; i++){
-                        retWithCorrectQuantity.add(ret.get(i));
-                    }
-                } else{
-                    retWithCorrectQuantity.addAll(ret);
-                }
-                retPaging.setTo(retWithCorrectQuantity.size());
-            } else{
-                boolean indexOutOfBound = false;
-                if (quantity <= ret.size()){
-                    for (int i=from; i<quantity+from; i++){
-                        try{
-                            retWithCorrectQuantity.add(ret.get(i));
-                            if (quantity+from > ret.size()){
-                                retPaging.setTo(ret.size());
-                            } else{
-                                retPaging.setTo(quantity+from);
-                            }
-                        } catch (IndexOutOfBoundsException e){
-                            indexOutOfBound = true;
-                            continue;
-                        }
-                    }
-                    if (indexOutOfBound){
-                        retPaging.setTo(ret.size());
-                    }
-                } else{
-                    retWithCorrectQuantity.addAll(ret);
-                    if (quantity+from > ret.size()){
-                        retPaging.setTo(ret.size());
-                    } else{
-                        retPaging.setTo(quantity+from);
-                    }
-                }
-            }
-            retPaging.setFrom(from);
-            retPaging.setResults(retWithCorrectQuantity);
-            retPaging.setTotal(ret.size());
-        } else{
-            retPaging.setResults(ret);
-            retPaging.setTotal(0);
-            retPaging.setFrom(0);
-            retPaging.setTo(0);
-        }
-        return retPaging;
-    }
-
     public DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
-        Datasource datasource = getOpenAIREDatasourceById(datasourceBundle.getId()).getBody();
+        Datasource datasource = getOpenAIREDatasourceById(datasourceBundle.getId());
         if (datasource != null){
             Identifiers datasourceIdentifiers = new Identifiers();
             List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
@@ -917,7 +782,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
             datasourceBundle.setIdentifiers(datasourceIdentifiers);
         } else{
-            throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource"));
+            throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
         }
         return datasourceBundle;
     }

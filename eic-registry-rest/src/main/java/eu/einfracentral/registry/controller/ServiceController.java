@@ -362,7 +362,7 @@ public class ServiceController {
         if (auditState == null) {
             return ResponseEntity.ok(resourceBundleService.getAllForAdmin(ff, authentication));
         } else {
-            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, allRequestParams, auditState, authentication));
+            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, auditState, authentication));
         }
     }
 
