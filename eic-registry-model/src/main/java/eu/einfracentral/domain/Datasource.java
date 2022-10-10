@@ -16,7 +16,7 @@ import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Datasource extends Service implements Identifiable{
+public class Datasource extends Service implements Identifiable {
 
     // Data Source Policies
     /**

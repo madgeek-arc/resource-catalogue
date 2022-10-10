@@ -14,7 +14,7 @@ public interface DatasourceService<T> extends ResourceBundleService<T>  {
 
     String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) throws IOException;
 
-    ResponseEntity<Datasource> getOpenAIREDatasourceById(String datasourceId) throws IOException;
+    Datasource getOpenAIREDatasourceById(String datasourceId) throws IOException;
 
     String createHttpRequest(String url, String data);
 
