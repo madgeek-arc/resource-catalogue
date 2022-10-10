@@ -1138,7 +1138,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         for (Vocabulary voc : allHLE){
             allHLEIDs.add(voc.getId());
         }
-        if (providerBundle.getProvider().isLegalEntity()){
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()){
             if (!allHLEIDs.contains("provider_hosting_legal_entity-" + providerBundle.getProvider().getId())){
                 addApprovedProviderToHLEVocabulary(providerBundle);
             }
