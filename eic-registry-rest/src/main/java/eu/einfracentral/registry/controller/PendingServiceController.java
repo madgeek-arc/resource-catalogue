@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -72,11 +73,11 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
     public ResponseEntity<Paging<ServiceBundle>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", id);
-        return new ResponseEntity<>(pendingServiceManager.getAll(ff, null), HttpStatus.OK);
+        return new ResponseEntity<>(pendingServiceManager.getAll(ff, auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/addResource", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -107,7 +108,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
+    @PostAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, returnObject.body)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
         ServiceBundle serviceBundle = new ServiceBundle();
         ServiceBundle toCreateId = new ServiceBundle();
@@ -155,7 +156,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
             serviceBundle = resourceBundleService.addResource(new ServiceBundle(service), auth);
             logger.info("User '{}' added Resource:\n{}", auth.getName(), serviceBundle);
         } else { // else update Pending Service and transform it to Active Service
-            if (serviceBundle.getService().getVersion().equals("")){
+            if (serviceBundle.getService().getVersion() != null && serviceBundle.getService().getVersion().equals("")) {
                 serviceBundle.getService().setVersion(null);
             }
             serviceBundle.setService(service); // important to keep other fields of ServiceBundle

@@ -113,7 +113,7 @@ public class ProviderController {
     //    @Override
     @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider,
                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                            @RequestParam(required = false) String comment,
@@ -178,7 +178,7 @@ public class ProviderController {
     }
 
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id,
                                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                             @ApiIgnore Authentication auth) {

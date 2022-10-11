@@ -247,7 +247,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<ServiceBundle>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                        @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
@@ -362,7 +362,7 @@ public class ServiceController {
         if (auditState == null) {
             return ResponseEntity.ok(resourceBundleService.getAllForAdmin(ff, authentication));
         } else {
-            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, allRequestParams, auditState, authentication));
+            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, auditState, authentication));
         }
     }
 

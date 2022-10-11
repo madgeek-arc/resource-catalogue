@@ -83,8 +83,7 @@ public class AnalyticsService implements Analytics {
                             dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
                     )
             );
-            Map<String, Integer> sortedResults = new TreeMap<>(results);
-            return sortedResults;
+            return new TreeMap<>(results);
         } catch (Exception e) {
             logger.warn("Cannot find visits for the label '{}'\n", label, e);
         }
@@ -128,17 +127,15 @@ public class AnalyticsService implements Analytics {
     private String getMatomoResponse(String url) {
         try {
             HttpEntity<String> request = new HttpEntity<>(headers);
-            try{
-                ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-                if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                    logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
-                            responseEntity.getStatusCode().toString(), responseEntity.getBody());
-                }
-                return responseEntity.getBody();
-            } catch (IllegalArgumentException e) {
-                logger.info ("URI is not absolute");
+            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
+                        responseEntity.getStatusCode(), responseEntity.getBody());
             }
-        } catch (RuntimeException e) {
+            return responseEntity.getBody();
+        } catch (IllegalArgumentException e) {
+            logger.info ("URI is not absolute");
+        } catch (Exception e) {
             logger.error("Could not retrieve analytics from matomo", e);
         }
         return "";

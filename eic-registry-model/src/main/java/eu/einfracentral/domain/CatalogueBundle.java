@@ -42,4 +42,22 @@ public class CatalogueBundle extends Bundle<Catalogue>{
     public void setStatus(String status) {
         this.status = status;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CatalogueBundle)) return false;
+        if (!super.equals(o)) return false;
+
+        CatalogueBundle that = (CatalogueBundle) o;
+
+        return getStatus() != null ? getStatus().equals(that.getStatus()) : that.getStatus() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (getStatus() != null ? getStatus().hashCode() : 0);
+        return result;
+    }
 }

@@ -485,25 +485,25 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         if (active == null) {
             active = false;
         }
-        if (active != null) {
-            catalogue.setActive(active);
-            if (!active) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-                loggingInfoList.add(loggingInfo);
-                catalogue.setLoggingInfo(loggingInfoList);
 
-                // latestOnboardingInfo
-                catalogue.setLatestUpdateInfo(loggingInfo);
+        catalogue.setActive(active);
+        if (!active) {
+            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+            loggingInfoList.add(loggingInfo);
+            catalogue.setLoggingInfo(loggingInfoList);
 
-            } else {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-                loggingInfoList.add(loggingInfo);
-                catalogue.setLoggingInfo(loggingInfoList);
+            // latestOnboardingInfo
+            catalogue.setLatestUpdateInfo(loggingInfo);
 
-                // latestOnboardingInfo
-                catalogue.setLatestUpdateInfo(loggingInfo);
-            }
+        } else {
+            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+            loggingInfoList.add(loggingInfo);
+            catalogue.setLoggingInfo(loggingInfoList);
+
+            // latestOnboardingInfo
+            catalogue.setLatestUpdateInfo(loggingInfo);
         }
+
         return super.update(catalogue, auth);
     }
 
@@ -579,7 +579,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             } else{
                 boolean indexOutOfBound = false;
                 if (quantity <= catalogueBundle.size()){
-                    for (int i=from; i<quantity+from; i++){
+                    for (int i=from; i<quantity+from; i++) {
                         try{
                             retWithCorrectQuantity.add(catalogueBundle.get(i));
                             if (quantity+from > catalogueBundle.size()){
@@ -589,7 +589,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                             }
                         } catch (IndexOutOfBoundsException e){
                             indexOutOfBound = true;
-                            continue;
                         }
                     }
                     if (indexOutOfBound){

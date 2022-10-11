@@ -3,7 +3,6 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.DatasourceService;
-import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -27,7 +26,9 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,8 +38,6 @@ public class DatasourceController {
 
     private static final Logger logger = LogManager.getLogger(DatasourceController.class);
     private final DatasourceService<DatasourceBundle> resourceBundleService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final DataSource commonDataSource;
 
     @Value("${auditing.interval:6}")
     private String auditingInterval;
@@ -47,24 +46,20 @@ public class DatasourceController {
     private String catalogueName;
 
     @Autowired
-    DatasourceController(DatasourceService<DatasourceBundle> resourceBundleService,
-                         ProviderService<ProviderBundle, Authentication> provider,
-                         DataSource commonDataSource) {
+    DatasourceController(DatasourceService<DatasourceBundle> resourceBundleService) {
         this.resourceBundleService = resourceBundleService;
-        this.providerService = provider;
-        this.commonDataSource = commonDataSource;
     }
 
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<DatasourceBundle> delete(@PathVariable("id") String id,
-                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasource;
         datasource = resourceBundleService.get(id, catalogueId);
 
         // Block users of deleting Datasources of another Catalogue
-        if (!datasource.getDatasource().getCatalogueId().equals(catalogueName)){
+        if (!datasource.getDatasource().getCatalogueId().equals(catalogueName)) {
             throw new ValidationException("You cannot delete a Datasource of a non EOSC Catalogue.");
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
@@ -120,7 +115,7 @@ public class DatasourceController {
     @PatchMapping(path = "verifyDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<DatasourceBundle> verifyDatasource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                        @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
+                                                             @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         DatasourceBundle resource = resourceBundleService.verifyResource(id, status, active, auth);
         logger.info("User '{}' updated Datasource with name '{}' [status: {}] [active: {}]", auth, resource.getDatasource().getName(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
@@ -144,8 +139,8 @@ public class DatasourceController {
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllDatasources(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
-                                                             @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                             @ApiIgnore Authentication authentication) {
+                                                                @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                @ApiIgnore Authentication authentication) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -188,10 +183,10 @@ public class DatasourceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<DatasourceBundle>> getDatasourcesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                       @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+                                                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                             @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -204,7 +199,7 @@ public class DatasourceController {
 
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
-        return resourceBundleService.getOpenAIREDatasourceById(datasourceId);
+        return ResponseEntity.ok(resourceBundleService.getOpenAIREDatasourceById(datasourceId));
     }
 
     @ApiImplicitParams({
@@ -217,11 +212,11 @@ public class DatasourceController {
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        Map<Integer, List<Datasource>> datasourceMap =  resourceBundleService.getAllOpenAIREDatasources(ff);
+        Map<Integer, List<Datasource>> datasourceMap = resourceBundleService.getAllOpenAIREDatasources(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();
         datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());
         datasourcePaging.setFrom(ff.getFrom());
-        datasourcePaging.setTo(ff.getFrom()+ff.getQuantity());
+        datasourcePaging.setTo(ff.getFrom() + ff.getQuantity());
         datasourcePaging.setResults(datasourceMap.get(datasourcePaging.getTotal()));
         return ResponseEntity.ok(new Paging<>(datasourcePaging.getTotal(), datasourcePaging.getFrom(), datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
     }
@@ -237,7 +232,7 @@ public class DatasourceController {
     @PatchMapping(path = "auditDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
-                                                       @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+                                                            @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         DatasourceBundle datasourceBundle = resourceBundleService.auditResource(id, comment, actionType, auth);
         logger.info("User '{}-{}' audited Datasource with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
                 datasourceBundle.getDatasource().getName(), actionType);
@@ -254,9 +249,9 @@ public class DatasourceController {
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllDatasourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                            @RequestParam(required = false) Set<String> auditState,
-                                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                            @ApiIgnore Authentication authentication) {
+                                                                                  @RequestParam(required = false) Set<String> auditState,
+                                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                                  @ApiIgnore Authentication authentication) {
 
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -268,7 +263,7 @@ public class DatasourceController {
         if (auditState == null) {
             return ResponseEntity.ok(resourceBundleService.getAllForAdmin(ff, authentication));
         } else {
-            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, allRequestParams, auditState, authentication));
+            return ResponseEntity.ok(resourceBundleService.getAllForAdminWithAuditStates(ff, auditState, authentication));
         }
     }
 
@@ -287,7 +282,6 @@ public class DatasourceController {
     }
 
     @GetMapping(path = "isDatasourceRegisteredOnOpenAIRE/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public boolean isDatasourceRegisteredOnOpenAIRE(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         return resourceBundleService.isDatasourceRegisteredOnOpenAIRE(id);
     }

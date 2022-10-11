@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -70,14 +71,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, Authentication auth) {
         return addResource(serviceBundle, null, auth);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
@@ -147,14 +148,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #serviceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String comment, Authentication auth) {
         return updateResource(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #serviceBundle)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #serviceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
         ServiceBundle ret;
@@ -280,7 +281,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             //TODO: userIsCatalogueAdmin -> transcationRollback error
             // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsResourceProviderAdmin(user, serviceId)) {
+                    securityService.userIsResourceProviderAdmin(user, serviceId, catalogueId)) {
                 return serviceBundle;
             }
         }
@@ -460,38 +461,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return super.update(service, auth);
     }
 
-    public Paging<ServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(1000);
-        facetFilter.addFilter("active", true);
-        Browsing<ServiceBundle> serviceBrowsing = getAll(facetFilter, auth);
-        Browsing<ServiceBundle> ret = serviceBrowsing;
-        long todayEpochTime = System.currentTimeMillis();
-        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (ServiceBundle serviceBundle : serviceBrowsing.getResults()) {
-            if (serviceBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(serviceBundle.getLatestAuditInfo().getDate()) > interval) {
-                    int index = 0;
-                    for (int i = 0; i < serviceBrowsing.getResults().size(); i++) {
-                        if (serviceBrowsing.getResults().get(i).getService().getId().equals(serviceBundle.getService().getId())) {
-                            index = i;
-                            break;
-                        }
-                    }
-                    ret.getResults().remove(index);
-                }
-            }
-        }
-        Collections.shuffle(ret.getResults());
-        for (int i = ret.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
-            ret.getResults().remove(i);
-        }
-        ret.setFrom(ff.getFrom());
-        ret.setTo(ret.getResults().size());
-        ret.setTotal(ret.getResults().size());
-        return ret;
-    }
-
     @Override
     public List<ServiceBundle> getResourceBundles(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
@@ -524,7 +493,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerId)) {
+                    securityService.userIsProviderAdmin(user, providerBundle)) {
                 return this.getAll(ff, auth).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
             }
         }
@@ -567,6 +536,36 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return this.getAll(ff, null).getResults();
+    }
+
+    // FIXME: refactor method
+    protected void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
+        List<String> resourceProviders = resourceBundle.getPayload().getResourceProviders();
+        if (resourceProviders != null && !resourceProviders.isEmpty()) {
+            for (String resourceProvider : resourceProviders) {
+                if (!resourceProvider.contains(".")) { // user did not give a Public Provider ID
+                    try {
+                        providerService.get(resourceBundle.getPayload().getCatalogueId(), resourceProvider, null); // Resource Provider belongs to the same Catalogue
+                    } catch (ResourceNotFoundException e) {
+                        throw new ValidationException(String.format("You cannot have a Resource Provider that belongs to a different Catalogue -> [%s]", resourceProvider));
+                    }
+                }
+            }
+        }
+        List<String> relatedRequiredResources = resourceBundle.getPayload().getRelatedResources();
+        relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
+        if (!relatedRequiredResources.isEmpty()){
+            for (String relatedRequiredResource : relatedRequiredResources){
+                int count = relatedRequiredResource.length() - relatedRequiredResource.replaceAll("\\.","").length();
+                if (count <= 1){ // user did not give a Public Resource ID
+                    try{
+                        get(relatedRequiredResource, resourceBundle.getPayload().getCatalogueId()); // Related/Required Resource belongs to the same Catalogue
+                    } catch (ResourceNotFoundException e){
+                        throw new ValidationException(String.format("You cannot have a Related or Required Resource that belongs to a different Catalogue -> [%s]", relatedRequiredResource));
+                    }
+                }
+            }
+        }
     }
 
     //    @Override
@@ -649,115 +648,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 
         return serviceBundle;
-    }
-
-    public Paging<ServiceBundle> getAllForAdminWithAuditStates(FacetFilter ff, MultiValueMap<String, Object> allRequestParams, Set<String> auditState, Authentication auth){
-        List<ServiceBundle> valid = new ArrayList<>();
-        List<ServiceBundle> notAudited = new ArrayList<>();
-        List<ServiceBundle> invalidAndUpdated = new ArrayList<>();
-        List<ServiceBundle> invalidAndNotUpdated = new ArrayList<>();
-
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
-        allRequestParams.remove("auditState");
-        FacetFilter ff2 = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff2.setQuantity(1000);
-        ff2.setFrom(0);
-        Paging<ServiceBundle> retPaging = getAllForAdmin(ff, auth);
-        List<ServiceBundle> allWithoutAuditFilterList =  getAllForAdmin(ff2, auth).getResults();
-        List<ServiceBundle> ret = new ArrayList<>();
-        for (ServiceBundle serviceBundle : allWithoutAuditFilterList) {
-            String auditVocStatus;
-            try{
-                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(serviceBundle.getLoggingInfo());
-            } catch (NullPointerException e){ // serviceBundle has null loggingInfo
-                continue;
-            }
-            switch (auditVocStatus) {
-                case "Valid and updated":
-                case "Valid and not updated":
-                    valid.add(serviceBundle);
-                    break;
-                case "Not Audited":
-                    notAudited.add(serviceBundle);
-                    break;
-                case "Invalid and updated":
-                    invalidAndUpdated.add(serviceBundle);
-                    break;
-                case "Invalid and not updated":
-                    invalidAndNotUpdated.add(serviceBundle);
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-            }
-        }
-        for (String state : auditState) {
-            switch (state) {
-                case "Valid":
-                    ret.addAll(valid);
-                    break;
-                case "Not Audited":
-                    ret.addAll(notAudited);
-                    break;
-                case "Invalid and updated":
-                    ret.addAll(invalidAndUpdated);
-                    break;
-                case "Invalid and not updated":
-                    ret.addAll(invalidAndNotUpdated);
-                    break;
-                default:
-                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-            }
-        }
-        if (!ret.isEmpty()) {
-            List<ServiceBundle> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0){
-                if (quantity <= ret.size()){
-                    for (int i=from; i<=quantity-1; i++){
-                        retWithCorrectQuantity.add(ret.get(i));
-                    }
-                } else{
-                    retWithCorrectQuantity.addAll(ret);
-                }
-                retPaging.setTo(retWithCorrectQuantity.size());
-            } else{
-                boolean indexOutOfBound = false;
-                if (quantity <= ret.size()){
-                    for (int i=from; i<quantity+from; i++){
-                        try{
-                            retWithCorrectQuantity.add(ret.get(i));
-                            if (quantity+from > ret.size()){
-                                retPaging.setTo(ret.size());
-                            } else{
-                                retPaging.setTo(quantity+from);
-                            }
-                        } catch (IndexOutOfBoundsException e){
-                            indexOutOfBound = true;
-                            continue;
-                        }
-                    }
-                    if (indexOutOfBound){
-                        retPaging.setTo(ret.size());
-                    }
-                } else{
-                    retWithCorrectQuantity.addAll(ret);
-                    if (quantity+from > ret.size()){
-                        retPaging.setTo(ret.size());
-                    } else{
-                        retPaging.setTo(quantity+from);
-                    }
-                }
-            }
-            retPaging.setFrom(from);
-            retPaging.setResults(retWithCorrectQuantity);
-            retPaging.setTotal(ret.size());
-        } else{
-            retPaging.setResults(ret);
-            retPaging.setTotal(0);
-            retPaging.setFrom(0);
-            retPaging.setTo(0);
-        }
-        return retPaging;
     }
 
 }

@@ -205,7 +205,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     public Resource getPendingResourceViaServiceId(String serviceId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
+                .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);

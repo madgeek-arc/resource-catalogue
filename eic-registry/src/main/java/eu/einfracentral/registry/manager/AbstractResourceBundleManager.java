@@ -29,6 +29,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -36,6 +37,8 @@ import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,6 +114,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         java.util.Collections.sort(browseBy);
         logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
     }
+
+    protected abstract void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle);
 
     @Override
     public String getResourceType() {
@@ -524,31 +529,25 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     private List<RichResource> createProviderInfo(List<RichResource> richResources, Authentication auth) {
         for (RichResource richResource : richResources) {
-            List<ProviderInfo> providerInfoList = new ArrayList<>();
-            List<String> allProviders = new ArrayList<>();
-            allProviders.add(richResource.getService().getResourceOrganisation());
-            if (richResource.getService().getResourceProviders() != null && !richResource.getService().getResourceProviders().isEmpty()) {
-                for (String provider : richResource.getService().getResourceProviders()) {
-                    if (!provider.equals(richResource.getService().getResourceOrganisation())) {
-                        allProviders.add(provider);
-                    }
-                }
-            }
-            for (String provider : allProviders) {
-                if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
-                    ProviderBundle providerBundle = providerService.get(provider, auth);
-                    boolean isResourceOrganisation = false;
-                    if (provider.equals(richResource.getService().getResourceOrganisation())) {
-                        isResourceOrganisation = true;
-                    }
-                    ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
-                    providerInfoList.add(providerInfo);
-                }
-            }
-
-            richResource.setProviderInfo(providerInfoList);
+            createProviderInfo(richResource, auth);
         }
         return richResources;
+    }
+
+    private RichResource createProviderInfo(RichResource richResource, Authentication auth) {
+        List<ProviderInfo> providerInfoList = new ArrayList<>();
+        Set<String> allProviders = new HashSet<>(richResource.getService().getResourceProviders());
+        allProviders.add(richResource.getService().getResourceOrganisation());
+        for (String provider : allProviders) {
+            if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
+                ProviderBundle providerBundle = providerService.get(provider, auth);
+                boolean isResourceOrganisation = provider.equals(richResource.getService().getResourceOrganisation());
+                ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
+                providerInfoList.add(providerInfo);
+            }
+        }
+        richResource.setProviderInfo(providerInfoList);
+        return richResource;
     }
 
     /**
@@ -905,6 +904,153 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return getMatchingResources(filter);
     }
 
+    // FIXME: not working...
+    @Override
+    public Paging<T> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setQuantity(maxQuantity);
+        facetFilter.addFilter("active", true);
+        Browsing<T> serviceBrowsing = getAll(facetFilter, auth);
+        Browsing<T> ret = serviceBrowsing;
+        long todayEpochTime = System.currentTimeMillis();
+        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
+        for (T resourceBundle : serviceBrowsing.getResults()) {
+            if (resourceBundle.getLatestAuditInfo() != null) {
+                if (Long.parseLong(resourceBundle.getLatestAuditInfo().getDate()) > interval) {
+                    int index = 0;
+                    for (int i = 0; i < serviceBrowsing.getResults().size(); i++) {
+                        if (serviceBrowsing.getResults().get(i).getPayload().getId().equals(resourceBundle.getPayload().getId())) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    ret.getResults().remove(index);
+                }
+            }
+        }
+        Collections.shuffle(ret.getResults());
+        for (int i = ret.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
+            ret.getResults().remove(i);
+        }
+        ret.setFrom(ff.getFrom());
+        ret.setTo(ret.getResults().size());
+        ret.setTotal(ret.getResults().size());
+        return ret;
+    }
+
+    // TODO: Please refactor this mess...
+    @Override
+    public Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication auth){
+        List<T> valid = new ArrayList<>();
+        List<T> notAudited = new ArrayList<>();
+        List<T> invalidAndUpdated = new ArrayList<>();
+        List<T> invalidAndNotUpdated = new ArrayList<>();
+
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+
+        FacetFilter ff2 = new FacetFilter();
+        ff2.setFilter(new HashMap<>(ff.getFilter()));
+        // remove auditState from ff2 filter
+        ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
+        ff2.setQuantity(maxQuantity);
+        ff2.setFrom(0);
+        Paging<T> retPaging = getAllForAdmin(ff, auth);
+        List<T> allWithoutAuditFilterList =  getAllForAdmin(ff2, auth).getResults();
+        List<T> ret = new ArrayList<>();
+        for (T serviceBundle : allWithoutAuditFilterList) {
+            String auditVocStatus;
+            try{
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(serviceBundle.getLoggingInfo());
+            } catch (NullPointerException e){ // serviceBundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus) {
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(serviceBundle);
+                    break;
+                case "Not Audited":
+                    notAudited.add(serviceBundle);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(serviceBundle);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(serviceBundle);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState) {
+            switch (state) {
+                case "Valid":
+                    ret.addAll(valid);
+                    break;
+                case "Not Audited":
+                    ret.addAll(notAudited);
+                    break;
+                case "Invalid and updated":
+                    ret.addAll(invalidAndUpdated);
+                    break;
+                case "Invalid and not updated":
+                    ret.addAll(invalidAndNotUpdated);
+                    break;
+                default:
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        if (!ret.isEmpty()) {
+            List<T> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0){
+                if (quantity <= ret.size()){
+                    for (int i=from; i<=quantity-1; i++){
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(ret);
+                }
+                retPaging.setTo(retWithCorrectQuantity.size());
+            } else{
+                boolean indexOutOfBound = false;
+                if (quantity <= ret.size()){
+                    for (int i=from; i<quantity+from; i++){
+                        try{
+                            retWithCorrectQuantity.add(ret.get(i));
+                            if (quantity+from > ret.size()){
+                                retPaging.setTo(ret.size());
+                            } else{
+                                retPaging.setTo(quantity+from);
+                            }
+                        } catch (IndexOutOfBoundsException e){
+                            indexOutOfBound = true;
+                        }
+                    }
+                    if (indexOutOfBound){
+                        retPaging.setTo(ret.size());
+                    }
+                } else{
+                    retWithCorrectQuantity.addAll(ret);
+                    if (quantity+from > ret.size()){
+                        retPaging.setTo(ret.size());
+                    } else{
+                        retPaging.setTo(quantity+from);
+                    }
+                }
+            }
+            retPaging.setFrom(from);
+            retPaging.setResults(retWithCorrectQuantity);
+            retPaging.setTotal(ret.size());
+        } else{
+            retPaging.setResults(ret);
+            retPaging.setTotal(0);
+            retPaging.setFrom(0);
+            retPaging.setTo(0);
+        }
+        return retPaging;
+    }
+
     @Override
     public ResourceBundle<?> updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth) {
         T bundle = get(resourceId, catalogueId);
@@ -1002,36 +1148,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             return null;
         }
         return resourceBundle;
-    }
-
-    // FIXME: refactor method
-    protected void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
-        List<String> resourceProviders = resourceBundle.getPayload().getResourceProviders();
-        if (resourceProviders != null && !resourceProviders.isEmpty()) {
-            for (String resourceProvider : resourceProviders) {
-                if (!resourceProvider.contains(".")) { // user did not give a Public Provider ID
-                    try {
-                        providerService.get(resourceBundle.getPayload().getCatalogueId(), resourceProvider, null); // Resource Provider belongs to the same Catalogue
-                    } catch (ResourceNotFoundException e) {
-                        throw new ValidationException(String.format("You cannot have a Resource Provider that belongs to a different Catalogue -> [%s]", resourceProvider));
-                    }
-                }
-            }
-        }
-        List<String> relatedRequiredResources = resourceBundle.getPayload().getRelatedResources();
-        relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
-        if (!relatedRequiredResources.isEmpty()){
-            for (String relatedRequiredResource : relatedRequiredResources){
-                int count = relatedRequiredResource.length() - relatedRequiredResource.replaceAll("\\.","").length();
-                if (count <= 1){ // user did not give a Public Provider ID
-                    try{
-                        get(relatedRequiredResource, resourceBundle.getPayload().getCatalogueId()); // Related/Required Resource belongs to the same Catalogue
-                    } catch (ResourceNotFoundException e){
-                        throw new ValidationException(String.format("You cannot have a Related or Required Resource that belongs to a different Catalogue -> [%s]", relatedRequiredResource));
-                    }
-                }
-            }
-        }
     }
 
 }

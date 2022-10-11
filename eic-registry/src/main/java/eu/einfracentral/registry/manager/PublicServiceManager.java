@@ -55,7 +55,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         List<ServiceBundle> serviceBundleList = new ArrayList<>();
         Browsing<ServiceBundle> serviceBundleBrowsing = super.getAll(facetFilter, authentication);
         for (ServiceBundle serviceBundle : serviceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, serviceBundle.getId()) && serviceBundle.getMetadata().isPublished()) {
+            if (securityService.isResourceProviderAdmin(authentication, serviceBundle.getId(), serviceBundle.getService().getCatalogueId()) && serviceBundle.getMetadata().isPublished()) {
                 serviceBundleList.add(serviceBundle);
             }
         }

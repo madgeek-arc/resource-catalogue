@@ -36,19 +36,16 @@ public class CatalogueController {
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
-    private final JmsTemplate jmsTopicTemplate;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
-                        ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                        JmsTemplate jmsTopicTemplate) {
+                        ResourceBundleService<DatasourceBundle> datasourceBundleService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
-        this.jmsTopicTemplate = jmsTopicTemplate;
     }
 
     //SECTION: CATALOGUE
@@ -161,7 +158,7 @@ public class CatalogueController {
     public ResponseEntity<CatalogueBundle> publish(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                    @ApiIgnore Authentication auth) {
         CatalogueBundle catalogue = catalogueManager.publish(id, active, auth);
-        logger.info("User '{}' updated Catalogue with name '{}' [status: {}] [active: {}]", auth, catalogue.getCatalogue().getName(), active);
+        logger.info("User '{}' updated Catalogue with name '{}' [status: {}] [active: {}]", auth, catalogue.getCatalogue().getName(), catalogue.getStatus(), active);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
@@ -195,9 +192,10 @@ public class CatalogueController {
         }
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
+        Paging<CatalogueBundle> retPaging = catalogueManager.getAll(ff, auth);
+        // FIXME: is the following needed?? remove
         List<Map<String, Object>> records = catalogueManager.createQueryForCatalogueFilters(ff, orderDirection, orderField);
         List<CatalogueBundle> ret = new ArrayList<>();
-        Paging<CatalogueBundle> retPaging = catalogueManager.getAll(ff, auth);
         for (Map<String, Object> record : records) {
             for (Map.Entry<String, Object> entry : record.entrySet()) {
                 ret.add(catalogueManager.get((String) entry.getValue()));
@@ -303,7 +301,7 @@ public class CatalogueController {
 
     @ApiOperation(value = "Updates the Provider of the specific Catalogue")
     @PutMapping(path = "{catalogueId}/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id, #provider.catalogueId)")
     public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
