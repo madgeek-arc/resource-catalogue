@@ -201,20 +201,11 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
         User user = User.of(auth);
 
-        // update existing datasource Metadata
+        // update existing datasource Metadata, ResourceExtras, Identifiers, MigrationStatus
         datasourceBundle.setMetadata(Metadata.updateMetadata(existingDatasource.getMetadata(), user.getFullName()));
-        // update existing service ResourceExtras
-        if (existingDatasource.getResourceExtras() != null) {
-            datasourceBundle.setResourceExtras(existingDatasource.getResourceExtras());
-        }
-        // update existing datasource Identifiers
-//        if (existingDatasource.getIdentifiers() != null) {
-//            datasourceBundle.setIdentifiers(existingDatasource.getIdentifiers());
-//        }
-        // update existing datasource MigrationStatus
-        if (existingDatasource.getMigrationStatus() != null) {
-            datasourceBundle.setMigrationStatus(existingDatasource.getMigrationStatus());
-        }
+        datasourceBundle.setResourceExtras(existingDatasource.getResourceExtras());
+//        datasourceBundle.setIdentifiers(existingDatasource.getIdentifiers());
+        datasourceBundle.setMigrationStatus(existingDatasource.getMigrationStatus());
 
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
