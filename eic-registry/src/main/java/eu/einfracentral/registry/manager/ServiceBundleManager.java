@@ -186,8 +186,12 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         User user = User.of(auth);
 
-        // update existing service serviceMetadata
+        // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
         serviceBundle.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
+        serviceBundle.setResourceExtras(existingService.getResourceExtras());
+//        serviceBundle.setIdentifiers(existingService.getIdentifiers());
+        serviceBundle.setMigrationStatus(existingService.getMigrationStatus());
+
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
@@ -552,8 +556,13 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                 }
             }
         }
-        List<String> relatedRequiredResources = resourceBundle.getPayload().getRelatedResources();
-        relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
+        List<String> relatedRequiredResources = new ArrayList<>();
+        if (resourceBundle.getPayload().getRelatedResources() != null && !resourceBundle.getPayload().getRelatedResources().isEmpty()){
+            relatedRequiredResources.addAll(resourceBundle.getPayload().getRelatedResources());
+        }
+        if (resourceBundle.getPayload().getRequiredResources() != null && !resourceBundle.getPayload().getRequiredResources().isEmpty()){
+            relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
+        }
         if (!relatedRequiredResources.isEmpty()){
             for (String relatedRequiredResource : relatedRequiredResources){
                 int count = relatedRequiredResource.length() - relatedRequiredResource.replaceAll("\\.","").length();

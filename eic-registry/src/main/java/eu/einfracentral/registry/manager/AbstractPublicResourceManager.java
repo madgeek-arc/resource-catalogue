@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class AbstractPublicResourceManager <T extends Identifiable> extends ResourceManager<T> {
+public abstract class AbstractPublicResourceManager<T extends Identifiable> extends ResourceManager<T> {
 
     public AbstractPublicResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
@@ -16,11 +16,13 @@ public abstract class AbstractPublicResourceManager <T extends Identifiable> ext
 
     protected List<String> appendCatalogueId(List<String> items, String catalogueId) {
         Set<String> transformed = new HashSet<>();
-        for (String item : items){
-            if (!item.contains(catalogueId)){
-                item = catalogueId + "." + item;
+        if (items != null) {
+            for (String item : items) {
+                if (!item.contains(catalogueId)) {
+                    item = catalogueId + "." + item;
+                }
+                transformed.add(item);
             }
-            transformed.add(item);
         }
         return new ArrayList<>(transformed);
     }

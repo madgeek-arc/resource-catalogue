@@ -1067,6 +1067,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         // check PID consistency
         checkEOSCIFGuidelinesPIDConsistency(bundle);
 
+        createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
         validate(bundle);
         update(bundle, auth);
         logger.info("User '{}'-'{}' updated field eoscIFGuidelines of the Resource '{}'",
@@ -1078,26 +1079,15 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         T bundle = get(resourceId, catalogueId);
         blockUpdateIfResourceIsPublished(bundle);
         ResourceExtras resourceExtras = bundle.getResourceExtras();
-        List<String> newResearchCategories = new ArrayList<>();
         if (resourceExtras == null) {
             ResourceExtras newResourceExtras = new ResourceExtras();
-            newResearchCategories.addAll(researchCategories);
+            List<String> newResearchCategories = new ArrayList<>(researchCategories);
             newResourceExtras.setResearchCategories(newResearchCategories);
             bundle.setResourceExtras(newResourceExtras);
         } else {
-            List<String> oldResearchCategories = resourceExtras.getResearchCategories();
-            if (oldResearchCategories == null || oldResearchCategories.isEmpty()) {
-                newResearchCategories.addAll(researchCategories);
-                bundle.getResourceExtras().setResearchCategories(newResearchCategories);
-            } else {
-                for (String researchCategory : researchCategories) {
-                    if (!oldResearchCategories.contains(researchCategory)) {
-                        oldResearchCategories.add(researchCategory);
-                    }
-                }
-                bundle.getResourceExtras().setResearchCategories(oldResearchCategories);
-            }
+            bundle.getResourceExtras().setResearchCategories(researchCategories);
         }
+        createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
         validate(bundle);
         update(bundle, auth);
         logger.info("User '{}'-'{}' updated field researchCategories of the Resource '{}' with value '{}'",
@@ -1116,6 +1106,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         } else {
             resourceExtras.setHorizontalService(horizontalService);
         }
+        createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
         validate(bundle);
         update(bundle, auth);
         logger.info("User '{}'-'{}' updated the field horizontalService of the Resource '{}' with value '{}'",
@@ -1148,6 +1139,20 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             return null;
         }
         return resourceBundle;
+    }
+
+    private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth){
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo;
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey(), null);
+        if (bundle.getLoggingInfo() != null) {
+            loggingInfoList = bundle.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        bundle.setLoggingInfo(loggingInfoList);
     }
 
 }
