@@ -33,21 +33,27 @@ public abstract class AbstractPublicResourceManager <T extends Identifiable> ext
                         resourceBundle.getPayload().getResourceOrganisation()));
 
         // Resource Providers
-        resourceBundle.getPayload().setResourceProviders(
-                appendCatalogueId(
-                        resourceBundle.getPayload().getResourceProviders(),
-                        resourceBundle.getPayload().getCatalogueId()));
+        if (resourceBundle.getPayload().getResourceProviders() != null && !resourceBundle.getPayload().getResourceProviders().isEmpty()){
+            resourceBundle.getPayload().setResourceProviders(
+                    appendCatalogueId(
+                            resourceBundle.getPayload().getResourceProviders(),
+                            resourceBundle.getPayload().getCatalogueId()));
+        }
 
         // Related Resources
-        resourceBundle.getPayload().setRelatedResources(
-                appendCatalogueId(
-                        resourceBundle.getPayload().getRelatedResources(),
-                        resourceBundle.getPayload().getCatalogueId()));
+        if (resourceBundle.getPayload().getRelatedResources() != null && !resourceBundle.getPayload().getRelatedResources().isEmpty()){
+            resourceBundle.getPayload().setRelatedResources(
+                    appendCatalogueId(
+                            resourceBundle.getPayload().getRelatedResources(),
+                            resourceBundle.getPayload().getCatalogueId()));
+        }
 
         // Required Resources
-        resourceBundle.getPayload().setRequiredResources(
-                appendCatalogueId(
-                        resourceBundle.getPayload().getRequiredResources(),
-                        resourceBundle.getPayload().getCatalogueId()));
+        if (resourceBundle.getPayload().getRequiredResources() != null && !resourceBundle.getPayload().getRequiredResources().isEmpty()){
+            resourceBundle.getPayload().setRequiredResources(
+                    appendCatalogueId(
+                            resourceBundle.getPayload().getRequiredResources(),
+                            resourceBundle.getPayload().getCatalogueId()));
+        }
     }
 }
