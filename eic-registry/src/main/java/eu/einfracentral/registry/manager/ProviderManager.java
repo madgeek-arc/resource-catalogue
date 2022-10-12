@@ -332,14 +332,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             providers.setResults(retList);
             providers.setTotal(retList.size());
             providers.setTo(retList.size());
-            userProviders = getMyServiceProviders(auth);
-            if (userProviders != null) {
-                // replace user providers having null users with complete provider entries
-                userProviders.forEach(x -> {
-                    providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
-                    providers.getResults().add(x);
-                });
-            }
             return providers;
         }
 
@@ -530,7 +522,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             ff.addFilter("published", false);
             providers = super.getAll(ff, null).getResults();
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
-            providers = getMyServiceProviders(auth);
+            providers = getMy(null, auth).getResults();
         } else {
             return new ArrayList<>();
         }
@@ -552,23 +544,21 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     @Cacheable(value = CACHE_PROVIDERS, key = "(#auth!=null?#auth:'')")
-    public List<ProviderBundle> getMyServiceProviders(Authentication auth) {
+    public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
         }
         User user = User.of(auth);
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
+        if (ff == null) {
+            ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+        }
+        if (!ff.getFilter().containsKey("published")) {
+            ff.addFilter("published", false);
+        }
+        ff.addFilter("users", user.getEmail());
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return super.getAll(ff, auth).getResults()
-                .stream().map(p -> {
-                    if (securityService.userIsProviderAdmin(user, p)) {
-                        return p;
-                    } else return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return super.getAll(ff, auth);
     }
 
     @Override
@@ -679,7 +669,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<Event> allUserEvents = new ArrayList<>();
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
-        List<ProviderBundle> allUserProviders = new ArrayList<>(getMyServiceProviders(authentication));
+        List<ProviderBundle> allUserProviders = getMy(null, authentication).getResults();
         for (ProviderBundle providerBundle : allUserProviders) {
             if (providerBundle.getProvider().getUsers().size() == 1) {
                 throw new ValidationException(String.format("Your user info cannot be deleted, because you are the solely Admin of the Provider [%s]. " +
@@ -817,7 +807,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(1000);
+        facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved provider");
         Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
         List<ProviderBundle> providerList = getAll(facetFilter, auth).getResults();

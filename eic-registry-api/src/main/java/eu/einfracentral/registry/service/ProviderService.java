@@ -34,9 +34,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     List<T> getServiceProviders(String email, U authentication);
 
-
-    List<T> getMyServiceProviders(U authentication);
-
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
 
     void adminAcceptedTerms(String providerId, U authentication);

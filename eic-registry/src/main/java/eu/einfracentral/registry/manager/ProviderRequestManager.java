@@ -84,7 +84,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     public List<ProviderRequest> getAllProviderRequests(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providerId);
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         return getAll(ff, auth).getResults();
     }
 
