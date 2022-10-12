@@ -138,7 +138,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
         // check if Service has already a Helpdesk registered
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<HelpdeskBundle> allHelpdesks = getAll(ff, null).getResults();
         for (HelpdeskBundle helpdesk : allHelpdesks){
             if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){

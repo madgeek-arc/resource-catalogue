@@ -145,7 +145,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
         // check if Service has already a Monitoring registered
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
         for (MonitoringBundle monitoring : allMonitorings){
             if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){

@@ -70,7 +70,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
 
         // Check if there is a Resource with the specific id
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<DatasourceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (DatasourceBundle existingResource : resourceList){
             if (datasourceBundle.getDatasource().getId().equals(existingResource.getDatasource().getId()) && existingResource.getDatasource().getCatalogueId().equals(catalogueName)) {

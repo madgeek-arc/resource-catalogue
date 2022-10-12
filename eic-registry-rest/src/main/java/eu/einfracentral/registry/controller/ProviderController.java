@@ -289,7 +289,7 @@ public class ProviderController {
     // Get a list of Providers in which you are admin.
     @GetMapping(path = "getMyServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(providerManager.getMyServiceProviders(auth), HttpStatus.OK);
+        return new ResponseEntity<>(providerManager.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     // Get the pending services of the given Provider.

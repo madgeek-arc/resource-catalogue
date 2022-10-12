@@ -292,7 +292,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             hostingLegalEntityNames.add(hostingLegalEntity.getName());
         }
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("active", true);
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", "false");

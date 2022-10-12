@@ -65,7 +65,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
         // Check if there is a Resource with the specific id
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<ServiceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle existingResource : resourceList){
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {

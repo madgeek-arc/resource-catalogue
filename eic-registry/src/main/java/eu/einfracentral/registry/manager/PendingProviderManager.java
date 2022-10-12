@@ -86,7 +86,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
         // Check if there is a Provider with the specific id
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList){
             if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueName)) {
@@ -240,15 +240,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("users", User.of(auth).getEmail());
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return super.getAll(ff, auth).getResults()
-                .stream().map(p -> {
-                    if (userIsPendingProviderAdmin(user, p)) {
-                        return p;
-                    } else return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return super.getAll(ff, auth).getResults();
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
