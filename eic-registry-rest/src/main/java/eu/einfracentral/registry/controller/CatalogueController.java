@@ -214,8 +214,8 @@ public class CatalogueController {
         catalogueManager.adminAcceptedTerms(catalogueId, authentication);
     }
 
-    @ApiOperation(value = "Deletes the Catalogue with the given id.")
-    @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ApiIgnore(value = "Deletes the Catalogue with the given id.")
+//    @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Catalogue> deleteCatalogue(@PathVariable("id") String id,
                                                      @ApiIgnore Authentication auth) throws ResourceNotFoundException {
