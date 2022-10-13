@@ -300,7 +300,7 @@ public class FieldValidator {
                             }
                         }
                     } else if (Provider.class.equals(annotation.idClass())
-                            && providerService.get(o.toString()) == null) {
+                            && providerService.get(o.toString()) == null) { //FIXME catalogueID
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Provider",
                                         field.getName()));

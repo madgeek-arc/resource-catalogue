@@ -809,32 +809,23 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved provider");
+        facetFilter.addFilter("published", "false");
         Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
-        List<ProviderBundle> providerList = getAll(facetFilter, auth).getResults();
+        List<ProviderBundle> providersToBeAudited = new ArrayList<>();
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (ProviderBundle providerBundle : providerList) {
+        for (ProviderBundle providerBundle : providerBrowsing.getResults()) {
             if (providerBundle.getLatestAuditInfo() != null) {
                 if (Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) > interval) {
-                    int index = 0;
-                    for (int i=0; i<providerBrowsing.getResults().size(); i++){
-                        if (providerBrowsing.getResults().get(i).getProvider().getId().equals(providerBundle.getProvider().getId())){
-                            index = i;
-                            break;
-                        }
-                    }
-                    providerBrowsing.getResults().remove(index);
+                    providersToBeAudited.add(providerBundle);
                 }
             }
         }
-        Collections.shuffle(providerBrowsing.getResults());
-        for (int i = providerBrowsing.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
-            providerBrowsing.getResults().remove(i);
+        Collections.shuffle(providersToBeAudited);
+        for (int i = providersToBeAudited.size() - 1; i > ff.getQuantity() - 1; i--) {
+            providersToBeAudited.remove(i);
         }
-        providerBrowsing.setFrom(ff.getFrom());
-        providerBrowsing.setTo(providerBrowsing.getResults().size());
-        providerBrowsing.setTotal(providerBrowsing.getResults().size());
-        return providerBrowsing;
+        return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
     }
 
 //    @Override

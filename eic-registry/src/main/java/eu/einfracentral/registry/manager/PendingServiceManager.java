@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -165,7 +167,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
         serviceBundle = this.update(serviceBundle, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
+        Resource resource = this.getPendingResourceViaServiceId(serviceBundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 

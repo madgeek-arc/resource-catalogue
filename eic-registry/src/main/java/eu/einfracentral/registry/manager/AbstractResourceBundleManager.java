@@ -131,9 +131,26 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return deserialize(resource);
     }
 
+    private T checkIdExistanceInOtherCatalogues(String id){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        List<CatalogueBundle> allCatalogues = catalogueService.getAll(ff, null).getResults();
+        for (CatalogueBundle catalogueBundle : allCatalogues){
+            try {
+                return get(id, catalogueBundle.getId());
+            } catch (ResourceNotFoundException e){
+            }
+        }
+        return null;
+    }
+
     //    @Override
     public T get(String id) {
-        return get(id, catalogueName);
+        try {
+            return get(id, catalogueName);
+        } catch (ResourceNotFoundException e){
+            return checkIdExistanceInOtherCatalogues(id);
+        }
     }
 
     @Override
@@ -909,33 +926,24 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public Paging<T> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
-        facetFilter.addFilter("active", true);
+        facetFilter.addFilter("status", "approved resource");
+        facetFilter.addFilter("published", "false");
         Browsing<T> serviceBrowsing = getAll(facetFilter, auth);
-        Browsing<T> ret = serviceBrowsing;
+        List<T> servicesToBeAudited = new ArrayList<>();
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
         for (T resourceBundle : serviceBrowsing.getResults()) {
             if (resourceBundle.getLatestAuditInfo() != null) {
                 if (Long.parseLong(resourceBundle.getLatestAuditInfo().getDate()) > interval) {
-                    int index = 0;
-                    for (int i = 0; i < serviceBrowsing.getResults().size(); i++) {
-                        if (serviceBrowsing.getResults().get(i).getPayload().getId().equals(resourceBundle.getPayload().getId())) {
-                            index = i;
-                            break;
-                        }
-                    }
-                    ret.getResults().remove(index);
+                    servicesToBeAudited.add(resourceBundle);
                 }
             }
         }
-        Collections.shuffle(ret.getResults());
-        for (int i = ret.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
-            ret.getResults().remove(i);
+        Collections.shuffle(servicesToBeAudited);
+        for (int i = servicesToBeAudited.size() - 1; i > ff.getQuantity() - 1; i--) {
+            servicesToBeAudited.remove(i);
         }
-        ret.setFrom(ff.getFrom());
-        ret.setTo(ret.getResults().size());
-        ret.setTotal(ret.getResults().size());
-        return ret;
+        return new Browsing<>(servicesToBeAudited.size(), 0, servicesToBeAudited.size(), servicesToBeAudited, serviceBrowsing.getFacets());
     }
 
     // TODO: Please refactor this mess...
