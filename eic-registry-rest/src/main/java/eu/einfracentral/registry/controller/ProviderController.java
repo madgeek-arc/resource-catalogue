@@ -478,10 +478,7 @@ public class ProviderController {
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", false);
         Paging<ProviderBundle> providerBundlePaging = providerManager.getRandomProviders(ff, auditingInterval, auth);
-        List<ProviderBundle> providerList = new LinkedList<>(providerBundlePaging.getResults());
-        Paging<ProviderBundle> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
-                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
-        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+        return new ResponseEntity<>(providerBundlePaging, HttpStatus.OK);
     }
 
     // Get all modification details of a specific Provider based on id.

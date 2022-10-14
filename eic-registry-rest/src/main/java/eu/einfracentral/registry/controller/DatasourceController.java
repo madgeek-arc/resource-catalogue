@@ -251,10 +251,7 @@ public class DatasourceController {
         ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
         Paging<DatasourceBundle> datasourceBundlePaging = resourceBundleService.getRandomResources(ff, auditingInterval, auth);
-        List<DatasourceBundle> datasourceList = new LinkedList<>(datasourceBundlePaging.getResults());
-        Paging<DatasourceBundle> datasourcePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
-                datasourceBundlePaging.getTo(), datasourceList, datasourceBundlePaging.getFacets());
-        return new ResponseEntity<>(datasourcePaging, HttpStatus.OK);
+        return new ResponseEntity<>(datasourceBundlePaging, HttpStatus.OK);
     }
 
     @ApiImplicitParams({

@@ -389,10 +389,7 @@ public class ServiceController {
         ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
         Paging<ServiceBundle> serviceBundlePaging = resourceBundleService.getRandomResources(ff, auditingInterval, auth);
-        List<ServiceBundle> serviceList = new LinkedList<>(serviceBundlePaging.getResults());
-        Paging<ServiceBundle> servicePaging = new Paging<>(serviceBundlePaging.getTotal(), serviceBundlePaging.getFrom(),
-                serviceBundlePaging.getTo(), serviceList, serviceBundlePaging.getFacets());
-        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundlePaging, HttpStatus.OK);
     }
 
     // Get all modification details of a specific Resource based on id.
