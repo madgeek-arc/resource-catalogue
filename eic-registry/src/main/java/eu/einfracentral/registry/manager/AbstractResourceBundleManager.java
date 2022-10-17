@@ -10,7 +10,10 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
-import eu.einfracentral.service.*;
+import eu.einfracentral.service.AnalyticsService;
+import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -30,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.Validator;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -43,8 +47,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.*;
-import static eu.einfracentral.utils.VocabularyValidationUtils.validateCategories;
-import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 import static java.util.stream.Collectors.toList;
 
 public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>> extends AbstractGenericService<T> implements ResourceBundleService<T> {
@@ -85,6 +87,10 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
+    @Autowired
+    @Qualifier("serviceValidator")
+    private Validator serviceValidator;
+
     @PostConstruct
     void initLabels() {
         resourceType = resourceTypeService.getResourceType(getResourceType());
@@ -115,8 +121,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
     }
 
-    protected abstract void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle);
-
     @Override
     public String getResourceType() {
         return resourceType.getName();
@@ -131,15 +135,18 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return deserialize(resource);
     }
 
-    private T checkIdExistanceInOtherCatalogues(String id){
+    private T checkIdExistanceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<CatalogueBundle> allCatalogues = catalogueService.getAll(ff, null).getResults();
-        for (CatalogueBundle catalogueBundle : allCatalogues){
-            try {
-                return get(id, catalogueBundle.getId());
-            } catch (ResourceNotFoundException e){
-            }
+        ff.addFilter(getResourceType() + "_id", id);
+        List<T> allResources = getAll(ff, null).getResults();
+        if (allResources.size() > 1) {
+        }
+        for (T resourceBundle : allResources) {
+//            try {
+//                return get(id, catalogueBundle.getId());
+//            } catch (ResourceNotFoundException e){
+//            }
         }
         return null;
     }
@@ -148,7 +155,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public T get(String id) {
         try {
             return get(id, catalogueName);
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return checkIdExistanceInOtherCatalogues(id);
         }
     }
@@ -296,10 +303,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
-
-        validateCategories(service.getCategories());
-        validateScientificDomains(service.getScientificDomains());
-        checkResourceProvidersAndRelatedRequiredResourcesConsistency(resourceBundle);
+        serviceValidator.validate(resourceBundle, null);
 
         return true;
     }
@@ -948,7 +952,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     // TODO: Please refactor this mess...
     @Override
-    public Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication auth){
+    public Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication auth) {
         List<T> valid = new ArrayList<>();
         List<T> notAudited = new ArrayList<>();
         List<T> invalidAndUpdated = new ArrayList<>();
@@ -964,13 +968,13 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         ff2.setQuantity(maxQuantity);
         ff2.setFrom(0);
         Paging<T> retPaging = getAllForAdmin(ff, auth);
-        List<T> allWithoutAuditFilterList =  getAllForAdmin(ff2, auth).getResults();
+        List<T> allWithoutAuditFilterList = getAllForAdmin(ff2, auth).getResults();
         List<T> ret = new ArrayList<>();
         for (T serviceBundle : allWithoutAuditFilterList) {
             String auditVocStatus;
-            try{
+            try {
                 auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(serviceBundle.getLoggingInfo());
-            } catch (NullPointerException e){ // serviceBundle has null loggingInfo
+            } catch (NullPointerException e) { // serviceBundle has null loggingInfo
                 continue;
             }
             switch (auditVocStatus) {
@@ -1011,46 +1015,46 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         }
         if (!ret.isEmpty()) {
             List<T> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0){
-                if (quantity <= ret.size()){
-                    for (int i=from; i<=quantity-1; i++){
+            if (from == 0) {
+                if (quantity <= ret.size()) {
+                    for (int i = from; i <= quantity - 1; i++) {
                         retWithCorrectQuantity.add(ret.get(i));
                     }
-                } else{
+                } else {
                     retWithCorrectQuantity.addAll(ret);
                 }
                 retPaging.setTo(retWithCorrectQuantity.size());
-            } else{
+            } else {
                 boolean indexOutOfBound = false;
-                if (quantity <= ret.size()){
-                    for (int i=from; i<quantity+from; i++){
-                        try{
+                if (quantity <= ret.size()) {
+                    for (int i = from; i < quantity + from; i++) {
+                        try {
                             retWithCorrectQuantity.add(ret.get(i));
-                            if (quantity+from > ret.size()){
+                            if (quantity + from > ret.size()) {
                                 retPaging.setTo(ret.size());
-                            } else{
-                                retPaging.setTo(quantity+from);
+                            } else {
+                                retPaging.setTo(quantity + from);
                             }
-                        } catch (IndexOutOfBoundsException e){
+                        } catch (IndexOutOfBoundsException e) {
                             indexOutOfBound = true;
                         }
                     }
-                    if (indexOutOfBound){
+                    if (indexOutOfBound) {
                         retPaging.setTo(ret.size());
                     }
-                } else{
+                } else {
                     retWithCorrectQuantity.addAll(ret);
-                    if (quantity+from > ret.size()){
+                    if (quantity + from > ret.size()) {
                         retPaging.setTo(ret.size());
-                    } else{
-                        retPaging.setTo(quantity+from);
+                    } else {
+                        retPaging.setTo(quantity + from);
                     }
                 }
             }
             retPaging.setFrom(from);
             retPaging.setResults(retWithCorrectQuantity);
             retPaging.setTotal(ret.size());
-        } else{
+        } else {
             retPaging.setResults(ret);
             retPaging.setTotal(0);
             retPaging.setFrom(0);
@@ -1149,7 +1153,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return resourceBundle;
     }
 
-    private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth){
+    private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;
         loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),

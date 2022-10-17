@@ -12,6 +12,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,7 +31,8 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
@@ -40,10 +42,12 @@ public class FieldValidator {
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          ResourceBundleService<ServiceBundle> resourceBundleService) {
+                          @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
+                          @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
-        this.resourceBundleService = resourceBundleService;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
     }
 
     private String getCurrentLocation() {
@@ -304,18 +308,18 @@ public class FieldValidator {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Provider",
                                         field.getName()));
+                    } else if ((eu.einfracentral.domain.Datasource.class.equals(annotation.idClass())
+                            || DatasourceBundle.class.equals(annotation.idClass()))
+                            && datasourceBundleService.get(o.toString()) == null) {
+                        throw new ValidationException(
+                                String.format("Field '%s' should contain the ID of an existing Datasource",
+                                        field.getName()));
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
                             || ServiceBundle.class.equals(annotation.idClass()))
-                            && resourceBundleService.get(o.toString()) == null) {
+                            && serviceBundleService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
                                         field.getName()));
-                    } else if ((eu.einfracentral.domain.Datasource.class.equals(annotation.idClass())
-                        || DatasourceBundle.class.equals(annotation.idClass()))
-                        && resourceBundleService.get(o.toString()) == null) {
-                    throw new ValidationException(
-                            String.format("Field '%s' should contain the ID of an existing Datasource",
-                                    field.getName()));
                     }
                 } catch (ResourceException | ResourceNotFoundException e) {
                     throw new ValidationException(

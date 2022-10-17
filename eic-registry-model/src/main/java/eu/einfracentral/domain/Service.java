@@ -327,7 +327,8 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "requiredResources")
     @XmlElement(name = "requiredResource")
     @ApiModelProperty(position = 33)
-    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+//    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+    @FieldValidation(nullable = true)
     private List<String> requiredResources;
 
     /**
@@ -336,7 +337,8 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "relatedResources")
     @XmlElement(name = "relatedResource")
     @ApiModelProperty(position = 34)
-    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+//    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+    @FieldValidation(nullable = true)
     private List<String> relatedResources;
 
     /**

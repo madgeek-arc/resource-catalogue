@@ -1,20 +1,21 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ResourceBundle;
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
-import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,11 +26,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
@@ -97,7 +97,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                     serviceBundle.getService().getResourceOrganisation()));
         }
         // check Provider's templateStatus
-        if (providerBundle.getTemplateStatus().equals("pending template")){
+        if (providerBundle.getTemplateStatus().equals("pending template")) {
             throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
         }
 
@@ -542,41 +542,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return this.getAll(ff, null).getResults();
     }
 
-    // FIXME: refactor method
-    protected void checkResourceProvidersAndRelatedRequiredResourcesConsistency(ResourceBundle<?> resourceBundle) { // we already know that IDs exist because they passed validation
-        List<String> resourceProviders = resourceBundle.getPayload().getResourceProviders();
-        if (resourceProviders != null && !resourceProviders.isEmpty()) {
-            for (String resourceProvider : resourceProviders) {
-                if (!resourceProvider.contains(".")) { // user did not give a Public Provider ID
-                    try {
-                        providerService.get(resourceBundle.getPayload().getCatalogueId(), resourceProvider, null); // Resource Provider belongs to the same Catalogue
-                    } catch (ResourceNotFoundException e) {
-                        throw new ValidationException(String.format("You cannot have a Resource Provider that belongs to a different Catalogue -> [%s]", resourceProvider));
-                    }
-                }
-            }
-        }
-        List<String> relatedRequiredResources = new ArrayList<>();
-        if (resourceBundle.getPayload().getRelatedResources() != null && !resourceBundle.getPayload().getRelatedResources().isEmpty()){
-            relatedRequiredResources.addAll(resourceBundle.getPayload().getRelatedResources());
-        }
-        if (resourceBundle.getPayload().getRequiredResources() != null && !resourceBundle.getPayload().getRequiredResources().isEmpty()){
-            relatedRequiredResources.addAll(resourceBundle.getPayload().getRequiredResources());
-        }
-        if (!relatedRequiredResources.isEmpty()){
-            for (String relatedRequiredResource : relatedRequiredResources){
-                int count = relatedRequiredResource.length() - relatedRequiredResource.replaceAll("\\.","").length();
-                if (count <= 1){ // user did not give a Public Resource ID
-                    try{
-                        get(relatedRequiredResource, resourceBundle.getPayload().getCatalogueId()); // Related/Required Resource belongs to the same Catalogue
-                    } catch (ResourceNotFoundException e){
-                        throw new ValidationException(String.format("You cannot have a Related or Required Resource that belongs to a different Catalogue -> [%s]", relatedRequiredResource));
-                    }
-                }
-            }
-        }
-    }
-
     //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         ServiceBundle serviceBundle = new ServiceBundle();
@@ -609,7 +574,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
         ServiceBundle serviceBundle = get(resourceId, catalogueName);
         // check Service's status
-        if (!serviceBundle.getStatus().equals("approved resource")){
+        if (!serviceBundle.getStatus().equals("approved resource")) {
             throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
                     "is not yet Approved", serviceBundle.getId()));
         }
