@@ -378,27 +378,18 @@ public class ServiceController {
 
 
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
+        ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
-        List<ServiceBundle> serviceList = new LinkedList<>();
         Paging<ServiceBundle> serviceBundlePaging = resourceBundleService.getRandomResources(ff, auditingInterval, auth);
-        for (ServiceBundle serviceBundle : serviceBundlePaging.getResults()) {
-            serviceList.add(serviceBundle);
-        }
-        Paging<ServiceBundle> servicePaging = new Paging<>(serviceBundlePaging.getTotal(), serviceBundlePaging.getFrom(),
-                serviceBundlePaging.getTo(), serviceList, serviceBundlePaging.getFacets());
-        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundlePaging, HttpStatus.OK);
     }
 
     // Get all modification details of a specific Resource based on id.

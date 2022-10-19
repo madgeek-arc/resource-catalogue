@@ -24,8 +24,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.sql.DataSource;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -237,6 +237,21 @@ public class DatasourceController {
         logger.info("User '{}-{}' audited Datasource with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
                 datasourceBundle.getDatasource().getName(), actionType);
         return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<DatasourceBundle>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        ff.setFilter(allRequestParams);
+        ff.addFilter("status", "approved resource");
+        ff.addFilter("published", false);
+        Paging<DatasourceBundle> datasourceBundlePaging = resourceBundleService.getRandomResources(ff, auditingInterval, auth);
+        return new ResponseEntity<>(datasourceBundlePaging, HttpStatus.OK);
     }
 
     @ApiImplicitParams({
