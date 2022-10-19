@@ -25,7 +25,6 @@ public class SearchServiceEIC extends AbstractSearchService {
 
             switch (filters.getKey()) {
                 case "active":
-                case "latest":
                     qBuilder.filter(createDisMaxQuery(filters.getKey(), filters.getValue()));
                     break;
 

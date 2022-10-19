@@ -3,17 +3,21 @@
     
   <xs:import schemaLocation="schema2.xsd"/>
     
+  <xs:element name="alternativeIdentifier" type="tns:alternativeIdentifier"/>
+    
   <xs:element name="bundle" type="tns:bundle"/>
     
   <xs:element name="catalogue" type="tns:catalogue"/>
     
   <xs:element name="catalogueBundle" type="tns:catalogueBundle"/>
     
-  <xs:element name="dataSource" type="tns:dataSource"/>
+  <xs:element name="datasource" type="tns:datasource"/>
     
-  <xs:element name="dataSourceBundle" type="tns:dataSourceBundle"/>
+  <xs:element name="datasourceBundle" type="tns:datasourceBundle"/>
     
   <xs:element name="emailMessage" type="tns:emailMessage"/>
+    
+  <xs:element name="eoscifGuidelines" type="tns:eoscifGuidelines"/>
     
   <xs:element name="event" type="tns:event"/>
     
@@ -21,9 +25,7 @@
     
   <xs:element name="helpdeskBundle" type="tns:helpdeskBundle"/>
     
-  <xs:element name="identifier" type="tns:identifier"/>
-    
-  <xs:element name="infraService" type="tns:infraService"/>
+  <xs:element name="identifiers" type="tns:identifiers"/>
     
   <xs:element name="loggingInfo" type="tns:loggingInfo"/>
     
@@ -57,7 +59,11 @@
     
   <xs:element name="rangeValue" type="tns:rangeValue"/>
     
+  <xs:element name="resourceExtras" type="tns:resourceExtras"/>
+    
   <xs:element name="service" type="tns:service"/>
+    
+  <xs:element name="serviceBundle" type="tns:serviceBundle"/>
     
   <xs:element name="serviceCategory" type="tns:serviceCategory"/>
     
@@ -77,13 +83,25 @@
     
   <xs:element name="vocabularyEntryRequest" type="tns:vocabularyEntryRequest"/>
     
+  <xs:complexType name="alternativeIdentifier">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="type" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="value" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
   <xs:complexType abstract="true" name="bundle">
         
     <xs:sequence>
             
       <xs:element name="active" type="xs:boolean"/>
             
-      <xs:element minOccurs="0" ref="tns:identifier"/>
+      <xs:element minOccurs="0" ref="tns:identifiers"/>
             
       <xs:element minOccurs="0" name="latestAuditInfo" type="tns:loggingInfo"/>
             
@@ -103,7 +121,7 @@
       
   </xs:complexType>
     
-  <xs:complexType name="identifier">
+  <xs:complexType name="identifiers">
         
     <xs:sequence>
             
@@ -113,15 +131,13 @@
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="alternativeIdentifier" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:alternativeIdentifier"/>
                       
           </xs:sequence>
                   
         </xs:complexType>
               
       </xs:element>
-            
-      <xs:element name="hidden" type="xs:boolean"/>
             
       <xs:element minOccurs="0" name="originalId" type="xs:string"/>
           
@@ -159,13 +175,11 @@
             
       <xs:element default="null" minOccurs="0" name="modifiedBy" type="xs:string"/>
             
-      <xs:element default="null" minOccurs="0" name="originalId" type="xs:string"/>
+      <xs:element default="false" name="published" type="xs:boolean"/>
             
       <xs:element default="null" minOccurs="0" name="registeredAt" type="xs:string"/>
             
       <xs:element default="null" minOccurs="0" name="registeredBy" type="xs:string"/>
-            
-      <xs:element default="null" minOccurs="0" name="source" type="xs:string"/>
             
       <xs:element minOccurs="0" name="terms">
                 
@@ -688,7 +702,7 @@ It is also possible to select Not a legal entity.]]>
       
   </xs:complexType>
     
-  <xs:complexType name="dataSource">
+  <xs:complexType name="datasource">
         
     <xs:complexContent>
             
@@ -696,7 +710,7 @@ It is also possible to select Not a legal entity.]]>
                 
         <xs:sequence>
                     
-          <xs:element name="dataSourceClassification" type="xs:string">
+          <xs:element name="datasourceClassification" type="xs:string">
             <xs:annotation>
               <xs:documentation>
                 <![CDATA[The specific type of the data source based on the vocabulary defined for this property]]>
@@ -1783,7 +1797,25 @@ c) list of customers, communities, users, etc. using the Resource.]]>
       
   </xs:complexType>
     
-  <xs:complexType name="dataSourceBundle">
+  <xs:complexType name="datasourceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:resourceBundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:datasource"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="resourceBundle">
         
     <xs:complexContent>
             
@@ -1791,13 +1823,57 @@ c) list of customers, communities, users, etc. using the Resource.]]>
                 
         <xs:sequence>
                     
-          <xs:element minOccurs="0" ref="tns:dataSource"/>
+          <xs:element minOccurs="0" ref="tns:resourceExtras"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               
       </xs:extension>
           
     </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="resourceExtras">
+        
+    <xs:sequence>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscIFGuidelines" type="tns:eoscifGuidelines"/>
+            
+      <xs:element name="horizontalService" type="xs:boolean"/>
+            
+      <xs:element minOccurs="0" name="researchCategories">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="researchCategory" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="eoscifGuidelines">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="label" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="pid" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="semanticRelationship" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="url" type="xs:anyURI"/>
+          
+    </xs:sequence>
       
   </xs:complexType>
     
@@ -1978,28 +2054,6 @@ c) list of customers, communities, users, etc. using the Resource.]]>
           <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
                     
           <xs:element minOccurs="0" ref="tns:helpdesk"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="infraService">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="tns:bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element name="latest" type="xs:boolean"/>
-                    
-          <xs:element minOccurs="0" ref="tns:service"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               
@@ -2573,6 +2627,24 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element minOccurs="0" name="toValue" type="xs:string"/>
           
     </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="serviceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:resourceBundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:service"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
       
   </xs:complexType>
     

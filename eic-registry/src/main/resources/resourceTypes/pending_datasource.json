@@ -1,0 +1,250 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "pending_datasource_id",
+      "path": "//*[local-name()='datasource']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "name",
+      "label": "Datasource Name",
+      "path": "//*[local-name()='datasource']/*[local-name()='name']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "abbreviation",
+      "label": "Abbreviation",
+      "path": "//*[local-name()='abbreviation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "version",
+      "label": "Version",
+      "path": "//*[local-name()='datasource']/*[local-name()='version']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "resource_organisation",
+      "label": "Resource Organisation",
+      "path": "//*[local-name()='datasource']/*[local-name()='resourceOrganisation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "resource_providers",
+      "label": "Resource Provider",
+      "path": "//*[local-name()='datasource']//*[local-name()='resourceProvider']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "subcategories",
+      "label": "Subcategory",
+      "path": "//*[local-name()='category']/*[local-name()='subcategory']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "label": "Scientific Subdomain",
+      "path": "//*[local-name()='scientificDomain']/*[local-name()='scientificSubdomain']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "target_users",
+      "label": "Target User",
+      "path": "//*[local-name()='datasource']//*[local-name()='targetUser']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "access_types",
+      "label": "Access Type",
+      "path": "//*[local-name()='datasource']//*[local-name()='accessType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "access_modes",
+      "label": "Access Mode",
+      "path": "//*[local-name()='datasource']//*[local-name()='accessMode']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "language_availabilities",
+      "label": "Language Availability",
+      "path": "//*[local-name()='datasource']//*[local-name()='languageAvailability']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "geographical_availabilities",
+      "label": "Geographical Availability",
+      "path": "//*[local-name()='datasource']//*[local-name()='geographicalAvailability']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "resource_geographic_locations",
+      "label": "Resource Geographic Location",
+      "path": "//*[local-name()='datasource']//*[local-name()='resourceGeographicLocation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "trl",
+      "label": "TRL",
+      "path": "//*[local-name()='datasource']/*[local-name()='trl']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "life_cycle_status",
+      "label": "Life Cycle Status",
+      "path": "//*[local-name()='datasource']//*[local-name()='lifeCycleStatus']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_body",
+      "label": "Funding Body",
+      "path": "//*[local-name()='datasource']//*[local-name()='fundingBody']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "funding_programs",
+      "label": "Funding Program",
+      "path": "//*[local-name()='datasource']//*[local-name()='fundingProgram']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "description",
+      "label": "Description",
+      "path": "//*[local-name()='datasource']/*[local-name()='description']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "tagline",
+      "label": "Tagline",
+      "path": "//*[local-name()='datasource']/*[local-name()='tagline']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "use_cases",
+      "label": "Use Case",
+      "path": "//*[local-name()='datasource']//*[local-name()='useCase']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "open_source_technologies",
+      "label": "Open Source Technology",
+      "path": "//*[local-name()='datasource']//*[local-name()='openSourceTechnology']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "tags",
+      "label": "Tag",
+      "path": "//*[local-name()='datasource']//*[local-name()='tag']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "order_type",
+      "label": "Order Type",
+      "path": "//*[local-name()='datasource']/*[local-name()='orderType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedBy']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='registeredAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "//*[local-name()='metadata']/*[local-name()='modifiedAt']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "published",
+      "path": "//*[local-name()='metadata']/*[local-name()='published']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "originalId",
+      "path": "//*[local-name()='identifiers']/*[local-name()='originalId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "alternative_identifiers",
+      "label": "Alternative Identifier",
+      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "active",
+      "defaultValue": false,
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='active']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "status",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='status']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "pending_datasource",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "properties": {
+    "class": "eu.einfracentral.domain.DatasourceBundle"
+  },
+  "schema": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://einfracentral.eu\" version=\"1.0\" xmlns:tns=\"http://einfracentral.eu\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n\t<xs:element name=\"datasourceBundle\"/>\n</xs:schema>"
+}

@@ -15,16 +15,6 @@ import java.util.stream.Collectors;
 public interface PendingResourceService<T extends Bundle> extends ResourceService<T, Authentication> {
 
     /**
-     * Updates the resource and sets a new id.
-     *
-     * @param t
-     * @param auth
-     * @return
-     */
-    @Override
-    T update(T t, Authentication auth);
-
-    /**
      * Transforms the resource to pending.
      *
      * @param t
@@ -96,7 +86,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
         return this.getAll(ff, null)
                 .getResults()
                 .stream()
-                .collect(Collectors.toMap(Bundle::getId, r -> r.getMetadata().getOriginalId()));
+                .collect(Collectors.toMap(Bundle::getId, r -> r.getIdentifiers().getOriginalId()));
     }
 
     List<T> getMy(Authentication authentication);
@@ -109,10 +99,9 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * Get the service resource.
      *
      * @param serviceId
-     * @param version
      * @return Resource
      */
-    Resource getPendingResource(String serviceId, String version);
+    Resource getPendingResourceViaServiceId(String serviceId);
 
     /**
      * Get the provider resource.
@@ -120,6 +109,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * @param providerId
      * @return Resource
      */
-    Resource getPendingResource(String providerId);
+    Resource getPendingResourceViaProviderId(String providerId);
 
 }

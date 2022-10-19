@@ -1,6 +1,7 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.User;
 import org.springframework.security.core.Authentication;
 
@@ -14,45 +15,44 @@ public interface SecurityService {
 
     boolean hasRole(Authentication auth, String role);
 
+//    boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
-
+    boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId);
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow);
-
-    boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId);
+    boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId, boolean noThrow);
 
     boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId);
 
     boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow);
 
+    //    boolean isResourceProviderAdmin(Authentication auth, String resourceId);
+
+    boolean isResourceProviderAdmin(Authentication auth, String resourceId);
+    boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId);
+
+//    boolean isResourceProviderAdmin(Authentication auth, String resourceId, boolean noThrow);
+
+    boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow);
+    <T extends eu.einfracentral.domain.Service> boolean isResourceProviderAdmin(Authentication auth, T service);
+
+    boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId, @NotNull String catalogueId);
+
+    boolean userIsProviderAdmin(@NotNull User user, @NotNull ProviderBundle providerBundle);
+
     boolean userIsCatalogueAdmin(@NotNull User user, @NotNull String catalogueId);
 
-    boolean isServiceProviderAdmin(Authentication auth, String serviceId);
+//    boolean userIsResourceProviderAdmin(User user, ResourceBundle<?> resourceBundle);
 
-    boolean isServiceProviderAdmin(Authentication auth, String serviceId, String catalogueId);
+//    boolean userIsResourceProviderAdmin(User user, String resourceId);
 
-    boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow);
+    boolean userIsResourceProviderAdmin(User user, String resourceId, String catalogueId);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service);
+    boolean providerCanAddResources(Authentication auth, String resourceId, String catalogueId);
+    boolean providerCanAddResources(Authentication auth, ResourceBundle<?> resourceBundle);
+    <T extends eu.einfracentral.domain.Service> boolean providerCanAddResources(Authentication auth, T service);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow);
+    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
+    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId);
 
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService);
-
-    boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow);
-
-    boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service);
-
-    boolean userIsServiceProviderAdmin(User user, InfraService infraService);
-
-    boolean userIsServiceProviderAdmin(User user, String serviceId);
-
-    boolean userIsServiceProviderAdmin(User user, String serviceId, String catalogueId);
-
-    boolean providerCanAddServices(Authentication auth, InfraService service);
-
-    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId);
-
-    boolean serviceIsActive(String serviceId);
-
-    boolean serviceIsActive(String serviceId, String version);
+    boolean resourceIsActive(String resourceId, String catalogueId);
 }

@@ -191,7 +191,8 @@ public class Catalogue implements Identifiable {
     @FieldValidation
     private List<User> users;
 
-    public Catalogue(){
+    public Catalogue() {
+        // no-arg constructor
     }
 
     @Override

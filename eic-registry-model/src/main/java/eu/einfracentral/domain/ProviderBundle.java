@@ -31,6 +31,16 @@ public class ProviderBundle extends Bundle<Provider> {
         this.setMetadata(metadata);
     }
 
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
+    }
+
     @XmlElement(name = "provider")
     public Provider getProvider() {
         return this.getPayload();

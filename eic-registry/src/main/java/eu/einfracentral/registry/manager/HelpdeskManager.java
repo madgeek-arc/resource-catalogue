@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -20,23 +20,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static eu.einfracentral.config.CacheConfig.*;
-
 @org.springframework.stereotype.Service("helpdeskManager")
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements ResourceService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
     @Autowired
-    public HelpdeskManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+    public HelpdeskManager(ResourceBundleService<ServiceBundle> resourceBundleService,
                            JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService) {
         super(HelpdeskBundle.class);
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -71,6 +69,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.debug("Adding Helpdesk: {}", helpdesk);
 
         registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "post");
+        logger.info("Sending JMS with topic 'helpdesk.create'");
         jmsTopicTemplate.convertAndSend("helpdesk.create", helpdesk);
 
         return helpdesk;
@@ -112,6 +111,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.debug("Updating Helpdesk: {}", helpdesk);
 
         registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "put");
+        logger.info("Sending JMS with topic 'helpdesk.update'");
         jmsTopicTemplate.convertAndSend("helpdesk.update", helpdesk);
 
         return helpdesk;
@@ -124,6 +124,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.debug("Deleting Helpdesk: {}", helpdesk);
 
         //TODO: send emails
+        logger.info("Sending JMS with topic 'helpdesk.delete'");
         jmsTopicTemplate.convertAndSend("helpdesk.delete", helpdesk);
 
     }
@@ -131,13 +132,13 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public void serviceConsistency(String serviceId, String catalogueId){
         // check if Service exists
         try{
-            infraServiceService.get(serviceId, catalogueId);
+            resourceBundleService.get(serviceId, catalogueId);
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
         }
         // check if Service has already a Helpdesk registered
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<HelpdeskBundle> allHelpdesks = getAll(ff, null).getResults();
         for (HelpdeskBundle helpdesk : allHelpdesks){
             if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){

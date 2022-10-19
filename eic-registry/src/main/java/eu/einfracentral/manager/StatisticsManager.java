@@ -1,13 +1,13 @@
 package eu.einfracentral.manager;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.Service;
 import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.dto.PlaceCount;
 import eu.einfracentral.dto.Value;
-import eu.einfracentral.registry.manager.InfraServiceManager;
+import eu.einfracentral.registry.manager.ServiceBundleManager;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.AnalyticsService;
@@ -65,7 +65,7 @@ public class StatisticsManager implements StatisticsService {
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final SearchService searchService;
     private final ParserService parserService;
-    private final InfraServiceManager infraServiceManager;
+    private final ServiceBundleManager serviceBundleManager;
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
 
@@ -79,14 +79,14 @@ public class StatisticsManager implements StatisticsService {
     StatisticsManager(RestHighLevelClient client, AnalyticsService analyticsService,
                       ProviderService<ProviderBundle, Authentication> providerService,
                       SearchService searchService, ParserService parserService,
-                      InfraServiceManager infraServiceManager, VocabularyService vocabularyService,
+                      ServiceBundleManager serviceBundleManager, VocabularyService vocabularyService,
                       DataSource dataSource) {
         this.client = client;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
         this.searchService = searchService;
         this.parserService = parserService;
-        this.infraServiceManager = infraServiceManager;
+        this.serviceBundleManager = serviceBundleManager;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
     }
@@ -246,7 +246,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> providerRatings(String id, Interval by) {
-        Map<String, Float> providerRatings = infraServiceManager.getServices(id)
+        Map<String, Float> providerRatings = serviceBundleManager.getResources(id)
                 .stream()
                 .flatMap(s -> ratings(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
@@ -263,7 +263,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerFavourites(String id, Interval by) {
-        Map<String, Integer> providerFavorites = infraServiceManager.getServices(id)
+        Map<String, Integer> providerFavorites = serviceBundleManager.getResources(id)
                 .stream()
                 .flatMap(s -> favourites(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -296,7 +296,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
-        Map<String, Integer> providerAddToProject = infraServiceManager.getServices(id)
+        Map<String, Integer> providerAddToProject = serviceBundleManager.getResources(id)
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -341,7 +341,7 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerVisits(String id, Interval by) {
         Map<String, Integer> results = new HashMap<>();
-        for (Service service : infraServiceManager.getServices(id)){
+        for (Service service : serviceBundleManager.getResources(id)){
             Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(),by).entrySet();
             for (Map.Entry<String, Integer> entry : entrySet){
                 if (!results.containsKey(entry.getKey())){
@@ -356,7 +356,7 @@ public class StatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Float> providerVisitation(String id, Interval by) {
-        Map<String, Integer> counts = infraServiceManager.getServices(id).stream().collect(Collectors.toMap(
+        Map<String, Integer> counts = serviceBundleManager.getResources(id).stream().collect(Collectors.toMap(
                 Service::getName,
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
         ));
@@ -448,7 +448,7 @@ public class StatisticsManager implements StatisticsService {
         MapSqlParameterSource in = new MapSqlParameterSource();
 
         in.addValue("resource_organisation", providerId);
-        String query = "SELECT unnest(geographical_availabilities) AS geographical_availability, count(unnest(geographical_availabilities)) AS count FROM infra_service_view WHERE latest=true AND active = true ";
+        String query = "SELECT unnest(geographical_availabilities) AS geographical_availability, count(unnest(geographical_availabilities)) AS count FROM service_view WHERE active = true ";
 
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
@@ -495,7 +495,7 @@ public class StatisticsManager implements StatisticsService {
 
         in.addValue("resource_organisation", providerId);
         in.addValue("geographical_availabilities", place);
-        String query = "SELECT infra_service_id, name FROM infra_service_view WHERE latest=true AND active=true ";
+        String query = "SELECT service_id, name FROM service_view WHERE active=true ";
 
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
@@ -521,7 +521,7 @@ public class StatisticsManager implements StatisticsService {
 
         placeServices = records
                 .stream()
-                .map(record -> new Value(record.get("infra_service_id").toString(), record.get("name").toString()))
+                .map(record -> new Value(record.get("service_id").toString(), record.get("name").toString()))
                 .collect(Collectors.toList());
         return placeServices;
     }
@@ -542,7 +542,7 @@ public class StatisticsManager implements StatisticsService {
         MapSqlParameterSource in = new MapSqlParameterSource();
         in.addValue("resource_organisation", providerId);
 
-        String query = "SELECT infra_service_id, name, geographical_availabilities FROM infra_service_view WHERE latest=true AND active=true ";
+        String query = "SELECT service_id, name, geographical_availabilities FROM service_view WHERE active=true ";
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
         }
@@ -552,7 +552,7 @@ public class StatisticsManager implements StatisticsService {
         try {
             for (Map<String, Object> entry : records) {
                 Value value = new Value();
-                value.setId(entry.get("infra_service_id").toString());
+                value.setId(entry.get("service_id").toString());
                 value.setName(entry.get("name").toString());
                 PgArray pgArray = ((PgArray) entry.get("geographical_availabilities"));
 
@@ -596,11 +596,11 @@ public class StatisticsManager implements StatisticsService {
 
         Map<String, Set<String>> providerCountries = providerCountriesMap();
 
-        List<InfraService> allServices = infraServiceManager.getAll(ff, null).getResults();
-        for (InfraService infraService : allServices) {
-            Value value = new Value(infraService.getId(), infraService.getService().getName());
+        List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, null).getResults();
+        for (ServiceBundle serviceBundle : allServices) {
+            Value value = new Value(serviceBundle.getId(), serviceBundle.getService().getName());
 
-            Set<String> countries = new HashSet<>(providerCountries.get(infraService.getService().getResourceOrganisation()));
+            Set<String> countries = new HashSet<>(providerCountries.get(serviceBundle.getService().getResourceOrganisation()));
             for (String country : countries) {
                 if (mapValues.get(country) == null) {
                     continue;
@@ -622,8 +622,8 @@ public class StatisticsManager implements StatisticsService {
         MapSqlParameterSource in = new MapSqlParameterSource();
         in.addValue("resource_organisation", providerId);
 
-        String query = "SELECT infra_service_id, name, " + vocabulary.getKey()
-                + " FROM infra_service_view WHERE latest=true AND active=true ";
+        String query = "SELECT service_id, name, " + vocabulary.getKey()
+                + " FROM service_view WHERE active=true ";
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
         }
@@ -633,7 +633,7 @@ public class StatisticsManager implements StatisticsService {
         try {
             for (Map<String, Object> entry : records) {
                 Value value = new Value();
-                value.setId(entry.get("infra_service_id").toString());
+                value.setId(entry.get("service_id").toString());
                 value.setName(entry.get("name").toString());
 
                 // TODO: refactor this code and Vocabulary enum

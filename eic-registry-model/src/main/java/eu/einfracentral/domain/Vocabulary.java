@@ -79,16 +79,19 @@ public class Vocabulary implements Identifiable {
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
-        AUDIT_STATE("Audit state"),
         CATALOGUE_STATE("Catalogue state"),
-        // DataSource
+        // Datasource
         DS_RESEARCH_ENTITY_TYPE("Research entity type"),
         DS_PERSISTENT_IDENTITY_SCHEME("Persistent identity scheme"),
         DS_JURISDICTION("Jurisdiction"),
         DS_CLASSIFICATION("Classification"),
         DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
         // Monitoring
-        MONITORING_MONITORED_BY("Monitored by");
+        MONITORING_MONITORED_BY("Monitored by"),
+        // Bundle Extras
+        SEMANTIC_RELATIONSHIP("Semantic relationship"),
+        RESEARCH_CATEGORY("Research category");
+
         private final String type;
 
         Type(final String type) {

@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
@@ -11,6 +13,7 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,9 +25,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import javax.sql.DataSource;
@@ -42,12 +45,12 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientifi
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final EventService eventService;
-    private final JmsTemplate jmsTopicTemplate;
     private final RegistrationMailService registrationMailService;
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
@@ -62,27 +65,23 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
-    @Value("${sync.enable}")
-    private boolean enableSyncing;
-
     @Autowired
-    public ProviderManager(@Lazy InfraServiceService<InfraService, InfraService> infraServiceService,
-                           @Lazy SecurityService securityService,
-                           @Lazy FieldValidator fieldValidator,
-                           @Lazy RegistrationMailService registrationMailService,
-                           IdCreator idCreator, EventService eventService,
-                           JmsTemplate jmsTopicTemplate, VersionService versionService,
+    public ProviderManager(@Lazy ResourceBundleService<ServiceBundle> resourceBundleService,
+                           @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                           @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
+                           @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
+                           EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
                            SynchronizerService<Provider> synchronizerServiceProvider,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService) {
         super(ProviderBundle.class);
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
         this.securityService = securityService;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
-        this.jmsTopicTemplate = jmsTopicTemplate;
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
@@ -126,8 +125,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
-        jmsTopicTemplate.convertAndSend("provider.create", provider);
-
         synchronizerServiceProvider.syncAdd(provider.getProvider());
 
         return ret;
@@ -144,7 +141,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
 
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             provider.getProvider().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(provider, catalogueId);
@@ -182,6 +179,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         resourceService.updateResource(existing);
         logger.debug("Updating Provider: {} of Catalogue: {}", provider, provider.getProvider().getCatalogueId());
 
+        // check if Provider has become a Legal Entity
+        checkAndAddProviderToHLEVocabulary(provider);
+
         // Send emails to newly added or deleted Admins
         adminDifferences(provider, ex);
 
@@ -193,8 +193,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
             }
         }
-
-        jmsTopicTemplate.convertAndSend("provider.update", provider);
 
         synchronizerServiceProvider.syncUpdate(provider.getProvider());
 
@@ -234,7 +232,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerId)) {
+                    securityService.userIsProviderAdmin(user, providerBundle)) {
                 return providerBundle;
             }
         }
@@ -253,7 +251,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, id)) {
+                    securityService.userIsProviderAdmin(user, providerBundle)) {
                 return providerBundle;
             }
         }
@@ -327,21 +325,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
             for (ProviderBundle providerBundle : providers.getResults()){
                 if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
-                securityService.userIsProviderAdmin(user, providerBundle.getId())) {
+                securityService.userIsProviderAdmin(user, providerBundle)) {
                     retList.add(providerBundle);
                 }
             }
             providers.setResults(retList);
             providers.setTotal(retList.size());
             providers.setTo(retList.size());
-            userProviders = getMyServiceProviders(auth);
-            if (userProviders != null) {
-                // replace user providers having null users with complete provider entries
-                userProviders.forEach(x -> {
-                    providers.getResults().removeIf(provider -> provider.getId().equals(x.getId()));
-                    providers.getResults().add(x);
-                });
-            }
             return providers;
         }
 
@@ -354,18 +344,32 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providers;
     }
 
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(Authentication authentication, ProviderBundle provider) {
+    public void delete(ProviderBundle provider) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<InfraService> services = infraServiceService.getInfraServices(provider.getId(), authentication);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
         services.forEach(s -> {
-            try {
-                infraServiceService.delete(s);
-            } catch (ResourceNotFoundException e) {
-                logger.error("Error deleting Resource", e);
+            if (!s.getMetadata().isPublished()){
+                try {
+                    resourceBundleService.delete(s);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Error deleting Service", e);
+                }
             }
         });
-        logger.debug("Deleting Provider: {}", provider);
+        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
+        datasources.forEach(s -> {
+            if (!s.getMetadata().isPublished()){
+                try {
+                    datasourceBundleService.delete(s);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Error deleting Datasource", e);
+                }
+            }
+        });
+        logger.debug("Deleting Provider: {} and all his Resources", provider);
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(authentication).getEmail(), User.of(authentication).getEmail(), securityService.getRoleName(authentication),
@@ -381,13 +385,19 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
 
-        jmsTopicTemplate.convertAndSend("provider.delete", provider);
+        deleteBundle(provider);
+        logger.debug("Deleting Resource {}", provider);
 
-        super.delete(provider);
+        // TODO: move to aspect
         registrationMailService.notifyProviderAdmins(provider);
 
         synchronizerServiceProvider.syncDelete(provider.getProvider());
 
+    }
+
+    private void deleteBundle(ProviderBundle providerBundle) {
+        logger.info("Deleting Provider: {}", providerBundle);
+        super.delete(providerBundle);
     }
 
     @Override
@@ -424,6 +434,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
                 // latestOnboardingInfo
                 provider.setLatestOnboardingInfo(loggingInfo);
+
+                // add Provider's Name as a HLE Vocabulary
+                checkAndAddProviderToHLEVocabulary(provider);
                 break;
             case "rejected provider":
                 provider.setActive(false);
@@ -468,7 +481,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (active != null) {
             provider.setActive(active);
             if (!active) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
                 loggingInfoList.add(loggingInfo);
                 provider.setLoggingInfo(loggingInfoList);
 
@@ -479,7 +493,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 deactivateServices(provider.getId(), auth);
                 logger.info("Deactivating Provider: {}", provider);
             } else {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
                 loggingInfoList.add(loggingInfo);
                 provider.setLoggingInfo(loggingInfoList);
 
@@ -504,9 +519,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 securityService.hasRole(auth, "ROLE_EPOT")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
+            ff.addFilter("published", false);
             providers = super.getAll(ff, null).getResults();
         } else if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
-            providers = getMyServiceProviders(auth);
+            providers = getMy(null, auth).getResults();
         } else {
             return new ArrayList<>();
         }
@@ -528,28 +544,28 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     @Cacheable(value = CACHE_PROVIDERS, key = "(#auth!=null?#auth:'')")
-    public List<ProviderBundle> getMyServiceProviders(Authentication auth) {
+    public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");
         }
         User user = User.of(auth);
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        if (ff == null) {
+            ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+        }
+        if (!ff.getFilter().containsKey("published")) {
+            ff.addFilter("published", false);
+        }
+        ff.addFilter("users", user.getEmail());
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return super.getAll(ff, auth).getResults()
-                .stream().map(p -> {
-                    if (securityService.userIsProviderAdmin(user, p.getId())) {
-                        return p;
-                    } else return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return super.getAll(ff, auth);
     }
 
     @Override
     public List<ProviderBundle> getInactive() {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", false);
+        ff.addFilter("published", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
@@ -557,9 +573,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
         logger.info("Activating all Resources of the Provider with id: {}", providerId);
-        for (InfraService service : services) {
+        for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
             if (service.getLoggingInfo() != null){
@@ -583,7 +599,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
-                infraServiceService.update(service, null);
+                resourceBundleService.update(service, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }
@@ -591,9 +607,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<InfraService> services = infraServiceService.getInfraServices(providerId, auth);
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
         logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
-        for (InfraService service : services) {
+        for (ServiceBundle service : services) {
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
             if (service.getLoggingInfo() != null){
@@ -617,7 +633,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
             try {
                 logger.debug("Setting Service with name '{}' as active", service.getService().getName());
-                infraServiceService.update(service, null);
+                resourceBundleService.update(service, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update service with name '{}", service.getService().getName());
             }
@@ -628,16 +644,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle validate(ProviderBundle provider) {
         logger.debug("Validating Provider with id: {}", provider.getId());
 
+        try {
+            fieldValidator.validate(provider);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
+
         if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
             validateScientificDomains(provider.getProvider().getScientificDomains());
         }
         if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
-        }
-        try {
-            fieldValidator.validate(provider);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
         }
 
         return provider;
@@ -652,7 +669,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<Event> allUserEvents = new ArrayList<>();
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
-        List<ProviderBundle> allUserProviders = new ArrayList<>(getMyServiceProviders(authentication));
+        List<ProviderBundle> allUserProviders = getMy(null, authentication).getResults();
         for (ProviderBundle providerBundle : allUserProviders) {
             if (providerBundle.getProvider().getUsers().size() == 1) {
                 throw new ValidationException(String.format("Your user info cannot be deleted, because you are the solely Admin of the Provider [%s]. " +
@@ -790,34 +807,25 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(1000);
+        facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved provider");
+        facetFilter.addFilter("published", "false");
         Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
-        List<ProviderBundle> providerList = getAll(facetFilter, auth).getResults();
+        List<ProviderBundle> providersToBeAudited = new ArrayList<>();
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (ProviderBundle providerBundle : providerList) {
+        for (ProviderBundle providerBundle : providerBrowsing.getResults()) {
             if (providerBundle.getLatestAuditInfo() != null) {
                 if (Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) > interval) {
-                    int index = 0;
-                    for (int i=0; i<providerBrowsing.getResults().size(); i++){
-                        if (providerBrowsing.getResults().get(i).getProvider().getId().equals(providerBundle.getProvider().getId())){
-                            index = i;
-                            break;
-                        }
-                    }
-                    providerBrowsing.getResults().remove(index);
+                    providersToBeAudited.add(providerBundle);
                 }
             }
         }
-        Collections.shuffle(providerBrowsing.getResults());
-        for (int i = providerBrowsing.getResults().size() - 1; i > ff.getQuantity() - 1; i--) {
-            providerBrowsing.getResults().remove(i);
+        Collections.shuffle(providersToBeAudited);
+        for (int i = providersToBeAudited.size() - 1; i > ff.getQuantity() - 1; i--) {
+            providersToBeAudited.remove(i);
         }
-        providerBrowsing.setFrom(ff.getFrom());
-        providerBrowsing.setTo(providerBrowsing.getResults().size());
-        providerBrowsing.setTotal(providerBrowsing.getResults().size());
-        return providerBrowsing;
+        return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
     }
 
 //    @Override
@@ -949,9 +957,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = 'eosc'";
+            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"' AND published = 'false' AND";
         } else{
-            query = "SELECT provider_id FROM provider_view WHERE";
+            query = "SELECT provider_id FROM provider_view WHERE published = 'false' AND";
         }
 
         boolean firstTime = true;
@@ -1063,7 +1071,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey()));
         provider.setLoggingInfo(loggingInfoList);
-        if (catalogueId == null) {
+        if (catalogueId == null || catalogueId.equals("")) {
             // set catalogueId = eosc
             provider.getProvider().setCatalogueId(catalogueName);
             provider.setActive(false);
@@ -1093,5 +1101,55 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
             }
         }
+    }
+
+    private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle){
+        Vocabulary newHostingLegalEntity = new Vocabulary();
+        newHostingLegalEntity.setId("provider_hosting_legal_entity-"+providerBundle.getProvider().getId());
+        newHostingLegalEntity.setName(providerBundle.getProvider().getName());
+        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
+                newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
+        vocabularyService.add(newHostingLegalEntity, null);
+    }
+
+    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle){
+        List<String> allHLEIDs = new ArrayList<>();
+        List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        for (Vocabulary voc : allHLE){
+            allHLEIDs.add(voc.getId());
+        }
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()){
+            if (!allHLEIDs.contains("provider_hosting_legal_entity-" + providerBundle.getProvider().getId())){
+                addApprovedProviderToHLEVocabulary(providerBundle);
+            }
+        }
+    }
+
+    public Paging<ResourceBundle<?>> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth){
+        List<ResourceBundle<?>> ret = new ArrayList<>();
+        if (resourceType.equals("service")){
+            Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, resourceBundleService, auth);
+            ret.addAll(providerRejectedResources.getResults());
+            return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
+                    providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
+        } else if (resourceType.equals("datasource")){
+            Browsing<DatasourceBundle> providerRejectedResources = getResourceBundles(ff, datasourceBundleService, auth);
+            ret.addAll(providerRejectedResources.getResults());
+            return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
+                    providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
+        }
+        return null;
+    }
+
+    private <T extends Bundle<?>, I extends ResourceCRUDService<T, Authentication>> Browsing<T> getResourceBundles(FacetFilter ff, I service, Authentication auth) {
+        FacetFilter filter = new FacetFilter();
+        filter.setFrom(ff.getFrom());
+        filter.setQuantity(ff.getQuantity());
+        filter.setKeyword(ff.getKeyword());
+        filter.setFilter(ff.getFilter());
+        filter.setOrderBy(ff.getOrderBy());
+        // Get all Catalogue's Resources
+        return service.getAll(filter, auth);
     }
 }

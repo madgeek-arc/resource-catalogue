@@ -1,13 +1,16 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.CatalogueManager;
 import eu.einfracentral.registry.manager.PendingProviderManager;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.DatasourceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
@@ -15,6 +18,7 @@ import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,9 +34,14 @@ public class OIDCSecurityService implements SecurityService {
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
-    private final PendingResourceService<InfraService> pendingServiceManager;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final DatasourceService<DatasourceBundle> datasourceService;
+    private final PendingResourceService<ServiceBundle> pendingServiceManager;
+    private final PendingResourceService<DatasourceBundle> pendingDatasourceManager;
     private OIDCAuthenticationToken adminAccess;
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Value("${project.name:}")
     private String projectName;
@@ -42,13 +51,17 @@ public class OIDCSecurityService implements SecurityService {
 
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
-                        InfraServiceService<InfraService, InfraService> infraServiceService,
-                        PendingProviderManager pendingProviderManager, PendingResourceService<InfraService> pendingServiceManager) {
+                        ResourceBundleService<ServiceBundle> resourceBundleService,
+                        @Lazy DatasourceService<DatasourceBundle> datasourceService,
+                        @Lazy PendingProviderManager pendingProviderManager, @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,
+                        @Lazy PendingResourceService<DatasourceBundle> pendingDatasourceManager) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
+        this.datasourceService = datasourceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
+        this.pendingDatasourceManager = pendingDatasourceManager;
 
         // create admin access
         List<GrantedAuthority> roles = new ArrayList<>();
@@ -80,34 +93,53 @@ public class OIDCSecurityService implements SecurityService {
         return role;
     }
 
+    @Override
     public boolean hasRole(Authentication auth, String role) {
         if (auth == null) return false;
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
+    @Override
+    public boolean userIsProviderAdmin(User user, ProviderBundle providerBundle) {
+        return userIsProviderAdmin(user, providerBundle.getId(), providerBundle.getPayload().getCatalogueId());
+    }
+
+    @Override
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId) {
+        return isProviderAdmin(auth, providerId, catalogueName);
+    }
+
+    @Override
+    public boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsProviderAdmin(user, providerId);
+        return userIsProviderAdmin(user, providerId, catalogueId);
     }
 
+    @Override
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow) {
-        if (auth == null && noThrow) {
-            return false;
+        return isProviderAdmin(auth, providerId, catalogueName, noThrow);
+    }
+
+    @Override
+    public boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId, boolean noThrow) {
+        if (noThrow) {
+            return true;
         }
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsProviderAdmin(user, providerId);
+        return userIsProviderAdmin(user, providerId, catalogueId);
     }
 
-    public boolean userIsProviderAdmin(User user, @NotNull String providerId) {
+    @Override
+    public boolean userIsProviderAdmin(User user, @NotNull String providerId, @NotNull String catalogueId) {
         ProviderBundle registeredProvider;
         try {
-            registeredProvider = providerManager.get(providerId);
+            registeredProvider = providerManager.get(catalogueId, providerId, adminAccess);
         } catch (ResourceException e) {
             try {
                 registeredProvider = pendingProviderManager.get(providerId);
@@ -138,6 +170,7 @@ public class OIDCSecurityService implements SecurityService {
                 });
     }
 
+    @Override
     public boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
@@ -146,6 +179,7 @@ public class OIDCSecurityService implements SecurityService {
         return userIsCatalogueAdmin(user, catalogueId);
     }
 
+    @Override
     public boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow) {
         if (auth == null && noThrow) {
             return false;
@@ -157,6 +191,7 @@ public class OIDCSecurityService implements SecurityService {
         return userIsCatalogueAdmin(user, catalogueId);
     }
 
+    @Override
     public boolean userIsCatalogueAdmin(User user, @NotNull String catalogueId) {
         CatalogueBundle registeredCatalogue;
         try {
@@ -186,25 +221,33 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, String serviceId) {
+    public boolean isResourceProviderAdmin(Authentication auth, String resourceId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, serviceId);
+        return userIsResourceProviderAdmin(user, resourceId, catalogueName);
     }
-
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, String serviceId, String catalogueId) {
+    public boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, serviceId, catalogueId);
+        return userIsResourceProviderAdmin(user, resourceId, catalogueId);
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, String serviceId, boolean noThrow) {
+    public <T extends eu.einfracentral.domain.Service> boolean isResourceProviderAdmin(Authentication auth, T service) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsResourceProviderAdmin(user, service.getId(), service.getCatalogueId());
+    }
+
+    @Override
+    public boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow) {
         if (auth == null && noThrow) {
             return false;
         }
@@ -212,142 +255,81 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
         User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, serviceId);
+        return userIsResourceProviderAdmin(user, resourceBundle.getId(), resourceBundle.getPayload().getCatalogueId());
     }
 
     @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service) {
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
-            return false;
-        }
-        User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, service);
-    }
-
-    @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.Service service, boolean noThrow) {
-        if (auth == null && noThrow) {
-            return false;
-        }
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
-            return false;
-        }
-        User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, service);
-    }
-
-    @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService) {
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
-            return false;
-        }
-        User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, infraService);
-    }
-
-    @Override
-    public boolean isServiceProviderAdmin(Authentication auth, eu.einfracentral.domain.InfraService infraService, boolean noThrow) {
-        if (auth == null && noThrow) {
-            return false;
-        }
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
-            return false;
-        }
-        User user = User.of(auth);
-        return userIsServiceProviderAdmin(user, infraService);
-    }
-
-    @Override
-    public boolean userIsServiceProviderAdmin(User user, eu.einfracentral.domain.Service service) {
-        if (service.getResourceOrganisation() == null || service.getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
-        }
-//        List<String> allProviders = service.getResourceProviders();
-//        allProviders.add(service.getResourceOrganisation());
-        List<String> allProviders = Collections.singletonList(service.getResourceOrganisation());
-        Optional<List<String>> providers = Optional.of(allProviders);
-        return providers
-                .get()
-                .stream()
-                .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(user, id));
-    }
-
-    @Override
-    public boolean userIsServiceProviderAdmin(User user, InfraService infraService) {
-        return userIsServiceProviderAdmin(user, infraService.getService());
-    }
-
-    @Override
-    public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId) {
-        InfraService service;
+    public boolean userIsResourceProviderAdmin(@NotNull User user, String resourceId, String catalogueId) {
+        ResourceBundle<?> resourceBundle;
         try {
-            service = infraServiceService.get(serviceId);
+            resourceBundle = resourceBundleService.getOrElseReturnNull(resourceId, catalogueId);
+            if (resourceBundle == null){
+                resourceBundle = datasourceService.getOrElseReturnNull(resourceId, catalogueId);
+            }
+            if (resourceBundle == null){
+                resourceBundle = pendingServiceManager.get(resourceId);
+            }
         } catch (ResourceException | ResourceNotFoundException e) {
             try {
-                service = pendingServiceManager.get(serviceId);
+                resourceBundle = pendingDatasourceManager.get(resourceId);
             } catch (RuntimeException re) {
                 return false;
             }
         } catch (RuntimeException e) {
             return false;
         }
-        if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
+        if (resourceBundle.getPayload().getResourceOrganisation() == null || resourceBundle.getPayload().getResourceOrganisation().equals("")) {
+            throw new ValidationException("Resource has no Resource Organisation");
         }
-//        List<String> allProviders = service.getService().getResourceProviders();
-//        allProviders.add(service.getService().getResourceOrganisation());
-        List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
-        Optional<List<String>> providers = Optional.of(allProviders);
-        return providers
-                .get()
+
+        List<String> allProviders = new ArrayList<>(resourceBundle.getPayload().getResourceProviders());
+        allProviders.add(resourceBundle.getPayload().getResourceOrganisation());
+        String catalogue = resourceBundle.getPayload().getCatalogueId();
+        return allProviders
                 .stream()
                 .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(user, id));
+                .anyMatch(id -> userIsProviderAdmin(user, id, catalogue));
     }
 
     @Override
-    public boolean userIsServiceProviderAdmin(@NotNull User user, String serviceId, String catalogueId) {
-        InfraService service;
-        try {
-            service = infraServiceService.get(serviceId, catalogueId);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            try {
-                service = pendingServiceManager.get(serviceId);
-            } catch (RuntimeException re) {
-                return false;
+    public boolean providerCanAddResources(Authentication auth, String resourceId, String catalogueId) {
+        return true;
+    }
+
+    @Override
+    public boolean providerCanAddResources(Authentication auth, ResourceBundle<?> resourceBundle) {
+        String providerId = resourceBundle.getPayload().getResourceOrganisation();
+        if (resourceBundle.getPayload().getCatalogueId() == null || resourceBundle.getPayload().getCatalogueId().equals("")){
+            resourceBundle.getPayload().setCatalogueId(catalogueName);
+        }
+        ProviderBundle provider = providerManager.get(resourceBundle.getPayload().getCatalogueId(), providerId, auth);
+        if (isProviderAdmin(auth, provider.getId(), provider.getPayload().getCatalogueId())) {
+            if (provider.getStatus() == null) {
+                throw new ServiceException("Provider status field is null");
             }
-        } catch (RuntimeException e) {
-            return false;
+            if (provider.isActive() && provider.getStatus().equals("approved provider")) {
+                return true;
+            } else if (provider.getTemplateStatus().equals("no template status")) {
+                FacetFilter ff = new FacetFilter();
+                ff.addFilter("resource_organisation", provider.getId());
+                if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                    return true;
+                }
+                throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
+            }
         }
-        if (service.getService().getResourceOrganisation() == null || service.getService().getResourceOrganisation().equals("")) {
-            throw new ValidationException("Service has no Service Organisation");
-        }
-
-        List<String> allProviders = Collections.singletonList(service.getService().getResourceOrganisation());
-        Optional<List<String>> providers = Optional.of(allProviders);
-        return providers
-                .get()
-                .stream()
-                .filter(Objects::nonNull)
-                .anyMatch(id -> userIsProviderAdmin(user, id));
+        return false;
     }
 
-    public boolean providerCanAddServices(Authentication auth, String serviceId) {
-        return providerCanAddServices(auth, infraServiceService.get(serviceId));
-    }
-
-    public boolean providerCanAddServices(Authentication auth, InfraService infraService) {
-        return providerCanAddServices(auth, infraService.getService());
-    }
-
-    public boolean providerCanAddServices(Authentication auth, eu.einfracentral.domain.Service service) {
-//        List<String> providerIds = service.getService().getResourceProviders();
-//        providerIds.add((service.getService().getResourceOrganisation()));
+    @Override
+    public <T extends eu.einfracentral.domain.Service> boolean providerCanAddResources(Authentication auth, T service) {
         List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
+        if (service.getCatalogueId() == null || service.getCatalogueId().equals("")){
+            service.setCatalogueId(catalogueName);
+        }
         for (String providerId : providerIds) {
-            ProviderBundle provider = providerManager.get(providerId);
-            if (isProviderAdmin(auth, provider.getId())) {
+            ProviderBundle provider = providerManager.get(service.getCatalogueId(), providerId, auth);
+            if (isProviderAdmin(auth, provider.getId(), service.getCatalogueId())) {
                 if (provider.getStatus() == null) {
                     throw new ServiceException("Provider status field is null");
                 }
@@ -356,7 +338,7 @@ public class OIDCSecurityService implements SecurityService {
                 } else if (provider.getTemplateStatus().equals("no template status")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());
-                    if (infraServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                    if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                         return true;
                     }
                     throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
@@ -366,15 +348,18 @@ public class OIDCSecurityService implements SecurityService {
         return false;
     }
 
-    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
-//        List<String> providerIds = service.getService().getResourceProviders();
-//        providerIds.add(service.getService().getResourceOrganisation());
-        List<String> providerIds = Collections.singletonList(service.getService().getResourceOrganisation());
+    @Override
+    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId){
+        return providerIsActiveAndUserIsAdmin(auth, resourceId, catalogueName);
+    }
+    @Override
+    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId) {
+        ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId, catalogueId);
+        List<String> providerIds = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
         for (String providerId : providerIds) {
-            ProviderBundle provider = providerManager.get(providerId);
+            ProviderBundle provider = providerManager.get(catalogueId, providerId, auth);
             if (provider != null && provider.isActive()) {
-                if (isProviderAdmin(auth, providerId)) {
+                if (isProviderAdmin(auth, providerId, provider.getPayload().getCatalogueId())) {
                     return true;
                 }
             }
@@ -382,23 +367,13 @@ public class OIDCSecurityService implements SecurityService {
         return false;
     }
 
-    public boolean serviceIsActive(String serviceId) {
-        InfraService service = infraServiceService.get(serviceId);
-        return service.isActive();
+    public boolean resourceIsActive(String resourceId, String catalogueId) {
+        ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId, catalogueId);
+        return resourceBundle.isActive();
     }
 
-    public boolean serviceIsActive(String serviceId, String catalogueId) {
-        InfraService service = infraServiceService.get(serviceId, catalogueId);
-        return service.isActive();
-    }
-
-    public boolean serviceIsActive(String serviceId, String catalogueId, String version) {
-        // FIXME: serviceId is equal to 'rich' and version holds the service ID
-        //  when searching for a Rich Service without providing a version
-        if ("rich".equals(serviceId)) {
-            serviceId = version;
-        }
-        InfraService service = infraServiceService.get(serviceId, catalogueId, "latest");
-        return service.isActive();
+    public boolean datasourceIsActive(String resourceId, String catalogueId) {
+        ResourceBundle<?> resourceBundle = datasourceService.get(resourceId, catalogueId);
+        return resourceBundle.isActive();
     }
 }

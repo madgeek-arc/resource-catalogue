@@ -86,11 +86,11 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
         // Check if there is a Provider with the specific id
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList){
             if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Provider with the specific id already exists on the EOSC Catalogue. Please refactor your 'abbreviation' field.");
+                throw new ValidationException("Provider with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
@@ -147,7 +147,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Provider with id '{}' to Pending", auth, providerId);
         Resource resource = providerManager.getResource(providerId, catalogueName);
-        resource.setResourceTypeName("provider"); //make sure that resource type is present
+        resource.setResourceTypeName("provider");
         resourceService.changeResourceType(resource, resourceType);
         return deserialize(resource);
     }
@@ -184,7 +184,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = this.getPendingResource(providerBundle.getId());
+        Resource resource = this.getPendingResourceViaProviderId(providerBundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
 
@@ -202,48 +202,8 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(String providerId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Provider with id {} to Active", auth, providerId);
         ProviderBundle providerBundle = get(providerId);
-
-        if (providerManager.exists(providerBundle)) {
-            throw new ResourceException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()), HttpStatus.CONFLICT);
-        }
-        providerManager.validate(providerBundle);
-
-        // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (providerBundle.getLoggingInfo() != null) {
-            loggingInfoList = providerBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
-        providerBundle.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardInfo
-        providerBundle.setLatestOnboardingInfo(loggingInfo);
-
-        // update providerStatus
-        providerBundle.setStatus(vocabularyService.get("pending provider").getId());
-        providerBundle.setTemplateStatus(vocabularyService.get("no template status").getId());
-
-        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = this.getPendingResource(providerId);
-        resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, providerResourceType);
-
-        try {
-            providerBundle = providerManager.update(providerBundle, auth);
-        } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        registrationMailService.sendEmailsToNewlyAddedAdmins(providerBundle, null);
-        return providerBundle;
+        return transformToActive(providerBundle, auth);
     }
 
 
@@ -280,15 +240,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("users", User.of(auth).getEmail());
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return super.getAll(ff, auth).getResults()
-                .stream().map(p -> {
-                    if (userIsPendingProviderAdmin(user, p)) {
-                        return p;
-                    } else return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return super.getAll(ff, auth).getResults();
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
@@ -314,15 +268,15 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         update(get(providerId), auth);
     }
 
-    public Resource getPendingResource(String providerId) {
+    public Resource getPendingResourceViaProviderId(String providerId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"eosc\"", providerId), resourceType.getName());
+                .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueName), resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    public Resource getPendingResource(String serviceId, String serviceVersion){
+    public Resource getPendingResourceViaServiceId(String serviceId){
         return null;
     }
 }

@@ -66,56 +66,81 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     protected void modifyContent(T t, Authentication auth) {
-        if (t instanceof Service) {
-            modifyService(t, auth);
-        } else if (t instanceof Provider) {
-            modifyProvider(t, auth);
-        } else if (t instanceof InfraService) {
-            modifyInfraService(t, auth);
+        if (t instanceof CatalogueBundle) {
+            modifyCatalogueBundle(t, auth);
+        } else if (t instanceof Catalogue) {
+            modifyCatalogue(t, auth);
         } else if (t instanceof ProviderBundle) {
             modifyProviderBundle(t, auth);
-        } else if (t instanceof RichService) {
+        } else if (t instanceof Provider) {
+            modifyProvider(t, auth);
+        } else if (t instanceof DatasourceBundle) {
+            modifyDatasourceBundle(t, auth);
+        } else if (t instanceof Datasource) {
+            modifyDatasource(t, auth);
+        } else if (t instanceof ServiceBundle) {
+            modifyServiceBundle(t, auth);
+        } else if (t instanceof Service) {
+            modifyService(t, auth);
+        } else if (t instanceof RichResource) {
             modifyRichService(t, auth);
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
-        } else if (t instanceof Catalogue) {
-            modifyCatalogue(t, auth);
-        } else if (t instanceof CatalogueBundle) {
-            modifyCatalogueBundle(t, auth);
         }
     }
 
     private void modifyService(T service, Authentication auth) {
-        if (!this.securityService.isServiceProviderAdmin(auth, ((Service) service), true)) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((Service) service).getId(), ((Service) service).getCatalogueId())) {
             ((Service) service).setMainContact(null);
             ((Service) service).setSecurityContactEmail(null);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void modifyInfraService(T infraService, Authentication auth) {
-        modifyLoggingInfoList((T) ((InfraService) infraService).getLoggingInfo());
-        modifyLoggingInfo((T) ((InfraService) infraService).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((InfraService) infraService).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((InfraService) infraService).getLatestOnboardingInfo());
+    private void modifyServiceBundle(T serviceBundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((ServiceBundle) serviceBundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isServiceProviderAdmin(auth, ((InfraService) infraService).getService().getId(), true)) {
-            ((InfraService) infraService).getService().setMainContact(null);
-            ((InfraService) infraService).getService().setSecurityContactEmail(null);
-            ((InfraService) infraService).getMetadata().setTerms(null);
+        if (!this.securityService.isResourceProviderAdmin(auth, ((ServiceBundle) serviceBundle).getId(), ((ResourceBundle<?>) serviceBundle).getPayload().getCatalogueId())) {
+            ((ServiceBundle) serviceBundle).getService().setMainContact(null);
+            ((ServiceBundle) serviceBundle).getService().setSecurityContactEmail(null);
+            ((ServiceBundle) serviceBundle).getMetadata().setTerms(null);
+        }
+    }
+
+    private void modifyDatasource(T datasource, Authentication auth) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((Datasource) datasource).getId(), ((Datasource) datasource).getCatalogueId())) {
+            ((Datasource) datasource).setMainContact(null);
+            ((Datasource) datasource).setSecurityContactEmail(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyDatasourceBundle(T datasourceBundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((DatasourceBundle) datasourceBundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestOnboardingInfo());
+
+        if (!this.securityService.isResourceProviderAdmin(auth, ((DatasourceBundle) datasourceBundle).getId(), ((ResourceBundle<?>) datasourceBundle).getPayload().getCatalogueId())) {
+            ((DatasourceBundle) datasourceBundle).getDatasource().setMainContact(null);
+            ((DatasourceBundle) datasourceBundle).getDatasource().setSecurityContactEmail(null);
+            ((DatasourceBundle) datasourceBundle).getMetadata().setTerms(null);
         }
     }
 
     private void modifyRichService(T richService, Authentication auth) {
-        if (!this.securityService.isServiceProviderAdmin(auth, ((RichService) richService).getService().getId(), true)) {
-            ((RichService) richService).getService().setMainContact(null);
-            ((RichService) richService).getService().setSecurityContactEmail(null);
-            ((RichService) richService).getMetadata().setTerms(null);
+        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richService).getService().getId(), ((RichResource) richService).getService().getCatalogueId())) {
+            ((RichResource) richService).getService().setMainContact(null);
+            ((RichResource) richService).getService().setSecurityContactEmail(null);
+            ((RichResource) richService).getMetadata().setTerms(null);
         }
     }
 
     private void modifyProvider(T provider, Authentication auth) {
-        if(!this.securityService.isProviderAdmin(auth, ((Provider) provider).getId(), true)) {
+        if(!this.securityService.isProviderAdmin(auth, ((Provider) provider).getId(), ((Provider) provider).getCatalogueId())) {
             ((Provider) provider).setMainContact(null);
             ((Provider) provider).setUsers(null);
         }
@@ -128,7 +153,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestOnboardingInfo());
 
-        if(!this.securityService.isProviderAdmin(auth, ((ProviderBundle) bundle).getId(), true)) {
+        if(!this.securityService.isProviderAdmin(auth, ((ProviderBundle) bundle).getId(), ((Bundle<Provider>) bundle).getPayload().getCatalogueId())) {
             ((ProviderBundle) bundle).getProvider().setMainContact(null);
             ((ProviderBundle) bundle).getProvider().setUsers(null);
             ((ProviderBundle) bundle).getMetadata().setTerms(null);

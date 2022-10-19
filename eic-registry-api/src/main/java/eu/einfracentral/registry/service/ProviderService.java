@@ -27,16 +27,12 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     @Override
     void delete(T provider);
 
-
     T get(String id, U auth);
 
     T get(String catalogueId, String providerId, U auth);
 
 
     List<T> getServiceProviders(String email, U authentication);
-
-
-    List<T> getMyServiceProviders(U authentication);
 
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
 
@@ -142,4 +138,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return Resource
      */
     Resource getResource(String id, String catalogueId);
+
+    Paging<ResourceBundle<?>> getRejectedResources(final FacetFilter ff, String resourceType, Authentication auth);
 }

@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -28,16 +28,16 @@ import java.util.UUID;
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
-    public MonitoringManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+    public MonitoringManager(ResourceBundleService<ServiceBundle> resourceBundleService,
                              JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService) {
         super(MonitoringBundle.class);
-        this.infraServiceService = infraServiceService;
+        this.resourceBundleService = resourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -76,6 +76,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Adding Monitoring: {}", monitoring);
 
         registrationMailService.sendEmailsForMonitoringExtension(monitoring, "post");
+        logger.info("Sending JMS with topic 'monitoring.create'");
         jmsTopicTemplate.convertAndSend("monitoring.create", monitoring);
 
         return ret;
@@ -117,6 +118,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Updating Monitoring: {}", monitoring);
 
         registrationMailService.sendEmailsForMonitoringExtension(monitoring, "put");
+        logger.info("Sending JMS with topic 'monitoring.update'");
         jmsTopicTemplate.convertAndSend("monitoring.update", monitoring);
 
         return monitoring;
@@ -129,6 +131,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Deleting Monitoring: {}", monitoring);
 
         //TODO: send emails
+        logger.info("Sending JMS with topic 'monitoring.delete'");
         jmsTopicTemplate.convertAndSend("monitoring.delete", monitoring);
 
     }
@@ -136,13 +139,13 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public void serviceConsistency(String serviceId, String catalogueId){
         // check if Service exists
         try{
-            infraServiceService.get(serviceId, catalogueId);
+            resourceBundleService.get(serviceId, catalogueId);
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
         }
         // check if Service has already a Monitoring registered
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
         for (MonitoringBundle monitoring : allMonitorings){
             if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){

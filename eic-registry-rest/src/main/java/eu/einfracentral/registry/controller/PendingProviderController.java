@@ -91,14 +91,12 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
-        if (provider.getId() == null || provider.getId().equals("")) {
-            provider.setId(idCreator.createProviderId(provider));
-        }
+        provider.setId(idCreator.createProviderId(provider));
         try {
             bundle = pendingProviderService.get(provider.getId());
             bundle.setProvider(provider);
             bundle = pendingProviderService.update(bundle, auth);
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             logger.debug("Pending Provider with id '{}' does not exist. Creating it...", provider.getId());
             bundle.setProvider(provider);
             bundle = pendingProviderService.add(bundle, auth);
@@ -107,8 +105,8 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #provider)")
-    public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #provider.id)")
+    public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         pendingProviderService.transformToPending(provider.getId(), auth);
         ProviderBundle bundle = pendingProviderService.get(provider.getId());
         bundle.setProvider(provider);

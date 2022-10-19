@@ -153,8 +153,8 @@ public class LoggingInfo {
     // find the AUDIT_STATE of a specific Provider or Resource through its LoggingInfo list
     public static String createAuditVocabularyStatuses(List<LoggingInfo> loggingInfoList){
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-        Boolean hasBeenAudited = false;
-        Boolean hasBeenUpdatedAfterAudit = false;
+        boolean hasBeenAudited = false;
+        boolean hasBeenUpdatedAfterAudit = false;
         String auditActionType = "";
         int auditIndex = -1;
         for (LoggingInfo loggingInfo : loggingInfoList){
@@ -174,23 +174,21 @@ public class LoggingInfo {
                 }
             }
         }
-        String ret = null;
+        String ret;
         if (!hasBeenAudited){
             ret = "Not Audited";
-        } else if (hasBeenAudited && !hasBeenUpdatedAfterAudit){
+        } else if (!hasBeenUpdatedAfterAudit){
             if (auditActionType.equals(ActionType.INVALID.getKey())){
                 ret = "Invalid and not updated";
             } else{
                 ret = "Valid and not updated";
             }
-        } else if (hasBeenAudited && hasBeenUpdatedAfterAudit){
+        } else {
             if (auditActionType.equals(ActionType.INVALID.getKey())){
                 ret = "Invalid and updated";
             } else{
                 ret = "Valid and updated";
             }
-        } else{
-            ret = null;
         }
         return ret;
     }

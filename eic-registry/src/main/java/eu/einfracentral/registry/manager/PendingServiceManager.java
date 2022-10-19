@@ -1,8 +1,9 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.InfraServiceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -27,11 +29,11 @@ import java.util.List;
 import static eu.einfracentral.config.CacheConfig.*;
 
 @Service("pendingServiceManager")
-public class PendingServiceManager extends ResourceManager<InfraService> implements PendingResourceService<InfraService> {
+public class PendingServiceManager extends ResourceManager<ServiceBundle> implements PendingResourceService<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceManager.class);
 
-    private final InfraServiceService<InfraService, InfraService> infraServiceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
@@ -41,11 +43,11 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
     private String catalogueName;
 
     @Autowired
-    public PendingServiceManager(InfraServiceService<InfraService, InfraService> infraServiceService,
+    public PendingServiceManager(ResourceBundleService<ServiceBundle> resourceBundleService,
                                  IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
                                  @Lazy ProviderManager providerManager) {
-        super(InfraService.class);
-        this.infraServiceService = infraServiceService;
+        super(ServiceBundle.class);
+        this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
@@ -59,17 +61,17 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService add(InfraService service, Authentication auth) {
+    public ServiceBundle add(ServiceBundle service, Authentication auth) {
 
-        service.setId(idCreator.createServiceId(service.getService()));
+        service.setId(idCreator.createServiceId(service));
 
         // Check if there is a Resource with the specific id
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        List<InfraService> resourceList = infraServiceService.getAll(ff, auth).getResults();
-        for (InfraService existingResource : resourceList){
+        ff.setQuantity(maxQuantity);
+        List<ServiceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
+        for (ServiceBundle existingResource : resourceList){
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' field.");
+                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
@@ -87,7 +89,6 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
         service.getService().setCatalogueId(catalogueName);
         service.setActive(false);
-        service.setLatest(true);
 
         super.add(service, auth);
 
@@ -96,149 +97,102 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService update(InfraService infraService, Authentication auth) {
+    public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
         // block catalogueId updates from Provider Admins
-        infraService.getService().setCatalogueId(catalogueName);
-        logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, infraService.getId());
-        infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName()));
+        serviceBundle.getService().setCatalogueId(catalogueName);
+        logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
+        serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
         // get existing resource
-//        Resource existing = this.whereID(infraService.getId(), true);
-        Resource existing = this.getPendingResource(infraService.getService().getId(), infraService.getService().getVersion());
+        Resource existing = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
         // save existing resource with new payload
-        existing.setPayload(serialize(infraService));
+        existing.setPayload(serialize(serviceBundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating PendingService: {}", infraService);
-        return infraService;
+        logger.debug("Updating Pending Service: {}", serviceBundle);
+        return serviceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService transformToPending(InfraService infraService, Authentication auth) {
-        return transformToPending(infraService.getId(), auth);
+    public ServiceBundle transformToPending(ServiceBundle serviceBundle, Authentication auth) {
+        return transformToPending(serviceBundle.getId(), auth);
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService transformToPending(String serviceId, Authentication auth) {
+    public ServiceBundle transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
-        InfraService infraService = infraServiceService.get(serviceId);
-        Resource resource = infraServiceService.getResource(infraService.getService().getId(), catalogueName, infraService.getService().getVersion());
-        resource.setResourceTypeName("infra_service");
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId);
+        Resource resource = resourceBundleService.getResource(serviceBundle.getService().getId(), catalogueName);
+        resource.setResourceTypeName("service");
         resourceService.changeResourceType(resource, resourceType);
-        return infraService;
+        return serviceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService transformToActive(InfraService infraService, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, infraService.getId());
-        infraServiceService.validate(infraService);
+    public ServiceBundle transformToActive(ServiceBundle serviceBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceBundle.getId());
+        resourceBundleService.validate(serviceBundle);
 
         // update loggingInfo
         LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
         List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (infraService.getLoggingInfo() != null) {
-            loggingInfoList = infraService.getLoggingInfo();
+        if (serviceBundle.getLoggingInfo() != null) {
+            loggingInfoList = serviceBundle.getLoggingInfo();
             loggingInfoList.add(loggingInfo);
         } else {
             loggingInfoList.add(loggingInfo);
         }
-        infraService.setLoggingInfo(loggingInfoList);
+        serviceBundle.setLoggingInfo(loggingInfoList);
 
         // latestOnboardInfo
-        infraService.setLatestOnboardingInfo(loggingInfo);
+        serviceBundle.setLatestOnboardingInfo(loggingInfo);
 
         // set resource status according to Provider's templateStatus
-        if (providerManager.get(infraService.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
-            infraService.setStatus(vocabularyService.get("approved resource").getId());
+        if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
+            serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
 
             // latestOnboardingInfo
-            infraService.setLatestOnboardingInfo(loggingInfoApproved);
+            serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);
         } else{
-            infraService.setStatus(vocabularyService.get("pending resource").getId());
+            serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
         }
 
-        infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        infraService = this.update(infraService, auth);
-        ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-//        Resource resource = this.getResource(infraService.getId());
-        Resource resource = this.getPendingResource(infraService.getService().getId(), infraService.getService().getVersion());
+        serviceBundle = this.update(serviceBundle, auth);
+        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
+        Resource resource = this.getPendingResourceViaServiceId(serviceBundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
         try {
-            infraService = infraServiceService.update(infraService, auth);
+            serviceBundle = resourceBundleService.update(serviceBundle, auth);
         } catch (ResourceNotFoundException e) {
             e.printStackTrace();
         }
 
-        return infraService;
+        return serviceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InfraService transformToActive(String serviceId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceId);
-        InfraService infraService = this.get(serviceId);
-        infraServiceService.validate(infraService);
-
-        // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (infraService.getLoggingInfo() != null) {
-            loggingInfoList = infraService.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
-        infraService.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardInfo
-        infraService.setLatestOnboardingInfo(loggingInfo);
-
-        // set resource status according to Provider's templateStatus
-        if (providerManager.get(infraService.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
-            infraService.setStatus(vocabularyService.get("approved resource").getId());
-            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
-            loggingInfoList.add(loggingInfoApproved);
-
-            // latestOnboardingInfo
-            infraService.setLatestOnboardingInfo(loggingInfoApproved);
-        } else{
-            infraService.setStatus(vocabularyService.get("pending resource").getId());
-        }
-
-        infraService.setMetadata(Metadata.updateMetadata(infraService.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType infraResourceType = resourceTypeService.getResourceType("infra_service");
-//        Resource resource = this.getResource(serviceId);
-        Resource resource = this.getPendingResource(serviceId, infraService.getService().getVersion());
-        resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, infraResourceType);
-
-        try {
-            infraService = infraServiceService.update(infraService, auth);
-        } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return infraService;
+    public ServiceBundle transformToActive(String serviceId, Authentication auth) {
+        ServiceBundle serviceBundle = this.get(serviceId);
+        return transformToActive(serviceBundle, auth);
     }
 
     public Object getPendingRich(String id, Authentication auth) {
-        return infraServiceService.createRichService(get(id), auth);
+        return resourceBundleService.createRichResource(get(id), auth);
     }
 
-    public List<InfraService> getMy(Authentication auth) {
-        List<InfraService> re = new ArrayList<>();
+    public List<ServiceBundle> getMy(Authentication auth) {
+        List<ServiceBundle> re = new ArrayList<>();
         return re;
     }
 
@@ -250,35 +204,18 @@ public class PendingServiceManager extends ResourceManager<InfraService> impleme
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
     }
 
-    public Resource getPendingResource(String serviceId, String serviceVersion) {
+    public Resource getPendingResourceViaServiceId(String serviceId) {
         Paging<Resource> resources;
-        if (serviceVersion == null || "".equals(serviceVersion)) {
-            resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\"", serviceId),
-                            resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-            // return the latest modified resource that does not contain a version attribute
-            for (Resource resource : resources.getResults()) {
-                if (!resource.getPayload().contains("<tns:version>")) {
-                    return resource;
-                }
-            }
-            if (resources.getTotal() > 0) {
-                return resources.getResults().get(0);
-            }
-            return null;
-        } else if ("latest".equals(serviceVersion)) {
-            resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\" AND latest = true", serviceId),
-                            resourceType.getName(), 1, 0, "modifiedAt", "DESC");
-        } else {
-            resources = searchService
-                    .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"eosc\" AND version = \"%s\"", serviceId, serviceVersion), resourceType.getName());
+        resources = searchService
+                .cqlQuery(String.format("pending_service_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
+                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+        if (resources.getTotal() > 0) {
+            return resources.getResults().get(0);
         }
-        assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return null;
     }
 
-    public Resource getPendingResource(String providerId) {
+    public Resource getPendingResourceViaProviderId(String providerId) {
         return null;
     }
 }

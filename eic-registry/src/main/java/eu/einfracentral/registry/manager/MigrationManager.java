@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.InfraService;
+import eu.einfracentral.domain.DatasourceBundle;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.User;
 import eu.einfracentral.registry.service.MigrationService;
@@ -20,17 +21,20 @@ public class MigrationManager implements MigrationService {
 
     private static final Logger logger = LogManager.getLogger(MigrationManager.class);
 
-    private final InfraServiceManager infraServiceManager;
+    private final ServiceBundleManager serviceBundleManager;
+    private final DatasourceBundleManager datasourceBundleManager;
     private final ProviderManager providerService;
     private final ResourceService resourceService;
     private final JmsTemplate jmsTopicTemplate;
 
     @Autowired
-    public MigrationManager(InfraServiceManager infraServiceManager,
+    public MigrationManager(ServiceBundleManager serviceBundleManager,
+                            DatasourceBundleManager datasourceBundleManager,
                             ProviderManager providerService,
                             ResourceService resourceService,
                             JmsTemplate jmsTopicTemplate) {
-        this.infraServiceManager = infraServiceManager;
+        this.serviceBundleManager = serviceBundleManager;
+        this.datasourceBundleManager = datasourceBundleManager;
         this.providerService = providerService;
         this.resourceService = resourceService;
         this.jmsTopicTemplate = jmsTopicTemplate;
@@ -47,7 +51,6 @@ public class MigrationManager implements MigrationService {
         resource.setPayload(providerService.serialize(providerBundle));
         logger.debug("Migrating Provider: {} of Catalogue: {} to Catalogue: {}", providerBundle.getId(), catalogueId, newCatalogueId);
         resourceService.updateResource(resource);
-        jmsTopicTemplate.convertAndSend("provider.update", providerBundle);
 
         // Public Provider
         try {
@@ -60,35 +63,69 @@ public class MigrationManager implements MigrationService {
             publicResource.setPayload(providerService.serialize(publicProviderBundle));
             logger.info("Migrating Public Provider: {} from Catalogue: {} to Catalogue: {}", publicProviderBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(publicResource);
-            jmsTopicTemplate.convertAndSend("public_provider.update", publicProviderBundle);
+            logger.info("Sending JMS with topic 'provider.update'");
+            jmsTopicTemplate.convertAndSend("provider.update", publicProviderBundle);
         } catch (RuntimeException e) {
             logger.error("Error migrating Public Provider", e);
         }
 
         // Update provider's resources' catalogue
-        changeResourceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
+        changeServiceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
+        changeDatasourceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
 
         return providerBundle;
     }
 
-    private void changeResourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<InfraService> infraServices = infraServiceManager.getInfraServices(providerId, authentication);
-        // Resources
-        String jmsTopic = "resource.update";
-        for (InfraService infraService : infraServices) {
-            String oldResourceId = infraService.getId();
-            if (infraService.getService().getId().startsWith(catalogueId)) {
-                // if Resource is Public, update its id
-                jmsTopic = "public_resource.update";
-                String id = infraService.getId().replaceFirst(catalogueId, newCatalogueId);
-                infraService.getService().setId(id);
+    private void changeServiceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
+        List<ServiceBundle> serviceBundles = serviceBundleManager.getResourceBundles(providerId, authentication);
+        // Services
+        String jmsTopic = "service.update";
+        boolean sendJMS;
+        for (ServiceBundle serviceBundle : serviceBundles) {
+            sendJMS = false;
+            String oldResourceId = serviceBundle.getId();
+            if (serviceBundle.getService().getId().startsWith(catalogueId)) {
+                // if Service is Public, update its id
+                sendJMS = true;
+                String id = serviceBundle.getId().replaceFirst(catalogueId, newCatalogueId);
+                serviceBundle.getService().setId(id);
             }
-            infraService.getService().setCatalogueId(newCatalogueId);
-            Resource resource = infraServiceManager.getResource(oldResourceId, catalogueId, infraService.getService().getVersion());
-            resource.setPayload(infraServiceManager.serialize(infraService));
-            logger.debug("Migrating Resource: {} of Catalogue: {} to Catalogue: {}", infraService.getId(), catalogueId, newCatalogueId);
+            serviceBundle.getService().setCatalogueId(newCatalogueId);
+            Resource resource = serviceBundleManager.getResource(oldResourceId, catalogueId);
+            resource.setPayload(serviceBundleManager.serialize(serviceBundle));
+            logger.debug("Migrating Service: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
-            jmsTopicTemplate.convertAndSend(jmsTopic, infraService);
+            if (sendJMS){
+                logger.info("Sending JMS with topic 'service.update'");
+                jmsTopicTemplate.convertAndSend(jmsTopic, serviceBundle);
+            }
         }
     }
+
+    private void changeDatasourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
+        List<DatasourceBundle> datasourceBundles = datasourceBundleManager.getResourceBundles(providerId, authentication);
+        // Datasources
+        String jmsTopic = "datasource.update";
+        boolean sendJMS;
+        for (DatasourceBundle datasourceBundle : datasourceBundles) {
+            sendJMS = false;
+            String oldResourceId = datasourceBundle.getId();
+            if (datasourceBundle.getDatasource().getId().startsWith(catalogueId)) {
+                // if Datasource is Public, update its id
+                sendJMS = true;
+                String id = datasourceBundle.getId().replaceFirst(catalogueId, newCatalogueId);
+                datasourceBundle.getDatasource().setId(id);
+            }
+            datasourceBundle.getDatasource().setCatalogueId(newCatalogueId);
+            Resource resource = datasourceBundleManager.getResource(oldResourceId, catalogueId);
+            resource.setPayload(datasourceBundleManager.serialize(datasourceBundle));
+            logger.debug("Migrating Datasource: {} of Catalogue: {} to Catalogue: {}", datasourceBundle.getId(), catalogueId, newCatalogueId);
+            resourceService.updateResource(resource);
+            if (sendJMS){
+                logger.info("Sending JMS with topic 'datasource.update'");
+                jmsTopicTemplate.convertAndSend(jmsTopic, datasourceBundle);
+            }
+        }
+    }
+
 }
