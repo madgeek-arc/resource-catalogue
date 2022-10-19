@@ -135,22 +135,19 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return deserialize(resource);
     }
 
+    // TODO: REMOVE ME
     private T checkIdExistanceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter(getResourceType() + "_id", id);
         List<T> allResources = getAll(ff, null).getResults();
         if (allResources.size() > 1) {
-        }
-        for (T resourceBundle : allResources) {
-//            try {
-//                return get(id, catalogueBundle.getId());
-//            } catch (ResourceNotFoundException e){
-//            }
+            return allResources.get(0);
         }
         return null;
     }
 
+    // TODO: REMOVE ME
     //    @Override
     public T get(String id) {
         try {
