@@ -390,7 +390,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public ServiceBundle publish(String serviceId, boolean active, Authentication auth) {
+    public ServiceBundle publish(String serviceId, Boolean active, Authentication auth) {
         ServiceBundle service;
         String activeProvider = "";
         service = this.get(serviceId, catalogueName);
