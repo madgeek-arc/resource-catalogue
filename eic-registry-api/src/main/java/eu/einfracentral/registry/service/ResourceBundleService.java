@@ -182,7 +182,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    T publish(String resourceId, boolean active, Authentication auth);
+    T publish(String resourceId, Boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies

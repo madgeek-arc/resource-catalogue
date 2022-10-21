@@ -406,7 +406,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     }
 
     @Override
-    public DatasourceBundle publish(String resourceId, boolean active, Authentication auth) {
+    public DatasourceBundle publish(String resourceId, Boolean active, Authentication auth) {
         DatasourceBundle datasourceBundle;
         String activeProvider = "";
         datasourceBundle = this.get(resourceId, catalogueName);
