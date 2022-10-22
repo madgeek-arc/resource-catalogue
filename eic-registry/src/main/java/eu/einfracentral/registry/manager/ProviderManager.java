@@ -47,6 +47,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final PublicServiceManager publicServiceManager;
+    private final PublicDatasourceManager publicDatasourceManager;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -73,7 +75,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
                            SynchronizerService<Provider> synchronizerServiceProvider,
-                           CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+                           CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                           @Lazy PublicServiceManager publicServiceManager,
+                           @Lazy PublicDatasourceManager publicDatasourceManager) {
         super(ProviderBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
@@ -87,6 +91,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.dataSource = dataSource;
         this.synchronizerServiceProvider = synchronizerServiceProvider;
         this.catalogueService = catalogueService;
+        this.publicServiceManager = publicServiceManager;
+        this.publicDatasourceManager = publicDatasourceManager;
     }
 
 
@@ -490,7 +496,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 provider.setLatestUpdateInfo(loggingInfo);
 
                 // deactivate Provider's Services
-                deactivateServices(provider.getId(), auth);
+                activateProviderResources(provider.getId(), active, auth);
                 logger.info("Deactivating Provider: {}", provider);
             } else {
                 loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
@@ -502,7 +508,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 provider.setLatestUpdateInfo(loggingInfo);
 
                 // activate Provider's Services
-                activateServices(provider.getId(), auth);
+                activateProviderResources(provider.getId(), active, auth);
                 logger.info("Activating Provider: {}", provider);
             }
         }
@@ -572,10 +578,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return getAll(ff, null).getResults();
     }
 
-    public void activateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
+    public void activateProviderResources(String providerId, Boolean active, Authentication auth) {
         List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
-        logger.info("Activating all Resources of the Provider with id: {}", providerId);
-        for (ServiceBundle service : services) {
+        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(providerId, auth);
+        if (active){
+            logger.info("Activating all Resources of the Provider with id: {}", providerId);
+        } else{
+            logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
+        }
+        activateProviderServices(services, active, auth);
+        activateProviderDatasources(datasources, active, auth);
+    }
+
+    private void activateProviderServices(List<ServiceBundle> services, Boolean active, Authentication auth){
+        for (ServiceBundle service : services){
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
             if (service.getLoggingInfo() != null){
@@ -584,58 +600,80 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 loggingInfoList = new ArrayList<>();
             }
             // distinction between system's (onboarding stage) and user's activation
-            try {
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
-            } catch (InsufficientAuthenticationException e) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+            if (active){
+                try {
+                    loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                            LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
+                } catch (InsufficientAuthenticationException e) {
+                    loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+                }
+            } else{
+                try {
+                    loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                            LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
+                } catch (InsufficientAuthenticationException e) {
+                    loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                }
             }
             loggingInfoList.add(loggingInfo);
 
-            // update Service
+            // update Service's fields
             service.setLoggingInfo(loggingInfoList);
             service.setLatestUpdateInfo(loggingInfo);
-            service.setActive(true);
+            service.setActive(active);
 
             try {
-                logger.debug("Setting Service with name '{}' as active", service.getService().getName());
+                logger.debug("Setting Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", service.getId(),
+                        service.getService().getName(), service.getService().getCatalogueId(), service.isActive());
                 resourceBundleService.update(service, null);
+                publicServiceManager.update(service, null);
             } catch (ResourceNotFoundException e) {
-                logger.error("Could not update service with name '{}", service.getService().getName());
+                logger.error("Could not update Service '{}'-'{}' of the '{}' Catalogue", service.getId(),
+                        service.getService().getName(), service.getService().getCatalogueId());
             }
         }
     }
 
-    public void deactivateServices(String providerId, Authentication auth) { // TODO: decide how to use service.status variable
-        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
-        logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
-        for (ServiceBundle service : services) {
+    private void activateProviderDatasources(List<DatasourceBundle> datasources, Boolean active, Authentication auth){
+        for (DatasourceBundle datasource : datasources){
             List<LoggingInfo> loggingInfoList;
             LoggingInfo loggingInfo;
-            if (service.getLoggingInfo() != null){
-                loggingInfoList = service.getLoggingInfo();
+            if (datasource.getLoggingInfo() != null){
+                loggingInfoList = datasource.getLoggingInfo();
             } else{
                 loggingInfoList = new ArrayList<>();
             }
-            // distinction between system's (onboarding stage) and user's deactivation
-            try {
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
-            } catch (InsufficientAuthenticationException e) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+            // distinction between system's (onboarding stage) and user's activation
+            if (active){
+                try {
+                    loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                            LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
+                } catch (InsufficientAuthenticationException e) {
+                    loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+                }
+            } else{
+                try {
+                    loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                            LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
+                } catch (InsufficientAuthenticationException e) {
+                    loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+                }
             }
             loggingInfoList.add(loggingInfo);
 
-            // update Service
-            service.setLoggingInfo(loggingInfoList);
-            service.setLatestUpdateInfo(loggingInfo);
-            service.setActive(false);
+            // update Datasource's fields
+            datasource.setLoggingInfo(loggingInfoList);
+            datasource.setLatestUpdateInfo(loggingInfo);
+            datasource.setActive(active);
 
             try {
-                logger.debug("Setting Service with name '{}' as active", service.getService().getName());
-                resourceBundleService.update(service, null);
+                logger.debug("Setting Datasource '{}'-'{}' of the '{}' Catalogue to active: '{}'", datasource.getId(),
+                        datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId(), datasource.isActive());
+                datasourceBundleService.update(datasource, null);
+                publicDatasourceManager.update(datasource, null);
             } catch (ResourceNotFoundException e) {
-                logger.error("Could not update service with name '{}", service.getService().getName());
+                logger.error("Could not update Datasource '{}'-'{}' of the '{}' Catalogue", datasource.getId(),
+                        datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId());
             }
         }
     }
