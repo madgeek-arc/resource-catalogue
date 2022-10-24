@@ -211,6 +211,8 @@ public class ProviderManagementAspect {
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.changeProvider(String, " +
+            "String, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, " +
             "org.springframework.security.core.Authentication))))", // pendingToInfra method
             returning = "serviceBundle")
@@ -232,6 +234,8 @@ public class ProviderManagementAspect {
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.changeProvider(String, " +
+            "String, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, " +
             "org.springframework.security.core.Authentication))))", // pendingToInfra method
             returning = "datasourceBundle")
@@ -286,7 +290,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-        @After("execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.delete(eu.einfracentral.domain.DatasourceBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.delete(eu.einfracentral.domain.DatasourceBundle)))")
     public void deletePublicDatasource(JoinPoint joinPoint) {
         DatasourceBundle datasourceBundle = (DatasourceBundle) joinPoint.getArgs()[0];
         publicDatasourceManager.delete(datasourceBundle);

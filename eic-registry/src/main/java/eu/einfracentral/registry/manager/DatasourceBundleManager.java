@@ -50,7 +50,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final PublicDatasourceManager publicDatasourceManager;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -61,7 +61,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                   ResourceBundleService<ServiceBundle> resourceBundleService) {
+                                   PublicDatasourceManager publicDatasourceManager) {
         super(DatasourceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -69,7 +69,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
-        this.resourceBundleService = resourceBundleService;
+        this.publicDatasourceManager = publicDatasourceManager;
     }
 
     @Override
@@ -594,8 +594,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
                     "is not yet Approved", datasourceBundle.getId()));
         }
-        ProviderBundle newProvider = providerService.get(newProviderId);
-        ProviderBundle oldProvider =  providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
+        ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
+        ProviderBundle oldProvider = providerService.get(catalogueName, datasourceBundle.getDatasource().getResourceOrganisation(), auth);
 
         User user = User.of(auth);
 
@@ -612,6 +612,9 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         loggingInfoList.add(loggingInfo);
         datasourceBundle.setLoggingInfo(loggingInfoList);
 
+        // update latestUpdateInfo
+        datasourceBundle.setLatestUpdateInfo(loggingInfo);
+
         // update metadata
         Metadata metadata = datasourceBundle.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
@@ -619,20 +622,20 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         metadata.setTerms(null);
         datasourceBundle.setMetadata(metadata);
 
-        // update id
-        String initialId = datasourceBundle.getId();
-        String[] parts = initialId.split("\\.");
-        String serviceId = parts[1];
-        String newResourceId = newProvider.getId()+"."+serviceId;
-        datasourceBundle.setId(newResourceId);
-        datasourceBundle.getDatasource().setId(newResourceId);
-
         // update ResourceOrganisation
-        datasourceBundle.getDatasource().setResourceOrganisation(newProvider.getId());
+        datasourceBundle.getDatasource().setResourceOrganisation(newProviderId);
+
+        // update id
+        try {
+            datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
 
         // add Resource, delete the old one
         add(datasourceBundle, auth);
         delete(get(resourceId, catalogueName));
+        publicDatasourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, datasourceBundle, auth);
