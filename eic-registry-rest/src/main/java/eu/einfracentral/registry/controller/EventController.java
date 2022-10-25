@@ -82,7 +82,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication), HttpStatus.OK);
     }
 
-    // Retrieve all the favourited events of a infraService with the specified ID.
+    // Retrieve all the favourited events of a Service with the specified ID.
     @GetMapping(path = "favourites/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Event>> getServiceFavourites(@PathVariable String id) {
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.FAVOURITE.getKey(), id), HttpStatus.OK);
@@ -132,7 +132,7 @@ public class EventController extends ResourceController<Event, Authentication> {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // Retrieve all the rating events of a infraService with the specified ID.
+    // Retrieve all the rating events of a Service with the specified ID.
     @GetMapping(path = "ratings/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Event>> getServiceRatings(@PathVariable String id) {
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.RATING.getKey(), id), HttpStatus.OK);

@@ -49,17 +49,17 @@ public class RichResource {
     }
 
     public RichResource(ResourceBundle<?> resource) {
-        this.service = resource.getPayload(); // copy constructor is needed to 'hide' infraService fields
+        this.service = resource.getPayload();
         this.metadata = resource.getMetadata();
     }
 
     public RichResource(ServiceBundle service) {
-        this.service = service.getService(); // copy constructor is needed to 'hide' infraService fields
+        this.service = service.getService();
         this.metadata = service.getMetadata();
     }
 
     public RichResource(DatasourceBundle dataSourceBundle) {
-        this.datasourceBundle = dataSourceBundle.getDatasource(); // copy constructor is needed to 'hide' infraService fields
+        this.datasourceBundle = dataSourceBundle.getDatasource();
         this.metadata = dataSourceBundle.getMetadata();
     }
 
