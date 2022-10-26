@@ -122,7 +122,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
-        ServiceBundle serviceBundle = resourceBundleService.get(serviceId);
+        ServiceBundle serviceBundle = resourceBundleService.get(serviceId, catalogueName);
         Resource resource = resourceBundleService.getResource(serviceBundle.getService().getId(), catalogueName);
         resource.setResourceTypeName("service");
         resourceService.changeResourceType(resource, resourceType);
