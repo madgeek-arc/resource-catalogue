@@ -49,6 +49,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final PublicServiceManager publicServiceManager;
     private final PublicDatasourceManager publicDatasourceManager;
+    private final PublicProviderManager publicProviderManager;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -77,7 +78,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            SynchronizerService<Provider> synchronizerServiceProvider,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService,
                            @Lazy PublicServiceManager publicServiceManager,
-                           @Lazy PublicDatasourceManager publicDatasourceManager) {
+                           @Lazy PublicDatasourceManager publicDatasourceManager,
+                           @Lazy PublicProviderManager publicProviderManager) {
         super(ProviderBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
@@ -93,6 +95,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
+        this.publicProviderManager = publicProviderManager;
     }
 
 
@@ -1189,5 +1192,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         filter.setOrderBy(ff.getOrderBy());
         // Get all Catalogue's Resources
         return service.getAll(filter, auth);
+    }
+
+    public ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth){
+        publicProviderManager.add(providerBundle, auth);
+        return providerBundle;
     }
 }

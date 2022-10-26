@@ -150,11 +150,16 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     // TODO: REMOVE ME
     //    @Override
     public T get(String id) {
+        T resource = null;
         try {
-            return get(id, catalogueName);
+            resource = get(id, catalogueName);
         } catch (ResourceNotFoundException e) {
-            return checkIdExistanceInOtherCatalogues(id);
+            resource = checkIdExistanceInOtherCatalogues(id);
+            if (resource == null) {
+                throw e;
+            }
         }
+        return resource;
     }
 
     @Override
