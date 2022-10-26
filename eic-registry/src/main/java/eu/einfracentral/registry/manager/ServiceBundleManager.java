@@ -46,6 +46,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final PublicServiceManager publicServiceManager;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -55,7 +56,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                                 IdCreator idCreator, @Lazy SecurityService securityService,
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
-                                CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+                                CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                @Lazy PublicServiceManager publicServiceManager) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -63,6 +65,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
+        this.publicServiceManager = publicServiceManager;
     }
 
     @Override
@@ -578,15 +581,15 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
                     "is not yet Approved", serviceBundle.getId()));
         }
-        ProviderBundle newProvider = providerService.get(newProviderId);
-        ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getResourceOrganisation());
+        ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
+        ProviderBundle oldProvider = providerService.get(catalogueName, serviceBundle.getService().getResourceOrganisation(), auth);
 
         User user = User.of(auth);
 
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
-        if (comment == null || comment == "") {
+        if (comment == null || "".equals(comment)) {
             loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
         } else {
@@ -596,6 +599,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         loggingInfoList.add(loggingInfo);
         serviceBundle.setLoggingInfo(loggingInfoList);
 
+        // update latestUpdateInfo
+        serviceBundle.setLatestUpdateInfo(loggingInfo);
+
         // update metadata
         Metadata metadata = serviceBundle.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
@@ -603,20 +609,21 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         metadata.setTerms(null);
         serviceBundle.setMetadata(metadata);
 
+        // update ResourceOrganisation
+        serviceBundle.getService().setResourceOrganisation(newProviderId);
+
         // update id
         String initialId = serviceBundle.getId();
         String[] parts = initialId.split("\\.");
         String serviceId = parts[1];
-        String newResourceId = newProvider.getId() + "." + serviceId;
+        String newResourceId = newProviderId + "." + serviceId;
         serviceBundle.setId(newResourceId);
         serviceBundle.getService().setId(newResourceId);
-
-        // update ResourceOrganisation
-        serviceBundle.getService().setResourceOrganisation(newProvider.getId());
 
         // add Resource, delete the old one
         add(serviceBundle, auth);
         delete(get(resourceId, catalogueName));
+        publicServiceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
