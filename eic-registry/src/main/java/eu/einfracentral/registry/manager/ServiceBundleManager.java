@@ -631,4 +631,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return serviceBundle;
     }
 
+    public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth){
+        publicServiceManager.add(serviceBundle, auth);
+        return serviceBundle;
+    }
+
 }

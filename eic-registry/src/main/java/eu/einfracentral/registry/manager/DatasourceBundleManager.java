@@ -822,4 +822,9 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         }
         return found;
     }
+
+    public DatasourceBundle createPublicResource(DatasourceBundle datasourceBundle, Authentication auth){
+        publicDatasourceManager.add(datasourceBundle, auth);
+        return datasourceBundle;
+    }
 }
