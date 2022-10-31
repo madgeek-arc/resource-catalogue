@@ -33,7 +33,7 @@ Dear ${user.fullName},
     </#if>
     <#if providerBundle.templateStatus == "approved template">
             You have applied for registering [${resource.name}] - [${resource.id}] as a new Resource in the ${project} Portal.
-            Your application has been approved and the Resource has been successfully listed in the ${project} Portal. You can view the published Resource here ${endpoint}/service/${resource.id}.
+            Your application has been approved and the Resource has been successfully listed in the ${project} Portal. You can view the published Resource here ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/resource-dashboard/${resource.id}/stats.
             [Attached you may find a Resource Description Recommendations Report to further improve your Resource description.]
             You may now proceed with registering more Resources for [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]). You can register all other Resources either manually (via the same web interface) or via the ${project} Portal API ${endpoint}/developers.
             For any clarifications, please contact us at ${registrationEmail}.

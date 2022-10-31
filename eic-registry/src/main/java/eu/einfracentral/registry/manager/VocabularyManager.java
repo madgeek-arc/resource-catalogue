@@ -251,6 +251,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     private static class Country {
         private String cca2;
+        private List<String> capital;
+        private List<String> altSpellings;
 
         public String getCca2() {
             return cca2;
@@ -258,6 +260,22 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
         public void setCca2(String cca2) {
             this.cca2 = cca2;
+        }
+
+        public List<String> getCapital() {
+            return capital;
+        }
+
+        public void setCapital(List<String> capital) {
+            this.capital = capital;
+        }
+
+        public List<String> getAltSpellings() {
+            return altSpellings;
+        }
+
+        public void setAltSpellings(List<String> altSpellings) {
+            this.altSpellings = altSpellings;
         }
     }
 
