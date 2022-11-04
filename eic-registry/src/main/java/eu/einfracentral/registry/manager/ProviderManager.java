@@ -3,7 +3,6 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
