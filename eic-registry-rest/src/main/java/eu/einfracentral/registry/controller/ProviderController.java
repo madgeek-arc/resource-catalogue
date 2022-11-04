@@ -512,7 +512,7 @@ public class ProviderController {
     @PostMapping(path = "createPublicProvider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle providerBundle, @ApiIgnore Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Provider from Provider '{}-{}' of the '{}' Catalogue", User.of(auth).getFullName(),
+        logger.info("User '{}-{}' attempts to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
         return ResponseEntity.ok(providerManager.createPublicProvider(providerBundle, auth));
     }
