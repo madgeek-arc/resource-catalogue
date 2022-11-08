@@ -322,7 +322,7 @@ public class DatasourceController {
     @PostMapping(path = "createPublicDatasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DatasourceBundle> createPublicDatasource(@RequestBody DatasourceBundle datasourceBundle, @ApiIgnore Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Datasource from Datasource '{}-{}' of the '{}' Catalogue", User.of(auth).getFullName(),
+        logger.info("User '{}-{}' attempts to create a Public Datasource from Datasource '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), datasourceBundle.getId(), datasourceBundle.getDatasource().getName(), datasourceBundle.getDatasource().getCatalogueId());
         return ResponseEntity.ok(resourceBundleService.createPublicResource(datasourceBundle, auth));
     }

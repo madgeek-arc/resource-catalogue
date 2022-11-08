@@ -629,6 +629,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.debug("Setting Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", service.getId(),
                         service.getService().getName(), service.getService().getCatalogueId(), service.isActive());
                 resourceBundleService.update(service, null);
+                // TODO: FIX ON ProviderManagementAspect
                 publicServiceManager.update(service, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Service '{}'-'{}' of the '{}' Catalogue", service.getId(),
@@ -673,6 +674,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.debug("Setting Datasource '{}'-'{}' of the '{}' Catalogue to active: '{}'", datasource.getId(),
                         datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId(), datasource.isActive());
                 datasourceBundleService.update(datasource, null);
+                // TODO: FIX ON ProviderManagementAspect
                 publicDatasourceManager.update(datasource, null);
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Datasource '{}'-'{}' of the '{}' Catalogue", datasource.getId(),
