@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.stream.Collectors;
 
 public class ApiKeyAuthorizationFilter extends GenericFilterBean {
 
@@ -50,7 +51,9 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
                          FilterChain chain) throws IOException, ServletException {
         log.debug("Attempt Authentication");
         HttpServletRequest request = (HttpServletRequest) req;
+        // TODO: mode Request debug info elsewhere
         log.debug("REQUEST URI: {}", request.getRequestURI());
+        log.debug("REQUEST: {}", request.getReader().lines().collect(Collectors.joining()));
         log.debug("AUTH HEADER: {}", request.getHeader(AUTHORIZATION_HEADER));
         String jwt = resolveToken(request);
         PendingOIDCAuthenticationToken token;
