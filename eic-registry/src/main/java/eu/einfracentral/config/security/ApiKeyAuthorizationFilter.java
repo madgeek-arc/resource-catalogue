@@ -53,7 +53,6 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
         HttpServletRequest request = (HttpServletRequest) req;
         // TODO: mode Request debug info elsewhere
         log.debug("REQUEST URI: {}", request.getRequestURI());
-        log.debug("REQUEST: {}", request.getReader().lines().collect(Collectors.joining()));
         log.debug("AUTH HEADER: {}", request.getHeader(AUTHORIZATION_HEADER));
         String jwt = resolveToken(request);
         PendingOIDCAuthenticationToken token;
