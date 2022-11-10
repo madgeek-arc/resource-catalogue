@@ -36,7 +36,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logging.version>2.17.1</logging.version>
-        <jackson.version.core>2.13.3</jackson.version.core>
+        <jackson.version.core>2.13.4.1</jackson.version.core>
         <registry-core.version>2.4.8</registry-core.version>
         <springfox.version>2.7.0</springfox.version>
         <javax.mail-version>1.4.3</javax.mail-version>
