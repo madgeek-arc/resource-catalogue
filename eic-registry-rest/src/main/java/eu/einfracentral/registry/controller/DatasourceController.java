@@ -197,6 +197,22 @@ public class DatasourceController {
         return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
+    public ResponseEntity<Paging<DatasourceBundle>> getDatasourcesByCatalogue(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("catalogue_id", id);
+        ff.addFilter("published", false);
+        return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
+    }
+
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
         return ResponseEntity.ok(resourceBundleService.getOpenAIREDatasourceById(datasourceId));
@@ -306,7 +322,7 @@ public class DatasourceController {
     @PostMapping(path = "createPublicDatasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DatasourceBundle> createPublicDatasource(@RequestBody DatasourceBundle datasourceBundle, @ApiIgnore Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Datasource from Datasource '{}-{}' of the '{}' Catalogue", User.of(auth).getFullName(),
+        logger.info("User '{}-{}' attempts to create a Public Datasource from Datasource '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), datasourceBundle.getId(), datasourceBundle.getDatasource().getName(), datasourceBundle.getDatasource().getCatalogueId());
         return ResponseEntity.ok(resourceBundleService.createPublicResource(datasourceBundle, auth));
     }

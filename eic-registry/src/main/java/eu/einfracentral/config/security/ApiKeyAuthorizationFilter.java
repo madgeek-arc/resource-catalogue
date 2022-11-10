@@ -2,6 +2,7 @@ package eu.einfracentral.config.security;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
+import eu.einfracentral.domain.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.stream.Collectors;
 
 public class ApiKeyAuthorizationFilter extends GenericFilterBean {
 
@@ -49,6 +51,9 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
                          FilterChain chain) throws IOException, ServletException {
         log.debug("Attempt Authentication");
         HttpServletRequest request = (HttpServletRequest) req;
+        // TODO: mode Request debug info elsewhere
+        log.debug("REQUEST URI: {}", request.getRequestURI());
+        log.debug("AUTH HEADER: {}", request.getHeader(AUTHORIZATION_HEADER));
         String jwt = resolveToken(request);
         PendingOIDCAuthenticationToken token;
         try {
@@ -61,8 +66,11 @@ public class ApiKeyAuthorizationFilter extends GenericFilterBean {
             String accessToken = idToken.getParsedString();
             ServerConfiguration config = serverConfigurationService.getServerConfiguration(issuer);
             token = new PendingOIDCAuthenticationToken(subject, issuer, config, idToken, accessToken, null);
+            log.debug("Auth Token: {}", token);
             Authentication auth = this.authenticationProvider.authenticate(token);
+            log.debug("Authentication: {}", auth);
             SecurityContextHolder.getContext().setAuthentication(auth);
+            log.debug("Successful Authentication: [{}]", User.of(auth));
             chain.doFilter(req, res);
         } catch (RuntimeException | ParseException e) {
             log.error(e);

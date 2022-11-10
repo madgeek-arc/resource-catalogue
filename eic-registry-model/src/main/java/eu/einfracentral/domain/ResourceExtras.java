@@ -13,7 +13,8 @@ import java.util.List;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ResourceExtras {
 
-    @XmlElement()
+    @XmlElementWrapper(name = "eoscIFGuidelines")
+    @XmlElement(name = "eoscIFGuideline")
     @FieldValidation(nullable = true)
     private List<EOSCIFGuidelines> eoscIFGuidelines;
 
