@@ -1,9 +1,6 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.Catalogue;
-import eu.einfracentral.domain.DatasourceBundle;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -90,6 +87,18 @@ public class SimpleIdCreator implements IdCreator {
             hashtext = "0" + hashtext;
         }
         return resourceOrganisation+"."+hashtext;
+    }
+
+    public String createInteroperabilityRecordId(InteroperabilityRecord interoperabilityRecord) throws NoSuchAlgorithmException {
+        String identifier = interoperabilityRecord.getIdentifier();
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] messageDigest = md.digest(identifier.getBytes());
+        BigInteger no = new BigInteger(1, messageDigest);
+        String hashtext = no.toString(16);
+        while (hashtext.length() < 32) {
+            hashtext = "0" + hashtext;
+        }
+        return hashtext;
     }
 
     @Override
