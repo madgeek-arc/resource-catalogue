@@ -90,7 +90,7 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     public String createInteroperabilityRecordId(InteroperabilityRecord interoperabilityRecord) throws NoSuchAlgorithmException {
-        String identifier = interoperabilityRecord.getIdentifier();
+        String identifier = interoperabilityRecord.getIdentifierInfo().getIdentifier() + '.' + interoperabilityRecord.getIdentifierInfo().getIdentifierType();
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] messageDigest = md.digest(identifier.getBytes());
         BigInteger no = new BigInteger(1, messageDigest);

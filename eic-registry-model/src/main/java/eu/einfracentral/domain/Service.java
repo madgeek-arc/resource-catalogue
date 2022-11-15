@@ -500,16 +500,6 @@ public class Service implements Identifiable {
     @FieldValidation(nullable = true)
     private URL pricing;
 
-    // Interoperability Record
-    /**
-     * List of Interoperability Record IDs
-     */
-    @XmlElementWrapper(name = "interoperabilityRecordIds")
-    @XmlElement(name = "interoperabilityRecordId")
-    @ApiModelProperty(position = 53)
-    @FieldValidation(nullable = true, containsId = true, idClass = InteroperabilityRecord.class)
-    private List<String> interoperabilityRecordIds;
-
     public Service() {
         // No arg constructor
     }

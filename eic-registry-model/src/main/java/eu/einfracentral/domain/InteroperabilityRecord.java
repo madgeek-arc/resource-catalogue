@@ -2,13 +2,16 @@ package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
+import eu.einfracentral.domain.interoperabilityRecordInternalFields.CreatorInfo;
+import eu.einfracentral.domain.interoperabilityRecordInternalFields.IdentifierInfo;
+import eu.einfracentral.domain.interoperabilityRecordInternalFields.ResourceTypeInfo;
+import eu.einfracentral.domain.interoperabilityRecordInternalFields.RightsInfo;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.net.URL;
 import java.util.List;
 
 
@@ -24,96 +27,24 @@ public class InteroperabilityRecord implements Identifiable {
     private String id;
 
     /**
-     * The Identifier is a unique string that identifies a resource. For software, determine whether the identifier is
-     * for a specific version of a piece of software,(per the Force11 Software Citation Principles11), or for all
-     * versions. The record's primary key for locating it in the EOSC-IF database.
+     * Interoperability Record Identifier Info
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, required = true)
-    @FieldValidation
-    private String identifier;
+    private IdentifierInfo identifierInfo;
 
     /**
-     * The type of Identifier.
+     * Interoperability Record Creator Info
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
-    private String identifierType;
-
-    /**
-     * The main researchers involved in producing the data, or the authors of the publication, in priority order.
-     * To supply multiple creators, repeat this property.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 4, required = true)
-    @FieldValidation
-    private String creator;
-
-    /**
-     * The full name of the creator.
-     */
-    @XmlElementWrapper(name = "creatorNames")
-    @XmlElement(name = "creatorName")
-    @ApiModelProperty(position = 5)
-    @FieldValidation(nullable = true)
-    private List<String> creatorNames;
-
-    /**
-     * The type of name
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 6, required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
-    private String nameType;
-
-    /**
-     * The personal or first name of the creator.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 7)
-    @FieldValidation(nullable = true)
-    private String givenName;
-
-    /**
-     * The surname or last name of the creator.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 8)
-    @FieldValidation(nullable = true)
-    private String familyName;
-
-    /**
-     * Uniquely identifies an individual or legal entity, according to various schemes.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 9)
-    @FieldValidation(nullable = true)
-    private String nameIdentifier;
-
-    /**
-     * The organizational or institutional affiliation of the creator.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 10)
-    @FieldValidation(nullable = true)
-    private String affiliation;
-
-    /**
-     * Uniquely identifies the organizational affiliation of the creator.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 11)
-    @FieldValidation(nullable = true)
-    private String affiliationIdentifier;
+    private CreatorInfo creatorInfo;
 
     /**
      * A name or title by which a resource is known. May be the title of a dataset or the name of a piece of software.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 12, required = true)
+    @ApiModelProperty(position = 4, required = true)
     @FieldValidation
     private String title;
 
@@ -123,32 +54,24 @@ public class InteroperabilityRecord implements Identifiable {
      * property and sub-properties to provide more information about the publication or release date details.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, required = true)
+    @ApiModelProperty(position = 5, required = true)
     @FieldValidation
     private int publicationYear;
 
     /**
-     * A description of the resource.
+     * Interoperability Record Resource Type Info
      */
-    @XmlElement
-    @ApiModelProperty(position = 14)
+    @XmlElementWrapper(name = "resourceTypesInfo")
+    @XmlElement(name = "resourceTypeInfo")
+    @ApiModelProperty(position = 6)
     @FieldValidation(nullable = true)
-    private List<String> resourceType;
-
-    /**
-     * The general type of a resource.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 15)
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
-    private List<String> resourceTypeGeneral;
+    private List<ResourceTypeInfo> resourceTypesInfo;
 
     /**
      * Time/date the record was created.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 16, required = true)
+    @ApiModelProperty(position = 7, required = true)
     @FieldValidation
     private String created;
 
@@ -156,7 +79,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Time/date the record was last saved, with or without modifications.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 17, required = true)
+    @ApiModelProperty(position = 8, required = true)
     @FieldValidation
     private String updated;
 
@@ -165,44 +88,27 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "eoscRelatedStandards")
     @XmlElement(name = "eoscRelatedStandard")
-    @ApiModelProperty(position = 18)
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
+    @ApiModelProperty(position = 9)
+    @FieldValidation(nullable = true)
+//    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+//    @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_RELATED_STANDARDS)
     private List<String> eoscRelatedStandards;
 
     /**
-     * Any rights information for this resource. The property may be repeated to record complex rights characteristics.
+     * Interoperability Record Rights Info
      */
-    @XmlElementWrapper(required = true, name = "rights")
-    @XmlElement(name = "right")
-    @ApiModelProperty(position = 19, required = true)
+    @XmlElementWrapper(required = true, name = "rightsInfo")
+    @XmlElement(name = "rightInfo")
+    @ApiModelProperty(position = 10, required = true)
     @FieldValidation
-    private List<String> rights;
-
-    /**
-     * The URI of the license.
-     */
-    @XmlElementWrapper(required = true, name = "rightsURI")
-    @XmlElement(name = "rightURI")
-    @ApiModelProperty(position = 20, required = true)
-    @FieldValidation
-    private List<URL> rightsURI;
-
-    /**
-     * A short, standardized version of the license name.
-     */
-    @XmlElementWrapper(required = true, name = "rightsIdentifier")
-    @XmlElement(name = "rightIdentifier")
-    @ApiModelProperty(position = 21, required = true)
-    @FieldValidation
-    private List<String> rightsIdentifier;
+    private List<RightsInfo> rightsInfo;
 
     /**
      * All additional information that does not fit in any of the other categories.
      * May be used for technical information.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 22, required = true)
+    @ApiModelProperty(position = 11, required = true)
     @FieldValidation
     private String description;
 
@@ -210,27 +116,27 @@ public class InteroperabilityRecord implements Identifiable {
      * Status of the resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 23, required = true)
+    @ApiModelProperty(position = 12, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
+    @VocabularyValidation(type = Vocabulary.Type.IR_STATUS)
     private String status;
 
     /**
      * Intended Audience for the Guideline.
      */
     @XmlElement
-    @ApiModelProperty(position = 24)
+    @ApiModelProperty(position = 13)
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
+    @VocabularyValidation(type = Vocabulary.Type.IR_DOMAIN)
     private String domain;
 
     /**
      * The type of record within the registry
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 25, required = true)
+    @ApiModelProperty(position = 14, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
+    @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_GUIDELINE_TYPE)
     private String eoscGuidelineType;
 
     /**
@@ -238,7 +144,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "eoscIntegrationOptions")
     @XmlElement(name = "eoscIntegrationOption")
-    @ApiModelProperty(position = 26)
+    @ApiModelProperty(position = 15)
     @FieldValidation(nullable = true)
     private List<String> eoscIntegrationOptions;
 
@@ -247,36 +153,25 @@ public class InteroperabilityRecord implements Identifiable {
      * in order to successfully interoperate.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 27, required = true)
+    @ApiModelProperty(position = 16, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.TBD)
+    @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_AAI)
     private String eoscAAI;
 
     public InteroperabilityRecord() {
     }
 
-    public InteroperabilityRecord(String id, String identifier, String identifierType, String creator, List<String> creatorNames, String nameType, String givenName, String familyName, String nameIdentifier, String affiliation, String affiliationIdentifier, String title, int publicationYear, List<String> resourceType, List<String> resourceTypeGeneral, String created, String updated, List<String> eoscRelatedStandards, List<String> rights, List<URL> rightsURI, List<String> rightsIdentifier, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, String eoscAAI) {
+    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, CreatorInfo creatorInfo, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<String> eoscRelatedStandards, List<RightsInfo> rightsInfo, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, String eoscAAI) {
         this.id = id;
-        this.identifier = identifier;
-        this.identifierType = identifierType;
-        this.creator = creator;
-        this.creatorNames = creatorNames;
-        this.nameType = nameType;
-        this.givenName = givenName;
-        this.familyName = familyName;
-        this.nameIdentifier = nameIdentifier;
-        this.affiliation = affiliation;
-        this.affiliationIdentifier = affiliationIdentifier;
+        this.identifierInfo = identifierInfo;
+        this.creatorInfo = creatorInfo;
         this.title = title;
         this.publicationYear = publicationYear;
-        this.resourceType = resourceType;
-        this.resourceTypeGeneral = resourceTypeGeneral;
+        this.resourceTypesInfo = resourceTypesInfo;
         this.created = created;
         this.updated = updated;
         this.eoscRelatedStandards = eoscRelatedStandards;
-        this.rights = rights;
-        this.rightsURI = rightsURI;
-        this.rightsIdentifier = rightsIdentifier;
+        this.rightsInfo = rightsInfo;
         this.description = description;
         this.status = status;
         this.domain = domain;
@@ -288,27 +183,16 @@ public class InteroperabilityRecord implements Identifiable {
     @Override
     public String toString() {
         return "InteroperabilityRecord{" +
-                "eoscInteroperabilityId=" + id +
-                ", identifier='" + identifier + '\'' +
-                ", identifierType='" + identifierType + '\'' +
-                ", creator='" + creator + '\'' +
-                ", creatorNames=" + creatorNames +
-                ", nameType='" + nameType + '\'' +
-                ", givenName='" + givenName + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", nameIdentifier='" + nameIdentifier + '\'' +
-                ", affiliation='" + affiliation + '\'' +
-                ", affiliationIdentifier='" + affiliationIdentifier + '\'' +
+                "id='" + id + '\'' +
+                ", identifierInfo=" + identifierInfo +
+                ", creatorInfo=" + creatorInfo +
                 ", title='" + title + '\'' +
                 ", publicationYear=" + publicationYear +
-                ", resourceType=" + resourceType +
-                ", resourceTypeGeneral=" + resourceTypeGeneral +
+                ", resourceTypesInfo=" + resourceTypesInfo +
                 ", created='" + created + '\'' +
                 ", updated='" + updated + '\'' +
                 ", eoscRelatedStandards=" + eoscRelatedStandards +
-                ", rights=" + rights +
-                ", rightsURI=" + rightsURI +
-                ", rightsIdentifier=" + rightsIdentifier +
+                ", rightsInfo=" + rightsInfo +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
                 ", domain='" + domain + '\'' +
@@ -324,88 +208,24 @@ public class InteroperabilityRecord implements Identifiable {
     }
 
     @Override
-    public void setId(String eoscInteroperabilityId) {
-        this.id = eoscInteroperabilityId;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getIdentifier() {
-        return identifier;
+    public IdentifierInfo getIdentifierInfo() {
+        return identifierInfo;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
+    public void setIdentifierInfo(IdentifierInfo identifierInfo) {
+        this.identifierInfo = identifierInfo;
     }
 
-    public String getIdentifierType() {
-        return identifierType;
+    public CreatorInfo getCreatorInfo() {
+        return creatorInfo;
     }
 
-    public void setIdentifierType(String identifierType) {
-        this.identifierType = identifierType;
-    }
-
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
-
-    public List<String> getCreatorNames() {
-        return creatorNames;
-    }
-
-    public void setCreatorNames(List<String> creatorNames) {
-        this.creatorNames = creatorNames;
-    }
-
-    public String getNameType() {
-        return nameType;
-    }
-
-    public void setNameType(String nameType) {
-        this.nameType = nameType;
-    }
-
-    public String getGivenName() {
-        return givenName;
-    }
-
-    public void setGivenName(String givenName) {
-        this.givenName = givenName;
-    }
-
-    public String getFamilyName() {
-        return familyName;
-    }
-
-    public void setFamilyName(String familyName) {
-        this.familyName = familyName;
-    }
-
-    public String getNameIdentifier() {
-        return nameIdentifier;
-    }
-
-    public void setNameIdentifier(String nameIdentifier) {
-        this.nameIdentifier = nameIdentifier;
-    }
-
-    public String getAffiliation() {
-        return affiliation;
-    }
-
-    public void setAffiliation(String affiliation) {
-        this.affiliation = affiliation;
-    }
-
-    public String getAffiliationIdentifier() {
-        return affiliationIdentifier;
-    }
-
-    public void setAffiliationIdentifier(String affiliationIdentifier) {
-        this.affiliationIdentifier = affiliationIdentifier;
+    public void setCreatorInfo(CreatorInfo creatorInfo) {
+        this.creatorInfo = creatorInfo;
     }
 
     public String getTitle() {
@@ -424,20 +244,12 @@ public class InteroperabilityRecord implements Identifiable {
         this.publicationYear = publicationYear;
     }
 
-    public List<String> getResourceType() {
-        return resourceType;
+    public List<ResourceTypeInfo> getResourceTypesInfo() {
+        return resourceTypesInfo;
     }
 
-    public void setResourceType(List<String> resourceType) {
-        this.resourceType = resourceType;
-    }
-
-    public List<String> getResourceTypeGeneral() {
-        return resourceTypeGeneral;
-    }
-
-    public void setResourceTypeGeneral(List<String> resourceTypeGeneral) {
-        this.resourceTypeGeneral = resourceTypeGeneral;
+    public void setResourceTypesInfo(List<ResourceTypeInfo> resourceTypesInfoInfo) {
+        this.resourceTypesInfo = resourceTypesInfoInfo;
     }
 
     public String getCreated() {
@@ -464,28 +276,12 @@ public class InteroperabilityRecord implements Identifiable {
         this.eoscRelatedStandards = eoscRelatedStandards;
     }
 
-    public List<String> getRights() {
-        return rights;
+    public List<RightsInfo> getRightsInfo() {
+        return rightsInfo;
     }
 
-    public void setRights(List<String> rights) {
-        this.rights = rights;
-    }
-
-    public List<URL> getRightsURI() {
-        return rightsURI;
-    }
-
-    public void setRightsURI(List<URL> rightsURI) {
-        this.rightsURI = rightsURI;
-    }
-
-    public List<String> getRightsIdentifier() {
-        return rightsIdentifier;
-    }
-
-    public void setRightsIdentifier(List<String> rightsIdentifier) {
-        this.rightsIdentifier = rightsIdentifier;
+    public void setRightsInfo(List<RightsInfo> rightsInfo) {
+        this.rightsInfo = rightsInfo;
     }
 
     public String getDescription() {

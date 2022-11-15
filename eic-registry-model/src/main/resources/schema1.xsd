@@ -11,6 +11,12 @@
     
   <xs:element name="catalogueBundle" type="tns:catalogueBundle"/>
     
+  <xs:element name="creatorAffiliationInfo" type="tns:creatorAffiliationInfo"/>
+    
+  <xs:element name="creatorInfo" type="tns:creatorInfo"/>
+    
+  <xs:element name="creatorNameTypeInfo" type="tns:creatorNameTypeInfo"/>
+    
   <xs:element name="datasource" type="tns:datasource"/>
     
   <xs:element name="datasourceBundle" type="tns:datasourceBundle"/>
@@ -25,7 +31,11 @@
     
   <xs:element name="helpdeskBundle" type="tns:helpdeskBundle"/>
     
+  <xs:element name="identifierInfo" type="tns:identifierInfo"/>
+    
   <xs:element name="identifiers" type="tns:identifiers"/>
+    
+  <xs:element name="interoperabilityRecord" type="tns:interoperabilityRecord"/>
     
   <xs:element name="loggingInfo" type="tns:loggingInfo"/>
     
@@ -60,6 +70,10 @@
   <xs:element name="rangeValue" type="tns:rangeValue"/>
     
   <xs:element name="resourceExtras" type="tns:resourceExtras"/>
+    
+  <xs:element name="resourceTypeInfo" type="tns:resourceTypeInfo"/>
+    
+  <xs:element name="rightsInfo" type="tns:rightsInfo"/>
     
   <xs:element name="service" type="tns:service"/>
     
@@ -1609,6 +1623,23 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
             
       <xs:element name="horizontalService" type="xs:boolean"/>
             
+      <xs:element minOccurs="0" name="interoperabilityRecordIds">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of Interoperability Record IDs]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="interoperabilityRecordId" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
       <xs:element minOccurs="0" name="researchCategories">
                 
         <xs:complexType>
@@ -1826,6 +1857,306 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
       </xs:extension>
           
     </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="interoperabilityRecord">
+        
+    <xs:sequence>
+            
+      <xs:element name="created" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Time/date the record was created.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element ref="tns:creatorInfo"/>
+            
+      <xs:element name="description" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[All additional information that does not fit in any of the other categories.
+May be used for technical information.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="domain" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Intended Audience for the Guideline.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="eoscAAI" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Indicates whether the guideline requires services and resources to be members of the EOSC AAI Federation
+in order to successfully interoperate.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="eoscGuidelineType" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The type of record within the registry]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="eoscIntegrationOptions">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Resources and services that declare compliance with the guideline to the specified level of interoperation.]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscIntegrationOption" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="eoscRelatedStandards">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Standards related to the guideline.]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscRelatedStandard" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[EOSC Interoperability ID (auto-assigned).]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element ref="tns:identifierInfo"/>
+            
+      <xs:element name="publicationYear" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The year when the data was or will be made publicly available. In the case of resources such as software or
+dynamic data where there may be multiple releases in one year, include the Date/dateType/dateInformation
+property and sub-properties to provide more information about the publication or release date details.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="resourceTypesInfo">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Interoperability Record Resource Type Info]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:resourceTypeInfo"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="rightsInfo">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Interoperability Record Rights Info]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="rightInfo" type="tns:rightsInfo"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="status" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Status of the resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="title" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A name or title by which a resource is known. May be the title of a dataset or the name of a piece of software.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="updated" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Time/date the record was last saved, with or without modifications.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="creatorInfo">
+        
+    <xs:sequence>
+            
+      <xs:element name="creator" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The main researchers involved in producing the data, or the authors of the publication, in priority order.
+To supply multiple creators, repeat this property.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" ref="tns:creatorAffiliationInfo"/>
+            
+      <xs:element ref="tns:creatorNameTypeInfo"/>
+            
+      <xs:element minOccurs="0" name="familyName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The surname or last name of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="givenName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The personal or first name of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="nameIdentifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Uniquely identifies an individual or legal entity, according to various schemes.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="creatorAffiliationInfo">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="affiliation" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The organizational or institutional affiliation of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="affiliationIdentifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Uniquely identifies the organizational affiliation of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="creatorNameTypeInfo">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="creatorNames">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The full name of the creator.]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="creatorName" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="nameType" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The type of name]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="identifierInfo">
+        
+    <xs:sequence>
+            
+      <xs:element name="identifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Identifier is a unique string that identifies a resource. For software, determine whether the identifier is
+for a specific version of a piece of software,(per the Force11 Software Citation Principles11), or for all
+versions. The record's primary key for locating it in the EOSC-IF database.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="identifierType" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The type of Identifier.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="resourceTypeInfo">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="resourceType" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A description of the resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="resourceTypeGeneral" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The general type of a resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="rightsInfo">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="right" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Any rights information for this resource. The property may be repeated to record complex rights characteristics.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="rightIdentifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A short, standardized version of the license name.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="rightURI" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The URI of the license.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
       
   </xs:complexType>
     

@@ -92,7 +92,14 @@ public class Vocabulary implements Identifiable {
         SEMANTIC_RELATIONSHIP("Semantic relationship"),
         RESEARCH_CATEGORY("Research category"),
         // Interoperability Record
-        TBD("Tbd");
+        IR_IDENTIFIER_TYPE("Interoperability Record identifier type"),
+        IR_NAME_TYPE("Interoperability Record name type"),
+        IR_RESOURCE_TYPE_GENERAL("Interoperability Record resource type general"),
+//        IR_EOSC_RELATED_STANDARDS("Interoperability Record eosc related standards"),
+        IR_STATUS("Interoperability Record status"),
+        IR_DOMAIN("Interoperability Record domain"),
+        IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type"),
+        IR_EOSC_AAI("Interoperability Record eosc aai");
 
         private final String type;
 

@@ -207,6 +207,28 @@
         
     <xs:restriction base="xs:string">
             
+      <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
+            
+      <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
+            
+      <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
+            
+      <xs:enumeration value="PROVIDER_HOSTING_LEGAL_ENTITY"/>
+            
+      <xs:enumeration value="PROVIDER_LEGAL_STATUS"/>
+            
+      <xs:enumeration value="PROVIDER_LIFE_CYCLE_STATUS"/>
+            
+      <xs:enumeration value="PROVIDER_NETWORK"/>
+            
+      <xs:enumeration value="PROVIDER_SOCIETAL_GRAND_CHALLENGE"/>
+            
+      <xs:enumeration value="PROVIDER_STRUCTURE_TYPE"/>
+            
+      <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
+            
+      <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
+            
       <xs:enumeration value="SUPERCATEGORY"/>
             
       <xs:enumeration value="CATEGORY"/>
@@ -243,6 +265,52 @@
             
       <xs:enumeration value="RELATED_PLATFORM"/>
             
+      <xs:enumeration value="CATALOGUE_STATE"/>
+            
+      <xs:enumeration value="PROVIDER_STATE"/>
+            
+      <xs:enumeration value="RESOURCE_STATE"/>
+            
+      <xs:enumeration value="TEMPLATE_STATE"/>
+            
+      <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
+            
+      <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
+            
+      <xs:enumeration value="DS_JURISDICTION"/>
+            
+      <xs:enumeration value="DS_CLASSIFICATION"/>
+            
+      <xs:enumeration value="DS_COAR_ACCESS_RIGHTS_1_0"/>
+            
+      <xs:enumeration value="MONITORING_MONITORED_BY"/>
+            
+      <xs:enumeration value="SEMANTIC_RELATIONSHIP"/>
+            
+      <xs:enumeration value="RESEARCH_CATEGORY"/>
+            
+      <xs:enumeration value="IR_IDENTIFIER_TYPE"/>
+            
+      <xs:enumeration value="IR_NAME_TYPE"/>
+            
+      <xs:enumeration value="IR_RESOURCE_TYPE_GENERAL"/>
+            
+      <xs:enumeration value="IR_STATUS"/>
+            
+      <xs:enumeration value="IR_DOMAIN"/>
+            
+      <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
+            
+      <xs:enumeration value="IR_EOSC_AAI"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="vocab">
+        
+    <xs:restriction base="xs:string">
+            
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
             
       <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
@@ -265,38 +333,6 @@
             
       <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
             
-      <xs:enumeration value="PROVIDER_STATE"/>
-            
-      <xs:enumeration value="RESOURCE_STATE"/>
-            
-      <xs:enumeration value="TEMPLATE_STATE"/>
-            
-      <xs:enumeration value="CATALOGUE_STATE"/>
-            
-      <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
-            
-      <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
-            
-      <xs:enumeration value="DS_JURISDICTION"/>
-            
-      <xs:enumeration value="DS_CLASSIFICATION"/>
-            
-      <xs:enumeration value="DS_COAR_ACCESS_RIGHTS_1_0"/>
-            
-      <xs:enumeration value="MONITORING_MONITORED_BY"/>
-            
-      <xs:enumeration value="SEMANTIC_RELATIONSHIP"/>
-            
-      <xs:enumeration value="RESEARCH_CATEGORY"/>
-          
-    </xs:restriction>
-      
-  </xs:simpleType>
-    
-  <xs:simpleType name="vocab">
-        
-    <xs:restriction base="xs:string">
-            
       <xs:enumeration value="SUPERCATEGORY"/>
             
       <xs:enumeration value="CATEGORY"/>
@@ -304,6 +340,10 @@
       <xs:enumeration value="SUBCATEGORY"/>
             
       <xs:enumeration value="LANGUAGE"/>
+            
+      <xs:enumeration value="GEOGRAPHIC_LOCATION"/>
+            
+      <xs:enumeration value="REGION"/>
             
       <xs:enumeration value="COUNTRY"/>
             
@@ -327,25 +367,45 @@
             
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
             
-      <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
+      <xs:enumeration value="RELATED_PLATFORM"/>
             
-      <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
+      <xs:enumeration value="CATALOGUE_STATE"/>
             
-      <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
+      <xs:enumeration value="PROVIDER_STATE"/>
             
-      <xs:enumeration value="PROVIDER_LEGAL_STATUS"/>
+      <xs:enumeration value="RESOURCE_STATE"/>
             
-      <xs:enumeration value="PROVIDER_LIFE_CYCLE_STATUS"/>
+      <xs:enumeration value="TEMPLATE_STATE"/>
             
-      <xs:enumeration value="PROVIDER_NETWORK"/>
+      <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
             
-      <xs:enumeration value="PROVIDER_SOCIETAL_GRAND_CHALLENGE"/>
+      <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
             
-      <xs:enumeration value="PROVIDER_STRUCTURE_TYPE"/>
+      <xs:enumeration value="DS_JURISDICTION"/>
             
-      <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
+      <xs:enumeration value="DS_CLASSIFICATION"/>
             
-      <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
+      <xs:enumeration value="DS_COAR_ACCESS_RIGHTS_1_0"/>
+            
+      <xs:enumeration value="MONITORING_MONITORED_BY"/>
+            
+      <xs:enumeration value="SEMANTIC_RELATIONSHIP"/>
+            
+      <xs:enumeration value="RESEARCH_CATEGORY"/>
+            
+      <xs:enumeration value="IR_IDENTIFIER_TYPE"/>
+            
+      <xs:enumeration value="IR_NAME_TYPE"/>
+            
+      <xs:enumeration value="IR_RESOURCE_TYPE_GENERAL"/>
+            
+      <xs:enumeration value="IR_STATUS"/>
+            
+      <xs:enumeration value="IR_DOMAIN"/>
+            
+      <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
+            
+      <xs:enumeration value="IR_EOSC_AAI"/>
           
     </xs:restriction>
       
