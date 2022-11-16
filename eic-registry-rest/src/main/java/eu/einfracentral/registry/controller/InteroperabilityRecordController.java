@@ -1,7 +1,5 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.Helpdesk;
-import eu.einfracentral.domain.HelpdeskBundle;
 import eu.einfracentral.domain.InteroperabilityRecord;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -24,8 +22,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,6 +39,7 @@ public class InteroperabilityRecordController {
 
     @ApiOperation(value = "Returns the Interoperability Record with the given id.")
     @GetMapping(path = "/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecord> getInteroperabilityRecord(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.get(id);
         return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
@@ -57,6 +54,7 @@ public class InteroperabilityRecordController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecord>> getAllInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                           @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();

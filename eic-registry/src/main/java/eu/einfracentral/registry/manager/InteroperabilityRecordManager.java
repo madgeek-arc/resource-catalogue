@@ -26,7 +26,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
     @Override
     public String getResourceType() {
-        return "interoperabilityRecord";
+        return "interoperability_record";
     }
 
     public InteroperabilityRecord add(InteroperabilityRecord interoperabilityRecord, Authentication auth) {

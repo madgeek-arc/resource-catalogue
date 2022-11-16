@@ -1,0 +1,19 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "interoperability_record_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "interoperability_record",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "properties": {
+    "class": "eu.einfracentral.domain.InteroperabilityRecord"
+  },
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/interoperability_record/eic-registry-model/src/main/resources/schema1.xsd"
+}
