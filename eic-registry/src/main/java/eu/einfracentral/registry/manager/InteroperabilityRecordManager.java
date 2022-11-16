@@ -36,6 +36,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+        interoperabilityRecord.setCreated(String.valueOf(System.currentTimeMillis()));
         logger.trace("User '{}' is attempting to add a new Interoperability Record: {}", auth, interoperabilityRecord);
         logger.info("Adding Interoperability Record: {}", interoperabilityRecord);
         super.add(interoperabilityRecord, auth);
@@ -48,6 +49,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         logger.trace("User '{}' is attempting to update the Interoperability Record with id '{}'", auth, interoperabilityRecord.getId());
         validate(interoperabilityRecord);
+        interoperabilityRecord.setUpdated(String.valueOf(System.currentTimeMillis()));
         Resource existing = whereID(interoperabilityRecord.getId(), true);
         existing.setPayload(serialize(interoperabilityRecord));
         existing.setResourceType(resourceType);
@@ -60,7 +62,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
     public void delete(InteroperabilityRecord interoperabilityRecord, Authentication auth) {
         logger.trace("User '{}' is attempting to delete the Interoperability Record with id '{}'", auth, interoperabilityRecord.getId());
-
         super.delete(interoperabilityRecord);
         logger.debug("Deleting Interoperability Record: {}", interoperabilityRecord);
     }
