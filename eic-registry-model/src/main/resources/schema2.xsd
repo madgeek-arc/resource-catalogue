@@ -300,8 +300,6 @@
       <xs:enumeration value="IR_DOMAIN"/>
             
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
-            
-      <xs:enumeration value="IR_EOSC_AAI"/>
           
     </xs:restriction>
       

@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.net.URL;
 import java.util.List;
 
 
@@ -90,9 +91,7 @@ public class InteroperabilityRecord implements Identifiable {
     @XmlElement(name = "eoscRelatedStandard")
     @ApiModelProperty(position = 9)
     @FieldValidation(nullable = true)
-//    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-//    @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_RELATED_STANDARDS)
-    private List<String> eoscRelatedStandards;
+    private List<URL> eoscRelatedStandards;
 
     /**
      * Interoperability Record Rights Info
@@ -154,14 +153,13 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 16, required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_AAI)
-    private String eoscAAI;
+    @FieldValidation
+    private boolean eoscAAI;
 
     public InteroperabilityRecord() {
     }
 
-    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, CreatorInfo creatorInfo, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<String> eoscRelatedStandards, List<RightsInfo> rightsInfo, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, String eoscAAI) {
+    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, CreatorInfo creatorInfo, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<RightsInfo> rightsInfo, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, boolean eoscAAI) {
         this.id = id;
         this.identifierInfo = identifierInfo;
         this.creatorInfo = creatorInfo;
@@ -268,11 +266,11 @@ public class InteroperabilityRecord implements Identifiable {
         this.updated = updated;
     }
 
-    public List<String> getEoscRelatedStandards() {
+    public List<URL> getEoscRelatedStandards() {
         return eoscRelatedStandards;
     }
 
-    public void setEoscRelatedStandards(List<String> eoscRelatedStandards) {
+    public void setEoscRelatedStandards(List<URL> eoscRelatedStandards) {
         this.eoscRelatedStandards = eoscRelatedStandards;
     }
 
@@ -324,11 +322,11 @@ public class InteroperabilityRecord implements Identifiable {
         this.eoscIntegrationOptions = eoscIntegrationOptions;
     }
 
-    public String getEoscAAI() {
+    public boolean isEoscAAI() {
         return eoscAAI;
     }
 
-    public void setEoscAAI(String eoscAAI) {
+    public void setEoscAAI(boolean eoscAAI) {
         this.eoscAAI = eoscAAI;
     }
 }
