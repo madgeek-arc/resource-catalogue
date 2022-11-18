@@ -103,7 +103,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         existing.setResourceType(resourceType);
 
         // block user from updating serviceId
-        if (!helpdesk.getHelpdesk().getServiceId().equals(ex.getHelpdesk().getServiceId())){
+        if (!helpdesk.getHelpdesk().getServiceId().equals(ex.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Service Id with which this Helpdesk is related");
         }
 
@@ -133,6 +133,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         // check if Service exists
         try{
             resourceBundleService.get(serviceId, catalogueId);
+            // check if Service is Public
+            if (resourceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
+                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
+            }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
         }
