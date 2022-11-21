@@ -2,10 +2,10 @@ package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
-import eu.einfracentral.domain.interoperabilityRecordInternalFields.CreatorInfo;
+import eu.einfracentral.domain.interoperabilityRecordInternalFields.Creator;
 import eu.einfracentral.domain.interoperabilityRecordInternalFields.IdentifierInfo;
 import eu.einfracentral.domain.interoperabilityRecordInternalFields.ResourceTypeInfo;
-import eu.einfracentral.domain.interoperabilityRecordInternalFields.RightsInfo;
+import eu.einfracentral.domain.interoperabilityRecordInternalFields.Right;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -35,11 +35,13 @@ public class InteroperabilityRecord implements Identifiable {
     private IdentifierInfo identifierInfo;
 
     /**
-     * Interoperability Record Creator Info
+     * The main researchers involved in producing the data, or the authors of the publication, in priority order.
+     * To supply multiple creators, repeat this property.
      */
-    @XmlElement(required = true)
+    @XmlElementWrapper(required = true, name = "creators")
+    @XmlElement(name = "creator")
     @ApiModelProperty(position = 3, required = true)
-    private CreatorInfo creatorInfo;
+    private List<Creator> creators;
 
     /**
      * A name or title by which a resource is known. May be the title of a dataset or the name of a piece of software.
@@ -94,13 +96,13 @@ public class InteroperabilityRecord implements Identifiable {
     private List<URL> eoscRelatedStandards;
 
     /**
-     * Interoperability Record Rights Info
+     * Any rights information for this resource. The property may be repeated to record complex rights characteristics.
      */
-    @XmlElementWrapper(required = true, name = "rightsInfo")
-    @XmlElement(name = "rightInfo")
+    @XmlElementWrapper(required = true, name = "rights")
+    @XmlElement(name = "right")
     @ApiModelProperty(position = 10, required = true)
     @FieldValidation
-    private List<RightsInfo> rightsInfo;
+    private List<Right> rights;
 
     /**
      * All additional information that does not fit in any of the other categories.
@@ -159,17 +161,17 @@ public class InteroperabilityRecord implements Identifiable {
     public InteroperabilityRecord() {
     }
 
-    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, CreatorInfo creatorInfo, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<RightsInfo> rightsInfo, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, boolean eoscAAI) {
+    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, boolean eoscAAI) {
         this.id = id;
         this.identifierInfo = identifierInfo;
-        this.creatorInfo = creatorInfo;
+        this.creators = creators;
         this.title = title;
         this.publicationYear = publicationYear;
         this.resourceTypesInfo = resourceTypesInfo;
         this.created = created;
         this.updated = updated;
         this.eoscRelatedStandards = eoscRelatedStandards;
-        this.rightsInfo = rightsInfo;
+        this.rights = rights;
         this.description = description;
         this.status = status;
         this.domain = domain;
@@ -183,14 +185,14 @@ public class InteroperabilityRecord implements Identifiable {
         return "InteroperabilityRecord{" +
                 "id='" + id + '\'' +
                 ", identifierInfo=" + identifierInfo +
-                ", creatorInfo=" + creatorInfo +
+                ", creators=" + creators +
                 ", title='" + title + '\'' +
                 ", publicationYear=" + publicationYear +
                 ", resourceTypesInfo=" + resourceTypesInfo +
                 ", created='" + created + '\'' +
                 ", updated='" + updated + '\'' +
                 ", eoscRelatedStandards=" + eoscRelatedStandards +
-                ", rightsInfo=" + rightsInfo +
+                ", rightsInfo=" + rights +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
                 ", domain='" + domain + '\'' +
@@ -218,12 +220,12 @@ public class InteroperabilityRecord implements Identifiable {
         this.identifierInfo = identifierInfo;
     }
 
-    public CreatorInfo getCreatorInfo() {
-        return creatorInfo;
+    public List<Creator> getCreators() {
+        return creators;
     }
 
-    public void setCreatorInfo(CreatorInfo creatorInfo) {
-        this.creatorInfo = creatorInfo;
+    public void setCreators(List<Creator> creators) {
+        this.creators = creators;
     }
 
     public String getTitle() {
@@ -274,12 +276,12 @@ public class InteroperabilityRecord implements Identifiable {
         this.eoscRelatedStandards = eoscRelatedStandards;
     }
 
-    public List<RightsInfo> getRightsInfo() {
-        return rightsInfo;
+    public List<Right> getRights() {
+        return rights;
     }
 
-    public void setRightsInfo(List<RightsInfo> rightsInfo) {
-        this.rightsInfo = rightsInfo;
+    public void setRights(List<Right> rights) {
+        this.rights = rights;
     }
 
     public String getDescription() {

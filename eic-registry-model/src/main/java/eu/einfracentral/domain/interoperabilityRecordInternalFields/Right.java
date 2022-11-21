@@ -10,21 +10,13 @@ import java.net.URL;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class RightsInfo {
-
-    /**
-     * Any rights information for this resource. The property may be repeated to record complex rights characteristics.
-     */
-    @XmlElement
-    @ApiModelProperty(position = 1, required = true)
-    @FieldValidation
-    private String right;
+public class Right {
 
     /**
      * The URI of the license.
      */
     @XmlElement
-    @ApiModelProperty(position = 2, required = true)
+    @ApiModelProperty(position = 1, required = true)
     @FieldValidation
     private URL rightURI;
 
@@ -32,15 +24,14 @@ public class RightsInfo {
      * A short, standardized version of the license name.
      */
     @XmlElement
-    @ApiModelProperty(position = 3, required = true)
+    @ApiModelProperty(position = 2, required = true)
     @FieldValidation
     private String rightIdentifier;
 
-    public RightsInfo() {
+    public Right() {
     }
 
-    public RightsInfo(String right, URL rightURI, String rightIdentifier) {
-        this.right = right;
+    public Right(String right, URL rightURI, String rightIdentifier) {
         this.rightURI = rightURI;
         this.rightIdentifier = rightIdentifier;
     }
@@ -48,18 +39,9 @@ public class RightsInfo {
     @Override
     public String toString() {
         return "RightsInfo{" +
-                "right='" + right + '\'' +
                 ", rightURI=" + rightURI +
                 ", rightIdentifier='" + rightIdentifier + '\'' +
                 '}';
-    }
-
-    public String getRight() {
-        return right;
-    }
-
-    public void setRight(String right) {
-        this.right = right;
     }
 
     public URL getRightURI() {

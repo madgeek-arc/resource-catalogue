@@ -9,22 +9,13 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class CreatorInfo {
-
-    /**
-     * The main researchers involved in producing the data, or the authors of the publication, in priority order.
-     * To supply multiple creators, repeat this property.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
-    @FieldValidation
-    private String creator;
+public class Creator {
 
     /**
      * Creator's full name and name type
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @ApiModelProperty(position = 1, required = true)
     @FieldValidation
     private CreatorNameTypeInfo creatorNameTypeInfo;
 
@@ -32,7 +23,7 @@ public class CreatorInfo {
      * The personal or first name of the creator.
      */
     @XmlElement
-    @ApiModelProperty(position = 3)
+    @ApiModelProperty(position = 2)
     @FieldValidation(nullable = true)
     private String givenName;
 
@@ -40,7 +31,7 @@ public class CreatorInfo {
      * The surname or last name of the creator.
      */
     @XmlElement
-    @ApiModelProperty(position = 4)
+    @ApiModelProperty(position = 3)
     @FieldValidation(nullable = true)
     private String familyName;
 
@@ -48,7 +39,7 @@ public class CreatorInfo {
      * Uniquely identifies an individual or legal entity, according to various schemes.
      */
     @XmlElement
-    @ApiModelProperty(position = 5)
+    @ApiModelProperty(position = 4)
     @FieldValidation(nullable = true)
     private String nameIdentifier;
 
@@ -56,15 +47,14 @@ public class CreatorInfo {
      * Affiliation
      */
     @XmlElement
-    @ApiModelProperty(position = 6)
+    @ApiModelProperty(position = 5)
     @FieldValidation(nullable = true)
     private CreatorAffiliationInfo creatorAffiliationInfo;
 
-    public CreatorInfo() {
+    public Creator() {
     }
 
-    public CreatorInfo(String creator, CreatorNameTypeInfo creatorNameTypeInfo, String givenName, String familyName, String nameIdentifier, CreatorAffiliationInfo creatorAffiliationInfo) {
-        this.creator = creator;
+    public Creator(CreatorNameTypeInfo creatorNameTypeInfo, String givenName, String familyName, String nameIdentifier, CreatorAffiliationInfo creatorAffiliationInfo) {
         this.creatorNameTypeInfo = creatorNameTypeInfo;
         this.givenName = givenName;
         this.familyName = familyName;
@@ -75,21 +65,12 @@ public class CreatorInfo {
     @Override
     public String toString() {
         return "CreatorInfo{" +
-                "creator='" + creator + '\'' +
                 ", creatorNameTypeInfo=" + creatorNameTypeInfo +
                 ", givenName='" + givenName + '\'' +
                 ", familyName='" + familyName + '\'' +
                 ", nameIdentifier='" + nameIdentifier + '\'' +
                 ", creatorAffiliationInfo=" + creatorAffiliationInfo +
                 '}';
-    }
-
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
     }
 
     public CreatorNameTypeInfo getCreatorNameTypeInfo() {

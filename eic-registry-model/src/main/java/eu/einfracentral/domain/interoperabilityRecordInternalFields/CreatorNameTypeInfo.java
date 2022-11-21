@@ -18,11 +18,10 @@ public class CreatorNameTypeInfo {
     /**
      * The full name of the creator.
      */
-    @XmlElementWrapper(name = "creatorNames")
-    @XmlElement(name = "creatorName")
-    @ApiModelProperty(position = 1)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 1, required = true)
     @FieldValidation(nullable = true)
-    private List<String> creatorNames;
+    private String creatorName;
 
     /**
      * The type of name
@@ -36,25 +35,25 @@ public class CreatorNameTypeInfo {
     public CreatorNameTypeInfo() {
     }
 
-    public CreatorNameTypeInfo(List<String> creatorNames, String nameType) {
-        this.creatorNames = creatorNames;
+    public CreatorNameTypeInfo(String creatorName, String nameType) {
+        this.creatorName = creatorName;
         this.nameType = nameType;
     }
 
     @Override
     public String toString() {
         return "CreatorNameType{" +
-                "creatorNames=" + creatorNames +
+                "creatorName=" + creatorName +
                 ", nameType='" + nameType + '\'' +
                 '}';
     }
 
-    public List<String> getCreatorNames() {
-        return creatorNames;
+    public String getCreatorName() {
+        return creatorName;
     }
 
-    public void setCreatorNames(List<String> creatorNames) {
-        this.creatorNames = creatorNames;
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
     }
 
     public String getNameType() {
