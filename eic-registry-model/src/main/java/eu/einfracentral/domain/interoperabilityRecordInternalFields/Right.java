@@ -13,10 +13,18 @@ import java.net.URL;
 public class Right {
 
     /**
-     * The URI of the license.
+     * Right title.
      */
     @XmlElement
     @ApiModelProperty(position = 1, required = true)
+    @FieldValidation
+    private String rightTitle;
+
+    /**
+     * The URI of the license.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 2, required = true)
     @FieldValidation
     private URL rightURI;
 
@@ -24,24 +32,34 @@ public class Right {
      * A short, standardized version of the license name.
      */
     @XmlElement
-    @ApiModelProperty(position = 2, required = true)
+    @ApiModelProperty(position = 3, required = true)
     @FieldValidation
     private String rightIdentifier;
 
     public Right() {
     }
 
-    public Right(String right, URL rightURI, String rightIdentifier) {
+    public Right(String rightTitle, URL rightURI, String rightIdentifier) {
+        this.rightTitle = rightTitle;
         this.rightURI = rightURI;
         this.rightIdentifier = rightIdentifier;
     }
 
     @Override
     public String toString() {
-        return "RightsInfo{" +
+        return "Right{" +
+                "rightTitle='" + rightTitle + '\'' +
                 ", rightURI=" + rightURI +
                 ", rightIdentifier='" + rightIdentifier + '\'' +
                 '}';
+    }
+
+    public String getRightTitle() {
+        return rightTitle;
+    }
+
+    public void setRightTitle(String rightTitle) {
+        this.rightTitle = rightTitle;
     }
 
     public URL getRightURI() {

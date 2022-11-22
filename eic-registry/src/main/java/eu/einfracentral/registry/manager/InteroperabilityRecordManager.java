@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.domain.Resource;
@@ -10,8 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 @org.springframework.stereotype.Service("interoperabilityRecordManager")
 public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecord> implements ResourceService<InteroperabilityRecord, Authentication> {
