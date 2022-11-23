@@ -25,7 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("resourceInteroperabilityRecord")
-@Api(value = "Get information about Resource Interoperability Record")
+@Api(value = "Operations for Resource Interoperability Records")
 public class ResourceInteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordController.class);
@@ -37,7 +37,7 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @ApiOperation(value = "Returns the ResourceInteroperabilityRecord with the given id.")
-    @GetMapping(path = "/resourceInteroperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecord(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id);
         return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
@@ -51,7 +51,7 @@ public class ResourceInteroperabilityRecordController {
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @GetMapping(path = "/resourceInteroperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
                                                             @ApiIgnore Authentication auth) {
@@ -78,7 +78,7 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @ApiOperation(value = "Creates a new ResourceInteroperabilityRecord.")
-    @PostMapping(path = "/resourceInteroperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceInteroperabilityRecord.resourceId, #catalogueId)")
     public ResponseEntity<ResourceInteroperabilityRecord> addResourceInteroperabilityRecord(@Valid @RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
                                                 @RequestParam String resourceType, @ApiIgnore Authentication auth) {
@@ -88,7 +88,7 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @ApiOperation(value = "Updates the ResourceInteroperabilityRecord with the given id.")
-    @PutMapping(path = "/resourceInteroperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceInteroperabilityRecord.resourceId, #catalogueId)")
     public ResponseEntity<ResourceInteroperabilityRecord> updateResourceInteroperabilityRecord(@Valid @RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -97,7 +97,7 @@ public class ResourceInteroperabilityRecordController {
         return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/resourceInteroperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id);

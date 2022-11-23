@@ -39,7 +39,7 @@ public class InteroperabilityRecordController {
 
     @ApiOperation(value = "Returns the Interoperability Record with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecord> getInteroperabilityRecord(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.get(id);
         return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
@@ -54,7 +54,7 @@ public class InteroperabilityRecordController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecord>> getAllInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                           @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();

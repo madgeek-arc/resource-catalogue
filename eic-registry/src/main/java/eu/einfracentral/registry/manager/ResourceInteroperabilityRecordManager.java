@@ -35,7 +35,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     @Override
     public String getResourceType() {
-        return "resourceInteroperabilityRecord";
+        return "resource_interoperability_record";
     }
 
     public ResourceInteroperabilityRecord add(ResourceInteroperabilityRecord resourceInteroperabilityRecord, String resourceType, Authentication auth) {
@@ -48,7 +48,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         } else{
             throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
         }
-        validate(resourceInteroperabilityRecord);
+//        validate(resourceInteroperabilityRecord);
 
         resourceInteroperabilityRecord.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecord);
