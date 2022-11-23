@@ -1,0 +1,40 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "resource_interoperability_record_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "service_id",
+      "label": "Service ID",
+      "path": "//*[local-name()='serviceId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "interoperability_record_ids",
+      "label": "Interoperability Record ID",
+      "path": "//*[local-name()='interoperabilityRecordId']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "resource_interoperability_record",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "properties": {
+    "class": "eu.einfracentral.domain.ResourceInteroperabilityRecord"
+  },
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/interoperability_record/eic-registry-model/src/main/resources/schema1.xsd"
+}

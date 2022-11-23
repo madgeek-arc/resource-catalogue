@@ -31,23 +31,13 @@ public class ResourceExtras {
     @VocabularyValidation(type = Vocabulary.Type.RESEARCH_CATEGORY)
     private List<String> researchCategories;
 
-    /**
-     * List of Interoperability Record IDs
-     */
-    @XmlElementWrapper(name = "interoperabilityRecordIds")
-    @XmlElement(name = "interoperabilityRecordId")
-    @ApiModelProperty(position = 4)
-    @FieldValidation(nullable = true, containsId = true, idClass = InteroperabilityRecord.class)
-    private List<String> interoperabilityRecordIds;
-
     public ResourceExtras() {
     }
 
-    public ResourceExtras(List<EOSCIFGuidelines> eoscIFGuidelines, boolean horizontalService, List<String> researchCategories, List<String> interoperabilityRecordIds) {
+    public ResourceExtras(List<EOSCIFGuidelines> eoscIFGuidelines, boolean horizontalService, List<String> researchCategories) {
         this.eoscIFGuidelines = eoscIFGuidelines;
         this.horizontalService = horizontalService;
         this.researchCategories = researchCategories;
-        this.interoperabilityRecordIds = interoperabilityRecordIds;
     }
 
     @Override
@@ -56,7 +46,6 @@ public class ResourceExtras {
                 "eoscIFGuidelines=" + eoscIFGuidelines +
                 ", horizontalService=" + horizontalService +
                 ", researchCategories=" + researchCategories +
-                ", interoperabilityRecordIds=" + interoperabilityRecordIds +
                 '}';
     }
 
@@ -82,13 +71,5 @@ public class ResourceExtras {
 
     public void setResearchCategories(List<String> researchCategories) {
         this.researchCategories = researchCategories;
-    }
-
-    public List<String> getInteroperabilityRecordIds() {
-        return interoperabilityRecordIds;
-    }
-
-    public void setInteroperabilityRecordIds(List<String> interoperabilityRecordIds) {
-        this.interoperabilityRecordIds = interoperabilityRecordIds;
     }
 }

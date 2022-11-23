@@ -93,24 +93,4 @@ public class ResourceExtrasController {
         }
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
-
-    @ApiOperation(value = "Update a specific Resource's Interoperability Records field")
-    @PutMapping(path = "/update/interoperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#resourceId,#catalogueId)")
-    public ResponseEntity<ResourceBundle<?>> updateInteroperabilityRecords(@RequestParam String resourceId, @RequestParam String catalogueId,
-                                                                      @RequestBody List<String> interoperabilityRecords, @RequestParam String type,
-                                                                      @ApiIgnore Authentication auth) {
-        ResourceBundle<?> bundle;
-        switch (type){
-            case "service":
-                bundle = serviceBundleService.updateInteroperabilityRecords(resourceId, catalogueId, interoperabilityRecords, auth);
-                break;
-            case "datasource":
-                bundle = datasourceBundleService.updateInteroperabilityRecords(resourceId, catalogueId, interoperabilityRecords, auth);
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("Type [%s] is not supported.", type));
-        }
-        return new ResponseEntity<>(bundle, HttpStatus.OK);
-    }
 }

@@ -1128,26 +1128,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return bundle;
     }
 
-    public ResourceBundle<?> updateInteroperabilityRecords(String resourceId, String catalogueId, List<String> interoperabilityRecords, Authentication auth) {
-        T bundle = get(resourceId, catalogueId);
-        blockUpdateIfResourceIsPublished(bundle);
-        ResourceExtras resourceExtras = bundle.getResourceExtras();
-        if (resourceExtras == null) {
-            ResourceExtras newResourceExtras = new ResourceExtras();
-            List<String> newInteroperabilityRecords = new ArrayList<>(interoperabilityRecords);
-            newResourceExtras.setInteroperabilityRecordIds(newInteroperabilityRecords);
-            bundle.setResourceExtras(newResourceExtras);
-        } else {
-            bundle.getResourceExtras().setInteroperabilityRecordIds(interoperabilityRecords);
-        }
-        createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
-        validate(bundle);
-        update(bundle, auth);
-        logger.info("User '{}'-'{}' updated field interoperabilityRecords of the Resource '{}' with value '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId, interoperabilityRecords);
-        return bundle;
-    }
-
     private void blockUpdateIfResourceIsPublished(ResourceBundle<?> resourceBundle) { //FIXME: DOES NOT WORK AS INTENDED
         if (resourceBundle.getMetadata().isPublished()) {
             throw new AccessDeniedException("You cannot directly update a Public Resource.");
