@@ -38,7 +38,7 @@ public class InteroperabilityRecordController {
     }
 
     @ApiOperation(value = "Returns the Interoperability Record with the given id.")
-    @GetMapping(path = "/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecord> getInteroperabilityRecord(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.get(id);
@@ -53,7 +53,7 @@ public class InteroperabilityRecordController {
             @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
-    @GetMapping(path = "/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecord>> getAllInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                           @ApiIgnore Authentication auth) {
@@ -76,7 +76,7 @@ public class InteroperabilityRecordController {
     }
 
     @ApiOperation(value = "Add a new Resource Interoperability Record")
-    @PostMapping(path = "/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecord> addInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @ApiIgnore Authentication auth) {
         interoperabilityRecordService.add(interoperabilityRecord, auth);
@@ -85,7 +85,7 @@ public class InteroperabilityRecordController {
     }
 
     @ApiOperation(value = "Updates the Interoperability Record with the given id.")
-    @PutMapping(path = "/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecord> updateHelpdesk(@Valid @RequestBody InteroperabilityRecord interoperabilityRecord,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -95,7 +95,7 @@ public class InteroperabilityRecordController {
     }
 
     // Deletes the Interoperability Record with the specific ID.
-    @DeleteMapping(path = "/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecord> deleteInteroperabilityRecordById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.get(id);

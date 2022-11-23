@@ -34,6 +34,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new RuntimeException(e);
         }
         interoperabilityRecord.setCreated(String.valueOf(System.currentTimeMillis()));
+        interoperabilityRecord.setUpdated(null);
         logger.trace("User '{}' is attempting to add a new Interoperability Record: {}", auth, interoperabilityRecord);
         logger.info("Adding Interoperability Record: {}", interoperabilityRecord);
         super.add(interoperabilityRecord, auth);
