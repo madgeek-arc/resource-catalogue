@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
+import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -12,25 +13,26 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
-public class ResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecord>
-        implements ResourceInteroperabilityRecordService<ResourceInteroperabilityRecord, Authentication> {
+public class ResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
+        implements ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordManager.class);
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
-    private final JmsTemplate jmsTopicTemplate;
+    private final SecurityService securityService;
 
     public ResourceInteroperabilityRecordManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                                                  ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                                                 JmsTemplate jmsTopicTemplate) {
-        super(ResourceInteroperabilityRecord.class);
+                                                 SecurityService securityService) {
+        super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.securityService = securityService;
     }
 
     @Override
@@ -38,44 +40,70 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return "resource_interoperability_record";
     }
 
-    public ResourceInteroperabilityRecord add(ResourceInteroperabilityRecord resourceInteroperabilityRecord, String resourceType, Authentication auth) {
+    @Override
+    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, String resourceType, Authentication auth) {
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
-            serviceConsistency(resourceInteroperabilityRecord.getResourceId(), resourceInteroperabilityRecord.getCatalogueId());
+            serviceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(), resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId());
         } else if (resourceType.equals("datasource")){
-            datasourceConsistency(resourceInteroperabilityRecord.getResourceId(), resourceInteroperabilityRecord.getCatalogueId());
+            datasourceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(), resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId());
         } else{
             throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
         }
-//        validate(resourceInteroperabilityRecord);
+        validate(resourceInteroperabilityRecord);
 
         resourceInteroperabilityRecord.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecord);
 
-        super.add(resourceInteroperabilityRecord, null);
+        resourceInteroperabilityRecord.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        loggingInfoList.add(loggingInfo);
+        resourceInteroperabilityRecord.setLoggingInfo(loggingInfoList);
+        // latestOnboardingInfo
+        resourceInteroperabilityRecord.setLatestOnboardingInfo(loggingInfo);
+
+        ResourceInteroperabilityRecordBundle ret;
+        ret = super.add(resourceInteroperabilityRecord, null);
         logger.debug("Adding ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecord);
 
         // TODO: emails?
-        // TODO: add public
-        logger.info("Sending JMS with topic 'resource_interoperability_record.create'");
-        jmsTopicTemplate.convertAndSend("resource_interoperability_record.create", resourceInteroperabilityRecord);
 
-        return resourceInteroperabilityRecord;
+        return ret;
     }
 
-    public ResourceInteroperabilityRecord update(ResourceInteroperabilityRecord resourceInteroperabilityRecord, Authentication auth) {
+    @Override
+    public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, Authentication auth) {
 
         logger.trace("User '{}' is attempting to update the ResourceInteroperabilityRecord with id '{}'", auth, resourceInteroperabilityRecord.getId());
         validate(resourceInteroperabilityRecord);
 
+        resourceInteroperabilityRecord.setMetadata(Metadata.updateMetadata(resourceInteroperabilityRecord.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo;
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey());
+        if (resourceInteroperabilityRecord.getLoggingInfo() != null) {
+            loggingInfoList = resourceInteroperabilityRecord.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        resourceInteroperabilityRecord.setLoggingInfo(loggingInfoList);
+
+        // latestUpdateInfo
+        resourceInteroperabilityRecord.setLatestUpdateInfo(loggingInfo);
+
         Resource existing = whereID(resourceInteroperabilityRecord.getId(), true);
-        ResourceInteroperabilityRecord ex = deserialize(existing);
+        ResourceInteroperabilityRecordBundle ex = deserialize(existing);
         existing.setPayload(serialize(resourceInteroperabilityRecord));
         existing.setResourceType(resourceType);
 
         // block user from updating resourceId
-        if (!resourceInteroperabilityRecord.getResourceId().equals(ex.getResourceId())){
+        if (!resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(ex.getResourceInteroperabilityRecord().getResourceId())
+                && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Resource Id with which this ResourceInteroperabilityRecord is related");
         }
 
@@ -83,14 +111,11 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         logger.debug("Updating ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecord);
 
         // TODO: emails?
-        // TODO: update public
-        logger.info("Sending JMS with topic 'resource_interoperability_record.update'");
-        jmsTopicTemplate.convertAndSend("resource_interoperability_record.update", resourceInteroperabilityRecord);
 
         return resourceInteroperabilityRecord;
     }
 
-    public void delete(ResourceInteroperabilityRecord resourceInteroperabilityRecord, Authentication auth) {
+    public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, Authentication auth) {
         logger.trace("User '{}' is attempting to delete the ResourceInteroperabilityRecord with id '{}'", auth,
                 resourceInteroperabilityRecord.getId());
 
@@ -98,9 +123,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         logger.debug("Deleting ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecord);
 
         // TODO: send emails
-        // TODO: delete public
-        logger.info("Sending JMS with topic 'resource_interoperability_record.delete'");
-        jmsTopicTemplate.convertAndSend("resource_interoperability_record.delete", resourceInteroperabilityRecord);
 
     }
 
@@ -108,15 +130,20 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         // check if Resource exists
         try{
             serviceBundleService.get(resourceId, catalogueId);
+            // check if Service is Public
+            if (serviceBundleService.get(resourceId, catalogueId).getMetadata().isPublished()){
+                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
+            }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
         // check if Resource has already a Resource Interoperability Record registered
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<ResourceInteroperabilityRecord> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecord resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecord.getResourceId().equals(resourceId) && resourceInteroperabilityRecord.getCatalogueId().equals(catalogueId)){
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
+            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId) &&
+                    resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
                 throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Resource " +
                         "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
                         resourceInteroperabilityRecord.getId()));
@@ -128,15 +155,20 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         // check if Resource exists
         try{
             datasourceBundleService.get(resourceId, catalogueId);
+            // check if Datasource is Public
+            if (datasourceBundleService.get(resourceId, catalogueId).getMetadata().isPublished()){
+                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
+            }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
         // check if Resource has already a Resource Interoperability Record registered
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<ResourceInteroperabilityRecord> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecord resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecord.getResourceId().equals(resourceId) && resourceInteroperabilityRecord.getCatalogueId().equals(catalogueId)){
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
+            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId)
+                    && resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
                 throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Resource " +
                                 "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
                         resourceInteroperabilityRecord.getId()));

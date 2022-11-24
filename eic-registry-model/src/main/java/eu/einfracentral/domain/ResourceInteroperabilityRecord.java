@@ -19,7 +19,8 @@ public class ResourceInteroperabilityRecord implements Identifiable {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Resource ID", required = true)
-    @FieldValidation(containsId = true, idClass = Datasource.class) //TODO: check if idClass fulfills both Services/Datasources
+    @FieldValidation
+//    @FieldValidation(containsId = true, idClass = Datasource.class) //FIXME: need both Datasource/Service
     private String resourceId;
 
     @XmlElement(required = true)

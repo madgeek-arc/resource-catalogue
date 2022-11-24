@@ -26,6 +26,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return "interoperability_record";
     }
 
+    @Override
     public InteroperabilityRecord add(InteroperabilityRecord interoperabilityRecord, Authentication auth) {
         validate(interoperabilityRecord);
         try {
@@ -56,12 +57,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         logger.debug("Updating Interoperability Record: {}", interoperabilityRecord);
 
         return interoperabilityRecord;
-    }
-
-    public void delete(InteroperabilityRecord interoperabilityRecord, Authentication auth) {
-        logger.trace("User '{}' is attempting to delete the Interoperability Record with id '{}'", auth, interoperabilityRecord.getId());
-        super.delete(interoperabilityRecord);
-        logger.debug("Deleting Interoperability Record: {}", interoperabilityRecord);
     }
 
 }

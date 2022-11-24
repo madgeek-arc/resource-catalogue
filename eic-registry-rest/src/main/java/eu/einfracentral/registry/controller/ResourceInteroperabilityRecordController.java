@@ -1,6 +1,9 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.Helpdesk;
+import eu.einfracentral.domain.HelpdeskBundle;
 import eu.einfracentral.domain.ResourceInteroperabilityRecord;
+import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -21,6 +24,8 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,16 +35,16 @@ public class ResourceInteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordController.class);
 
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecord, Authentication> resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle, Authentication> resourceInteroperabilityRecordService;
 
-    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecord, Authentication> resourceInteroperabilityRecordService) {
+    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle, Authentication> resourceInteroperabilityRecordService) {
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
 
     @ApiOperation(value = "Returns the ResourceInteroperabilityRecord with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecord(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id);
+        ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id).getResourceInteroperabilityRecord();
         return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
     }
 
@@ -73,8 +78,31 @@ public class ResourceInteroperabilityRecordController {
             ff.setOrderBy(sort);
         }
         ff.setFilter(allRequestParams);
-        Paging<ResourceInteroperabilityRecord> resourceInteroperabilityRecordPaging = resourceInteroperabilityRecordService.getAll(ff, auth);
+        List<ResourceInteroperabilityRecord> resourceInteroperabilityRecordList = new LinkedList<>();
+        Paging<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundlePaging = resourceInteroperabilityRecordService.getAll(ff, auth);
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundlePaging.getResults()) {
+            resourceInteroperabilityRecordList.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord());
+        }
+        Paging<ResourceInteroperabilityRecord> resourceInteroperabilityRecordPaging = new Paging<>(resourceInteroperabilityRecordBundlePaging.getTotal(), resourceInteroperabilityRecordBundlePaging.getFrom(),
+                resourceInteroperabilityRecordBundlePaging.getTo(), resourceInteroperabilityRecordList, resourceInteroperabilityRecordBundlePaging.getFacets());
         return new ResponseEntity<>(resourceInteroperabilityRecordPaging, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")
+    @GetMapping(path = "/byResource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@PathVariable("resourceId") String resourceId,
+                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                           @ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, auth).getResults();
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
+            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)
+                    && (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId))){
+                return new ResponseEntity<>(resourceInteroperabilityRecord.getResourceInteroperabilityRecord(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new ResourceInteroperabilityRecord.")
@@ -82,9 +110,9 @@ public class ResourceInteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceInteroperabilityRecord.resourceId, #catalogueId)")
     public ResponseEntity<ResourceInteroperabilityRecord> addResourceInteroperabilityRecord(@Valid @RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
                                                 @RequestParam String resourceType, @ApiIgnore Authentication auth) {
-        resourceInteroperabilityRecordService.add(resourceInteroperabilityRecord, resourceType, auth);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.add(new ResourceInteroperabilityRecordBundle(resourceInteroperabilityRecord), resourceType, auth);
         logger.info("User '{}' added the ResourceInteroperabilityRecord with id '{}'", auth.getName(), resourceInteroperabilityRecord.getId());
-        return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.CREATED);
+        return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Updates the ResourceInteroperabilityRecord with the given id.")
@@ -92,21 +120,25 @@ public class ResourceInteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceInteroperabilityRecord.resourceId, #catalogueId)")
     public ResponseEntity<ResourceInteroperabilityRecord> updateResourceInteroperabilityRecord(@Valid @RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        resourceInteroperabilityRecordService.update(resourceInteroperabilityRecord, auth);
-        logger.info("User '{}' updated the ResourceInteroperabilityRecord with id '{}'", auth.getName(), resourceInteroperabilityRecord.getId());
-        return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecord.getId());
+        resourceInteroperabilityRecordBundle.setResourceInteroperabilityRecord(resourceInteroperabilityRecord);
+        resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
+        logger.info("User '{}' updated the ResourceInteroperabilityRecord with id '{}'", auth.getName(), resourceInteroperabilityRecordBundle.getId());
+        return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id);
-        if (resourceInteroperabilityRecord == null) {
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(id);
+        if (resourceInteroperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecord.getId());
-        resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecord);
-        logger.info("User '{}' deleted the ResourceInteroperabilityRecord with id '{}'", auth.getName(), resourceInteroperabilityRecord.getId());
-        return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
+        logger.info("Deleting ResourceInteroperabilityRecord: {} of the Catalogue: {}", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
+        resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
+        logger.info("User '{}' deleted the ResourceInteroperabilityRecord with id '{}' of the Catalogue '{}'", auth.getName(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(), resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
+        return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 }
