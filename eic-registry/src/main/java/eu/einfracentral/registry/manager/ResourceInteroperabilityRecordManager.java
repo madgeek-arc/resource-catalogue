@@ -77,6 +77,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     @Override
     public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, Authentication auth) {
+        // block Public ResourceInteroperabilityRecordBundle updates
+        if (resourceInteroperabilityRecord.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly update a Public Resource Interoperability Record");
+        }
 
         logger.trace("User '{}' is attempting to update the ResourceInteroperabilityRecord with id '{}'", auth, resourceInteroperabilityRecord.getId());
         validate(resourceInteroperabilityRecord);
@@ -117,6 +121,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord) {
+        // block Public ResourceInteroperabilityRecordBundle deletions
+        if (resourceInteroperabilityRecord.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Resource Interoperability Record");
+        }
         logger.trace("User is attempting to delete the ResourceInteroperabilityRecord with id '{}'",
                 resourceInteroperabilityRecord.getId());
         super.delete(resourceInteroperabilityRecord);
