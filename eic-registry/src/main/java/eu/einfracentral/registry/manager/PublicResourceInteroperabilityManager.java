@@ -1,9 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiers;
-import eu.einfracentral.domain.ResourceInteroperabilityRecord;
 import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
@@ -72,7 +70,8 @@ public class PublicResourceInteroperabilityManager extends ResourceManager<Resou
         resourceInteroperabilityRecordBundle.setIdentifiers(Identifiers.createIdentifier(resourceInteroperabilityRecordBundle.getId()));
         resourceInteroperabilityRecordBundle.setId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                 resourceInteroperabilityRecordBundle.getId()));
-
+        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setResourceId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId()));
         resourceInteroperabilityRecordBundle.getMetadata().setPublished(true);
         ResourceInteroperabilityRecordBundle ret;
         logger.info(String.format("ResourceInteroperabilityRecordBundle [%s] is being published with id [%s]", lowerLevelResourceId, resourceInteroperabilityRecordBundle.getId()));
@@ -91,7 +90,8 @@ public class PublicResourceInteroperabilityManager extends ResourceManager<Resou
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-
+        ret.getResourceInteroperabilityRecord().setResourceId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId()));
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());

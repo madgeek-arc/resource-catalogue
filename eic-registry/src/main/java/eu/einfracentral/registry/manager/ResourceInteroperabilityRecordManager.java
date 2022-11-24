@@ -10,7 +10,6 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -62,6 +61,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         loggingInfoList.add(loggingInfo);
         resourceInteroperabilityRecord.setLoggingInfo(loggingInfoList);
+        resourceInteroperabilityRecord.setActive(true);
+
         // latestOnboardingInfo
         resourceInteroperabilityRecord.setLatestOnboardingInfo(loggingInfo);
 
@@ -115,10 +116,9 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return resourceInteroperabilityRecord;
     }
 
-    public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, Authentication auth) {
-        logger.trace("User '{}' is attempting to delete the ResourceInteroperabilityRecord with id '{}'", auth,
+    public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord) {
+        logger.trace("User is attempting to delete the ResourceInteroperabilityRecord with id '{}'",
                 resourceInteroperabilityRecord.getId());
-
         super.delete(resourceInteroperabilityRecord);
         logger.debug("Deleting ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecord);
 

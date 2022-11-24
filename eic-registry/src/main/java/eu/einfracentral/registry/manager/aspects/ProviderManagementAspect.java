@@ -364,7 +364,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.delete(eu.einfracentral.domain.ResourceInteroperabilityRecordBundle, org.springframework.security.core.Authentication)))")
+    @After("execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.delete(eu.einfracentral.domain.ResourceInteroperabilityRecordBundle)))")
     public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
         publicResourceInteroperabilityManager.delete(resourceInteroperabilityRecordBundle);

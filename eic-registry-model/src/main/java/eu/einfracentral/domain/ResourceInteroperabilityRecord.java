@@ -31,7 +31,7 @@ public class ResourceInteroperabilityRecord implements Identifiable {
     @XmlElementWrapper(name = "interoperabilityRecordIds", required = true)
     @XmlElement(name = "interoperabilityRecordId")
     @ApiModelProperty(position = 4, notes = "Unique identifier of the Interoperability Record", required = true)
-    @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class)
+    @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class) //FIXME: does not work
     private List<String> interoperabilityRecordIds;
 
     public ResourceInteroperabilityRecord() {

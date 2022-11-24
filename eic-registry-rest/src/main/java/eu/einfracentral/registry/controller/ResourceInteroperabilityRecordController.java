@@ -1,7 +1,5 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.Helpdesk;
-import eu.einfracentral.domain.HelpdeskBundle;
 import eu.einfracentral.domain.ResourceInteroperabilityRecord;
 import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
@@ -78,6 +76,7 @@ public class ResourceInteroperabilityRecordController {
             ff.setOrderBy(sort);
         }
         ff.setFilter(allRequestParams);
+        ff.addFilter("published", false);
         List<ResourceInteroperabilityRecord> resourceInteroperabilityRecordList = new LinkedList<>();
         Paging<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundlePaging = resourceInteroperabilityRecordService.getAll(ff, auth);
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundlePaging.getResults()) {
@@ -95,6 +94,7 @@ public class ResourceInteroperabilityRecordController {
                                                            @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("published", false);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, auth).getResults();
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
             if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)
