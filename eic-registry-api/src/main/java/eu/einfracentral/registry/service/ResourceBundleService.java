@@ -278,7 +278,6 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     ResourceBundle<?> updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth);
     ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth);
     ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth);
-
     ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);

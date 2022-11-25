@@ -1,6 +1,7 @@
 package eu.einfracentral.config;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
 import freemarker.template.TemplateExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
@@ -52,7 +53,9 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
                 ResourceBundle.class, Datasource.class, DatasourceBundle.class, ProviderBundle.class,
                 RangeValue.class, Vocabulary.class, ProviderMainContact.class, ProviderPublicContact.class,
                 ServiceMainContact.class, ServicePublicContact.class, ProviderLocation.class, ProviderRequest.class,
-                Helpdesk.class, Monitoring.class, HelpdeskBundle.class, MonitoringBundle.class, Metric.class);
+                Helpdesk.class, Monitoring.class, HelpdeskBundle.class, MonitoringBundle.class, Metric.class,
+                ResourceExtras.class, InteroperabilityRecord.class, ResourceInteroperabilityRecord.class,
+                ResourceInteroperabilityRecordBundle.class);
 
     }
 

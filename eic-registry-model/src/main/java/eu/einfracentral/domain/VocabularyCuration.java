@@ -81,10 +81,25 @@ public class VocabularyCuration implements Identifiable {
     }
 
     public enum Vocab {
+        // Provider
+        PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
+        PROVIDER_ESFRI_TYPE("Provider esfri type"),
+        PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
+        PROVIDER_HOSTING_LEGAL_ENTITY("Provider hosting legal entity"),
+        PROVIDER_LEGAL_STATUS("Provider legal status"),
+        PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
+        PROVIDER_NETWORK("Provider network"),
+        PROVIDER_SOCIETAL_GRAND_CHALLENGE("Provider societal grand challenge"),
+        PROVIDER_STRUCTURE_TYPE("Provider structure type"),
+        PROVIDER_MERIL_SCIENTIFIC_DOMAIN("Provider meril scientific domain"),
+        PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN("Provider meril scientific subdomain"),
+        // Service
         SUPERCATEGORY("Supercategory"),
         CATEGORY("Category"),
         SUBCATEGORY("Subcategory"),
         LANGUAGE("Language"),
+        GEOGRAPHIC_LOCATION("Geographic location"),
+        REGION("Region"),
         COUNTRY("Country"),
         TRL("Technology readiness level"),
         SCIENTIFIC_DOMAIN("Scientific domain"),
@@ -96,16 +111,32 @@ public class VocabularyCuration implements Identifiable {
         FUNDING_BODY("Funding body"),
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
-        PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
-        PROVIDER_ESFRI_TYPE("Provider esfri type"),
-        PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
-        PROVIDER_LEGAL_STATUS("Provider legal status"),
-        PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
-        PROVIDER_NETWORK("Provider network"),
-        PROVIDER_SOCIETAL_GRAND_CHALLENGE("Provider societal grand challenge"),
-        PROVIDER_STRUCTURE_TYPE("Provider structure type"),
-        PROVIDER_MERIL_SCIENTIFIC_DOMAIN("Provider meril scientific domain"),
-        PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN("Provider meril scientific subdomain");
+        RELATED_PLATFORM("Related platform"),
+        // States
+        CATALOGUE_STATE("Catalogue state"),
+        PROVIDER_STATE("Provider state"),
+        RESOURCE_STATE("Resource state"),
+        TEMPLATE_STATE("Template state"),
+        // Datasource
+        DS_RESEARCH_ENTITY_TYPE("Research entity type"),
+        DS_PERSISTENT_IDENTITY_SCHEME("Persistent identity scheme"),
+        DS_JURISDICTION("Jurisdiction"),
+        DS_CLASSIFICATION("Classification"),
+        DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
+        // Monitoring
+        MONITORING_MONITORED_BY("Monitored by"),
+        // Bundle Extras
+        SEMANTIC_RELATIONSHIP("Semantic relationship"),
+        RESEARCH_CATEGORY("Research category"),
+        // Interoperability Record
+        IR_IDENTIFIER_TYPE("Interoperability Record identifier type"),
+        IR_NAME_TYPE("Interoperability Record name type"),
+        IR_RESOURCE_TYPE_GENERAL("Interoperability Record resource type general"),
+        //        IR_EOSC_RELATED_STANDARDS("Interoperability Record eosc related standards"),
+        IR_STATUS("Interoperability Record status"),
+        IR_DOMAIN("Interoperability Record domain"),
+        IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type"),
+        IR_EOSC_AAI("Interoperability Record eosc aai");
 
         private final String vocabulary;
 
