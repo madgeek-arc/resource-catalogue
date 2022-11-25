@@ -19,8 +19,7 @@ public class ResourceInteroperabilityRecord implements Identifiable {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Resource ID", required = true)
-    @FieldValidation
-//    @FieldValidation(containsId = true, idClass = Datasource.class) //FIXME: need both Datasource/Service
+    @FieldValidation(containsId = true) //FIXME: need both Datasource/Service
     private String resourceId;
 
     @XmlElement(required = true)
@@ -31,7 +30,7 @@ public class ResourceInteroperabilityRecord implements Identifiable {
     @XmlElementWrapper(name = "interoperabilityRecordIds", required = true)
     @XmlElement(name = "interoperabilityRecordId")
     @ApiModelProperty(position = 4, notes = "Unique identifier of the Interoperability Record", required = true)
-    @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class) //FIXME: does not work
+    @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class)
     private List<String> interoperabilityRecordIds;
 
     public ResourceInteroperabilityRecord() {

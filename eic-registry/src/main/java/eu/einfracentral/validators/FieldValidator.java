@@ -6,13 +6,13 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.ProviderManager;
-import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,6 +33,8 @@ public class FieldValidator {
     private final ProviderManager providerService;
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final ResourceService<InteroperabilityRecord, Authentication> interoperabilityRecordService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
@@ -43,11 +45,15 @@ public class FieldValidator {
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
                           @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
-                          @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService) {
+                          @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                          @Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                          @Lazy ResourceService<InteroperabilityRecord, Authentication> interoperabilityRecordService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.catalogueService = catalogueService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
     private String getCurrentLocation() {
@@ -319,6 +325,17 @@ public class FieldValidator {
                             && serviceBundleService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
+                                        field.getName()));
+                    } else if ((eu.einfracentral.domain.Catalogue.class.equals(annotation.idClass())
+                        || CatalogueBundle.class.equals(annotation.idClass()))
+                        && catalogueService.get(o.toString()) == null) {
+                        throw new ValidationException(
+                                String.format("Field '%s' should contain the ID of an existing Catalogue",
+                                        field.getName()));
+                    } else if ((eu.einfracentral.domain.InteroperabilityRecord.class.equals(annotation.idClass()))
+                            && interoperabilityRecordService.get(o.toString()) == null) {
+                        throw new ValidationException(
+                                String.format("Field '%s' should contain the ID of an existing InteroperabilityRecord",
                                         field.getName()));
                     }
                 } catch (ResourceException | ResourceNotFoundException e) {
