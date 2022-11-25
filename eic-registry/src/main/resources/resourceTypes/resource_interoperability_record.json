@@ -40,7 +40,7 @@
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
-    "class": "eu.einfracentral.domain.ResourceInteroperabilityRecord"
+    "class": "eu.einfracentral.domain.ResourceInteroperabilityRecordBundle"
   },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/interoperability_record/eic-registry-model/src/main/resources/schema1.xsd"
 }
