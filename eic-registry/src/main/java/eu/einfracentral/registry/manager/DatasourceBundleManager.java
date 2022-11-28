@@ -54,6 +54,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
+    @Value("${openaire.dsm.api}")
+    private String openaireAPI;
 
     public DatasourceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
                                    IdCreator idCreator,
@@ -673,8 +675,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         int quantity = Integer.parseInt(pagination[1]);
         String ordering = pagination[2];
         String data = pagination[3];
-        // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
-        String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
+        String url = openaireAPI+"openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
         String response = createHttpRequest(url, data);
         if (response != null){
             JSONObject obj = new JSONObject(response);
