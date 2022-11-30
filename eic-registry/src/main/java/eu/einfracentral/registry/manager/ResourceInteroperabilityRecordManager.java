@@ -145,7 +145,12 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
-        // check if Resource has already a Resource Interoperability Record registered
+        // check if Service is Active + Approved
+        if (!serviceBundleService.get(resourceId, catalogueId).isActive() ||
+                !serviceBundleService.get(resourceId, catalogueId).getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", resourceId));
+        }
+        // check if Service has already a Resource Interoperability Record registered
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
@@ -170,7 +175,12 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
-        // check if Resource has already a Resource Interoperability Record registered
+        // check if Datasource is Active + Approved
+        if (!datasourceBundleService.get(resourceId, catalogueId).isActive() ||
+                !datasourceBundleService.get(resourceId, catalogueId).getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", resourceId));
+        }
+        // check if Datasource has already a Resource Interoperability Record registered
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
