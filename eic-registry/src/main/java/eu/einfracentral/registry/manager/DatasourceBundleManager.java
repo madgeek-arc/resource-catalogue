@@ -201,6 +201,11 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                     datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId()));
         }
 
+        // block Public Datasource updates
+        if (existingDatasource.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly update a Public Datasource");
+        }
+
         User user = User.of(auth);
 
         // update existing datasource Metadata, ResourceExtras, Identifiers, MigrationStatus
@@ -315,6 +320,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
+        // block Public Datasource deletion
+        if (datasourceBundle.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Service");
+        }
         logger.info("Deleting Datasource: {}", datasourceBundle);
         super.delete(datasourceBundle);
     }

@@ -187,6 +187,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                     serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()));
         }
 
+        // block Public Service update
+        if (existingService.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly update a Public Service");
+        }
+
         User user = User.of(auth);
 
         // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
@@ -301,6 +306,10 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     @Override
     public void delete(ServiceBundle serviceBundle) {
+        // block Public Service deletion
+        if (serviceBundle.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Service");
+        }
         logger.info("Deleting Service: {}", serviceBundle);
         super.delete(serviceBundle);
     }

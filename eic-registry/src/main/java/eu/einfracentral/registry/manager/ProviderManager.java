@@ -156,6 +156,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             checkCatalogueIdConsistency(provider, catalogueId);
         }
 
+        // block Public Provider update
+        if (provider.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly update a Public Provider");
+        }
+
         validate(provider);
         provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -356,6 +361,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {
+        // block Public Provider update
+        if (provider.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Provider");
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
@@ -405,6 +414,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void deleteBundle(ProviderBundle providerBundle) {
+        // block Public Provider update
+        if (providerBundle.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Provider");
+        }
         logger.info("Deleting Provider: {}", providerBundle);
         super.delete(providerBundle);
     }
