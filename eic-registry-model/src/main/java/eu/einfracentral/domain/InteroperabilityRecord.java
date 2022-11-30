@@ -75,7 +75,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 7)
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private String created;
 
     /**
@@ -83,7 +83,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElement
     @ApiModelProperty(position = 8)
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private String updated;
 
     /**

@@ -35,7 +35,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new RuntimeException(e);
         }
         interoperabilityRecord.setCreated(String.valueOf(System.currentTimeMillis()));
-        interoperabilityRecord.setUpdated(String.valueOf(System.currentTimeMillis()));
         logger.trace("User '{}' is attempting to add a new Interoperability Record: {}", auth, interoperabilityRecord);
         logger.info("Adding Interoperability Record: {}", interoperabilityRecord);
         super.add(interoperabilityRecord, auth);
@@ -48,8 +47,9 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         logger.trace("User '{}' is attempting to update the Interoperability Record with id '{}'", auth, interoperabilityRecord.getId());
         validate(interoperabilityRecord);
-        interoperabilityRecord.setUpdated(String.valueOf(System.currentTimeMillis()));
         Resource existing = whereID(interoperabilityRecord.getId(), true);
+        interoperabilityRecord.setCreated(deserialize(existing).getCreated());
+        interoperabilityRecord.setUpdated(String.valueOf(System.currentTimeMillis()));
         existing.setPayload(serialize(interoperabilityRecord));
         existing.setResourceType(resourceType);
 
