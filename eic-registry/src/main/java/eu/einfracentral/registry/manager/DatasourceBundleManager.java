@@ -175,7 +175,20 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #datasourceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle updateResource(DatasourceBundle datasourceBundle, String catalogueId, String comment, Authentication auth) {
+
         DatasourceBundle ret;
+        DatasourceBundle existingDatasource;
+        try { // try to find a Datasource with the same id
+            existingDatasource = get(datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(String.format("There is no Datasource with id [%s] on the [%s] Catalogue",
+                    datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId()));
+        }
+
+        // check if there are actual changes in the Datasource
+        if (datasourceBundle.getDatasource().equals(existingDatasource.getDatasource())){
+            throw new ValidationException("There are no changes in the Datasource", HttpStatus.OK);
+        }
 
         if (catalogueId == null || catalogueId.equals("")) {
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
@@ -187,18 +200,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         validate(datasourceBundle);
 
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
-        DatasourceBundle existingDatasource;
 
         // if service version is empty set it null
         if ("".equals(datasourceBundle.getDatasource().getVersion())) {
             datasourceBundle.getDatasource().setVersion(null);
-        }
-
-        try { // try to find a Datasource with the same id
-            existingDatasource = get(datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
-        } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Datasource with id [%s] on the [%s] Catalogue",
-                    datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId()));
         }
 
         // block Public Datasource updates

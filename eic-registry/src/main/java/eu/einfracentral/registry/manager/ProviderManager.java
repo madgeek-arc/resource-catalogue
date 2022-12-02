@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -150,6 +151,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
 
+        Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle ex = deserialize(existing);
+        // check if there are actual changes in the Provider
+        if (provider.getProvider().equals(ex.getProvider())){
+            throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+        }
+
         if (catalogueId == null || catalogueId.equals("")) {
             provider.getProvider().setCatalogueId(catalogueName);
         } else {
@@ -178,9 +186,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
-
-        Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
-        ProviderBundle ex = deserialize(existing);
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN") && !ex.getProvider().getCatalogueId().equals(provider.getProvider().getCatalogueId())) {

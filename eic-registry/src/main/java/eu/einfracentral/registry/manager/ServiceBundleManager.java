@@ -161,7 +161,20 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #serviceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
+
         ServiceBundle ret;
+        ServiceBundle existingService;
+        try { // try to find a Service with the same id
+            existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
+                    serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()));
+        }
+
+        // check if there are actual changes in the Service
+        if (serviceBundle.getService().equals(existingService.getService())){
+            throw new ValidationException("There are no changes in the Service", HttpStatus.OK);
+        }
 
         if (catalogueId == null || catalogueId.equals("")) {
             serviceBundle.getService().setCatalogueId(catalogueName);
@@ -173,18 +186,10 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         validate(serviceBundle);
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
-        ServiceBundle existingService;
 
         // if service version is empty set it null
         if ("".equals(serviceBundle.getService().getVersion())) {
             serviceBundle.getService().setVersion(null);
-        }
-
-        try { // try to find a Service with the same id
-            existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
-        } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
-                    serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()));
         }
 
         // block Public Service update

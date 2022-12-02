@@ -113,12 +113,17 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
+        // get existing resource
+        Resource existing = whereID(providerBundle.getId(), true);
+        ProviderBundle ex = deserialize(existing);
+        // check if there are actual changes in the Provider
+        if (providerBundle.getProvider().equals(ex.getProvider())){
+            throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+        }
         // block catalogueId updates from Provider Admins
         providerBundle.getProvider().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        // get existing resource
-        Resource existing = whereID(providerBundle.getId(), true);
         // save existing resource with new payload
         existing.setPayload(serialize(providerBundle));
         existing.setResourceType(resourceType);

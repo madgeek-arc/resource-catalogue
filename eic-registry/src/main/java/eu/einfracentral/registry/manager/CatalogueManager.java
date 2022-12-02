@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
@@ -201,6 +202,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     public CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogue);
+
+        Resource existing = whereID(catalogue.getId(), true);
+        CatalogueBundle ex = deserialize(existing);
+        // check if there are actual changes in the Catalogue
+        if (catalogue.getCatalogue().equals(ex.getCatalogue())){
+            throw new ValidationException("There are no changes in the Catalogue", HttpStatus.OK);
+        }
+
         validate(catalogue);
         catalogue.setMetadata(Metadata.updateMetadata(catalogue.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -219,8 +228,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         // latestUpdateInfo
         catalogue.setLatestUpdateInfo(loggingInfo);
 
-        Resource existing = whereID(catalogue.getId(), true);
-        CatalogueBundle ex = deserialize(existing);
         catalogue.setActive(ex.isActive());
         catalogue.setStatus(ex.getStatus());
         existing.setPayload(serialize(catalogue));
