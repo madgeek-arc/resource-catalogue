@@ -1013,27 +1013,33 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"' AND published = 'false' AND";
+            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"'";
         } else{
-            query = "SELECT provider_id FROM provider_view WHERE published = 'false' AND";
+            query = "SELECT provider_id FROM provider_view WHERE";
         }
 
         boolean firstTime = true;
-        boolean hasStatus = false;
-        boolean hasTemplateStatus = false;
-        boolean hasCatalogueId = false;
         for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
             in.addValue(entry.getKey(), entry.getValue());
+            // published
+            if (entry.getKey().equals("published")) {
+                if (firstTime) {
+                    query += String.format(" (published=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    query += String.format(" AND (published=%s)", entry.getValue().toString());
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR published='");
+                }
+            }
             // status
             if (entry.getKey().equals("status")) {
-                hasStatus = true;
                 if (firstTime) {
                     query += String.format(" (status=%s)", entry.getValue().toString());
                     firstTime = false;
                 } else {
-                    if (hasStatus && hasTemplateStatus){
-                        query += String.format(" AND (status=%s)", entry.getValue().toString());
-                    }
+                    query += String.format(" AND (status=%s)", entry.getValue().toString());
                 }
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR status='");
@@ -1041,14 +1047,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
             // templateStatus
             if (entry.getKey().equals("templateStatus")) {
-                hasTemplateStatus = true;
                 if (firstTime) {
                     query += String.format(" (templateStatus=%s)", entry.getValue().toString());
                     firstTime = false;
                 } else {
-                    if (hasStatus && hasTemplateStatus){
-                        query += String.format(" AND (templateStatus=%s)", entry.getValue().toString());
-                    }
+                    query += String.format(" AND (templateStatus=%s)", entry.getValue().toString());
                 }
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR templateStatus='");
@@ -1056,7 +1059,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
             // catalogue_id
             if (entry.getKey().equals("catalogue_id")) {
-                hasCatalogueId = true;
                 if (firstTime) {
                     if (((LinkedHashSet) entry.getValue()).contains("all")){
                         query += String.format(" (catalogue_id LIKE '%%%%')");
@@ -1067,13 +1069,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         firstTime = false;
                     }
                 } else {
-                    if ((hasStatus && hasCatalogueId) || (hasTemplateStatus && hasCatalogueId) || (hasStatus && hasTemplateStatus && hasCatalogueId)){
-                        if (((LinkedHashSet) entry.getValue()).contains("all")){
-                            query += String.format(" AND (catalogue_id LIKE '%%%%')");
-                            continue;
-                        } else{
-                            query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
-                        }
+                    if (((LinkedHashSet) entry.getValue()).contains("all")){
+                        query += String.format(" AND (catalogue_id LIKE '%%%%')");
+                        continue;
+                    } else{
+                        query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
                     }
                 }
                 if (query.contains(",")){
