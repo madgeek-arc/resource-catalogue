@@ -98,12 +98,17 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
+        // get existing resource
+        Resource existing = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
+        ServiceBundle ex = deserialize(existing);
+        // check if there are actual changes in the Service
+        if (serviceBundle.getService().equals(ex.getService())){
+            throw new ValidationException("There are no changes in the Service", HttpStatus.OK);
+        }
         // block catalogueId updates from Provider Admins
         serviceBundle.getService().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
-        // get existing resource
-        Resource existing = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
         // save existing resource with new payload
         existing.setPayload(serialize(serviceBundle));
         existing.setResourceType(resourceType);

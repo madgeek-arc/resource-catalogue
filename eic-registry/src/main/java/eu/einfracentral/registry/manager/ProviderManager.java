@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -61,7 +62,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
-        " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
+            " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
     private final SynchronizerService<Provider> synchronizerServiceProvider;
 
@@ -150,10 +151,22 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
 
+        Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle ex = deserialize(existing);
+        // check if there are actual changes in the Provider
+        if (provider.getProvider().equals(ex.getProvider())){
+            throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+        }
+
         if (catalogueId == null || catalogueId.equals("")) {
             provider.getProvider().setCatalogueId(catalogueName);
         } else {
             checkCatalogueIdConsistency(provider, catalogueId);
+        }
+
+        // block Public Provider update
+        if (provider.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly update a Public Provider");
         }
 
         validate(provider);
@@ -173,9 +186,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         // latestUpdateInfo
         provider.setLatestUpdateInfo(loggingInfo);
-
-        Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
-        ProviderBundle ex = deserialize(existing);
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN") && !ex.getProvider().getCatalogueId().equals(provider.getProvider().getCatalogueId())) {
@@ -334,7 +344,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
             for (ProviderBundle providerBundle : providers.getResults()){
                 if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
-                securityService.userIsProviderAdmin(user, providerBundle)) {
+                        securityService.userIsProviderAdmin(user, providerBundle)) {
                     retList.add(providerBundle);
                 }
             }
@@ -356,6 +366,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {
+        // block Public Provider update
+        if (provider.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Provider");
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
@@ -405,6 +419,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void deleteBundle(ProviderBundle providerBundle) {
+        // block Public Provider update
+        if (providerBundle.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Provider");
+        }
         logger.info("Deleting Provider: {}", providerBundle);
         super.delete(providerBundle);
     }
@@ -871,7 +889,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
     }
 
-//    @Override
+    //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
         if (providerBundle.getLoggingInfo() != null){
@@ -938,7 +956,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging,
-                                                        int quantity, int from){
+                                                              int quantity, int from){
         if (!providerBundle.isEmpty()) {
             List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
             if (from == 0){
@@ -993,34 +1011,38 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     // TODO: refactor / delete?...
     public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff, String orderDirection, String orderField){
         String keyword = ff.getKeyword();
-        Map<String, Object> order = ff.getOrderBy();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
-        List<String> allFilters = new ArrayList<>();
 
         String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"' AND published = 'false' AND";
+            query = "SELECT provider_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"'";
         } else{
-            query = "SELECT provider_id FROM provider_view WHERE published = 'false' AND";
+            query = "SELECT provider_id FROM provider_view WHERE";
         }
 
         boolean firstTime = true;
-        boolean hasStatus = false;
-        boolean hasTemplateStatus = false;
-        boolean hasCatalogueId = false;
         for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
             in.addValue(entry.getKey(), entry.getValue());
+            // published
+            if (entry.getKey().equals("published")) {
+                if (firstTime) {
+                    query += String.format(" (published=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    query += String.format(" AND (published=%s)", entry.getValue().toString());
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR published='");
+                }
+            }
             // status
             if (entry.getKey().equals("status")) {
-                hasStatus = true;
                 if (firstTime) {
                     query += String.format(" (status=%s)", entry.getValue().toString());
                     firstTime = false;
                 } else {
-                    if (hasStatus && hasTemplateStatus){
-                        query += String.format(" AND (status=%s)", entry.getValue().toString());
-                    }
+                    query += String.format(" AND (status=%s)", entry.getValue().toString());
                 }
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR status='");
@@ -1028,14 +1050,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
             // templateStatus
             if (entry.getKey().equals("templateStatus")) {
-                hasTemplateStatus = true;
                 if (firstTime) {
                     query += String.format(" (templateStatus=%s)", entry.getValue().toString());
                     firstTime = false;
                 } else {
-                    if (hasStatus && hasTemplateStatus){
-                        query += String.format(" AND (templateStatus=%s)", entry.getValue().toString());
-                    }
+                    query += String.format(" AND (templateStatus=%s)", entry.getValue().toString());
                 }
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR templateStatus='");
@@ -1043,7 +1062,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
             // catalogue_id
             if (entry.getKey().equals("catalogue_id")) {
-                hasCatalogueId = true;
                 if (firstTime) {
                     if (((LinkedHashSet) entry.getValue()).contains("all")){
                         query += String.format(" (catalogue_id LIKE '%%%%')");
@@ -1054,13 +1072,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         firstTime = false;
                     }
                 } else {
-                    if ((hasStatus && hasCatalogueId) || (hasTemplateStatus && hasCatalogueId) || (hasStatus && hasTemplateStatus && hasCatalogueId)){
-                        if (((LinkedHashSet) entry.getValue()).contains("all")){
-                            query += String.format(" AND (catalogue_id LIKE '%%%%')");
-                            continue;
-                        } else{
-                            query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
-                        }
+                    if (((LinkedHashSet) entry.getValue()).contains("all")){
+                        query += String.format(" AND (catalogue_id LIKE '%%%%')");
+                        continue;
+                    } else{
+                        query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
                     }
                 }
                 if (query.contains(",")){
