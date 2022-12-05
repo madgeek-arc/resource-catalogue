@@ -3,8 +3,8 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -22,20 +22,23 @@ import java.util.List;
 import java.util.UUID;
 
 @org.springframework.stereotype.Service("helpdeskManager")
-public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements ResourceService<HelpdeskBundle, Authentication> {
+public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
     @Autowired
-    public HelpdeskManager(ResourceBundleService<ServiceBundle> resourceBundleService,
+    public HelpdeskManager(ResourceBundleService<ServiceBundle> serviceBundleService,
+                           ResourceBundleService<DatasourceBundle> datasourceBundleService,
                            JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService) {
         super(HelpdeskBundle.class);
-        this.resourceBundleService = resourceBundleService;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -47,10 +50,16 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    public HelpdeskBundle add(HelpdeskBundle helpdesk, Authentication auth) {
+    public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
 
-        // check if Service exists and if it has already a Helpdesk registered
-        serviceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
+        // check if Resource exists and if User belongs to Resource's Provider Admins
+        if (resourceType.equals("service")){
+            serviceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
+        } else if (resourceType.equals("datasource")){
+            datasourceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
+        } else{
+            throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
+        }
         validate(helpdesk);
 
         helpdesk.setId(UUID.randomUUID().toString());
@@ -135,16 +144,21 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     }
 
-    public void serviceConsistency(String serviceId, String catalogueId){
+    private void serviceConsistency(String serviceId, String catalogueId){
         // check if Service exists
         try{
-            resourceBundleService.get(serviceId, catalogueId);
+            serviceBundleService.get(serviceId, catalogueId);
             // check if Service is Public
-            if (resourceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
+            if (serviceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+        }
+        // check if Service is Active + Approved
+        if (!serviceBundleService.get(serviceId, catalogueId).isActive() ||
+                !serviceBundleService.get(serviceId, catalogueId).getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", serviceId));
         }
         // check if Service has already a Helpdesk registered
         FacetFilter ff = new FacetFilter();
@@ -153,6 +167,34 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         for (HelpdeskBundle helpdesk : allHelpdesks){
             if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){
                 throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Helpdesk " +
+                        "registered, with id: [%s]", serviceId, catalogueId, helpdesk.getId()));
+            }
+        }
+    }
+
+    private void datasourceConsistency(String serviceId, String catalogueId){
+        // check if Resource exists
+        try{
+            datasourceBundleService.get(serviceId, catalogueId);
+            // check if Datasource is Public
+            if (datasourceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
+                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
+            }
+        } catch(ResourceNotFoundException e){
+            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+        }
+        // check if Datasource is Active + Approved
+        if (!datasourceBundleService.get(serviceId, catalogueId).isActive() ||
+                !datasourceBundleService.get(serviceId, catalogueId).getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", serviceId));
+        }
+        // check if Datasource has already a Helpdesk registered
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        List<HelpdeskBundle> allHelpdesks = getAll(ff, null).getResults();
+        for (HelpdeskBundle helpdesk : allHelpdesks){
+            if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){
+                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Helpdesk " +
                         "registered, with id: [%s]", serviceId, catalogueId, helpdesk.getId()));
             }
         }
