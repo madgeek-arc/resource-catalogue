@@ -84,8 +84,15 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     @Override
     public MonitoringBundle update(MonitoringBundle monitoring, Authentication auth) {
-
         logger.trace("User '{}' is attempting to update the Monitoring with id '{}'", auth, monitoring.getId());
+
+        Resource existing = whereID(monitoring.getId(), true);
+        MonitoringBundle ex = deserialize(existing);
+        // check if there are actual changes in the Monitoring
+        if (monitoring.getMonitoring().equals(ex.getMonitoring())){
+            throw new ValidationException("There are no changes in the Monitoring", HttpStatus.OK);
+        }
+
         validate(monitoring);
         monitoring.setMetadata(Metadata.updateMetadata(monitoring.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -103,8 +110,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         // latestUpdateInfo
         monitoring.setLatestUpdateInfo(loggingInfo);
 
-        Resource existing = whereID(monitoring.getId(), true);
-        MonitoringBundle ex = deserialize(existing);
         monitoring.setActive(ex.isActive());
         existing.setPayload(serialize(monitoring));
         existing.setResourceType(resourceType);

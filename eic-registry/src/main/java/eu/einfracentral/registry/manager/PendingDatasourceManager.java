@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +44,8 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
 
     @Autowired
     public PendingDatasourceManager(ResourceBundleService<DatasourceBundle> resourceBundleService,
-                                 IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                 @Lazy ProviderManager providerManager) {
+                                    IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                                    @Lazy ProviderManager providerManager) {
         super(DatasourceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
@@ -101,12 +102,17 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication auth) {
+        // get existing resource
+        Resource existing = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
+        DatasourceBundle ex = deserialize(existing);
+        // check if there are actual changes in the Datasource
+        if (datasourceBundle.getDatasource().equals(ex.getDatasource())){
+            throw new ValidationException("There are no changes in the Datasource", HttpStatus.OK);
+        }
         // block catalogueId updates from Provider Admins
         datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Datasource with id {}", auth, datasourceBundle.getId());
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName()));
-        // get existing resource
-        Resource existing = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
         // save existing resource with new payload
         existing.setPayload(serialize(datasourceBundle));
         existing.setResourceType(resourceType);
