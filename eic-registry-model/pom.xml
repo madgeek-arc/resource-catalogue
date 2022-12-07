@@ -3,12 +3,12 @@
     <parent>
         <groupId>eu.einfracentral</groupId>
         <artifactId>eic</artifactId>
-        <version>4.1.0-rc.1</version>
+        <version>4.1.1-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>eic-registry-model</artifactId>
-    <version>4.1.0-rc.1</version>
+    <version>4.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <licenses>
         <license>
