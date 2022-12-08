@@ -129,7 +129,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         ff.setQuantity(maxQuantity);
         try {
             List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
-            providers.addAll(pendingProviderService.getAll(ff, null).getResults());
+//            providers.addAll(pendingProviderService.getAll(ff, null).getResults()); // TODO: try/catch or something
             List<User> users = getProviderUsers(providers);
             mergeRoles(createUserRoles(users, "ROLE_PROVIDER"));
 
@@ -145,6 +145,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
             logger.warn("There are no Catalogue entries in DB");
         }
 
+        //TODO: move to different function -> call it on AuthoritiesUpdaterAspect
         mergeRoles(Arrays.stream(epotAdmins.replace(" ", "").split(","))
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
