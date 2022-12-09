@@ -22,6 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,9 +32,10 @@ import java.util.stream.Collectors;
 public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
-    private Map<String, List<SimpleGrantedAuthority>> userRolesMap;
+    private Map<String, Set<SimpleGrantedAuthority>> userRolesMap;
+    private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpots = new HashMap<>();
     private final String admins;
-    private String epotAdmins;
+    private final String epotAdmins;
     private final int maxQuantity;
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
@@ -60,7 +62,24 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         }
         this.admins = admins;
         this.epotAdmins = epotAdmins;
-        mapAuthorities(admins);
+    }
+
+    @PostConstruct
+    void createAdminsOnStartup() {
+        mergeRoles(adminsAndEpots, Arrays.stream(epotAdmins.replace(" ", "").split(","))
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        a -> new SimpleGrantedAuthority("ROLE_EPOT"))
+                ));
+
+        mergeRoles(adminsAndEpots, Arrays.stream(admins.replace(" ", "").split(","))
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
+                ));
+        mapAuthorities(adminsAndEpots);
     }
 
     @Override
@@ -70,7 +89,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
             throw new UnauthorizedUserException("token is not valid or it has expired");
         }
 
-        List<SimpleGrantedAuthority> authorities;
+        Set<SimpleGrantedAuthority> authorities;
         out.add(new SimpleGrantedAuthority("ROLE_USER"));
         if (userRolesMap.get(userInfo.getEmail()) != null){
             logger.info(String.format("Roles by email: [%s]", userRolesMap.get(userInfo.getEmail()).stream().map(Objects::toString).collect(Collectors.joining(","))));
@@ -120,18 +139,21 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
     @Override
     public void updateAuthorities() {
         logger.info("Updating authorities map");
-        mapAuthorities(admins);
+        mapAuthorities(adminsAndEpots);
     }
 
-    private void mapAuthorities(String admins) {
-        userRolesMap = new HashMap<>();
+    private void mapAuthorities(Map<String, Set<SimpleGrantedAuthority>> adminsAndEpots) {
+        logger.info("Entered");
+        long time = System.nanoTime();
+        userRolesMap = new HashMap<>(adminsAndEpots);
         FacetFilter ff = new FacetFilter();
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         try {
             List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
 //            providers.addAll(pendingProviderService.getAll(ff, null).getResults()); // TODO: try/catch or something
             List<User> users = getProviderUsers(providers);
-            mergeRoles(createUserRoles(users, "ROLE_PROVIDER"));
+            mergeRoles(userRolesMap, createUserRoles(users, "ROLE_PROVIDER"));
 
         } catch (Exception e) {
             logger.warn("There are no Provider entries in DB");
@@ -140,25 +162,11 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         try {
             List<CatalogueBundle> catalogueAdmins = catalogueService.getAll(ff, securityService.getAdminAccess()).getResults();
             List<User> users = getCatalogueUsers(catalogueAdmins);
-            mergeRoles(createUserRoles(users, "ROLE_CATALOGUE_ADMIN"));
+            mergeRoles(userRolesMap, createUserRoles(users, "ROLE_CATALOGUE_ADMIN"));
         } catch (Exception e) {
             logger.warn("There are no Catalogue entries in DB");
         }
-
-        //TODO: move to different function -> call it on AuthoritiesUpdaterAspect
-        mergeRoles(Arrays.stream(epotAdmins.replace(" ", "").split(","))
-                .map(String::toLowerCase)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        a -> new SimpleGrantedAuthority("ROLE_EPOT"))
-                ));
-
-        mergeRoles(Arrays.stream(admins.replace(" ", "").split(","))
-                .map(String::toLowerCase)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
-                ));
+        logger.info("Map Authorities took {} ms", (System.nanoTime() - time) / 1000);
     }
 
     private List<User> getProviderUsers(List<ProviderBundle> providers) {
@@ -208,15 +216,22 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
                         .toMap(Function.identity(), a -> new SimpleGrantedAuthority(role)));
     }
 
-    private void mergeRoles(Map<String, SimpleGrantedAuthority> newRoles) {
+//    private void mergeRoles(Map<String, Set<SimpleGrantedAuthority>> roles, Map<String, SimpleGrantedAuthority> newRoles) {
+//        for (Map.Entry<String, SimpleGrantedAuthority> role : newRoles.entrySet()) {
+//            roles.putIfAbsent(role.getKey(), new HashSet<>());
+//            roles.get(role.getKey()).add(role.getValue());
+////            if (!userRolesMap.containsKey(role.getKey())){
+////            }
+////            if (userRolesMap.containsKey(role.getKey()) && !userRolesMap.get(role.getKey()).contains(role.getValue())) {
+////                userRolesMap.get(role.getKey()).add(role.getValue());
+////            }
+//        }
+//    }
+
+    private void mergeRoles(Map<String, Set<SimpleGrantedAuthority>> roles, Map<String, SimpleGrantedAuthority> newRoles) {
         for (Map.Entry<String, SimpleGrantedAuthority> role : newRoles.entrySet()) {
-            if (!userRolesMap.containsKey(role.getKey())){
-                userRolesMap.put(role.getKey(), new ArrayList<>());
-                userRolesMap.get(role.getKey()).add(role.getValue());
-            }
-            if (userRolesMap.containsKey(role.getKey()) && !userRolesMap.get(role.getKey()).contains(role.getValue())) {
-                userRolesMap.get(role.getKey()).add(role.getValue());
-            }
+            roles.putIfAbsent(role.getKey(), new HashSet<>());
+            roles.get(role.getKey()).add(role.getValue());
         }
     }
 }
