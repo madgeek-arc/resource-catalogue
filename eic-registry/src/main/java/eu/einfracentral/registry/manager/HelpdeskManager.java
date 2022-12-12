@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
@@ -77,8 +78,15 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     @Override
     public HelpdeskBundle update(HelpdeskBundle helpdesk, Authentication auth) {
-
         logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdesk.getId());
+
+        Resource existing = whereID(helpdesk.getId(), true);
+        HelpdeskBundle ex = deserialize(existing);
+        // check if there are actual changes in the Helpdesk
+        if (helpdesk.getHelpdesk().equals(ex.getHelpdesk())){
+            throw new ValidationException("There are no changes in the Helpdesk", HttpStatus.OK);
+        }
+
         validate(helpdesk);
         helpdesk.setMetadata(Metadata.updateMetadata(helpdesk.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -96,8 +104,6 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         // latestUpdateInfo
         helpdesk.setLatestUpdateInfo(loggingInfo);
 
-        Resource existing = whereID(helpdesk.getId(), true);
-        HelpdeskBundle ex = deserialize(existing);
         helpdesk.setActive(ex.isActive());
         existing.setPayload(serialize(helpdesk));
         existing.setResourceType(resourceType);

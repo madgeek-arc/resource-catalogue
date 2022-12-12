@@ -54,6 +54,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
+    @Value("${openaire.dsm.api}")
+    private String openaireAPI;
 
     public DatasourceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
                                    IdCreator idCreator,
@@ -173,7 +175,20 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #datasourceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle updateResource(DatasourceBundle datasourceBundle, String catalogueId, String comment, Authentication auth) {
+
         DatasourceBundle ret;
+        DatasourceBundle existingDatasource;
+        try { // try to find a Datasource with the same id
+            existingDatasource = get(datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(String.format("There is no Datasource with id [%s] on the [%s] Catalogue",
+                    datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId()));
+        }
+
+        // check if there are actual changes in the Datasource
+        if (datasourceBundle.getDatasource().equals(existingDatasource.getDatasource())){
+            throw new ValidationException("There are no changes in the Datasource", HttpStatus.OK);
+        }
 
         if (catalogueId == null || catalogueId.equals("")) {
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
@@ -185,18 +200,15 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         validate(datasourceBundle);
 
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
-        DatasourceBundle existingDatasource;
 
         // if service version is empty set it null
         if ("".equals(datasourceBundle.getDatasource().getVersion())) {
             datasourceBundle.getDatasource().setVersion(null);
         }
 
-        try { // try to find a Datasource with the same id
-            existingDatasource = get(datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
-        } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Datasource with id [%s] on the [%s] Catalogue",
-                    datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId()));
+        // block Public Datasource updates
+        if (existingDatasource.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly update a Public Datasource");
         }
 
         User user = User.of(auth);
@@ -313,13 +325,17 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
+        // block Public Datasource deletion
+        if (datasourceBundle.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Service");
+        }
         logger.info("Deleting Datasource: {}", datasourceBundle);
         super.delete(datasourceBundle);
     }
 
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-        public DatasourceBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
+    public DatasourceBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
@@ -673,8 +689,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         int quantity = Integer.parseInt(pagination[1]);
         String ordering = pagination[2];
         String data = pagination[3];
-        // PROD -> https://dev-openaire.d4science.org/openaire/ds/searchdetails/0/1000?order=ASCENDING&requestSortBy=dateofvalidation
-        String url = "https://beta.services.openaire.eu/openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
+        String url = openaireAPI+"openaire/ds/searchdetails/"+page+"/"+quantity+"?order="+ordering+"&requestSortBy=id";
         String response = createHttpRequest(url, data);
         if (response != null){
             JSONObject obj = new JSONObject(response);
