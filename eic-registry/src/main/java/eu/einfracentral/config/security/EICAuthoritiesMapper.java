@@ -164,19 +164,24 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
         try {
-            lock.tryLock(10, TimeUnit.SECONDS);
+            if (!lock.tryLock(10, TimeUnit.SECONDS)) {
+                throw new UnauthorizedUserException("Could not authorize user. Try again...");
+            }
+            if (providerUsers.contains(email.toLowerCase())) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
+            }
+            if (catalogueUsers.contains(email.toLowerCase())) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_CATALOGUE_ADMIN"));
+            }
         } catch (InterruptedException e) {
-            throw new UnauthorizedUserException("Could not authorize user. Try again...");
+            logger.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
         }
-        if (providerUsers.contains(email.toLowerCase())) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
+        if (adminsAndEpots.containsKey(email.toLowerCase())) {
+            authorities.addAll(adminsAndEpots.get(email.toLowerCase()));
         }
-        if (catalogueUsers.contains(email.toLowerCase())) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_CATALOGUE_ADMIN"));
-        }
-        lock.unlock();
-
-        authorities.addAll(adminsAndEpots.get(email));
         logger.debug("Get Authorities took {} ms", (System.nanoTime() - time) / 1000000);
         return authorities;
     }
