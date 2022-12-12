@@ -5,11 +5,9 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.openminted.registry.core.exception.ServerError;
 import eu.openminted.registry.core.service.ServiceException;
-import javassist.NotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +40,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return handleExceptionInternal(ex, se, new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(value = {ResourceNotFoundException.class, NotFoundException.class,
-            ChangeSetPersister.NotFoundException.class})
+    @ExceptionHandler(value = {ResourceNotFoundException.class})
     protected ResponseEntity<Object> handleNotFound(Exception ex, WebRequest request) {
         logger.info(ex.getMessage());
         logger.debug(ex);
