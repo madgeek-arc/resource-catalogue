@@ -869,7 +869,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     private Browsing<T> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
         List<T> results = paging.getResults()
-                .parallelStream()
+                .stream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
         return new Browsing<>(paging, results, labels);

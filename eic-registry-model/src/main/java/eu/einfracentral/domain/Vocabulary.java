@@ -172,8 +172,8 @@ public class Vocabulary implements Identifiable {
         return type;
     }
 
-    public void setType(Type type) {
-        this.type = type.getKey();
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Map<String, String> getExtras() {

@@ -340,7 +340,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabulary.setId(vocabularyFormed+"-"+valueNameFormed);
         vocabulary.setDescription("Vocabulary submitted by " +vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
         vocabulary.setName(vocabularyCuration.getEntryValueName());
-        vocabulary.setType(Vocabulary.Type.valueOf(vocabularyFormed.toUpperCase()));
+        vocabulary.setType(Vocabulary.Type.valueOf(vocabularyFormed.toUpperCase()).getKey());
         vocabulary.setExtras(extras);
         if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().equals("")){
             String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
@@ -369,7 +369,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     private Browsing<VocabularyCuration> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
         List<VocabularyCuration> results = paging.getResults()
-                .parallelStream()
+                .stream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
         return new Browsing<>(paging, results, labels);

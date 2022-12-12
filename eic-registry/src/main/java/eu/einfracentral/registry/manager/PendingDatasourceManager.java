@@ -44,8 +44,8 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
 
     @Autowired
     public PendingDatasourceManager(ResourceBundleService<DatasourceBundle> resourceBundleService,
-                                 IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                 @Lazy ProviderManager providerManager) {
+                                    IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                                    @Lazy ProviderManager providerManager) {
         super(DatasourceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
