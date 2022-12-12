@@ -338,7 +338,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             Vocabulary newHostingLegalEntity = new Vocabulary();
             newHostingLegalEntity.setId(idCreator.reformatId(newHLE));
             newHostingLegalEntity.setName(newHLE);
-            newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+            newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
             logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                     newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
 //                        add(newHostingLegalEntity, null);

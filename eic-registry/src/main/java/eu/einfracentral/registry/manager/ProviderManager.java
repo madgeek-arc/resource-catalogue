@@ -1166,7 +1166,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Vocabulary newHostingLegalEntity = new Vocabulary();
         newHostingLegalEntity.setId("provider_hosting_legal_entity-"+providerBundle.getProvider().getId());
         newHostingLegalEntity.setName(providerBundle.getProvider().getName());
-        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                 newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
         vocabularyService.add(newHostingLegalEntity, null);

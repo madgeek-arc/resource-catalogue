@@ -68,7 +68,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     }
 
     @Transient
-    void setPayload(T payload) {
+    protected void setPayload(T payload) {
         this.payload = payload;
     }
 

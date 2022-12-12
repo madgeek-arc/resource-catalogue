@@ -270,6 +270,14 @@ public class DatasourceController {
         return new ResponseEntity<>(datasourceBundlePaging, HttpStatus.OK);
     }
 
+    // Get all modification details of a specific Resource based on id.
+    @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                  @ApiIgnore Authentication auth) {
+        Paging<LoggingInfo> loggingInfoHistory = this.resourceBundleService.getLoggingInfoHistory(id, catalogueId);
+        return ResponseEntity.ok(loggingInfoHistory);
+    }
+
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),

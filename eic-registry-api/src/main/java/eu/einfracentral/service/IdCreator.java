@@ -1,9 +1,6 @@
 package eu.einfracentral.service;
 
-import eu.einfracentral.domain.Catalogue;
-import eu.einfracentral.domain.DatasourceBundle;
-import eu.einfracentral.domain.Provider;
-import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.*;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -40,6 +37,14 @@ public interface IdCreator {
      * @return
      */
     String createCatalogueId(Catalogue catalogue);
+
+    /**
+     * Creates id for {@link InteroperabilityRecord}
+     *
+     * @param interoperabilityRecord
+     * @return
+     */
+    String createInteroperabilityRecordId(InteroperabilityRecord interoperabilityRecord) throws NoSuchAlgorithmException;
 
     /**
      * *
