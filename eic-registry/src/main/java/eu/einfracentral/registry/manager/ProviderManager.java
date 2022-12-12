@@ -62,7 +62,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
-        " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
+            " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
     private final SynchronizerService<Provider> synchronizerServiceProvider;
 
@@ -344,7 +344,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
             for (ProviderBundle providerBundle : providers.getResults()){
                 if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
-                securityService.userIsProviderAdmin(user, providerBundle)) {
+                        securityService.userIsProviderAdmin(user, providerBundle)) {
                     retList.add(providerBundle);
                 }
             }
@@ -889,7 +889,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
     }
 
-//    @Override
+    //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
         if (providerBundle.getLoggingInfo() != null){
@@ -956,7 +956,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging,
-                                                        int quantity, int from){
+                                                              int quantity, int from){
         if (!providerBundle.isEmpty()) {
             List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
             if (from == 0){
@@ -1011,10 +1011,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     // TODO: refactor / delete?...
     public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff, String orderDirection, String orderField){
         String keyword = ff.getKeyword();
-        Map<String, Object> order = ff.getOrderBy();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
-        List<String> allFilters = new ArrayList<>();
 
         String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()){
@@ -1168,7 +1166,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Vocabulary newHostingLegalEntity = new Vocabulary();
         newHostingLegalEntity.setId("provider_hosting_legal_entity-"+providerBundle.getProvider().getId());
         newHostingLegalEntity.setName(providerBundle.getProvider().getName());
-        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                 newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
         vocabularyService.add(newHostingLegalEntity, null);

@@ -571,7 +571,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     public Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging,
-                                                              int quantity, int from){
+                                                               int quantity, int from){
         if (!catalogueBundle.isEmpty()) {
             List<CatalogueBundle> retWithCorrectQuantity = new ArrayList<>();
             if (from == 0){

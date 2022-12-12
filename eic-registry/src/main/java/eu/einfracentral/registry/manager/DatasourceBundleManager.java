@@ -335,7 +335,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-        public DatasourceBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
+    public DatasourceBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
