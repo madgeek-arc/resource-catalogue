@@ -139,6 +139,7 @@ public class SimpleMailService implements MailService {
                 sent = true;
             } catch (SendFailedException e) {
                 if (e.getMessage().contains("Recipient address rejected")) {
+                    logger.warn(String.format("Send mail failed. Reason: %s%nAttempting to remove problematic address", e.getMessage()));
                     Matcher m = Pattern.compile("\\<(.*?)\\>").matcher(e.getMessage());
                     while (m.find()) {
                         String problematicEmail = m.group(1);
