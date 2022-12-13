@@ -13,7 +13,10 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -95,6 +98,59 @@ public class SimpleMailService implements MailService {
             } finally {
                 if (transport != null) {
                     transport.close();
+                }
+            }
+        }
+    }
+
+    @Async
+    @Override
+    public void sendMail(@NotNull List<String> to, @NotNull List<String> cc, @NotNull List<String> bcc, String subject, String text) throws MessagingException {
+        if (enableEmails) {
+            Transport transport = null;
+            Message message;
+            try {
+                transport = session.getTransport();
+                InternetAddress sender = new InternetAddress(from);
+                message = new MimeMessage(session);
+                message.setFrom(sender);
+                message.setRecipients(Message.RecipientType.TO, createAddresses(to));
+                message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
+                message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+                message.setSubject(subject);
+                message.setText(text);
+                transport.connect();
+                sendMessage(message, to, cc, bcc);
+            } catch (MessagingException e) {
+                logger.error("ERROR", e);
+            } finally {
+                if (transport != null) {
+                    transport.close();
+                }
+            }
+        }
+    }
+
+    void sendMessage(Message message, List<String> to, List<String> cc, List<String> bcc) throws MessagingException {
+        boolean sent = false;
+        while(!sent) {
+            try {
+                Transport.send(message);
+                sent = true;
+            } catch (SendFailedException e) {
+                if (e.getMessage().contains("Recipient address rejected")) {
+                    Matcher m = Pattern.compile("\\<(.*?)\\>").matcher(e.getMessage());
+                    while (m.find()) {
+                        String problematicEmail = m.group(1);
+                        to.remove(problematicEmail);
+                        cc.remove(problematicEmail);
+                        bcc.remove(problematicEmail);
+                    }
+                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
+                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
+                    message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+                } else {
+                    logger.error(e);
                 }
             }
         }
