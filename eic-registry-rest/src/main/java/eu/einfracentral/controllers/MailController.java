@@ -49,15 +49,15 @@ public class MailController {
 
     @PostMapping("custom")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void sendMails(@RequestParam List<String> to, @RequestParam List<String> cc,
-                          @RequestParam List<String> bcc, @RequestParam String subject,
+    public void sendMails(@RequestParam(defaultValue = "") List<String> to, @RequestParam(defaultValue = "") List<String> cc,
+                          @RequestParam(defaultValue = "") List<String> bcc, @RequestParam String subject,
                           @RequestBody String text) throws MessagingException {
         mailService.sendMail(to, cc, bcc, subject, text);
     }
 
     @PostMapping("/all")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void sendToAll(@RequestParam List<String> cc, @RequestParam String subject,
+    public void sendToAll(@RequestParam(defaultValue = "") List<String> cc, @RequestParam String subject,
                           @RequestBody String text) throws MessagingException {
         int partitionSize = 100;
         if (cc != null) {
@@ -65,7 +65,7 @@ public class MailController {
         }
         List<String> allEmails = getAllEmails();
         for (List<String> bccChunk : Lists.partition(allEmails, partitionSize)) {
-            logger.info(String.format("Sending email to: %s", String.join(", ", bccChunk)));
+            logger.info(String.format("Sending emails to: %s", String.join(", ", bccChunk)));
             mailService.sendMail(new ArrayList<>(), cc, bccChunk, subject, text);
         }
     }
