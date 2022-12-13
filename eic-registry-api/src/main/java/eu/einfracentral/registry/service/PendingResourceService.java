@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Bundle;
+import eu.einfracentral.domain.Datasource;
+import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -110,5 +112,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * @return Resource
      */
     Resource getPendingResourceViaProviderId(String providerId);
+    DatasourceBundle checkOpenAIREDatasourceList(Datasource datasource);
 
 }
