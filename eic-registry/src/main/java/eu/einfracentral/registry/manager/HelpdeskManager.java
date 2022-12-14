@@ -145,19 +145,19 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     private void serviceConsistency(String serviceId, String catalogueId){
+        ServiceBundle serviceBundle;
         // check if Service exists
         try{
-            serviceBundleService.get(serviceId, catalogueId);
+            serviceBundle = serviceBundleService.get(serviceId, catalogueId);
             // check if Service is Public
-            if (serviceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
+            if (serviceBundle.getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
         }
         // check if Service is Active + Approved
-        if (!serviceBundleService.get(serviceId, catalogueId).isActive() ||
-                !serviceBundleService.get(serviceId, catalogueId).getStatus().equals("approved resource")){
+        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
             throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", serviceId));
         }
         // check if Service has already a Helpdesk registered
@@ -173,19 +173,19 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     private void datasourceConsistency(String serviceId, String catalogueId){
+        DatasourceBundle datasourceBundle;
         // check if Resource exists
         try{
-            datasourceBundleService.get(serviceId, catalogueId);
+            datasourceBundle = datasourceBundleService.get(serviceId, catalogueId);
             // check if Datasource is Public
-            if (datasourceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
+            if (datasourceBundle.getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
         }
         // check if Datasource is Active + Approved
-        if (!datasourceBundleService.get(serviceId, catalogueId).isActive() ||
-                !datasourceBundleService.get(serviceId, catalogueId).getStatus().equals("approved resource")){
+        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
             throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", serviceId));
         }
         // check if Datasource has already a Helpdesk registered

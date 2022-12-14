@@ -112,6 +112,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * @return Resource
      */
     Resource getPendingResourceViaProviderId(String providerId);
-    DatasourceBundle checkOpenAIREDatasourceList(Datasource datasource);
+    DatasourceBundle getOpenAIREDatasource(Datasource datasource);
 
 }

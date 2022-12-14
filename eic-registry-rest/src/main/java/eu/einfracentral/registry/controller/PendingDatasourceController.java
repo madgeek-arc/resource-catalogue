@@ -113,7 +113,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
     @PostAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, returnObject.body)")
     public ResponseEntity<Datasource> temporarySavePending(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws NoSuchAlgorithmException {
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
-        DatasourceBundle datasourceBundle = pendingDatasourceManager.checkOpenAIREDatasourceList(datasource);
+        DatasourceBundle datasourceBundle = pendingDatasourceManager.getOpenAIREDatasource(datasource);
         DatasourceBundle toCreateId = new DatasourceBundle();
         toCreateId.setDatasource(datasource);
         datasource.setId(idCreator.createDatasourceId(toCreateId));

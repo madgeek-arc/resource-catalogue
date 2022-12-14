@@ -71,7 +71,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         List<ServiceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle existingResource : resourceList){
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'abbreviation' field.");
+                throw new ValidationException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueName));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
@@ -219,7 +219,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     public Resource getPendingResourceViaProviderId(String providerId) {
         return null;
     }
-    public DatasourceBundle checkOpenAIREDatasourceList(Datasource datasource){
+    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
         return null;
     }
 }

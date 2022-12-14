@@ -142,19 +142,19 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     private void serviceConsistency(String resourceId, String catalogueId){
+        ServiceBundle serviceBundle;
         // check if Resource exists
         try{
-            serviceBundleService.get(resourceId, catalogueId);
+            serviceBundle = serviceBundleService.get(resourceId, catalogueId);
             // check if Service is Public
-            if (serviceBundleService.get(resourceId, catalogueId).getMetadata().isPublished()){
+            if (serviceBundle.getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
         // check if Service is Active + Approved
-        if (!serviceBundleService.get(resourceId, catalogueId).isActive() ||
-                !serviceBundleService.get(resourceId, catalogueId).getStatus().equals("approved resource")){
+        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
             throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", resourceId));
         }
         // check if Service has already a Resource Interoperability Record registered
@@ -172,19 +172,19 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     private void datasourceConsistency(String resourceId, String catalogueId){
+        DatasourceBundle datasourceBundle;
         // check if Resource exists
         try{
-            datasourceBundleService.get(resourceId, catalogueId);
+            datasourceBundle = datasourceBundleService.get(resourceId, catalogueId);
             // check if Datasource is Public
-            if (datasourceBundleService.get(resourceId, catalogueId).getMetadata().isPublished()){
+            if (datasourceBundle.getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
         // check if Datasource is Active + Approved
-        if (!datasourceBundleService.get(resourceId, catalogueId).isActive() ||
-                !datasourceBundleService.get(resourceId, catalogueId).getStatus().equals("approved resource")){
+        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
             throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", resourceId));
         }
         // check if Datasource has already a Resource Interoperability Record registered

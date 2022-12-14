@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +76,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         List<DatasourceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (DatasourceBundle existingResource : resourceList){
             if (datasourceBundle.getDatasource().getId().equals(existingResource.getDatasource().getId()) && existingResource.getDatasource().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' field.");
+                throw new ValidationException(String.format("Datasource with the specific id already exists on the [%s] Catalogue. Please refactor your 'name' field.", catalogueName));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Datasource with id {}", auth, datasourceBundle.getId());
@@ -226,7 +225,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         return null;
     }
 
-    public DatasourceBundle checkOpenAIREDatasourceList(Datasource datasource){
+    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
         DatasourceBundle datasourceBundle = new DatasourceBundle(datasource);
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")){
