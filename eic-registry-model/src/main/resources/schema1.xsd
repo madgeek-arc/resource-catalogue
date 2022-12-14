@@ -1851,7 +1851,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         
     <xs:sequence>
             
-      <xs:element name="created" type="xs:string">
+      <xs:element minOccurs="0" name="created" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Time/date the record was created.]]></xs:documentation>
         </xs:annotation>
@@ -1997,7 +1997,7 @@ property and sub-properties to provide more information about the publication or
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="updated" type="xs:string">
+      <xs:element minOccurs="0" name="updated" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Time/date the record was last saved, with or without modifications.]]></xs:documentation>
         </xs:annotation>

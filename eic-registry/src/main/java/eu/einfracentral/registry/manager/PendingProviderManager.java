@@ -90,7 +90,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList){
             if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Provider with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
+                throw new ValidationException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueName));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
@@ -115,11 +115,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
         // get existing resource
         Resource existing = whereID(providerBundle.getId(), true);
-        ProviderBundle ex = deserialize(existing);
-        // check if there are actual changes in the Provider
-        if (providerBundle.getProvider().equals(ex.getProvider())){
-            throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
-        }
         // block catalogueId updates from Provider Admins
         providerBundle.getProvider().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
@@ -282,6 +277,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     }
 
     public Resource getPendingResourceViaServiceId(String serviceId){
+        return null;
+    }
+    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
         return null;
     }
 }

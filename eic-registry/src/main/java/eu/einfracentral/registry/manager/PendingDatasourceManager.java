@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +37,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final ProviderManager providerManager;
+    private DatasourceBundleManager datasourceBundleManager;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -45,13 +45,14 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     @Autowired
     public PendingDatasourceManager(ResourceBundleService<DatasourceBundle> resourceBundleService,
                                     IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                    @Lazy ProviderManager providerManager) {
+                                    @Lazy ProviderManager providerManager, @Lazy DatasourceBundleManager datasourceBundleManager) {
         super(DatasourceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.providerManager = providerManager;
+        this.datasourceBundleManager = datasourceBundleManager;
     }
 
     @Override
@@ -75,7 +76,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         List<DatasourceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (DatasourceBundle existingResource : resourceList){
             if (datasourceBundle.getDatasource().getId().equals(existingResource.getDatasource().getId()) && existingResource.getDatasource().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
+                throw new ValidationException(String.format("Datasource with the specific id already exists on the [%s] Catalogue. Please refactor your 'name' field.", catalogueName));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Datasource with id {}", auth, datasourceBundle.getId());
@@ -104,11 +105,6 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication auth) {
         // get existing resource
         Resource existing = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
-        DatasourceBundle ex = deserialize(existing);
-        // check if there are actual changes in the Datasource
-        if (datasourceBundle.getDatasource().equals(ex.getDatasource())){
-            throw new ValidationException("There are no changes in the Datasource", HttpStatus.OK);
-        }
         // block catalogueId updates from Provider Admins
         datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Datasource with id {}", auth, datasourceBundle.getId());
@@ -165,6 +161,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
+            datasourceBundle.setActive(true);
 
             // latestOnboardingInfo
             datasourceBundle.setLatestOnboardingInfo(loggingInfoApproved);
@@ -226,5 +223,14 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
 
     public Resource getPendingResourceViaProviderId(String providerId) {
         return null;
+    }
+
+    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
+        DatasourceBundle datasourceBundle = new DatasourceBundle(datasource);
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
+        if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")){
+            datasourceBundleManager.checkOpenAIREIDExistance(datasourceBundle);
+        }
+        return datasourceBundle;
     }
 }

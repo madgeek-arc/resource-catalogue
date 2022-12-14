@@ -75,7 +75,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordPaging, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Add a new Resource Interoperability Record")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecord> addInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @ApiIgnore Authentication auth) {
@@ -84,10 +83,9 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecord, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the Interoperability Record with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<InteroperabilityRecord> updateHelpdesk(@Valid @RequestBody InteroperabilityRecord interoperabilityRecord,
+    public ResponseEntity<InteroperabilityRecord> updateInteroperabilityRecord(@Valid @RequestBody InteroperabilityRecord interoperabilityRecord,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         interoperabilityRecordService.update(interoperabilityRecord, auth);
         logger.info("User '{}' updated Interoperability Record with id '{}' and identifier '{}'", auth.getName(), interoperabilityRecord.getId(), interoperabilityRecord.getIdentifierInfo().getIdentifier());
