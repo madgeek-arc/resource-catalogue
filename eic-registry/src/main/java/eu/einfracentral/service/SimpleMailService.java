@@ -103,7 +103,6 @@ public class SimpleMailService implements MailService {
         }
     }
 
-    @Async
     @Override
     public void sendMail(@NotNull List<String> to, @NotNull List<String> cc, @NotNull List<String> bcc, String subject, String text) throws MessagingException {
         if (enableEmails) {
