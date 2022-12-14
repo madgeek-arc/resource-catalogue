@@ -1,13 +1,11 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,17 +31,20 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
+    private final AbstractConsistencyManager abstractConsistencyManager;
 
     public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                              ResourceBundleService<DatasourceBundle> datasourceBundleService,
                              JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
-                             @Lazy RegistrationMailService registrationMailService) {
+                             @Lazy RegistrationMailService registrationMailService,
+                             @Lazy AbstractConsistencyManager abstractConsistencyManager) {
         super(MonitoringBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
+        this.abstractConsistencyManager = abstractConsistencyManager;
     }
 
     @Override
@@ -56,9 +57,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
-            serviceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId());
+            abstractConsistencyManager.serviceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId(), getResourceType());
         } else if (resourceType.equals("datasource")){
-            datasourceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId());
+            abstractConsistencyManager.datasourceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId(), getResourceType());
         } else{
             throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
         }
@@ -150,61 +151,61 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     }
 
-    private void serviceConsistency(String serviceId, String catalogueId){
-        ServiceBundle serviceBundle;
-        // check if Service exists
-        try{
-            serviceBundle = serviceBundleService.get(serviceId, catalogueId);
-            // check if Service is Public
-            if (serviceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
-        }
-        // check if Service is Active + Approved
-        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", serviceId));
-        }
-        // check if Service has already a Monitoring registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
-        for (MonitoringBundle monitoring : allMonitorings){
-            if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Monitoring " +
-                        "registered, with id: [%s]", serviceId, catalogueId, monitoring.getId()));
-            }
-        }
-    }
+//    public void serviceConsistency(String serviceId, String catalogueId){
+//        ServiceBundle serviceBundle;
+//        // check if Service exists
+//        try{
+//            serviceBundle = serviceBundleService.get(serviceId, catalogueId);
+//            // check if Service is Public
+//            if (serviceBundle.getMetadata().isPublished()){
+//                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
+//            }
+//        } catch(ResourceNotFoundException e){
+//            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+//        }
+//        // check if Service is Active + Approved
+//        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
+//            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", serviceId));
+//        }
+//        // check if Service has already a Monitoring/Helpdesk/ResourceInteroperabilityRecord registered
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(maxQuantity);
+//        List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
+//        for (MonitoringBundle monitoring : allMonitorings){
+//            if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){
+//                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Monitoring " +
+//                        "registered, with id: [%s]", serviceId, catalogueId, monitoring.getId()));
+//            }
+//        }
+//    }
 
-    private void datasourceConsistency(String serviceId, String catalogueId){
-        DatasourceBundle datasourceBundle;
-        // check if Datasource exists
-        try{
-            datasourceBundle = datasourceBundleService.get(serviceId, catalogueId);
-            // check if Datasource is Public
-            if (datasourceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
-        }
-        // check if Datasource is Active + Approved
-        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", serviceId));
-        }
-        // check if Datasource has already a Monitoring registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
-        for (MonitoringBundle monitoring : allMonitorings){
-            if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Monitoring " +
-                        "registered, with id: [%s]", serviceId, catalogueId, monitoring.getId()));
-            }
-        }
-    }
+//    public void datasourceConsistency(String serviceId, String catalogueId){
+//        DatasourceBundle datasourceBundle;
+//        // check if Datasource exists
+//        try{
+//            datasourceBundle = datasourceBundleService.get(serviceId, catalogueId);
+//            // check if Datasource is Public
+//            if (datasourceBundle.getMetadata().isPublished()){
+//                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
+//            }
+//        } catch(ResourceNotFoundException e){
+//            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+//        }
+//        // check if Datasource is Active + Approved
+//        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
+//            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", serviceId));
+//        }
+//        // check if Datasource has already a Monitoring registered
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(maxQuantity);
+//        List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
+//        for (MonitoringBundle monitoring : allMonitorings){
+//            if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){
+//                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Monitoring " +
+//                        "registered, with id: [%s]", serviceId, catalogueId, monitoring.getId()));
+//            }
+//        }
+//    }
 
     public List<String> getAvailableServiceTypes() {
         List<String> serviceTypeList = new ArrayList<>();

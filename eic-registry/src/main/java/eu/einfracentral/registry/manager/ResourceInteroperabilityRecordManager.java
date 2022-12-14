@@ -1,15 +1,14 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -25,14 +24,17 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final SecurityService securityService;
+    private final AbstractConsistencyManager abstractConsistencyManager;
 
     public ResourceInteroperabilityRecordManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                                                  ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                                                 SecurityService securityService) {
+                                                 SecurityService securityService,
+                                                 @Lazy AbstractConsistencyManager abstractConsistencyManager) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.securityService = securityService;
+        this.abstractConsistencyManager = abstractConsistencyManager;
     }
 
     @Override
@@ -45,9 +47,11 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
-            serviceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(), resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId());
+            abstractConsistencyManager.serviceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(),
+                    resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId(), getResourceType());
         } else if (resourceType.equals("datasource")){
-            datasourceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(), resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId());
+            abstractConsistencyManager.datasourceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(),
+                    resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId(), getResourceType());
         } else{
             throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
         }
@@ -141,63 +145,63 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     }
 
-    private void serviceConsistency(String resourceId, String catalogueId){
-        ServiceBundle serviceBundle;
-        // check if Resource exists
-        try{
-            serviceBundle = serviceBundleService.get(resourceId, catalogueId);
-            // check if Service is Public
-            if (serviceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
-        }
-        // check if Service is Active + Approved
-        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", resourceId));
-        }
-        // check if Service has already a Resource Interoperability Record registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId) &&
-                    resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Resource " +
-                        "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
-                        resourceInteroperabilityRecord.getId()));
-            }
-        }
-    }
+//    public void serviceConsistency(String resourceId, String catalogueId){
+//        ServiceBundle serviceBundle;
+//        // check if Resource exists
+//        try{
+//            serviceBundle = serviceBundleService.get(resourceId, catalogueId);
+//            // check if Service is Public
+//            if (serviceBundle.getMetadata().isPublished()){
+//                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
+//            }
+//        } catch(ResourceNotFoundException e){
+//            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
+//        }
+//        // check if Service is Active + Approved
+//        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
+//            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", resourceId));
+//        }
+//        // check if Service has already a Resource Interoperability Record registered
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(maxQuantity);
+//        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
+//        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
+//            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId) &&
+//                    resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
+//                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Resource " +
+//                        "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
+//                        resourceInteroperabilityRecord.getId()));
+//            }
+//        }
+//    }
 
-    private void datasourceConsistency(String resourceId, String catalogueId){
-        DatasourceBundle datasourceBundle;
-        // check if Resource exists
-        try{
-            datasourceBundle = datasourceBundleService.get(resourceId, catalogueId);
-            // check if Datasource is Public
-            if (datasourceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
-        }
-        // check if Datasource is Active + Approved
-        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", resourceId));
-        }
-        // check if Datasource has already a Resource Interoperability Record registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId)
-                    && resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Resource " +
-                                "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
-                        resourceInteroperabilityRecord.getId()));
-            }
-        }
-    }
+//    public void datasourceConsistency(String resourceId, String catalogueId){
+//        DatasourceBundle datasourceBundle;
+//        // check if Resource exists
+//        try{
+//            datasourceBundle = datasourceBundleService.get(resourceId, catalogueId);
+//            // check if Datasource is Public
+//            if (datasourceBundle.getMetadata().isPublished()){
+//                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
+//            }
+//        } catch(ResourceNotFoundException e){
+//            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
+//        }
+//        // check if Datasource is Active + Approved
+//        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
+//            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", resourceId));
+//        }
+//        // check if Datasource has already a Resource Interoperability Record registered
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(maxQuantity);
+//        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
+//        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
+//            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId)
+//                    && resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
+//                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Resource " +
+//                                "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
+//                        resourceInteroperabilityRecord.getId()));
+//            }
+//        }
+//    }
 }
