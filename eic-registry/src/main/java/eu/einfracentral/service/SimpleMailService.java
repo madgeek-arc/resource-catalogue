@@ -156,6 +156,10 @@ public class SimpleMailService implements MailService {
                 }
             }
         }
+        if (!sent) {
+            logger.error("Send Message Aborted...\nTo: {}\nCC: {}\nBCC: {}",
+                    String.join(", ", to), String.join(", ", cc), String.join(", ", bcc));
+        }
     }
 
     @Override
