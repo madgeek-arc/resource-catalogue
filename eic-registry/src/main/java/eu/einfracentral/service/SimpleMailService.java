@@ -133,19 +133,21 @@ public class SimpleMailService implements MailService {
 
     void sendMessage(Message message, List<String> to, List<String> cc, List<String> bcc) throws MessagingException {
         boolean sent = false;
-        while(!sent) {
+        int attempts = 0;
+        while(!sent && attempts < 20) {
             try {
+                attempts++;
                 Transport.send(message);
                 sent = true;
             } catch (SendFailedException e) {
-                if (e.getMessage().contains("Recipient address rejected")) {
-                    logger.warn(String.format("Send mail failed. Reason: %s%nAttempting to remove problematic address", e.getMessage()));
-                    Matcher m = Pattern.compile("\\<(.*?)\\>").matcher(e.getMessage());
-                    while (m.find()) {
-                        String problematicEmail = m.group(1);
-                        to.remove(problematicEmail);
-                        cc.remove(problematicEmail);
-                        bcc.remove(problematicEmail);
+                if (e.getInvalidAddresses().length > 0) {
+                    logger.warn("Send mail failed. Attempting to remove invalid address");
+                    for (int i = 0; i < e.getInvalidAddresses().length; i++) {
+                        Address invalidAddress = e.getInvalidAddresses()[i];
+                        logger.debug("Invalid e-mail address: {}", invalidAddress);
+                        to.remove(invalidAddress.toString());
+                        cc.remove(invalidAddress.toString());
+                        bcc.remove(invalidAddress.toString());
                     }
                     message.setRecipients(Message.RecipientType.TO, createAddresses(to));
                     message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
@@ -180,11 +182,15 @@ public class SimpleMailService implements MailService {
         sendMail(to, null, subject, text);
     }
 
-    private InternetAddress[] createAddresses(List<String> emailAddresses) throws AddressException {
-        InternetAddress[] addresses = new InternetAddress[emailAddresses.size()];
+    private InternetAddress[] createAddresses(List<String> emailAddresses) {
+        List<InternetAddress> addresses = new ArrayList<>();
         for (int i = 0; i < emailAddresses.size(); i++) {
-            addresses[i] = new InternetAddress(emailAddresses.get(i));
+            try {
+                addresses.add(new InternetAddress(emailAddresses.get(i)));
+            } catch (AddressException e) {
+                logger.warn(e.getMessage());
+            }
         }
-        return addresses;
+        return addresses.toArray(new InternetAddress[0]);
     }
 }
