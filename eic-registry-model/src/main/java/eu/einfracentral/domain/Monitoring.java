@@ -20,7 +20,7 @@ public class Monitoring implements Identifiable {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Service ID", required = true)
-    @FieldValidation(containsId = true, idClass = Service.class)
+    @FieldValidation(containsId = true)
     private String serviceId;
 
     @XmlElement(required = true)

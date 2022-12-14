@@ -10,6 +10,7 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -77,12 +78,20 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     @Override
     public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the ResourceInteroperabilityRecord with id '{}'", auth, resourceInteroperabilityRecord.getId());
+
+        Resource existing = whereID(resourceInteroperabilityRecord.getId(), true);
+        ResourceInteroperabilityRecordBundle ex = deserialize(existing);
+        // check if there are actual changes in the ResourceInteroperabilityRecord
+        if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().equals(ex.getResourceInteroperabilityRecord())){
+            throw new ValidationException("There are no changes in the Resource Interoperability Record", HttpStatus.OK);
+        }
+
         // block Public ResourceInteroperabilityRecordBundle updates
         if (resourceInteroperabilityRecord.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Resource Interoperability Record");
         }
 
-        logger.trace("User '{}' is attempting to update the ResourceInteroperabilityRecord with id '{}'", auth, resourceInteroperabilityRecord.getId());
         validate(resourceInteroperabilityRecord);
 
         resourceInteroperabilityRecord.setMetadata(Metadata.updateMetadata(resourceInteroperabilityRecord.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
@@ -101,8 +110,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         // latestUpdateInfo
         resourceInteroperabilityRecord.setLatestUpdateInfo(loggingInfo);
 
-        Resource existing = whereID(resourceInteroperabilityRecord.getId(), true);
-        ResourceInteroperabilityRecordBundle ex = deserialize(existing);
         existing.setPayload(serialize(resourceInteroperabilityRecord));
         existing.setResourceType(resourceType);
 
@@ -135,17 +142,22 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     private void serviceConsistency(String resourceId, String catalogueId){
+        ServiceBundle serviceBundle;
         // check if Resource exists
         try{
-            serviceBundleService.get(resourceId, catalogueId);
+            serviceBundle = serviceBundleService.get(resourceId, catalogueId);
             // check if Service is Public
-            if (serviceBundleService.get(resourceId, catalogueId).getMetadata().isPublished()){
+            if (serviceBundle.getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
-        // check if Resource has already a Resource Interoperability Record registered
+        // check if Service is Active + Approved
+        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", resourceId));
+        }
+        // check if Service has already a Resource Interoperability Record registered
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
@@ -160,17 +172,22 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     private void datasourceConsistency(String resourceId, String catalogueId){
+        DatasourceBundle datasourceBundle;
         // check if Resource exists
         try{
-            datasourceBundleService.get(resourceId, catalogueId);
+            datasourceBundle = datasourceBundleService.get(resourceId, catalogueId);
             // check if Datasource is Public
-            if (datasourceBundleService.get(resourceId, catalogueId).getMetadata().isPublished()){
+            if (datasourceBundle.getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
         }
-        // check if Resource has already a Resource Interoperability Record registered
+        // check if Datasource is Active + Approved
+        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", resourceId));
+        }
+        // check if Datasource has already a Resource Interoperability Record registered
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();

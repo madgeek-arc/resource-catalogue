@@ -212,6 +212,8 @@ public class ProviderManagementAspect {
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
             "org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, " +
+            "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.changeProvider(String, " +
             "String, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, " +
@@ -234,6 +236,8 @@ public class ProviderManagementAspect {
             "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(String, String, Boolean, " +
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(String, " +
+            "org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(eu.einfracentral.domain.DatasourceBundle, " +
             "org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.changeProvider(String, " +
             "String, String, org.springframework.security.core.Authentication)))" +

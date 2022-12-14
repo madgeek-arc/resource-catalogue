@@ -1,5 +1,7 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.Helpdesk;
+import eu.einfracentral.domain.HelpdeskBundle;
 import eu.einfracentral.domain.ResourceInteroperabilityRecord;
 import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
@@ -127,10 +129,12 @@ public class ResourceInteroperabilityRecordController {
         return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(id);
+    @DeleteMapping(path = "{resourceId}/{resourceInteroperabilityRecordId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceId)")
+    public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@PathVariable("resourceId") String resourceId,
+                                                                                                   @PathVariable("resourceInteroperabilityRecordId") String resourceInteroperabilityRecordId,
+                                                                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecordId);
         if (resourceInteroperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

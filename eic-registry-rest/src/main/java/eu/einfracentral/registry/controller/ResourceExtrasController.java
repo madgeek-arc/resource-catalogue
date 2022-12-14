@@ -19,7 +19,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("resource-extras")
-@Api(value = "Modify a Resource's extra info")
+//@Api(value = "Modify a Resource's extra info")
 @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
 public class ResourceExtrasController {
 

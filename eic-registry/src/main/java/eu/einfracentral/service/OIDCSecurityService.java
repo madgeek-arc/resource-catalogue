@@ -140,14 +140,12 @@ public class OIDCSecurityService implements SecurityService {
         ProviderBundle registeredProvider;
         try {
             registeredProvider = providerManager.get(catalogueId, providerId, adminAccess);
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             try {
                 registeredProvider = pendingProviderManager.get(providerId);
             } catch (RuntimeException re) {
                 return false;
             }
-        } catch (RuntimeException e) {
-            return false;
         }
         if (registeredProvider == null) {
             throw new ResourceNotFoundException("Provider with id '" + providerId + "' does not exist.");

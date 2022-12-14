@@ -28,16 +28,19 @@ import java.util.UUID;
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
-    public MonitoringManager(ResourceBundleService<ServiceBundle> resourceBundleService,
+    public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
+                             ResourceBundleService<DatasourceBundle> datasourceBundleService,
                              JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService) {
         super(MonitoringBundle.class);
-        this.resourceBundleService = resourceBundleService;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -49,10 +52,16 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     @Override
-    public MonitoringBundle add(MonitoringBundle monitoring, Authentication auth) {
+    public MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth) {
 
-        // check if Service exists and if User belongs to Service's Provider Admins
-        serviceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId());
+        // check if Resource exists and if User belongs to Resource's Provider Admins
+        if (resourceType.equals("service")){
+            serviceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId());
+        } else if (resourceType.equals("datasource")){
+            datasourceConsistency(monitoring.getMonitoring().getServiceId(), monitoring.getCatalogueId());
+        } else{
+            throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
+        }
         validate(monitoring);
 
         // validate serviceType
@@ -141,16 +150,21 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     }
 
-    public void serviceConsistency(String serviceId, String catalogueId){
+    private void serviceConsistency(String serviceId, String catalogueId){
+        ServiceBundle serviceBundle;
         // check if Service exists
         try{
-            resourceBundleService.get(serviceId, catalogueId);
+            serviceBundle = serviceBundleService.get(serviceId, catalogueId);
             // check if Service is Public
-            if (resourceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
+            if (serviceBundle.getMetadata().isPublished()){
                 throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
             }
         } catch(ResourceNotFoundException e){
             throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+        }
+        // check if Service is Active + Approved
+        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", serviceId));
         }
         // check if Service has already a Monitoring registered
         FacetFilter ff = new FacetFilter();
@@ -159,6 +173,34 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         for (MonitoringBundle monitoring : allMonitorings){
             if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){
                 throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Monitoring " +
+                        "registered, with id: [%s]", serviceId, catalogueId, monitoring.getId()));
+            }
+        }
+    }
+
+    private void datasourceConsistency(String serviceId, String catalogueId){
+        DatasourceBundle datasourceBundle;
+        // check if Datasource exists
+        try{
+            datasourceBundle = datasourceBundleService.get(serviceId, catalogueId);
+            // check if Datasource is Public
+            if (datasourceBundle.getMetadata().isPublished()){
+                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
+            }
+        } catch(ResourceNotFoundException e){
+            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
+        }
+        // check if Datasource is Active + Approved
+        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", serviceId));
+        }
+        // check if Datasource has already a Monitoring registered
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        List<MonitoringBundle> allMonitorings = getAll(ff, null).getResults();
+        for (MonitoringBundle monitoring : allMonitorings){
+            if (monitoring.getMonitoring().getServiceId().equals(serviceId) && monitoring.getCatalogueId().equals(catalogueId)){
+                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Monitoring " +
                         "registered, with id: [%s]", serviceId, catalogueId, monitoring.getId()));
             }
         }

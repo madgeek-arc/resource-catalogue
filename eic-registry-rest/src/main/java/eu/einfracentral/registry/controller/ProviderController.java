@@ -498,7 +498,6 @@ public class ProviderController {
         return ret;
     }
 
-    @ApiOperation(value = "Change a Provider's and all its Resources Catalogue ID")
     @PutMapping(path = "changeCatalogue", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> changeCatalogue(@RequestParam String catalogueId, @RequestParam String providerId,

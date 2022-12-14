@@ -199,7 +199,6 @@ public class ServiceController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(

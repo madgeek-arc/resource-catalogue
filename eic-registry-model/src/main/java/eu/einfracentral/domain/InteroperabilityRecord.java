@@ -73,17 +73,17 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Time/date the record was created.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 7, required = true)
-    @FieldValidation
+    @XmlElement
+    @ApiModelProperty(position = 7)
+    @FieldValidation(nullable = true)
     private String created;
 
     /**
      * Time/date the record was last saved, with or without modifications.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 8, required = true)
-    @FieldValidation
+    @XmlElement
+    @ApiModelProperty(position = 8)
+    @FieldValidation(nullable = true)
     private String updated;
 
     /**
