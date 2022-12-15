@@ -71,7 +71,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         List<ServiceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle existingResource : resourceList){
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
+                throw new ValidationException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueName));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
@@ -100,11 +100,6 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
         // get existing resource
         Resource existing = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
-        ServiceBundle ex = deserialize(existing);
-        // check if there are actual changes in the Service
-        if (serviceBundle.getService().equals(ex.getService())){
-            throw new ValidationException("There are no changes in the Service", HttpStatus.OK);
-        }
         // block catalogueId updates from Provider Admins
         serviceBundle.getService().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
@@ -161,6 +156,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
+            serviceBundle.setActive(true);
 
             // latestOnboardingInfo
             serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);

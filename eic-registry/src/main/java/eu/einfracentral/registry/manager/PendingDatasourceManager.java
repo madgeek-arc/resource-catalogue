@@ -75,7 +75,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         List<DatasourceBundle> resourceList = resourceBundleService.getAll(ff, auth).getResults();
         for (DatasourceBundle existingResource : resourceList){
             if (datasourceBundle.getDatasource().getId().equals(existingResource.getDatasource().getId()) && existingResource.getDatasource().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException("Resource with the specific id already exists on the EOSC Catalogue. Please refactor your 'name' and/or 'abbreviation' field.");
+                throw new ValidationException(String.format("Datasource with the specific id already exists on the [%s] Catalogue. Please refactor your 'name' field.", catalogueName));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Datasource with id {}", auth, datasourceBundle.getId());
@@ -104,11 +104,6 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication auth) {
         // get existing resource
         Resource existing = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
-        DatasourceBundle ex = deserialize(existing);
-        // check if there are actual changes in the Datasource
-        if (datasourceBundle.getDatasource().equals(ex.getDatasource())){
-            throw new ValidationException("There are no changes in the Datasource", HttpStatus.OK);
-        }
         // block catalogueId updates from Provider Admins
         datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Datasource with id {}", auth, datasourceBundle.getId());
@@ -165,6 +160,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
             LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
+            datasourceBundle.setActive(true);
 
             // latestOnboardingInfo
             datasourceBundle.setLatestOnboardingInfo(loggingInfoApproved);
