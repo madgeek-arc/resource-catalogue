@@ -154,8 +154,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle ex = deserialize(existing);
         // check if there are actual changes in the Provider
-        if (provider.getProvider().equals(ex.getProvider())){
-            throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+        if (provider.getTemplateStatus().equals(ex.getTemplateStatus())){
+            if (provider.getProvider().equals(ex.getProvider())){
+                throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+            }
         }
 
         if (catalogueId == null || catalogueId.equals("")) {

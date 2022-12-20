@@ -228,7 +228,8 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
         DatasourceBundle datasourceBundle = new DatasourceBundle(datasource);
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
-        if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")){
+        if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")
+                && !datasourceBundle.getId().contains(datasource.getResourceOrganisation())){
             datasourceBundleManager.checkOpenAIREIDExistance(datasourceBundle);
         }
         return datasourceBundle;

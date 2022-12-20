@@ -324,6 +324,21 @@ public class DatasourceController {
         return resourceBundleService.isDatasourceRegisteredOnOpenAIRE(id);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "getSharedDatasources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
+    public ResponseEntity<Paging<DatasourceBundle>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.addFilter("resource_providers", id);
+        return ResponseEntity.ok(resourceBundleService.getAll(ff, null));
+    }
+
     // Create a Public DatasourceBundle if something went bad during its creation
     @ApiIgnore
     @PostMapping(path = "createPublicDatasource", produces = {MediaType.APPLICATION_JSON_VALUE})

@@ -1,15 +1,16 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -41,17 +42,30 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     @Override
-    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, String resourceType, Authentication auth) {
+    public ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType) {
+        String resourceId = resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId();
+        String catalogueId = resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId();
+
+        ResourceInteroperabilityRecordBundle existing = get(resourceId, catalogueId);
+        if (existing != null) {
+            throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Resource " +
+                                "Interoperability Record registered, with id: [%s]", resourceId, catalogueId, existing.getId()));
+        }
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
-            serviceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(), resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId());
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService);
         } else if (resourceType.equals("datasource")){
-            datasourceConsistency(resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId(), resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId());
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService);
         } else{
             throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
         }
-        validate(resourceInteroperabilityRecord);
+        return super.validate(resourceInteroperabilityRecordBundle);
+    }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, String resourceType, Authentication auth) {
+        validate(resourceInteroperabilityRecord, resourceType);
 
         resourceInteroperabilityRecord.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecord);
@@ -74,6 +88,12 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         // TODO: emails?
 
         return ret;
+    }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle get(String resourceId, String catalogueId) {
+        Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        return res != null ? deserialize(res) : null;
     }
 
     @Override
@@ -139,65 +159,5 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
         // TODO: send emails
 
-    }
-
-    private void serviceConsistency(String resourceId, String catalogueId){
-        ServiceBundle serviceBundle;
-        // check if Resource exists
-        try{
-            serviceBundle = serviceBundleService.get(resourceId, catalogueId);
-            // check if Service is Public
-            if (serviceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
-        }
-        // check if Service is Active + Approved
-        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", resourceId));
-        }
-        // check if Service has already a Resource Interoperability Record registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId) &&
-                    resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Resource " +
-                        "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
-                        resourceInteroperabilityRecord.getId()));
-            }
-        }
-    }
-
-    private void datasourceConsistency(String resourceId, String catalogueId){
-        DatasourceBundle datasourceBundle;
-        // check if Resource exists
-        try{
-            datasourceBundle = datasourceBundleService.get(resourceId, catalogueId);
-            // check if Datasource is Public
-            if (datasourceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", resourceId, catalogueId));
-        }
-        // check if Datasource is Active + Approved
-        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", resourceId));
-        }
-        // check if Datasource has already a Resource Interoperability Record registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId)
-                    && resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Resource " +
-                                "Interoperability Record registered, with id: [%s]", resourceId, catalogueId,
-                        resourceInteroperabilityRecord.getId()));
-            }
-        }
     }
 }

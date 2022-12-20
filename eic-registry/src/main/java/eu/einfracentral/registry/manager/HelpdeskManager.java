@@ -1,14 +1,14 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,17 +50,30 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
+    public HelpdeskBundle validate(HelpdeskBundle helpdeskBundle, String resourceType) {
+        String resourceId = helpdeskBundle.getHelpdesk().getServiceId();
+        String catalogueId = helpdeskBundle.getCatalogueId();
+
+        HelpdeskBundle existingHelpdesk = get(resourceId, catalogueId);
+        if (existingHelpdesk != null) {
+            throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Helpdesk " +
+                    "registered, with id: [%s]", resourceId, catalogueId, existingHelpdesk.getId()));
+        }
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
-            serviceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService);
         } else if (resourceType.equals("datasource")){
-            datasourceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService);
         } else{
             throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
         }
-        validate(helpdesk);
+        return super.validate(helpdeskBundle);
+    }
+
+    @Override
+    public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
+        validate(helpdesk, resourceType);
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -83,6 +96,12 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         jmsTopicTemplate.convertAndSend("helpdesk.create", helpdesk);
 
         return helpdesk;
+    }
+
+    @Override
+    public HelpdeskBundle get(String serviceId, String catalogueId) {
+        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        return res != null ? deserialize(res) : null;
     }
 
     @Override
@@ -142,61 +161,5 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.info("Sending JMS with topic 'helpdesk.delete'");
         jmsTopicTemplate.convertAndSend("helpdesk.delete", helpdesk);
 
-    }
-
-    private void serviceConsistency(String serviceId, String catalogueId){
-        ServiceBundle serviceBundle;
-        // check if Service exists
-        try{
-            serviceBundle = serviceBundleService.get(serviceId, catalogueId);
-            // check if Service is Public
-            if (serviceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
-        }
-        // check if Service is Active + Approved
-        if (!serviceBundle.isActive() || !serviceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Service with ID [%s] is not Approved and/or Active", serviceId));
-        }
-        // check if Service has already a Helpdesk registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<HelpdeskBundle> allHelpdesks = getAll(ff, null).getResults();
-        for (HelpdeskBundle helpdesk : allHelpdesks){
-            if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Helpdesk " +
-                        "registered, with id: [%s]", serviceId, catalogueId, helpdesk.getId()));
-            }
-        }
-    }
-
-    private void datasourceConsistency(String serviceId, String catalogueId){
-        DatasourceBundle datasourceBundle;
-        // check if Resource exists
-        try{
-            datasourceBundle = datasourceBundleService.get(serviceId, catalogueId);
-            // check if Datasource is Public
-            if (datasourceBundle.getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Datasource ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Datasource with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
-        }
-        // check if Datasource is Active + Approved
-        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("Datasource with ID [%s] is not Approved and/or Active", serviceId));
-        }
-        // check if Datasource has already a Helpdesk registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<HelpdeskBundle> allHelpdesks = getAll(ff, null).getResults();
-        for (HelpdeskBundle helpdesk : allHelpdesks){
-            if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Datasource [%s] of the Catalogue [%s] has already a Helpdesk " +
-                        "registered, with id: [%s]", serviceId, catalogueId, helpdesk.getId()));
-            }
-        }
     }
 }

@@ -101,7 +101,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 entry -> entry.getValue()
                         .stream()
-                        .map(resource -> deserialize(where("id", resource.getId(), true)))
+                        .map(resource -> deserialize(where(true, new SearchService.KeyValue("id", resource.getId()))))
                         .collect(Collectors.toList())));
     }
 
@@ -111,8 +111,8 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
-    public T get(String field, String value) {
-        return deserialize(where(field, value, true));
+    public T get(SearchService.KeyValue... keyValues) {
+        return deserialize(where(true, keyValues));
     }
 
     @Override
@@ -170,15 +170,15 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected Resource whereID(String id, boolean throwOnNull) {
-        return where(String.format("%s_id", resourceType.getName()), id, throwOnNull);
+        return where(throwOnNull, new SearchService.KeyValue(String.format("%s_id", resourceType.getName()), id));
     }
 
-    protected Resource where(String field, String value, boolean throwOnNull) {
+    protected Resource where(boolean throwOnNull, SearchService.KeyValue... keyValues) {
         Resource ret;
         try {
-            ret = searchService.searchId(resourceType.getName(), new SearchService.KeyValue(field, value));
+            ret = searchService.searchId(resourceType.getName(), keyValues);
             if (throwOnNull && ret == null) {
-                throw new ResourceException(String.format("%s '%s' does not exist!", resourceType.getName(), value), HttpStatus.NOT_FOUND);
+                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
             }
         } catch (UnknownHostException e) {
             throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
