@@ -185,7 +185,8 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     @Override
     public MonitoringBundle get(String serviceId, String catalogueId) {
-        return deserialize(where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId)));
+        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        return res != null ? deserialize(res) : null;
     }
 
     public void serviceTypeValidation(Monitoring monitoring){

@@ -100,7 +100,8 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     @Override
     public HelpdeskBundle get(String serviceId, String catalogueId) {
-        return deserialize(where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId)));
+        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        return res != null ? deserialize(res) : null;
     }
 
     @Override

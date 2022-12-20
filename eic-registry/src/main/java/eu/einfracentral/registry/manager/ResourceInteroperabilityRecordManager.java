@@ -92,7 +92,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     @Override
     public ResourceInteroperabilityRecordBundle get(String resourceId, String catalogueId) {
-        return deserialize(where(false, new SearchService.KeyValue("resource_id", resourceId), new SearchService.KeyValue("catalogue_id", catalogueId)));
+        Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        return res != null ? deserialize(res) : null;
     }
 
     @Override
