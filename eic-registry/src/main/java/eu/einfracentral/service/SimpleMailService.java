@@ -13,7 +13,10 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -101,6 +104,65 @@ public class SimpleMailService implements MailService {
     }
 
     @Override
+    public void sendMail(@NotNull List<String> to, @NotNull List<String> cc, @NotNull List<String> bcc, String subject, String text) throws MessagingException {
+        if (enableEmails) {
+            Transport transport = null;
+            Message message;
+            try {
+                transport = session.getTransport();
+                InternetAddress sender = new InternetAddress(from);
+                message = new MimeMessage(session);
+                message.setFrom(sender);
+                message.setRecipients(Message.RecipientType.TO, createAddresses(to));
+                message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
+                message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+                message.setSubject(subject);
+                message.setText(text);
+                transport.connect();
+                sendMessage(message, to, cc, bcc);
+            } catch (MessagingException e) {
+                logger.error("ERROR", e);
+            } finally {
+                if (transport != null) {
+                    transport.close();
+                }
+            }
+        }
+    }
+
+    void sendMessage(Message message, List<String> to, List<String> cc, List<String> bcc) throws MessagingException {
+        boolean sent = false;
+        int attempts = 0;
+        while(!sent && attempts < 20) {
+            try {
+                attempts++;
+                Transport.send(message);
+                sent = true;
+            } catch (SendFailedException e) {
+                if (e.getInvalidAddresses().length > 0) {
+                    logger.warn("Send mail failed. Attempting to remove invalid address");
+                    for (int i = 0; i < e.getInvalidAddresses().length; i++) {
+                        Address invalidAddress = e.getInvalidAddresses()[i];
+                        logger.debug("Invalid e-mail address: {}", invalidAddress);
+                        to.remove(invalidAddress.toString());
+                        cc.remove(invalidAddress.toString());
+                        bcc.remove(invalidAddress.toString());
+                    }
+                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
+                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
+                    message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+                } else {
+                    logger.error(e);
+                }
+            }
+        }
+        if (!sent) {
+            logger.error("Send Message Aborted...\nTo: {}\nCC: {}\nBCC: {}",
+                    String.join(", ", to), String.join(", ", cc), String.join(", ", bcc));
+        }
+    }
+
+    @Override
     public void sendMail(List<String> to, String subject, String text) throws MessagingException {
         sendMail(to, null, subject, text);
     }
@@ -123,11 +185,15 @@ public class SimpleMailService implements MailService {
         sendMail(to, null, subject, text);
     }
 
-    private InternetAddress[] createAddresses(List<String> emailAddresses) throws AddressException {
-        InternetAddress[] addresses = new InternetAddress[emailAddresses.size()];
+    private InternetAddress[] createAddresses(List<String> emailAddresses) {
+        List<InternetAddress> addresses = new ArrayList<>();
         for (int i = 0; i < emailAddresses.size(); i++) {
-            addresses[i] = new InternetAddress(emailAddresses.get(i));
+            try {
+                addresses.add(new InternetAddress(emailAddresses.get(i)));
+            } catch (AddressException e) {
+                logger.warn(e.getMessage());
+            }
         }
-        return addresses;
+        return addresses.toArray(new InternetAddress[0]);
     }
 }
