@@ -54,9 +54,9 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
-            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService);
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
         } else if (resourceType.equals("datasource")){
-            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService);
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
         } else{
             throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
         }
