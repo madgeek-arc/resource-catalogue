@@ -2,6 +2,8 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
@@ -34,15 +36,18 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final IdCreator idCreator;
 
     @Autowired
     PendingServiceController(PendingResourceService<ServiceBundle> pendingServiceManager,
                              ResourceBundleService<ServiceBundle> resourceBundleService,
+                             ProviderService<ProviderBundle, Authentication> providerService,
                              IdCreator idCreator) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
         this.resourceBundleService = resourceBundleService;
+        this.providerService = providerService;
         this.idCreator = idCreator;
     }
 
@@ -150,6 +155,13 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
             serviceBundle = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service
+        }
+
+        // check Provider's template status -> block transform if it's on 'pending' state
+        String resourceOrgranisation = service.getResourceOrganisation();
+        ProviderBundle providerBundle = providerService.get(resourceOrgranisation);
+        if (providerBundle.getTemplateStatus().equals("pending template")){
+            throw new ValidationException(String.format("There is already a Resource waiting to be approved for the Provider [%s]", resourceOrgranisation));
         }
 
         if (serviceBundle == null) { // if existing Pending Service is null, create a new Active Service
