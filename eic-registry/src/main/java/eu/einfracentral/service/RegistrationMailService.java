@@ -403,6 +403,7 @@ public class RegistrationMailService {
         // Fetch Active/Pending Services and Active/Pending Providers
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ServiceBundle> activeServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
