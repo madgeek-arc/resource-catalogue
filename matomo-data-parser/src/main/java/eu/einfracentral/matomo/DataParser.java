@@ -60,7 +60,7 @@ public class DataParser {
         serviceRatings = String.format(SERVICE_KPIs_TEMPLATE, matomoHost, matomoToken, 3, matomoSiteId);
     }
 
-    @Scheduled(cron = "0 10 0 * * *")
+    @Scheduled(cron = "0 10 0 * * *") // 00.10 every day
     public void getServiceVisits() {
         JsonNode json = parse(getMatomoResponse(serviceVisits));
         Map<String, Float> results = new HashMap<>();
@@ -72,8 +72,9 @@ public class DataParser {
                     String visits = node.path("nb_uniq_visitors").toString();
                     results.putIfAbsent(serviceId, Float.parseFloat(visits));
                 }
+                logger.info("Resource ID : Visits");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + ":" + entry.getValue().toString());
+                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -101,8 +102,9 @@ public class DataParser {
                     String rating = node.path("avg_event_value").toString();
                     results.putIfAbsent(serviceId, Float.parseFloat(rating));
                 }
+                logger.info("Resource ID : Ratings");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + ":" + entry.getValue().toString());
+                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -130,8 +132,9 @@ public class DataParser {
                     String addToProject = "1";
                     results.putIfAbsent(serviceId, Float.parseFloat(addToProject));
                 }
+                logger.info("Resource ID : Add to Project");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + ":" + entry.getValue().toString());
+                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
