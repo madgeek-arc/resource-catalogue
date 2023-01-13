@@ -128,7 +128,7 @@ public class InteroperabilityRecord implements Identifiable {
     @XmlElement
     @ApiModelProperty(position = 13)
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.IR_DOMAIN)
+    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
     private String domain;
 
     /**
@@ -149,19 +149,10 @@ public class InteroperabilityRecord implements Identifiable {
     @FieldValidation(nullable = true)
     private List<String> eoscIntegrationOptions;
 
-    /**
-     * Indicates whether the guideline requires services and resources to be members of the EOSC AAI Federation
-     * in order to successfully interoperate.
-     */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 16, required = true)
-    @FieldValidation
-    private boolean eoscAAI;
-
     public InteroperabilityRecord() {
     }
 
-    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, boolean eoscAAI) {
+    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions) {
         this.id = id;
         this.identifierInfo = identifierInfo;
         this.creators = creators;
@@ -177,7 +168,6 @@ public class InteroperabilityRecord implements Identifiable {
         this.domain = domain;
         this.eoscGuidelineType = eoscGuidelineType;
         this.eoscIntegrationOptions = eoscIntegrationOptions;
-        this.eoscAAI = eoscAAI;
     }
 
     @Override
@@ -198,7 +188,6 @@ public class InteroperabilityRecord implements Identifiable {
                 ", domain='" + domain + '\'' +
                 ", eoscGuidelineType='" + eoscGuidelineType + '\'' +
                 ", eoscIntegrationOptions=" + eoscIntegrationOptions +
-                ", eoscAAI='" + eoscAAI + '\'' +
                 '}';
     }
 
@@ -322,13 +311,5 @@ public class InteroperabilityRecord implements Identifiable {
 
     public void setEoscIntegrationOptions(List<String> eoscIntegrationOptions) {
         this.eoscIntegrationOptions = eoscIntegrationOptions;
-    }
-
-    public boolean isEoscAAI() {
-        return eoscAAI;
-    }
-
-    public void setEoscAAI(boolean eoscAAI) {
-        this.eoscAAI = eoscAAI;
     }
 }

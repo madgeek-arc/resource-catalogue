@@ -297,8 +297,6 @@
             
       <xs:enumeration value="IR_STATUS"/>
             
-      <xs:enumeration value="IR_DOMAIN"/>
-            
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
           
     </xs:restriction>
@@ -398,8 +396,6 @@
       <xs:enumeration value="IR_RESOURCE_TYPE_GENERAL"/>
             
       <xs:enumeration value="IR_STATUS"/>
-            
-      <xs:enumeration value="IR_DOMAIN"/>
             
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
             

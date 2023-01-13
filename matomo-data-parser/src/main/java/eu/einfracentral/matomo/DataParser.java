@@ -61,6 +61,7 @@ public class DataParser {
     }
 
     @Scheduled(cron = "0 10 0 * * *") // 00.10 every day
+//    @Scheduled(initialDelay = 0, fixedRate = 120000) //run every 2 min
     public void getServiceVisits() {
         JsonNode json = parse(getMatomoResponse(serviceVisits));
         Map<String, Float> results = new HashMap<>();
