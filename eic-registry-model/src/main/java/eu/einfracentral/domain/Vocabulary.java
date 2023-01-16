@@ -97,7 +97,6 @@ public class Vocabulary implements Identifiable {
         IR_RESOURCE_TYPE_GENERAL("Interoperability Record resource type general"),
 //        IR_EOSC_RELATED_STANDARDS("Interoperability Record eosc related standards"),
         IR_STATUS("Interoperability Record status"),
-        IR_DOMAIN("Interoperability Record domain"),
         IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type");
 
         private final String type;

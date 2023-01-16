@@ -1888,13 +1888,6 @@ May be used for technical information.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="eoscAAI" type="xs:boolean">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Indicates whether the guideline requires services and resources to be members of the EOSC AAI Federation
-in order to successfully interoperate.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
       <xs:element name="eoscGuidelineType" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The type of record within the registry]]></xs:documentation>

@@ -130,11 +130,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            try {
-                add(vocabulary, auth);
-            } catch (ResourceException e){
-                logger.info(String.format("Vocabulary [%s] already exists", vocabulary.getId()));
-            }
+            add(vocabulary, auth);
         }
     }
 

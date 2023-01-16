@@ -58,12 +58,12 @@ public class DataParser {
         String authorizationHeader = "";
         headers.add("Authorization", authorizationHeader);
         serviceVisits = String.format(SERVICE_VISITS_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
-        serviceRatings = String.format(SERVICE_RATINGS_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
         serviceAddToProject = String.format(SERVICE_ADD_TO_PROJECT_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
+        serviceRatings = String.format(SERVICE_RATINGS_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
     }
 
-    //    @Scheduled(fixedDelay = (20000))
-    @Scheduled(cron = "0 10 0 * * *")
+    @Scheduled(cron = "0 10 0 * * *") // 00.10 every day
+//    @Scheduled(initialDelay = 0, fixedRate = 120000) //run every 2 min
     public void getServiceVisits() {
         JsonNode json = parse(getMatomoResponse(serviceVisits));
         Map<String, Float> results = new HashMap<>();
@@ -75,8 +75,9 @@ public class DataParser {
                     String visits = node.path("nb_uniq_visitors").toString();
                     results.putIfAbsent(serviceId, Float.parseFloat(visits));
                 }
+                logger.info("Resource ID : Visits");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + ":" + entry.getValue().toString());
+                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -92,7 +93,6 @@ public class DataParser {
         }
     }
 
-    //        @Scheduled(fixedDelay = (20000))
     @Scheduled(cron = "0 15 0 * * *")
     public void getServiceRatings() {
         JsonNode json = parse(getMatomoResponse(serviceRatings));
@@ -105,8 +105,9 @@ public class DataParser {
                     String rating = node.path("avg_event_value").toString();
                     results.putIfAbsent(serviceId, Float.parseFloat(rating));
                 }
+                logger.info("Resource ID : Ratings");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + ":" + entry.getValue().toString());
+                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -122,7 +123,6 @@ public class DataParser {
         }
     }
 
-    //    @Scheduled(fixedDelay = (20000))
     @Scheduled(cron = "0 20 0 * * *")
     public void getServiceAddToProject() {
         JsonNode json = parse(getMatomoResponse(serviceAddToProject));
@@ -135,8 +135,9 @@ public class DataParser {
                     String addToProject = "1";
                     results.putIfAbsent(serviceId, Float.parseFloat(addToProject));
                 }
+                logger.info("Resource ID : Add to Project");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + ":" + entry.getValue().toString());
+                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
