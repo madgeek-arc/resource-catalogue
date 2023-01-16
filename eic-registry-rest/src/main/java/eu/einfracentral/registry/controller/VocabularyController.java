@@ -127,7 +127,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         List<Vocabulary> toBeDeleted = vocabularyService.getByType(type);
         for (Vocabulary vocabulary : toBeDeleted){
-            delete(vocabulary, auth);
+            super.delete(vocabulary, auth);
         }
 
     }
