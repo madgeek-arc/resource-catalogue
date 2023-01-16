@@ -27,7 +27,9 @@ import java.util.Spliterators;
 public class DataParser {
 
     private static final Logger logger = LogManager.getLogger(DataParser.class);
-    private static final String SERVICE_KPIs_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=%s&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String SERVICE_VISITS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String SERVICE_RATINGS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=yesterday";
+    private static final String SERVICE_ADD_TO_PROJECT_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=yesterday";
     private String serviceVisits;
     private String serviceRatings;
     private String serviceAddToProject;
@@ -55,9 +57,9 @@ public class DataParser {
         headers = new HttpHeaders();
         String authorizationHeader = "";
         headers.add("Authorization", authorizationHeader);
-        serviceVisits = String.format(SERVICE_KPIs_TEMPLATE, matomoHost, matomoToken, 1, matomoSiteId);
-        serviceAddToProject = String.format(SERVICE_KPIs_TEMPLATE, matomoHost, matomoToken, 2, matomoSiteId);
-        serviceRatings = String.format(SERVICE_KPIs_TEMPLATE, matomoHost, matomoToken, 3, matomoSiteId);
+        serviceVisits = String.format(SERVICE_VISITS_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
+        serviceAddToProject = String.format(SERVICE_ADD_TO_PROJECT_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
+        serviceRatings = String.format(SERVICE_RATINGS_TEMPLATE, matomoHost, matomoToken, matomoSiteId);
     }
 
     @Scheduled(cron = "0 10 0 * * *") // 00.10 every day
