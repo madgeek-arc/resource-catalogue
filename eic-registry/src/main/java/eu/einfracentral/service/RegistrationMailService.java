@@ -270,6 +270,7 @@ public class RegistrationMailService {
     public void sendEmailNotificationsToProviders() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
@@ -360,6 +361,7 @@ public class RegistrationMailService {
     public void sendEmailNotificationsToAdmins() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
         List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
 
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
