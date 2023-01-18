@@ -149,13 +149,6 @@
     },
     {
       "multivalued": true,
-      "name": "use_cases",
-      "label": "Use Case",
-      "path": "//*[local-name()='service']//*[local-name()='useCase']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "open_source_technologies",
       "label": "Open Source Technology",
       "path": "//*[local-name()='service']//*[local-name()='openSourceTechnology']/text()",
