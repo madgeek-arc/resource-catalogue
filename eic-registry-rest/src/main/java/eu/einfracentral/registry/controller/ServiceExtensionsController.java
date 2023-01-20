@@ -322,7 +322,6 @@ public class ServiceExtensionsController {
 
 
     // Argo GRNET Monitoring Status API calls
-    @ApiOperation(value = "monitoringAvailability")
     @GetMapping(path = "/monitoring/monitoringAvailability", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<MonitoringStatus> getMonitoringAvailability(String serviceId) {
         String url = monitoringAvailability+serviceId;
@@ -339,7 +338,6 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    @ApiOperation(value = "monitoringStatus")
     @GetMapping(path = "/monitoring/monitoringStatus", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<MonitoringStatus> getMonitoringStatus(String serviceId, Boolean allStatuses) {
         String url = monitoringStatus+serviceId;
