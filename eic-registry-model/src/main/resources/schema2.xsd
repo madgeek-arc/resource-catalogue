@@ -7,26 +7,6 @@
       
   </xs:complexType>
     
-  <xs:complexType name="monitoringStatus">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="availability" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="date" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="downtime" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="reliability" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="unknown" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="uptime" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:simpleType name="userActionType">
         
     <xs:restriction base="xs:string">

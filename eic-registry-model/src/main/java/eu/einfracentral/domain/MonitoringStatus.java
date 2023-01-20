@@ -1,5 +1,6 @@
-package eu.einfracentral.domain.monitoringStatus;
+package eu.einfracentral.domain;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -7,11 +8,17 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class MonitoringStatus {
 
+    @XmlElement
     private String date;
+    @XmlElement
     private String availability;
+    @XmlElement
     private String reliability;
+    @XmlElement
     private String unknown;
+    @XmlElement
     private String uptime;
+    @XmlElement
     private String downtime;
 
     public MonitoringStatus() {

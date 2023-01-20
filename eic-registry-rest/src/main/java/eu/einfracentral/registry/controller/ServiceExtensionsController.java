@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.monitoringStatus.MonitoringStatus;
+import eu.einfracentral.domain.MonitoringStatus;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.validators.HelpdeskValidator;
