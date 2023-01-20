@@ -51,6 +51,8 @@
     
   <xs:element name="monitoringGroup" type="tns:monitoringGroup"/>
     
+  <xs:element name="monitoringStatus" type="monitoringStatus"/>
+    
   <xs:element name="multimediaPair" type="tns:multimediaPair"/>
     
   <xs:element name="provider" type="tns:provider"/>
