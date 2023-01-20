@@ -2238,9 +2238,13 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
             
       <xs:element minOccurs="0" name="reliability" type="xs:string"/>
             
+      <xs:element minOccurs="0" name="timestamp" type="xs:string"/>
+            
       <xs:element minOccurs="0" name="unknown" type="xs:string"/>
             
       <xs:element minOccurs="0" name="uptime" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="value" type="xs:string"/>
           
     </xs:sequence>
       

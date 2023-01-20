@@ -44,8 +44,6 @@ public class ServiceExtensionsController {
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status}")
     private String monitoringStatus;
-    @Value("${argo.grnet.monitoring.token}")
-    private String monitoringToken;
 
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
@@ -322,49 +320,43 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
+
     // Argo GRNET Monitoring Status API calls
     @ApiOperation(value = "monitoringAvailability")
-    @GetMapping(path = "/monitoringAvailability", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/monitoringAvailability", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<MonitoringStatus> getMonitoringAvailability(String serviceId) {
         String url = monitoringAvailability+serviceId;
-        String response = createHttpRequest(url);
-        List<MonitoringStatus> serviceMonitoringStatuses = new ArrayList<>();
+        String response = monitoringService.createHttpRequest(url);
+        List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null){
             JSONObject obj = new JSONObject(response);
             Gson gson = new Gson();
             JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
             JsonArray results = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("results").getAsJsonArray();
-            serviceMonitoringStatuses = createMonitoringAvailabilityObject(serviceId, results);
+            serviceMonitoringStatuses = monitoringService.createMonitoringAvailabilityObject(results);
             return serviceMonitoringStatuses;
         }
         return null;
     }
 
-    public String createHttpRequest(String url){
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("accept", "application/json");
-        headers.add("Content-Type", "application/json");
-        headers.add("x-api-key", monitoringToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
-    }
-
-    public List<MonitoringStatus> createMonitoringAvailabilityObject(String serviceId, JsonArray results){
-        List<MonitoringStatus> monitoringStatuses = new ArrayList<>();
-        for(int i=0; i<results.size(); i++){
-            String date = results.get(i).getAsJsonObject().get("date").getAsString();
-            String availability = results.get(i).getAsJsonObject().get("availability").getAsString();
-            String reliability = results.get(i).getAsJsonObject().get("reliability").getAsString();
-            String unknown = results.get(i).getAsJsonObject().get("unknown").getAsString();
-            String uptime = results.get(i).getAsJsonObject().get("uptime").getAsString();
-            String downtime = results.get(i).getAsJsonObject().get("downtime").getAsString();
-            MonitoringStatus monitoringStatus =
-                    new MonitoringStatus(date, availability, reliability, unknown, uptime, downtime);
-            monitoringStatuses.add(monitoringStatus);
+    @ApiOperation(value = "monitoringStatus")
+    @GetMapping(path = "/monitoring/monitoringStatus", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringStatus(String serviceId, Boolean allStatuses) {
+        String url = monitoringStatus+serviceId;
+        if (allStatuses){
+            url += "?view=details";
         }
-        return monitoringStatuses;
+        String response = monitoringService.createHttpRequest(url);
+        List<MonitoringStatus> serviceMonitoringStatuses;
+        if (response != null){
+            JSONObject obj = new JSONObject(response);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            JsonArray statuses = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("statuses").getAsJsonArray();
+            serviceMonitoringStatuses = monitoringService.createMonitoringStatusObject(statuses);
+            return serviceMonitoringStatuses;
+        }
+        return null;
     }
-
 
 }

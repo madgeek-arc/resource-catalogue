@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class MonitoringStatus {
 
+    // Monitoring Availability
     @XmlElement
     private String date;
     @XmlElement
@@ -21,6 +22,12 @@ public class MonitoringStatus {
     @XmlElement
     private String downtime;
 
+    // Monitoring Status
+    @XmlElement
+    private String timestamp;
+    @XmlElement
+    private String value;
+
     public MonitoringStatus() {
     }
 
@@ -31,6 +38,11 @@ public class MonitoringStatus {
         this.unknown = unknown;
         this.uptime = uptime;
         this.downtime = downtime;
+    }
+
+    public MonitoringStatus(String timestamp, String value) {
+        this.timestamp = timestamp;
+        this.value = value;
     }
 
     public String getDate() {
@@ -79,5 +91,21 @@ public class MonitoringStatus {
 
     public void setDowntime(String downtime) {
         this.downtime = downtime;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }
