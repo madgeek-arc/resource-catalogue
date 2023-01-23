@@ -369,14 +369,11 @@ public class ServiceExtensionsController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
-        logger.info("Getting all Services Start");
         List<ServiceBundle> allServices = serviceBundleService.getAll(ff, null).getResults();
-        logger.info("Getting all Services End. Filling Map Start");
         Map<String, String> serviceStatusMap = new HashMap<>();
         for (ServiceBundle serviceBundle : allServices){
             serviceStatusMap.put(serviceBundle.getId(), getServiceMonitoringStatusValue(serviceBundle.getId()));
         }
-        logger.info("Filling Map End");
         return serviceStatusMap;
     }
 
