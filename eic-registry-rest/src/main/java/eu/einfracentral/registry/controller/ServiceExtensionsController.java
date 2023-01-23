@@ -349,7 +349,9 @@ public class ServiceExtensionsController {
     public List<MonitoringStatus> getMonitoringStatus(@PathVariable String serviceId, @RequestParam(defaultValue = "false") Boolean allStatuses) {
         String url = monitoringStatus + serviceId;
         if (allStatuses != null) {
-            url += "?view=details";
+            if (allStatuses) {
+                url += "?view=details";
+            }
         }
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
