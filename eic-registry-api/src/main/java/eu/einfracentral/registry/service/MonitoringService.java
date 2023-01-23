@@ -31,7 +31,6 @@ public interface MonitoringService<T, U extends Authentication> extends Resource
 
 
     // Argo GRNET Monitoring Status methods
-    String createHttpRequest(String url);
     List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results);
     List<MonitoringStatus> createMonitoringStatusObject(JsonArray results);
 }

@@ -36,8 +36,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
-    @Value("${argo.grnet.monitoring.token}")
-    private String monitoringToken;
 
 
     public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
@@ -207,16 +205,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
 
     // Argo GRNET Monitoring Status methods
-    public String createHttpRequest(String url){
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("accept", "application/json");
-        headers.add("Content-Type", "application/json");
-        headers.add("x-api-key", monitoringToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
-    }
-
     public List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results){
         List<MonitoringStatus> monitoringStatuses = new ArrayList<>();
         for(int i=0; i<results.size(); i++){
