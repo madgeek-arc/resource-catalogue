@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.manager;
 
+import com.google.gson.JsonArray;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
@@ -33,6 +36,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
+
 
     public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                              ResourceBundleService<DatasourceBundle> datasourceBundleService,
@@ -197,5 +201,35 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
                 throw new ValidationException(String.format("The serviceType you provided is wrong. Available serviceTypes are: '%s'", serviceTypeList));
             }
         }
+    }
+
+
+    // Argo GRNET Monitoring Status methods
+    public List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results){
+        List<MonitoringStatus> monitoringStatuses = new ArrayList<>();
+        for(int i=0; i<results.size(); i++){
+            String date = results.get(i).getAsJsonObject().get("date").getAsString();
+            String availability = results.get(i).getAsJsonObject().get("availability").getAsString();
+            String reliability = results.get(i).getAsJsonObject().get("reliability").getAsString();
+            String unknown = results.get(i).getAsJsonObject().get("unknown").getAsString();
+            String uptime = results.get(i).getAsJsonObject().get("uptime").getAsString();
+            String downtime = results.get(i).getAsJsonObject().get("downtime").getAsString();
+            MonitoringStatus monitoringStatus =
+                    new MonitoringStatus(date, availability, reliability, unknown, uptime, downtime);
+            monitoringStatuses.add(monitoringStatus);
+        }
+        return monitoringStatuses;
+    }
+
+    public List<MonitoringStatus> createMonitoringStatusObject(JsonArray results){
+        List<MonitoringStatus> monitoringStatuses = new ArrayList<>();
+        for(int i=0; i<results.size(); i++){
+            String timestamp = results.get(i).getAsJsonObject().get("timestamp").getAsString();
+            String value = results.get(i).getAsJsonObject().get("value").getAsString();
+            MonitoringStatus monitoringStatus =
+                    new MonitoringStatus(timestamp, value);
+            monitoringStatuses.add(monitoringStatus);
+        }
+        return monitoringStatuses;
     }
 }
