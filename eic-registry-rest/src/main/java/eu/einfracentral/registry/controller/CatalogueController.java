@@ -56,7 +56,6 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Creates a new Catalogue")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Catalogue> addCatalogue(@RequestBody Catalogue catalogue, @ApiIgnore Authentication auth) {
