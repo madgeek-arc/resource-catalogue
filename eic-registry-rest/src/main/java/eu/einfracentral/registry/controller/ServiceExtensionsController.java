@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.MonitoringStatus;
+import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.validators.HelpdeskValidator;
@@ -26,7 +26,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;

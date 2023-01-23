@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import com.google.gson.JsonArray;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;

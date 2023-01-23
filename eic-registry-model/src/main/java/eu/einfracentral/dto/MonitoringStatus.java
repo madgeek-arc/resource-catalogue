@@ -1,34 +1,21 @@
-package eu.einfracentral.domain;
+package eu.einfracentral.dto;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
-@XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
 public class MonitoringStatus {
 
     // Monitoring Availability
-    @XmlElement
     private String date;
-    @XmlElement
     private String availability;
-    @XmlElement
     private String reliability;
-    @XmlElement
     private String unknown;
-    @XmlElement
     private String uptime;
-    @XmlElement
     private String downtime;
 
     // Monitoring Status
-    @XmlElement
     private String timestamp;
-    @XmlElement
     private String value;
 
     public MonitoringStatus() {
+        // no-arg constructor
     }
 
     public MonitoringStatus(String date, String availability, String reliability, String unknown, String uptime, String downtime) {

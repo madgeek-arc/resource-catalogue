@@ -1,9 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import com.google.gson.JsonArray;
-import eu.einfracentral.domain.HelpdeskBundle;
 import eu.einfracentral.domain.MonitoringBundle;
-import eu.einfracentral.domain.MonitoringStatus;
+import eu.einfracentral.dto.MonitoringStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
