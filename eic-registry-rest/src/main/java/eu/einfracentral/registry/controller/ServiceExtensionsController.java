@@ -3,13 +3,11 @@ package eu.einfracentral.registry.controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import eu.einfracentral.domain.Helpdesk;
-import eu.einfracentral.domain.HelpdeskBundle;
-import eu.einfracentral.domain.Monitoring;
-import eu.einfracentral.domain.MonitoringBundle;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
 import eu.einfracentral.validators.HelpdeskValidator;
 import eu.einfracentral.validators.MonitoringValidator;
@@ -33,10 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("service-extensions")
@@ -46,6 +41,7 @@ public class ServiceExtensionsController {
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
     @Value("${argo.grnet.monitoring.availability}")
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status}")
@@ -65,9 +61,11 @@ public class ServiceExtensionsController {
 
     @Autowired
     ServiceExtensionsController(HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
-                                MonitoringService<MonitoringBundle, Authentication> monitoringService) {
+                                MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                ResourceBundleService<ServiceBundle> serviceBundleService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.serviceBundleService = serviceBundleService;
     }
 
     //SECTION: HELPDESK
@@ -364,6 +362,30 @@ public class ServiceExtensionsController {
             return serviceMonitoringStatuses;
         }
         return null;
+    }
+
+    @GetMapping(path = "/monitoring/monitoringStatus/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public Map<String, String> getMonitoringStatusForAllServices() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        logger.info("Getting all Services Start");
+        List<ServiceBundle> allServices = serviceBundleService.getAll(ff, null).getResults();
+        logger.info("Getting all Services End. Filling Map Start");
+        Map<String, String> serviceStatusMap = new HashMap<>();
+        for (ServiceBundle serviceBundle : allServices){
+            serviceStatusMap.put(serviceBundle.getId(), getServiceMonitoringStatusValue(serviceBundle.getId()));
+        }
+        logger.info("Filling Map End");
+        return serviceStatusMap;
+    }
+
+    private String getServiceMonitoringStatusValue(String serviceId){
+        try {
+            return getMonitoringStatus(serviceId, false).get(0).getValue();
+        } catch(NullPointerException e) {
+            return "";
+        }
     }
 
 }

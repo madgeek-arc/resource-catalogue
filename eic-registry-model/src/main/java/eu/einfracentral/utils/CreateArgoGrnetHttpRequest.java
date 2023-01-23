@@ -1,8 +1,7 @@
 package eu.einfracentral.utils;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 public class CreateArgoGrnetHttpRequest {
@@ -14,7 +13,12 @@ public class CreateArgoGrnetHttpRequest {
         headers.add("Content-Type", "application/json");
         headers.add("x-api-key", token);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            return response.getStatusCode().is2xxSuccessful() ? response.getBody() : null;
+        } catch(HttpClientErrorException e) {
+            return null;
+        }
     }
 
     private CreateArgoGrnetHttpRequest() {}
