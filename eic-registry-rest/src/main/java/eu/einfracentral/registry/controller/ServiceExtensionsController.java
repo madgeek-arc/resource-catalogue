@@ -10,6 +10,7 @@ import eu.einfracentral.domain.MonitoringBundle;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
+import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
 import eu.einfracentral.validators.HelpdeskValidator;
 import eu.einfracentral.validators.MonitoringValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -29,8 +30,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
@@ -51,7 +50,6 @@ public class ServiceExtensionsController {
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status}")
     private String monitoringStatus;
-
     @Value("${argo.grnet.monitoring.token}")
     private String monitoringToken;
 
@@ -331,10 +329,10 @@ public class ServiceExtensionsController {
 
 
     // Argo GRNET Monitoring Status API calls
-    @GetMapping(path = "/monitoring/monitoringAvailability", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<MonitoringStatus> getMonitoringAvailability(String serviceId) {
+    @GetMapping(path = "/monitoring/monitoringAvailability/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringAvailability(@PathVariable String serviceId) {
         String url = monitoringAvailability + serviceId;
-        String response = createHttpRequest(url);
+        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
             JSONObject obj = new JSONObject(response);
@@ -347,13 +345,13 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    @GetMapping(path = "/monitoring/monitoringStatus", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<MonitoringStatus> getMonitoringStatus(String serviceId, Boolean allStatuses) {
+    @GetMapping(path = "/monitoring/monitoringStatus/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringStatus(@PathVariable String serviceId, @RequestParam(defaultValue = "false") Boolean allStatuses) {
         String url = monitoringStatus + serviceId;
-        if (allStatuses) {
+        if (allStatuses != null) {
             url += "?view=details";
         }
-        String response = createHttpRequest(url);
+        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
             JSONObject obj = new JSONObject(response);
@@ -366,13 +364,4 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    private String createHttpRequest(String url) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("accept", "application/json");
-        headers.add("Content-Type", "application/json");
-        headers.add("x-api-key", monitoringToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
-    }
 }

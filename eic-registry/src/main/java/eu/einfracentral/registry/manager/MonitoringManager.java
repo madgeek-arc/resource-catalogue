@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
@@ -20,7 +21,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +36,11 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
+
+    @Value("${argo.grnet.monitoring.token}")
+    private String monitoringToken;
+    @Value("${argo.grnet.monitoring.service.types}")
+    private String monitoringServiceTypes;
 
 
     public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
@@ -172,13 +177,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     public List<String> getAvailableServiceTypes() {
         List<String> serviceTypeList = new ArrayList<>();
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("x-api-key", "71553f86c28d296daa4b997bd140015cdeacdb66659aae8b2661c098235ef5ff");
-        headers.add("Accept", "application/json");
-        String url = "https://api.devel.argo.grnet.gr/api/v2/topology/service-types";
-        HttpEntity<String> entity = new HttpEntity<>("body", headers);
-        String response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
+        String response = CreateArgoGrnetHttpRequest.createHttpRequest(monitoringServiceTypes, monitoringToken);
         JSONObject obj = new JSONObject(response);
         JSONArray arr = obj.getJSONArray("data");
         for (int i = 0; i < arr.length(); i++) {
